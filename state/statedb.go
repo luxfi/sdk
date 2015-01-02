@@ -1,11 +1,12 @@
 package state
 
 import (
+	"bytes"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethutil"
 	"github.com/ethereum/go-ethereum/logger"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/ptrie"
 )
 
 var statelogger = logger.NewLogger("STATE")
@@ -16,21 +17,21 @@ var statelogger = logger.NewLogger("STATE")
 // * Contracts
 // * Accounts
 type StateDB struct {
-	// The trie for this structure
-	Trie *trie.Trie
+	//Trie *trie.Trie
+	trie *ptrie.Trie
 
 	stateObjects map[string]*StateObject
 
 	manifest *Manifest
 
-	refund map[string][]refund
+	refund map[string]*big.Int
 
 	logs Logs
 }
 
 // Create a new state from a given trie
-func New(trie *trie.Trie) *StateDB {
-	return &StateDB{Trie: trie, stateObjects: make(map[string]*StateObject), manifest: NewManifest(), refund: make(map[string][]refund)}
+func New(trie *ptrie.Trie) *StateDB {
+	return &StateDB{trie: trie, stateObjects: make(map[string]*StateObject), manifest: NewManifest(), refund: make(map[string]*big.Int)}
 }
 
 func (self *StateDB) EmptyLogs() {
@@ -55,12 +56,11 @@ func (self *StateDB) GetBalance(addr []byte) *big.Int {
 	return ethutil.Big0
 }
 
-type refund struct {
-	gas, price *big.Int
-}
-
-func (self *StateDB) Refund(addr []byte, gas, price *big.Int) {
-	self.refund[string(addr)] = append(self.refund[string(addr)], refund{gas, price})
+func (self *StateDB) Refund(addr []byte, gas *big.Int) {
+	if self.refund[string(addr)] == nil {
+		self.refund[string(addr)] = new(big.Int)
+	}
+	self.refund[string(addr)].Add(self.refund[string(addr)], gas)
 }
 
 func (self *StateDB) AddBalance(addr []byte, amount *big.Int) {
@@ -93,6 +93,13 @@ func (self *StateDB) GetCode(addr []byte) []byte {
 	}
 
 	return nil
+}
+
+func (self *StateDB) SetCode(addr, code []byte) {
+	stateObject := self.GetStateObject(addr)
+	if stateObject != nil {
+		stateObject.SetCode(code)
+	}
 }
 
 func (self *StateDB) GetState(a, b []byte) []byte {
@@ -134,12 +141,12 @@ func (self *StateDB) UpdateStateObject(stateObject *StateObject) {
 		ethutil.Config.Db.Put(stateObject.CodeHash(), stateObject.Code)
 	}
 
-	self.Trie.Update(string(addr), string(stateObject.RlpEncode()))
+	self.trie.Update(addr, stateObject.RlpEncode())
 }
 
 // Delete the given state object and delete it from the state trie
 func (self *StateDB) DeleteStateObject(stateObject *StateObject) {
-	self.Trie.Delete(string(stateObject.Address()))
+	self.trie.Delete(stateObject.Address())
 
 	delete(self.stateObjects, string(stateObject.Address()))
 }
@@ -153,7 +160,7 @@ func (self *StateDB) GetStateObject(addr []byte) *StateObject {
 		return stateObject
 	}
 
-	data := self.Trie.Get(string(addr))
+	data := self.trie.Get(addr)
 	if len(data) == 0 {
 		return nil
 	}
@@ -200,18 +207,18 @@ func (self *StateDB) GetAccount(addr []byte) *StateObject {
 //
 
 func (s *StateDB) Cmp(other *StateDB) bool {
-	return s.Trie.Cmp(other.Trie)
+	return bytes.Equal(s.trie.Root(), other.trie.Root())
 }
 
 func (self *StateDB) Copy() *StateDB {
-	if self.Trie != nil {
-		state := New(self.Trie.Copy())
+	if self.trie != nil {
+		state := New(self.trie.Copy())
 		for k, stateObject := range self.stateObjects {
 			state.stateObjects[k] = stateObject.Copy()
 		}
 
 		for addr, refund := range self.refund {
-			state.refund[addr] = refund
+			state.refund[addr] = new(big.Int).Set(refund)
 		}
 
 		logs := make(Logs, len(self.logs))
@@ -229,19 +236,19 @@ func (self *StateDB) Set(state *StateDB) {
 		panic("Tried setting 'state' to nil through 'Set'")
 	}
 
-	self.Trie = state.Trie
+	self.trie = state.trie
 	self.stateObjects = state.stateObjects
 	self.refund = state.refund
 	self.logs = state.logs
 }
 
 func (s *StateDB) Root() []byte {
-	return s.Trie.GetRoot()
+	return s.trie.Root()
 }
 
 // Resets the trie and all siblings
 func (s *StateDB) Reset() {
-	s.Trie.Undo()
+	s.trie.Reset()
 
 	// Reset all nested states
 	for _, stateObject := range s.stateObjects {
@@ -266,30 +273,24 @@ func (s *StateDB) Sync() {
 		stateObject.State.Sync()
 	}
 
-	s.Trie.Sync()
+	s.trie.Commit()
 
 	s.Empty()
 }
 
 func (self *StateDB) Empty() {
 	self.stateObjects = make(map[string]*StateObject)
-	self.refund = make(map[string][]refund)
+	self.refund = make(map[string]*big.Int)
+}
+
+func (self *StateDB) Refunds() map[string]*big.Int {
+	return self.refund
 }
 
 func (self *StateDB) Update(gasUsed *big.Int) {
 	var deleted bool
 
-	// Refund any gas that's left
-	// XXX THIS WILL CHANGE IN POC8
-	uhalf := new(big.Int).Div(gasUsed, ethutil.Big2)
-	for addr, refs := range self.refund {
-		for _, ref := range refs {
-			refund := ethutil.BigMin(uhalf, ref.gas)
-
-			self.GetStateObject([]byte(addr)).AddBalance(refund.Mul(refund, ref.price))
-		}
-	}
-	self.refund = make(map[string][]refund)
+	self.refund = make(map[string]*big.Int)
 
 	for _, stateObject := range self.stateObjects {
 		if stateObject.remove {
@@ -304,11 +305,11 @@ func (self *StateDB) Update(gasUsed *big.Int) {
 
 	// FIXME trie delete is broken
 	if deleted {
-		valid, t2 := trie.ParanoiaCheck(self.Trie)
+		valid, t2 := ptrie.ParanoiaCheck(self.trie, ethutil.Config.Db)
 		if !valid {
-			statelogger.Infof("Warn: PARANOIA: Different state root during copy %x vs %x\n", self.Trie.GetRoot(), t2.GetRoot())
+			statelogger.Infof("Warn: PARANOIA: Different state root during copy %x vs %x\n", self.trie.Root(), t2.Root())
 
-			self.Trie = t2
+			self.trie = t2
 		}
 	}
 }
