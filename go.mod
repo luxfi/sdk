@@ -18,7 +18,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.5.0
 	github.com/docker/docker v1.6.2
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
-	github.com/ethereum/go-ethereum v1.10.26
+	github.com/ethereum/go-ethereum v1.13.5
 	github.com/fjl/memsize v0.0.2
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
@@ -32,13 +32,14 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.2.4
 	github.com/kylelemons/godebug v1.1.0
+	github.com/luxdefi/evm/cmd/simulator v0.0.0-20231217020722-fd08c47bd97c
 	github.com/luxdefi/netrunner v1.7.7
 	github.com/luxdefi/node v1.10.21
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/onsi/ginkgo/v2 v2.13.2
-	github.com/onsi/gomega v1.29.0
+	github.com/onsi/gomega v1.30.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/client_model v0.5.0
 	github.com/shirou/gopsutil v3.21.11+incompatible

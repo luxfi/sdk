@@ -111,8 +111,6 @@ github.com/dop251/goja_nodejs v0.0.0-20210225215109-d91c329300e7/go.mod h1:hn7BA
 github.com/dop251/goja_nodejs v0.0.0-20211022123610-8dd9abb0616d/go.mod h1:DngW8aVqWbuLRMHItjPUyqdj+HWPvnQe8V8y1nDpIbM=
 github.com/ethereum/c-kzg-4844 v0.4.0 h1:3MS1s4JtA868KpJxroZoepdV0ZKBp3u/O5HcZ7R3nlY=
 github.com/ethereum/c-kzg-4844 v0.4.0/go.mod h1:VewdlzQmpT5QSrVhbBuGoCdFJkpaJlO1aQputP83wc0=
-github.com/ethereum/go-ethereum v1.10.26 h1:i/7d9RBBwiXCEuyduBQzJw/mKmnvzsN14jqBmytw72s=
-github.com/ethereum/go-ethereum v1.10.26/go.mod h1:EYFyF19u3ezGLD4RqOkLq+ZCXzYbLoNDdZlMt7kyKFg=
 github.com/ethereum/go-ethereum v1.13.5 h1:U6TCRciCqZRe4FPXmy1sMGxTfuk8P7u2UoinF3VbaFk=
 github.com/ethereum/go-ethereum v1.13.5/go.mod h1:yMTu38GSuyxaYzQMViqNmQ1s3cE84abZexQmTgenWk0=
 github.com/fjl/memsize v0.0.2 h1:27txuSD9or+NZlnOWdKUxeBzTAUkWCVh+4Gf2dWFOzA=
@@ -255,8 +253,8 @@ github.com/leanovate/gopter v0.2.9 h1:fQjYxZaynp97ozCzfOyOuAGOU4aU/z37zf/tOujFk7
 github.com/leanovate/gopter v0.2.9/go.mod h1:U2L/78B+KVFIx2VmW6onHJQzXtFb+p5y3y2Sh+Jxxv8=
 github.com/luxdefi/coreth v0.12.17 h1:mp4AYusy1xOYNUKZf/zWI6MOChTN0XVt0KY2uS3ZvYc=
 github.com/luxdefi/coreth v0.12.17/go.mod h1:gv8FGIdyt/rlG76L69tAE09TIE7i2Di10VHV1mHXNfM=
-github.com/luxdefi/evm/cmd/simulator v0.0.0-20231213204502-b36c20f67043 h1:mgd4lnXKgBDLS1ZprA03wy2+Iqrr2zElvqbu/D0gVOI=
-github.com/luxdefi/evm/cmd/simulator v0.0.0-20231213204502-b36c20f67043/go.mod h1:HLEJMXRlxFxdlTSUVh4Os7r7Bu+AvCvPQKFLduTc+tQ=
+github.com/luxdefi/evm/cmd/simulator v0.0.0-20231217020722-fd08c47bd97c h1:o2wxqZkCSWO6Tmor7XMqKRyC+nO2CH+xITDZjtAC50w=
+github.com/luxdefi/evm/cmd/simulator v0.0.0-20231217020722-fd08c47bd97c/go.mod h1:FW0YDbdn4ouMRlVzJE6AS2nXZ/xCWAbWuZUCkZ8o15w=
 github.com/luxdefi/netrunner v1.7.7 h1:jlOb8s2FD77ITSRDZUspLDfjTHoX3HhnxE947jZiJv4=
 github.com/luxdefi/netrunner v1.7.7/go.mod h1:oTKVuaE251VRjhgjC1b995f26CQhDiQ7VebIYYCZklo=
 github.com/luxdefi/node v1.10.21 h1:ghv9Rm54RikLXplQoOeerreiq/6srYSBxi7QkffOr28=
@@ -309,8 +307,8 @@ github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7J
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/onsi/gomega v1.19.0/go.mod h1:LY+I3pBVzYsTBU1AnDwOSxaYi9WoWiqgwooUqq9yPro=
-github.com/onsi/gomega v1.29.0 h1:KIA/t2t5UBzoirT4H9tsML45GEbo3ouUnBHsCfD2tVg=
-github.com/onsi/gomega v1.29.0/go.mod h1:9sxs+SwGrKI0+PWe4Fxa9tFQQBG5xSsSbMXOI8PPpoQ=
+github.com/onsi/gomega v1.30.0 h1:hvMK7xYz4D3HapigLTeGdId/NcfQx1VHMJc60ew99+8=
+github.com/onsi/gomega v1.30.0/go.mod h1:9sxs+SwGrKI0+PWe4Fxa9tFQQBG5xSsSbMXOI8PPpoQ=
 github.com/opentracing/opentracing-go v1.2.0/go.mod h1:GxEUsuufX4nBwe+T+Wl9TAgYrxe9dPLANfrWvHYVTgc=
 github.com/otiai10/copy v1.14.0 h1:dCI/t1iTdYGtkvCuBG2BgR6KZa83PTclw4U5n2wAllU=
 github.com/otiai10/copy v1.14.0/go.mod h1:ECfuL02W+/FkTWZWgQqXPWZgW9oeKCSQ5qVfSc4qc4w=
