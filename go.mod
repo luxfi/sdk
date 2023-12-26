@@ -12,11 +12,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.5.0
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
-<<<<<<< HEAD
-	github.com/ethereum/go-ethereum v1.13.5
-=======
 	github.com/ethereum/go-ethereum v1.13.8
->>>>>>> 865be66 (Sync upstream)
 	github.com/fjl/memsize v0.0.2
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
@@ -30,7 +26,6 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.2.4
 	github.com/kylelemons/godebug v1.1.0
-	github.com/luxdefi/evm/cmd/simulator v0.0.0-20231217020722-fd08c47bd97c
 	github.com/luxdefi/netrunner v1.7.7
 	github.com/luxdefi/node v1.10.17
 	github.com/luxdefi/node v1.10.21
