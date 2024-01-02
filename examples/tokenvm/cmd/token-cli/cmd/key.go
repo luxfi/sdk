@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package cmd
@@ -6,14 +6,14 @@ package cmd
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/hypersdk/crypto"
-	hutils "github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/vmsdk/crypto"
+	hutils "github.com/luxdefi/vmsdk/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/client"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/utils"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/client"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/utils"
 )
 
 var keyCmd = &cobra.Command{

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package codec
@@ -6,7 +6,7 @@ package codec
 import (
 	"fmt"
 
-	"github.com/ava-labs/hypersdk/consts"
+	"github.com/luxdefi/vmsdk/consts"
 )
 
 type decoder[T any, X any, Y any] struct {

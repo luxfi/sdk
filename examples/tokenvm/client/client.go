@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package client
@@ -7,12 +7,12 @@ import (
 	"context"
 	"strings"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/hypersdk/client"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/vmsdk/client"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/controller"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/genesis"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/controller"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/genesis"
 )
 
 type Client struct {

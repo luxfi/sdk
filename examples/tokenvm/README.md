@@ -5,16 +5,16 @@
   Mint, Transfer, and Trade User-Generated Tokens, All On-Chain
 </p>
 <p align="center">
-  <a href="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-static-analysis.yml"><img src="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-static-analysis.yml/badge.svg" /></a>
-  <a href="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-unit-tests.yml"><img src="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-unit-tests.yml/badge.svg" /></a>
-  <a href="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-sync-tests.yml"><img src="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-sync-tests.yml/badge.svg" /></a>
-  <a href="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-load-tests.yml"><img src="https://github.com/ava-labs/hypersdk/actions/workflows/tokenvm-load-tests.yml/badge.svg" /></a>
+  <a href="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-static-analysis.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-static-analysis.yml/badge.svg" /></a>
+  <a href="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-unit-tests.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-unit-tests.yml/badge.svg" /></a>
+  <a href="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-sync-tests.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-sync-tests.yml/badge.svg" /></a>
+  <a href="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-load-tests.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/tokenvm-load-tests.yml/badge.svg" /></a>
 </p>
 
 ---
 
 We created the [`tokenvm`](./examples/tokenvm) to showcase how to use the
-`hypersdk` in an application most readers are already familiar with, token minting
+`vmsdk` in an application most readers are already familiar with, token minting
 and token trading. The `tokenvm` lets anyone create any asset, mint more of
 their asset, modify the metadata of their asset (if they reveal some info), and
 burn their asset. Additionally, there is an embedded on-chain exchange that
@@ -45,12 +45,12 @@ optimized specifically to support their efficient usage (each balance entry
 requires only 72 bytes of state = `assetID|publicKey=>balance(uint64)`). This
 storage format makes it possible to parallelize the execution of any transfers
 that don't touch the same accounts. This parallelism will take effect as soon
-as it is re-added upstream by the `hypersdk` (no action required in the
+as it is re-added upstream by the `vmsdk` (no action required in the
 `tokenvm`).
 
 ### Trade Any 2 Tokens
 What good are custom assets if you can't do anything with them? To showcase the
-raw power of the `hypersdk`, the `tokenvm` also provides support for fully
+raw power of the `vmsdk`, the `tokenvm` also provides support for fully
 on-chain trading. Anyone can create an "offer" with a rate/token they are
 willing to accept and anyone else can fill that "offer" if they find it
 interesting. The `tokenvm` also maintains an in-memory order book to serve over
@@ -64,15 +64,15 @@ storage format also makes it possible to parallelize the execution of any fills
 that don't touch the same order (there may be hundreds or thousands of orders
 for the same pair, so this stil allows parallelization within a single pair
 unlike a pool-based trading mechanism like an AMM). This parallelism will take
-effect as soon as it is re-added upstream by the `hypersdk` (no action required
+effect as soon as it is re-added upstream by the `vmsdk` (no action required
 in the `tokenvm`).
 
 #### In-Memory Order Book
 To make it easier for clients to interact with the `tokenvm`, it comes bundled
 with an in-memory order book that will listen for orders submitted on-chain for
 any specified list of pairs (or all if you prefer). Behind the scenes, this
-uses the `hypersdk's` support for feeding accepted transactions to any
-`hypervm` (where the `tokenvm`, in this case, uses the data to keep its
+uses the `vmsdk's` support for feeding accepted transactions to any
+`luxvm` (where the `tokenvm`, in this case, uses the data to keep its
 in-memory record of order state up to date). The implementation of this is
 a simple max heap per pair where we arrange best on the best "rate" for a given
 asset (in/out).
@@ -100,14 +100,14 @@ any remaining tokens...it would not be acceptable for all the assets you
 pledged for the fill that weren't used to disappear.
 
 #### Expiring Fills
-Because of the format of `hypersdk` transactions, you can scope your fills to
+Because of the format of `vmsdk` transactions, you can scope your fills to
 be valid only until a particular time. This enables you to go for orders as you
 see fit at the time and not have to worry about your fill sitting around until you
 explicitly cancel it/replace it.
 
-### Avalanche Warp Support
-We take advantage of the Avalanche Warp Messaging (AWM) support provided by the
-`hypersdk` to enable any `tokenvm` to send assets to any other `tokenvm` without
+### Lux Warp Support
+We take advantage of the Lux Warp Messaging (LWM) support provided by the
+`vmsdk` to enable any `tokenvm` to send assets to any other `tokenvm` without
 relying on a trusted relayer or bridge (just the validators of the `tokenvm`
 sending the message).
 
@@ -127,7 +127,7 @@ transfer an asset between two `tokenvms` A and B but you can't export from
 for an external `tokenvm` is always transparent and is never inherited
 implicitly by the transfers between other `tokenvms`. The ability to impose
 this restriction (without massively driving up the cost of each transfer) is
-possible because AWM does not impose an additional overhead per Subnet
+possible because LWM does not impose an additional overhead per Subnet
 connection (no "per connection" state to maintain). This means it is just as
 cheap/scalable to communicate with every other `tokenvm` as it is to only
 communicate with one.
@@ -173,7 +173,7 @@ Lastly, you'll need to add the chains you created and the default key to the
 ./build/token-cli chain import-anr
 ```
 
-_`chain import-anr` connects to the Avalanche Network Runner server running in
+_`chain import-anr` connects to the Lux Network Runner server running in
 the background and pulls the URIs of all nodes tracking each chain you
 created._
 
@@ -346,7 +346,7 @@ height:15 txs:1 units:464 root:u2FyTtup4gwPfEFybMNTgL2svvSnajfGH4QKqiJ9vpZBSvx7q
 ```
 
 ### Transfer Assets to Another Subnet
-Unlike the mint and trade demo, the AWM demo only requires running a single
+Unlike the mint and trade demo, the LWM demo only requires running a single
 command. You can kick off a transfer between the 2 Subnets you created by
 running the following command from this location:
 ```bash
@@ -375,12 +375,12 @@ perform import on destination (y/n): y
 ```
 
 _The `export` command will automatically run the `import` command on the
-destination. If you wish to import the AWM message using a separate account,
+destination. If you wish to import the LWM message using a separate account,
 you can run the `import` command after changing your key._
 
 ### Running a Load Test
 _Before running this demo, make sure to stop the network you started using
-`killall avalanche-network-runner`._
+`killall netrunner`._
 
 The `tokenvm` load test will provision 5 `tokenvms` and process 500k transfers
 on each between 10k different accounts.
@@ -391,7 +391,7 @@ on each between 10k different accounts.
 
 _This test SOLELY tests the speed of the `tokenvm`. It does not include any
 network delay or consensus overhead. It just tests the underlying performance
-of the `hypersdk` and the storage engine used (in this case MerkleDB on top of
+of the `vmsdk` and the storage engine used (in this case MerkleDB on top of
 Pebble)._
 
 #### Measuring Disk Speed
@@ -409,7 +409,7 @@ load tests._
 ## Zipkin Tracing
 To trace the performance of `tokenvm` during load testing, we use `OpenTelemetry + Zipkin`.
 
-To get started, startup the `Zipkin` backend and `ElasticSearch` database (inside `hypersdk/trace`):
+To get started, startup the `Zipkin` backend and `ElasticSearch` database (inside `vmsdk/trace`):
 ```bash
 docker-compose -f trace/zipkin.yml up
 ```
@@ -428,8 +428,8 @@ docker-compose -f trace/zipkin.yml down
 
 ## Future Work
 _If you want to take the lead on any of these items, please
-[start a discussion](https://github.com/ava-labs/hypersdk/discussions) or reach
-out on the Avalanche Discord._
+[start a discussion](https://github.com/luxdefi/vmsdk/discussions) or reach
+out on the Lux Discord._
 
 * Add more config options for determining which order books to store in-memory
 * Add option to CLI to fill up to some amount of an asset as long as it is
@@ -446,5 +446,5 @@ out on the Avalanche Discord._
 <br>
 <br>
 <p align="center">
-  <a href="https://github.com/ava-labs/hypersdk"><img width="40%" alt="tokenvm" src="assets/hypersdk.png"></a>
+  <a href="https://github.com/luxdefi/vmsdk"><img width="40%" alt="tokenvm" src="assets/vmsdk.png"></a>
 </p>

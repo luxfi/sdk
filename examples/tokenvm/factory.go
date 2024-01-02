@@ -1,13 +1,13 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
 
 import (
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/controller"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/controller"
 )
 
 var _ vms.Factory = &Factory{}

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -15,15 +15,15 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/ips"
 
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/codec"
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/listeners"
-	"github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/codec"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/listeners"
+	"github.com/luxdefi/vmsdk/utils"
 )
 
 type rpcMode int

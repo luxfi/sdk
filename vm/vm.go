@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -10,34 +10,34 @@ import (
 	"sync"
 	"time"
 
-	ametrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	smblock "github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/avalanchego/trace"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/x/merkledb"
-	syncEng "github.com/ava-labs/avalanchego/x/sync"
+	ametrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/cache"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/database/manager"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/choices"
+	"github.com/luxdefi/node/snow/consensus/snowman"
+	"github.com/luxdefi/node/snow/engine/common"
+	smblock "github.com/luxdefi/node/snow/engine/snowman/block"
+	"github.com/luxdefi/node/trace"
+	"github.com/luxdefi/node/utils"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	"github.com/luxdefi/node/version"
+	"github.com/luxdefi/node/x/merkledb"
+	syncEng "github.com/luxdefi/node/x/sync"
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/hypersdk/builder"
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/emap"
-	"github.com/ava-labs/hypersdk/gossiper"
-	"github.com/ava-labs/hypersdk/listeners"
-	"github.com/ava-labs/hypersdk/mempool"
-	htrace "github.com/ava-labs/hypersdk/trace"
-	hutils "github.com/ava-labs/hypersdk/utils"
-	"github.com/ava-labs/hypersdk/workers"
+	"github.com/luxdefi/vmsdk/builder"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/emap"
+	"github.com/luxdefi/vmsdk/gossiper"
+	"github.com/luxdefi/vmsdk/listeners"
+	"github.com/luxdefi/vmsdk/mempool"
+	htrace "github.com/luxdefi/vmsdk/trace"
+	hutils "github.com/luxdefi/vmsdk/utils"
+	"github.com/luxdefi/vmsdk/workers"
 )
 
 type VM struct {
@@ -723,7 +723,7 @@ func (vm *VM) LastAccepted(_ context.Context) (ids.ID, error) {
 //
 // implements "snowmanblock.ChainVM.commom.VM.AppHandler"
 // assume gossip via proposervm has been activated
-// ref. "avalanchego/vms/platformvm/network.AppGossip"
+// ref. "node/vms/platformvm/network.AppGossip"
 func (vm *VM) AppGossip(ctx context.Context, nodeID ids.NodeID, msg []byte) error {
 	ctx, span := vm.tracer.Start(ctx, "VM.AppGossip")
 	defer span.End()

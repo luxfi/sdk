@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package window
@@ -7,7 +7,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/ava-labs/hypersdk/consts"
+	"github.com/luxdefi/vmsdk/consts"
 )
 
 func testRollup(t *testing.T, uint64s []uint64, roll int) {

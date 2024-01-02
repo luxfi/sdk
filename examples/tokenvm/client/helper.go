@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package client
@@ -6,11 +6,11 @@ package client
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/client"
-	"github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/client"
+	"github.com/luxdefi/vmsdk/utils"
 )
 
 func (cli *Client) GenerateTransaction(

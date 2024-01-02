@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/hypersdk/codec"
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/heap"
-	"github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/vmsdk/codec"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/heap"
+	"github.com/luxdefi/vmsdk/utils"
 	"go.uber.org/zap"
 )
 

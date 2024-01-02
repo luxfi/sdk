@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -8,14 +8,14 @@ import (
 	"errors"
 	"sync"
 
-	ametrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	syncEng "github.com/ava-labs/avalanchego/x/sync"
+	ametrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/snow/engine/snowman/block"
+	syncEng "github.com/luxdefi/node/x/sync"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/hypersdk/chain"
+	"github.com/luxdefi/vmsdk/chain"
 )
 
 type stateSyncerClient struct {

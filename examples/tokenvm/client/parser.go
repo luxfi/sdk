@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package client
@@ -6,12 +6,12 @@ package client
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/hypersdk/chain"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/vmsdk/chain"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
-	_ "github.com/ava-labs/hypersdk/examples/tokenvm/controller" // ensure registry populated
-	"github.com/ava-labs/hypersdk/examples/tokenvm/genesis"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
+	_ "github.com/luxdefi/vmsdk/examples/tokenvm/controller" // ensure registry populated
+	"github.com/luxdefi/vmsdk/examples/tokenvm/genesis"
 )
 
 var _ chain.Parser = (*Parser)(nil)

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package e2e_test
@@ -10,19 +10,19 @@ import (
 	"testing"
 	"time"
 
-	runner_sdk "github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanche-network-runner/rpcpb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/hypersdk/crypto"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/actions"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/auth"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/client"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/genesis"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/utils"
-	hutils "github.com/ava-labs/hypersdk/utils"
+	runner_sdk "github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/netrunner/rpcpb"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/vmsdk/crypto"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/actions"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/auth"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/client"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/genesis"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/utils"
+	hutils "github.com/luxdefi/vmsdk/utils"
 	"github.com/fatih/color"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -93,16 +93,16 @@ func init() {
 
 	flag.StringVar(
 		&execPath,
-		"avalanchego-path",
+		"node-path",
 		"",
-		"avalanchego executable path",
+		"node executable path",
 	)
 
 	flag.StringVar(
 		&pluginDir,
-		"avalanchego-plugin-dir",
+		"node-plugin-dir",
 		"",
-		"avalanchego plugin directory",
+		"node plugin directory",
 	)
 
 	flag.StringVar(

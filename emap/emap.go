@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package emap
@@ -6,14 +6,14 @@ package emap
 import (
 	"sync"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/hypersdk/heap"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/vmsdk/heap"
 )
 
 type bucket struct {
 	t     int64    // Timestamp
-	items []ids.ID // Array of AvalancheGo ids
+	items []ids.ID // Array of Lux Node ids
 }
 
 // Item defines an interface accepted by EMap

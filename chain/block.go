@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chain
@@ -8,22 +8,22 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/x/merkledb"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow/choices"
+	"github.com/luxdefi/node/snow/consensus/snowman"
+	"github.com/luxdefi/node/snow/engine/snowman/block"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/x/merkledb"
 	"go.opentelemetry.io/otel/attribute"
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/hypersdk/codec"
-	"github.com/ava-labs/hypersdk/utils"
-	"github.com/ava-labs/hypersdk/window"
-	"github.com/ava-labs/hypersdk/workers"
+	"github.com/luxdefi/vmsdk/codec"
+	"github.com/luxdefi/vmsdk/utils"
+	"github.com/luxdefi/vmsdk/window"
+	"github.com/luxdefi/vmsdk/workers"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 )
 
 const (
-	// AvalancheGo imposes a limit of 2 MiB on the network, so we limit at
+	// Lux Node imposes a limit of 2 MiB on the network, so we limit at
 	// 2 MiB - ProposerVM header - Protobuf encoding overhead (we assume this is
 	// no more than 50 KiB of overhead but is likely much less)
 	NetworkSizeLimit = 2_044_723 // 1.95 MiB
@@ -169,7 +169,7 @@ func (b *StatelessBlock) populateTxs(ctx context.Context, verifySigs bool) error
 		b.txsSet.Add(tx.ID())
 
 		// Check if we need the block context to verify the block (which contains
-		// an Avalanche Warp Message)
+		// an Lux Warp Message)
 		//
 		// Instead of erroring out if a warp message is invalid, we mark the
 		// verification as skipped and include it in the verification result so

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package pebble
@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/utils"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/utils"
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/bloom"
 	"golang.org/x/exp/slices"
@@ -310,7 +310,7 @@ func (it *iter) Value() []byte {
 
 func (it *iter) Release() { it.iter.Close() }
 
-// updateError casts pebble-specific errors to errors that Avalanche VMs expect
+// updateError casts pebble-specific errors to errors that Lux VMs expect
 // to see (they do not know which type of db may be provided).
 func updateError(err error) error {
 	switch err {

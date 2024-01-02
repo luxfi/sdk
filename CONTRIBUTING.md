@@ -1,12 +1,12 @@
-# Contributing to hypersdk
+# Contributing to vmsdk
 
-Thank you for your interest in contributing to `hypersdk`! By contributing to hypersdk, you are helping to build the foundation for the next generation of blockchains and decentralized applications.
+Thank you for your interest in contributing to `vmsdk`! By contributing to vmsdk, you are helping to build the foundation for the next generation of blockchains and decentralized applications.
 
 ## Getting Started
 
 ### Prerequisites
 
-To contribute to `hypersdk`, you'll need:
+To contribute to `vmsdk`, you'll need:
 
 - [Go](https://golang.org/dl/) 1.20 or higher
 
@@ -15,8 +15,8 @@ To contribute to `hypersdk`, you'll need:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/ava-labs/hypersdk.git
-cd hypersdk
+git clone https://github.com/luxdefi/vmsdk.git
+cd vmsdk
 ```
 
 2. Install the dependencies:
@@ -29,7 +29,7 @@ This will download and install all required dependencies for the project.
 
 ## Building and running tests
 
-To build and run tests for the hypersdk, simply run:
+To build and run tests for the vmsdk, simply run:
 
 ```go
 ./scripts/tests.unit.sh
@@ -47,7 +47,7 @@ To run the linters, simply run:
 
 This will run the linters on all code in the project.
 
-The `hypersdk` project also has a fixer that tries to help. To run the fixer, simply run:
+The `vmsdk` project also has a fixer that tries to help. To run the fixer, simply run:
 
 ```go
 ./scripts/fix.lint.sh
@@ -55,7 +55,7 @@ The `hypersdk` project also has a fixer that tries to help. To run the fixer, si
 
 ## Contributing
 
-We welcome contributions to hypersdk! To contribute, please follow these steps:
+We welcome contributions to vmsdk! To contribute, please follow these steps:
 
 1. Fork the repository and create a new branch for your contribution.
 

@@ -1,11 +1,11 @@
 # examples
-This folder is dedicated to all "example" `hypervms` that we build to showcase
-the capability of the `hypersdk`. If you are interested in writing your own
-`hypervm`, this is usally the right place to start.
+This folder is dedicated to all "example" `luxvms` that we build to showcase
+the capability of the `vmsdk`. If you are interested in writing your own
+`luxvm`, this is usally the right place to start.
 
 ## Beginner: `tokenvm`
 We created the [`tokenvm`](./tokenvm) to showcase how to use the
-`hypersdk` in an application most readers are already familiar with, token minting
+`vmsdk` in an application most readers are already familiar with, token minting
 and token trading. The `tokenvm` lets anyone create any asset, mint more of
 their asset, modify the metadata of their asset (if they reveal some info), and
 burn their asset. Additionally, there is an embedded on-chain exchange that
@@ -16,16 +16,16 @@ maintains by syncing blocks. If you are interested in the intersection of
 exchanges and blockchains, it is definitely worth a read (the logic for filling
 orders is < 100 lines of code!).
 
-To ensure the `hypersdk` stays reliable as we optimize and evolve the codebase,
-we also run E2E tests in the `tokenvm` on each PR to the `hypersdk` core modules.
+To ensure the `vmsdk` stays reliable as we optimize and evolve the codebase,
+we also run E2E tests in the `tokenvm` on each PR to the `vmsdk` core modules.
 
 ## Expert: `indexvm`
-The [`indexvm`](https://github.com/ava-labs/indexvm) is much more complex than
+The [`indexvm`](https://github.com/luxdefi/indexvm) is much more complex than
 the `tokenvm` (more elaborate mechanisms and a new use case you may not be
-familiar with). It was built during the design of the `hypersdk` to test out the
+familiar with). It was built during the design of the `vmsdk` to test out the
 limits of the abstractions for building complex on-chain mechanisms. We recommend
-taking a look at this `hypervm` once you already have familiarity with the `hypersdk` to gain an
-even deeper understanding of how you can build a complex runtime on top of the `hypersdk`.
+taking a look at this `luxvm` once you already have familiarity with the `vmsdk` to gain an
+even deeper understanding of how you can build a complex runtime on top of the `vmsdk`.
 
 The `indexvm` is dedicated to increasing the usefulness of the world's
 content-addressable data (like IPFS) by enabling anyone to "index it" by
@@ -49,11 +49,11 @@ interacted with them before.
 
 ## Future Work
 ### storagevm
-It would be great to create a `hypervm` dedicated to the storage of arbitrary
+It would be great to create a `luxvm` dedicated to the storage of arbitrary
 data blobs (maybe up to 64KB) that could be used by different on-chain
 applications, like NFTs, to store large data (which may utilize many data blobs on-chain).
 
-This `hypervm` should put the raw data blobs in each block but only store the
+This `luxvm` should put the raw data blobs in each block but only store the
 hash in state (so that anyone syncing the network does not need to state sync
 everything in it). Nodes can then best-effort/selectively store the content
 that matters to them. We can additionally add some sort of DHT that could be

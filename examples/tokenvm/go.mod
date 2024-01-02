@@ -1,11 +1,11 @@
-module github.com/ava-labs/hypersdk/examples/tokenvm
+module github.com/luxdefi/vmsdk/examples/tokenvm
 
 go 1.20
 
 require (
-	github.com/ava-labs/avalanche-network-runner v1.3.10-0.20230315100749-fc888ba0646f
-	github.com/ava-labs/avalanchego v1.9.15
-	github.com/ava-labs/hypersdk v0.0.1
+	github.com/luxdefi/netrunner v1.3.10-0.20230315100749-fc888ba0646f
+	github.com/luxdefi/node v1.9.15
+	github.com/luxdefi/vmsdk v0.0.1
 	github.com/fatih/color v1.13.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/onsi/ginkgo/v2 v2.7.0
@@ -20,7 +20,7 @@ require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/VictoriaMetrics/fastcache v1.10.0 // indirect
-	github.com/ava-labs/coreth v0.11.9-rc.0 // indirect
+	github.com/luxdefi/coreth v0.11.9-rc.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
@@ -142,4 +142,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/ava-labs/hypersdk => ../../
+replace github.com/luxdefi/vmsdk => ../../
