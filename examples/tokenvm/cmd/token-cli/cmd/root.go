@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // "token-cli" implements tokenvm client operation interface.
@@ -7,9 +7,9 @@ package cmd
 import (
 	"time"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/hypersdk/pebble"
-	"github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/vmsdk/pebble"
+	"github.com/luxdefi/vmsdk/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package client
@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	"github.com/luxdefi/node/vms/platformvm/warp"
 
-	"github.com/ava-labs/hypersdk/requester"
-	"github.com/ava-labs/hypersdk/vm"
+	"github.com/luxdefi/vmsdk/requester"
+	"github.com/luxdefi/vmsdk/vm"
 )
 
 const suggestedFeeCacheRefresh = 10 * time.Second

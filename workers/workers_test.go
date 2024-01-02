@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package workers
@@ -15,7 +15,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/utils/hashing"
+	"github.com/luxdefi/node/utils/hashing"
 	"github.com/neilotoole/errgroup"
 	"golang.org/x/sync/semaphore"
 )
@@ -24,7 +24,7 @@ import (
 //
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ava-labs/hypersdk/workers
+// pkg: github.com/luxdefi/vmsdk/workers
 // BenchmarkWorker/10-10   	             10000	     10752 ns/op	    5921 B/op	      60 allocs/op
 // BenchmarkWorker/50-10   	             10000	     36131 ns/op	   29603 B/op	     300 allocs/op
 // BenchmarkWorker/100-10  	             10000	    107860 ns/op	   59203 B/op	     600 allocs/op

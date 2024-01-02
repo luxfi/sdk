@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chain
@@ -8,17 +8,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	smath "github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/ids"
+	smath "github.com/luxdefi/node/utils/math"
+	"github.com/luxdefi/node/vms/platformvm/warp"
 
-	"github.com/ava-labs/hypersdk/codec"
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/emap"
-	"github.com/ava-labs/hypersdk/mempool"
-	"github.com/ava-labs/hypersdk/tstate"
-	"github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/vmsdk/codec"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/emap"
+	"github.com/luxdefi/vmsdk/mempool"
+	"github.com/luxdefi/vmsdk/tstate"
+	"github.com/luxdefi/vmsdk/utils"
 )
 
 var (

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package mempool
@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ava-labs/hypersdk/trace"
+	"github.com/luxdefi/vmsdk/trace"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )

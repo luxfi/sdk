@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+# Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 # See the file LICENSE for licensing terms.
 
 set -e
@@ -25,43 +25,43 @@ if [[ ${MODE} != "run" ]]; then
   STATESYNC_DELAY=500000000 # 500ms
 fi
 
-AVALANCHE_LOG_LEVEL=${AVALANCHE_LOG_LEVEL:-INFO}
+LUX_LOG_LEVEL=${LUX_LOG_LEVEL:-INFO}
 
 echo "Running with:"
 echo VERSION: ${VERSION}
 echo MODE: ${MODE}
 
 ############################
-# build avalanchego
-# https://github.com/ava-labs/avalanchego/releases
+# build node
+# https://github.com/luxdefi/node/releases
 GOARCH=$(go env GOARCH)
 GOOS=$(go env GOOS)
-AVALANCHEGO_PATH=/tmp/avalanchego-v${VERSION}/avalanchego
-AVALANCHEGO_PLUGIN_DIR=/tmp/avalanchego-v${VERSION}/plugins
+LUXD_PATH=/tmp/node-v${VERSION}/node
+LUXD_PLUGIN_DIR=/tmp/node-v${VERSION}/plugins
 
-if [ ! -f "$AVALANCHEGO_PATH" ]; then
-  echo "building avalanchego"
+if [ ! -f "$LUXD_PATH" ]; then
+  echo "building node"
   CWD=$(pwd)
 
   # Clear old folders
-  rm -rf /tmp/avalanchego-v${VERSION}
-  mkdir -p /tmp/avalanchego-v${VERSION}
-  rm -rf /tmp/avalanchego-src
-  mkdir -p /tmp/avalanchego-src
+  rm -rf /tmp/node-v${VERSION}
+  mkdir -p /tmp/node-v${VERSION}
+  rm -rf /tmp/node-src
+  mkdir -p /tmp/node-src
 
   # Download src
-  cd /tmp/avalanchego-src
-  git clone https://github.com/ava-labs/avalanchego.git
-  cd avalanchego
+  cd /tmp/node-src
+  git clone https://github.com/luxdefi/node.git
+  cd node
   git checkout v${VERSION}
 
-  # Build avalanchego
+  # Build node
   ./scripts/build.sh
-  mv build/avalanchego /tmp/avalanchego-v${VERSION}
+  mv build/node /tmp/node-v${VERSION}
 
   cd ${CWD}
 else
-  echo "using previously built avalanchego"
+  echo "using previously built node"
 fi
 
 ############################
@@ -70,18 +70,18 @@ fi
 echo "building tokenvm"
 
 # delete previous (if exists)
-rm -f /tmp/avalanchego-v${VERSION}/plugins/tHBYNu8ikqo4MWMHehC9iKB9mR5tB3DWzbkYmTfe9buWQ5GZ8
+rm -f /tmp/node-v${VERSION}/plugins/tHBYNu8ikqo4MWMHehC9iKB9mR5tB3DWzbkYmTfe9buWQ5GZ8
 
 # rebuild with latest code
 go build \
--o /tmp/avalanchego-v${VERSION}/plugins/tHBYNu8ikqo4MWMHehC9iKB9mR5tB3DWzbkYmTfe9buWQ5GZ8 \
+-o /tmp/node-v${VERSION}/plugins/tHBYNu8ikqo4MWMHehC9iKB9mR5tB3DWzbkYmTfe9buWQ5GZ8 \
 ./cmd/tokenvm
 
 echo "building token-cli"
 go build -v -o /tmp/token-cli ./cmd/token-cli
 
-# log everything in the avalanchego directory
-find /tmp/avalanchego-v${VERSION}
+# log everything in the node directory
+find /tmp/node-v${VERSION}
 
 ############################
 
@@ -155,27 +155,27 @@ ACK_GINKGO_RC=true ginkgo build ./tests/e2e
 ./tests/e2e/e2e.test --help
 
 #################################
-# download avalanche-network-runner
-# https://github.com/ava-labs/avalanche-network-runner
-ANR_REPO_PATH=github.com/ava-labs/avalanche-network-runner
+# download netrunner
+# https://github.com/luxdefi/netrunner
+ANR_REPO_PATH=github.com/luxdefi/netrunner
 ANR_VERSION=fc888ba0646f4396456ba2b36eb56c26aa76a26a
 # version set
 go install -v ${ANR_REPO_PATH}@${ANR_VERSION}
 
 #################################
-# run "avalanche-network-runner" server
+# run "netrunner" server
 GOPATH=$(go env GOPATH)
 if [[ -z ${GOBIN+x} ]]; then
   # no gobin set
-  BIN=${GOPATH}/bin/avalanche-network-runner
+  BIN=${GOPATH}/bin/netrunner
 else
   # gobin set
-  BIN=${GOBIN}/avalanche-network-runner
+  BIN=${GOBIN}/netrunner
 fi
 
-killall avalanche-network-runner || true
+killall netrunner || true
 
-echo "launch avalanche-network-runner in the background"
+echo "launch netrunner in the background"
 $BIN server \
 --log-level verbo \
 --port=":12352" \
@@ -190,17 +190,17 @@ PID=${!}
 KEEPALIVE=false
 function cleanup() {
   if [[ ${KEEPALIVE} = true ]]; then
-    echo "avalanche-network-runner is running in the background..."
+    echo "netrunner is running in the background..."
     echo ""
     echo "use the following command to terminate:"
     echo ""
-    echo "killall avalanche-network-runner"
+    echo "killall netrunner"
     echo ""
     exit
   fi
 
-  echo "avalanche-network-runner shutting down..."
-  killall avalanche-network-runner
+  echo "netrunner shutting down..."
+  killall netrunner
 }
 trap cleanup EXIT
 
@@ -210,12 +210,12 @@ echo "running e2e tests"
 --network-runner-log-level verbo \
 --network-runner-grpc-endpoint="0.0.0.0:12352" \
 --network-runner-grpc-gateway-endpoint="0.0.0.0:12353" \
---avalanchego-path=${AVALANCHEGO_PATH} \
---avalanchego-plugin-dir=${AVALANCHEGO_PLUGIN_DIR} \
+--node-path=${LUXD_PATH} \
+--node-plugin-dir=${LUXD_PLUGIN_DIR} \
 --vm-genesis-path=/tmp/tokenvm.genesis \
 --vm-config-path=/tmp/tokenvm.config \
 --subnet-config-path=/tmp/tokenvm.subnet \
---output-path=/tmp/avalanchego-v${VERSION}/output.yaml \
+--output-path=/tmp/node-v${VERSION}/output.yaml \
 --mode=${MODE}
 
 ############################

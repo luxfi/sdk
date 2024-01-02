@@ -1,11 +1,11 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
 
 import (
-	ametrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
+	ametrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/utils/wrappers"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -67,7 +67,7 @@ func newMetrics(gatherer ametrics.MultiGatherer) (*Metrics, error) {
 		r.Register(m.txsAccepted),
 		r.Register(m.decisionsRPCConnections),
 		r.Register(m.blocksRPCConnections),
-		gatherer.Register("hyper_sdk", r),
+		gatherer.Register("vmsdk", r),
 	)
 	return m, errs.Err
 }

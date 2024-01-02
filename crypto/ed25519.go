@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Package crypto provides functionality for interacting with Ed25519
@@ -11,7 +11,7 @@ import (
 	"encoding/hex"
 	"os"
 
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
+	"github.com/luxdefi/node/utils/formatting/address"
 )
 
 type (
@@ -37,7 +37,7 @@ var (
 )
 
 // Address returns a Bech32 address from hrp and p.
-// This function uses avalanchego's FormatBech32 function.
+// This function uses node's FormatBech32 function.
 func Address(hrp string, p PublicKey) string {
 	// TODO: handle error
 	addrString, _ := address.FormatBech32(hrp, p[:])

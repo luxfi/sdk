@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chain
@@ -6,11 +6,11 @@ package chain
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/trace"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/window"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/trace"
+	"github.com/luxdefi/node/utils/math"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/window"
 )
 
 type ExecutionContext struct {

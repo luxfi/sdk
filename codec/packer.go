@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package codec
@@ -6,16 +6,16 @@ package codec
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/wrappers"
 
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/crypto"
-	"github.com/ava-labs/hypersdk/window"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/crypto"
+	"github.com/luxdefi/vmsdk/window"
 )
 
 // Packer is a wrapper struct for the Packer struct
-// from avalanchego/utils/wrappers/packing.go. It adds methods to
+// from node/utils/wrappers/packing.go. It adds methods to
 // pack/unpack ids, PublicKeys and Signatures. A bool [required] parameter is
 // added to many unpacking methods, which signals the packer to add an error
 // if the expected method does not unpack properly.
@@ -50,7 +50,7 @@ func (p *Packer) PackID(src ids.ID) {
 	p.p.PackFixedBytes(src[:])
 }
 
-// UnpackID unpacks an avalanchego ID into [dest]. If [required] is true,
+// UnpackID unpacks an node ID into [dest]. If [required] is true,
 // and the unpacked bytes are empty, Packer will add an ErrFieldNotPopulated error.
 func (p *Packer) UnpackID(required bool, dest *ids.ID) {
 	copy((*dest)[:], p.p.UnpackFixedBytes(consts.IDLen))

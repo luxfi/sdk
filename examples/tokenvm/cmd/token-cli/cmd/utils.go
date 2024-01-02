@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package cmd
@@ -9,15 +9,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/set"
-	hconsts "github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/crypto"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/auth"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/client"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/utils"
-	hutils "github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/set"
+	hconsts "github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/crypto"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/auth"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/client"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/utils"
+	hutils "github.com/luxdefi/vmsdk/utils"
 	"github.com/manifoldco/promptui"
 )
 

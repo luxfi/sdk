@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -12,11 +12,11 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/hashing"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/node/utils/hashing"
+	"github.com/luxdefi/node/utils/json"
+	"github.com/luxdefi/node/utils/perms"
 	"github.com/gorilla/rpc/v2"
 	formatter "github.com/onsi/ginkgo/v2/formatter"
 )

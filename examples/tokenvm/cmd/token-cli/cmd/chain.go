@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 //nolint:lll
@@ -12,18 +12,18 @@ import (
 	"strings"
 	"time"
 
-	runner "github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/hypersdk/utils"
-	"github.com/ava-labs/hypersdk/vm"
+	runner "github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/vmsdk/utils"
+	"github.com/luxdefi/vmsdk/vm"
 	"github.com/spf13/cobra"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/actions"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/auth"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/client"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
-	tutils "github.com/ava-labs/hypersdk/examples/tokenvm/utils"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/actions"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/auth"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/client"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
+	tutils "github.com/luxdefi/vmsdk/examples/tokenvm/utils"
 )
 
 var chainCmd = &cobra.Command{

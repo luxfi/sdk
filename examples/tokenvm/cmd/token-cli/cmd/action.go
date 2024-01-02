@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 //nolint:lll
@@ -9,16 +9,16 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/crypto"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/actions"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/client"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/utils"
-	hutils "github.com/ava-labs/hypersdk/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/crypto"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/actions"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/client"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/utils"
+	hutils "github.com/luxdefi/vmsdk/utils"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -634,7 +634,7 @@ func submitDummy(
 		if underHeight || time.Now().Unix()-t > dummyBlockAgeThreshold {
 			if underHeight && !logEmitted {
 				hutils.Outf(
-					"{{yellow}}waiting for snowman++ activation (needed for AWM)...{{/}}\n",
+					"{{yellow}}waiting for snowman++ activation (needed for LWM)...{{/}}\n",
 				)
 				logEmitted = true
 			}

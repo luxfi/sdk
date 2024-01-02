@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -7,16 +7,16 @@ import (
 	"context"
 	"time"
 
-	ametrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	atrace "github.com/ava-labs/avalanchego/trace"
+	ametrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/engine/common"
+	atrace "github.com/luxdefi/node/trace"
 
-	"github.com/ava-labs/hypersdk/builder"
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/gossiper"
-	trace "github.com/ava-labs/hypersdk/trace"
+	"github.com/luxdefi/vmsdk/builder"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/gossiper"
+	trace "github.com/luxdefi/vmsdk/trace"
 )
 
 type Handlers map[string]*common.HTTPHandler
@@ -46,7 +46,7 @@ type Genesis interface {
 
 type Controller interface {
 	Initialize(
-		inner *VM, // hypersdk VM
+		inner *VM, // vmsdk VM
 		snowCtx *snow.Context,
 		gatherer ametrics.MultiGatherer,
 		genesisBytes []byte,

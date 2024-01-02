@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package controller
@@ -7,26 +7,26 @@ import (
 	"context"
 	"fmt"
 
-	ametrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/hypersdk/builder"
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/gossiper"
-	"github.com/ava-labs/hypersdk/pebble"
-	"github.com/ava-labs/hypersdk/utils"
-	"github.com/ava-labs/hypersdk/vm"
+	ametrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/vmsdk/builder"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/gossiper"
+	"github.com/luxdefi/vmsdk/pebble"
+	"github.com/luxdefi/vmsdk/utils"
+	"github.com/luxdefi/vmsdk/vm"
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/actions"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/auth"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/config"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/genesis"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/storage"
-	tutils "github.com/ava-labs/hypersdk/examples/tokenvm/utils"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/version"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/actions"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/auth"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/config"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/genesis"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/storage"
+	tutils "github.com/luxdefi/vmsdk/examples/tokenvm/utils"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/version"
 )
 
 var _ vm.Controller = (*Controller)(nil)
@@ -55,7 +55,7 @@ func (c *Controller) Initialize(
 	snowCtx *snow.Context,
 	gatherer ametrics.MultiGatherer,
 	genesisBytes []byte,
-	upgradeBytes []byte, // subnets to allow for AWM
+	upgradeBytes []byte, // subnets to allow for LWM
 	configBytes []byte,
 ) (
 	vm.Config,

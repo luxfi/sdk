@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package window
@@ -6,8 +6,8 @@ package window
 import (
 	"encoding/binary"
 
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/hypersdk/consts"
+	"github.com/luxdefi/node/utils/math"
+	"github.com/luxdefi/vmsdk/consts"
 )
 
 const (

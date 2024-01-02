@@ -1,9 +1,9 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
 
-import "github.com/ava-labs/avalanchego/snow/engine/common"
+import "github.com/luxdefi/node/snow/engine/common"
 
 var _ Builder = (*Manual)(nil)
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package storage
@@ -9,14 +9,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	smath "github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/hypersdk/chain"
-	"github.com/ava-labs/hypersdk/consts"
-	"github.com/ava-labs/hypersdk/crypto"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/ids"
+	smath "github.com/luxdefi/node/utils/math"
+	"github.com/luxdefi/vmsdk/chain"
+	"github.com/luxdefi/vmsdk/consts"
+	"github.com/luxdefi/vmsdk/crypto"
 
-	"github.com/ava-labs/hypersdk/examples/tokenvm/utils"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/utils"
 )
 
 type ReadState func(context.Context, [][]byte) ([][]byte, []error)
@@ -34,8 +34,8 @@ type ReadState func(context.Context, [][]byte) ([][]byte, []error)
 //   -> [txID] => in|out|rate|remaining|owner
 // 0x3/ (loans)
 //   -> [assetID|destination] => amount
-// 0x4/ (hypersdk-incoming warp)
-// 0x5/ (hypersdk-outgoing warp)
+// 0x4/ (vmsdk-incoming warp)
+// 0x5/ (vmsdk-outgoing warp)
 
 const (
 	txPrefix = 0x0

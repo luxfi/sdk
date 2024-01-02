@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chain
@@ -7,11 +7,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/trace"
-	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/trace"
+	"github.com/luxdefi/node/utils/set"
 
-	"github.com/ava-labs/hypersdk/tstate"
+	"github.com/luxdefi/vmsdk/tstate"
 )
 
 type txData struct {

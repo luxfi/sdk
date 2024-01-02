@@ -1,12 +1,12 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package mempool
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
+	"github.com/luxdefi/node/ids"
 
-	"github.com/ava-labs/hypersdk/heap"
+	"github.com/luxdefi/vmsdk/heap"
 )
 
 // Item is the interface that any item put in the mempool must adheare to.

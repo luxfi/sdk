@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+# Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 # See the file LICENSE for licensing terms.
 
 set -e
@@ -29,7 +29,7 @@ run \
 --fail-fast \
 -cover \
 -covermode=atomic \
--coverpkg=github.com/ava-labs/hypersdk/... \
+-coverpkg=github.com/luxdefi/vmsdk/... \
 -coverprofile=integration.coverage.out \
 ./tests/integration \
 --vms 3 \

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package main
@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/ulimit"
-	"github.com/ava-labs/avalanchego/vms/rpcchainvm"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/cmd/tokenvm/version"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/controller"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/ulimit"
+	"github.com/luxdefi/node/vms/rpcchainvm"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/cmd/tokenvm/version"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/controller"
 	"github.com/spf13/cobra"
 )
 

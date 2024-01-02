@@ -1,12 +1,12 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package controller
 
 import (
-	ametrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/consts"
+	ametrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/consts"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

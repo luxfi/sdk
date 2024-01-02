@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -6,9 +6,9 @@ package vm
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/hypersdk/chain"
+	"github.com/luxdefi/node/snow/choices"
+	"github.com/luxdefi/node/snow/engine/snowman/block"
+	"github.com/luxdefi/vmsdk/chain"
 	"go.uber.org/zap"
 )
 

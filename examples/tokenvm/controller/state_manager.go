@@ -1,11 +1,11 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package controller
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/hypersdk/examples/tokenvm/storage"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/vmsdk/examples/tokenvm/storage"
 )
 
 type StateManager struct{}

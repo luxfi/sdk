@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 //nolint:revive
@@ -8,10 +8,10 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/hypersdk/trace"
-	"github.com/ava-labs/hypersdk/vm"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/units"
+	"github.com/luxdefi/vmsdk/trace"
+	"github.com/luxdefi/vmsdk/vm"
 )
 
 var _ vm.Config = (*Config)(nil)
