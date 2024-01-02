@@ -1,6 +1,4 @@
-<p align="center">
-  <img width="90%" alt="vmsdk" src="assets/logo.png">
-</p>
+<h1>vmsdk</h1>
 <p align="center">
   Framework for Building Hyper-Scalable Blockchains on Lux
 </p>
@@ -15,8 +13,8 @@
 The freedom to create your own [Virtual Machine (VM)](https://docs.lux.network/subnets#virtual-machines),
 or blockchain runtime, is one of the most exciting and powerful aspects of building
 on Lux, however, it is difficult and time-intensive to do from scratch. Forking
-existing Lux VMs makes it easier to get started, like [evm](https://github.com/luxdefi/evm), but is time-consuming
-and complex to ensure correctness as changes occur upstream (in repos which
+existing Lux VMs makes it easier to get started, like [Lux EVM](https://github.com/luxdefi/evm), but is time-consuming
+but it is complex to ensure correctness as changes occur upstream (in repos which
 often weren't meant to be used as a library).
 
 The `vmsdk` is the first (of many) frameworks dedicated to making it
