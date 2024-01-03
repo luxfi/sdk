@@ -9,7 +9,7 @@ require (
 	github.com/cespare/cp v1.1.1
 	github.com/cockroachdb/pebble v1.0.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
-	github.com/deckarep/golang-set/v2 v2.5.0
+	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
 	github.com/ethereum/go-ethereum v1.13.8
@@ -44,7 +44,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	github.com/tyler-smith/go-bip39 v1.1.0
-	github.com/urfave/cli/v2 v2.26.0
+	github.com/urfave/cli/v2 v2.27.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/mock v0.4.0
 	golang.org/x/crypto v0.17.0
@@ -76,7 +76,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.12.0 // indirect
+	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.4 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
