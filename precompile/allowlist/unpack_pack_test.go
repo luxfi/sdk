@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+=======
+// (c) 2019-2020, Lux Partners Limited. All rights reserved.
+>>>>>>> d5328b4 (Sync upstream)
 // See the file LICENSE for licensing terms.
 
 package allowlist

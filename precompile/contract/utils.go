@@ -11,9 +11,12 @@ import (
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/vmerrs"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	"github.com/ethereum/go-ethereum/common"
 >>>>>>> fd08c47 (Update import path)
+=======
+>>>>>>> d5328b4 (Sync upstream)
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

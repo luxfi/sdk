@@ -8,21 +8,13 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 var errNoKey = errors.New("PrecompileUpgrade cannot be empty")
-
-// PrecompileUpgrade is a helper struct embedded in UpgradeConfig.
-// It is used to unmarshal the json into the correct precompile config type
-// based on the key. Keys are defined in each precompile module, and registered in
-// precompile/registry/registry.go.
-type PrecompileUpgrade struct {
-	precompileconfig.Config
-}
 
 // UnmarshalJSON unmarshals the json into the correct precompile config type
 // based on the key. Keys are defined in each precompile module, and registered in

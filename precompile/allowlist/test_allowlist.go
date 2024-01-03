@@ -525,7 +525,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			ReadOnly:    true,
 			ExpectedRes: common.Hash(NoRole).Bytes(),
 		},
-		"radmin read allow list out of gas": {
+		"admin read allow list out of gas": {
 			Caller:     TestAdminAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			InputFn: func(t testing.TB) []byte {

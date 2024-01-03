@@ -44,9 +44,9 @@ type PredicateContext struct {
 // If implemented, the predicate will be enforced on every transaction in a block, prior to
 // the block's execution.
 // If VerifyPredicate returns an error, the block will fail verification with no further processing.
-// WARNING: If you are implementing a custom precompile, beware that evm
+// WARNING: If you are implementing a custom precompile, beware that subnet-evm
 // will not maintain backwards compatibility of this interface and your code should not
-// rely on this. Designed for use only by precompiles that ship with evm.
+// rely on this. Designed for use only by precompiles that ship with subnet-evm.
 type Predicater interface {
 	PredicateGas(predicateBytes []byte) (uint64, error)
 	VerifyPredicate(predicateContext *PredicateContext, predicateBytes []byte) error
@@ -71,9 +71,9 @@ type AcceptContext struct {
 
 // Accepter is an optional interface for StatefulPrecompiledContracts to implement.
 // If implemented, Accept will be called for every log with the address of the precompile when the block is accepted.
-// WARNING: If you are implementing a custom precompile, beware that evm
+// WARNING: If you are implementing a custom precompile, beware that subnet-evm
 // will not maintain backwards compatibility of this interface and your code should not
-// rely on this. Designed for use only by precompiles that ship with evm.
+// rely on this. Designed for use only by precompiles that ship with subnet-evm.
 type Accepter interface {
 	Accept(acceptCtx *AcceptContext, blockHash common.Hash, blockNumber uint64, txHash common.Hash, logIndex int, topics []common.Hash, logData []byte) error
 }

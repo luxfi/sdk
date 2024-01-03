@@ -202,7 +202,11 @@ func setRewardAddress(accessibleState contract.AccessibleState, caller common.Ad
 	// Assumes that [input] does not include selector
 	// do not use strict mode after DUpgrade
 	useStrictMode := !contract.IsDUpgradeActivated(accessibleState)
+<<<<<<< HEAD
 	rewardAddress, err := UnpackSetRewardAddressInput(input, useStrictMode)
+=======
+	inputStruct, err := UnpackSetRewardAddressInput(input, useStrictMode)
+>>>>>>> d5328b4 (Sync upstream)
 	if err != nil {
 		return nil, remainingGas, err
 	}
