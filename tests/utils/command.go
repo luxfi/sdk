@@ -59,10 +59,17 @@ func RegisterPingTest() {
 	})
 }
 
+<<<<<<< HEAD
 // RegisterNodeRun registers a before suite that starts an Lux Node process to use for the e2e tests
 // and an after suite that stops the Lux Node process
 func RegisterNodeRun() {
 	// BeforeSuite starts an Lux Node process to use for the e2e tests
+=======
+// RegisterNodeRun registers a before suite that starts an Luxd process to use for the e2e tests
+// and an after suite that stops the Luxd process
+func RegisterNodeRun() {
+	// BeforeSuite starts an Luxd process to use for the e2e tests
+>>>>>>> b36c20f (Update executable to luxd)
 	var startCmd *cmd.Cmd
 	_ = ginkgo.BeforeSuite(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -70,7 +77,11 @@ func RegisterNodeRun() {
 
 		wd, err := os.Getwd()
 		gomega.Expect(err).Should(gomega.BeNil())
+<<<<<<< HEAD
 		log.Info("Starting Lux Node node", "wd", wd)
+=======
+		log.Info("Starting Luxd node", "wd", wd)
+>>>>>>> b36c20f (Update executable to luxd)
 		cmd, err := RunCommand("./scripts/run.sh")
 		startCmd = cmd
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -80,7 +91,11 @@ func RegisterNodeRun() {
 		healthy, err := health.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(healthy).Should(gomega.BeTrue())
+<<<<<<< HEAD
 		log.Info("Lux Node node is healthy")
+=======
+		log.Info("Luxd node is healthy")
+>>>>>>> b36c20f (Update executable to luxd)
 	})
 
 	ginkgo.AfterSuite(func() {

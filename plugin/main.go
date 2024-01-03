@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+<<<<<<< HEAD
 	versionString := fmt.Sprintf("Subnet-EVM/%s [Lux Node=%s, rpcchainvm=%d]", evm.Version, version.Current, version.RPCChainVMProtocol)
+=======
+	versionString := fmt.Sprintf("Subnet-EVM/%s [Luxd=%s, rpcchainvm=%d]", evm.Version, version.Current, version.RPCChainVMProtocol)
+>>>>>>> b36c20f (Update executable to luxd)
 	runner.Run(versionString)
 }

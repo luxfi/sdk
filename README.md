@@ -13,8 +13,9 @@ This chain implements the Ethereum Virtual Machine and supports Solidity smart c
 
 ## Building
 
-The Subnet EVM runs in a separate process from the main LuxGo process and communicates with it over a local gRPC connection.
+The Subnet EVM runs in a separate process from the main Luxd process and communicates with it over a local gRPC connection.
 
+<<<<<<< HEAD
 ### Lux Node Compatibility
 
 ```text
@@ -55,6 +56,48 @@ The Subnet EVM runs in a separate process from the main LuxGo process and commun
 [v0.5.8] Lux Node@v1.10.13-v1.10.14 (Protocol Version: 29)
 [v0.5.9] Lux Node@v1.10.15-v1.10.17 (Protocol Version: 30)
 [v0.5.10] Lux Node@v1.10.15-v1.10.17 (Protocol Version: 30)
+=======
+### Luxd Compatibility
+
+```text
+[v0.1.0] Luxd@v1.7.0-v1.7.4 (Protocol Version: 9)
+[v0.1.1-v0.1.2] Luxd@v1.7.5-v1.7.6 (Protocol Version: 10)
+[v0.2.0] Luxd@v1.7.7-v1.7.9 (Protocol Version: 11)
+[v0.2.1] Luxd@v1.7.10 (Protocol Version: 12)
+[v0.2.2] Luxd@v1.7.11-v1.7.12 (Protocol Version: 14)
+[v0.2.3] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.4] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.5] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.6] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.7] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.8] Luxd@v1.7.13-v1.7.18 (Protocol Version: 15)
+[v0.2.9] Luxd@v1.7.13-v1.7.18 (Protocol Version: 15)
+[v0.3.0] Luxd@v1.8.0-v1.8.6 (Protocol Version: 16)
+[v0.4.0] Luxd@v1.9.0 (Protocol Version: 17)
+[v0.4.1] Luxd@v1.9.1 (Protocol Version: 18)
+[v0.4.2] Luxd@v1.9.1 (Protocol Version: 18)
+[v0.4.3] Luxd@v1.9.2-v1.9.3 (Protocol Version: 19)
+[v0.4.4] Luxd@v1.9.2-v1.9.3 (Protocol Version: 19)
+[v0.4.5] Luxd@v1.9.4 (Protocol Version: 20)
+[v0.4.6] Luxd@v1.9.4 (Protocol Version: 20)
+[v0.4.7] Luxd@v1.9.5 (Protocol Version: 21)
+[v0.4.8] Luxd@v1.9.6-v1.9.8 (Protocol Version: 22)
+[v0.4.9] Luxd@v1.9.9 (Protocol Version: 23)
+[v0.4.10] Luxd@v1.9.9 (Protocol Version: 23)
+[v0.4.11] Luxd@v1.9.10-v1.9.16 (Protocol Version: 24)
+[v0.4.12] Luxd@v1.9.10-v1.9.16 (Protocol Version: 24)
+[v0.5.0] Luxd@v1.10.0 (Protocol Version: 25)
+[v0.5.1] Luxd@v1.10.1-v1.10.4 (Protocol Version: 26)
+[v0.5.2] Luxd@v1.10.1-v1.10.4 (Protocol Version: 26)
+[v0.5.3] Luxd@v1.10.5-v1.10.8 (Protocol Version: 27)
+[v0.5.4] Luxd@v1.10.9-v1.10.12 (Protocol Version: 28)
+[v0.5.5] Luxd@v1.10.9-v1.10.12 (Protocol Version: 28)
+[v0.5.6] Luxd@v1.10.9-v1.10.12 (Protocol Version: 28)
+[v0.5.7] Luxd@v1.10.13-v1.10.14 (Protocol Version: 29)
+[v0.5.8] Luxd@v1.10.13-v1.10.14 (Protocol Version: 29)
+[v0.5.9] Luxd@v1.10.15-v1.10.17 (Protocol Version: 30)
+[v0.5.10] Luxd@v1.10.15-v1.10.17 (Protocol Version: 30)
+>>>>>>> b36c20f (Update executable to luxd)
 ```
 
 ## API

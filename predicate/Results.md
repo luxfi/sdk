@@ -6,7 +6,11 @@ For more information on the motivation for encoding the results of predicate ver
 
 ## Serialization
 
+<<<<<<< HEAD
 Note: PredicateResults are encoded using the Lux Node codec, which serializes a map by serializing the length of the map as a uint32 and then serializes each key-value pair sequentially.
+=======
+Note: PredicateResults are encoded using the Luxd codec, which serializes a map by serializing the length of the map as a uint32 and then serializes each key-value pair sequentially.
+>>>>>>> b36c20f (Update executable to luxd)
 
 PredicateResults:
 ```

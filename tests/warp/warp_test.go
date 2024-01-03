@@ -139,7 +139,11 @@ var _ = ginkgo.BeforeSuite(func() {
 	require.NoError(err)
 	err = manager.SetupNetwork(
 		ctx,
+<<<<<<< HEAD
 		config.Lux NodeExecPath,
+=======
+		config.LuxdExecPath,
+>>>>>>> b36c20f (Update executable to luxd)
 		[]*rpcpb.BlockchainSpec{
 			{
 				VmName:      evm.IDStr,

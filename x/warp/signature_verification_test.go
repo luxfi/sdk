@@ -18,7 +18,11 @@ import (
 )
 
 // This test copies the test coverage from https://github.com/luxdefi/node/blob/v1.10.0/vms/platformvm/warp/signature_test.go#L137.
+<<<<<<< HEAD
 // These tests are only expected to fail if there is a breaking change in Lux Node that unexpectedly changes behavior.
+=======
+// These tests are only expected to fail if there is a breaking change in Luxd that unexpectedly changes behavior.
+>>>>>>> b36c20f (Update executable to luxd)
 func TestSignatureVerification(t *testing.T) {
 	tests = []signatureTest{
 		{

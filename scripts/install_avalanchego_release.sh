@@ -116,14 +116,19 @@ else
   fi
 fi
 
-LUXGO_PATH=${LUXGO_BUILD_PATH}/node
-LUXGO_PLUGIN_DIR=${LUXGO_BUILD_PATH}/plugins
+LUXD_PATH=${LUXD_BUILD_PATH}/node
+LUXD_PLUGIN_DIR=${LUXD_BUILD_PATH}/plugins
 
 mkdir -p ${LUXD_BUILD_PATH}
 
 cp ${BUILD_DIR}/node ${LUXD_PATH}
 
 
+<<<<<<< HEAD
 echo "Installed Lux Node release ${LUX_VERSION}"
 echo "Lux Node Path: ${LUXD_PATH}"
+=======
+echo "Installed Luxd release ${LUX_VERSION}"
+echo "Luxd Path: ${LUXD_PATH}"
+>>>>>>> b36c20f (Update executable to luxd)
 echo "Plugin Dir: ${LUXD_PLUGIN_DIR}"

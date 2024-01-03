@@ -44,11 +44,19 @@ func (s *SubnetSuite) SetBlockchainIDs(blockchainIDs map[string]string) {
 	s.blockchainIDs = blockchainIDs
 }
 
+<<<<<<< HEAD
 // CreateSubnetsSuite creates subnets for given [genesisFiles], and registers a before suite that starts an Lux Node process to use for the e2e tests.
 // genesisFiles is a map of test aliases to genesis file paths.
 func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 	// Keep track of the Lux Node external bash script, it is null for most
 	// processes except the first process that starts Lux Node
+=======
+// CreateSubnetsSuite creates subnets for given [genesisFiles], and registers a before suite that starts an Luxd process to use for the e2e tests.
+// genesisFiles is a map of test aliases to genesis file paths.
+func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
+	// Keep track of the Luxd external bash script, it is null for most
+	// processes except the first process that starts Luxd
+>>>>>>> b36c20f (Update executable to luxd)
 	var startCmd *cmd.Cmd
 
 	// This is used to pass the blockchain IDs from the SynchronizedBeforeSuite() to the tests
@@ -58,7 +66,11 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 	// SynchronizedBeforeSuite() which runs once, and its return value is passed
 	// over to each worker.
 	//
+<<<<<<< HEAD
 	// Here an Lux Node node instance is started, and subnets are created for
+=======
+	// Here an Luxd node instance is started, and subnets are created for
+>>>>>>> b36c20f (Update executable to luxd)
 	// each test case. Each test case has its own subnet, therefore all tests
 	// can run in parallel without any issue.
 	//
@@ -68,7 +80,11 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 
 		wd, err := os.Getwd()
 		gomega.Expect(err).Should(gomega.BeNil())
+<<<<<<< HEAD
 		log.Info("Starting Lux Node node", "wd", wd)
+=======
+		log.Info("Starting Luxd node", "wd", wd)
+>>>>>>> b36c20f (Update executable to luxd)
 		cmd, err := RunCommand("./scripts/run.sh")
 		startCmd = cmd
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -78,7 +94,11 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 		healthy, err := health.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(healthy).Should(gomega.BeTrue())
+<<<<<<< HEAD
 		log.Info("Lux Node node is healthy")
+=======
+		log.Info("Luxd node is healthy")
+>>>>>>> b36c20f (Update executable to luxd)
 
 		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		blockchainIDs := make(map[string]string)
@@ -99,7 +119,11 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 
 	// SynchronizedAfterSuite() takes two functions, the first runs after each test suite is done and the second
 	// function is executed once when all the tests are done. This function is used
+<<<<<<< HEAD
 	// to gracefully shutdown the Lux Node node.
+=======
+	// to gracefully shutdown the Luxd node.
+>>>>>>> b36c20f (Update executable to luxd)
 	var _ = ginkgo.SynchronizedAfterSuite(func() {}, func() {
 		gomega.Expect(startCmd).ShouldNot(gomega.BeNil())
 		gomega.Expect(startCmd.Stop()).Should(gomega.BeNil())

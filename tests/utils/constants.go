@@ -6,10 +6,17 @@ package utils
 import "time"
 
 const (
+<<<<<<< HEAD
 	// Timeout to boot the Lux Node node
 	BootLuxNodeTimeout = 5 * time.Minute
 
 	// Timeout for the health API to check the Lux Node is ready
+=======
+	// Timeout to boot the Luxd node
+	BootLuxNodeTimeout = 5 * time.Minute
+
+	// Timeout for the health API to check the Luxd is ready
+>>>>>>> b36c20f (Update executable to luxd)
 	HealthCheckTimeout = 5 * time.Second
 
 	DefaultLocalNodeURI = "http://127.0.0.1:9650"
