@@ -27,7 +27,10 @@ require (
 	github.com/holiman/uint256 v1.2.4
 	github.com/kylelemons/godebug v1.1.0
 	github.com/luxdefi/evm/cmd/simulator v0.0.0-20231217020722-fd08c47bd97c
+<<<<<<< HEAD
 	github.com/luxdefi/netrunner v1.6.0
+=======
+>>>>>>> b0f1acc (Bump github.com/ethereum/go-ethereum from 1.10.26 to 1.13.5)
 	github.com/luxdefi/netrunner v1.7.7
 	github.com/luxdefi/node v1.10.17
 	github.com/luxdefi/node v1.10.21
