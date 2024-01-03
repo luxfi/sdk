@@ -16,7 +16,7 @@ source "$SUBNET_EVM_PATH"/scripts/versions.sh
 # Load the constants
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
-BUILD_IMAGE_ID=${BUILD_IMAGE_ID:-"${LUX_VERSION}-Subnet-EVM-${CURRENT_BRANCH}"}
+BUILD_IMAGE_ID=${BUILD_IMAGE_ID:-"${LUX_VERSION}-EVM-${CURRENT_BRANCH}"}
 
 echo "Building Docker Image: $DOCKERHUB_REPO:$BUILD_IMAGE_ID based of $LUX_VERSION"
 docker build -t "$DOCKERHUB_REPO:$BUILD_IMAGE_ID" "$SUBNET_EVM_PATH" -f "$SUBNET_EVM_PATH/Dockerfile" \

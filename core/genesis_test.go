@@ -62,8 +62,8 @@ func TestGenesisBlockForTesting(t *testing.T) {
 }
 
 func TestSetupGenesis(t *testing.T) {
-	preSubnetConfig := *params.TestPreSubnetEVMConfig
-	preSubnetConfig.SubnetEVMTimestamp = utils.NewUint64(100)
+	preSubnetConfig := *params.TestPreEVMConfig
+	preSubnetConfig.EVMTimestamp = utils.NewUint64(100)
 	var (
 		customghash = common.HexToHash("0x4a12fe7bf8d40d152d7e9de22337b115186a4662aa3a97217b36146202bbfc66")
 		customg     = Genesis{
@@ -77,7 +77,7 @@ func TestSetupGenesis(t *testing.T) {
 	)
 
 	rollbackpreSubnetConfig := preSubnetConfig
-	rollbackpreSubnetConfig.SubnetEVMTimestamp = utils.NewUint64(90)
+	rollbackpreSubnetConfig.EVMTimestamp = utils.NewUint64(90)
 	oldcustomg.Config = &rollbackpreSubnetConfig
 	tests := []struct {
 		name       string
@@ -123,8 +123,8 @@ func TestSetupGenesis(t *testing.T) {
 		{
 			name: "incompatible config for lux fork in DB",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				// Commit the 'old' genesis block with SubnetEVM transition at 90.
-				// Advance to block #4, past the SubnetEVM transition block of customg.
+				// Commit the 'old' genesis block with EVM transition at 90.
+				// Advance to block #4, past the EVM transition block of customg.
 				genesis := oldcustomg.MustCommit(db)
 
 				bc, _ := NewBlockChain(db, DefaultCacheConfig, &oldcustomg, dummy.NewFullFaker(), vm.Config{}, genesis.Hash(), false)
@@ -145,7 +145,7 @@ func TestSetupGenesis(t *testing.T) {
 			wantHash:   customghash,
 			wantConfig: customg.Config,
 			wantErr: &params.ConfigCompatError{
-				What:         "SubnetEVM fork block timestamp",
+				What:         "EVM fork block timestamp",
 				StoredTime:   u64(90),
 				NewTime:      u64(100),
 				RewindToTime: 89,

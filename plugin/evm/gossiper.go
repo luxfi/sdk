@@ -74,7 +74,7 @@ type pushGossiper struct {
 }
 
 // createGossiper constructs and returns a pushGossiper or noopGossiper
-// based on whether vm.chainConfig.SubnetEVMTimestamp is set
+// based on whether vm.chainConfig.EVMTimestamp is set
 func (vm *VM) createGossiper(stats GossipStats) Gossiper {
 	net := &pushGossiper{
 		ctx:             vm.ctx,

@@ -10,6 +10,10 @@ import (
 
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/vmerrs"
+<<<<<<< HEAD
+=======
+	"github.com/ethereum/go-ethereum/common"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

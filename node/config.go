@@ -31,6 +31,12 @@ import (
 	"os"
 	"path/filepath"
 
+<<<<<<< HEAD
+=======
+	"github.com/luxdefi/evm/accounts"
+	"github.com/luxdefi/evm/accounts/external"
+	"github.com/luxdefi/evm/accounts/keystore"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxdefi/evm/accounts"
 	"github.com/luxdefi/evm/accounts/external"
@@ -60,7 +66,7 @@ type Config struct {
 	// InsecureUnlockAllowed allows user to unlock accounts in unsafe http environment.
 	InsecureUnlockAllowed bool `toml:",omitempty"`
 
-	SubnetEVMVersion string
+	EVMVersion string
 }
 
 // ExtRPCEnabled returns the indicator whether node enables the external

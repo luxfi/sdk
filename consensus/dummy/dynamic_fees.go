@@ -22,10 +22,10 @@ import (
 func CalcBaseFee(config *params.ChainConfig, feeConfig commontype.FeeConfig, parent *types.Header, timestamp uint64) ([]byte, *big.Int, error) {
 	// If the current block is the first EIP-1559 block, or it is the genesis block
 	// return the initial slice and initial base fee.
-	isSubnetEVM := config.IsSubnetEVM(parent.Time)
+	isEVM := config.IsEVM(parent.Time)
 	extraDataSize := params.DynamicFeeExtraDataSize
 
-	if !isSubnetEVM || parent.Number.Cmp(common.Big0) == 0 {
+	if !isEVM || parent.Number.Cmp(common.Big0) == 0 {
 		initialSlice := make([]byte, extraDataSize)
 		return initialSlice, feeConfig.MinBaseFee, nil
 	}
@@ -213,7 +213,7 @@ func calcBlockGasCost(
 	parentBlockGasCost *big.Int,
 	parentTime, currentTime uint64,
 ) *big.Int {
-	// Handle Subnet EVM boundary by returning the minimum value as the boundary.
+	// Handle EVM boundary by returning the minimum value as the boundary.
 	if parentBlockGasCost == nil {
 		return new(big.Int).Set(minBlockGasCost)
 	}
@@ -248,9 +248,9 @@ func calcBlockGasCost(
 // correctness check performed is that the sum of all tips is >= the
 // required block fee.
 //
-// This function will return nil for all return values prior to Subnet EVM.
+// This function will return nil for all return values prior to EVM.
 func MinRequiredTip(config *params.ChainConfig, header *types.Header) (*big.Int, error) {
-	if !config.IsSubnetEVM(header.Time) {
+	if !config.IsEVM(header.Time) {
 		return nil, nil
 	}
 	if header.BaseFee == nil {

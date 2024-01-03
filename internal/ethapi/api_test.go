@@ -52,7 +52,10 @@ import (
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/rpc"
+<<<<<<< HEAD
 
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

@@ -47,7 +47,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	}
 
 	// initialize the VM with these upgrade bytes
-	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONSubnetEVM, "", string(upgradeBytesJSON))
+	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONEVM, "", string(upgradeBytesJSON))
 
 	// Submit a successful transaction
 	tx0 := types.NewTransaction(uint64(0), testEthAddrs[0], big.NewInt(1), 21000, big.NewInt(testMinGasPrice), nil)
@@ -96,7 +96,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 		metrics.Enabled = true
 	}()
 	if err := vm.Initialize(
-		context.Background(), vm.ctx, dbManager, []byte(genesisJSONSubnetEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender,
+		context.Background(), vm.ctx, dbManager, []byte(genesisJSONEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender,
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -193,13 +193,13 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 // 			require.NoError(t, err)
 
 // 			// initialize the VM with these upgrade bytes
-// 			issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONPreSubnetEVM, "", string(upgradeBytesJSON))
+// 			issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONPreEVM, "", string(upgradeBytesJSON))
 // 			vm.clock.Set(testTimestamp)
 
 // 			// verify upgrade is applied
 // 			require.True(t, test.checkUpgradeFn(vm.chainConfig, big.NewInt(testTimestamp.Unix())))
 
-// 			// Submit a successful transaction and build a block to move the chain head past the SubnetEVMTimestamp network upgrade
+// 			// Submit a successful transaction and build a block to move the chain head past the EVMTimestamp network upgrade
 // 			tx0 := types.NewTransaction(uint64(0), testEthAddrs[0], big.NewInt(1), 21000, big.NewInt(testMinGasPrice), nil)
 // 			signedTx0, err := types.SignTx(tx0, types.NewEIP155Signer(vm.chainConfig.ChainID), testKeys[0])
 // 			require.NoError(t, err)
@@ -210,21 +210,21 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 
 // 			require.NoError(t, vm.Shutdown(context.Background()))
 // 			// VM should not start again without proper upgrade bytes.
-// 			err = vm.Initialize(context.Background(), vm.ctx, dbManager, []byte(genesisJSONPreSubnetEVM), []byte{}, []byte{}, issuer, []*commonEng.Fx{}, appSender)
+// 			err = vm.Initialize(context.Background(), vm.ctx, dbManager, []byte(genesisJSONPreEVM), []byte{}, []byte{}, issuer, []*commonEng.Fx{}, appSender)
 // 			require.ErrorContains(t, err, fmt.Sprintf("mismatching %s fork block timestamp in database", test.name))
 
 // 			// VM should not start if fork is moved back
 // 			test.setTimestampFn(upgradeConfig, big.NewInt(2))
 // 			upgradeBytesJSON, err = json.Marshal(upgradeConfig)
 // 			require.NoError(t, err)
-// 			err = vm.Initialize(context.Background(), vm.ctx, dbManager, []byte(genesisJSONPreSubnetEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender)
+// 			err = vm.Initialize(context.Background(), vm.ctx, dbManager, []byte(genesisJSONPreEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender)
 // 			require.ErrorContains(t, err, fmt.Sprintf("mismatching %s fork block timestamp in database", test.name))
 
 // 			// VM should not start if fork is moved forward
 // 			test.setTimestampFn(upgradeConfig, big.NewInt(30))
 // 			upgradeBytesJSON, err = json.Marshal(upgradeConfig)
 // 			require.NoError(t, err)
-// 			err = vm.Initialize(context.Background(), vm.ctx, dbManager, []byte(genesisJSONPreSubnetEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender)
+// 			err = vm.Initialize(context.Background(), vm.ctx, dbManager, []byte(genesisJSONPreEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender)
 // 			require.ErrorContains(t, err, fmt.Sprintf("mismatching %s fork block timestamp in database", test.name))
 // 		})
 // 	}
@@ -235,11 +235,11 @@ func TestMandatoryUpgradesEnforced(t *testing.T) {
 	// but this should not be used because we are enforcing
 	// network upgrades within the code
 	var genesis core.Genesis
-	if err := json.Unmarshal([]byte(genesisJSONPreSubnetEVM), &genesis); err != nil {
+	if err := json.Unmarshal([]byte(genesisJSONPreEVM), &genesis); err != nil {
 		t.Fatalf("could not unmarshal genesis bytes: %s", err)
 	}
-	genesisSubnetEVMTimestamp := utils.NewUint64(5)
-	genesis.Config.SubnetEVMTimestamp = genesisSubnetEVMTimestamp
+	genesisEVMTimestamp := utils.NewUint64(5)
+	genesis.Config.EVMTimestamp = genesisEVMTimestamp
 	genesisBytes, err := json.Marshal(&genesis)
 	if err != nil {
 		t.Fatalf("could not unmarshal genesis bytes: %s", err)
@@ -299,7 +299,7 @@ func TestMandatoryUpgradesEnforced(t *testing.T) {
 			}()
 
 			// verify upgrade is rescheduled
-			require.Equal(t, test.expected, vm.chainConfig.IsSubnetEVM(0))
+			require.Equal(t, test.expected, vm.chainConfig.IsEVM(0))
 		})
 	}
 }
@@ -313,7 +313,7 @@ func mustMarshal(t *testing.T, v interface{}) string {
 func TestVMStateUpgrade(t *testing.T) {
 	// modify genesis to add a key to the state
 	genesis := &core.Genesis{}
-	err := json.Unmarshal([]byte(genesisJSONSubnetEVM), genesis)
+	err := json.Unmarshal([]byte(genesisJSONEVM), genesis)
 	require.NoError(t, err)
 	genesisAccount, ok := genesis.Alloc[testEthAddrs[0]]
 	require.True(t, ok)

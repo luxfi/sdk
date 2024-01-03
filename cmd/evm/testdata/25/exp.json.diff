@@ -1,4 +1,4 @@
-State root and balance differ because of SubnetEVM's fee calculations.
+State root and balance differ because of EVM's fee calculations.
 
 CurrentDifficulty is 0xdeadc0de instead of null because the test overrides the
 difficulty if currentRandom is provided in the environment.

@@ -35,6 +35,10 @@ import (
 	"strings"
 	"testing"
 
+<<<<<<< HEAD
+=======
+	"github.com/luxdefi/evm/accounts/abi/bind"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/stretchr/testify/require"
@@ -452,7 +456,11 @@ var bindTests = []struct {
 		`"github.com/stretchr/testify/require"
 		 "math/big"
 		 "github.com/ethereum/go-ethereum/common"
+<<<<<<< HEAD
 		 "github.com/luxdefijevm/core/state"
+=======
+		 "github.com/luxdefi/evm/core/state"
+>>>>>>> fd08c47 (Update import path)
 		 "github.com/luxdefi/evm/precompile/allowlist"
 		`,
 		`

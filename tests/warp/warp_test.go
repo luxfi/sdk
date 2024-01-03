@@ -112,7 +112,7 @@ func toWebsocketURI(uri string, blockchainID string) string {
 // BeforeSuite starts the default network and adds 10 new nodes as validators with BLS keys
 // registered on the P-Chain.
 // Adds two disjoint sets of 5 of the new validator nodes to validate two new subnets with a
-// a single Subnet-EVM blockchain.
+// a single EVM blockchain.
 var _ = ginkgo.BeforeSuite(func() {
 	ctx := context.Background()
 	require := require.New(ginkgo.GinkgoT())
@@ -291,7 +291,7 @@ func (w *warpTest) initClients() {
 }
 
 func (w *warpTest) getBlockHashAndNumberFromTxReceipt(ctx context.Context, client ethclient.Client, tx *types.Transaction) (common.Hash, uint64) {
-	// This uses the Subnet-EVM client to fetch a block from Coreth (when testing the C-Chain), so we use this
+	// This uses the EVM client to fetch a block from Coreth (when testing the C-Chain), so we use this
 	// workaround to get the correct block hash. Note the client recalculates the block hash locally, which results
 	// in a different block hash due to small differences in the block format.
 	require := require.New(ginkgo.GinkgoT())

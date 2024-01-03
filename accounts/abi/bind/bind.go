@@ -39,6 +39,10 @@ import (
 	"text/template"
 	"unicode"
 
+<<<<<<< HEAD
+=======
+	"github.com/luxdefi/evm/accounts/abi"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxdefi/evm/accounts/abi"
 )

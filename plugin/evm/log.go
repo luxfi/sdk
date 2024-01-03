@@ -18,30 +18,30 @@ const (
 	timeFormat = "2006-01-02T15:04:05-0700"
 )
 
-type SubnetEVMLogger struct {
+type EVMLogger struct {
 	log.Handler
 }
 
 // InitLogger initializes logger with alias and sets the log level and format with the original [os.StdErr] interface
 // along with the context logger.
-func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (SubnetEVMLogger, error) {
-	logFormat := SubnetEVMTermFormat(alias)
+func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (EVMLogger, error) {
+	logFormat := EVMTermFormat(alias)
 	if jsonFormat {
-		logFormat = SubnetEVMJSONFormat(alias)
+		logFormat = EVMJSONFormat(alias)
 	}
 
 	// Create handler
 	logHandler := log.StreamHandler(writer, logFormat)
-	c := SubnetEVMLogger{Handler: logHandler}
+	c := EVMLogger{Handler: logHandler}
 
 	if err := c.SetLogLevel(level); err != nil {
-		return SubnetEVMLogger{}, err
+		return EVMLogger{}, err
 	}
 	return c, nil
 }
 
 // SetLogLevel sets the log level of initialized log handler.
-func (c *SubnetEVMLogger) SetLogLevel(level string) error {
+func (c *EVMLogger) SetLogLevel(level string) error {
 	// Set log level
 	logLevel, err := log.LvlFromString(level)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *SubnetEVMLogger) SetLogLevel(level string) error {
 	return nil
 }
 
-func SubnetEVMTermFormat(alias string) log.Format {
+func EVMTermFormat(alias string) log.Format {
 	prefix := fmt.Sprintf("<%s Chain>", alias)
 	return log.FormatFunc(func(r *log.Record) []byte {
 		location := fmt.Sprintf("%+v", r.Call)
@@ -61,7 +61,7 @@ func SubnetEVMTermFormat(alias string) log.Format {
 	})
 }
 
-func SubnetEVMJSONFormat(alias string) log.Format {
+func EVMJSONFormat(alias string) log.Format {
 	prefix := fmt.Sprintf("%s Chain", alias)
 	return log.FormatFunc(func(r *log.Record) []byte {
 		props := make(map[string]interface{}, 5+len(r.Ctx)/2)

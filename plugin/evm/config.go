@@ -86,7 +86,7 @@ type Config struct {
 	// Airdrop
 	AirdropFile string `json:"airdrop"`
 
-	// Subnet EVM APIs
+	// EVM APIs
 	SnowmanAPIEnabled bool   `json:"snowman-api-enabled"`
 	WarpAPIEnabled    bool   `json:"warp-api-enabled"`
 	AdminAPIEnabled   bool   `json:"admin-api-enabled"`

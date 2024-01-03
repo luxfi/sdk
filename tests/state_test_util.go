@@ -127,11 +127,11 @@ func GetChainConfig(forkString string) (baseConfig *params.ChainConfig, eips []i
 	// NOTE: this is added to support mapping geth fork names to
 	// evm fork names.
 	forkAliases := map[string]string{
-		"Berlin":       "Pre-SubnetEVM",
-		"London":       "SubnetEVM",
-		"ArrowGlacier": "SubnetEVM",
-		"GrayGlacier":  "SubnetEVM",
-		"Merge":        "SubnetEVM",
+		"Berlin":       "Pre-EVM",
+		"London":       "EVM",
+		"ArrowGlacier": "EVM",
+		"GrayGlacier":  "EVM",
+		"Merge":        "EVM",
 	}
 	if alias, ok := forkAliases[baseName]; ok {
 		baseName = alias
@@ -221,7 +221,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	snaps, statedb := MakePreState(rawdb.NewMemoryDatabase(), t.json.Pre, snapshotter)
 
 	var baseFee *big.Int
-	if config.IsSubnetEVM(0) {
+	if config.IsEVM(0) {
 		baseFee = t.json.Env.BaseFee
 		if baseFee == nil {
 			// Retesteth uses `0x10` for genesis baseFee. Therefore, it defaults to
@@ -253,7 +253,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	context := core.NewEVMBlockContext(block.Header(), nil, &t.json.Env.Coinbase)
 	context.GetHash = vmTestBlockHash
 	context.BaseFee = baseFee
-	if config.IsSubnetEVM(0) && t.json.Env.Random != nil {
+	if config.IsEVM(0) && t.json.Env.Random != nil {
 		context.Difficulty = big.NewInt(0)
 	}
 	evm := vm.NewEVM(context, txContext, statedb, config, vmconfig)

@@ -2,7 +2,7 @@
 
 Lux Warp Messaging offers a basic primitive to enable Cross-Subnet communication on the Lux Network.
 
-It is intended to allow communication between arbitrary Custom Virtual Machines (including, but not limited to Subnet-EVM and Coreth).
+It is intended to allow communication between arbitrary Custom Virtual Machines (including, but not limited to EVM and Coreth).
 
 ## How does Lux Warp Messaging Work
 

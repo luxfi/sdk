@@ -256,8 +256,8 @@ func Transition(ctx *cli.Context) error {
 		return NewError(ErrorJson, fmt.Errorf("failed signing transactions: %v", err))
 	}
 	// Sanity check, to not `panic` in state_transition
-	// NOTE: IsLondon replaced with IsSubnetEVM here
-	if chainConfig.IsSubnetEVM(prestate.Env.Timestamp) {
+	// NOTE: IsLondon replaced with IsEVM here
+	if chainConfig.IsEVM(prestate.Env.Timestamp) {
 		if prestate.Env.BaseFee != nil {
 			// Already set, base fee has precedent over parent base fee.
 		} else if prestate.Env.ParentBaseFee != nil && prestate.Env.Number != 0 {

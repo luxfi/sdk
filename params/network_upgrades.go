@@ -9,22 +9,22 @@ import (
 
 var (
 	LocalNetworkUpgrades = MandatoryNetworkUpgrades{
-		SubnetEVMTimestamp: utils.NewUint64(0),
+		EVMTimestamp: utils.NewUint64(0),
 		DUpgradeTimestamp:  utils.NewUint64(0),
 	}
 
 	FujiNetworkUpgrades = MandatoryNetworkUpgrades{
-		SubnetEVMTimestamp: utils.NewUint64(0),
+		EVMTimestamp: utils.NewUint64(0),
 		// DUpgradeTimestamp: utils.NewUint64(0), // TODO: Uncomment and set this to the correct value
 	}
 
 	MainnetNetworkUpgrades = MandatoryNetworkUpgrades{
-		SubnetEVMTimestamp: utils.NewUint64(0),
+		EVMTimestamp: utils.NewUint64(0),
 		// DUpgradeTimestamp: utils.NewUint64(0), // TODO: Uncomment and set this to the correct value
 	}
 
 	UnitTestNetworkUpgrades = MandatoryNetworkUpgrades{
-		SubnetEVMTimestamp: utils.NewUint64(0),
+		EVMTimestamp: utils.NewUint64(0),
 		DUpgradeTimestamp:  utils.NewUint64(0),
 	}
 )
@@ -34,8 +34,8 @@ var (
 // specified timestamp, it will be unable to participate in consensus.
 // Lux specific network upgrades are also included here.
 type MandatoryNetworkUpgrades struct {
-	// SubnetEVMTimestamp is a placeholder that activates Lux Upgrades prior to ApricotPhase6 (nil = no fork, 0 = already activated)
-	SubnetEVMTimestamp *uint64 `json:"subnetEVMTimestamp,omitempty"`
+	// EVMTimestamp is a placeholder that activates Lux Upgrades prior to ApricotPhase6 (nil = no fork, 0 = already activated)
+	EVMTimestamp *uint64 `json:"subnetEVMTimestamp,omitempty"`
 	// DUpgrade activates the Shanghai Execution Spec Upgrade from Ethereum (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md#included-eips)
 	// and Lux Warp Messaging. (nil = no fork, 0 = already activated)
 	// Note: EIP-4895 is excluded since withdrawals are not relevant to the Lux C-Chain or Subnets running the EVM.
@@ -45,8 +45,8 @@ type MandatoryNetworkUpgrades struct {
 }
 
 func (m *MandatoryNetworkUpgrades) CheckMandatoryCompatible(newcfg *MandatoryNetworkUpgrades, time uint64) *ConfigCompatError {
-	if isForkTimestampIncompatible(m.SubnetEVMTimestamp, newcfg.SubnetEVMTimestamp, time) {
-		return newTimestampCompatError("SubnetEVM fork block timestamp", m.SubnetEVMTimestamp, newcfg.SubnetEVMTimestamp)
+	if isForkTimestampIncompatible(m.EVMTimestamp, newcfg.EVMTimestamp, time) {
+		return newTimestampCompatError("EVM fork block timestamp", m.EVMTimestamp, newcfg.EVMTimestamp)
 	}
 	if isForkTimestampIncompatible(m.DUpgradeTimestamp, newcfg.DUpgradeTimestamp, time) {
 		return newTimestampCompatError("DUpgrade fork block timestamp", m.DUpgradeTimestamp, newcfg.DUpgradeTimestamp)
@@ -59,12 +59,12 @@ func (m *MandatoryNetworkUpgrades) CheckMandatoryCompatible(newcfg *MandatoryNet
 
 func (m *MandatoryNetworkUpgrades) mandatoryForkOrder() []fork {
 	return []fork{
-		{name: "subnetEVMTimestamp", timestamp: m.SubnetEVMTimestamp},
+		{name: "subnetEVMTimestamp", timestamp: m.EVMTimestamp},
 		{name: "dUpgradeTimestamp", timestamp: m.DUpgradeTimestamp},
 	}
 }
 
-// OptionalNetworkUpgrades includes overridable and optional Subnet-EVM network upgrades.
+// OptionalNetworkUpgrades includes overridable and optional EVM network upgrades.
 // These can be specified in genesis and upgrade configs.
 // Timestamps can be different for each subnet network.
 // TODO: once we add the first optional upgrade here, we should uncomment TestVMUpgradeBytesOptionalNetworkUpgrades

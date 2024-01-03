@@ -37,7 +37,10 @@ import (
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/luxdefi/evm/metrics"
 	"github.com/luxdefi/evm/trie/trienode"
+<<<<<<< HEAD
 
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"

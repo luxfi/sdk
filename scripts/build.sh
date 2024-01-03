@@ -23,7 +23,7 @@ version_lt() {
 }
 
 if version_lt "$(go_version)" "$go_version_minimum"; then
-    echo "SubnetEVM requires Go >= $go_version_minimum, Go $(go_version) found." >&2
+    echo "EVM requires Go >= $go_version_minimum, Go $(go_version) found." >&2
     exit 1
 fi
 
@@ -48,6 +48,11 @@ else
     exit 1
 fi
 
+<<<<<<< HEAD
 # Build Subnet EVM, which is run as a subprocess
 echo "Building Subnet EVM @ GitCommit: $SUBNET_EVM_COMMIT at $BINARY_PATH"
+=======
+# Build EVM, which is run as a subprocess
+echo "Building EVM @ GitCommit: $SUBNET_EVM_COMMIT at $BINARY_PATH"
+>>>>>>> fd08c47 (Update import path)
 go build -ldflags "-X github.com/luxdefi/evm/plugin/evm.GitCommit=$SUBNET_EVM_COMMIT $STATIC_LD_FLAGS" -o "$BINARY_PATH" "plugin/"*.go

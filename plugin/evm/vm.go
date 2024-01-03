@@ -147,8 +147,8 @@ var (
 	errInvalidBlock                  = errors.New("invalid block")
 	errInvalidNonce                  = errors.New("invalid nonce")
 	errUnclesUnsupported             = errors.New("uncles unsupported")
-	errNilBaseFeeSubnetEVM           = errors.New("nil base fee is invalid after subnetEVM")
-	errNilBlockGasCostSubnetEVM      = errors.New("nil blockGasCost is invalid after subnetEVM")
+	errNilBaseFeeEVM           = errors.New("nil base fee is invalid after subnetEVM")
+	errNilBlockGasCostEVM      = errors.New("nil blockGasCost is invalid after subnetEVM")
 	errInvalidHeaderPredicateResults = errors.New("invalid header predicate results")
 )
 
@@ -238,7 +238,7 @@ type VM struct {
 
 	bootstrapped bool
 
-	logger SubnetEVMLogger
+	logger EVMLogger
 	// State sync server and client
 	StateSyncServer
 	StateSyncClient
@@ -284,7 +284,7 @@ func (vm *VM) Initialize(
 	}
 	vm.logger = subnetEVMLogger
 
-	log.Info("Initializing Subnet EVM VM", "Version", Version, "Config", vm.config)
+	log.Info("Initializing EVM VM", "Version", Version, "Config", vm.config)
 
 	if len(fxs) > 0 {
 		return errUnsupportedFXs
@@ -321,7 +321,7 @@ func (vm *VM) Initialize(
 	}
 
 	if g.Config == nil {
-		g.Config = params.SubnetEVMDefaultChainConfig
+		g.Config = params.EVMDefaultChainConfig
 	}
 
 	mandatoryNetworkUpgrades, enforce := getMandatoryNetworkUpgrades(chainCtx.NetworkID)
@@ -512,7 +512,7 @@ func (vm *VM) initializeMetrics() error {
 
 func (vm *VM) initializeChain(lastAcceptedHash common.Hash, ethConfig ethconfig.Config) error {
 	nodecfg := &node.Config{
-		SubnetEVMVersion:      Version,
+		EVMVersion:      Version,
 		KeyStoreDir:           vm.config.KeystoreDirectory,
 		ExternalSigner:        vm.config.KeystoreExternalSigner,
 		InsecureUnlockAllowed: vm.config.KeystoreInsecureUnlockAllowed,
@@ -761,7 +761,7 @@ func (vm *VM) Shutdown(context.Context) error {
 	vm.eth.Stop()
 	log.Info("Ethereum backend stop completed")
 	vm.shutdownWg.Wait()
-	log.Info("Subnet-EVM Shutdown completed")
+	log.Info("EVM Shutdown completed")
 	return nil
 }
 

@@ -15,9 +15,14 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 =======
 	"github.com/ethereum/go-ethereum/common"
+<<<<<<< HEAD
 	"github.com/luxdefi/subnet-evm/precompile/contract"
 	"github.com/luxdefi/subnet-evm/vmerrs"
 >>>>>>> 9e0b39d (Update deps)
+=======
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/vmerrs"
+>>>>>>> fd08c47 (Update import path)
 )
 
 // AllowList is an abstraction that allows other precompiles to manage

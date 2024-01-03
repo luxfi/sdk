@@ -586,7 +586,7 @@ func TestReceiveWarpMessage(t *testing.T) {
 }
 
 func TestMessageSignatureRequestsToVM(t *testing.T) {
-	_, vm, _, appSender := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	_, vm, _, appSender := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		err := vm.Shutdown(context.Background())
@@ -646,7 +646,7 @@ func TestMessageSignatureRequestsToVM(t *testing.T) {
 }
 
 func TestBlockSignatureRequestsToVM(t *testing.T) {
-	_, vm, _, appSender := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	_, vm, _, appSender := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		err := vm.Shutdown(context.Background())

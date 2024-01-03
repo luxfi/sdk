@@ -18,7 +18,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.5.0
 	github.com/docker/docker v1.6.2
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d
-	github.com/ethereum/go-ethereum v1.13.5
+	github.com/ethereum/go-ethereum v1.10.26
 	github.com/fjl/memsize v0.0.2
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08
@@ -34,7 +34,6 @@ require (
 	github.com/kylelemons/godebug v1.1.0
 	github.com/luxdefi/netrunner v1.7.7
 	github.com/luxdefi/node v1.10.21
-	github.com/luxdefi/subnet-evm/cmd/simulator v0.0.0-20231213204502-b36c20f67043
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
 	github.com/olekukonko/tablewriter v0.0.5

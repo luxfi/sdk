@@ -32,6 +32,10 @@ import (
 	"os"
 
 	"github.com/luxdefi/evm/cmd/evm/internal/compiler"
+<<<<<<< HEAD
+=======
+
+>>>>>>> fd08c47 (Update import path)
 	"github.com/urfave/cli/v2"
 )
 

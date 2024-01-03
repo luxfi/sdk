@@ -146,10 +146,10 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 		return nil, err
 	}
 	configuredGasLimit := feeConfig.GasLimit.Uint64()
-	if w.chainConfig.IsSubnetEVM(timestamp) {
+	if w.chainConfig.IsEVM(timestamp) {
 		gasLimit = configuredGasLimit
 	} else {
-		// The gas limit is set in SubnetEVMGasLimit because the ceiling and floor were set to the same value
+		// The gas limit is set in EVMGasLimit because the ceiling and floor were set to the same value
 		// such that the gas limit converged to it. Since this is hardbaked now, we remove the ability to configure it.
 		gasLimit = core.CalcGasLimit(parent.GasUsed, parent.GasLimit, configuredGasLimit, configuredGasLimit)
 	}
@@ -161,7 +161,7 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 		Time:       timestamp,
 	}
 
-	if w.chainConfig.IsSubnetEVM(timestamp) {
+	if w.chainConfig.IsEVM(timestamp) {
 		var err error
 		header.Extra, header.BaseFee, err = dummy.CalcBaseFee(w.chainConfig, feeConfig, parent, timestamp)
 		if err != nil {

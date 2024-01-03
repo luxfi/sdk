@@ -23,7 +23,11 @@ import (
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/precompile/testutils"
 	"github.com/luxdefi/evm/predicate"
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/utils"
+=======
+	subnetEVMUtils "github.com/luxdefi/evm/utils"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

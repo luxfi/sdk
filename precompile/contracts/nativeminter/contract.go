@@ -9,10 +9,16 @@ import (
 	"fmt"
 	"math/big"
 
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/vmerrs"
 )
 
 const (
@@ -62,7 +68,7 @@ func PackMintInput(address common.Address, amount *big.Int) ([]byte, error) {
 	// function selector (4 bytes) + input(hash for address + hash for amount)
 	res := make([]byte, contract.SelectorLen+mintInputLen)
 	err := contract.PackOrderedHashesWithSelector(res, mintSignature, []common.Hash{
-		common.BytesToHash(address.Bytes())
+		common.BytesToHash(address.Bytes()),
 		common.BigToHash(amount),
 	})
 

@@ -256,7 +256,7 @@ func TestT8n(t *testing.T) {
 		// 	expExitCode: 3,
 		// },
 		// NOTE: this test was modified to test a non-trivial calculation
-		// of dynamic Subnet-EVM fees (instead of the original EIP-1559
+		// of dynamic EVM fees (instead of the original EIP-1559
 		// [misc.CalcBaseFee] calculation).
 		{ // Test base fee calculation
 			base: "./testdata/25",

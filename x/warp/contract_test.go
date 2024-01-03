@@ -18,7 +18,10 @@ import (
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/testutils"
 	"github.com/luxdefi/evm/predicate"
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/utils"
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"

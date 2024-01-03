@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# This script assumes that an Luxd and Subnet-EVM binaries are available in the standard location
+# This script assumes that an Luxd and EVM binaries are available in the standard location
 # within the $GOPATH
 # The Luxd and PluginDir paths can be specified via the environment variables used in ./scripts/run.sh.
 

@@ -72,7 +72,7 @@ func NewEVMInterpreter(evm *EVM) *EVMInterpreter {
 	switch {
 	case evm.chainRules.IsDUpgrade:
 		table = &dUpgradeInstructionSet
-	case evm.chainRules.IsSubnetEVM:
+	case evm.chainRules.IsEVM:
 		table = &subnetEVMInstructionSet
 	case evm.chainRules.IsIstanbul:
 		table = &istanbulInstructionSet

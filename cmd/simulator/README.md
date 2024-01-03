@@ -28,7 +28,7 @@ This should give the following output:
 v0.1.0
 ```
 
-To run the load simulator, you must first start an EVM based network. The load simulator works on both the C-Chain and Subnet-EVM, so we will start a single node network and run the load simulator on the C-Chain.
+To run the load simulator, you must first start an EVM based network. The load simulator works on both the C-Chain and EVM, so we will start a single node network and run the load simulator on the C-Chain.
 
 To start a single node network, follow the instructions from the Luxd [README](https://github.com/luxdefi/node#building-node) to build from source.
 

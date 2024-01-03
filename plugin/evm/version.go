@@ -10,7 +10,7 @@ import (
 var (
 	// GitCommit is set by the build script
 	GitCommit string
-	// Version is the version of Subnet EVM
+	// Version is the version of EVM
 	Version string = "v0.5.10"
 )
 

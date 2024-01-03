@@ -319,7 +319,7 @@ func TestStateProcessorErrors(t *testing.T) {
 					IstanbulBlock:       big.NewInt(0),
 					MuirGlacierBlock:    big.NewInt(0),
 					MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-						SubnetEVMTimestamp: utils.NewUint64(0),
+						EVMTimestamp: utils.NewUint64(0),
 						DUpgradeTimestamp:  utils.NewUint64(0),
 					},
 					FeeConfig: params.DefaultFeeConfig,
@@ -387,7 +387,7 @@ func TestBadTxAllowListBlock(t *testing.T) {
 			IstanbulBlock:       big.NewInt(0),
 			MuirGlacierBlock:    big.NewInt(0),
 			MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-				SubnetEVMTimestamp: utils.NewUint64(0),
+				EVMTimestamp: utils.NewUint64(0),
 			},
 			GenesisPrecompiles: params.Precompiles{
 				txallowlist.ConfigKey: txallowlist.NewConfig(utils.NewUint64(0), nil, nil, nil),
@@ -465,7 +465,7 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 		UncleHash: types.EmptyUncleHash,
 	}
 
-	if config.IsSubnetEVM(header.Time) {
+	if config.IsEVM(header.Time) {
 		header.Extra, header.BaseFee, _ = dummy.CalcBaseFee(config, config.FeeConfig, parent.Header(), header.Time)
 		header.BlockGasCost = big.NewInt(0)
 	}

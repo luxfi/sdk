@@ -2,7 +2,7 @@
 
 The miner is a package inherited from go-ethereum with a large amount of functionality stripped out since it is not needed in evm.
 
-In go-ethereum, the miner needs to perform PoW in order to try and produce the next block. Since Lux does not rely on PoW in any way, the miner within Subnet-EVM is only used to produce blocks on demand.
+In go-ethereum, the miner needs to perform PoW in order to try and produce the next block. Since Lux does not rely on PoW in any way, the miner within EVM is only used to produce blocks on demand.
 
 All of the async functionality has been stripped out in favor of a much lighter weight miner implementation which takes a backend that supplies the blockchain and transaction pool and exposes the functionality to produce a new block with the contents of the transaction pool.
 

@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "@luxdefi/evm-contracts",
+=======
+  "name": "@avalabs/evm-contracts",
+>>>>>>> fd08c47 (Update import path)
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/mocha": "^9.0.0",

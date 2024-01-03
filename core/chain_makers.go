@@ -336,7 +336,7 @@ func makeHeader(chain consensus.ChainReader, config *params.ChainConfig, parent 
 		Time:   time,
 	}
 
-	if chain.Config().IsSubnetEVM(time) {
+	if chain.Config().IsEVM(time) {
 		feeConfig, _, err := chain.GetFeeConfigAt(parent.Header())
 		if err != nil {
 			panic(err)

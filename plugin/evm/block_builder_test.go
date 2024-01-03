@@ -10,6 +10,11 @@ import (
 
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/utils"
+<<<<<<< HEAD
+=======
+
+	"github.com/luxdefi/node/snow"
+>>>>>>> fd08c47 (Update import path)
 )
 
 func attemptAwait(t *testing.T, wg *sync.WaitGroup, delay time.Duration) {
@@ -35,7 +40,7 @@ func TestBlockBuilderShutsDown(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	config := *params.TestChainConfig
 
-	config.SubnetEVMTimestamp = utils.TimeToNewUint64(time.Now().Add(time.Hour))
+	config.EVMTimestamp = utils.TimeToNewUint64(time.Now().Add(time.Hour))
 
 	builder := &blockBuilder{
 		ctx:          utils.TestSnowContext(),

@@ -11,7 +11,10 @@ import (
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/contract"
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/precompile/precompileconfig"
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/luxdefi/evm/precompile/testutils"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"

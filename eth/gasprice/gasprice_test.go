@@ -328,10 +328,10 @@ func TestSuggestTipCapMinGas(t *testing.T) {
 	}, defaultOracleConfig())
 }
 
-// Regression test to ensure that SuggestPrice does not panic with activation of Subnet EVM
+// Regression test to ensure that SuggestPrice does not panic with activation of EVM
 // Note: support for gas estimation without activated hard forks has been deprecated, but we still
 // ensure that the call does not panic.
-func TestSuggestGasPriceSubnetEVM(t *testing.T) {
+func TestSuggestGasPriceEVM(t *testing.T) {
 	config := Config{
 		Blocks:     20,
 		Percentile: 60,

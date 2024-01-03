@@ -1048,8 +1048,8 @@ func overrideConfig(original *params.ChainConfig, override *params.ChainConfig) 
 	*copy = *original
 	canon := true
 
-	if timestamp := override.SubnetEVMTimestamp; timestamp != nil {
-		copy.SubnetEVMTimestamp = timestamp
+	if timestamp := override.EVMTimestamp; timestamp != nil {
+		copy.EVMTimestamp = timestamp
 		canon = false
 	}
 	if timestamp := override.DUpgradeTimestamp; timestamp != nil {

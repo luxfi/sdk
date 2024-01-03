@@ -9,7 +9,10 @@ import (
 
 	"github.com/luxdefi/evm/constants"
 	"github.com/luxdefi/evm/utils"
+<<<<<<< HEAD
 
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 )
 

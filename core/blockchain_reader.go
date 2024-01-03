@@ -384,7 +384,7 @@ func (bc *BlockChain) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig
 // If fee recipients are allowed, returns true in the second return value.
 func (bc *BlockChain) GetCoinbaseAt(parent *types.Header) (common.Address, bool, error) {
 	config := bc.Config()
-	if !config.IsSubnetEVM(parent.Time) {
+	if !config.IsEVM(parent.Time) {
 		return constants.BlackholeAddr, false, nil
 	}
 

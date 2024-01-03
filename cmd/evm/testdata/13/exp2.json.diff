@@ -1,4 +1,4 @@
-State root differs because of SubnetEVM's fee calculations.
+State root differs because of EVM's fee calculations.
 
 --- a/cmd/evm/testdata/13/exp2.json	2023-08-25 07:34:20
 +++ b/cmd/evm/testdata/13/exp2.json	2023-08-24 14:17:32

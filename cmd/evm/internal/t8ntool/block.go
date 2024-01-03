@@ -34,6 +34,10 @@ import (
 	"math/big"
 	"os"
 
+<<<<<<< HEAD
+=======
+	"github.com/luxdefi/evm/core/types"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"

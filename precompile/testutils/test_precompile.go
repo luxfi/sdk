@@ -8,11 +8,18 @@ import (
 	"testing"
 	"time"
 
+<<<<<<< HEAD
+=======
+	"github.com/luxdefi/node/snow"
+>>>>>>> fd08c47 (Update import path)
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/utils"
+=======
+>>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

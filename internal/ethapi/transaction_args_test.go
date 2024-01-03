@@ -227,7 +227,7 @@ func newBackendMock() *backendMock {
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-			SubnetEVMTimestamp: utils.NewUint64(1000),
+			EVMTimestamp: utils.NewUint64(1000),
 		},
 	}
 	return &backendMock{

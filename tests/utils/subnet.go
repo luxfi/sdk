@@ -132,7 +132,7 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 	return &globalSuite
 }
 
-// CreateNewSubnet creates a new subnet and Subnet-EVM blockchain with the given genesis file.
+// CreateNewSubnet creates a new subnet and EVM blockchain with the given genesis file.
 // returns the ID of the new created blockchain.
 func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 	kc := secp256k1fx.NewKeychain(genesis.EWOQKey)
@@ -169,7 +169,7 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 	err = json.Unmarshal(genesisBytes, genesis)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	log.Info("Creating new Subnet-EVM blockchain", "genesis", genesis)
+	log.Info("Creating new EVM blockchain", "genesis", genesis)
 	createChainTx, err := pWallet.IssueCreateChainTx(
 		createSubnetTx.ID(),
 		genesisBytes,
