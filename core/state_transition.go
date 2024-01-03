@@ -31,15 +31,14 @@ import (
 	"math"
 	"math/big"
 
-
+	"github.com/ethereum/go-ethereum/common"
+	cmath "github.com/ethereum/go-ethereum/common/math"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/core/vm"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
 	"github.com/luxdefi/evm/utils"
 	"github.com/luxdefi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
-	cmath "github.com/ethereum/go-ethereum/common/math"
 )
 
 // ExecutionResult includes all output after executing given evm
@@ -406,11 +405,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	var (
 		msg              = st.msg
 		sender           = vm.AccountRef(msg.From)
-<<<<<<< HEAD
 		rules            = st.evm.ChainConfig().LuxRules(st.evm.Context.BlockNumber, st.evm.Context.Time)
-=======
-		rules            = st.evm.ChainConfig().LuxRules(st.evm.Context.BlockNumber, st.evm.Context.Time)
->>>>>>> d2613b8 (Update SubnetEVM)
 		contractCreation = msg.To == nil
 	)
 

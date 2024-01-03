@@ -31,7 +31,9 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/luxdefi/node/snow"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/holiman/uint256"
 	"github.com/luxdefi/evm/constants"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/precompile/contract"
@@ -40,9 +42,7 @@ import (
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/predicate"
 	"github.com/luxdefi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/holiman/uint256"
+	"github.com/luxdefi/node/snow"
 )
 
 var (
@@ -241,11 +241,7 @@ func (evm *EVM) Interpreter() *EVMInterpreter {
 func (evm *EVM) SetBlockContext(blockCtx BlockContext) {
 	evm.Context = blockCtx
 	num := blockCtx.BlockNumber
-<<<<<<< HEAD
 	evm.chainRules = evm.chainConfig.LuxRules(num, blockCtx.Time)
-=======
-	evm.chainRules = evm.chainConfig.LuxRules(num, blockCtx.Time)
->>>>>>> d2613b8 (Update SubnetEVM)
 }
 
 // Call executes the contract associated with the addr with the given input as
