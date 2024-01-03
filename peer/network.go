@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -14,17 +14,17 @@ import (
 
 	"github.com/ethereum/go-ethereum/log"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/network/p2p"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/luxdefi/node/codec"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/network/p2p"
+	"github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/version"
 
-	"github.com/ava-labs/subnet-evm/peer/stats"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
+	"github.com/luxdefi/evm/peer/stats"
+	"github.com/luxdefi/evm/plugin/evm/message"
 )
 
 // Minimum amount of time to handle a request
@@ -89,11 +89,11 @@ type network struct {
 	lock                       sync.RWMutex                       // lock for mutating state of this Network struct
 	self                       ids.NodeID                         // NodeID of this node
 	requestIDGen               uint32                             // requestID counter used to track outbound requests
-	outstandingRequestHandlers map[uint32]message.ResponseHandler // maps avalanchego requestID => message.ResponseHandler
+	outstandingRequestHandlers map[uint32]message.ResponseHandler // maps node requestID => message.ResponseHandler
 	activeAppRequests          *semaphore.Weighted                // controls maximum number of active outbound requests
 	activeCrossChainRequests   *semaphore.Weighted                // controls maximum number of active outbound cross chain requests
 	network                    *p2p.Network
-	appSender                  common.AppSender                 // avalanchego AppSender for sending messages
+	appSender                  common.AppSender                 // node AppSender for sending messages
 	codec                      codec.Manager                    // Codec used for parsing messages
 	crossChainCodec            codec.Manager                    // Codec used for parsing cross chain messages
 	appRequestHandler          message.RequestHandler           // maps request type => handler
@@ -273,7 +273,7 @@ func (n *network) CrossChainAppRequest(ctx context.Context, requestingChainID id
 	}
 }
 
-// CrossChainAppRequestFailed can be called by the avalanchego -> VM in following cases:
+// CrossChainAppRequestFailed can be called by the node -> VM in following cases:
 // - respondingChain doesn't exist
 // - invalid CrossChainAppResponse from respondingChain
 // - invalid CrossChainRequest was sent to respondingChain
@@ -316,7 +316,7 @@ func (n *network) CrossChainAppResponse(ctx context.Context, respondingChainID i
 	return handler.OnResponse(response)
 }
 
-// AppRequest is called by avalanchego -> VM when there is an incoming AppRequest from a peer
+// AppRequest is called by node -> VM when there is an incoming AppRequest from a peer
 // error returned by this function is expected to be treated as fatal by the engine
 // returns error if the requestHandler returns an error
 // sends a response back to the sender if length of response returned by the handler is >0
@@ -376,7 +376,7 @@ func (n *network) AppResponse(ctx context.Context, nodeID ids.NodeID, requestID 
 	return handler.OnResponse(response)
 }
 
-// AppRequestFailed can be called by the avalanchego -> VM in following cases:
+// AppRequestFailed can be called by the node -> VM in following cases:
 // - node is benched
 // - failed to send message to [nodeID] due to a network issue
 // - request times out before a response is provided
@@ -445,7 +445,7 @@ func (n *network) Gossip(gossip []byte) error {
 	return n.appSender.SendAppGossip(context.TODO(), gossip)
 }
 
-// AppGossip is called by avalanchego -> VM when there is an incoming AppGossip from a peer
+// AppGossip is called by node -> VM when there is an incoming AppGossip from a peer
 // error returned by this function is expected to be treated as fatal by the engine
 // returns error if request could not be parsed as message.Request or when the requestHandler returns an error
 func (n *network) AppGossip(_ context.Context, nodeID ids.NodeID, gossipBytes []byte) error {

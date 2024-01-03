@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,11 +29,11 @@ package core
 import (
 	"fmt"
 
-	"github.com/ava-labs/subnet-evm/consensus"
-	"github.com/ava-labs/subnet-evm/core/state"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/trie"
+	"github.com/luxdefi/evm/consensus"
+	"github.com/luxdefi/evm/core/state"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/trie"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and

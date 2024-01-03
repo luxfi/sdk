@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -6,12 +6,12 @@ package warp
 import (
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp/payload"
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/predicate"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/predicate"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 )

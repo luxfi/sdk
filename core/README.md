@@ -4,7 +4,7 @@ The core package maintains the backend for the blockchain, transaction pool, and
 
 ## Blockchain
 
-The [BlockChain](./blockchain.go) struct handles the insertion of blocks into the maintained chain. It maintains a "canonical chain", which is essentially the preferred chain (the chain that ends with the block preferred by the AvalancheGo consensus engine).
+The [BlockChain](./blockchain.go) struct handles the insertion of blocks into the maintained chain. It maintains a "canonical chain", which is essentially the preferred chain (the chain that ends with the block preferred by the LuxGo consensus engine).
 
 When the consensus engine verifies blocks as they are ready to be issued into consensus, it calls `Verify()` on the ChainVM Block interface implemented [here](../plugin/evm/block.go). This calls `InsertBlockManual` on the BlockChain struct implemented in this package, which is the first entrypoint of a block into the blockchain.
 

@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -6,15 +6,15 @@ package validators
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils/constants"
 )
 
 var _ validators.State = (*State)(nil)
 
-// State provides a special case used to handle Avalanche Warp Message verification for messages sent
+// State provides a special case used to handle Lux Warp Message verification for messages sent
 // from the Primary Network. Subnets have strictly fewer validators than the Primary Network, so we require
 // signatures from a threshold of the RECEIVING subnet validator set rather than the full Primary Network
 // since the receiving subnet already relies on a majority of its validators being correct.

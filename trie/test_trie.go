@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package trie
@@ -10,10 +10,10 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/subnet-evm/accounts/keystore"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/trie/trienode"
+	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxdefi/evm/accounts/keystore"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/trie/trienode"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"

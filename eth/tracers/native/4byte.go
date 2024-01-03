@@ -1,4 +1,4 @@
-// (c) 2020-2021, Ava Labs, Inc.
+// (c) 2020-2021, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,8 +32,8 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"github.com/ava-labs/subnet-evm/core/vm"
-	"github.com/ava-labs/subnet-evm/eth/tracers"
+	"github.com/luxdefi/evm/core/vm"
+	"github.com/luxdefi/evm/eth/tracers"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -91,7 +91,7 @@ func (t *fourByteTracer) store(id []byte, size int) {
 // CaptureStart implements the EVMLogger interface to initialize the tracing operation.
 func (t *fourByteTracer) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) {
 	// Update list of precompiles based on current block
-	rules := env.ChainConfig().AvalancheRules(env.Context.BlockNumber, env.Context.Time)
+	rules := env.ChainConfig().LuxRules(env.Context.BlockNumber, env.Context.Time)
 	t.activePrecompiles = vm.ActivePrecompiles(rules)
 
 	// Save the outer calldata also

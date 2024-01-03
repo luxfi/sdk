@@ -1,4 +1,4 @@
-// (c) 2021, Ava Labs, Inc. All rights reserved.
+// (c) 2021, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package prometheus
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ava-labs/subnet-evm/metrics"
+	"github.com/luxdefi/evm/metrics"
 )
 
 func TestGatherer(t *testing.T) {

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dummy
@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 )
 

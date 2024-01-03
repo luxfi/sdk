@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -35,8 +35,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/stretchr/testify/require"
 )
 
@@ -452,8 +452,8 @@ var bindTests = []struct {
 		`"github.com/stretchr/testify/require"
 		 "math/big"
 		 "github.com/ethereum/go-ethereum/common"
-		 "github.com/ava-labs/subnet-evm/core/state"
-		 "github.com/ava-labs/subnet-evm/precompile/allowlist"
+		 "github.com/luxdefijevm/core/state"
+		 "github.com/luxdefi/evm/precompile/allowlist"
 		`,
 		`
 			testGreeting := "test"
@@ -517,7 +517,7 @@ var bindTests = []struct {
 		`[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"addressTest","type":"address"},{"indexed":true,"internalType":"uint8","name":"intTest","type":"uint8"},{"indexed":false,"internalType":"bytes","name":"bytesTest","type":"bytes"}],"name":"test","type":"event"},{"inputs":[],"name":"eventTest","outputs":[{"internalType":"string","name":"result","type":"string"}],"stateMutability":"view","type":"function"},{"type":"event","name":"empty","inputs":[]},{"type":"event","name":"indexed","inputs":[{"name":"addr","type":"address","indexed":true},{"name":"num","type":"int8","indexed":true}]},{"type":"event","name":"mixed","inputs":[{"name":"addr","type":"address","indexed":true},{"name":"num","type":"int8"}]},{"type":"event","name":"dynamic","inputs":[{"name":"idxStr","type":"string","indexed":true},{"name":"idxDat","type":"bytes","indexed":true},{"name":"str","type":"string"},{"name":"dat","type":"bytes"}]},{"type":"event","name":"unnamed","inputs":[{"name":"","type":"uint8","indexed":true},{"name":"","type":"uint8","indexed":true}]}]`,
 		`"github.com/stretchr/testify/require"
 		"github.com/ethereum/go-ethereum/common"
-		"github.com/ava-labs/subnet-evm/precompile/contract"
+		"github.com/luxdefi/evm/precompile/contract"
 		`,
 		`
 			testAddr := common.Address{1}
@@ -690,7 +690,7 @@ func TestPrecompileBind(t *testing.T) {
 		t.Fatalf("failed to convert binding test to modules: %v\n%s", err, out)
 	}
 	pwd, _ := os.Getwd()
-	replacer := exec.Command(gocmd, "mod", "edit", "-x", "-require", "github.com/ava-labs/subnet-evm@v0.0.0", "-replace", "github.com/ava-labs/subnet-evm="+filepath.Join(pwd, "..", "..", "..", "..")) // Repo root
+	replacer := exec.Command(gocmd, "mod", "edit", "-x", "-require", "github.com/luxdefi/evm@v0.0.0", "-replace", "github.com/luxdefi/evm="+filepath.Join(pwd, "..", "..", "..", "..")) // Repo root
 	replacer.Dir = pkg
 	if out, err := replacer.CombinedOutput(); err != nil {
 		t.Fatalf("failed to replace binding test dependency to current source tree: %v\n%s", err, out)

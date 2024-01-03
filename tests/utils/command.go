@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ava-labs/avalanchego/api/health"
+	"github.com/luxdefi/node/api/health"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
@@ -59,10 +59,10 @@ func RegisterPingTest() {
 	})
 }
 
-// RegisterNodeRun registers a before suite that starts an AvalancheGo process to use for the e2e tests
-// and an after suite that stops the AvalancheGo process
+// RegisterNodeRun registers a before suite that starts an Lux Node process to use for the e2e tests
+// and an after suite that stops the Lux Node process
 func RegisterNodeRun() {
-	// BeforeSuite starts an AvalancheGo process to use for the e2e tests
+	// BeforeSuite starts an Lux Node process to use for the e2e tests
 	var startCmd *cmd.Cmd
 	_ = ginkgo.BeforeSuite(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -70,7 +70,7 @@ func RegisterNodeRun() {
 
 		wd, err := os.Getwd()
 		gomega.Expect(err).Should(gomega.BeNil())
-		log.Info("Starting AvalancheGo node", "wd", wd)
+		log.Info("Starting Lux Node node", "wd", wd)
 		cmd, err := RunCommand("./scripts/run.sh")
 		startCmd = cmd
 		gomega.Expect(err).Should(gomega.BeNil())
@@ -80,7 +80,7 @@ func RegisterNodeRun() {
 		healthy, err := health.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(healthy).Should(gomega.BeTrue())
-		log.Info("AvalancheGo node is healthy")
+		log.Info("Lux Node node is healthy")
 	})
 
 	ginkgo.AfterSuite(func() {

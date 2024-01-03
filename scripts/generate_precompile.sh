@@ -2,7 +2,7 @@
 set -e
 
 # This script generates a Stateful Precompile stub based off of a Solidity ABI file.
-# It first sets the necessary CGO_FLAGs for the BLST library used in AvalancheGo and
+# It first sets the necessary CGO_FLAGs for the BLST library used in Lux Node and
 # then runs PrecompileGen.
 if ! [[ "$0" =~ scripts/generate_precompile.sh ]]; then
   echo "must be run from repository root, but got $0"

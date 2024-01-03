@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,7 +29,7 @@ package eth
 import (
 	"time"
 
-	"github.com/ava-labs/subnet-evm/core/rawdb"
+	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/ethereum/go-ethereum/common/bitutil"
 )
 

@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package stats
@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/metrics"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
+	"github.com/luxdefi/evm/metrics"
+	"github.com/luxdefi/evm/plugin/evm/message"
 )
 
 var (

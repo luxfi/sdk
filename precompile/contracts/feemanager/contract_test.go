@@ -1,4 +1,4 @@
-// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package feemanager
@@ -7,13 +7,13 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/core/state"
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
-	"github.com/ava-labs/subnet-evm/precompile/testutils"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/core/state"
+	"github.com/luxdefi/evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/precompile/testutils"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -83,7 +83,6 @@ var (
 			AfterHook: func(t testing.TB, state contract.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
-
 				logsTopics, logsData := state.GetLogData()
 				assertFeeEvent(t, logsTopics, logsData, allowlist.TestEnabledAddr, zeroFeeConfig, testFeeConfig)
 			},
@@ -103,7 +102,6 @@ var (
 			AfterHook: func(t testing.TB, state contract.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
-
 				logsTopics, logsData := state.GetLogData()
 				assertFeeEvent(t, logsTopics, logsData, allowlist.TestManagerAddr, zeroFeeConfig, testFeeConfig)
 			},
@@ -151,7 +149,6 @@ var (
 				require.Equal(t, testFeeConfig, feeConfig)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
 				require.EqualValues(t, testBlockNumber, lastChangedAt)
-
 				logsTopics, logsData := state.GetLogData()
 				assertFeeEvent(t, logsTopics, logsData, allowlist.TestAdminAddr, zeroFeeConfig, testFeeConfig)
 			},
@@ -356,7 +353,7 @@ var (
 				assertFeeEvent(t, logsTopics, logsData, allowlist.TestEnabledAddr, zeroFeeConfig, testFeeConfig)
 			},
 		},
-		// from https://github.com/ava-labs/subnet-evm/issues/487
+		// from https://github.com/luxdefi/evm/issues/487
 		"setFeeConfig regression test should fail before DUpgrade": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),

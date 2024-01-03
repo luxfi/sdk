@@ -1,4 +1,4 @@
-// (c) 2020-2021, Ava Labs, Inc.
+// (c) 2020-2021, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,7 +33,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/ethdb"
+	"github.com/luxdefi/evm/ethdb"
 )
 
 // TestDatabaseSuite runs a suite of tests against a KeyValueStore database

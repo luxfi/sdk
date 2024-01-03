@@ -1,9 +1,9 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
 
-import "github.com/ava-labs/subnet-evm/metrics"
+import "github.com/luxdefi/evm/metrics"
 
 var _ GossipStats = &gossipStats{}
 

@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc.
+// (c) 2019-2022, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,10 +32,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/core/bloombits"
-	"github.com/ava-labs/subnet-evm/core/rawdb"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/ethdb"
+	"github.com/luxdefi/evm/core/bloombits"
+	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/ethdb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/bitutil"
 	"github.com/stretchr/testify/require"
@@ -73,7 +73,7 @@ const benchFilterCnt = 2000
 
 func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 	b.Skip("test disabled: this tests presume (and modify) an existing datadir.")
-	benchDataDir := b.TempDir() + "/subnet-evm/chaindata"
+	benchDataDir := b.TempDir() + "/evm/chaindata"
 	b.Log("Running bloombits benchmark   section size:", sectionSize)
 
 	db, err := rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
@@ -173,7 +173,7 @@ func clearBloomBits(db ethdb.Database) {
 
 func BenchmarkNoBloomBits(b *testing.B) {
 	b.Skip("test disabled: this tests presume (and modify) an existing datadir.")
-	benchDataDir := b.TempDir() + "/subnet-evm/chaindata"
+	benchDataDir := b.TempDir() + "/evm/chaindata"
 	b.Log("Running benchmark without bloombits")
 	db, err := rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
 	if err != nil {

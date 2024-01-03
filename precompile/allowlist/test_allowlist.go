@@ -1,4 +1,4 @@
-// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package allowlist
@@ -6,11 +6,11 @@ package allowlist
 import (
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/precompile/modules"
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
-	"github.com/ava-labs/subnet-evm/precompile/testutils"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/precompile/modules"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/precompile/testutils"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -418,7 +418,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			ReadOnly:    false,
 			ExpectedErr: ErrCannotModifyAllowList.Error(),
 		},
-		"manager set admin role to enabled": {
+		"set admin role to enabled from manager after activation": {
 			Caller:     TestManagerAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			InputFn: func(t testing.TB) []byte {
@@ -534,6 +534,29 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 
 				return input
 			}, SuppliedGas: ReadAllowListGasCost - 1,
+=======
+		"read allow list admin role": {
+			Caller:      TestAdminAddr,
+			BeforeHook:  SetDefaultRoles(contractAddress),
+			Input:       PackReadAllowList(TestAdminAddr),
+			SuppliedGas: ReadAllowListGasCost,
+			ReadOnly:    false,
+			ExpectedRes: common.Hash(AdminRole).Bytes(),
+		},
+		"read allow list with readOnly enabled": {
+			Caller:      TestAdminAddr,
+			BeforeHook:  SetDefaultRoles(contractAddress),
+			Input:       PackReadAllowList(TestNoRoleAddr),
+			SuppliedGas: ReadAllowListGasCost,
+			ReadOnly:    true,
+			ExpectedRes: common.Hash(NoRole).Bytes(),
+		},
+		"read allow list out of gas": {
+			Caller:      TestAdminAddr,
+			BeforeHook:  SetDefaultRoles(contractAddress),
+			Input:       PackReadAllowList(TestNoRoleAddr),
+			SuppliedGas: ReadAllowListGasCost - 1,
+>>>>>>> d2613b8 (Update SubnetEVM)
 			ReadOnly:    true,
 			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
 		},
@@ -579,6 +602,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 				require.Equal(t, EnabledRole, GetAllowListStatus(state, contractAddress, TestNoRoleAddr))
 			},
 		},
+<<<<<<< HEAD
 		"admin set admin pre-DUpgrade": {
 			Caller:     TestAdminAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),

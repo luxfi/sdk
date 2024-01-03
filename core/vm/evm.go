@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,15 +31,15 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/subnet-evm/constants"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/deployerallowlist"
-	"github.com/ava-labs/subnet-evm/precompile/modules"
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
-	"github.com/ava-labs/subnet-evm/predicate"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/evm/constants"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/precompile/contracts/deployerallowlist"
+	"github.com/luxdefi/evm/precompile/modules"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/predicate"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/holiman/uint256"
@@ -193,7 +193,7 @@ func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig
 		StateDB:     statedb,
 		Config:      config,
 		chainConfig: chainConfig,
-		chainRules:  chainConfig.AvalancheRules(blockCtx.BlockNumber, blockCtx.Time),
+		chainRules:  chainConfig.LuxRules(blockCtx.BlockNumber, blockCtx.Time),
 	}
 	evm.interpreter = NewEVMInterpreter(evm)
 	return evm
@@ -241,7 +241,11 @@ func (evm *EVM) Interpreter() *EVMInterpreter {
 func (evm *EVM) SetBlockContext(blockCtx BlockContext) {
 	evm.Context = blockCtx
 	num := blockCtx.BlockNumber
-	evm.chainRules = evm.chainConfig.AvalancheRules(num, blockCtx.Time)
+<<<<<<< HEAD
+	evm.chainRules = evm.chainConfig.LuxRules(num, blockCtx.Time)
+=======
+	evm.chainRules = evm.chainConfig.LuxRules(num, blockCtx.Time)
+>>>>>>> d2613b8 (Update SubnetEVM)
 }
 
 // Call executes the contract associated with the addr with the given input as

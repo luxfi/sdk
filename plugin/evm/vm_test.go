@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -21,51 +21,51 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	luxConstants "github.com/luxdefi/node/utils/constants"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/api/keystore"
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/memdb"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	commonEng "github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	avalancheConstants "github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/components/chain"
+	"github.com/luxdefi/node/api/keystore"
+	"github.com/luxdefi/node/chains/atomic"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/database/memdb"
+	"github.com/luxdefi/node/database/prefixdb"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/choices"
+	"github.com/luxdefi/node/snow/consensus/snowman"
+	commonEng "github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	"github.com/luxdefi/node/utils/formatting"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/vms/components/chain"
 
-	"github.com/ava-labs/subnet-evm/accounts/abi"
-	accountKeystore "github.com/ava-labs/subnet-evm/accounts/keystore"
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/consensus/dummy"
-	"github.com/ava-labs/subnet-evm/constants"
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/core/txpool"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/eth"
-	"github.com/ava-labs/subnet-evm/internal/ethapi"
-	"github.com/ava-labs/subnet-evm/metrics"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/deployerallowlist"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/feemanager"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/rewardmanager"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/txallowlist"
-	"github.com/ava-labs/subnet-evm/rpc"
-	"github.com/ava-labs/subnet-evm/trie"
-	"github.com/ava-labs/subnet-evm/utils"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/accounts/abi"
+	accountKeystore "github.com/luxdefi/evm/accounts/keystore"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/consensus/dummy"
+	"github.com/luxdefi/evm/constants"
+	"github.com/luxdefi/evm/core"
+	"github.com/luxdefi/evm/core/txpool"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/eth"
+	"github.com/luxdefi/evm/internal/ethapi"
+	"github.com/luxdefi/evm/metrics"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/plugin/evm/message"
+	"github.com/luxdefi/evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/contracts/deployerallowlist"
+	"github.com/luxdefi/evm/precompile/contracts/feemanager"
+	"github.com/luxdefi/evm/precompile/contracts/rewardmanager"
+	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
+	"github.com/luxdefi/evm/rpc"
+	"github.com/luxdefi/evm/trie"
+	"github.com/luxdefi/evm/utils"
+	"github.com/luxdefi/evm/vmerrs"
 
-	avagoconstants "github.com/ava-labs/avalanchego/utils/constants"
-	avalancheWarp "github.com/ava-labs/avalanchego/vms/platformvm/warp"
+	avagoconstants "github.com/luxdefi/node/utils/constants"
+	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
 )
 
 var (
@@ -75,10 +75,10 @@ var (
 	testMinGasPrice int64  = 225_000_000_000
 	testKeys        []*ecdsa.PrivateKey
 	testEthAddrs    []common.Address // testEthAddrs[i] corresponds to testKeys[i]
-	testAvaxAssetID = ids.ID{1, 2, 3}
+	testLuxAssetID  = ids.ID{1, 2, 3}
 	username        = "Johns"
 	password        = "CjasdjhiPeirbSenfeI13" // #nosec G101
-	// Use chainId: 43111, so that it does not overlap with any Avalanche ChainIDs, which may have their
+	// Use chainId: 43111, so that it does not overlap with any Lux ChainIDs, which may have their
 	// config overridden in vm.Initialize.
 	genesisJSONSubnetEVM    = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"subnetEVMTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
 	genesisJSONDUpgrade     = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"subnetEVMTimestamp\":0,\"dUpgradeTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
@@ -124,7 +124,7 @@ func NewContext() *snow.Context {
 	ctx.NetworkID = testNetworkID
 	ctx.NodeID = ids.GenerateTestNodeID()
 	ctx.ChainID = testCChainID
-	ctx.AVAXAssetID = testAvaxAssetID
+	ctx.LUXAssetID = testLuxAssetID
 	ctx.XChainID = testXChainID
 	aliaser := ctx.BCLookup.(ids.Aliaser)
 	_ = aliaser.Alias(testCChainID, "C")
@@ -134,9 +134,9 @@ func NewContext() *snow.Context {
 	ctx.ValidatorState = &validators.TestState{
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
-				avalancheConstants.PlatformChainID: avalancheConstants.PrimaryNetworkID,
-				testXChainID:                       avalancheConstants.PrimaryNetworkID,
-				testCChainID:                       avalancheConstants.PrimaryNetworkID,
+				luxConstants.PlatformChainID: luxConstants.PrimaryNetworkID,
+				testXChainID:                 luxConstants.PrimaryNetworkID,
+				testCChainID:                 luxConstants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
 				return ids.Empty, errors.New("unknown chain")
@@ -148,7 +148,7 @@ func NewContext() *snow.Context {
 	if err != nil {
 		panic(err)
 	}
-	ctx.WarpSigner = avalancheWarp.NewSigner(blsSecretKey, ctx.NetworkID, ctx.ChainID)
+	ctx.WarpSigner = luxWarp.NewSigner(blsSecretKey, ctx.NetworkID, ctx.ChainID)
 	ctx.PublicKey = bls.PublicFromSecretKey(blsSecretKey)
 	return ctx
 }

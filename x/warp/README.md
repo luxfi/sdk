@@ -1,22 +1,22 @@
-# Avalanche Warp Messaging
+# Lux Warp Messaging
 
-Avalanche Warp Messaging offers a basic primitive to enable Cross-Subnet communication on the Avalanche Network.
+Lux Warp Messaging offers a basic primitive to enable Cross-Subnet communication on the Lux Network.
 
 It is intended to allow communication between arbitrary Custom Virtual Machines (including, but not limited to Subnet-EVM and Coreth).
 
-## How does Avalanche Warp Messaging Work
+## How does Lux Warp Messaging Work
 
-Avalanche Warp Messaging uses BLS Multi-Signatures with Public-Key Aggregation where every Avalanche validator registers a public key alongside its NodeID on the Avalanche P-Chain.
+Lux Warp Messaging uses BLS Multi-Signatures with Public-Key Aggregation where every Lux validator registers a public key alongside its NodeID on the Lux P-Chain.
 
-Every node tracking a Subnet has read access to the Avalanche P-Chain. This provides weighted sets of BLS Public Keys that correspond to the validator sets of each Subnet on the Avalanche Network. Avalanche Warp Messaging provides a basic primitive for signing and verifying messages between Subnets: the receiving network can verify whether an aggregation of signatures from a set of source Subnet validators represents a threshold of stake large enough for the receiving network to process the message.
+Every node tracking a Subnet has read access to the Lux P-Chain. This provides weighted sets of BLS Public Keys that correspond to the validator sets of each Subnet on the Lux Network. Lux Warp Messaging provides a basic primitive for signing and verifying messages between Subnets: the receiving network can verify whether an aggregation of signatures from a set of source Subnet validators represents a threshold of stake large enough for the receiving network to process the message.
 
-For more details on Avalanche Warp Messaging, see the AvalancheGo [Warp README](https://github.com/ava-labs/avalanchego/blob/warp-readme/vms/platformvm/warp/README.md).
+For more details on Lux Warp Messaging, see the Lux Node [Warp README](https://github.com/luxdefi/node/blob/warp-readme/vms/platformvm/warp/README.md).
 
-## Integrating Avalanche Warp Messaging into the EVM
+## Integrating Lux Warp Messaging into the EVM
 
 ### Flow of Sending / Receiving a Warp Message within the EVM
 
-The Avalanche Warp Precompile enables this flow to send a message from blockchain A to blockchain B:
+The Lux Warp Precompile enables this flow to send a message from blockchain A to blockchain B:
 
 1. Call the Warp Precompile `sendWarpMessage` function with the arguments for the `UnsignedMessage`
 2. Warp Precompile emits an event / log containing the `UnsignedMessage` specified by the caller of `sendWarpMessage`
@@ -33,7 +33,7 @@ The Warp Precompile is broken down into three functions defined in the Solidity 
 
 `sendWarpMessage` is used to send a verifiable message. Calling this function results in sending a message with the following contents:
 
-- `SourceChainID` - blockchainID of the sourceChain on the Avalanche P-Chain
+- `SourceChainID` - blockchainID of the sourceChain on the Lux P-Chain
 - `SourceAddress` - `msg.sender` encoded as a 32 byte value that calls `sendWarpMessage`
 - `Payload` - `payload` argument specified in the call to `sendWarpMessage` emitted as the unindexed data of the resulting log
 
@@ -46,15 +46,15 @@ Additionally, the `SourceChainID` is excluded because anyone parsing the chain c
 - `sender`
 - The `messageID` of the unsigned message (sha256 of the unsigned message)
 
-The actual `message` is the entire [Avalanche Warp Unsigned Message](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/ava-labs/avalanchego/tree/v1.10.15/vms/platformvm/warp/payload). The unsigned message is emitted as the unindexed data in the log.
+The actual `message` is the entire [Lux Warp Unsigned Message](https://github.com/luxdefi/node/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/luxdefi/node/tree/v1.10.15/vms/platformvm/warp/payload). The unsigned message is emitted as the unindexed data in the log.
 
 #### getVerifiedMessage
 
-`getVerifiedMessage` is used to read the contents of the delivered Avalanche Warp Message into the expected format.
+`getVerifiedMessage` is used to read the contents of the delivered Lux Warp Message into the expected format.
 
 It returns the message if present and a boolean indicating if a message is present.
 
-To use this function, the transaction must include the signed Avalanche Warp Message encoded in the [predicate](#predicate-encoding) of the transaction. Prior to executing a block, the VM iterates through transactions and pre-verifies all predicates. If a transaction's predicate is invalid, then it is considered invalid to include in the block and dropped.
+To use this function, the transaction must include the signed Lux Warp Message encoded in the [predicate](#predicate-encoding) of the transaction. Prior to executing a block, the VM iterates through transactions and pre-verifies all predicates. If a transaction's predicate is invalid, then it is considered invalid to include in the block and dropped.
 
 This leads to the following advantages:
 
@@ -69,11 +69,11 @@ This pre-verification is performed using the ProposerVM Block header during [blo
 
 This is different from the conventional Ethereum ChainID registered to [ChainList](https://chainlist.org/).
 
-The `blockchainID` in Avalanche refers to the txID that created the blockchain on the Avalanche P-Chain ([docs](https://docs.avax.network/specs/platform-transaction-serialization#unsigned-create-chain-tx)).
+The `blockchainID` in Lux refers to the txID that created the blockchain on the Lux P-Chain ([docs](https://docs.lux.network/specs/platform-transaction-serialization#unsigned-create-chain-tx)).
 
 ### Predicate Encoding
 
-Avalanche Warp Messages are encoded as a signed Avalanche [Warp Message](https://github.com/ava-labs/avalanchego/blob/v1.10.4/vms/platformvm/warp/message.go#L7) where the [UnsignedMessage](https://github.com/ava-labs/avalanchego/blob/v1.10.4/vms/platformvm/warp/unsigned_message.go#L14)'s payload includes an [AddressedPayload](../../../warp/payload/payload.go).
+Lux Warp Messages are encoded as a signed Lux [Warp Message](https://github.com/luxdefi/node/blob/v1.10.4/vms/platformvm/warp/message.go#L7) where the [UnsignedMessage](https://github.com/luxdefi/node/blob/v1.10.4/vms/platformvm/warp/unsigned_message.go#L14)'s payload includes an [AddressedPayload](../../../warp/payload/payload.go).
 
 Since the predicate is encoded into the [Transaction Access List](https://eips.ethereum.org/EIPS/eip-2930), it is packed into 32 byte hashes intended to declare storage slots that should be pre-warmed into the cache prior to transaction execution.
 
@@ -86,7 +86,7 @@ To support C-Chain to Subnet communication, or more generally Primary Network to
 1. Every Subnet validator validates the C-Chain
 2. The Primary Network has the largest possible number of validators
 
-Since the Primary Network has the largest possible number of validators for any Subnet on Avalanche, it would also be the most expensive Subnet to receive and verify Avalanche Warp Messages from as it reaching a threshold of stake on the primary network would require many signatures. Luckily, we can do something much smarter.
+Since the Primary Network has the largest possible number of validators for any Subnet on Lux, it would also be the most expensive Subnet to receive and verify Lux Warp Messages from as it reaching a threshold of stake on the primary network would require many signatures. Luckily, we can do something much smarter.
 
 When a Subnet receives a message from a blockchain on the Primary Network, we use the validator set of the receiving Subnet instead of the entire network when validating the message. This means that the C-Chain sending a message can be the exact same as Subnet to Subnet communication.
 
@@ -101,23 +101,23 @@ This means that C-Chain to Subnet communication only requires a threshold of sta
 
 This assumes that the security of Subnet B already depends on the validators of Subnet B to behave virtuously. Therefore, requiring a threshold of stake from the receiving Subnet's validator set instead of the whole Primary Network does not meaningfully change security of the receiving Subnet.
 
-Note: this special case is ONLY applied during Warp Message verification. The message sent by the Primary Network will still contain the Avalanche C-Chain's blockchainID as the sourceChainID and signatures will be served by querying the C-Chain directly.
+Note: this special case is ONLY applied during Warp Message verification. The message sent by the Primary Network will still contain the Lux C-Chain's blockchainID as the sourceChainID and signatures will be served by querying the C-Chain directly.
 
 ## Design Considerations
 
 ### Re-Processing Historical Blocks
 
-Avalanche Warp Messaging depends on the Avalanche P-Chain state at the P-Chain height specified by the ProposerVM block header.
+Lux Warp Messaging depends on the Lux P-Chain state at the P-Chain height specified by the ProposerVM block header.
 
-Verifying a message requires looking up the validator set of the source subnet on the P-Chain. To support this, Avalanche Warp Messaging uses the ProposerVM header, which includes the P-Chain height it was issued at as the canonical point to lookup the source subnet's validator set.
+Verifying a message requires looking up the validator set of the source subnet on the P-Chain. To support this, Lux Warp Messaging uses the ProposerVM header, which includes the P-Chain height it was issued at as the canonical point to lookup the source subnet's validator set.
 
 This means verifying the Warp Message and therefore the state transition on a block depends on state that is external to the blockchain itself: the P-Chain.
 
-The Avalanche P-Chain tracks only its current state and reverse diff layers (reversing the changes from past blocks) in order to re-calculate the validator set at a historical height. This means calculating a very old validator set that is used to verify a Warp Message in an old block may become prohibitively expensive.
+The Lux P-Chain tracks only its current state and reverse diff layers (reversing the changes from past blocks) in order to re-calculate the validator set at a historical height. This means calculating a very old validator set that is used to verify a Warp Message in an old block may become prohibitively expensive.
 
 Therefore, we need a heuristic to ensure that the network can correctly re-process old blocks (note: re-processing old blocks is a requirement to perform bootstrapping and is used in some VMs to serve or verify historical data).
 
-As a result, we require that the block itself provides a deterministic hint which determines which Avalanche Warp Messages were considered valid/invalid during the block's execution. This ensures that we can always re-process blocks and use the hint to decide whether an Avalanche Warp Message should be treated as valid/invalid even after the P-Chain state that was used at the original execution time may no longer support fast lookups.
+As a result, we require that the block itself provides a deterministic hint which determines which Lux Warp Messages were considered valid/invalid during the block's execution. This ensures that we can always re-process blocks and use the hint to decide whether an Lux Warp Message should be treated as valid/invalid even after the P-Chain state that was used at the original execution time may no longer support fast lookups.
 
 To provide that hint, we've explored two designs:
 
@@ -126,13 +126,13 @@ To provide that hint, we've explored two designs:
 
 The current implementation uses option (1).
 
-The original reason for this was that the notion of predicates for precompiles was designed with Shared Memory in mind. In the case of shared memory, there is no canonical "P-Chain height" in the block which determines whether or not Avalanche Warp Messages are valid.
+The original reason for this was that the notion of predicates for precompiles was designed with Shared Memory in mind. In the case of shared memory, there is no canonical "P-Chain height" in the block which determines whether or not Lux Warp Messages are valid.
 
 Instead, the VM interprets a shared memory import operation as valid as soon as the UTXO is available in shared memory. This means that if it were up to the block producer to staple the valid/invalid results of whether or not an attempted atomic operation should be treated as valid, a byzantine block producer could arbitrarily report that such atomic operations were invalid and cause a griefing attack to burn the gas of users that attempted to perform an import.
 
 Therefore, a transaction specified predicate is required to implement the shared memory precompile to prevent such a griefing attack.
 
-In contrast, Avalanche Warp Messages are validated within the context of an exact P-Chain height. Therefore, if a block producer attempted to lie about the validity of such a message, the network would interpret that block as invalid.
+In contrast, Lux Warp Messages are validated within the context of an exact P-Chain height. Therefore, if a block producer attempted to lie about the validity of such a message, the network would interpret that block as invalid.
 
 ### Guarantees Offered by Warp Precompile vs. Built on Top
 

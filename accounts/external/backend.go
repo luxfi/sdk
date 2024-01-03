@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,11 +31,11 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ava-labs/subnet-evm/accounts"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/interfaces"
-	"github.com/ava-labs/subnet-evm/rpc"
-	"github.com/ava-labs/subnet-evm/signer/core/apitypes"
+	"github.com/luxdefi/evm/accounts"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/interfaces"
+	"github.com/luxdefi/evm/rpc"
+	"github.com/luxdefi/evm/signer/core/apitypes"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/event"

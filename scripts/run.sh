@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-# This script starts N nodes (TODO N instead of 5) and waits for ctrl-c to shutdown the process group of AvalancheGo processes
-# Uses data directory to store all AvalancheGo data neatly in one location with minimal config overhead
+# This script starts N nodes (TODO N instead of 5) and waits for ctrl-c to shutdown the process group of LuxGo processes
+# Uses data directory to store all LuxGo data neatly in one location with minimal config overhead
 if ! [[ "$0" =~ scripts/run.sh ]]; then
   echo "must be run from repository root, but got $0"
   exit 255
@@ -18,11 +18,11 @@ source "$SUBNET_EVM_PATH"/scripts/versions.sh
 # Load the constants
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
-# Set up avalanche binary path and assume build directory is set
-AVALANCHEGO_BUILD_PATH=${AVALANCHEGO_BUILD_PATH:-"$GOPATH/src/github.com/ava-labs/avalanchego/build"}
-AVALANCHEGO_PATH=${AVALANCHEGO_PATH:-"$AVALANCHEGO_BUILD_PATH/avalanchego"}
-AVALANCHEGO_PLUGIN_DIR=${AVALANCHEGO_PLUGIN_DIR:-"$AVALANCHEGO_BUILD_PATH/plugins"}
-DATA_DIR=${DATA_DIR:-/tmp/subnet-evm-start-node/$(date "+%Y-%m-%d%:%H:%M:%S")}
+# Set up lux binary path and assume build directory is set
+LUXGO_BUILD_PATH=${LUXGO_BUILD_PATH:-"$GOPATH/src/github.com/luxdefi/node/build"}
+LUXGO_PATH=${LUXGO_PATH:-"$LUXGO_BUILD_PATH/node"}
+LUXGO_PLUGIN_DIR=${LUXGO_PLUGIN_DIR:-"$LUXGO_BUILD_PATH/plugins"}
+DATA_DIR=${DATA_DIR:-/tmp/evm-start-node/$(date "+%Y-%m-%d%:%H:%M:%S")}
 
 mkdir -p $DATA_DIR
 
@@ -33,7 +33,7 @@ function _set_config(){
     "network-id": "local",
     "sybil-protection-enabled": false,
     "health-check-frequency": "5s",
-    "plugin-dir": "$AVALANCHEGO_PLUGIN_DIR"
+    "plugin-dir": "$LUXGO_PLUGIN_DIR"
   }
 EOF
 }
@@ -50,6 +50,6 @@ mkdir -p $NODE_DATA_DIR
 NODE_CONFIG_FILE_PATH="$NODE_DATA_DIR/config.json"
 _set_config $NODE_CONFIG_FILE_PATH
 
-CMD="$AVALANCHEGO_PATH --data-dir=$NODE_DATA_DIR --config-file=$NODE_CONFIG_FILE_PATH"
+CMD="$LUXGO_PATH --data-dir=$NODE_DATA_DIR --config-file=$NODE_CONFIG_FILE_PATH"
 
 execute_cmd $CMD

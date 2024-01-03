@@ -166,7 +166,7 @@ task("minter:mint", "Mints native tokens")
 
 // npx hardhat minter:burn --network local --address [address]
 task("minter:burn", "Burns native tokens")
-  .addParam("amount", "the amount you want to burn (in AVAX unit)")
+  .addParam("amount", "the amount you want to burn (in LUX unit)")
   .setAction(async (args, hre) => {
     const [owner] = await hre.ethers.getSigners()
     const transactionHash = await owner.sendTransaction({

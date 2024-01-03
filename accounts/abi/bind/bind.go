@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -39,8 +39,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/ava-labs/subnet-evm/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxdefi/evm/accounts/abi"
 )
 
 // BindHook is a callback function that can be used to customize the binding.

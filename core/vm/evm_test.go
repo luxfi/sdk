@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -16,7 +16,7 @@ func TestIsProhibited(t *testing.T) {
 	assert.True(t, IsProhibited(common.HexToAddress("0x0100000000000000000000000000000000000010")))
 	assert.True(t, IsProhibited(common.HexToAddress("0x01000000000000000000000000000000000000f0")))
 	assert.True(t, IsProhibited(common.HexToAddress("0x01000000000000000000000000000000000000ff")))
-	// reserved addresses (subnet-evm)
+	// reserved addresses (evm)
 	assert.True(t, IsProhibited(common.HexToAddress("0x0200000000000000000000000000000000000000")))
 	assert.True(t, IsProhibited(common.HexToAddress("0x0200000000000000000000000000000000000010")))
 	assert.True(t, IsProhibited(common.HexToAddress("0x02000000000000000000000000000000000000f0")))

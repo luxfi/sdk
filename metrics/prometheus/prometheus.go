@@ -1,4 +1,4 @@
-// (c) 2021, Ava Labs, Inc. All rights reserved.
+// (c) 2021, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package prometheus
@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/ava-labs/subnet-evm/metrics"
+	"github.com/luxdefi/evm/metrics"
 
 	"github.com/prometheus/client_golang/prometheus"
 

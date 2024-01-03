@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -7,11 +7,11 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
+	"github.com/luxdefi/node/codec"
+	"github.com/luxdefi/node/ids"
 
-	"github.com/ava-labs/subnet-evm/internal/ethapi"
-	"github.com/ava-labs/subnet-evm/rpc"
+	"github.com/luxdefi/evm/internal/ethapi"
+	"github.com/luxdefi/evm/rpc"
 
 	"github.com/ethereum/go-ethereum/log"
 )

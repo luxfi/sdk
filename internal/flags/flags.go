@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // (c) 2023, Ava Labs, Inc.
+=======
+// (c) 2023, Lux Partners Limited.
+>>>>>>> d2613b8 (Update SubnetEVM)
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.

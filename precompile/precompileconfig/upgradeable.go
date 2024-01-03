@@ -1,9 +1,9 @@
-// (c) 2022 Ava Labs, Inc. All rights reserved.
+// (c) 2022-2024 Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package precompileconfig
 
-import "github.com/ava-labs/subnet-evm/utils"
+import "github.com/luxdefi/evm/utils"
 
 // Upgrade contains the timestamp for the upgrade along with
 // a boolean [Disable]. If [Disable] is set, the upgrade deactivates

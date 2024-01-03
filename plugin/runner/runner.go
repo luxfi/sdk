@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package runner
@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/ulimit"
-	"github.com/ava-labs/avalanchego/vms/rpcchainvm"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/ulimit"
+	"github.com/luxdefi/node/vms/rpcchainvm"
 
-	"github.com/ava-labs/subnet-evm/plugin/evm"
+	"github.com/luxdefi/evm/plugin/evm"
 )
 
 func Run(versionStr string) {

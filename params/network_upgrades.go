@@ -1,10 +1,10 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package params
 
 import (
-	"github.com/ava-labs/subnet-evm/utils"
+	"github.com/luxdefi/evm/utils"
 )
 
 var (
@@ -32,13 +32,13 @@ var (
 // MandatoryNetworkUpgrades contains timestamps that enable mandatory network upgrades.
 // These upgrades are mandatory, meaning that if a node does not upgrade by the
 // specified timestamp, it will be unable to participate in consensus.
-// Avalanche specific network upgrades are also included here.
+// Lux specific network upgrades are also included here.
 type MandatoryNetworkUpgrades struct {
-	// SubnetEVMTimestamp is a placeholder that activates Avalanche Upgrades prior to ApricotPhase6 (nil = no fork, 0 = already activated)
+	// SubnetEVMTimestamp is a placeholder that activates Lux Upgrades prior to ApricotPhase6 (nil = no fork, 0 = already activated)
 	SubnetEVMTimestamp *uint64 `json:"subnetEVMTimestamp,omitempty"`
 	// DUpgrade activates the Shanghai Execution Spec Upgrade from Ethereum (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md#included-eips)
-	// and Avalanche Warp Messaging. (nil = no fork, 0 = already activated)
-	// Note: EIP-4895 is excluded since withdrawals are not relevant to the Avalanche C-Chain or Subnets running the EVM.
+	// and Lux Warp Messaging. (nil = no fork, 0 = already activated)
+	// Note: EIP-4895 is excluded since withdrawals are not relevant to the Lux C-Chain or Subnets running the EVM.
 	DUpgradeTimestamp *uint64 `json:"dUpgradeTimestamp,omitempty"`
 	// Cancun activates the Cancun upgrade from Ethereum. (nil = no fork, 0 = already activated)
 	CancunTime *uint64 `json:"cancunTime,omitempty"`

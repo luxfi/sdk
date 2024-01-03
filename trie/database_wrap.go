@@ -21,10 +21,10 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/ethdb"
-	"github.com/ava-labs/subnet-evm/trie/triedb/hashdb"
-	"github.com/ava-labs/subnet-evm/trie/trienode"
-	"github.com/ava-labs/subnet-evm/utils"
+	"github.com/luxdefi/evm/ethdb"
+	"github.com/luxdefi/evm/trie/triedb/hashdb"
+	"github.com/luxdefi/evm/trie/trienode"
+	"github.com/luxdefi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

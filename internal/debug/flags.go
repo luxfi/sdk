@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -35,9 +35,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/ava-labs/subnet-evm/internal/flags"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/fjl/memsize/memsizeui"
+	"github.com/luxdefi/evm/internal/flags"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"

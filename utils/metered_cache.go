@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/ava-labs/subnet-evm/metrics"
+	"github.com/luxdefi/evm/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

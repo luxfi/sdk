@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 package precompilebind
 
@@ -14,12 +14,12 @@ import (
 	"testing"
 	"math/big"
 
-	"github.com/ava-labs/subnet-evm/core/state"
+	"github.com/luxdefi/evm/core/state"
 	{{- if .Contract.AllowList}}
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/allowlist"
 	{{- end}}
-	"github.com/ava-labs/subnet-evm/precompile/testutils"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/precompile/testutils"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )

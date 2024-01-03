@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -43,7 +43,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/ava-labs/subnet-evm/core"
+	"github.com/luxdefi/evm/core"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 

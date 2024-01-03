@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesyncclient
@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/subnet-evm/peer"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/evm/peer"
 
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/luxdefi/node/version"
 )
 
 var _ peer.NetworkClient = &mockNetwork{}

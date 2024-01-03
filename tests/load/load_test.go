@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/tests/utils/runner"
+	"github.com/luxdefi/evm/tests/utils/runner"
 	"github.com/ethereum/go-ethereum/log"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -24,7 +24,7 @@ func init() {
 
 func TestE2E(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "subnet-evm small load simulator test suite")
+	ginkgo.RunSpecs(t, "evm small load simulator test suite")
 }
 
 var _ = ginkgo.Describe("[Load Simulator]", ginkgo.Ordered, func() {

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package nativeminter
@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -112,6 +112,7 @@ func mintNativeCoin(accessibleState contract.AccessibleState, caller common.Addr
 			accessibleState.GetBlockContext().Number().Uint64(),
 		)
 	}
+
 	// if there is no address in the state, create one.
 	if !stateDB.Exist(to) {
 		stateDB.CreateAccount(to)

@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 package precompilebind
 
@@ -11,9 +11,9 @@ const tmplSourcePrecompileConfigGo = `
 package {{.Package}}
 
 import (
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
 	{{- if .Contract.AllowList}}
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/allowlist"
 
 	"github.com/ethereum/go-ethereum/common"
 	{{- end}}

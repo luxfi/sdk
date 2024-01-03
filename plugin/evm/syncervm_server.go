@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/snow/engine/snowman/block"
 
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
+	"github.com/luxdefi/evm/core"
+	"github.com/luxdefi/evm/plugin/evm/message"
 	"github.com/ethereum/go-ethereum/log"
 )
 

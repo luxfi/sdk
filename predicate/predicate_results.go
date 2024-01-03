@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package predicate
@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/codec/linearcodec"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/luxdefi/node/codec"
+	"github.com/luxdefi/node/codec/linearcodec"
+	"github.com/luxdefi/node/utils/units"
+	"github.com/luxdefi/node/utils/wrappers"
 	"github.com/ethereum/go-ethereum/common"
 )
 

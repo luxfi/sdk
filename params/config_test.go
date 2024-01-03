@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,11 +34,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/precompile/contracts/nativeminter"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/rewardmanager"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/txallowlist"
-	"github.com/ava-labs/subnet-evm/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/evm/precompile/contracts/nativeminter"
+	"github.com/luxdefi/evm/precompile/contracts/rewardmanager"
+	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
+	"github.com/luxdefi/evm/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -157,16 +157,16 @@ func TestConfigRules(t *testing.T) {
 	}
 
 	var stamp uint64
-	if r := c.AvalancheRules(big.NewInt(0), stamp); r.IsSubnetEVM {
-		t.Errorf("expected %v to not be subnet-evm", stamp)
+	if r := c.LuxRules(big.NewInt(0), stamp); r.IsSubnetEVM {
+		t.Errorf("expected %v to not be evm", stamp)
 	}
 	stamp = 500
-	if r := c.AvalancheRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
-		t.Errorf("expected %v to be subnet-evm", stamp)
+	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
+		t.Errorf("expected %v to be evm", stamp)
 	}
 	stamp = math.MaxInt64
-	if r := c.AvalancheRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
-		t.Errorf("expected %v to be subnet-evm", stamp)
+	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
+		t.Errorf("expected %v to be evm", stamp)
 	}
 }
 
@@ -250,10 +250,10 @@ func TestActivePrecompiles(t *testing.T) {
 		},
 	}
 
-	rules0 := config.AvalancheRules(common.Big0, 0)
+	rules0 := config.LuxRules(common.Big0, 0)
 	require.True(t, rules0.IsPrecompileEnabled(nativeminter.Module.Address))
 
-	rules1 := config.AvalancheRules(common.Big0, 1)
+	rules1 := config.LuxRules(common.Big0, 1)
 	require.False(t, rules1.IsPrecompileEnabled(nativeminter.Module.Address))
 }
 

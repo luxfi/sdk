@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -8,15 +8,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	avalancheWarp "github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp/payload"
-	"github.com/ava-labs/subnet-evm/ethdb"
+	"github.com/luxdefi/node/cache"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow/choices"
+	"github.com/luxdefi/node/snow/consensus/snowman"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxdefi/evm/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 )
 
@@ -35,7 +35,7 @@ type BlockClient interface {
 // The backend is also used to query for warp message signatures by the signature request handler.
 type Backend interface {
 	// AddMessage signs [unsignedMessage] and adds it to the warp backend database
-	AddMessage(unsignedMessage *avalancheWarp.UnsignedMessage) error
+	AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error
 
 	// GetMessageSignature returns the signature of the requested message hash.
 	GetMessageSignature(messageID ids.ID) ([bls.SignatureLen]byte, error)
@@ -44,7 +44,7 @@ type Backend interface {
 	GetBlockSignature(blockID ids.ID) ([bls.SignatureLen]byte, error)
 
 	// GetMessage retrieves the [unsignedMessage] from the warp backend database if available
-	GetMessage(messageHash ids.ID) (*avalancheWarp.UnsignedMessage, error)
+	GetMessage(messageHash ids.ID) (*luxWarp.UnsignedMessage, error)
 
 	// Clear clears the entire db
 	Clear() error
@@ -55,19 +55,19 @@ type backend struct {
 	networkID                 uint32
 	sourceChainID             ids.ID
 	db                        database.Database
-	warpSigner                avalancheWarp.Signer
+	warpSigner                luxWarp.Signer
 	blockClient               BlockClient
 	messageSignatureCache     *cache.LRU[ids.ID, [bls.SignatureLen]byte]
 	blockSignatureCache       *cache.LRU[ids.ID, [bls.SignatureLen]byte]
-	messageCache              *cache.LRU[ids.ID, *avalancheWarp.UnsignedMessage]
-	offchainAddressedCallMsgs map[ids.ID]*avalancheWarp.UnsignedMessage
+	messageCache              *cache.LRU[ids.ID, *luxWarp.UnsignedMessage]
+	offchainAddressedCallMsgs map[ids.ID]*luxWarp.UnsignedMessage
 }
 
 // NewBackend creates a new Backend, and initializes the signature cache and message tracking database.
 func NewBackend(
 	networkID uint32,
 	sourceChainID ids.ID,
-	warpSigner avalancheWarp.Signer,
+	warpSigner luxWarp.Signer,
 	blockClient BlockClient,
 	db database.Database,
 	cacheSize int,
@@ -81,15 +81,15 @@ func NewBackend(
 		blockClient:               blockClient,
 		messageSignatureCache:     &cache.LRU[ids.ID, [bls.SignatureLen]byte]{Size: cacheSize},
 		blockSignatureCache:       &cache.LRU[ids.ID, [bls.SignatureLen]byte]{Size: cacheSize},
-		messageCache:              &cache.LRU[ids.ID, *avalancheWarp.UnsignedMessage]{Size: cacheSize},
-		offchainAddressedCallMsgs: make(map[ids.ID]*avalancheWarp.UnsignedMessage),
+		messageCache:              &cache.LRU[ids.ID, *luxWarp.UnsignedMessage]{Size: cacheSize},
+		offchainAddressedCallMsgs: make(map[ids.ID]*luxWarp.UnsignedMessage),
 	}
 	return b, b.initOffChainMessages(offchainMessages)
 }
 
 func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 	for i, offchainMsg := range offchainMessages {
-		unsignedMsg, err := avalancheWarp.ParseUnsignedMessage(offchainMsg)
+		unsignedMsg, err := luxWarp.ParseUnsignedMessage(offchainMsg)
 		if err != nil {
 			return fmt.Errorf("%w at index %d: %w", errParsingOffChainMessage, i, err)
 		}
@@ -111,7 +111,7 @@ func (b *backend) Clear() error {
 	return database.Clear(b.db, batchSize)
 }
 
-func (b *backend) AddMessage(unsignedMessage *avalancheWarp.UnsignedMessage) error {
+func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 	messageID := unsignedMessage.ID()
 
 	// In the case when a node restarts, and possibly changes its bls key, the cache gets emptied but the database does not.
@@ -174,7 +174,7 @@ func (b *backend) GetBlockSignature(blockID ids.ID) ([bls.SignatureLen]byte, err
 	if err != nil {
 		return [bls.SignatureLen]byte{}, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}
-	unsignedMessage, err := avalancheWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
 		return [bls.SignatureLen]byte{}, fmt.Errorf("failed to create new unsigned warp message: %w", err)
 	}
@@ -188,7 +188,7 @@ func (b *backend) GetBlockSignature(blockID ids.ID) ([bls.SignatureLen]byte, err
 	return signature, nil
 }
 
-func (b *backend) GetMessage(messageID ids.ID) (*avalancheWarp.UnsignedMessage, error) {
+func (b *backend) GetMessage(messageID ids.ID) (*luxWarp.UnsignedMessage, error) {
 	if message, ok := b.messageCache.Get(messageID); ok {
 		return message, nil
 	}
@@ -201,7 +201,7 @@ func (b *backend) GetMessage(messageID ids.ID) (*avalancheWarp.UnsignedMessage, 
 		return nil, fmt.Errorf("failed to get warp message %s from db: %w", messageID.String(), err)
 	}
 
-	unsignedMessage, err := avalancheWarp.ParseUnsignedMessage(unsignedMessageBytes)
+	unsignedMessage, err := luxWarp.ParseUnsignedMessage(unsignedMessageBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse unsigned message %s: %w", messageID.String(), err)
 	}

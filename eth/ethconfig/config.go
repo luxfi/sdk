@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,10 +29,10 @@ package ethconfig
 import (
 	"time"
 
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/core/txpool"
-	"github.com/ava-labs/subnet-evm/eth/gasprice"
-	"github.com/ava-labs/subnet-evm/miner"
+	"github.com/luxdefi/evm/core"
+	"github.com/luxdefi/evm/core/txpool"
+	"github.com/luxdefi/evm/eth/gasprice"
+	"github.com/luxdefi/evm/miner"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -48,7 +48,7 @@ var DefaultFullGPOConfig = gasprice.Config{
 	MinGasUsed:          gasprice.DefaultMinGasUsed,
 }
 
-// DefaultConfig contains default settings for use on the Avalanche main net.
+// DefaultConfig contains default settings for use on the Lux main net.
 var DefaultConfig = NewDefaultConfig()
 
 func NewDefaultConfig() Config {

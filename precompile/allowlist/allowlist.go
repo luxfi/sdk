@@ -1,4 +1,4 @@
-// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package allowlist
@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -109,6 +109,7 @@ func createAllowListRoleSetter(precompileAddr common.Address, role Role) contrac
 		if !callerStatus.CanModify(modifyStatus, role) {
 			return nil, remainingGas, fmt.Errorf("%w: modify address: %s, from role: %s, to role: %s", ErrCannotModifyAllowList, callerAddr, modifyStatus, role)
 		}
+
 		if contract.IsDUpgradeActivated(evm) {
 			if remainingGas, err = contract.DeductGas(remainingGas, AllowListEventGasCost); err != nil {
 				return nil, 0, err

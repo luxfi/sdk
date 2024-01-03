@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -10,21 +10,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/network/p2p"
-	"github.com/ava-labs/avalanchego/network/p2p/gossip"
-	"github.com/ava-labs/avalanchego/proto/pb/sdk"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/network/p2p"
+	"github.com/luxdefi/node/network/p2p/gossip"
+	"github.com/luxdefi/node/proto/pb/sdk"
+	"github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/set"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/ava-labs/subnet-evm/core/types"
+	"github.com/luxdefi/evm/core/types"
 )
 
 func TestTxGossip(t *testing.T) {

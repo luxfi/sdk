@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -7,8 +7,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/subnet-evm/core"
+	"github.com/luxdefi/node/utils/formatting"
+	"github.com/luxdefi/evm/core"
 	"github.com/ethereum/go-ethereum/common"
 )
 

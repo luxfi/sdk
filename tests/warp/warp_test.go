@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Implements solidity tests.
@@ -15,29 +15,29 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/avalanche-network-runner/rpcpb"
-	"github.com/ava-labs/avalanchego/api/info"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/vms/platformvm"
-	avalancheWarp "github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp/payload"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/key"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/load"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/metrics"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/txs"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/ethclient"
-	"github.com/ava-labs/subnet-evm/interfaces"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/plugin/evm"
-	"github.com/ava-labs/subnet-evm/predicate"
-	"github.com/ava-labs/subnet-evm/tests/utils"
-	"github.com/ava-labs/subnet-evm/tests/utils/runner"
-	warpBackend "github.com/ava-labs/subnet-evm/warp"
-	"github.com/ava-labs/subnet-evm/warp/aggregator"
-	"github.com/ava-labs/subnet-evm/x/warp"
+	"github.com/luxdefi/lux-network-runner/rpcpb"
+	"github.com/luxdefi/node/api/info"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow/validators"
+	"github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/vms/platformvm"
+	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxdefi/evm/cmd/simulator/key"
+	"github.com/luxdefi/evm/cmd/simulator/load"
+	"github.com/luxdefi/evm/cmd/simulator/metrics"
+	"github.com/luxdefi/evm/cmd/simulator/txs"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/ethclient"
+	"github.com/luxdefi/evm/interfaces"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/plugin/evm"
+	"github.com/luxdefi/evm/predicate"
+	"github.com/luxdefi/evm/tests/utils"
+	"github.com/luxdefi/evm/tests/utils/runner"
+	warpBackend "github.com/luxdefi/evm/warp"
+	"github.com/luxdefi/evm/warp/aggregator"
+	"github.com/luxdefi/evm/x/warp"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
@@ -102,7 +102,7 @@ var _ = ginkgo.DescribeTable("[Warp]", func(gen func() *warpTest) {
 
 func TestE2E(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "subnet-evm warp e2e test")
+	ginkgo.RunSpecs(t, "evm warp e2e test")
 }
 
 func toWebsocketURI(uri string, blockchainID string) string {
@@ -134,12 +134,12 @@ var _ = ginkgo.BeforeSuite(func() {
 	require.NoError(err)
 	warpChainConfigPath = f.Name()
 
-	// Construct the network using the avalanche-network-runner
+	// Construct the network using the lux-network-runner
 	_, err = manager.StartDefaultNetwork(ctx)
 	require.NoError(err)
 	err = manager.SetupNetwork(
 		ctx,
-		config.AvalancheGoExecPath,
+		config.Lux NodeExecPath,
 		[]*rpcpb.BlockchainSpec{
 			{
 				VmName:      evm.IDStr,
@@ -220,11 +220,11 @@ type warpTest struct {
 	// Fields set throughout test execution
 	blockID                     ids.ID
 	blockPayload                *payload.Hash
-	blockPayloadUnsignedMessage *avalancheWarp.UnsignedMessage
-	blockPayloadSignedMessage   *avalancheWarp.Message
+	blockPayloadUnsignedMessage *luxWarp.UnsignedMessage
+	blockPayloadSignedMessage   *luxWarp.Message
 
-	addressedCallUnsignedMessage *avalancheWarp.UnsignedMessage
-	addressedCallSignedMessage   *avalancheWarp.Message
+	addressedCallUnsignedMessage *luxWarp.UnsignedMessage
+	addressedCallSignedMessage   *luxWarp.Message
 }
 
 func newWarpTest(ctx context.Context, sendingSubnet *runner.Subnet, sendingSubnetFundedKey *ecdsa.PrivateKey, receivingSubnet *runner.Subnet, receivingSubnetFundedKey *ecdsa.PrivateKey) *warpTest {
@@ -342,7 +342,7 @@ func (w *warpTest) sendMessageFromSendingSubnet() {
 	w.blockID = ids.ID(blockHash) // Set blockID to construct a warp message containing a block hash payload later
 	w.blockPayload, err = payload.NewHash(w.blockID)
 	require.NoError(err)
-	w.blockPayloadUnsignedMessage, err = avalancheWarp.NewUnsignedMessage(w.networkID, w.sendingSubnet.BlockchainID, w.blockPayload.Bytes())
+	w.blockPayloadUnsignedMessage, err = luxWarp.NewUnsignedMessage(w.networkID, w.sendingSubnet.BlockchainID, w.blockPayload.Bytes())
 	require.NoError(err)
 
 	log.Info("Fetching relevant warp logs from the newly produced block")
@@ -411,9 +411,9 @@ func (w *warpTest) aggregateSignaturesViaAPI() {
 	require.NotZero(len(validators))
 
 	totalWeight := uint64(0)
-	warpValidators := make([]*avalancheWarp.Validator, 0, len(validators))
+	warpValidators := make([]*luxWarp.Validator, 0, len(validators))
 	for nodeID, validator := range validators {
-		warpValidators = append(warpValidators, &avalancheWarp.Validator{
+		warpValidators = append(warpValidators, &luxWarp.Validator{
 			PublicKey: validator.PublicKey,
 			Weight:    validator.Weight,
 			NodeIDs:   []ids.NodeID{nodeID},

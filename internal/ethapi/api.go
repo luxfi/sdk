@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -35,20 +35,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/accounts"
-	"github.com/ava-labs/subnet-evm/accounts/abi"
-	"github.com/ava-labs/subnet-evm/accounts/keystore"
-	"github.com/ava-labs/subnet-evm/accounts/scwallet"
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/consensus"
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/core/state"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/core/vm"
-	"github.com/ava-labs/subnet-evm/eth/tracers/logger"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/rpc"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/accounts"
+	"github.com/luxdefi/evm/accounts/abi"
+	"github.com/luxdefi/evm/accounts/keystore"
+	"github.com/luxdefi/evm/accounts/scwallet"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/consensus"
+	"github.com/luxdefi/evm/core"
+	"github.com/luxdefi/evm/core/state"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/core/vm"
+	"github.com/luxdefi/evm/eth/tracers/logger"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/rpc"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -135,7 +135,7 @@ func (s *EthereumAPI) FeeHistory(ctx context.Context, blockCount math.HexOrDecim
 // Syncing allows the caller to determine whether the chain is syncing or not.
 // In geth, the response is either a map representing an ethereum.SyncProgress
 // struct or "false" (indicating the chain is not syncing).
-// In subnet-evm, avalanchego prevents API calls unless bootstrapping is complete,
+// In evm, node prevents API calls unless bootstrapping is complete,
 // so we always return false here for API compatibility.
 func (s *EthereumAPI) Syncing() (interface{}, error) {
 	return false, nil
@@ -773,7 +773,7 @@ func (s *BlockChainAPI) GetHeaderByNumber(ctx context.Context, number rpc.BlockN
 	header, err := s.b.HeaderByNumber(ctx, number)
 	if header != nil && err == nil {
 		response := s.rpcMarshalHeader(ctx, header)
-		// subnet-evm has no notion of a pending block
+		// evm has no notion of a pending block
 		// if number == rpc.PendingBlockNumber {
 		// 	// Pending header need to nil out a few fields
 		// 	for _, field := range []string{"hash", "nonce", "miner"} {
@@ -803,7 +803,7 @@ func (s *BlockChainAPI) GetBlockByNumber(ctx context.Context, number rpc.BlockNu
 	block, err := s.b.BlockByNumber(ctx, number)
 	if block != nil && err == nil {
 		response, err := s.rpcMarshalBlock(ctx, block, true, fullTx)
-		// subnet-evm has no notion of a pending block
+		// evm has no notion of a pending block
 		// if err == nil && number == rpc.PendingBlockNumber {
 		// 	// Pending blocks need to nil out a few fields
 		// 	for _, field := range []string{"hash", "nonce", "miner"} {
@@ -1476,7 +1476,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 
 // NewRPCTransaction returns a pending transaction that will serialize to the RPC representation
 // Note: in go-ethereum this function is called NewRPCPendingTransaction.
-// In subnet-evm, we have renamed it to NewRPCTransaction as it is used for accepted transactions as well.
+// In evm, we have renamed it to NewRPCTransaction as it is used for accepted transactions as well.
 func NewRPCTransaction(tx *types.Transaction, current *types.Header, baseFee *big.Int, config *params.ChainConfig) *RPCTransaction {
 	var (
 		blockNumber = uint64(0)
@@ -1561,7 +1561,7 @@ func AccessList(ctx context.Context, b Backend, blockNrOrHash rpc.BlockNumberOrH
 		to = crypto.CreateAddress(args.from(), uint64(*args.Nonce))
 	}
 	// Retrieve the precompiles since they don't need to be added to the access list
-	precompiles := vm.ActivePrecompiles(b.ChainConfig().AvalancheRules(header.Number, header.Time))
+	precompiles := vm.ActivePrecompiles(b.ChainConfig().LuxRules(header.Number, header.Time))
 
 	// Create an initial tracer
 	prevTracer := logger.NewAccessListTracer(nil, args.from(), to, precompiles)

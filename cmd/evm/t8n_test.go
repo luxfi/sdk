@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc.
+// (c) 2023-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,8 +34,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/cmd/evm/internal/t8ntool"
-	"github.com/ava-labs/subnet-evm/internal/cmdtest"
+	"github.com/luxdefi/evm/cmd/evm/internal/t8ntool"
+	"github.com/luxdefi/evm/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
 )
 
@@ -478,7 +478,7 @@ func TestB11r(t *testing.T) {
 			},
 			expOut: "exp.json",
 		},
-		// NOTE: we ignore these tests since subnet-evm does not do
+		// NOTE: we ignore these tests since evm does not do
 		// ethash or clique sealing.
 		// { // ethash test seal
 		// 	base: "./testdata/21",
@@ -556,7 +556,7 @@ func cmpJson(a, b []byte) (bool, error) {
 	if err := json.Unmarshal(b, &j2); err != nil {
 		return false, err
 	}
-	// NOTE: In subnet-evm the difficulty for each block is 1 where in go-ethereum
+	// NOTE: In evm the difficulty for each block is 1 where in go-ethereum
 	// (pre-merge) this depends on the block. We ignore this field to avoid having
 	// to modify all the test inputs.
 	ignoreKeys := []string{"currentDifficulty"}

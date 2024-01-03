@@ -4,11 +4,11 @@ CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_relea
 
 ## Introduction
 
-Avalanche is an open-source platform for launching decentralized applications and enterprise blockchain deployments in one interoperable, highly scalable ecosystem. Avalanche gives you complete control on both the network and application layers&mdash;helping you build anything you can imagine.
+Lux is an open-source platform for launching decentralized applications and enterprise blockchain deployments in one interoperable, highly scalable ecosystem. Lux gives you complete control on both the network and application layers&mdash;helping you build anything you can imagine.
 
-The Avalanche Network is composed of many subnets and chains. Chains in subnets run with customizable virtual machines. One of these virtual machines is Subnet EVM. The Subnet EVM's API is almost identical to an Ethereum node's API. Subnet EVM brings its own features like minting native tokens via contracts, restrincting contract deployer etc. These features are presented with `Stateful Precompile Contracts`. These contracts are precompiled and deployed when they're activated.
+The Lux Network is composed of many subnets and chains. Chains in subnets run with customizable virtual machines. One of these virtual machines is Subnet EVM. The Subnet EVM's API is almost identical to an Ethereum node's API. Subnet EVM brings its own features like minting native tokens via contracts, restrincting contract deployer etc. These features are presented with `Stateful Precompile Contracts`. These contracts are precompiled and deployed when they're activated.
 
-The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Avalanche's Subnet EVM. We'll be building smart contracts with development environment [Hardhat](https://hardhat.org).
+The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Lux's Subnet EVM. We'll be building smart contracts with development environment [Hardhat](https://hardhat.org).
 
 ## Prerequisites
 
@@ -16,16 +16,20 @@ The goal of this guide is to lay out best practices regarding writing, testing a
 
 First, install the LTS (long-term support) version of [nodejs](https://nodejs.org/en). This is `18.16.0` at the time of writing. NodeJS bundles `npm`.
 
-### Solidity and Avalanche
+### Solidity and Lux
 
-It is also helpful to have a basic understanding of [Solidity](https://docs.soliditylang.org) and [Avalanche](https://docs.avax.network).
+It is also helpful to have a basic understanding of [Solidity](https://docs.soliditylang.org) and [Lux](https://docs.lux.network).
 
 ## Dependencies
 
 Clone the repo and install the necessary packages via `yarn`.
 
 ```bash
-git clone https://github.com/ava-labs/subnet-evm.git
+git clone https://github.com/luxdefi/evm.git
+cd contracts
+npm install
+```bash
+git clone https://github.com/luxdefi/evm.git
 cd contracts
 npm install
 ```
@@ -42,13 +46,13 @@ npm install
 
 All of these `NativeMinter`, `FeeManager` and `AllowList` contracts should be enabled by a chain config in genesis or as an upgrade. See the example genesis under [Tests](#tests) section.
 
-For more information about precompiles see [subnet-evm precompiles](https://github.com/ava-labs/subnet-evm#precompiles).
+For more information about precompiles see [evm precompiles](https://github.com/luxdefi/evm#precompiles).
 
 ## Hardhat Config
 
 Hardhat uses `hardhat.config.js` as the configuration file. You can define tasks, networks, compilers and more in that file. For more information see [here](https://hardhat.org/config/).
 
-In Subnet-EVM, we provide a pre-configured file [hardhat.config.ts](https://github.com/ava-labs/subnet-evm/blob/master/contracts/hardhat.config.ts).
+In Subnet-EVM, we provide a pre-configured file [hardhat.config.ts](https://github.com/luxdefi/lux-smart-contract-quickstart/blob/main/hardhat.config.ts).
 
 The HardHat config file includes a single network configuration: `local`. `local` defaults to using the following values for the RPC URL and the Chain ID:
 
@@ -97,7 +101,7 @@ npx hardhat accounts --network mynetwork
 
 ## Hardhat Tasks
 
-You can define custom hardhat tasks in [tasks.ts](https://github.com/ava-labs/avalanche-smart-contract-quickstart/blob/main/tasks.ts). Tasks contain helpers for precompiles `allowList` and `minter`. Precompiles have their own contract already-deployed when they're activated. So these can be called without deploying any intermediate contract. See `npx hardhat --help` for more information about available tasks.
+You can define custom hardhat tasks in [tasks.ts](https://github.com/luxdefi/lux-smart-contract-quickstart/blob/main/tasks.ts). Tasks contain helpers for precompiles `allowList` and `minter`. Precompiles have their own contract already-deployed when they're activated. So these can be called without deploying any intermediate contract. See `npx hardhat --help` for more information about available tasks.
 
 ## Tests
 

@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc.
+// (c) 2023-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -14,8 +14,8 @@ import (
 	"unicode"
 
 	// Force-load native and js packages, to trigger registration
-	_ "github.com/ava-labs/subnet-evm/eth/tracers/js"
-	_ "github.com/ava-labs/subnet-evm/eth/tracers/native"
+	_ "github.com/luxdefi/evm/eth/tracers/js"
+	_ "github.com/luxdefi/evm/eth/tracers/native"
 )
 
 // To generate a new callTracer test, copy paste the makeTest method below into

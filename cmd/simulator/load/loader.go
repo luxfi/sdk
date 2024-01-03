@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -14,13 +14,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/cmd/simulator/config"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/key"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/metrics"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/txs"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/ethclient"
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/evm/cmd/simulator/config"
+	"github.com/luxdefi/evm/cmd/simulator/key"
+	"github.com/luxdefi/evm/cmd/simulator/metrics"
+	"github.com/luxdefi/evm/cmd/simulator/txs"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/ethclient"
+	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"

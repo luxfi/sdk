@@ -1,4 +1,4 @@
-// (c) 2022 Ava Labs, Inc. All rights reserved.
+// (c) 2022-2024 Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package params
@@ -8,13 +8,13 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/deployerallowlist"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/feemanager"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/nativeminter"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/rewardmanager"
-	"github.com/ava-labs/subnet-evm/precompile/contracts/txallowlist"
-	"github.com/ava-labs/subnet-evm/utils"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/precompile/contracts/deployerallowlist"
+	"github.com/luxdefi/evm/precompile/contracts/feemanager"
+	"github.com/luxdefi/evm/precompile/contracts/nativeminter"
+	"github.com/luxdefi/evm/precompile/contracts/rewardmanager"
+	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
+	"github.com/luxdefi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )

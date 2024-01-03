@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package main
@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ava-labs/subnet-evm/cmd/simulator/config"
-	"github.com/ava-labs/subnet-evm/cmd/simulator/load"
+	"github.com/luxdefi/evm/cmd/simulator/config"
+	"github.com/luxdefi/evm/cmd/simulator/load"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/spf13/pflag"
 )

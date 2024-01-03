@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rawdb
@@ -6,8 +6,8 @@ package rawdb
 import (
 	"encoding/binary"
 
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/subnet-evm/ethdb"
+	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxdefi/evm/ethdb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

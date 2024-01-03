@@ -1,4 +1,4 @@
-// (c) 2019-2021, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/utils"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/utils"
 )
 
 func attemptAwait(t *testing.T, wg *sync.WaitGroup, delay time.Duration) {

@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package aggregator
@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	avalancheWarp "github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp/payload"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxdefi/evm/plugin/evm/message"
 )
 
 const (
@@ -26,7 +26,7 @@ var _ SignatureGetter = (*NetworkSignatureGetter)(nil)
 // SignatureGetter defines the minimum network interface to perform signature aggregation
 type SignatureGetter interface {
 	// GetSignature attempts to fetch a BLS Signature from [nodeID] for [unsignedWarpMessage]
-	GetSignature(ctx context.Context, nodeID ids.NodeID, unsignedWarpMessage *avalancheWarp.UnsignedMessage) (*bls.Signature, error)
+	GetSignature(ctx context.Context, nodeID ids.NodeID, unsignedWarpMessage *luxWarp.UnsignedMessage) (*bls.Signature, error)
 }
 
 type NetworkClient interface {
@@ -49,7 +49,7 @@ func NewSignatureGetter(client NetworkClient) *NetworkSignatureGetter {
 //
 // Note: this function will continue attempting to fetch the signature from [nodeID] until it receives an invalid value or [ctx] is cancelled.
 // The caller is responsible to cancel [ctx] if it no longer needs to fetch this signature.
-func (s *NetworkSignatureGetter) GetSignature(ctx context.Context, nodeID ids.NodeID, unsignedWarpMessage *avalancheWarp.UnsignedMessage) (*bls.Signature, error) {
+func (s *NetworkSignatureGetter) GetSignature(ctx context.Context, nodeID ids.NodeID, unsignedWarpMessage *luxWarp.UnsignedMessage) (*bls.Signature, error) {
 	var signatureReqBytes []byte
 	parsedPayload, err := payload.Parse(unsignedWarpMessage.Payload)
 	if err != nil {

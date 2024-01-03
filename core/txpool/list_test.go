@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,7 +31,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/core/types"
+	"github.com/luxdefi/evm/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

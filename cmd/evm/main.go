@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc.
+// (c) 2023-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,8 +32,8 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ava-labs/subnet-evm/cmd/evm/internal/t8ntool"
-	"github.com/ava-labs/subnet-evm/internal/flags"
+	"github.com/luxdefi/evm/cmd/evm/internal/t8ntool"
+	"github.com/luxdefi/evm/internal/flags"
 	"github.com/urfave/cli/v2"
 )
 

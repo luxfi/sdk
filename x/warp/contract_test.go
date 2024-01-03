@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -8,18 +8,18 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ava-labs/avalanchego/ids"
-	agoUtils "github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	avalancheWarp "github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp/payload"
-	"github.com/ava-labs/subnet-evm/core/state"
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/precompile/testutils"
-	"github.com/ava-labs/subnet-evm/predicate"
-	"github.com/ava-labs/subnet-evm/utils"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/node/ids"
+	agoUtils "github.com/luxdefi/node/utils"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxdefi/evm/core/state"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/precompile/testutils"
+	"github.com/luxdefi/evm/predicate"
+	"github.com/luxdefi/evm/utils"
+	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -154,14 +154,12 @@ func TestSendWarpMessage(t *testing.T) {
 				require.Equal(t, topics[0], WarpABI.Events["SendWarpMessage"].ID)
 				require.Equal(t, topics[1], callerAddr.Hash())
 				require.Equal(t, topics[2], common.Hash(unsignedWarpMessage.ID()))
-
 				require.Len(t, logsData, 1)
 				logData := logsData[0]
 				unsignedWarpMsg, err := UnpackSendWarpEventDataToMessage(logData)
 				require.NoError(t, err)
 				addressedPayload, err := payload.ParseAddressedCall(unsignedWarpMsg.Payload)
 				require.NoError(t, err)
-
 				require.Equal(t, common.BytesToAddress(addressedPayload.SourceAddress), callerAddr)
 				require.Equal(t, unsignedWarpMsg.SourceChainID, blockchainID)
 				require.Equal(t, addressedPayload.Payload, sendWarpMessagePayload)
@@ -183,9 +181,9 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 		packagedPayloadBytes,
 	)
 	require.NoError(t, err)
-	unsignedWarpMsg, err := avalancheWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
+	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
 	require.NoError(t, err)
-	warpMessage, err := avalancheWarp.NewMessage(unsignedWarpMsg, &avalancheWarp.BitSetSignature{}) // Create message with empty signature for testing
+	warpMessage, err := luxWarp.NewMessage(unsignedWarpMsg, &luxWarp.BitSetSignature{}) // Create message with empty signature for testing
 	require.NoError(t, err)
 	warpMessagePredicateBytes := predicate.PackPredicate(warpMessage.Bytes())
 	getVerifiedWarpMsg, err := PackGetVerifiedWarpMessage(0)
@@ -407,9 +405,9 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 			Caller:  callerAddr,
 			InputFn: func(t testing.TB) []byte { return getVerifiedWarpMsg },
 			BeforeHook: func(t testing.TB, state contract.StateDB) {
-				unsignedMessage, err := avalancheWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid addressed payload
+				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid addressed payload
 				require.NoError(t, err)
-				warpMessage, err := avalancheWarp.NewMessage(unsignedMessage, &avalancheWarp.BitSetSignature{})
+				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
 				require.NoError(t, err)
 
 				state.SetPredicateStorageSlots(ContractAddress, [][]byte{predicate.PackPredicate(warpMessage.Bytes())})
@@ -464,9 +462,9 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 	blockHash := ids.GenerateTestID()
 	blockHashPayload, err := payload.NewHash(blockHash)
 	require.NoError(t, err)
-	unsignedWarpMsg, err := avalancheWarp.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(t, err)
-	warpMessage, err := avalancheWarp.NewMessage(unsignedWarpMsg, &avalancheWarp.BitSetSignature{}) // Create message with empty signature for testing
+	warpMessage, err := luxWarp.NewMessage(unsignedWarpMsg, &luxWarp.BitSetSignature{}) // Create message with empty signature for testing
 	require.NoError(t, err)
 	warpMessagePredicateBytes := predicate.PackPredicate(warpMessage.Bytes())
 	getVerifiedWarpBlockHash, err := PackGetVerifiedWarpBlockHash(0)
@@ -685,11 +683,10 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 			Caller:  callerAddr,
 			InputFn: func(t testing.TB) []byte { return getVerifiedWarpBlockHash },
 			BeforeHook: func(t testing.TB, state contract.StateDB) {
-				unsignedMessage, err := avalancheWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid block hash payload
+				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid block hash payload
 				require.NoError(t, err)
-				warpMessage, err := avalancheWarp.NewMessage(unsignedMessage, &avalancheWarp.BitSetSignature{})
+				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
 				require.NoError(t, err)
-
 				state.SetPredicateStorageSlots(ContractAddress, [][]byte{predicate.PackPredicate(warpMessage.Bytes())})
 			},
 			SetupBlockContext: func(mbc *contract.MockBlockContext) {

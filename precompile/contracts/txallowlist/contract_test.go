@@ -1,4 +1,4 @@
-// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
+// (c) 2022-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txallowlist
@@ -6,8 +6,8 @@ package txallowlist
 import (
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/core/state"
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
+	"github.com/luxdefi/evm/core/state"
+	"github.com/luxdefi/evm/precompile/allowlist"
 )
 
 func TestTxAllowListRun(t *testing.T) {

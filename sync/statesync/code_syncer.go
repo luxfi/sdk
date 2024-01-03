@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/subnet-evm/core/rawdb"
-	"github.com/ava-labs/subnet-evm/ethdb"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
-	statesyncclient "github.com/ava-labs/subnet-evm/sync/client"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/luxdefi/evm/ethdb"
+	"github.com/luxdefi/evm/plugin/evm/message"
+	statesyncclient "github.com/luxdefi/evm/sync/client"
 
 	"github.com/ethereum/go-ethereum/common"
 )

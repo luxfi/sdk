@@ -1,10 +1,10 @@
 # Consensus
 
-Disclaimer: the consensus package in subnet-evm is a complete misnomer.
+Disclaimer: the consensus package in evm is a complete misnomer.
 
 The consensus package in go-ethereum handles block validation and specifically handles validating the PoW portion of consensus - thus the name.
 
-Since AvalancheGo handles consensus for Subnet-EVM, Subnet-EVM is just the VM, but we keep the consensus package in place to handle part of the block verification process.
+Since LuxGo handles consensus for Subnet-EVM, Subnet-EVM is just the VM, but we keep the consensus package in place to handle part of the block verification process.
 
 ## Block Verification
 

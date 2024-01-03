@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -6,7 +6,7 @@ package handlers
 import (
 	"time"
 
-	"github.com/ava-labs/subnet-evm/metrics"
+	"github.com/luxdefi/evm/metrics"
 )
 
 type handlerStats struct {

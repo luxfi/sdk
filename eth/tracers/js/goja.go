@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc.
+// (c) 2023-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,9 +34,9 @@ import (
 
 	"github.com/dop251/goja"
 
-	"github.com/ava-labs/subnet-evm/core/vm"
-	"github.com/ava-labs/subnet-evm/eth/tracers"
-	jsassets "github.com/ava-labs/subnet-evm/eth/tracers/js/internal/tracers"
+	"github.com/luxdefi/evm/core/vm"
+	"github.com/luxdefi/evm/eth/tracers"
+	jsassets "github.com/luxdefi/evm/eth/tracers/js/internal/tracers"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -255,7 +255,7 @@ func (t *jsTracer) CaptureStart(env *vm.EVM, from common.Address, to common.Addr
 	t.ctx["value"] = valueBig
 	t.ctx["block"] = t.vm.ToValue(env.Context.BlockNumber.Uint64())
 	// Update list of precompiles based on current block
-	rules := env.ChainConfig().AvalancheRules(env.Context.BlockNumber, env.Context.Time)
+	rules := env.ChainConfig().LuxRules(env.Context.BlockNumber, env.Context.Time)
 	t.activePrecompiles = vm.ActivePrecompiles(rules)
 }
 

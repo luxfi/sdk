@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -9,21 +9,21 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	agoUtils "github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/set"
-	avalancheWarp "github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp/payload"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
-	"github.com/ava-labs/subnet-evm/precompile/testutils"
-	"github.com/ava-labs/subnet-evm/predicate"
-	"github.com/ava-labs/subnet-evm/utils"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/engine/snowman/block"
+	"github.com/luxdefi/node/snow/validators"
+	agoUtils "github.com/luxdefi/node/utils"
+	"github.com/luxdefi/node/utils/constants"
+	"github.com/luxdefi/node/utils/crypto/bls"
+	"github.com/luxdefi/node/utils/set"
+	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/precompile/testutils"
+	"github.com/luxdefi/evm/predicate"
+	"github.com/luxdefi/evm/utils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -39,7 +39,7 @@ var (
 	sourceSubnetID = ids.GenerateTestID()
 
 	// valid unsigned warp message used throughout testing
-	unsignedMsg *avalancheWarp.UnsignedMessage
+	unsignedMsg *luxWarp.UnsignedMessage
 	// valid addressed payload
 	addressedPayload      *payload.AddressedCall
 	addressedPayloadBytes []byte
@@ -89,7 +89,7 @@ func init() {
 		panic(err)
 	}
 	addressedPayloadBytes = addressedPayload.Bytes()
-	unsignedMsg, err = avalancheWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMsg, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -105,7 +105,7 @@ func init() {
 type testValidator struct {
 	nodeID ids.NodeID
 	sk     *bls.SecretKey
-	vdr    *avalancheWarp.Validator
+	vdr    *luxWarp.Validator
 }
 
 func (v *testValidator) Less(o *testValidator) bool {
@@ -123,7 +123,7 @@ func newTestValidator() *testValidator {
 	return &testValidator{
 		nodeID: nodeID,
 		sk:     sk,
-		vdr: &avalancheWarp.Validator{
+		vdr: &luxWarp.Validator{
 			PublicKey:      pk,
 			PublicKeyBytes: pk.Serialize(),
 			Weight:         3,
@@ -137,13 +137,13 @@ type signatureTest struct {
 	stateF    func(*gomock.Controller) validators.State
 	quorumNum uint64
 	quorumDen uint64
-	msgF      func(*require.Assertions) *avalancheWarp.Message
+	msgF      func(*require.Assertions) *luxWarp.Message
 	err       error
 }
 
 // createWarpMessage constructs a signed warp message using the global variable [unsignedMsg]
 // and the first [numKeys] signatures from [blsSignatures]
-func createWarpMessage(numKeys int) *avalancheWarp.Message {
+func createWarpMessage(numKeys int) *luxWarp.Message {
 	aggregateSignature, err := bls.AggregateSignatures(blsSignatures[0:numKeys])
 	if err != nil {
 		panic(err)
@@ -152,11 +152,11 @@ func createWarpMessage(numKeys int) *avalancheWarp.Message {
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &avalancheWarp.BitSetSignature{
+	warpSignature := &luxWarp.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
-	warpMsg, err := avalancheWarp.NewMessage(unsignedMsg, warpSignature)
+	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
 	if err != nil {
 		panic(err)
 	}
@@ -233,7 +233,7 @@ func TestWarpMessageFromPrimaryNetwork(t *testing.T) {
 	cChainID := ids.GenerateTestID()
 	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(err)
-	unsignedMsg, err := avalancheWarp.NewUnsignedMessage(networkID, cChainID, addressedCall.Bytes())
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(networkID, cChainID, addressedCall.Bytes())
 	require.NoError(err)
 
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
@@ -253,11 +253,11 @@ func TestWarpMessageFromPrimaryNetwork(t *testing.T) {
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &avalancheWarp.BitSetSignature{
+	warpSignature := &luxWarp.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
-	warpMsg, err := avalancheWarp.NewMessage(unsignedMsg, warpSignature)
+	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
 	require.NoError(err)
 
 	predicateBytes := predicate.PackPredicate(warpMsg.Bytes())
@@ -371,14 +371,14 @@ func TestInvalidAddressedPayload(t *testing.T) {
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &avalancheWarp.BitSetSignature{
+	warpSignature := &luxWarp.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
 	// Create an unsigned message with an invalid addressed payload
-	unsignedMsg, err := avalancheWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3})
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3})
 	require.NoError(t, err)
-	warpMsg, err := avalancheWarp.NewMessage(unsignedMsg, warpSignature)
+	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
 	require.NoError(t, err)
 	warpMsgBytes := warpMsg.Bytes()
 	predicateBytes := predicate.PackPredicate(warpMsgBytes)
@@ -402,16 +402,16 @@ func TestInvalidAddressedPayload(t *testing.T) {
 func TestInvalidBitSet(t *testing.T) {
 	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(t, err)
-	unsignedMsg, err := avalancheWarp.NewUnsignedMessage(
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(
 		networkID,
 		sourceChainID,
 		addressedCall.Bytes(),
 	)
 	require.NoError(t, err)
 
-	msg, err := avalancheWarp.NewMessage(
+	msg, err := luxWarp.NewMessage(
 		unsignedMsg,
-		&avalancheWarp.BitSetSignature{
+		&luxWarp.BitSetSignature{
 			Signers:   make([]byte, 1),
 			Signature: [bls.SignatureLen]byte{},
 		},

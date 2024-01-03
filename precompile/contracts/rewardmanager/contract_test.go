@@ -1,4 +1,4 @@
-// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rewardmanager
@@ -10,14 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/constants"
-	"github.com/ava-labs/subnet-evm/core/state"
-	"github.com/ava-labs/subnet-evm/precompile/allowlist"
-	"github.com/ava-labs/subnet-evm/precompile/contract"
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
-	"github.com/ava-labs/subnet-evm/precompile/testutils"
-	"github.com/ava-labs/subnet-evm/vmerrs"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/constants"
+	"github.com/luxdefi/evm/core/state"
+	"github.com/luxdefi/evm/precompile/allowlist"
+	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/precompile/testutils"
+	"github.com/luxdefi/evm/vmerrs"
 )
 
 var (
@@ -144,7 +144,6 @@ var (
 			AfterHook: func(t testing.TB, state contract.StateDB) {
 				_, isFeeRecipients := GetStoredRewardAddress(state)
 				require.True(t, isFeeRecipients)
-
 				logsTopics, logsData := state.GetLogData()
 				assertFeeRecipientsAllowed(t, logsTopics, logsData, allowlist.TestManagerAddr)
 			},
@@ -155,7 +154,6 @@ var (
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackSetRewardAddress(rewardAddress)
 				require.NoError(t, err)
-
 				return input
 			},
 			SuppliedGas: SetRewardAddressGasCost + RewardAddressChangedEventGasCost,
@@ -233,7 +231,6 @@ var (
 				address, isFeeRecipients := GetStoredRewardAddress(state)
 				require.False(t, isFeeRecipients)
 				require.Equal(t, constants.BlackholeAddr, address)
-
 				logsTopics, logsData := state.GetLogData()
 				assertRewardsDisabled(t, logsTopics, logsData, allowlist.TestEnabledAddr)
 			},
@@ -359,7 +356,6 @@ var (
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackAllowFeeRecipients()
 				require.NoError(t, err)
-
 				return input
 			},
 			SuppliedGas: AllowFeeRecipientsGasCost,
@@ -372,7 +368,6 @@ var (
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackSetRewardAddress(rewardAddress)
 				require.NoError(t, err)
-
 				return input
 			},
 			SuppliedGas: SetRewardAddressGasCost,
@@ -385,7 +380,6 @@ var (
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackSetRewardAddress(rewardAddress)
 				require.NoError(t, err)
-
 				return input
 			},
 			SuppliedGas: SetRewardAddressGasCost + RewardAddressChangedEventGasCost - 1,

@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc.
+// (c) 2021-2022, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -37,8 +37,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/ethdb"
-	"github.com/ava-labs/subnet-evm/metrics"
+	"github.com/luxdefi/evm/ethdb"
+	"github.com/luxdefi/evm/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/syndtr/goleveldb/leveldb"

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,18 +32,18 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/precompile/modules"
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
-	"github.com/ava-labs/subnet-evm/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/precompile/modules"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/utils"
 )
 
 const maxJSONLen = 64 * 1024 * 1024 // 64MB
 
 var (
-	errNonGenesisForkByHeight = errors.New("subnet-evm only supports forking by height at the genesis block")
+	errNonGenesisForkByHeight = errors.New("evm only supports forking by height at the genesis block")
 
 	SubnetEVMChainID = big.NewInt(43214)
 
@@ -91,7 +91,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		AvalancheContext:    AvalancheContext{utils.TestSnowContext()},
+		LuxContext:          LuxContext{utils.TestSnowContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -113,7 +113,7 @@ var (
 	}
 
 	TestSubnetEVMConfig = &ChainConfig{
-		AvalancheContext:    AvalancheContext{utils.TestSnowContext()},
+		LuxContext:          LuxContext{utils.TestSnowContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -134,7 +134,7 @@ var (
 	}
 
 	TestPreSubnetEVMConfig = &ChainConfig{
-		AvalancheContext:         AvalancheContext{utils.TestSnowContext()},
+		LuxContext:               LuxContext{utils.TestSnowContext()},
 		ChainID:                  big.NewInt(1),
 		FeeConfig:                DefaultFeeConfig,
 		AllowFeeRecipients:       false,
@@ -152,11 +152,11 @@ var (
 		UpgradeConfig:            UpgradeConfig{},
 	}
 
-	TestRules = TestChainConfig.AvalancheRules(new(big.Int), 0)
+	TestRules = TestChainConfig.LuxRules(new(big.Int), 0)
 )
 
 // UpgradeConfig includes the following configs that may be specified in upgradeBytes:
-// - Timestamps that enable avalanche network upgrades,
+// - Timestamps that enable lux network upgrades,
 // - Enabling or disabling precompiles as network upgrades.
 type UpgradeConfig struct {
 	// Config for optional timestamps that enable network upgrades.
@@ -171,8 +171,8 @@ type UpgradeConfig struct {
 	PrecompileUpgrades []PrecompileUpgrade `json:"precompileUpgrades,omitempty"`
 }
 
-// AvalancheContext provides Avalanche specific context directly into the EVM.
-type AvalancheContext struct {
+// LuxContext provides Lux specific context directly into the EVM.
+type LuxContext struct {
 	SnowCtx *snow.Context
 }
 
@@ -182,7 +182,7 @@ type AvalancheContext struct {
 // that any network, identified by its genesis block, can have its own
 // set of configuration options.
 type ChainConfig struct {
-	AvalancheContext `json:"-"` // Avalanche specific context set during VM initialization. Not serialized.
+	LuxContext `json:"-"` // Lux specific context set during VM initialization. Not serialized.
 
 	ChainID            *big.Int             `json:"chainId"`                      // chainId identifies the current chain and is used for replay protection
 	FeeConfig          commontype.FeeConfig `json:"feeConfig"`                    // Set the configuration for the dynamic fee algorithm
@@ -204,7 +204,7 @@ type ChainConfig struct {
 	MandatoryNetworkUpgrades             // Config for timestamps that enable mandatory network upgrades. Skip encoding/decoding directly into ChainConfig.
 	OptionalNetworkUpgrades              // Config for optional timestamps that enable network upgrades
 	GenesisPrecompiles       Precompiles `json:"-"` // Config for enabling precompiles from genesis. JSON encode/decode will be handled by the custom marshaler/unmarshaler.
-	UpgradeConfig            `json:"-"`  // Config specified in upgradeBytes (avalanche network upgrades or enable/disabling precompiles). Skip encoding/decoding directly into ChainConfig.
+	UpgradeConfig            `json:"-"`  // Config specified in upgradeBytes (lux network upgrades or enable/disabling precompiles). Skip encoding/decoding directly into ChainConfig.
 }
 
 // UnmarshalJSON parses the JSON-encoded data and stores the result in the
@@ -278,9 +278,9 @@ func (c *ChainConfig) Description() string {
 		banner += fmt.Sprintf(" - Muir Glacier:                #%-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/muir-glacier.md)\n", c.MuirGlacierBlock)
 	}
 	banner += "Mandatory Upgrades:\n"
-	banner += fmt.Sprintf(" - SubnetEVM Timestamp:           @%-10v (https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0)\n", ptrToString(c.SubnetEVMTimestamp))
-	banner += fmt.Sprintf(" - DUpgrade Timestamp:            @%-10v (https://github.com/ava-labs/avalanchego/releases/tag/v1.11.0)\n", ptrToString(c.DUpgradeTimestamp))
-	banner += fmt.Sprintf(" - Cancun Timestamp:              @%-10v (https://github.com/ava-labs/avalanchego/releases/tag/v1.11.0)\n", ptrToString(c.CancunTime))
+	banner += fmt.Sprintf(" - SubnetEVM Timestamp:           @%-10v (https://github.com/luxdefi/node/releases/tag/v1.10.0)\n", ptrToString(c.SubnetEVMTimestamp))
+	banner += fmt.Sprintf(" - DUpgrade Timestamp:            @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(c.DUpgradeTimestamp))
+	banner += fmt.Sprintf(" - Cancun Timestamp:              @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(c.CancunTime))
 	banner += "\n"
 
 	// Add Subnet-EVM custom fields
@@ -444,7 +444,7 @@ func (c *ChainConfig) Verify() error {
 type fork struct {
 	name      string
 	block     *big.Int // some go-ethereum forks use block numbers
-	timestamp *uint64  // Avalanche forks use timestamps
+	timestamp *uint64  // Lux forks use timestamps
 	optional  bool     // if true, the fork may be nil and next fork is still allowed
 }
 
@@ -468,7 +468,12 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 		return err
 	}
 
-	// Note: In Avalanche, hard forks must take place via block timestamps instead
+	// Check that forks are enabled in order
+	if err := checkForks(ethForks, true); err != nil {
+		return err
+	}
+
+	// Note: In Lux, hard forks must take place via block timestamps instead
 	// of block numbers since blocks are produced asynchronously. Therefore, we do not
 	// check that the block timestamps in the same way as for
 	// the block number forks since it would not be a meaningful comparison.
@@ -518,7 +523,7 @@ func checkForks(forks []fork, blockFork bool) error {
 }
 
 // checkCompatible confirms that [newcfg] is backwards compatible with [c] to upgrade with the given head block height and timestamp.
-// This confirms that all Ethereum and Avalanche upgrades are backwards compatible as well as that the precompile config is backwards
+// This confirms that all Ethereum and Lux upgrades are backwards compatible as well as that the precompile config is backwards
 // compatible.
 func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, height *big.Int, time uint64) *ConfigCompatError {
 	if isForkBlockIncompatible(c.HomesteadBlock, newcfg.HomesteadBlock, height) {
@@ -556,12 +561,12 @@ func (c *ChainConfig) checkCompatible(newcfg *ChainConfig, height *big.Int, time
 		return newBlockCompatError("Muir Glacier fork block", c.MuirGlacierBlock, newcfg.MuirGlacierBlock)
 	}
 
-	// Check avalanhe network upgrades
+	// Check lux network upgrades
 	if err := c.CheckMandatoryCompatible(&newcfg.MandatoryNetworkUpgrades, time); err != nil {
 		return err
 	}
 
-	// Check subnet-evm specific activations
+	// Check evm specific activations
 	newOptionalNetworkUpgrades := newcfg.getOptionalNetworkUpgrades()
 	if c.UpgradeConfig.OptionalNetworkUpgrades != nil && newcfg.UpgradeConfig.OptionalNetworkUpgrades == nil {
 		// Note: if the current OptionalNetworkUpgrades are set via UpgradeConfig, then a new config
@@ -715,7 +720,7 @@ type Rules struct {
 	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
 	IsCancun                                                bool
 
-	// Rules for Avalanche releases
+	// Rules for Lux releases
 	IsSubnetEVM bool
 	IsDUpgrade  bool
 
@@ -758,9 +763,9 @@ func (c *ChainConfig) rules(num *big.Int, timestamp uint64) Rules {
 	}
 }
 
-// AvalancheRules returns the Avalanche modified rules to support Avalanche
+// LuxRules returns the Lux modified rules to support Lux
 // network upgrades
-func (c *ChainConfig) AvalancheRules(blockNum *big.Int, timestamp uint64) Rules {
+func (c *ChainConfig) LuxRules(blockNum *big.Int, timestamp uint64) Rules {
 	rules := c.rules(blockNum, timestamp)
 
 	rules.IsSubnetEVM = c.IsSubnetEVM(timestamp)

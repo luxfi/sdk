@@ -15,9 +15,9 @@ if [ ! -z "${extra_imports}" ]; then
     exit 1
 fi
 
-extra_imports=$(grep -r --include='*.go' '"github.com/ava-labs/coreth/.*"' -o -h || true | sort -u)
+extra_imports=$(grep -r --include='*.go' '"github.com/luxdefi/coreth/.*"' -o -h || true | sort -u)
 if [ ! -z "${extra_imports}" ]; then
-    echo "subnet-evm should not import packages from coreth:"
+    echo "evm should not import packages from coreth:"
     echo "${extra_imports}"
     exit 1
 fi

@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -6,16 +6,16 @@ package evm
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/subnet-evm/ethdb"
-	"github.com/ava-labs/subnet-evm/metrics"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
-	syncHandlers "github.com/ava-labs/subnet-evm/sync/handlers"
-	syncStats "github.com/ava-labs/subnet-evm/sync/handlers/stats"
-	"github.com/ava-labs/subnet-evm/trie"
-	"github.com/ava-labs/subnet-evm/warp"
-	warpHandlers "github.com/ava-labs/subnet-evm/warp/handlers"
+	"github.com/luxdefi/node/codec"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/evm/ethdb"
+	"github.com/luxdefi/evm/metrics"
+	"github.com/luxdefi/evm/plugin/evm/message"
+	syncHandlers "github.com/luxdefi/evm/sync/handlers"
+	syncStats "github.com/luxdefi/evm/sync/handlers/stats"
+	"github.com/luxdefi/evm/trie"
+	"github.com/luxdefi/evm/warp"
+	warpHandlers "github.com/luxdefi/evm/warp/handlers"
 )
 
 var _ message.RequestHandler = &networkHandler{}

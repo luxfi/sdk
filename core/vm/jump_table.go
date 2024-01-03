@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,7 +29,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/evm/params"
 )
 
 type (
@@ -88,7 +88,7 @@ func validate(jt JumpTable) JumpTable {
 }
 
 // newDUpgradeInstructionSet returns the frontier, homestead, byzantium,
-// constantinople, istanbul, petersburg, subnet-evm, d-upgrade instructions.
+// constantinople, istanbul, petersburg, evm, d-upgrade instructions.
 func newDUpgradeInstructionSet() JumpTable {
 	instructionSet := newSubnetEVMInstructionSet()
 	enable3855(&instructionSet) // PUSH0 instruction
@@ -97,7 +97,7 @@ func newDUpgradeInstructionSet() JumpTable {
 }
 
 // newSubnetEVMInstructionSet returns the frontier, homestead, byzantium,
-// constantinople, istanbul, petersburg, subnet-evm instructions.
+// constantinople, istanbul, petersburg, evm instructions.
 func newSubnetEVMInstructionSet() JumpTable {
 	instructionSet := newIstanbulInstructionSet()
 	enable2929(&instructionSet)

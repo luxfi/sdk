@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/node/utils/formatting"
+	"github.com/luxdefi/evm/core"
+	"github.com/luxdefi/evm/params"
 	"github.com/stretchr/testify/assert"
 )
 

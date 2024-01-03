@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2021-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,10 +31,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ava-labs/subnet-evm/accounts"
-	"github.com/ava-labs/subnet-evm/accounts/external"
-	"github.com/ava-labs/subnet-evm/accounts/keystore"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxdefi/evm/accounts"
+	"github.com/luxdefi/evm/accounts/external"
+	"github.com/luxdefi/evm/accounts/keystore"
 )
 
 // Config represents a small collection of configuration values to fine tune the
@@ -66,7 +66,7 @@ type Config struct {
 // ExtRPCEnabled returns the indicator whether node enables the external
 // RPC(http, ws or graphql).
 func (c *Config) ExtRPCEnabled() bool {
-	// In avalanche, we always disable the external RPC.
+	// In lux, we always disable the external RPC.
 	return false
 }
 
@@ -95,7 +95,7 @@ func (c *Config) GetKeyStoreDir() (string, bool, error) {
 	isEphemeral := false
 	if keydir == "" {
 		// There is no datadir.
-		keydir, err = os.MkdirTemp("", "subnet-evm-keystore")
+		keydir, err = os.MkdirTemp("", "evm-keystore")
 		isEphemeral = true
 	}
 

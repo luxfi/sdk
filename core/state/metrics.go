@@ -1,4 +1,4 @@
-// (c) 2019-2021, Ava Labs, Inc.
+// (c) 2019-2021, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -26,7 +26,7 @@
 
 package state
 
-import "github.com/ava-labs/subnet-evm/metrics"
+import "github.com/luxdefi/evm/metrics"
 
 var (
 	accountUpdatedMeter      = metrics.NewRegisteredMeter("state/update/account", nil)

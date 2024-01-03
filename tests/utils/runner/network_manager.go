@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package runner
@@ -9,13 +9,13 @@ import (
 	"os"
 	"time"
 
-	runner_sdk "github.com/ava-labs/avalanche-network-runner/client"
-	"github.com/ava-labs/avalanche-network-runner/rpcpb"
-	runner_server "github.com/ava-labs/avalanche-network-runner/server"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/subnet-evm/plugin/evm"
+	runner_sdk "github.com/luxdefi/lux-network-runner/client"
+	"github.com/luxdefi/lux-network-runner/rpcpb"
+	runner_server "github.com/luxdefi/lux-network-runner/server"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxdefi/evm/plugin/evm"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -34,7 +34,7 @@ type Subnet struct {
 
 type ANRConfig struct {
 	LogLevel            string
-	AvalancheGoExecPath string
+	Lux NodeExecPath string
 	PluginDir           string
 	GlobalNodeConfig    string
 	GlobalCChainConfig  string
@@ -54,17 +54,17 @@ type NetworkManager struct {
 	serverCtxCancel context.CancelFunc
 }
 
-// NewDefaultANRConfig returns a default config for launching the avalanche-network-runner manager
+// NewDefaultANRConfig returns a default config for launching the lux-network-runner manager
 // with both a server and client.
-// By default, it expands $GOPATH/src/github.com/ava-labs/avalanchego/build/ directory to extract
-// the AvalancheGoExecPath and PluginDir arguments.
-// If the AVALANCHEGO_BUILD_PATH environment variable is set, it overrides the default location for
-// the AvalancheGoExecPath and PluginDir arguments.
+// By default, it expands $GOPATH/src/github.com/luxdefi/node/build/ directory to extract
+// the Lux NodeExecPath and PluginDir arguments.
+// If the LUXD_BUILD_PATH environment variable is set, it overrides the default location for
+// the Lux NodeExecPath and PluginDir arguments.
 func NewDefaultANRConfig() ANRConfig {
 	defaultConfig := ANRConfig{
 		LogLevel:            "info",
-		AvalancheGoExecPath: os.ExpandEnv("$GOPATH/src/github.com/ava-labs/avalanchego/build/avalanchego"),
-		PluginDir:           os.ExpandEnv("$GOPATH/src/github.com/ava-labs/avalanchego/build/plugins"),
+		Lux NodeExecPath: os.ExpandEnv("$GOPATH/src/github.com/luxdefi/node/build/node"),
+		PluginDir:           os.ExpandEnv("$GOPATH/src/github.com/luxdefi/node/build/plugins"),
 		GlobalNodeConfig: `{
 			"log-display-level":"info",
 			"proposervm-use-current-height":true
@@ -74,9 +74,9 @@ func NewDefaultANRConfig() ANRConfig {
 			"log-level": "debug"
 		}`,
 	}
-	// If AVALANCHEGO_BUILD_PATH is populated, override location set by GOPATH
-	if envBuildPath, exists := os.LookupEnv("AVALANCHEGO_BUILD_PATH"); exists {
-		defaultConfig.AvalancheGoExecPath = fmt.Sprintf("%s/avalanchego", envBuildPath)
+	// If LUXD_BUILD_PATH is populated, override location set by GOPATH
+	if envBuildPath, exists := os.LookupEnv("LUXD_BUILD_PATH"); exists {
+		defaultConfig.Lux NodeExecPath = fmt.Sprintf("%s/node", envBuildPath)
 		defaultConfig.PluginDir = fmt.Sprintf("%s/plugins", envBuildPath)
 	}
 	return defaultConfig
@@ -205,7 +205,7 @@ func (n *NetworkManager) StartDefaultNetwork(ctx context.Context) (<-chan struct
 		return nil, err
 	}
 
-	log.Info("Sending 'start'", "AvalancheGoExecPath", n.ANRConfig.AvalancheGoExecPath)
+	log.Info("Sending 'start'", "Lux NodeExecPath", n.ANRConfig.Lux NodeExecPath)
 
 	// Start cluster
 	opts := []runner_sdk.OpOption{
@@ -219,7 +219,7 @@ func (n *NetworkManager) StartDefaultNetwork(ctx context.Context) (<-chan struct
 	}
 	resp, err := n.anrClient.Start(
 		ctx,
-		n.ANRConfig.AvalancheGoExecPath,
+		n.ANRConfig.Lux NodeExecPath,
 		opts...,
 	)
 	if err != nil {
@@ -230,7 +230,7 @@ func (n *NetworkManager) StartDefaultNetwork(ctx context.Context) (<-chan struct
 }
 
 // SetupNetwork constructs blockchains with the given [blockchainSpecs] and adds them to the network manager.
-// Uses [execPath] as the AvalancheGo binary execution path for any started nodes.
+// Uses [execPath] as the Lux Node binary execution path for any started nodes.
 // Note: this assumes that the default network has already been constructed.
 func (n *NetworkManager) SetupNetwork(ctx context.Context, execPath string, blockchainSpecs []*rpcpb.BlockchainSpec) error {
 	// timeout according to how many blockchains we're creating
@@ -367,7 +367,7 @@ func RegisterFiveNodeSubnetRun() func() *Subnet {
 		gomega.Expect(err).Should(gomega.BeNil())
 		err = manager.SetupNetwork(
 			ctx,
-			config.AvalancheGoExecPath,
+			config.Lux NodeExecPath,
 			[]*rpcpb.BlockchainSpec{
 				{
 					VmName:      evm.IDStr,

@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc.
+// (c) 2023-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,10 +33,10 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxdefi/evm/params"
 )
 
-const ourPath = "github.com/ava-labs/subnet-evm" // Path to our module
+const ourPath = "github.com/luxdefi/evm" // Path to our module
 
 // These variables are set at build-time by the linker when the build is
 // done by build/ci.go.

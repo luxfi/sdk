@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/luxdefi/node/version"
 	"github.com/stretchr/testify/assert"
 )
 

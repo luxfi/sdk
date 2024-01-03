@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -6,7 +6,7 @@ package peer
 import (
 	"context"
 
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
+	"github.com/luxdefi/evm/plugin/evm/message"
 )
 
 var _ message.ResponseHandler = &waitingResponseHandler{}

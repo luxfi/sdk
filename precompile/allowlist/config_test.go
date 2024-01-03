@@ -1,4 +1,4 @@
-// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package allowlist
@@ -6,7 +6,7 @@ package allowlist
 import (
 	"testing"
 
-	"github.com/ava-labs/subnet-evm/precompile/modules"
+	"github.com/luxdefi/evm/precompile/modules"
 )
 
 var testModule = modules.Module{

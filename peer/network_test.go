@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -12,21 +12,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ava-labs/avalanchego/network/p2p"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/luxdefi/node/network/p2p"
+	"github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxdefi/node/utils/logging"
+	"github.com/luxdefi/node/utils/set"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
+	"github.com/luxdefi/evm/plugin/evm/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/codec/linearcodec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/luxdefi/node/codec"
+	"github.com/luxdefi/node/codec/linearcodec"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/version"
 )
 
 var (
@@ -430,7 +430,7 @@ func TestRequestMinVersion(t *testing.T) {
 		},
 		requestBytes,
 	)
-	assert.Equal(t, err.Error(), "no peers found matching version avalanche/2.0.0 out of 1 peers")
+	assert.Equal(t, err.Error(), "no peers found matching version lux/2.0.0 out of 1 peers")
 	assert.Nil(t, responseBytes)
 
 	// ensure version matches and the request goes through

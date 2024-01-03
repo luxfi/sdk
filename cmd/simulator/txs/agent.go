@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/cmd/simulator/metrics"
+	"github.com/luxdefi/evm/cmd/simulator/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

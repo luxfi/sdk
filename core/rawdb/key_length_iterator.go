@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc.
+// (c) 2022, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -26,7 +26,7 @@
 
 package rawdb
 
-import "github.com/ava-labs/subnet-evm/ethdb"
+import "github.com/luxdefi/evm/ethdb"
 
 // KeyLengthIterator is a wrapper for a database iterator that ensures only key-value pairs
 // with a specific key length will be returned.

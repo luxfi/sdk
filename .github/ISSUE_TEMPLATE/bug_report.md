@@ -20,7 +20,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Logs**
-If applicable, please include the relevant logs that indicate a problem and/or the log directory of your node. By default, this can be found at `~/.avalanchego/logs/`.
+If applicable, please include the relevant logs that indicate a problem and/or the log directory of your node. By default, this can be found at `~/.luxgo/logs/`.
 
 **Metrics**
 If applicable, please include any metrics gathered from your node to assist us in diagnosing the problem.
@@ -31,4 +31,4 @@ Which OS you used to reveal the bug.
 **Additional context**
 Add any other context about the problem here.
 
-Avalanche Bug Bounty program can be found [here](https://hackenproof.com/avalanche/avalanche-protocol).
+Lux Bug Bounty program can be found [here](https://hackenproof.com/lux/lux-protocol).

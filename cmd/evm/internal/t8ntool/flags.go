@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc.
+// (c) 2023-2024, Lux Partners Limited.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,8 +30,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ava-labs/subnet-evm/core/vm"
-	"github.com/ava-labs/subnet-evm/tests"
+	"github.com/luxdefi/evm/core/vm"
+	"github.com/luxdefi/evm/tests"
 	"github.com/urfave/cli/v2"
 )
 

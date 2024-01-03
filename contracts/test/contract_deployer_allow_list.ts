@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // (c) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
@@ -6,6 +7,13 @@ import { Roles, test } from "./utils"
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers"
+=======
+// (c) 2019-2022, Lux Partners Limited. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+import { ethers } from "hardhat"
+import { test } from "./utils"
+>>>>>>> d2613b8 (Update SubnetEVM)
 
 const ADMIN_ADDRESS: string = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"
 const OTHER_SIGNER = "0x0Fa8EA536Be85F32724D57A37758761B86416123"

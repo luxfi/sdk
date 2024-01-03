@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -16,70 +16,68 @@ import (
 	"sync"
 	"time"
 
-	avalanchegoMetrics "github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/network/p2p"
-	"github.com/ava-labs/avalanchego/network/p2p/gossip"
-	avalanchegoConstants "github.com/ava-labs/avalanchego/utils/constants"
+	nodeMetrics "github.com/luxdefi/node/api/metrics"
+	"github.com/luxdefi/node/network/p2p"
+	"github.com/luxdefi/node/network/p2p/gossip"
+	nodeConstants "github.com/luxdefi/node/utils/constants"
+	luxJSON "github.com/luxdefi/node/utils/json"
+	luxRPC "github.com/gorilla/rpc/v2"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/ava-labs/subnet-evm/commontype"
-	"github.com/ava-labs/subnet-evm/constants"
-	"github.com/ava-labs/subnet-evm/core"
-	"github.com/ava-labs/subnet-evm/core/rawdb"
-	"github.com/ava-labs/subnet-evm/core/txpool"
-	"github.com/ava-labs/subnet-evm/core/types"
-	"github.com/ava-labs/subnet-evm/eth"
-	"github.com/ava-labs/subnet-evm/eth/ethconfig"
-	"github.com/ava-labs/subnet-evm/metrics"
-	subnetEVMPrometheus "github.com/ava-labs/subnet-evm/metrics/prometheus"
-	"github.com/ava-labs/subnet-evm/miner"
-	"github.com/ava-labs/subnet-evm/node"
-	"github.com/ava-labs/subnet-evm/params"
-	"github.com/ava-labs/subnet-evm/peer"
-	"github.com/ava-labs/subnet-evm/plugin/evm/message"
-	"github.com/ava-labs/subnet-evm/rpc"
-	statesyncclient "github.com/ava-labs/subnet-evm/sync/client"
-	"github.com/ava-labs/subnet-evm/sync/client/stats"
-	"github.com/ava-labs/subnet-evm/trie"
-	"github.com/ava-labs/subnet-evm/warp"
-	warpValidators "github.com/ava-labs/subnet-evm/warp/validators"
+	"github.com/luxdefi/evm/commontype"
+	"github.com/luxdefi/evm/constants"
+	"github.com/luxdefi/evm/core"
+	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/luxdefi/evm/core/txpool"
+	"github.com/luxdefi/evm/core/types"
+	"github.com/luxdefi/evm/eth"
+	"github.com/luxdefi/evm/eth/ethconfig"
+	"github.com/luxdefi/evm/metrics"
+	subnetEVMPrometheus "github.com/luxdefi/evm/metrics/prometheus"
+	"github.com/luxdefi/evm/miner"
+	"github.com/luxdefi/evm/node"
+	"github.com/luxdefi/evm/params"
+	"github.com/luxdefi/evm/peer"
+	"github.com/luxdefi/evm/plugin/evm/message"
+	"github.com/luxdefi/evm/rpc"
+	statesyncclient "github.com/luxdefi/evm/sync/client"
+	"github.com/luxdefi/evm/sync/client/stats"
+	"github.com/luxdefi/evm/trie"
+	"github.com/luxdefi/evm/warp"
+	warpValidators "github.com/luxdefi/evm/warp/validators"
 
 	// Force-load tracer engine to trigger registration
 	//
 	// We must import this package (not referenced elsewhere) so that the native "callTracer"
 	// is added to a map of client-accessible tracers. In geth, this is done
 	// inside of cmd/geth.
-	_ "github.com/ava-labs/subnet-evm/eth/tracers/js"
-	_ "github.com/ava-labs/subnet-evm/eth/tracers/native"
+	_ "github.com/luxdefi/evm/eth/tracers/js"
+	_ "github.com/luxdefi/evm/eth/tracers/native"
 
-	"github.com/ava-labs/subnet-evm/precompile/precompileconfig"
+	"github.com/luxdefi/evm/precompile/precompileconfig"
 	// Force-load precompiles to trigger registration
-	_ "github.com/ava-labs/subnet-evm/precompile/registry"
+	_ "github.com/luxdefi/evm/precompile/registry"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 
-	avalancheRPC "github.com/gorilla/rpc/v2"
+	"github.com/luxdefi/node/codec"
+	"github.com/luxdefi/node/database"
+	"github.com/luxdefi/node/database/prefixdb"
+	"github.com/luxdefi/node/database/versiondb"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/snow"
+	"github.com/luxdefi/node/snow/choices"
+	"github.com/luxdefi/node/snow/consensus/snowman"
+	"github.com/luxdefi/node/snow/engine/snowman/block"
+	"github.com/luxdefi/node/utils/perms"
+	"github.com/luxdefi/node/utils/profiler"
+	"github.com/luxdefi/node/utils/timer/mockable"
+	"github.com/luxdefi/node/utils/units"
+	"github.com/luxdefi/node/vms/components/chain"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/avalanchego/utils/perms"
-	"github.com/ava-labs/avalanchego/utils/profiler"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/chain"
-
-	commonEng "github.com/ava-labs/avalanchego/snow/engine/common"
-
-	avalancheJSON "github.com/ava-labs/avalanchego/utils/json"
+	commonEng "github.com/luxdefi/node/snow/engine/common"
 )
 
 var (
@@ -235,7 +233,7 @@ type VM struct {
 	validators *p2p.Validators
 
 	// Metrics
-	multiGatherer avalanchegoMetrics.MultiGatherer
+	multiGatherer nodeMetrics.MultiGatherer
 	sdkMetrics    *prometheus.Registry
 
 	bootstrapped bool
@@ -245,7 +243,7 @@ type VM struct {
 	StateSyncServer
 	StateSyncClient
 
-	// Avalanche Warp Messaging backend
+	// Lux Warp Messaging backend
 	// Used to serve BLS signatures of warp messages over RPC
 	warpBackend warp.Backend
 }
@@ -346,8 +344,8 @@ func (vm *VM) Initialize(
 			return fmt.Errorf("could not read airdrop file '%s': %w", vm.config.AirdropFile, err)
 		}
 	}
-	// Set the Avalanche Context on the ChainConfig
-	g.Config.AvalancheContext = params.AvalancheContext{
+	// Set the Lux Context on the ChainConfig
+	g.Config.LuxContext = params.LuxContext{
 		SnowCtx: chainCtx,
 	}
 	vm.syntacticBlockValidator = NewBlockValidator()
@@ -374,9 +372,9 @@ func (vm *VM) Initialize(
 
 	vm.ethConfig = ethconfig.NewDefaultConfig()
 	vm.ethConfig.Genesis = g
-	// NetworkID here is different than Avalanche's NetworkID.
-	// Avalanche's NetworkID represents the Avalanche network is running on
-	// like Fuji, Mainnet, Local, etc.
+	// NetworkID here is different than Lux's NetworkID.
+	// Lux's NetworkID represents the Lux network is running on
+	// like Mainnet, Testnet, Local, etc.
 	// The NetworkId here is kept same as ChainID to be compatible with
 	// Ethereum tooling.
 	vm.ethConfig.NetworkId = g.Config.ChainID.Uint64()
@@ -494,7 +492,7 @@ func (vm *VM) Initialize(
 
 func (vm *VM) initializeMetrics() error {
 	vm.sdkMetrics = prometheus.NewRegistry()
-	vm.multiGatherer = avalanchegoMetrics.NewMultiGatherer()
+	vm.multiGatherer = nodeMetrics.NewMultiGatherer()
 	// If metrics are enabled, register the default metrics regitry
 	if metrics.Enabled {
 		gatherer := subnetEVMPrometheus.Gatherer(metrics.DefaultRegistry)
@@ -896,9 +894,9 @@ func (vm *VM) Version(context.Context) (string, error) {
 //     [service] should be a gorilla RPC service (see https://www.gorillatoolkit.org/pkg/rpc/v2)
 //   - The name of the service is [name]
 func newHandler(name string, service interface{}) (http.Handler, error) {
-	server := avalancheRPC.NewServer()
-	server.RegisterCodec(avalancheJSON.NewCodec(), "application/json")
-	server.RegisterCodec(avalancheJSON.NewCodec(), "application/json;charset=UTF-8")
+	server := luxRPC.NewServer()
+	server.RegisterCodec(luxJSON.NewCodec(), "application/json")
+	server.RegisterCodec(luxJSON.NewCodec(), "application/json;charset=UTF-8")
 	return server, server.RegisterService(service, name)
 }
 
@@ -921,7 +919,7 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 			return nil, fmt.Errorf("failed to register service for admin API due to %w", err)
 		}
 		apis[adminEndpoint] = adminAPI
-		enabledAPIs = append(enabledAPIs, "subnet-evm-admin")
+		enabledAPIs = append(enabledAPIs, "evm-admin")
 	}
 
 	if vm.config.SnowmanAPIEnabled {
@@ -1073,11 +1071,11 @@ func attachEthService(handler *rpc.Server, apis []rpc.API, names []string) error
 // along with a flag that indicates if returned upgrades should be strictly enforced.
 func getMandatoryNetworkUpgrades(networkID uint32) (params.MandatoryNetworkUpgrades, bool) {
 	switch networkID {
-	case avalanchegoConstants.MainnetID:
+	case nodeConstants.MainnetID:
 		return params.MainnetNetworkUpgrades, true
-	case avalanchegoConstants.FujiID:
+	case nodeConstants.FujiID:
 		return params.FujiNetworkUpgrades, true
-	case avalanchegoConstants.UnitTestID:
+	case nodeConstants.UnitTestID:
 		return params.UnitTestNetworkUpgrades, false
 	default:
 		return params.LocalNetworkUpgrades, false

@@ -3,8 +3,8 @@
 # Set the PATHS
 GOPATH="$(go env GOPATH)"
 
-# Avalabs docker hub
-DOCKERHUB_REPO="avaplatform/avalanchego"
+# Lux docker hub
+DOCKERHUB_REPO="luxdefi/node"
 
 # if this isn't a git repository (say building from a release), don't set our git constants.
 if [ ! -d .git ]; then

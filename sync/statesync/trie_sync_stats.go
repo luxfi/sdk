@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2022, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	utils_math "github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/subnet-evm/metrics"
+	utils_math "github.com/luxdefi/node/utils/math"
+	"github.com/luxdefi/evm/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

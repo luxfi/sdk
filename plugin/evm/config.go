@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2021-2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/subnet-evm/core/txpool"
-	"github.com/ava-labs/subnet-evm/eth"
+	"github.com/luxdefi/evm/core/txpool"
+	"github.com/luxdefi/evm/eth"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/spf13/cast"
@@ -26,7 +26,7 @@ const (
 	defaultSyncableCommitInterval                     = defaultCommitInterval * 4
 	defaultSnapshotWait                               = false
 	defaultRpcGasCap                                  = 50_000_000 // Default to 50M Gas Limit
-	defaultRpcTxFeeCap                                = 100        // 100 AVAX
+	defaultRpcTxFeeCap                                = 100        // 100 LUX
 	defaultMetricsExpensiveEnabled                    = true
 	defaultApiMaxDuration                             = 0 // Default to no maximum API call duration
 	defaultWsCpuRefillRate                            = 0 // Default to no maximum WS CPU usage
@@ -69,6 +69,8 @@ var (
 		"internal-eth",
 		"internal-blockchain",
 		"internal-transaction",
+		"debug",
+		"txpool",
 	}
 	defaultAllowUnprotectedTxHashes = []common.Hash{
 		common.HexToHash("0xfefb2da535e927b85fe68eb81cb2e4a5827c905f78381a01ef2322aa9b0aee8e"), // EIP-1820: https://eips.ethereum.org/EIPS/eip-1820
@@ -213,7 +215,7 @@ type Config struct {
 	// WarpOffChainMessages encodes off-chain messages (unrelated to any on-chain event ie. block or AddressedCall)
 	// that the node should be willing to sign.
 	// Note: only supports AddressedCall payloads as defined here:
-	// https://github.com/ava-labs/avalanchego/tree/7623ffd4be915a5185c9ed5e11fa9be15a6e1f00/vms/platformvm/warp/payload#addressedcall
+	// https://github.com/luxdefi/node/tree/7623ffd4be915a5185c9ed5e11fa9be15a6e1f00/vms/platformvm/warp/payload#addressedcall
 	WarpOffChainMessages []hexutil.Bytes `json:"warp-off-chain-messages"`
 }
 

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package runner
@@ -11,7 +11,7 @@ import (
 )
 
 func subnetEVMFlagSet() *flag.FlagSet {
-	fs := flag.NewFlagSet("subnet-evm", flag.ContinueOnError)
+	fs := flag.NewFlagSet("evm", flag.ContinueOnError)
 
 	fs.Bool(versionKey, false, "If true, print version and quit")
 
