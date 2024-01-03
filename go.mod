@@ -5,18 +5,8 @@ go 1.21
 toolchain go1.21.5
 
 require (
-<<<<<<< HEAD
 	github.com/VictoriaMetrics/fastcache v1.10.0
-	github.com/luxdefi/netrunner v1.6.0
-	github.com/luxdefi/node v1.10.17
-=======
-	github.com/VictoriaMetrics/fastcache v1.12.2
-<<<<<<< HEAD
->>>>>>> 9e0b39d (Update deps)
-	github.com/cespare/cp v0.1.0
-=======
 	github.com/cespare/cp v1.1.1
->>>>>>> 57a12fa (Bump github.com/cespare/cp from 0.1.0 to 1.1.1)
 	github.com/cockroachdb/pebble v1.0.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/deckarep/golang-set/v2 v2.5.0
@@ -37,7 +27,9 @@ require (
 	github.com/holiman/uint256 v1.2.4
 	github.com/kylelemons/godebug v1.1.0
 	github.com/luxdefi/evm/cmd/simulator v0.0.0-20231217020722-fd08c47bd97c
+	github.com/luxdefi/netrunner v1.6.0
 	github.com/luxdefi/netrunner v1.7.7
+	github.com/luxdefi/node v1.10.17
 	github.com/luxdefi/node v1.10.21
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
