@@ -51,9 +51,23 @@ func SetContractNativeMinterStatus(stateDB contract.StateDB, address common.Addr
 	allowlist.SetAllowListRole(stateDB, ContractAddress, address, role)
 }
 
+<<<<<<< HEAD
 // PackMintNativeCoin packs [address] and [amount] into the appropriate arguments for mintNativeCoin.
 func PackMintNativeCoin(address common.Address, amount *big.Int) ([]byte, error) {
 	return NativeMinterABI.Pack("mintNativeCoin", address, amount)
+=======
+// PackMintInput packs [address] and [amount] into the appropriate arguments for minting operation.
+// Assumes that [amount] can be represented by 32 bytes.
+func PackMintInput(address common.Address, amount *big.Int) ([]byte, error) {
+	// function selector (4 bytes) + input(hash for address + hash for amount)
+	res := make([]byte, contract.SelectorLen+mintInputLen)
+	err := contract.PackOrderedHashesWithSelector(res, mintSignature, []common.Hash{
+		common.BytesToHash(address.Bytes())
+		common.BigToHash(amount),
+	})
+
+	return res, err
+>>>>>>> 9e0b39d (Update deps)
 }
 
 // UnpackMintNativeCoinInput attempts to unpack [input] as address and amount.

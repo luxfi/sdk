@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	runner_sdk "github.com/luxdefi/lux-network-runner/client"
-	"github.com/luxdefi/lux-network-runner/rpcpb"
-	runner_server "github.com/luxdefi/lux-network-runner/server"
+	runner_sdk "github.com/luxdefi/netrunner/client"
+	"github.com/luxdefi/netrunner/rpcpb"
+	runner_server "github.com/luxdefi/netrunner/server"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/node/utils/wrappers"
@@ -58,7 +58,7 @@ type NetworkManager struct {
 	serverCtxCancel context.CancelFunc
 }
 
-// NewDefaultANRConfig returns a default config for launching the lux-network-runner manager
+// NewDefaultANRConfig returns a default config for launching the netrunner manager
 // with both a server and client.
 // By default, it expands $GOPATH/src/github.com/luxdefi/node/build/ directory to extract
 <<<<<<< HEAD

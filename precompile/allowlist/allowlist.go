@@ -9,9 +9,15 @@ import (
 	"fmt"
 	"math/big"
 
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
+=======
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/subnet-evm/precompile/contract"
+	"github.com/luxdefi/subnet-evm/vmerrs"
+>>>>>>> 9e0b39d (Update deps)
 )
 
 // AllowList is an abstraction that allows other precompiles to manage
@@ -40,7 +46,7 @@ var (
 // at [precompileAddr]
 func GetAllowListStatus(state contract.StateDB, precompileAddr common.Address, address common.Address) Role {
 	// Generate the state key for [address]
-	addressKey := address.Hash()
+	addressKey := common.BytesToHash(address.Bytes())
 	return Role(state.GetState(precompileAddr, addressKey))
 }
 
@@ -49,7 +55,7 @@ func GetAllowListStatus(state contract.StateDB, precompileAddr common.Address, a
 // assumes [role] has already been verified as valid.
 func SetAllowListRole(stateDB contract.StateDB, precompileAddr, address common.Address, role Role) {
 	// Generate the state key for [address]
-	addressKey := address.Hash()
+	addressKey := common.BytesToHash(address.Bytes())
 	// Assign [role] to the address
 	// This stores the [role] in the contract storage with address [precompileAddr]
 	// and [addressKey] hash. It means that any reusage of the [addressKey] for different value
@@ -71,6 +77,7 @@ func UnpackModifyAllowListInput(input []byte, r Role, useStrictMode bool) (commo
 		return common.Address{}, fmt.Errorf("invalid input length for modifying allow list: %d", len(input))
 	}
 
+<<<<<<< HEAD
 	funcName, err := r.GetSetterFunctionName()
 	if err != nil {
 		return common.Address{}, err
@@ -78,6 +85,20 @@ func UnpackModifyAllowListInput(input []byte, r Role, useStrictMode bool) (commo
 	var modifyAddress common.Address
 	err = AllowListABI.UnpackInputIntoInterface(&modifyAddress, funcName, input, useStrictMode)
 	return modifyAddress, err
+=======
+	addressKey := common.BytesToHash(address.Bytes())
+	input = append(input, addressKey.Bytes()...)
+	return input, nil
+}
+
+// PackReadAllowList packs [address] into the input data to the read allow list function
+func PackReadAllowList(address common.Address) []byte {
+	input := make([]byte, 0, contract.SelectorLen+common.HashLength)
+	input = append(input, readAllowListSignature...)
+	addressKey := common.BytesToHash(address.Bytes())
+	input = append(input, addressKey.Bytes()...)
+	return input
+>>>>>>> 9e0b39d (Update deps)
 }
 
 // createAllowListRoleSetter returns an execution function for setting the allow list status of the input address argument to [role].

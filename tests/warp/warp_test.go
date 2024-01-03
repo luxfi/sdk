@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/lux-network-runner/rpcpb"
+	"github.com/luxdefi/netrunner/rpcpb"
 	"github.com/luxdefi/node/api/info"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/snow/validators"
@@ -134,7 +134,7 @@ var _ = ginkgo.BeforeSuite(func() {
 	require.NoError(err)
 	warpChainConfigPath = f.Name()
 
-	// Construct the network using the lux-network-runner
+	// Construct the network using the netrunner
 	_, err = manager.StartDefaultNetwork(ctx)
 	require.NoError(err)
 	err = manager.SetupNetwork(
