@@ -1,8 +1,8 @@
 <h1>vmsdk</h1>
-<p align="center">
+<p>
   Framework for Building Hyper-Scalable Blockchains on Lux
 </p>
-<p align="center">
+<p>
   <a href="https://goreportcard.com/report/github.com/luxdefi/vmsdk"><img src="https://goreportcard.com/badge/github.com/luxdefi/vmsdk" /></a>
   <a href="https://github.com/luxdefi/vmsdk/actions/workflows/unit-tests.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/unit-tests.yml/badge.svg" /></a>
   <a href="https://github.com/luxdefi/vmsdk/actions/workflows/static-analysis.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/static-analysis.yml/badge.svg" /></a>
