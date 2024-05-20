@@ -1,4 +1,4 @@
-<h1>Lux SDK</h1>
+<h1>Lux Chain SDK</h1>
 <p>
   Framework for Building Hyper-Scalable Blockchains on Lux
 </p>
