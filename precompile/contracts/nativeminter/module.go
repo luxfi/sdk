@@ -6,7 +6,6 @@ package nativeminter
 import (
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
@@ -52,8 +51,9 @@ func (*configurator) Configure(chainConfig precompileconfig.ChainConfig, cfg pre
 	}
 	for to, amount := range config.InitialMint {
 		if amount != nil {
-			bigIntAmount := (*big.Int)(amount)
-			state.AddBalance(to, bigIntAmount)
+			amountBig := (*big.Int)(amount)
+			amountU256, _ := uint256.FromBig(amountBig)
+			state.AddBalance(to, amountU256)
 		}
 	}
 

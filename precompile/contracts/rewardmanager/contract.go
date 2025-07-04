@@ -10,14 +10,13 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/constants"
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
-
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/evm/interfaces/core/vm"
 )
 
 const (
@@ -72,9 +71,9 @@ func EnableAllowFeeRecipients(stateDB contract.StateDB) {
 	stateDB.SetState(ContractAddress, rewardAddressStorageKey, allowFeeRecipientsAddressValue)
 }
 
-// DisableRewardAddress disables rewards and burns them by sending to Blackhole Address.
+// DisableFeeRewards disables rewards and burns them by sending to Blackhole Address.
 func DisableFeeRewards(stateDB contract.StateDB) {
-	stateDB.SetState(ContractAddress, rewardAddressStorageKey, constants.BlackholeAddr.Hash())
+	stateDB.SetState(ContractAddress, rewardAddressStorageKey, common.BytesToHash(constants.BlackholeAddr.Bytes()))
 }
 
 func allowFeeRecipients(accessibleState contract.AccessibleState, caller common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
@@ -82,7 +81,7 @@ func allowFeeRecipients(accessibleState contract.AccessibleState, caller common.
 		return nil, 0, err
 	}
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
 	// no input provided for this function
 
@@ -97,7 +96,7 @@ func allowFeeRecipients(accessibleState contract.AccessibleState, caller common.
 	}
 	// allow list code ends here.
 
-	if contract.IsDUpgradeActivated(accessibleState) {
+	if contract.IsDurangoActivated(accessibleState) {
 		if remainingGas, err = contract.DeductGas(remainingGas, FeeRecipientsAllowedEventGasCost); err != nil {
 			return nil, 0, err
 		}
@@ -105,12 +104,12 @@ func allowFeeRecipients(accessibleState contract.AccessibleState, caller common.
 		if err != nil {
 			return nil, remainingGas, err
 		}
-		stateDB.AddLog(
-			ContractAddress,
-			topics,
-			data,
-			accessibleState.GetBlockContext().Number().Uint64(),
-		)
+		stateDB.AddLog(&types.Log{
+			Address:     ContractAddress,
+			Topics:      topics,
+			Data:        data,
+			BlockNumber: accessibleState.GetBlockContext().Number().Uint64(),
+		})
 	}
 	EnableAllowFeeRecipients(stateDB)
 	// Return the packed output and the remaining gas
@@ -162,14 +161,14 @@ func PackCurrentRewardAddressOutput(rewardAddress common.Address) ([]byte, error
 
 // GetStoredRewardAddress returns the current value of the address stored under rewardAddressStorageKey.
 // Returns an empty address and true if allow fee recipients is enabled, otherwise returns current reward address and false.
-func GetStoredRewardAddress(stateDB contract.StateDB) (common.Address, bool) {
+func GetStoredRewardAddress(stateDB contract.StateReader) (common.Address, bool) {
 	val := stateDB.GetState(ContractAddress, rewardAddressStorageKey)
 	return common.BytesToAddress(val.Bytes()), val == allowFeeRecipientsAddressValue
 }
 
-// StoredRewardAddress stores the given [val] under rewardAddressStorageKey.
+// StoreRewardAddress stores the given [val] under rewardAddressStorageKey.
 func StoreRewardAddress(stateDB contract.StateDB, val common.Address) {
-	stateDB.SetState(ContractAddress, rewardAddressStorageKey, val.Hash())
+	stateDB.SetState(ContractAddress, rewardAddressStorageKey, common.BytesToHash(val.Bytes()))
 }
 
 // PackSetRewardAddress packs [addr] of type common.Address into the appropriate arguments for setRewardAddress.
@@ -196,12 +195,12 @@ func setRewardAddress(accessibleState contract.AccessibleState, caller common.Ad
 		return nil, 0, err
 	}
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
 	// attempts to unpack [input] into the arguments to the SetRewardAddressInput.
 	// Assumes that [input] does not include selector
-	// do not use strict mode after DUpgrade
-	useStrictMode := !contract.IsDUpgradeActivated(accessibleState)
+	// do not use strict mode after Durango
+	useStrictMode := !contract.IsDurangoActivated(accessibleState)
 	rewardAddress, err := UnpackSetRewardAddressInput(input, useStrictMode)
 	if err != nil {
 		return nil, remainingGas, err
@@ -224,7 +223,7 @@ func setRewardAddress(accessibleState contract.AccessibleState, caller common.Ad
 	}
 
 	// Add a log to be handled if this action is finalized.
-	if contract.IsDUpgradeActivated(accessibleState) {
+	if contract.IsDurangoActivated(accessibleState) {
 		if remainingGas, err = contract.DeductGas(remainingGas, RewardAddressChangedEventGasCost); err != nil {
 			return nil, 0, err
 		}
@@ -233,12 +232,12 @@ func setRewardAddress(accessibleState contract.AccessibleState, caller common.Ad
 		if err != nil {
 			return nil, remainingGas, err
 		}
-		stateDB.AddLog(
-			ContractAddress,
-			topics,
-			data,
-			accessibleState.GetBlockContext().Number().Uint64(),
-		)
+		stateDB.AddLog(&types.Log{
+			Address:     ContractAddress,
+			Topics:      topics,
+			Data:        data,
+			BlockNumber: accessibleState.GetBlockContext().Number().Uint64(),
+		})
 	}
 	StoreRewardAddress(stateDB, rewardAddress)
 	// Return the packed output and the remaining gas
@@ -273,7 +272,7 @@ func disableRewards(accessibleState contract.AccessibleState, caller common.Addr
 		return nil, 0, err
 	}
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
 	// no input provided for this function
 
@@ -288,7 +287,7 @@ func disableRewards(accessibleState contract.AccessibleState, caller common.Addr
 	}
 	// allow list code ends here.
 
-	if contract.IsDUpgradeActivated(accessibleState) {
+	if contract.IsDurangoActivated(accessibleState) {
 		if remainingGas, err = contract.DeductGas(remainingGas, RewardsDisabledEventGasCost); err != nil {
 			return nil, 0, err
 		}
@@ -296,12 +295,12 @@ func disableRewards(accessibleState contract.AccessibleState, caller common.Addr
 		if err != nil {
 			return nil, remainingGas, err
 		}
-		stateDB.AddLog(
-			ContractAddress,
-			topics,
-			data,
-			accessibleState.GetBlockContext().Number().Uint64(),
-		)
+		stateDB.AddLog(&types.Log{
+			Address:     ContractAddress,
+			Topics:      topics,
+			Data:        data,
+			BlockNumber: accessibleState.GetBlockContext().Number().Uint64(),
+		})
 	}
 	DisableFeeRewards(stateDB)
 	// Return the packed output and the remaining gas

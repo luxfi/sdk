@@ -34,7 +34,6 @@ import (
 	"math/big"
 	"sync"
 	"time"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/interfaces"
 	"github.com/luxdefi/evm/internal/ethapi"
@@ -45,9 +44,14 @@ import (
 )
 
 var (
-	errInvalidTopic   = errors.New("invalid topic(s)")
-	errFilterNotFound = errors.New("filter not found")
+	errInvalidTopic      = errors.New("invalid topic(s)")
+	errFilterNotFound    = errors.New("filter not found")
+	errInvalidBlockRange = errors.New("invalid block range params")
+	errExceedMaxTopics   = errors.New("exceed max topics")
 )
+
+// The maximum number of topic criteria allowed, vm.LOG4 - vm.LOG0
+const maxTopics = 4
 
 // filter is a helper struct that holds meta information over the filter type
 // and associated subscription in the event system.
@@ -165,6 +169,8 @@ func (api *FilterAPI) NewPendingTransactions(ctx context.Context, fullTx *bool) 
 	go func() {
 		txs := make(chan []*types.Transaction, 128)
 		pendingTxSub := api.events.SubscribePendingTxs(txs)
+		defer pendingTxSub.Unsubscribe()
+
 		chainConfig := api.sys.backend.ChainConfig()
 
 		for {
@@ -182,10 +188,8 @@ func (api *FilterAPI) NewPendingTransactions(ctx context.Context, fullTx *bool) 
 					}
 				}
 			case <-rpcSub.Err():
-				pendingTxSub.Unsubscribe()
 				return
 			case <-notifier.Closed():
-				pendingTxSub.Unsubscribe()
 				return
 			}
 		}
@@ -245,7 +249,7 @@ func (api *FilterAPI) NewBlockFilter() rpc.ID {
 		headerSub *Subscription
 	)
 
-	if api.sys.backend.GetVMConfig().AllowUnfinalizedQueries {
+	if api.sys.backend.IsAllowUnfinalizedQueries() {
 		headerSub = api.events.SubscribeNewHeads(headers)
 	} else {
 		headerSub = api.events.SubscribeAcceptedHeads(headers)
@@ -291,21 +295,20 @@ func (api *FilterAPI) NewHeads(ctx context.Context) (*rpc.Subscription, error) {
 			headersSub event.Subscription
 		)
 
-		if api.sys.backend.GetVMConfig().AllowUnfinalizedQueries {
+		if api.sys.backend.IsAllowUnfinalizedQueries() {
 			headersSub = api.events.SubscribeNewHeads(headers)
 		} else {
 			headersSub = api.events.SubscribeAcceptedHeads(headers)
 		}
+		defer headersSub.Unsubscribe()
 
 		for {
 			select {
 			case h := <-headers:
 				notifier.Notify(rpcSub.ID, h)
 			case <-rpcSub.Err():
-				headersSub.Unsubscribe()
 				return
 			case <-notifier.Closed():
-				headersSub.Unsubscribe()
 				return
 			}
 		}
@@ -328,31 +331,29 @@ func (api *FilterAPI) Logs(ctx context.Context, crit FilterCriteria) (*rpc.Subsc
 		err         error
 	)
 
-	if api.sys.backend.GetVMConfig().AllowUnfinalizedQueries {
-		logsSub, err = api.events.SubscribeLogs(interfaces.FilterQuery(crit), matchedLogs)
+	if api.sys.backend.IsAllowUnfinalizedQueries() {
+		logsSub, err = api.events.SubscribeLogs(ethereum.FilterQuery(crit), matchedLogs)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		logsSub, err = api.events.SubscribeAcceptedLogs(interfaces.FilterQuery(crit), matchedLogs)
+		logsSub, err = api.events.SubscribeAcceptedLogs(ethereum.FilterQuery(crit), matchedLogs)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	go func() {
+		defer logsSub.Unsubscribe()
 		for {
 			select {
 			case logs := <-matchedLogs:
 				for _, log := range logs {
-					log := log
 					notifier.Notify(rpcSub.ID, &log)
 				}
 			case <-rpcSub.Err(): // client send an unsubscribe request
-				logsSub.Unsubscribe()
 				return
 			case <-notifier.Closed(): // connection dropped
-				logsSub.Unsubscribe()
 				return
 			}
 		}
@@ -362,8 +363,8 @@ func (api *FilterAPI) Logs(ctx context.Context, crit FilterCriteria) (*rpc.Subsc
 }
 
 // FilterCriteria represents a request to create a new filter.
-// Same as interfaces.FilterQuery but with UnmarshalJSON() method.
-type FilterCriteria interfaces.FilterQuery
+// Same as [ethereum.FilterQuery] with the method [FilterCriteria.UnmarshalJSON].
+type FilterCriteria ethereum.FilterQuery
 
 // NewFilter creates a new filter and returns the filter id. It can be
 // used to retrieve logs when the state changes. This method cannot be
@@ -383,15 +384,15 @@ func (api *FilterAPI) NewFilter(crit FilterCriteria) (rpc.ID, error) {
 		err     error
 	)
 
-	if api.sys.backend.GetVMConfig().AllowUnfinalizedQueries {
-		logsSub, err = api.events.SubscribeLogs(interfaces.FilterQuery(crit), logs)
+	if api.sys.backend.IsAllowUnfinalizedQueries() {
+		logsSub, err = api.events.SubscribeLogs(ethereum.FilterQuery(crit), logs)
 		if err != nil {
-			return rpc.ID(""), err
+			return "", err
 		}
 	} else {
-		logsSub, err = api.events.SubscribeAcceptedLogs(interfaces.FilterQuery(crit), logs)
+		logsSub, err = api.events.SubscribeAcceptedLogs(ethereum.FilterQuery(crit), logs)
 		if err != nil {
-			return rpc.ID(""), err
+			return "", err
 		}
 	}
 
@@ -422,6 +423,9 @@ func (api *FilterAPI) NewFilter(crit FilterCriteria) (rpc.ID, error) {
 
 // GetLogs returns logs matching the given argument that are stored within the state.
 func (api *FilterAPI) GetLogs(ctx context.Context, crit FilterCriteria) ([]*types.Log, error) {
+	if len(crit.Topics) > maxTopics {
+		return nil, errExceedMaxTopics
+	}
 	var filter *Filter
 	if crit.BlockHash != nil {
 		// Block filter requested, construct a single-shot filter
@@ -438,12 +442,11 @@ func (api *FilterAPI) GetLogs(ctx context.Context, crit FilterCriteria) ([]*type
 		if crit.ToBlock != nil {
 			end = crit.ToBlock.Int64()
 		}
-		// Construct the range filter
-		var err error
-		filter, err = api.sys.NewRangeFilter(begin, end, crit.Addresses, crit.Topics)
-		if err != nil {
-			return nil, err
+		if begin > 0 && end > 0 && begin > end {
+			return nil, errInvalidBlockRange
 		}
+		// Construct the range filter
+		filter = api.sys.NewRangeFilter(begin, end, crit.Addresses, crit.Topics)
 	}
 	// Run the filter and return all the logs
 	logs, err := filter.Logs(ctx)
@@ -497,11 +500,7 @@ func (api *FilterAPI) GetFilterLogs(ctx context.Context, id rpc.ID) ([]*types.Lo
 			end = f.crit.ToBlock.Int64()
 		}
 		// Construct the range filter
-		var err error
-		filter, err = api.sys.NewRangeFilter(begin, end, f.crit.Addresses, f.crit.Topics)
-		if err != nil {
-			return nil, err
-		}
+		filter = api.sys.NewRangeFilter(begin, end, f.crit.Addresses, f.crit.Topics)
 	}
 	// Run the filter and return all the logs
 	logs, err := filter.Logs(ctx)

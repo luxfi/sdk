@@ -31,17 +31,15 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/accounts/abi"
 	{{- if .Contract.AllowList}}
 	"github.com/luxdefi/evm/precompile/allowlist"
 	{{- end}}
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
-
 	_ "embed"
-
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/evm/interfaces/core/vm"
 )
 {{$contract := .Contract}}
 const (
@@ -67,7 +65,7 @@ var (
 	_ = abi.JSON
 	_ = errors.New
 	_ = big.NewInt
-	_ = vmerrs.ErrOutOfGas
+	_ = vm.ErrOutOfGas
 	_ = common.Big0
 )
 
@@ -143,7 +141,6 @@ func Set{{.Contract.Type}}AllowListStatus(stateDB contract.StateDB, address comm
 // assumes that [input] does not include selector (omits first 4 func signature bytes)
 func Unpack{{capitalise .Normalized.Name}}Input(input []byte) ({{capitalise .Normalized.Name}}Input, error) {
 	inputStruct := {{capitalise .Normalized.Name}}Input{}
-	// The strict mode in decoding is disabled after DUpgrade. You can re-enable by changing the last argument to true.
 	err := {{$contract.Type}}ABI.UnpackInputIntoInterface(&inputStruct, "{{.Original.Name}}", input, false)
 
 	return inputStruct, err
@@ -160,7 +157,6 @@ func Pack{{.Normalized.Name}}(inputStruct {{capitalise .Normalized.Name}}Input) 
 // Unpack{{capitalise .Normalized.Name}}Input attempts to unpack [input] into the {{$bindedType}} type argument
 // assumes that [input] does not include selector (omits first 4 func signature bytes)
 func Unpack{{capitalise .Normalized.Name}}Input(input []byte)({{$bindedType}}, error) {
-// The strict mode in decoding is disabled after DUpgrade. You can re-enable by changing the last argument to true.
 res, err := {{$contract.Type}}ABI.UnpackInput("{{$method.Original.Name}}", input, false)
 if err != nil {
 	return {{bindtypenew $input.Type $structs}}, err
@@ -232,7 +228,7 @@ func {{decapitalise .Normalized.Name}}(accessibleState contract.AccessibleState,
 
 	{{- if not .Original.IsConstant}}
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
  	{{- end}}
 
@@ -296,7 +292,7 @@ func {{decapitalise $contract.Type}}Fallback (accessibleState contract.Accessibl
 	}
 
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
 
 	{{- if $contract.AllowList}}

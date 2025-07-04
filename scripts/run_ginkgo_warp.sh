@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-set -e
+
+set -euo pipefail
 
 # This script assumes that a Lux and EVM binaries are available in the standard location
 # within the $GOPATH
 # The Lux and PluginDir paths can be specified via the environment variables used in ./scripts/run.sh.
 
-# Load the versions
 SUBNET_EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
@@ -13,16 +13,11 @@ SUBNET_EVM_PATH=$(
 
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
-source "$SUBNET_EVM_PATH"/scripts/versions.sh
+EXTRA_ARGS=()
+AVALANCHEGO_BUILD_PATH="${AVALANCHEGO_BUILD_PATH:-}"
+if [[ -n "${AVALANCHEGO_BUILD_PATH}" ]]; then
+  EXTRA_ARGS=("--avalanchego-path=${AVALANCHEGO_BUILD_PATH}/avalanchego")
+  echo "Running with extra args:" "${EXTRA_ARGS[@]}"
+fi
 
-# Build ginkgo
-# to install the ginkgo binary (required for test build and run)
-go install -v github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}
-
-TEST_SOURCE_ROOT=$(pwd)
-
-ACK_GINKGO_RC=true ginkgo build ./tests/warp
-
-./tests/warp/warp.test \
-  --ginkgo.vv \
-  --ginkgo.label-filter=${GINKGO_LABEL_FILTER:-""}
+"${SUBNET_EVM_PATH}"/bin/ginkgo -vv --label-filter="${GINKGO_LABEL_FILTER:-}" ./tests/warp -- "${EXTRA_ARGS[@]}"

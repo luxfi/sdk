@@ -28,7 +28,6 @@ package core
 
 import (
 	"math/big"
-
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/constants"
@@ -203,20 +202,37 @@ func (bc *BlockChain) GetCanonicalHash(number uint64) common.Hash {
 	return bc.hc.GetCanonicalHash(number)
 }
 
-// GetTransactionLookup retrieves the lookup associate with the given transaction
-// hash from the cache or database.
-func (bc *BlockChain) GetTransactionLookup(hash common.Hash) *rawdb.LegacyTxLookupEntry {
+// GetTransactionLookup retrieves the lookup along with the transaction
+// itself associate with the given transaction hash.
+//
+// An error will be returned if the transaction is not found, and background
+// indexing for transactions is still in progress. The transaction might be
+// reachable shortly once it's indexed.
+//
+// A null will be returned in the transaction is not found and background
+// transaction indexing is already finished. The transaction is not existent
+// from the node's perspective.
+func (bc *BlockChain) GetTransactionLookup(hash common.Hash) (*rawdb.LegacyTxLookupEntry, *types.Transaction, error) {
 	// Short circuit if the txlookup already in the cache, retrieve otherwise
-	if lookup, exist := bc.txLookupCache.Get(hash); exist {
-		return lookup
+	if item, exist := bc.txLookupCache.Get(hash); exist {
+		return item.lookup, item.transaction, nil
 	}
 	tx, blockHash, blockNumber, txIndex := rawdb.ReadTransaction(bc.db, hash)
 	if tx == nil {
-		return nil
+		// The transaction is already indexed, the transaction is either
+		// not existent or not in the range of index, returning null.
+		return nil, nil, nil
 	}
-	lookup := &rawdb.LegacyTxLookupEntry{BlockHash: blockHash, BlockIndex: blockNumber, Index: txIndex}
-	bc.txLookupCache.Add(hash, lookup)
-	return lookup
+	lookup := &rawdb.LegacyTxLookupEntry{
+		BlockHash:  blockHash,
+		BlockIndex: blockNumber,
+		Index:      txIndex,
+	}
+	bc.txLookupCache.Add(hash, txLookup{
+		lookup:      lookup,
+		transaction: tx,
+	})
+	return lookup, tx, nil
 }
 
 // HasState checks if state trie is fully present in the database or not.
@@ -234,12 +250,6 @@ func (bc *BlockChain) HasBlockAndState(hash common.Hash, number uint64) bool {
 		return false
 	}
 	return bc.HasState(block.Root())
-}
-
-// TrieNode retrieves a blob of data associated with a trie node
-// either from ephemeral in-memory cache, or from persistent storage.
-func (bc *BlockChain) TrieNode(hash common.Hash) ([]byte, error) {
-	return bc.stateCache.TrieDB().Node(hash)
 }
 
 // State returns a new mutable state based on the current HEAD block.
@@ -294,8 +304,13 @@ func (bc *BlockChain) GetVMConfig() *vm.Config {
 }
 
 // TrieDB retrieves the low level trie database used for data storage.
-func (bc *BlockChain) TrieDB() *trie.Database {
+func (bc *BlockChain) TrieDB() *triedb.Database {
 	return bc.triedb
+}
+
+// HeaderChain returns the underlying header chain.
+func (bc *BlockChain) HeaderChain() *HeaderChain {
+	return bc.hc
 }
 
 // SubscribeRemovedLogsEvent registers a subscription of RemovedLogsEvent.
@@ -345,11 +360,15 @@ func (bc *BlockChain) SubscribeAcceptedTransactionEvent(ch chan<- NewTxsEvent) e
 }
 
 // GetFeeConfigAt returns the fee configuration and the last changed block number at [parent].
+// If Subnet-EVM is not activated, returns default fee config and nil block number.
 // If FeeManager is activated at [parent], returns the fee config in the precompile contract state.
 // Otherwise returns the fee config in the chain config.
 // Assumes that a valid configuration is stored when the precompile is activated.
 func (bc *BlockChain) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error) {
-	config := bc.Config()
+	config := params.GetExtra(bc.Config())
+	if !config.IsSubnetEVM(parent.Time) {
+		return params.DefaultFeeConfig, nil, nil
+	}
 	if !config.IsPrecompileEnabled(feemanager.ContractAddress, parent.Time) {
 		return config.FeeConfig, common.Big0, nil
 	}
@@ -383,13 +402,13 @@ func (bc *BlockChain) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig
 // If RewardManager is activated at [parent], returns the reward manager config in the precompile contract state.
 // If fee recipients are allowed, returns true in the second return value.
 func (bc *BlockChain) GetCoinbaseAt(parent *types.Header) (common.Address, bool, error) {
-	config := bc.Config()
-	if !config.IsSubnetEVM(parent.Time) {
+	configExtra := params.GetExtra(bc.Config())
+	if !configExtra.IsSubnetEVM(parent.Time) {
 		return constants.BlackholeAddr, false, nil
 	}
 
-	if !config.IsPrecompileEnabled(rewardmanager.ContractAddress, parent.Time) {
-		if bc.chainConfig.AllowFeeRecipients {
+	if !configExtra.IsPrecompileEnabled(rewardmanager.ContractAddress, parent.Time) {
+		if configExtra.AllowFeeRecipients {
 			return common.Address{}, true, nil
 		} else {
 			return constants.BlackholeAddr, false, nil

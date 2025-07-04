@@ -5,13 +5,12 @@ package stateupgrade
 
 import (
 	"math/big"
-
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 )
 
 // Configure applies the state upgrade to the state.
-func Configure(stateUpgrade *params.StateUpgrade, chainConfig ChainContext, state StateDB, blockContext BlockContext) error {
+func Configure(stateUpgrade *extras.StateUpgrade, chainConfig ChainContext, state StateDB, blockContext BlockContext) error {
 	isEIP158 := chainConfig.IsEIP158(blockContext.Number())
 	for account, upgrade := range stateUpgrade.StateUpgradeAccounts {
 		if err := upgradeAccount(account, upgrade, state, isEIP158); err != nil {
@@ -22,14 +21,15 @@ func Configure(stateUpgrade *params.StateUpgrade, chainConfig ChainContext, stat
 }
 
 // upgradeAccount applies the state upgrade to the given account.
-func upgradeAccount(account common.Address, upgrade params.StateUpgradeAccount, state StateDB, isEIP158 bool) error {
+func upgradeAccount(account common.Address, upgrade extras.StateUpgradeAccount, state StateDB, isEIP158 bool) error {
 	// Create the account if it does not exist
 	if !state.Exist(account) {
 		state.CreateAccount(account)
 	}
 
 	if upgrade.BalanceChange != nil {
-		state.AddBalance(account, (*big.Int)(upgrade.BalanceChange))
+		balanceChange, _ := uint256.FromBig((*big.Int)(upgrade.BalanceChange))
+		state.AddBalance(account, balanceChange)
 	}
 	if len(upgrade.Code) != 0 {
 		// if the nonce is 0, set the nonce to 1 as we would when deploying a contract at

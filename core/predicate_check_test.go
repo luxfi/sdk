@@ -6,7 +6,6 @@ package core
 import (
 	"errors"
 	"testing"
-
 	"github.com/luxdefi/node/snow/engine/snowman/block"
 	"github.com/luxdefi/node/utils/set"
 	"github.com/luxdefi/evm/core/types"
@@ -244,7 +243,7 @@ func TestCheckPredicate(t *testing.T) {
 			},
 			expectedErr: nil,
 		},
-		"two predicates niether named by access list": {
+		"two predicates neither named by access list": {
 			gas:              61600,
 			predicateContext: predicateContext,
 			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
@@ -293,13 +292,13 @@ func TestCheckPredicate(t *testing.T) {
 			expectedErr: ErrIntrinsicGas,
 		},
 	} {
-		test := test
 		t.Run(name, func(t *testing.T) {
 			require := require.New(t)
 			// Create the rules from TestChainConfig and update the predicates based on the test params
 			rules := params.TestChainConfig.LuxRules(common.Big0, 0)
 			if test.createPredicates != nil {
 				for address, predicater := range test.createPredicates(t) {
+					rules := params.GetRulesExtra(rules)
 					rules.Predicaters[address] = predicater
 				}
 			}
@@ -445,8 +444,9 @@ func TestCheckPredicatesOutput(t *testing.T) {
 				})
 			}
 
-			rules.Predicaters[addr1] = predicater
-			rules.Predicaters[addr2] = predicater
+			rulesExtra := params.GetRulesExtra(rules)
+			rulesExtra.Predicaters[addr1] = predicater
+			rulesExtra.Predicaters[addr2] = predicater
 
 			// Specify only the access list, since this test should not depend on any other values
 			tx := types.NewTx(&types.DynamicFeeTx{

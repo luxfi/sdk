@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/allowlist"
@@ -70,7 +69,7 @@ type FeeConfigABIStruct struct {
 }
 
 // GetFeeManagerStatus returns the role of [address] for the fee config manager list.
-func GetFeeManagerStatus(stateDB contract.StateDB, address common.Address) allowlist.Role {
+func GetFeeManagerStatus(stateDB contract.StateReader, address common.Address) allowlist.Role {
 	return allowlist.GetAllowListStatus(stateDB, ContractAddress, address)
 }
 
@@ -81,7 +80,7 @@ func SetFeeManagerStatus(stateDB contract.StateDB, address common.Address, role 
 }
 
 // GetStoredFeeConfig returns fee config from contract storage in given state
-func GetStoredFeeConfig(stateDB contract.StateDB) commontype.FeeConfig {
+func GetStoredFeeConfig(stateDB contract.StateReader) commontype.FeeConfig {
 	feeConfig := commontype.FeeConfig{}
 	for i := minFeeConfigFieldKey; i <= numFeeConfigField; i++ {
 		val := stateDB.GetState(ContractAddress, common.Hash{byte(i)})
@@ -110,7 +109,7 @@ func GetStoredFeeConfig(stateDB contract.StateDB) commontype.FeeConfig {
 	return feeConfig
 }
 
-func GetFeeConfigLastChangedAt(stateDB contract.StateDB) *big.Int {
+func GetFeeConfigLastChangedAt(stateDB contract.StateReader) *big.Int {
 	val := stateDB.GetState(ContractAddress, feeConfigLastChangedAtKey)
 	return val.Big()
 }
@@ -178,7 +177,7 @@ func UnpackSetFeeConfigInput(input []byte, useStrictMode bool) (commontype.FeeCo
 	// Initially we had this check to ensure that the input was the correct length.
 	// However solidity does not always pack the input to the correct length, and allows
 	// for extra padding bytes to be added to the end of the input. Therefore, we have removed
-	// this check with the DUpgrade. We still need to keep this check for backwards compatibility.
+	// this check with the Durango. We still need to keep this check for backwards compatibility.
 	if useStrictMode && len(input) != feeConfigInputLen {
 		return commontype.FeeConfig{}, fmt.Errorf("%w: %d", ErrInvalidLen, len(input))
 	}
@@ -210,11 +209,11 @@ func setFeeConfig(accessibleState contract.AccessibleState, caller common.Addres
 	}
 
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
 
-	// do not use strict mode after DUpgrade
-	useStrictMode := !contract.IsDUpgradeActivated(accessibleState)
+	// do not use strict mode after Durango
+	useStrictMode := !contract.IsDurangoActivated(accessibleState)
 	feeConfig, err := UnpackSetFeeConfigInput(input, useStrictMode)
 	if err != nil {
 		return nil, remainingGas, err
@@ -227,7 +226,7 @@ func setFeeConfig(accessibleState contract.AccessibleState, caller common.Addres
 		return nil, remainingGas, fmt.Errorf("%w: %s", ErrCannotChangeFee, caller)
 	}
 
-	if contract.IsDUpgradeActivated(accessibleState) {
+	if contract.IsDurangoActivated(accessibleState) {
 		if remainingGas, err = contract.DeductGas(remainingGas, FeeConfigChangedEventGasCost); err != nil {
 			return nil, 0, err
 		}
@@ -241,12 +240,12 @@ func setFeeConfig(accessibleState contract.AccessibleState, caller common.Addres
 			return nil, remainingGas, err
 		}
 
-		stateDB.AddLog(
-			ContractAddress,
-			topics,
-			data,
-			accessibleState.GetBlockContext().Number().Uint64(),
-		)
+		stateDB.AddLog(&types.Log{
+			Address:     ContractAddress,
+			Topics:      topics,
+			Data:        data,
+			BlockNumber: accessibleState.GetBlockContext().Number().Uint64(),
+		})
 	}
 
 	if err := StoreFeeConfig(stateDB, feeConfig, accessibleState.GetBlockContext()); err != nil {

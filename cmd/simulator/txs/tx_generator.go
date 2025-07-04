@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethclient"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"

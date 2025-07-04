@@ -5,7 +5,6 @@ package statesync
 
 import (
 	"fmt"
-
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethdb"

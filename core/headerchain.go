@@ -32,7 +32,6 @@ import (
 	"math/big"
 	mrand "math/rand"
 	"sync/atomic"
-
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/types"

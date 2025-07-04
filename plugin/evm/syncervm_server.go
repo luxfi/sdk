@@ -6,10 +6,8 @@ package evm
 import (
 	"context"
 	"fmt"
-
 	"github.com/luxdefi/node/database"
 	"github.com/luxdefi/node/snow/engine/snowman/block"
-
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/plugin/evm/message"
 	"github.com/ethereum/go-ethereum/log"

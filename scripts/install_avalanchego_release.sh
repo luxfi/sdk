@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-# Load the versions
 SUBNET_EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
 )
-source "$SUBNET_EVM_PATH"/scripts/versions.sh
 
 # Load the constants
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
@@ -19,7 +17,7 @@ GOOS=$(go env GOOS)
 BASEDIR=${BASEDIR:-"/tmp/node-release"}
 LUXD_BUILD_PATH=${LUXD_BUILD_PATH:-${BASEDIR}/node}
 
-mkdir -p ${BASEDIR}
+mkdir -p "${BASEDIR}"
 
 LUXD_DOWNLOAD_URL=https://github.com/luxdefi/node/releases/download/${LUX_VERSION}/node-linux-${GOARCH}-${LUX_VERSION}.tar.gz
 LUXD_DOWNLOAD_PATH=${BASEDIR}/node-linux-${GOARCH}-${LUX_VERSION}.tar.gz
@@ -32,7 +30,7 @@ fi
 BUILD_DIR=${LUXD_BUILD_PATH}-${LUX_VERSION}
 
 extract_archive() {
-  mkdir -p ${BUILD_DIR}
+  mkdir -p "${BUILD_DIR}"
 
   if [[ ${LUXD_DOWNLOAD_PATH} == *.tar.gz ]]; then
     tar xzvf ${LUXD_DOWNLOAD_PATH} --directory ${BUILD_DIR} --strip-components 1
@@ -65,13 +63,13 @@ else
     # check to see if the repo already exists, if not clone it
     if [[ ! -d ${GIT_CLONE_PATH} ]]; then
       echo "cloning ${GIT_CLONE_URL} to ${GIT_CLONE_PATH}"
-      git clone --no-checkout ${GIT_CLONE_URL} ${GIT_CLONE_PATH}
+      git clone --no-checkout ${GIT_CLONE_URL} "${GIT_CLONE_PATH}"
     fi
 
     # check to see if the commitish exists in the repo
     WORKDIR=$(pwd)
 
-    cd ${GIT_CLONE_PATH}
+    cd "${GIT_CLONE_PATH}"
 
     git fetch
 
@@ -92,7 +90,7 @@ else
 
       if [[ $CHECKOUT_STATUS -ne 0 ]]; then
         echo
-        echo "'${VERSION}' is not a valid release tag, commit hash, or branch name"
+        echo "'${AVALANCHE_VERSION}' is not a valid release tag, commit hash, or branch name"
         exit 1
       fi
     fi
@@ -106,12 +104,12 @@ else
     if [[ ! -d ${BUILD_DIR} ]]; then
       echo "building node ${COMMIT} to ${BUILD_DIR}"
       ./scripts/build.sh
-      mkdir -p ${BUILD_DIR}
+      mkdir -p "${BUILD_DIR}"
 
-      mv ${GIT_CLONE_PATH}/build/* ${BUILD_DIR}/
+      mv "${GIT_CLONE_PATH}"/build/* "${BUILD_DIR}"/
     fi
 
-    cd $WORKDIR
+    cd "$WORKDIR"
   fi
 fi
 
@@ -122,6 +120,7 @@ mkdir -p ${LUXD_BUILD_PATH}
 
 cp ${BUILD_DIR}/node ${LUXD_PATH}
 
+cp "${BUILD_DIR}"/avalanchego "${AVALANCHEGO_PATH}"
 
 echo "Installed Lux release ${LUX_VERSION}"
 echo "Lux Path: ${LUXD_PATH}"

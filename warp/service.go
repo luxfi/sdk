@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/vms/platformvm/warp"
 	"github.com/luxdefi/node/vms/platformvm/warp/payload"
@@ -25,24 +24,39 @@ type API struct {
 	networkID                     uint32
 	sourceSubnetID, sourceChainID ids.ID
 	backend                       Backend
-	state                         *validators.State
+	state                         validators.State
 	client                        peer.NetworkClient
+	requirePrimaryNetworkSigners  func() bool
 }
 
-func NewAPI(networkID uint32, sourceSubnetID ids.ID, sourceChainID ids.ID, state *validators.State, backend Backend, client peer.NetworkClient) *API {
+func NewAPI(networkID uint32, sourceSubnetID ids.ID, sourceChainID ids.ID, state validators.State, backend Backend, client peer.NetworkClient, requirePrimaryNetworkSigners func() bool) *API {
 	return &API{
-		networkID:      networkID,
-		sourceSubnetID: sourceSubnetID,
-		sourceChainID:  sourceChainID,
-		backend:        backend,
-		state:          state,
-		client:         client,
+		networkID:                    networkID,
+		sourceSubnetID:               sourceSubnetID,
+		sourceChainID:                sourceChainID,
+		backend:                      backend,
+		state:                        state,
+		client:                       client,
+		requirePrimaryNetworkSigners: requirePrimaryNetworkSigners,
 	}
+}
+
+// GetMessage returns the Warp message associated with a messageID.
+func (a *API) GetMessage(ctx context.Context, messageID ids.ID) (hexutil.Bytes, error) {
+	message, err := a.backend.GetMessage(messageID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message %s with error %w", messageID, err)
+	}
+	return hexutil.Bytes(message.Bytes()), nil
 }
 
 // GetMessageSignature returns the BLS signature associated with a messageID.
 func (a *API) GetMessageSignature(ctx context.Context, messageID ids.ID) (hexutil.Bytes, error) {
-	signature, err := a.backend.GetMessageSignature(messageID)
+	unsignedMessage, err := a.backend.GetMessage(messageID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message %s with error %w", messageID, err)
+	}
+	signature, err := a.backend.GetMessageSignature(ctx, unsignedMessage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signature for message %s with error %w", messageID, err)
 	}
@@ -51,7 +65,7 @@ func (a *API) GetMessageSignature(ctx context.Context, messageID ids.ID) (hexuti
 
 // GetBlockSignature returns the BLS signature associated with a blockID.
 func (a *API) GetBlockSignature(ctx context.Context, blockID ids.ID) (hexutil.Bytes, error) {
-	signature, err := a.backend.GetBlockSignature(blockID)
+	signature, err := a.backend.GetBlockSignature(ctx, blockID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signature for block %s with error %w", blockID, err)
 	}
@@ -95,22 +109,23 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 		return nil, err
 	}
 
-	validators, totalWeight, err := warp.GetCanonicalValidatorSet(ctx, a.state, pChainHeight, subnetID)
+	state := warpValidators.NewState(a.state, a.sourceSubnetID, a.sourceChainID, a.requirePrimaryNetworkSigners())
+	validatorSet, err := warp.GetCanonicalValidatorSetFromSubnetID(ctx, state, pChainHeight, subnetID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validator set: %w", err)
 	}
-	if len(validators) == 0 {
+	if len(validatorSet.Validators) == 0 {
 		return nil, fmt.Errorf("%w (SubnetID: %s, Height: %d)", errNoValidators, subnetID, pChainHeight)
 	}
 
 	log.Debug("Fetching signature",
 		"sourceSubnetID", subnetID,
 		"height", pChainHeight,
-		"numValidators", len(validators),
-		"totalWeight", totalWeight,
+		"numValidators", len(validatorSet.Validators),
+		"totalWeight", validatorSet.TotalWeight,
 	)
 
-	agg := aggregator.New(aggregator.NewSignatureGetter(a.client), validators, totalWeight)
+	agg := aggregator.New(aggregator.NewSignatureGetter(a.client), validatorSet.Validators, validatorSet.TotalWeight)
 	signatureResult, err := agg.AggregateSignatures(ctx, unsignedMessage, quorumNum)
 	if err != nil {
 		return nil, err

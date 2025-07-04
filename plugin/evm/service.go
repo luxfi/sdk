@@ -4,35 +4,75 @@
 package evm
 
 import (
-	"context"
-	"math/big"
+	"fmt"
+	"net/http"
+	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/evm/plugin/evm/client"
 )
 
-// SnowmanAPI introduces snowman specific functionality to the evm
-type SnowmanAPI struct{ vm *VM }
-
-// GetAcceptedFrontReply defines the reply that will be sent from the
-// GetAcceptedFront API call
-type GetAcceptedFrontReply struct {
-	Hash   common.Hash `json:"hash"`
-	Number *big.Int    `json:"number"`
+type ValidatorsAPI struct {
+	vm *VM
 }
 
-// GetAcceptedFront returns the last accepted block's hash and height
-func (api *SnowmanAPI) GetAcceptedFront(ctx context.Context) (*GetAcceptedFrontReply, error) {
-	blk := api.vm.blockChain.LastConsensusAcceptedBlock()
-	return &GetAcceptedFrontReply{
-		Hash:   blk.Hash(),
-		Number: blk.Number(),
-	}, nil
-}
+func (api *ValidatorsAPI) GetCurrentValidators(_ *http.Request, req *client.GetCurrentValidatorsRequest, reply *client.GetCurrentValidatorsResponse) error {
+	api.vm.vmLock.RLock()
+	defer api.vm.vmLock.RUnlock()
 
-// IssueBlock to the chain
-func (api *SnowmanAPI) IssueBlock(ctx context.Context) error {
-	log.Info("Issuing a new block")
-	api.vm.builder.signalTxsReady()
+	var vIDs set.Set[ids.ID]
+	if len(req.NodeIDs) > 0 {
+		vIDs = set.NewSet[ids.ID](len(req.NodeIDs))
+		for _, nodeID := range req.NodeIDs {
+			vID, err := api.vm.validatorsManager.GetValidationID(nodeID)
+			if err != nil {
+				return fmt.Errorf("couldn't find validator with node ID %s", nodeID)
+			}
+			vIDs.Add(vID)
+		}
+	} else {
+		vIDs = api.vm.validatorsManager.GetValidationIDs()
+	}
+
+	reply.Validators = make([]client.CurrentValidator, 0, vIDs.Len())
+
+	for _, vID := range vIDs.List() {
+		validator, err := api.vm.validatorsManager.GetValidator(vID)
+		if err != nil {
+			return fmt.Errorf("couldn't find validator with validation ID %s", vID)
+		}
+
+		isConnected := api.vm.validatorsManager.IsConnected(validator.NodeID)
+
+		upDuration, lastUpdated, err := api.vm.validatorsManager.CalculateUptime(validator.NodeID)
+		if err != nil {
+			return err
+		}
+		var uptimeFloat float64
+		startTime := time.Unix(int64(validator.StartTimestamp), 0)
+		bestPossibleUpDuration := lastUpdated.Sub(startTime)
+		if bestPossibleUpDuration == 0 {
+			uptimeFloat = 1
+		} else {
+			uptimeFloat = float64(upDuration) / float64(bestPossibleUpDuration)
+		}
+
+		// Transform this to a percentage (0-100) to make it consistent
+		// with currentValidators in PlatformVM API
+		uptimePercentage := float32(uptimeFloat * 100)
+
+		reply.Validators = append(reply.Validators, client.CurrentValidator{
+			ValidationID:     validator.ValidationID,
+			NodeID:           validator.NodeID,
+			StartTimestamp:   validator.StartTimestamp,
+			Weight:           validator.Weight,
+			IsActive:         validator.IsActive,
+			IsL1Validator:    validator.IsL1Validator,
+			IsConnected:      isConnected,
+			UptimePercentage: uptimePercentage,
+			UptimeSeconds:    uint64(upDuration.Seconds()),
+		})
+	}
 	return nil
 }

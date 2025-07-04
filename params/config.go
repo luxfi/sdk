@@ -27,11 +27,7 @@
 package params
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
 	"math/big"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/node/snow"
 	"github.com/luxdefi/evm/commontype"
@@ -72,10 +68,9 @@ var (
 var (
 	// SubnetEVMDefaultConfig is the default configuration
 	// without any network upgrades.
-	SubnetEVMDefaultChainConfig = &ChainConfig{
-		ChainID:            SubnetEVMChainID,
-		FeeConfig:          DefaultFeeConfig,
-		AllowFeeRecipients: false,
+	SubnetEVMDefaultChainConfig = WithExtra(
+		&ChainConfig{
+			ChainID: DefaultChainID,
 
 		HomesteadBlock:           big.NewInt(0),
 		EIP150Block:              big.NewInt(0),
@@ -108,9 +103,8 @@ var (
 			SubnetEVMTimestamp: utils.NewUint64(0),
 			DUpgradeTimestamp:  utils.NewUint64(0),
 		},
-		GenesisPrecompiles: Precompiles{},
-		UpgradeConfig:      UpgradeConfig{},
-	}
+		extras.SubnetEVMDefaultChainConfig,
+	)
 
 	TestSubnetEVMConfig = &ChainConfig{
 		LuxContext:          LuxContext{utils.TestSnowContext()},
@@ -129,9 +123,8 @@ var (
 		MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
 			SubnetEVMTimestamp: utils.NewUint64(0),
 		},
-		GenesisPrecompiles: Precompiles{},
-		UpgradeConfig:      UpgradeConfig{},
-	}
+		extras.TestChainConfig,
+	)
 
 	TestPreSubnetEVMConfig = &ChainConfig{
 		LuxContext:               LuxContext{utils.TestSnowContext()},

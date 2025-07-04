@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"sync"
 	"testing"
-
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/params"

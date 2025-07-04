@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-
 	"github.com/luxdefi/node/database"
 	"github.com/luxdefi/node/database/versiondb"
 	"github.com/luxdefi/node/ids"
@@ -85,7 +84,7 @@ type StateSyncClient interface {
 	ParseStateSummary(ctx context.Context, summaryBytes []byte) (block.StateSummary, error)
 
 	// additional methods required by the evm package
-	StateSyncClearOngoingSummary() error
+	ClearOngoingSummary() error
 	Shutdown() error
 	Error() error
 }
@@ -125,8 +124,8 @@ func (client *stateSyncerClient) GetOngoingSyncStateSummary(context.Context) (bl
 	return summary, nil
 }
 
-// StateSyncClearOngoingSummary clears any marker of an ongoing state sync summary
-func (client *stateSyncerClient) StateSyncClearOngoingSummary() error {
+// ClearOngoingSummary clears any marker of an ongoing state sync summary
+func (client *stateSyncerClient) ClearOngoingSummary() error {
 	if err := client.metadataDB.Delete(stateSyncSummaryKey); err != nil {
 		return fmt.Errorf("failed to clear ongoing summary: %w", err)
 	}
@@ -167,12 +166,6 @@ func (client *stateSyncerClient) acceptSyncSummary(proposedSummary message.SyncS
 				"lastAccepted", client.lastAcceptedHeight,
 				"syncableHeight", proposedSummary.Height(),
 			)
-			if err := client.StateSyncClearOngoingSummary(); err != nil {
-				return block.StateSyncSkipped, fmt.Errorf("failed to clear ongoing summary after skipping state sync: %w", err)
-			}
-			// Initialize snapshots if we're skipping state sync, since it will not have been initialized on
-			// startup.
-			client.chain.BlockChain().InitializeSnapshots()
 			return block.StateSyncSkipped, nil
 		}
 
@@ -306,7 +299,7 @@ func (client *stateSyncerClient) Shutdown() error {
 }
 
 // finishSync is responsible for updating disk and memory pointers so the VM is prepared
-// for bootstrapping. Executes any shared memory operations from the atomic trie to shared memory.
+// for bootstrapping.
 func (client *stateSyncerClient) finishSync() error {
 	stateBlock, err := client.state.GetBlock(context.TODO(), ids.ID(client.syncSummary.BlockHash))
 	if err != nil {
@@ -322,7 +315,6 @@ func (client *stateSyncerClient) finishSync() error {
 		return fmt.Errorf("could not convert block(%T) to evm.Block", stateBlock)
 	}
 
-	evmBlock.SetStatus(choices.Accepted)
 	block := evmBlock.ethBlock
 
 	if block.Hash() != client.syncSummary.BlockHash {
@@ -357,8 +349,6 @@ func (client *stateSyncerClient) finishSync() error {
 
 // updateVMMarkers updates the following markers in the VM's database
 // and commits them atomically:
-// - updates atomic trie so it will have necessary metadata for the last committed root
-// - updates atomic trie so it will resume applying operations to shared memory on initialize
 // - updates lastAcceptedKey
 // - removes state sync progress markers
 func (client *stateSyncerClient) updateVMMarkers() error {

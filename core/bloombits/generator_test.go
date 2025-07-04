@@ -31,7 +31,6 @@ import (
 	crand "crypto/rand"
 	"math/rand"
 	"testing"
-
 	"github.com/luxdefi/evm/core/types"
 )
 

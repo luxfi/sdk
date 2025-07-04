@@ -29,7 +29,6 @@ package consensus
 
 import (
 	"math/big"
-
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/core/types"

@@ -1,11 +1,10 @@
 // (c) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package allowlist
+package allowlist_test
 
 import (
 	"testing"
-
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/modules"
@@ -62,7 +61,7 @@ func TestAllowListRun(t *testing.T) {
 		Configurator: &dummyConfigurator{},
 		ConfigKey:    "dummy",
 	}
-	RunPrecompileWithAllowListTests(t, dummyModule, state.NewTestStateDB, nil)
+	RunPrecompileWithAllowListTests(t, dummyModule, extstate.NewTestStateDB, nil)
 }
 
 func BenchmarkAllowList(b *testing.B) {
@@ -72,5 +71,5 @@ func BenchmarkAllowList(b *testing.B) {
 		Configurator: &dummyConfigurator{},
 		ConfigKey:    "dummy",
 	}
-	BenchPrecompileWithAllowList(b, dummyModule, state.NewTestStateDB, nil)
+	BenchPrecompileWithAllowList(b, dummyModule, extstate.NewTestStateDB, nil)
 }

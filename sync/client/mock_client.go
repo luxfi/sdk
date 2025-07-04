@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"sync/atomic"
-
 	"github.com/luxdefi/node/codec"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/evm/core/types"

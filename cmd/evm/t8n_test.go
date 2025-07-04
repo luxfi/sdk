@@ -33,7 +33,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
 	"github.com/luxdefi/evm/cmd/evm/internal/t8ntool"
 	"github.com/luxdefi/evm/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
@@ -116,6 +115,7 @@ func (args *t8nOutput) get() (out []string) {
 }
 
 func TestT8n(t *testing.T) {
+	t.Parallel()
 	tt := new(testT8n)
 	tt.TestCmd = cmdtest.NewTestCmd(t, tt)
 	for i, tc := range []struct {
@@ -276,6 +276,30 @@ func TestT8n(t *testing.T) {
 		// 	output: t8nOutput{alloc: true, result: true},
 		// 	expOut: "exp.json",
 		// },
+		{ // Cancun tests
+			base: "./testdata/28",
+			input: t8nInput{
+				"alloc.json", "txs.rlp", "env.json", "Cancun", "",
+			},
+			output: t8nOutput{alloc: true, result: true},
+			expOut: "exp.json",
+		},
+		{ // More cancun tests
+			base: "./testdata/29",
+			input: t8nInput{
+				"alloc.json", "txs.json", "env.json", "Cancun", "",
+			},
+			output: t8nOutput{alloc: true, result: true},
+			expOut: "exp.json",
+		},
+		{ // More cancun test, plus example of rlp-transaction that cannot be decoded properly
+			base: "./testdata/30",
+			input: t8nInput{
+				"alloc.json", "txs_more.rlp", "env.json", "Cancun", "",
+			},
+			output: t8nOutput{alloc: true, result: true},
+			expOut: "exp.json",
+		},
 	} {
 		args := []string{"t8n"}
 		args = append(args, tc.output.get()...)
@@ -331,6 +355,7 @@ func (args *t9nInput) get(base string) []string {
 }
 
 func TestT9n(t *testing.T) {
+	t.Parallel()
 	tt := new(testT8n)
 	tt.TestCmd = cmdtest.NewTestCmd(t, tt)
 	for i, tc := range []struct {
@@ -403,7 +428,7 @@ func TestT9n(t *testing.T) {
 			ok, err := cmpJson(have, want)
 			switch {
 			case err != nil:
-				t.Logf(string(have))
+				t.Log(string(have))
 				t.Fatalf("test %d, json parsing failed: %v", i, err)
 			case !ok:
 				t.Fatalf("test %d: output wrong, have \n%v\nwant\n%v\n", i, string(have), string(want))
@@ -461,6 +486,7 @@ func (args *b11rInput) get(base string) []string {
 }
 
 func TestB11r(t *testing.T) {
+	t.Parallel()
 	tt := new(testT8n)
 	tt.TestCmd = cmdtest.NewTestCmd(t, tt)
 	for i, tc := range []struct {
@@ -534,7 +560,7 @@ func TestB11r(t *testing.T) {
 			ok, err := cmpJson(have, want)
 			switch {
 			case err != nil:
-				t.Logf(string(have))
+				t.Log(string(have))
 				t.Fatalf("test %d, json parsing failed: %v", i, err)
 			case !ok:
 				t.Fatalf("test %d: output wrong, have \n%v\nwant\n%v\n", i, string(have), string(want))

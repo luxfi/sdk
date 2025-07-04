@@ -34,7 +34,6 @@ import (
 	"runtime"
 	"strings"
 	"testing"
-
 	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
@@ -466,7 +465,7 @@ var bindTests = []struct {
 			require.Equal(t, testGreeting, unpackedGreeting)
 
 			// test that the allow list is generated correctly
-			stateDB := state.NewTestStateDB(t)
+			stateDB := extstate.NewTestStateDB(t)
 			address := common.BigToAddress(big.NewInt(1))
 			SetHelloWorldAllowListStatus(stateDB, address, allowlist.EnabledRole)
 			role := GetHelloWorldAllowListStatus(stateDB, address)
@@ -536,7 +535,7 @@ var bindTests = []struct {
 			require.NoError(t, err)
 			require.Equal(t, testBytes, unpacked.BytesTest)
 			gasCost := GetTestEventGasCost(testEventData)
-			require.Equal(t, contract.LogGas + 2 * contract.LogTopicGas + contract.LogDataGas, gasCost)
+			require.Equal(t, contract.LogGas + 3 * contract.LogTopicGas + contract.LogDataGas, gasCost)
 
 			topics, data, err = PackEmptyEvent()
 			require.NoError(t, err)
@@ -551,9 +550,9 @@ var bindTests = []struct {
 			eventID = IEventerABI.Events["indexed"].ID
 			require.Len(t, topics, 3)
 			require.Equal(t, eventID, topics[0])
-			require.Equal(t, testAddr.Hash(), topics[1])
+			require.Equal(t, common.BytesToHash(testAddr[:]), topics[1])
 			require.Equal(t, 0, len(data))
-			require.Equal(t, contract.LogGas + 2 * contract.LogTopicGas, GetIndexedEventGasCost())
+			require.Equal(t, contract.LogGas + 3 * contract.LogTopicGas, GetIndexedEventGasCost())
 
 			testMixedData := MixedEventData{
 				Num: testInt,
@@ -563,11 +562,11 @@ var bindTests = []struct {
 			eventID = IEventerABI.Events["mixed"].ID
 			require.Len(t, topics, 2)
 			require.Equal(t, eventID, topics[0])
-			require.Equal(t, testAddr.Hash(), topics[1])
+			require.Equal(t, common.BytesToHash(testAddr[:]), topics[1])
 			unpackedMixedData, err := UnpackMixedEventData(data)
 			require.NoError(t, err)
 			require.Equal(t, testMixedData, unpackedMixedData)
-			require.Equal(t, contract.LogGas + contract.LogTopicGas + contract.LogDataGas, GetMixedEventGasCost(testMixedData))
+			require.Equal(t, contract.LogGas + 2 * contract.LogTopicGas + contract.LogDataGas, GetMixedEventGasCost(testMixedData))
 
 			testDynamicData := DynamicEventData{
 				Str:    "test",
@@ -581,7 +580,7 @@ var bindTests = []struct {
 			unpackedDynamicData, err := UnpackDynamicEventData(data)
 			require.NoError(t, err)
 			require.Equal(t, testDynamicData, unpackedDynamicData)
-			require.Equal(t, contract.LogGas + 2 * contract.LogTopicGas + 2 * contract.LogDataGas, GetDynamicEventGasCost(testDynamicData))
+			require.Equal(t, contract.LogGas + 3 * contract.LogTopicGas + 2 * contract.LogDataGas, GetDynamicEventGasCost(testDynamicData))
 
 			topics, data, err = PackUnnamedEvent(testUint, testUint)
 			require.NoError(t, err)
@@ -589,7 +588,7 @@ var bindTests = []struct {
 			require.Len(t, topics, 3)
 			require.Equal(t, eventID, topics[0])
 			require.Equal(t, 0, len(data))
-			require.Equal(t, contract.LogGas + 2 * contract.LogTopicGas, GetUnnamedEventGasCost())
+			require.Equal(t, contract.LogGas + 3 * contract.LogTopicGas, GetUnnamedEventGasCost())
 	`,
 		"",
 		false,
@@ -670,7 +669,6 @@ func TestPrecompileBind(t *testing.T) {
 			package %s
 
 			import (
-				"testing"
 				%s
 			)
 
@@ -695,7 +693,7 @@ func TestPrecompileBind(t *testing.T) {
 	if out, err := replacer.CombinedOutput(); err != nil {
 		t.Fatalf("failed to replace binding test dependency to current source tree: %v\n%s", err, out)
 	}
-	tidier := exec.Command(gocmd, "mod", "tidy", "-compat=1.20")
+	tidier := exec.Command(gocmd, "mod", "tidy", "-compat=1.23")
 	tidier.Dir = pkg
 	if out, err := tidier.CombinedOutput(); err != nil {
 		t.Fatalf("failed to tidy Go module file: %v\n%s", err, out)

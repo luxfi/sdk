@@ -33,7 +33,6 @@ import (
 	"math/big"
 	"os"
 	"strings"
-
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/params"
@@ -75,11 +74,6 @@ func (r *result) MarshalJSON() ([]byte, error) {
 }
 
 func Transaction(ctx *cli.Context) error {
-	// Configure the go-ethereum logger
-	glogger := log.NewGlogHandler(log.StreamHandler(os.Stderr, log.TerminalFormat(false)))
-	glogger.Verbosity(log.Lvl(ctx.Int(VerbosityFlag.Name)))
-	log.Root().SetHandler(glogger)
-
 	var (
 		err error
 	)
@@ -182,7 +176,7 @@ func Transaction(ctx *cli.Context) error {
 			r.Error = errors.New("gas * maxFeePerGas exceeds 256 bits")
 		}
 		// Check whether the init code size has been exceeded.
-		if chainConfig.IsDUpgrade(0) && tx.To() == nil && len(tx.Data()) > params.MaxInitCodeSize {
+		if params.GetExtra(chainConfig).IsDurango(0) && tx.To() == nil && len(tx.Data()) > ethparams.MaxInitCodeSize {
 			r.Error = errors.New("max initcode size exceeded")
 		}
 		results = append(results, r)

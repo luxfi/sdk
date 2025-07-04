@@ -10,20 +10,15 @@ import (
 	"fmt"
 	"sync/atomic"
 	"time"
-
 	"github.com/luxdefi/node/ids"
-
 	"github.com/luxdefi/evm/ethdb/memorydb"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/sync/client/stats"
-
 	"github.com/luxdefi/node/codec"
 	"github.com/luxdefi/node/version"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/luxdefi/evm/peer"
@@ -151,7 +146,7 @@ func parseLeafsResponse(codec codec.Manager, reqIntf message.Request, data []byt
 	// Populate proof when ProofVals are present in the response. Its ok to pass it as nil to the trie.VerifyRangeProof
 	// function as it will assert that all the leaves belonging to the specified root are present.
 	if len(leafsResponse.ProofVals) > 0 {
-		proof = memorydb.New()
+		proof = rawdb.NewMemoryDatabase()
 		defer proof.Close()
 		for _, proofVal := range leafsResponse.ProofVals {
 			proofKey := crypto.Keccak256(proofVal)
@@ -161,13 +156,9 @@ func parseLeafsResponse(codec codec.Manager, reqIntf message.Request, data []byt
 		}
 	}
 
-	var (
-		firstKey = leafsRequest.Start
-		lastKey  = leafsRequest.End
-	)
-	// Last key is the last returned key in response
+	firstKey := leafsRequest.Start
 	if len(leafsResponse.Keys) > 0 {
-		lastKey = leafsResponse.Keys[len(leafsResponse.Keys)-1]
+		lastKey := leafsResponse.Keys[len(leafsResponse.Keys)-1]
 
 		if firstKey == nil {
 			firstKey = bytes.Repeat([]byte{0x00}, len(lastKey))
@@ -177,7 +168,7 @@ func parseLeafsResponse(codec codec.Manager, reqIntf message.Request, data []byt
 	// VerifyRangeProof verifies that the key-value pairs included in [leafResponse] are all of the keys within the range from start
 	// to the last key returned.
 	// Also ensures the keys are in monotonically increasing order
-	more, err := trie.VerifyRangeProof(leafsRequest.Root, firstKey, lastKey, leafsResponse.Keys, leafsResponse.Vals, proof)
+	more, err := trie.VerifyRangeProof(leafsRequest.Root, firstKey, leafsResponse.Keys, leafsResponse.Vals, proof)
 	if err != nil {
 		return nil, 0, fmt.Errorf("%s due to %w", errInvalidRangeProof, err)
 	}
@@ -271,7 +262,7 @@ func parseCode(codec codec.Manager, req message.Request, data []byte) (interface
 
 	totalBytes := 0
 	for i, code := range response.Data {
-		if len(code) > params.MaxCodeSize {
+		if len(code) > ethparams.MaxCodeSize {
 			return nil, 0, fmt.Errorf("%w: (hash %s) (size %d)", errMaxCodeSizeExceeded, codeRequest.Hashes[i], len(code))
 		}
 
@@ -351,7 +342,7 @@ func (c *client) get(ctx context.Context, request message.Request, parseFn parse
 			responseIntf, numElements, err = parseFn(c.codec, request, response)
 			if err != nil {
 				lastErr = err
-				log.Info("could not validate response, retrying", "nodeID", nodeID, "attempt", attempt, "request", request, "err", err)
+				log.Debug("could not validate response, retrying", "nodeID", nodeID, "attempt", attempt, "request", request, "err", err)
 				c.networkClient.TrackBandwidth(nodeID, 0)
 				metric.IncFailed()
 				metric.IncInvalidResponse()

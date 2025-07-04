@@ -5,7 +5,6 @@ package core
 
 import (
 	"testing"
-
 	"go.uber.org/goleak"
 )
 

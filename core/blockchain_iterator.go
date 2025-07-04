@@ -32,7 +32,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-
 	"github.com/luxdefi/evm/core/types"
 )
 

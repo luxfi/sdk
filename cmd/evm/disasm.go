@@ -32,14 +32,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/core/asm"
+	"github.com/luxdefi/evm/interfaces/core/asm"
 	"github.com/urfave/cli/v2"
 )
 
 var disasmCommand = &cli.Command{
 	Action:    disasmCmd,
 	Name:      "disasm",
-	Usage:     "disassembles evm binary",
+	Usage:     "Disassembles evm binary",
 	ArgsUsage: "<file>",
 }
 

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -43,7 +42,7 @@ func CalculateFunctionSelector(functionSignature string) []byte {
 // DeductGas checks if [suppliedGas] is sufficient against [requiredGas] and deducts [requiredGas] from [suppliedGas].
 func DeductGas(suppliedGas uint64, requiredGas uint64) (uint64, error) {
 	if suppliedGas < requiredGas {
-		return 0, vmerrs.ErrOutOfGas
+		return 0, vm.ErrOutOfGas
 	}
 	return suppliedGas - requiredGas, nil
 }
@@ -59,6 +58,6 @@ func ParseABI(rawABI string) abi.ABI {
 	return parsed
 }
 
-func IsDUpgradeActivated(evm AccessibleState) bool {
-	return evm.GetChainConfig().IsDUpgrade(evm.GetBlockContext().Timestamp())
+func IsDurangoActivated(evm AccessibleState) bool {
+	return evm.GetChainConfig().IsDurango(evm.GetBlockContext().Timestamp())
 }

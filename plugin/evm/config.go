@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
 	"github.com/luxdefi/evm/core/txpool"
 	"github.com/luxdefi/evm/eth"
 	"github.com/ethereum/go-ethereum/common"

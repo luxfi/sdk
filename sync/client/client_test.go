@@ -10,11 +10,8 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
-
 	"github.com/stretchr/testify/assert"
-
 	"github.com/luxdefi/node/ids"
-
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/types"
@@ -73,7 +70,7 @@ func TestGetCode(t *testing.T) {
 		},
 		"code size is too large": {
 			setupRequest: func() (requestHashes []common.Hash, mockResponse message.CodeResponse, expectedCode [][]byte) {
-				oversizedCode := make([]byte, params.MaxCodeSize+1)
+				oversizedCode := make([]byte, ethparams.MaxCodeSize+1)
 				codeHash := crypto.Keccak256Hash(oversizedCode)
 				return []common.Hash{codeHash}, message.CodeResponse{
 					Data: [][]byte{oversizedCode},
@@ -141,8 +138,9 @@ func TestGetBlocks(t *testing.T) {
 	var gspec = &core.Genesis{
 		Config: params.TestChainConfig,
 	}
-	memdb := memorydb.New()
-	genesis := gspec.MustCommit(memdb)
+	memdb := rawdb.NewMemoryDatabase()
+	tdb := triedb.NewDatabase(memdb, nil)
+	genesis := gspec.MustCommit(memdb, tdb)
 	engine := dummy.NewETHFaker()
 	numBlocks := 110
 	blocks, _, err := core.GenerateChain(params.TestChainConfig, genesis, engine, memdb, numBlocks, 0, func(i int, b *core.BlockGen) {})
@@ -264,7 +262,7 @@ func TestGetBlocks(t *testing.T) {
 
 				return responseBytes
 			},
-			expectedErr: "failed to unmarshal response: rlp: expected input list for types.extblock",
+			expectedErr: "failed to unmarshal response: rlp: expected List",
 		},
 		"incorrect starting point": {
 			request: message.BlockRequest{
@@ -379,7 +377,7 @@ func TestGetBlocks(t *testing.T) {
 				if err == nil {
 					t.Fatalf("Expected error: %s, but found no error", test.expectedErr)
 				}
-				assert.True(t, strings.Contains(err.Error(), test.expectedErr), "expected error to contain [%s], but found [%s]", test.expectedErr, err)
+				assert.ErrorContains(t, err, test.expectedErr)
 				return
 			}
 			if err != nil {
@@ -409,9 +407,9 @@ func TestGetLeafs(t *testing.T) {
 
 	const leafsLimit = 1024
 
-	trieDB := trie.NewDatabase(memorydb.New())
-	largeTrieRoot, largeTrieKeys, _ := trie.GenerateTrie(t, trieDB, 100_000, common.HashLength)
-	smallTrieRoot, _, _ := trie.GenerateTrie(t, trieDB, leafsLimit, common.HashLength)
+	trieDB := triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)
+	largeTrieRoot, largeTrieKeys, _ := syncutils.GenerateTrie(t, trieDB, 100_000, common.HashLength)
+	smallTrieRoot, _, _ := syncutils.GenerateTrie(t, trieDB, leafsLimit, common.HashLength)
 
 	handler := handlers.NewLeafsRequestHandler(trieDB, nil, message.Codec, handlerstats.NewNoopHandlerStats())
 	client := NewClient(&ClientConfig{
@@ -780,8 +778,8 @@ func TestGetLeafs(t *testing.T) {
 func TestGetLeafsRetries(t *testing.T) {
 	rand.Seed(1)
 
-	trieDB := trie.NewDatabase(memorydb.New())
-	root, _, _ := trie.GenerateTrie(t, trieDB, 100_000, common.HashLength)
+	trieDB := triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)
+	root, _, _ := syncutils.GenerateTrie(t, trieDB, 100_000, common.HashLength)
 
 	handler := handlers.NewLeafsRequestHandler(trieDB, nil, message.Codec, handlerstats.NewNoopHandlerStats())
 	mockNetClient := &mockNetwork{}

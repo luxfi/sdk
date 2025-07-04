@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
@@ -63,7 +62,7 @@ func UnpackMintNativeCoinInput(input []byte, useStrictMode bool) (common.Address
 	// Initially we had this check to ensure that the input was the correct length.
 	// However solidity does not always pack the input to the correct length, and allows
 	// for extra padding bytes to be added to the end of the input. Therefore, we have removed
-	// this check with the DUpgrade. We still need to keep this check for backwards compatibility.
+	// this check with Durango. We still need to keep this check for backwards compatibility.
 	if useStrictMode && len(input) != mintInputLen {
 		return common.Address{}, nil, fmt.Errorf("%w: %d", ErrInvalidLen, len(input))
 	}
@@ -81,10 +80,10 @@ func mintNativeCoin(accessibleState contract.AccessibleState, caller common.Addr
 	}
 
 	if readOnly {
-		return nil, remainingGas, vmerrs.ErrWriteProtection
+		return nil, remainingGas, vm.ErrWriteProtection
 	}
 
-	useStrictMode := !contract.IsDUpgradeActivated(accessibleState)
+	useStrictMode := !contract.IsDurangoActivated(accessibleState)
 	to, amount, err := UnpackMintNativeCoinInput(input, useStrictMode)
 	if err != nil {
 		return nil, remainingGas, err
@@ -97,7 +96,7 @@ func mintNativeCoin(accessibleState contract.AccessibleState, caller common.Addr
 		return nil, remainingGas, fmt.Errorf("%w: %s", ErrCannotMint, caller)
 	}
 
-	if contract.IsDUpgradeActivated(accessibleState) {
+	if contract.IsDurangoActivated(accessibleState) {
 		if remainingGas, err = contract.DeductGas(remainingGas, NativeCoinMintedEventGasCost); err != nil {
 			return nil, 0, err
 		}
@@ -105,19 +104,20 @@ func mintNativeCoin(accessibleState contract.AccessibleState, caller common.Addr
 		if err != nil {
 			return nil, remainingGas, err
 		}
-		stateDB.AddLog(
-			ContractAddress,
-			topics,
-			data,
-			accessibleState.GetBlockContext().Number().Uint64(),
-		)
+		stateDB.AddLog(&types.Log{
+			Address:     ContractAddress,
+			Topics:      topics,
+			Data:        data,
+			BlockNumber: accessibleState.GetBlockContext().Number().Uint64(),
+		})
 	}
 	// if there is no address in the state, create one.
 	if !stateDB.Exist(to) {
 		stateDB.CreateAccount(to)
 	}
 
-	stateDB.AddBalance(to, amount)
+	amountU256, _ := uint256.FromBig(amount)
+	stateDB.AddBalance(to, amountU256)
 	// Return an empty output and the remaining gas
 	return []byte{}, remainingGas, nil
 }

@@ -8,7 +8,6 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/cmd/simulator/key"
 	"github.com/luxdefi/evm/cmd/simulator/metrics"
 	"github.com/luxdefi/evm/cmd/simulator/txs"
@@ -90,7 +89,7 @@ func DistributeFunds(ctx context.Context, client ethclient.Client, keys []*key.K
 			Nonce:     nonce,
 			GasTipCap: gasTipCap,
 			GasFeeCap: gasFeeCap,
-			Gas:       params.TxGas,
+			Gas:       ethparams.TxGas,
 			To:        &needFundsAddrs[i],
 			Data:      nil,
 			Value:     requiredFunds,

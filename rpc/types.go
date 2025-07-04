@@ -29,9 +29,9 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
-	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -62,7 +62,7 @@ type ServerCodec interface {
 type jsonWriter interface {
 	// writeJSON writes a message to the connection.
 	writeJSON(ctx context.Context, msg interface{}, isError bool) error
-	// writeJSON writes a message to the connection with the option of skipping the deadline.
+	// writeJSONSkipDeadline writes a message to the connection with the option of skipping the deadline.
 	writeJSONSkipDeadline(ctx context.Context, msg interface{}, isError bool, skip bool) error
 	// Closed returns a channel which is closed when the connection is closed.
 	closed() <-chan interface{}
@@ -73,11 +73,11 @@ type jsonWriter interface {
 type BlockNumber int64
 
 const (
-	SafeBlockNumber     = BlockNumber(-4)
-	AcceptedBlockNumber = BlockNumber(-3)
-	LatestBlockNumber   = BlockNumber(-2)
-	PendingBlockNumber  = BlockNumber(-1)
-	EarliestBlockNumber = BlockNumber(0)
+	SafeBlockNumber      = BlockNumber(-4)
+	FinalizedBlockNumber = BlockNumber(-3)
+	LatestBlockNumber    = BlockNumber(-2)
+	PendingBlockNumber   = BlockNumber(-1)
+	EarliestBlockNumber  = BlockNumber(0)
 )
 
 // UnmarshalJSON parses the given JSON fragment into a BlockNumber. It supports:
@@ -104,7 +104,7 @@ func (bn *BlockNumber) UnmarshalJSON(data []byte) error {
 		return nil
 	// Include "finalized" as an option for compatibility with FinalizedBlockNumber from geth.
 	case "accepted", "finalized":
-		*bn = AcceptedBlockNumber
+		*bn = FinalizedBlockNumber
 		return nil
 	case "safe":
 		*bn = SafeBlockNumber
@@ -116,7 +116,7 @@ func (bn *BlockNumber) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if blckNum > math.MaxInt64 {
-		return fmt.Errorf("block number larger than int64")
+		return errors.New("block number larger than int64")
 	}
 	*bn = BlockNumber(blckNum)
 	return nil
@@ -142,7 +142,7 @@ func (bn BlockNumber) String() string {
 		return "latest"
 	case PendingBlockNumber:
 		return "pending"
-	case AcceptedBlockNumber:
+	case FinalizedBlockNumber:
 		return "accepted"
 	case SafeBlockNumber:
 		return "safe"
@@ -159,6 +159,10 @@ func (bn BlockNumber) IsAccepted() bool {
 	return bn < EarliestBlockNumber && bn >= SafeBlockNumber
 }
 
+func (bn BlockNumber) IsLatest() bool {
+	return bn == LatestBlockNumber || bn == PendingBlockNumber
+}
+
 type BlockNumberOrHash struct {
 	BlockNumber      *BlockNumber `json:"blockNumber,omitempty"`
 	BlockHash        *common.Hash `json:"blockHash,omitempty"`
@@ -171,7 +175,7 @@ func (bnh *BlockNumberOrHash) UnmarshalJSON(data []byte) error {
 	err := json.Unmarshal(data, &e)
 	if err == nil {
 		if e.BlockNumber != nil && e.BlockHash != nil {
-			return fmt.Errorf("cannot specify both BlockHash and BlockNumber, choose one or the other")
+			return errors.New("cannot specify both BlockHash and BlockNumber, choose one or the other")
 		}
 		bnh.BlockNumber = e.BlockNumber
 		bnh.BlockHash = e.BlockHash
@@ -198,7 +202,7 @@ func (bnh *BlockNumberOrHash) UnmarshalJSON(data []byte) error {
 		return nil
 	// Include "finalized" as an option for compatibility with FinalizedBlockNumber from geth.
 	case "accepted", "finalized":
-		bn := AcceptedBlockNumber
+		bn := FinalizedBlockNumber
 		bnh.BlockNumber = &bn
 		return nil
 	case "safe":
@@ -220,7 +224,7 @@ func (bnh *BlockNumberOrHash) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			if blckNum > math.MaxInt64 {
-				return fmt.Errorf("blocknumber too high")
+				return errors.New("blocknumber too high")
 			}
 			bn := BlockNumber(blckNum)
 			bnh.BlockNumber = &bn
@@ -238,7 +242,7 @@ func (bnh *BlockNumberOrHash) Number() (BlockNumber, bool) {
 
 func (bnh *BlockNumberOrHash) String() string {
 	if bnh.BlockNumber != nil {
-		return strconv.Itoa(int(*bnh.BlockNumber))
+		return bnh.BlockNumber.String()
 	}
 	if bnh.BlockHash != nil {
 		return bnh.BlockHash.String()

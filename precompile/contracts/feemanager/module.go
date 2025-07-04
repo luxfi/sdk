@@ -5,7 +5,6 @@ package feemanager
 
 import (
 	"fmt"
-
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"

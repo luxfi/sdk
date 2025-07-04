@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"sync/atomic"
 	"testing"
-
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/eth/tracers/logger"
@@ -30,10 +29,10 @@ func TestTraceBlockPrecompileActivation(t *testing.T) {
 
 	// Initialize test accounts
 	accounts := newAccounts(3)
-	copyConfig := *params.TestChainConfig
+	copyConfig := params.Copy(params.TestChainConfig)
 	genesis := &core.Genesis{
 		Config: &copyConfig,
-		Alloc: core.GenesisAlloc{
+		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
 			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
 			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
@@ -42,17 +41,17 @@ func TestTraceBlockPrecompileActivation(t *testing.T) {
 	activateAllowlistBlock := 3
 	// assumes gap is 10 sec
 	activateAllowListTime := uint64(activateAllowlistBlock * 10)
-	activateTxAllowListConfig := params.PrecompileUpgrade{
+	activateTxAllowListConfig := extras.PrecompileUpgrade{
 		Config: txallowlist.NewConfig(&activateAllowListTime, []common.Address{accounts[0].addr}, nil, nil),
 	}
 
 	deactivateAllowlistBlock := activateAllowlistBlock + 3
 	deactivateAllowListTime := uint64(deactivateAllowlistBlock) * 10
-	deactivateTxAllowListConfig := params.PrecompileUpgrade{
+	deactivateTxAllowListConfig := extras.PrecompileUpgrade{
 		Config: txallowlist.NewDisableConfig(&deactivateAllowListTime),
 	}
 
-	genesis.Config.PrecompileUpgrades = []params.PrecompileUpgrade{
+	params.GetExtra(genesis.Config).PrecompileUpgrades = []extras.PrecompileUpgrade{
 		activateTxAllowListConfig,
 		deactivateTxAllowListConfig,
 	}
@@ -63,7 +62,7 @@ func TestTraceBlockPrecompileActivation(t *testing.T) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), params.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
+		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
 		b.AddTx(tx)
 		txHashes[i] = tx.Hash()
 	})
@@ -136,10 +135,10 @@ func TestTraceTransactionPrecompileActivation(t *testing.T) {
 
 	// Initialize test accounts
 	accounts := newAccounts(3)
-	copyConfig := *params.TestChainConfig
+	copyConfig := params.Copy(params.TestChainConfig)
 	genesis := &core.Genesis{
 		Config: &copyConfig,
-		Alloc: core.GenesisAlloc{
+		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
 			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
 			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
@@ -148,17 +147,17 @@ func TestTraceTransactionPrecompileActivation(t *testing.T) {
 	activateAllowlistBlock := uint64(2)
 	// assumes gap is 10 sec
 	activateAllowListTime := activateAllowlistBlock * 10
-	activateTxAllowListConfig := params.PrecompileUpgrade{
+	activateTxAllowListConfig := extras.PrecompileUpgrade{
 		Config: txallowlist.NewConfig(&activateAllowListTime, []common.Address{accounts[0].addr}, nil, nil),
 	}
 
 	deactivateAllowlistBlock := activateAllowlistBlock + 2
 	deactivateAllowListTime := deactivateAllowlistBlock * 10
-	deactivateTxAllowListConfig := params.PrecompileUpgrade{
+	deactivateTxAllowListConfig := extras.PrecompileUpgrade{
 		Config: txallowlist.NewDisableConfig(&deactivateAllowListTime),
 	}
 
-	genesis.Config.PrecompileUpgrades = []params.PrecompileUpgrade{
+	params.GetExtra(genesis.Config).PrecompileUpgrades = []extras.PrecompileUpgrade{
 		activateTxAllowListConfig,
 		deactivateTxAllowListConfig,
 	}
@@ -169,7 +168,7 @@ func TestTraceTransactionPrecompileActivation(t *testing.T) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), params.TxGas, new(big.Int).Add(b.BaseFee(), big.NewInt(int64(500*params.GWei))), nil), signer, accounts[0].key)
+		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, new(big.Int).Add(b.BaseFee(), big.NewInt(int64(500*params.GWei))), nil), signer, accounts[0].key)
 		b.AddTx(tx)
 		blockNoTxMap[uint64(i)] = tx.Hash()
 	})
@@ -185,7 +184,7 @@ func TestTraceTransactionPrecompileActivation(t *testing.T) {
 			err = json.Unmarshal(result.(json.RawMessage), &have)
 			require.NoError(err)
 			expected := &logger.ExecutionResult{
-				Gas:         params.TxGas,
+				Gas:         ethparams.TxGas,
 				Failed:      false,
 				ReturnValue: "",
 				StructLogs:  []logger.StructLogRes{},
@@ -200,10 +199,10 @@ func TestTraceChainPrecompileActivation(t *testing.T) {
 	// Initialize test accounts
 	// Note: the balances in this test have been increased compared to go-ethereum.
 	accounts := newAccounts(3)
-	copyConfig := *params.TestChainConfig
+	copyConfig := params.Copy(params.TestChainConfig)
 	genesis := &core.Genesis{
 		Config: &copyConfig,
-		Alloc: core.GenesisAlloc{
+		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: big.NewInt(5 * params.Ether)},
 			accounts[1].addr: {Balance: big.NewInt(5 * params.Ether)},
 			accounts[2].addr: {Balance: big.NewInt(5 * params.Ether)},
@@ -212,17 +211,17 @@ func TestTraceChainPrecompileActivation(t *testing.T) {
 	activateAllowlistBlock := uint64(20)
 	// assumes gap is 10 sec
 	activateAllowListTime := activateAllowlistBlock * 10
-	activateTxAllowListConfig := params.PrecompileUpgrade{
+	activateTxAllowListConfig := extras.PrecompileUpgrade{
 		Config: txallowlist.NewConfig(&activateAllowListTime, []common.Address{accounts[0].addr}, nil, nil),
 	}
 
 	deactivateAllowlistBlock := activateAllowlistBlock + 10
 	deactivateAllowListTime := deactivateAllowlistBlock * 10
-	deactivateTxAllowListConfig := params.PrecompileUpgrade{
+	deactivateTxAllowListConfig := extras.PrecompileUpgrade{
 		Config: txallowlist.NewDisableConfig(&deactivateAllowListTime),
 	}
 
-	genesis.Config.PrecompileUpgrades = []params.PrecompileUpgrade{
+	params.GetExtra(genesis.Config).PrecompileUpgrades = []extras.PrecompileUpgrade{
 		activateTxAllowListConfig,
 		deactivateTxAllowListConfig,
 	}
@@ -239,7 +238,7 @@ func TestTraceChainPrecompileActivation(t *testing.T) {
 		//    value: 1000 wei
 		//    fee:   0 wei
 		for j := 0; j < i+1; j++ {
-			tx, _ := types.SignTx(types.NewTransaction(nonce, accounts[1].addr, big.NewInt(1000), params.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
+			tx, _ := types.SignTx(types.NewTransaction(nonce, accounts[1].addr, big.NewInt(1000), ethparams.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
 			b.AddTx(tx)
 			nonce += 1
 		}
@@ -297,10 +296,10 @@ func TestTraceCallWithOverridesStateUpgrade(t *testing.T) {
 
 	// Initialize test accounts
 	accounts := newAccounts(3)
-	copyConfig := *params.TestChainConfig
+	copyConfig := params.Copy(params.TestChainConfig)
 	genesis := &core.Genesis{
 		Config: &copyConfig,
-		Alloc: core.GenesisAlloc{
+		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: big.NewInt(5 * params.Ether)},
 			accounts[1].addr: {Balance: big.NewInt(5 * params.Ether)},
 			accounts[2].addr: {Balance: big.NewInt(5 * params.Ether)},
@@ -309,9 +308,9 @@ func TestTraceCallWithOverridesStateUpgrade(t *testing.T) {
 	activateStateUpgradeBlock := uint64(2)
 	// assumes gap is 10 sec
 	activateStateUpgradeTime := activateStateUpgradeBlock * 10
-	activateStateUpgradeConfig := params.StateUpgrade{
+	activateStateUpgradeConfig := extras.StateUpgrade{
 		BlockTimestamp: &activateStateUpgradeTime,
-		StateUpgradeAccounts: map[common.Address]params.StateUpgradeAccount{
+		StateUpgradeAccounts: map[common.Address]extras.StateUpgradeAccount{
 			accounts[2].addr: {
 				// deplete all balance
 				BalanceChange: (*math.HexOrDecimal256)(new(big.Int).Neg(big.NewInt(5 * params.Ether))),
@@ -319,7 +318,7 @@ func TestTraceCallWithOverridesStateUpgrade(t *testing.T) {
 		},
 	}
 
-	genesis.Config.StateUpgrades = []params.StateUpgrade{
+	params.GetExtra(genesis.Config).StateUpgrades = []extras.StateUpgrade{
 		activateStateUpgradeConfig,
 	}
 	genBlocks := 3
@@ -330,7 +329,7 @@ func TestTraceCallWithOverridesStateUpgrade(t *testing.T) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), params.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
+		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
 		b.AddTx(tx)
 	})
 	defer backend.teardown()

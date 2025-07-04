@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
@@ -38,9 +37,9 @@ var (
 
 // GetAllowListStatus returns the allow list role of [address] for the precompile
 // at [precompileAddr]
-func GetAllowListStatus(state contract.StateDB, precompileAddr common.Address, address common.Address) Role {
+func GetAllowListStatus(state contract.StateReader, precompileAddr common.Address, address common.Address) Role {
 	// Generate the state key for [address]
-	addressKey := address.Hash()
+	addressKey := common.BytesToHash(address.Bytes())
 	return Role(state.GetState(precompileAddr, addressKey))
 }
 
@@ -49,7 +48,7 @@ func GetAllowListStatus(state contract.StateDB, precompileAddr common.Address, a
 // assumes [role] has already been verified as valid.
 func SetAllowListRole(stateDB contract.StateDB, precompileAddr, address common.Address, role Role) {
 	// Generate the state key for [address]
-	addressKey := address.Hash()
+	addressKey := common.BytesToHash(address.Bytes())
 	// Assign [role] to the address
 	// This stores the [role] in the contract storage with address [precompileAddr]
 	// and [addressKey] hash. It means that any reusage of the [addressKey] for different value
@@ -81,15 +80,15 @@ func UnpackModifyAllowListInput(input []byte, r Role, useStrictMode bool) (commo
 }
 
 // createAllowListRoleSetter returns an execution function for setting the allow list status of the input address argument to [role].
-// This execution function is speciifc to [precompileAddr].
+// This execution function is specific to [precompileAddr].
 func createAllowListRoleSetter(precompileAddr common.Address, role Role) contract.RunStatefulPrecompileFunc {
 	return func(evm contract.AccessibleState, callerAddr, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 		if remainingGas, err = contract.DeductGas(suppliedGas, ModifyAllowListGasCost); err != nil {
 			return nil, 0, err
 		}
 
-		// do not use strict mode after DUpgrade
-		useStrictMode := !contract.IsDUpgradeActivated(evm)
+		// do not use strict mode after Durango
+		useStrictMode := !contract.IsDurangoActivated(evm)
 		modifyAddress, err := UnpackModifyAllowListInput(input, role, useStrictMode)
 
 		if err != nil {
@@ -97,7 +96,7 @@ func createAllowListRoleSetter(precompileAddr common.Address, role Role) contrac
 		}
 
 		if readOnly {
-			return nil, remainingGas, vmerrs.ErrWriteProtection
+			return nil, remainingGas, vm.ErrWriteProtection
 		}
 
 		stateDB := evm.GetStateDB()
@@ -109,7 +108,7 @@ func createAllowListRoleSetter(precompileAddr common.Address, role Role) contrac
 		if !callerStatus.CanModify(modifyStatus, role) {
 			return nil, remainingGas, fmt.Errorf("%w: modify address: %s, from role: %s, to role: %s", ErrCannotModifyAllowList, callerAddr, modifyStatus, role)
 		}
-		if contract.IsDUpgradeActivated(evm) {
+		if contract.IsDurangoActivated(evm) {
 			if remainingGas, err = contract.DeductGas(remainingGas, AllowListEventGasCost); err != nil {
 				return nil, 0, err
 			}
@@ -117,12 +116,12 @@ func createAllowListRoleSetter(precompileAddr common.Address, role Role) contrac
 			if err != nil {
 				return nil, remainingGas, err
 			}
-			stateDB.AddLog(
-				precompileAddr,
-				topics,
-				data,
-				evm.GetBlockContext().Number().Uint64(),
-			)
+			stateDB.AddLog(&types.Log{
+				Address:     precompileAddr,
+				Topics:      topics,
+				Data:        data,
+				BlockNumber: evm.GetBlockContext().Number().Uint64(),
+			})
 		}
 
 		SetAllowListRole(stateDB, precompileAddr, modifyAddress, role)
@@ -159,8 +158,8 @@ func createReadAllowList(precompileAddr common.Address) contract.RunStatefulPrec
 			return nil, 0, err
 		}
 
-		// We skip the fixed length check with DUpgrade
-		useStrictMode := !contract.IsDUpgradeActivated(evm)
+		// We skip the fixed length check with Durango
+		useStrictMode := !contract.IsDurangoActivated(evm)
 		readAddress, err := UnpackReadAllowListInput(input, useStrictMode)
 		if err != nil {
 			return nil, remainingGas, err
@@ -200,7 +199,7 @@ func CreateAllowListFunctions(precompileAddr common.Address) []*contract.Statefu
 		} else if noRoleFnName, _ := NoRole.GetSetterFunctionName(); name == noRoleFnName {
 			fn = contract.NewStatefulPrecompileFunction(method.ID, createAllowListRoleSetter(precompileAddr, NoRole))
 		} else if managerFnName, _ := ManagerRole.GetSetterFunctionName(); name == managerFnName {
-			fn = contract.NewStatefulPrecompileFunctionWithActivator(method.ID, createAllowListRoleSetter(precompileAddr, ManagerRole), contract.IsDUpgradeActivated)
+			fn = contract.NewStatefulPrecompileFunctionWithActivator(method.ID, createAllowListRoleSetter(precompileAddr, ManagerRole), contract.IsDurangoActivated)
 		} else {
 			panic(fmt.Sprintf("unexpected method name: %s", name))
 		}
