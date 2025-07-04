@@ -12,15 +12,15 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/predicate"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/snow/choices"
-	"github.com/luxdefi/node/snow/consensus/snowman"
-	"github.com/luxdefi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/choices"
+	"github.com/luxfi/node/snow/consensus/snowman"
+	"github.com/luxfi/node/snow/engine/snowman/block"
 )
 
 var (

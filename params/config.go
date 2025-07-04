@@ -29,7 +29,7 @@ package params
 import (
 	"math/big"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/node/snow"
+	"github.com/luxfi/node/snow"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
@@ -271,9 +271,9 @@ func (c *ChainConfig) Description() string {
 		banner += fmt.Sprintf(" - Muir Glacier:                #%-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/muir-glacier.md)\n", c.MuirGlacierBlock)
 	}
 	banner += "Mandatory Upgrades:\n"
-	banner += fmt.Sprintf(" - SubnetEVM Timestamp:           @%-10v (https://github.com/luxdefi/node/releases/tag/v1.10.0)\n", ptrToString(c.SubnetEVMTimestamp))
-	banner += fmt.Sprintf(" - DUpgrade Timestamp:            @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(c.DUpgradeTimestamp))
-	banner += fmt.Sprintf(" - Cancun Timestamp:              @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(c.CancunTime))
+	banner += fmt.Sprintf(" - SubnetEVM Timestamp:           @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(c.SubnetEVMTimestamp))
+	banner += fmt.Sprintf(" - DUpgrade Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.11.0)\n", ptrToString(c.DUpgradeTimestamp))
+	banner += fmt.Sprintf(" - Cancun Timestamp:              @%-10v (https://github.com/luxfi/node/releases/tag/v1.11.0)\n", ptrToString(c.CancunTime))
 	banner += "\n"
 
 	// Add EVM custom fields

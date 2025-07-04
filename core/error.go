@@ -28,7 +28,7 @@ package core
 
 import (
 	"errors"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 var (

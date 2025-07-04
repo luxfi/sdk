@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxfi/node/utils/wrappers"
 	safemath "github.com/ethereum/go-ethereum/common/math"
 )
 

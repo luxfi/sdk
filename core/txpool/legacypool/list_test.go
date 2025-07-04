@@ -31,7 +31,7 @@ import (
 	"math/rand"
 	"testing"
 <<<<<<< HEAD:core/txpool/list_test.go
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 =======
 	"github.com/ethereum/go-ethereum/common"

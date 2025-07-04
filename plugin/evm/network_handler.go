@@ -5,14 +5,14 @@ package evm
 
 import (
 	"context"
-	"github.com/luxdefi/node/codec"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/evm/ethdb"
-	"github.com/luxdefi/evm/metrics"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/luxdefi/evm/plugin/evm/message"
 	syncHandlers "github.com/luxdefi/evm/sync/handlers"
 	syncStats "github.com/luxdefi/evm/sync/handlers/stats"
-	"github.com/luxdefi/evm/trie"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/luxdefi/evm/warp"
 	warpHandlers "github.com/luxdefi/evm/warp/handlers"
 )

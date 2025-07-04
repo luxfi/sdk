@@ -12,7 +12,7 @@ package interfaces
 import (
 	reflect "reflect"
 
-	ids "github.com/luxdefi/node/ids"
+	ids "github.com/luxfi/node/ids"
 	gomock "go.uber.org/mock/gomock"
 )
 

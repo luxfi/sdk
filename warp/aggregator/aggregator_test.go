@@ -9,9 +9,9 @@ import (
 	"testing"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/crypto/bls"
-	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/crypto/bls"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 )
 
 func newValidator(t testing.TB, weight uint64) (*bls.SecretKey, *luxWarp.Validator) {

@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxdefi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/snow/uptime"
-	"github.com/luxdefi/node/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/uptime"
+	"github.com/luxfi/node/utils/set"
 )
 
 var errPausedDisconnect = errors.New("paused node cannot be disconnected")

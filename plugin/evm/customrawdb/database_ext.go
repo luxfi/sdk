@@ -8,7 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/interfaces/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 // InspectDatabase traverses the entire database and checks the size

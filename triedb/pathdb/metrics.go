@@ -30,7 +30,7 @@ import (
 	"github.com/luxdefi/evm/interfaces/metrics"
 
 	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/luxdefi/evm/interfaces/triedb/pathdb"
+	_ "github.com/ethereum/go-ethereum/triedb/pathdb"
 )
 
 // ====== If resolving merge conflicts ======

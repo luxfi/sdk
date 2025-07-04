@@ -5,11 +5,11 @@
 package precompileconfig
 
 import (
-	"github.com/luxdefi/node/chains/atomic"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/snow"
-	"github.com/luxdefi/node/snow/engine/snowman/block"
-	"github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/chains/atomic"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/ethereum/go-ethereum/common"
 )

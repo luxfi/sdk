@@ -5,7 +5,7 @@ package interfaces
 
 import (
 	"context"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

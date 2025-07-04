@@ -23,10 +23,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/luxdefi/evm/interfaces/ethdb"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	"github.com/ethereum/go-ethereum/ethdb"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/params"
 	"github.com/stretchr/testify/require"

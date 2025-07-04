@@ -16,7 +16,7 @@ import (
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 )
 
 const (

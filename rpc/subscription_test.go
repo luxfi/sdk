@@ -39,7 +39,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 
 	// Side effect: registration of libevm extras.
 	_ "github.com/luxdefi/evm/plugin/evm/customtypes"

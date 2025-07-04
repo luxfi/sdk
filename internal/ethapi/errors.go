@@ -30,7 +30,7 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxdefi/evm/accounts/abi"
 )
 

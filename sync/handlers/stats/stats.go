@@ -5,7 +5,7 @@ package stats
 
 import (
 	"time"
-	"github.com/luxdefi/evm/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 // HandlerStats reports prometheus metrics for the state sync handlers

@@ -6,9 +6,9 @@ package extras
 import (
 	"testing"
 
-	"github.com/luxdefi/node/upgrade"
-	"github.com/luxdefi/node/upgrade/upgradetest"
-	"github.com/luxdefi/node/utils/constants"
+	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/node/utils/constants"
 	"github.com/luxdefi/evm/utils"
 	"github.com/stretchr/testify/require"
 )

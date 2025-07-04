@@ -10,7 +10,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	ethrawdb "github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/interfaces/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxdefi/evm/params"

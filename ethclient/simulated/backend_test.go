@@ -25,9 +25,9 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/rpc"

@@ -37,7 +37,7 @@ import (
 	// TODO(arr4n) These tests were originally part of the `subnet-evm/core/types`
 	// package so assume the presence of identifiers. A dot-import reduces PR
 	// noise during the refactoring.
-	. "github.com/luxdefi/evm/core/types"
+	. "github.com/ethereum/go-ethereum/core/types"
 )
 
 type devnull struct{ len int }

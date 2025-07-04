@@ -6,7 +6,7 @@ package rewardmanager
 import (
 	"testing"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"github.com/luxdefi/evm/commontype"

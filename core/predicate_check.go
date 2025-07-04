@@ -6,8 +6,8 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/luxdefi/node/utils/set"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/luxfi/node/utils/set"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/predicate"

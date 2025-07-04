@@ -32,29 +32,21 @@ import (
 	"reflect"
 	"sync"
 	"time"
-<<<<<<< HEAD:trie/triedb/hashdb/database.go
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/ethdb"
-	"github.com/luxdefi/evm/metrics"
-	"github.com/luxdefi/evm/trie/trienode"
+	
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/libevm/stateconf"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/rlp"
-=======
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/interfaces/ethdb"
-	"github.com/luxdefi/evm/interfaces/libevm/stateconf"
-	"github.com/luxdefi/evm/interfaces/metrics"
-	"github.com/luxdefi/evm/interfaces/trie"
-	"github.com/luxdefi/evm/interfaces/trie/trienode"
-	"github.com/luxdefi/evm/interfaces/trie/triestate"
-	"github.com/luxdefi/evm/interfaces/triedb"
-	"github.com/luxdefi/evm/interfaces/triedb/database"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/ethereum/go-ethereum/trie/triestate"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/triedb/database"
 	"github.com/luxdefi/evm/utils"
-	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/luxdefi/evm/interfaces/triedb/hashdb"
->>>>>>> v0.7.5:triedb/hashdb/database.go
 )
 
 const (

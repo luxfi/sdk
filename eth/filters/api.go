@@ -34,7 +34,7 @@ import (
 	"math/big"
 	"sync"
 	"time"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/interfaces"
 	"github.com/luxdefi/evm/internal/ethapi"
 	"github.com/luxdefi/evm/rpc"

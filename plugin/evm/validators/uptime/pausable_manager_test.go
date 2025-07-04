@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/snow/uptime"
-	"github.com/luxdefi/node/utils/timer/mockable"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/uptime"
+	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxdefi/evm/plugin/evm/validators/uptime/interfaces"
 	"github.com/stretchr/testify/require"
 )

@@ -7,12 +7,12 @@ import (
 	"math"
 	"math/rand"
 	"time"
-	"github.com/luxdefi/node/ids"
-	utils_math "github.com/luxdefi/node/utils/math"
-	"github.com/luxdefi/node/utils/set"
-	"github.com/luxdefi/node/version"
+	"github.com/luxfi/node/ids"
+	utils_math "github.com/luxfi/node/utils/math"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/version"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 const (

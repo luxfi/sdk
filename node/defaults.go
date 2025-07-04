@@ -20,7 +20,7 @@ package memorydb
 
 import (
 	"testing"
-	"github.com/luxdefi/evm/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxdefi/evm/ethdb/dbtest"
 )
 

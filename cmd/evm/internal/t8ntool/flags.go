@@ -29,7 +29,7 @@ package t8ntool
 import (
 	"fmt"
 	"strings"
-	"github.com/luxdefi/evm/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxdefi/evm/tests"
 	"github.com/urfave/cli/v2"
 )

@@ -34,9 +34,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/luxdefi/evm/interfaces/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/interfaces/trie/trienode"
+	"github.com/ethereum/go-ethereum/trie/trienode"
 )
 
 // nodebuffer is a collection of modified trie nodes to aggregate the disk

@@ -34,14 +34,14 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/interfaces/ethdb"
-	"github.com/luxdefi/evm/interfaces/libevm/stateconf"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/libevm/stateconf"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/interfaces/trie/trienode"
-	"github.com/luxdefi/evm/interfaces/trie/triestate"
-	"github.com/luxdefi/evm/interfaces/triedb"
-	"github.com/luxdefi/evm/interfaces/triedb/database"
+	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/ethereum/go-ethereum/trie/triestate"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/triedb/database"
 	"github.com/luxdefi/evm/params"
 )
 

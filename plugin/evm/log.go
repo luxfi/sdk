@@ -12,7 +12,7 @@ import (
 
 	ethlog "github.com/ethereum/go-ethereum/log"
 	"github.com/luxdefi/evm/log"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 type SubnetEVMLogger struct {

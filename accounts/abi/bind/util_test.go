@@ -35,7 +35,7 @@ import (
 	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/luxdefi/evm/accounts/abi/bind/backends"
 	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

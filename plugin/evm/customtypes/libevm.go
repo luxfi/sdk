@@ -6,7 +6,7 @@ package customtypes
 import (
 	"io"
 
-	ethtypes "github.com/luxdefi/evm/core/types"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 

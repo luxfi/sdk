@@ -35,12 +35,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxdefi/evm/interfaces/trie/testutil"
-	"github.com/luxdefi/evm/interfaces/trie/trienode"
-	"github.com/luxdefi/evm/interfaces/trie/triestate"
+	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/ethereum/go-ethereum/trie/triestate"
 	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 )

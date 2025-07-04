@@ -31,8 +31,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxdefi/evm/core/types"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	"github.com/ethereum/go-ethereum/core/types"
+	ethparams "github.com/ethereum/go-ethereum/params"
 )
 
 var (

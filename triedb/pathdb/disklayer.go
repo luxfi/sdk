@@ -36,8 +36,8 @@ import (
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/interfaces/trie/trienode"
-	"github.com/luxdefi/evm/interfaces/trie/triestate"
+	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/ethereum/go-ethereum/trie/triestate"
 	"golang.org/x/crypto/sha3"
 )
 

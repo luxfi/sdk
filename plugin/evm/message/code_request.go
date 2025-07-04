@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/ethereum/go-ethereum/common"
 )
 

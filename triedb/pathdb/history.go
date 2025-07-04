@@ -33,8 +33,8 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/trie/triestate"
-	"golang.org/x/exp/slices"
+	"github.com/ethereum/go-ethereum/trie/triestate"
+	"slices"
 )
 
 // State history records the state changes involved in executing a block. The

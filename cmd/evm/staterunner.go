@@ -32,7 +32,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxdefi/evm/eth/tracers/logger"
 	"github.com/luxdefi/evm/tests"
 	"github.com/ethereum/go-ethereum/common"

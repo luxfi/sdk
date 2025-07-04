@@ -34,7 +34,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxdefi/evm/core"
 )

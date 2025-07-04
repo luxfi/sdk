@@ -9,7 +9,7 @@ import (
 	"github.com/luxdefi/evm/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/luxdefi/evm/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 func TestGatherer_Gather(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 <<<<<<< HEAD:x/warp/contract.go
-	"github.com/luxdefi/node/vms/platformvm/warp"
-	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/precompile/contract"
@@ -17,8 +17,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 =======
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 >>>>>>> v0.7.5:precompile/contracts/warp/contract.go
 )
 

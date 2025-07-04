@@ -39,7 +39,7 @@ import (
 	"github.com/luxdefi/evm/vmerrs"
 	_ "embed"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 )
 {{$contract := .Contract}}
 const (

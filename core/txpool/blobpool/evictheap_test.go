@@ -32,7 +32,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/holiman/uint256"
 )
 

@@ -30,9 +30,9 @@ import (
 	"math/big"
 	"testing"
 <<<<<<< HEAD:core/txpool/txpool2_test.go
-	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/event"

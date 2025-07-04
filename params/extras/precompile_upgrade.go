@@ -13,7 +13,7 @@ import (
 	"github.com/luxdefi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 =======
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 >>>>>>> v0.7.5:params/extras/precompile_upgrade.go
 )
 

@@ -33,13 +33,13 @@ import (
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/constants"
-	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/core/vm"
-	"github.com/luxdefi/evm/ethdb"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/trie"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/ethereum/go-ethereum/common"
 )
 
