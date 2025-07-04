@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -72,7 +72,7 @@ func NewEVMInterpreter(evm *EVM) *EVMInterpreter {
 	switch {
 	case evm.chainRules.IsDUpgrade:
 		table = &dUpgradeInstructionSet
-	case evm.chainRules.IsEVM:
+	case evm.chainRules.IsSubnetEVM:
 		table = &subnetEVMInstructionSet
 	case evm.chainRules.IsIstanbul:
 		table = &istanbulInstructionSet

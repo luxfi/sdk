@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited.
+// (c) 2023, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,18 +30,12 @@ import (
 	"math/big"
 	"testing"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/core/types"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/event"
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
 )
 
 func pricedValuedTransaction(nonce uint64, value int64, gaslimit uint64, gasprice *big.Int, key *ecdsa.PrivateKey) *types.Transaction {

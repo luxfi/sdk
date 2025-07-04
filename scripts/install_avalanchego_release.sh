@@ -21,12 +21,12 @@ LUXD_BUILD_PATH=${LUXD_BUILD_PATH:-${BASEDIR}/node}
 
 mkdir -p ${BASEDIR}
 
-AVAGO_DOWNLOAD_URL=https://github.com/luxdefi/node/releases/download/${LUX_VERSION}/node-linux-${GOARCH}-${LUX_VERSION}.tar.gz
-AVAGO_DOWNLOAD_PATH=${BASEDIR}/node-linux-${GOARCH}-${LUX_VERSION}.tar.gz
+LUXD_DOWNLOAD_URL=https://github.com/luxdefi/node/releases/download/${LUX_VERSION}/node-linux-${GOARCH}-${LUX_VERSION}.tar.gz
+LUXD_DOWNLOAD_PATH=${BASEDIR}/node-linux-${GOARCH}-${LUX_VERSION}.tar.gz
 
 if [[ ${GOOS} == "darwin" ]]; then
-  AVAGO_DOWNLOAD_URL=https://github.com/luxdefi/node/releases/download/${LUX_VERSION}/node-macos-${LUX_VERSION}.zip
-  AVAGO_DOWNLOAD_PATH=${BASEDIR}/node-macos-${LUX_VERSION}.zip
+  LUXD_DOWNLOAD_URL=https://github.com/luxdefi/node/releases/download/${LUX_VERSION}/node-macos-${LUX_VERSION}.zip
+  LUXD_DOWNLOAD_PATH=${BASEDIR}/node-macos-${LUX_VERSION}.zip
 fi
 
 BUILD_DIR=${LUXD_BUILD_PATH}-${LUX_VERSION}
@@ -34,27 +34,27 @@ BUILD_DIR=${LUXD_BUILD_PATH}-${LUX_VERSION}
 extract_archive() {
   mkdir -p ${BUILD_DIR}
 
-  if [[ ${AVAGO_DOWNLOAD_PATH} == *.tar.gz ]]; then
-    tar xzvf ${AVAGO_DOWNLOAD_PATH} --directory ${BUILD_DIR} --strip-components 1
-  elif [[ ${AVAGO_DOWNLOAD_PATH} == *.zip ]]; then
-    unzip ${AVAGO_DOWNLOAD_PATH} -d ${BUILD_DIR}
+  if [[ ${LUXD_DOWNLOAD_PATH} == *.tar.gz ]]; then
+    tar xzvf ${LUXD_DOWNLOAD_PATH} --directory ${BUILD_DIR} --strip-components 1
+  elif [[ ${LUXD_DOWNLOAD_PATH} == *.zip ]]; then
+    unzip ${LUXD_DOWNLOAD_PATH} -d ${BUILD_DIR}
     mv ${BUILD_DIR}/build/* ${BUILD_DIR}
     rm -rf ${BUILD_DIR}/build/
   fi
 }
 
 # first check if we already have the archive
-if [[ -f ${AVAGO_DOWNLOAD_PATH} ]]; then
+if [[ -f ${LUXD_DOWNLOAD_PATH} ]]; then
   # if the download path already exists, extract and exit
-  echo "found node ${LUX_VERSION} at ${AVAGO_DOWNLOAD_PATH}"
+  echo "found node ${LUX_VERSION} at ${LUXD_DOWNLOAD_PATH}"
 
   extract_archive
 else
   # try to download the archive if it exists
-  if curl -s --head --request GET ${AVAGO_DOWNLOAD_URL} | grep "302" > /dev/null; then
-    echo "${AVAGO_DOWNLOAD_URL} found"
-    echo "downloading to ${AVAGO_DOWNLOAD_PATH}"
-    curl -L ${AVAGO_DOWNLOAD_URL} -o ${AVAGO_DOWNLOAD_PATH}
+  if curl -s --head --request GET ${LUXD_DOWNLOAD_URL} | grep "302" > /dev/null; then
+    echo "${LUXD_DOWNLOAD_URL} found"
+    echo "downloading to ${LUXD_DOWNLOAD_PATH}"
+    curl -L ${LUXD_DOWNLOAD_URL} -o ${LUXD_DOWNLOAD_PATH}
 
     extract_archive
   else
@@ -80,7 +80,6 @@ else
     set +e
     # try to checkout the branch
     git checkout origin/${LUX_VERSION} > /dev/null 2>&1
-
     CHECKOUT_STATUS=$?
     set -e
 
@@ -124,11 +123,6 @@ mkdir -p ${LUXD_BUILD_PATH}
 cp ${BUILD_DIR}/node ${LUXD_PATH}
 
 
-<<<<<<< HEAD
-echo "Installed Lux Node release ${LUX_VERSION}"
-echo "Lux Node Path: ${LUXD_PATH}"
-=======
-echo "Installed Luxd release ${LUX_VERSION}"
-echo "Luxd Path: ${LUXD_PATH}"
->>>>>>> b36c20f (Update executable to luxd)
+echo "Installed Lux release ${LUX_VERSION}"
+echo "Lux Path: ${LUXD_PATH}"
 echo "Plugin Dir: ${LUXD_PLUGIN_DIR}"

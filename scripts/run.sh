@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-# This script starts N nodes (TODO N instead of 5) and waits for ctrl-c to shutdown the process group of Luxd processes
-# Uses data directory to store all Luxd data neatly in one location with minimal config overhead
+# This script starts N nodes (TODO N instead of 5) and waits for ctrl-c to shutdown the process group of Lux processes
+# Uses data directory to store all Lux data neatly in one location with minimal config overhead
 if ! [[ "$0" =~ scripts/run.sh ]]; then
   echo "must be run from repository root, but got $0"
   exit 255
@@ -19,21 +19,10 @@ source "$SUBNET_EVM_PATH"/scripts/versions.sh
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
 # Set up lux binary path and assume build directory is set
-<<<<<<< HEAD
-LUXGO_BUILD_PATH=${LUXGO_BUILD_PATH:-"$GOPATH/src/github.com/luxdefi/node/build"}
-LUXGO_PATH=${LUXGO_PATH:-"$LUXGO_BUILD_PATH/node"}
-LUXGO_PLUGIN_DIR=${LUXGO_PLUGIN_DIR:-"$LUXGO_BUILD_PATH/plugins"}
-DATA_DIR=${DATA_DIR:-/tmp/evm-start-node/$(date "+%Y-%m-%d%:%H:%M:%S")}
-=======
 LUXD_BUILD_PATH=${LUXD_BUILD_PATH:-"$GOPATH/src/github.com/luxdefi/node/build"}
 LUXD_PATH=${LUXD_PATH:-"$LUXD_BUILD_PATH/node"}
 LUXD_PLUGIN_DIR=${LUXD_PLUGIN_DIR:-"$LUXD_BUILD_PATH/plugins"}
-<<<<<<< HEAD
-DATA_DIR=${DATA_DIR:-/tmp/subnet-evm-start-node/$(date "+%Y-%m-%d%:%H:%M:%S")}
->>>>>>> b36c20f (Update executable to luxd)
-=======
 DATA_DIR=${DATA_DIR:-/tmp/evm-start-node/$(date "+%Y-%m-%d%:%H:%M:%S")}
->>>>>>> fd08c47 (Update import path)
 
 mkdir -p $DATA_DIR
 

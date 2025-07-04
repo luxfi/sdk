@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package nativeminter
@@ -9,16 +9,6 @@ import (
 	"fmt"
 	"math/big"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-	"github.com/luxdefi/evm/precompile/allowlist"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/vmerrs"
-=======
->>>>>>> fd08c47 (Update import path)
-	"github.com/ethereum/go-ethereum/common"
-=======
->>>>>>> d5328b4 (Sync upstream)
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
@@ -61,29 +51,9 @@ func SetContractNativeMinterStatus(stateDB contract.StateDB, address common.Addr
 	allowlist.SetAllowListRole(stateDB, ContractAddress, address, role)
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // PackMintNativeCoin packs [address] and [amount] into the appropriate arguments for mintNativeCoin.
 func PackMintNativeCoin(address common.Address, amount *big.Int) ([]byte, error) {
 	return NativeMinterABI.Pack("mintNativeCoin", address, amount)
-=======
-// PackMintInput packs [address] and [amount] into the appropriate arguments for minting operation.
-// Assumes that [amount] can be represented by 32 bytes.
-func PackMintInput(address common.Address, amount *big.Int) ([]byte, error) {
-	// function selector (4 bytes) + input(hash for address + hash for amount)
-	res := make([]byte, contract.SelectorLen+mintInputLen)
-	err := contract.PackOrderedHashesWithSelector(res, mintSignature, []common.Hash{
-		common.BytesToHash(address.Bytes()),
-		common.BigToHash(amount),
-	})
-
-	return res, err
->>>>>>> 9e0b39d (Update deps)
-=======
-// PackMintNativeCoin packs [address] and [amount] into the appropriate arguments for mintNativeCoin.
-func PackMintNativeCoin(address common.Address, amount *big.Int) ([]byte, error) {
-	return NativeMinterABI.Pack("mintNativeCoin", address, amount)
->>>>>>> d5328b4 (Sync upstream)
 }
 
 // UnpackMintNativeCoinInput attempts to unpack [input] as address and amount.
@@ -142,7 +112,6 @@ func mintNativeCoin(accessibleState contract.AccessibleState, caller common.Addr
 			accessibleState.GetBlockContext().Number().Uint64(),
 		)
 	}
-
 	// if there is no address in the state, create one.
 	if !stateDB.Exist(to) {
 		stateDB.CreateAccount(to)

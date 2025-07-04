@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -51,7 +51,7 @@ func MakeSigner(config *params.ChainConfig, blockNumber *big.Int, blockTime uint
 	switch {
 	case config.IsCancun(blockTime):
 		return NewCancunSigner(config.ChainID)
-	case config.IsEVM(blockTime):
+	case config.IsSubnetEVM(blockTime):
 		return NewLondonSigner(config.ChainID)
 	case config.IsEIP155(blockNumber):
 		return NewEIP155Signer(config.ChainID)
@@ -74,7 +74,7 @@ func LatestSigner(config *params.ChainConfig) Signer {
 		if config.CancunTime != nil {
 			return NewCancunSigner(config.ChainID)
 		}
-		if config.EVMTimestamp != nil {
+		if config.SubnetEVMTimestamp != nil {
 			return NewLondonSigner(config.ChainID)
 		}
 		if config.EIP155Block != nil {

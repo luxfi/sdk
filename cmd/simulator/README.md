@@ -30,12 +30,12 @@ v0.1.0
 
 To run the load simulator, you must first start an EVM based network. The load simulator works on both the C-Chain and EVM, so we will start a single node network and run the load simulator on the C-Chain.
 
-To start a single node network, follow the instructions from the Luxd [README](https://github.com/luxdefi/node#building-node) to build from source.
+To start a single node network, follow the instructions from the Lux [README](https://github.com/luxdefi/node#building-node) to build from source.
 
-Once you've built Luxd, open the Luxd directory in a separate terminal window and run a single node non-staking network with the following command:
+Once you've built Lux, open the Lux directory in a separate terminal window and run a single node non-staking network with the following command:
 
 ```bash
-./build/luxd --sybil-protection-enabled=false --network-id=local
+./build/node --sybil-protection-enabled=false --network-id=local
 ```
 
 WARNING:
@@ -45,11 +45,7 @@ The staking-enabled flag is only for local testing. Disabling staking serves two
 1. Ignore stake weight on the P-Chain and count each connected peer as having a stake weight of 1
 2. Automatically opts in to validate every Subnet
 
-<<<<<<< HEAD
 Once you have Lux running locally, it will be running an HTTP Server on the default port `9650`. This means that the RPC Endpoint for the C-Chain will be http://127.0.0.1:9650/ext/bc/C/rpc and ws://127.0.0.1:9650/ext/bc/C/ws for WebSocket connections.
-=======
-Once you have Luxd running locally, it will be running an HTTP Server on the default port `9650`. This means that the RPC Endpoint for the C-Chain will be http://127.0.0.1:9650/ext/bc/C/rpc and ws://127.0.0.1:9650/ext/bc/C/ws for WebSocket connections.
->>>>>>> b36c20f (Update executable to luxd)
 
 Now, we can run the simulator command to simulate some load on the local C-Chain for 30s:
 

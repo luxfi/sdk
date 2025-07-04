@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2021, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,8 +33,6 @@ import (
 	"strings"
 	"testing"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/core"
@@ -45,19 +43,8 @@ import (
 	"github.com/luxdefi/evm/eth/tracers"
 	"github.com/luxdefi/evm/eth/tracers/logger"
 	"github.com/luxdefi/evm/params"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/asm"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/consensus"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/core/vm"
-	"github.com/luxdefi/evm/eth/tracers"
-	"github.com/luxdefi/evm/eth/tracers/logger"
-	"github.com/luxdefi/evm/params"
 
 	// force-load js tracers to trigger registration
 	_ "github.com/luxdefi/evm/eth/tracers/js"

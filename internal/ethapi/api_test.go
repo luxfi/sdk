@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited.
+// (c) 2023, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -52,10 +52,6 @@ import (
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/rpc"
-<<<<<<< HEAD
-
-=======
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

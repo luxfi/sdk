@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,21 +33,13 @@ import (
 	"sort"
 	"testing"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/vmerrs"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/vmerrs"
 )
 
 func TestMemoryGasCost(t *testing.T) {
@@ -169,9 +161,9 @@ func TestCreateGas(t *testing.T) {
 				config.ExtraEips = []int{3860}
 			}
 
-			// Note: we use TestEVMConfig instead of AllEthashProtocolChanges (upstream)
+			// Note: we use TestSubnetEVMConfig instead of AllEthashProtocolChanges (upstream)
 			// because it is the last fork before the activation of EIP-3860
-			vmenv := NewEVM(vmctx, TxContext{}, statedb, params.TestEVMConfig, config)
+			vmenv := NewEVM(vmctx, TxContext{}, statedb, params.TestSubnetEVMConfig, config)
 			var startGas = uint64(testGas)
 			ret, gas, err := vmenv.Call(AccountRef(common.Address{}), address, nil, startGas, new(big.Int))
 			if err != nil {

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -62,7 +62,7 @@ var (
 	byzantiumInstructionSet        = newByzantiumInstructionSet()
 	constantinopleInstructionSet   = newConstantinopleInstructionSet()
 	istanbulInstructionSet         = newIstanbulInstructionSet()
-	subnetEVMInstructionSet        = newEVMInstructionSet()
+	subnetEVMInstructionSet        = newSubnetEVMInstructionSet()
 	dUpgradeInstructionSet         = newDUpgradeInstructionSet()
 )
 
@@ -90,21 +90,15 @@ func validate(jt JumpTable) JumpTable {
 // newDUpgradeInstructionSet returns the frontier, homestead, byzantium,
 // constantinople, istanbul, petersburg, evm, d-upgrade instructions.
 func newDUpgradeInstructionSet() JumpTable {
-	instructionSet := newEVMInstructionSet()
+	instructionSet := newSubnetEVMInstructionSet()
 	enable3855(&instructionSet) // PUSH0 instruction
 	enable3860(&instructionSet) // Limit and meter initcode
 	return validate(instructionSet)
 }
 
-<<<<<<< HEAD
 // newSubnetEVMInstructionSet returns the frontier, homestead, byzantium,
 // constantinople, istanbul, petersburg, evm instructions.
 func newSubnetEVMInstructionSet() JumpTable {
-=======
-// newEVMInstructionSet returns the frontier, homestead, byzantium,
-// constantinople, istanbul, petersburg, evm instructions.
-func newEVMInstructionSet() JumpTable {
->>>>>>> fd08c47 (Update import path)
 	instructionSet := newIstanbulInstructionSet()
 	enable2929(&instructionSet)
 	enable3198(&instructionSet) // Base fee opcode https://eips.ethereum.org/EIPS/eip-3198

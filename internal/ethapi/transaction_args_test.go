@@ -1,4 +1,4 @@
-// (c) 2022-2024, Lux Partners Limited.
+// (c) 2022, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -227,7 +227,7 @@ func newBackendMock() *backendMock {
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(1000),
+			SubnetEVMTimestamp: utils.NewUint64(1000),
 		},
 	}
 	return &backendMock{

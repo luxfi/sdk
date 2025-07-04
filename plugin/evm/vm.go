@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -20,8 +20,6 @@ import (
 	"github.com/luxdefi/node/network/p2p"
 	"github.com/luxdefi/node/network/p2p/gossip"
 	nodeConstants "github.com/luxdefi/node/utils/constants"
-	luxJSON "github.com/luxdefi/node/utils/json"
-	luxRPC "github.com/gorilla/rpc/v2"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/luxdefi/evm/commontype"
@@ -62,6 +60,8 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 
+	luxRPC "github.com/gorilla/rpc/v2"
+
 	"github.com/luxdefi/node/codec"
 	"github.com/luxdefi/node/database"
 	"github.com/luxdefi/node/database/prefixdb"
@@ -78,6 +78,8 @@ import (
 	"github.com/luxdefi/node/vms/components/chain"
 
 	commonEng "github.com/luxdefi/node/snow/engine/common"
+
+	luxJSON "github.com/luxdefi/node/utils/json"
 )
 
 var (
@@ -147,8 +149,8 @@ var (
 	errInvalidBlock                  = errors.New("invalid block")
 	errInvalidNonce                  = errors.New("invalid nonce")
 	errUnclesUnsupported             = errors.New("uncles unsupported")
-	errNilBaseFeeEVM           = errors.New("nil base fee is invalid after subnetEVM")
-	errNilBlockGasCostEVM      = errors.New("nil blockGasCost is invalid after subnetEVM")
+	errNilBaseFeeSubnetEVM           = errors.New("nil base fee is invalid after subnetEVM")
+	errNilBlockGasCostSubnetEVM      = errors.New("nil blockGasCost is invalid after subnetEVM")
 	errInvalidHeaderPredicateResults = errors.New("invalid header predicate results")
 )
 
@@ -238,7 +240,7 @@ type VM struct {
 
 	bootstrapped bool
 
-	logger EVMLogger
+	logger SubnetEVMLogger
 	// State sync server and client
 	StateSyncServer
 	StateSyncClient
@@ -284,7 +286,7 @@ func (vm *VM) Initialize(
 	}
 	vm.logger = subnetEVMLogger
 
-	log.Info("Initializing EVM VM", "Version", Version, "Config", vm.config)
+	log.Info("Initializing Subnet EVM VM", "Version", Version, "Config", vm.config)
 
 	if len(fxs) > 0 {
 		return errUnsupportedFXs
@@ -321,7 +323,7 @@ func (vm *VM) Initialize(
 	}
 
 	if g.Config == nil {
-		g.Config = params.EVMDefaultChainConfig
+		g.Config = params.SubnetEVMDefaultChainConfig
 	}
 
 	mandatoryNetworkUpgrades, enforce := getMandatoryNetworkUpgrades(chainCtx.NetworkID)
@@ -372,9 +374,9 @@ func (vm *VM) Initialize(
 
 	vm.ethConfig = ethconfig.NewDefaultConfig()
 	vm.ethConfig.Genesis = g
-	// NetworkID here is different than Lux's NetworkID.
+	// NetworkID here is different tha Lux's NetworkID.
 	// Lux's NetworkID represents the Lux network is running on
-	// like Mainnet, Testnet, Local, etc.
+	// like Fuji, Mainnet, Local, etc.
 	// The NetworkId here is kept same as ChainID to be compatible with
 	// Ethereum tooling.
 	vm.ethConfig.NetworkId = g.Config.ChainID.Uint64()
@@ -512,7 +514,7 @@ func (vm *VM) initializeMetrics() error {
 
 func (vm *VM) initializeChain(lastAcceptedHash common.Hash, ethConfig ethconfig.Config) error {
 	nodecfg := &node.Config{
-		EVMVersion:      Version,
+		SubnetEVMVersion:      Version,
 		KeyStoreDir:           vm.config.KeystoreDirectory,
 		ExternalSigner:        vm.config.KeystoreExternalSigner,
 		InsecureUnlockAllowed: vm.config.KeystoreInsecureUnlockAllowed,

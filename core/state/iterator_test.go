@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited.
+// (c) 2023, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,13 +29,9 @@ package state
 import (
 	"testing"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/core/rawdb"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/luxdefi/evm/core/rawdb"
 )
 
 // Tests that the node iterator indeed walks over the entire database contents.

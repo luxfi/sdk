@@ -13,7 +13,7 @@ The `Network` interface implements the networking portion of the required VM int
 
 ## Client
 
-The client utilizes the `Network` interface to send requests to peers on the network and utilizes the `waitingHandler` to wait until a response or failure is received from the Luxd networking layer.
+The client utilizes the `Network` interface to send requests to peers on the network and utilizes the `waitingHandler` to wait until a response or failure is received from the Lux networking layer.
 
 This allows the user of `Client` to treat it as if it were returning results from the network synchronously.
 

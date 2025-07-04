@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 import { ethers } from "hardhat"
@@ -34,10 +34,12 @@ describe("ERC20NativeMinter", function () {
   test("admin should mintdraw", "step_adminMintdraw")
 
   test("minter should not mintdraw", "step_minterMintdrawFailure")
+
   test("should deposit for minter", "step_minterDeposit")
 
   test("minter should mintdraw", "step_mintdraw")
 })
+
 
 describe("INativeMinter", function () {
   let owner: SignerWithAddress

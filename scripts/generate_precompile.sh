@@ -2,11 +2,7 @@
 set -e
 
 # This script generates a Stateful Precompile stub based off of a Solidity ABI file.
-<<<<<<< HEAD
-# It first sets the necessary CGO_FLAGs for the BLST library used in Lux Node and
-=======
-# It first sets the necessary CGO_FLAGs for the BLST library used in Luxd and
->>>>>>> b36c20f (Update executable to luxd)
+# It first sets the necessary CGO_FLAGs for the BLST library used in Lux and
 # then runs PrecompileGen.
 if ! [[ "$0" =~ scripts/generate_precompile.sh ]]; then
   echo "must be run from repository root, but got $0"

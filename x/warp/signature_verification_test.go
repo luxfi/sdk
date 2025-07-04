@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited. All rights reserved.
+// (c) 2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -18,11 +18,7 @@ import (
 )
 
 // This test copies the test coverage from https://github.com/luxdefi/node/blob/v1.10.0/vms/platformvm/warp/signature_test.go#L137.
-<<<<<<< HEAD
-// These tests are only expected to fail if there is a breaking change in Lux Node that unexpectedly changes behavior.
-=======
-// These tests are only expected to fail if there is a breaking change in Luxd that unexpectedly changes behavior.
->>>>>>> b36c20f (Update executable to luxd)
+// These tests are only expected to fail if there is a breaking change in Lux that unexpectedly changes behavior.
 func TestSignatureVerification(t *testing.T) {
 	tests = []signatureTest{
 		{
@@ -212,6 +208,7 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				aggSigBytes := [bls.SignatureLen]byte{}
 				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
+
 				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
 					&luxWarp.BitSetSignature{

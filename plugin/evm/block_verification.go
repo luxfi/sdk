@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -66,7 +66,7 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 				params.DynamicFeeExtraDataSize, len(ethHeader.Extra),
 			)
 		}
-	case rules.IsEVM:
+	case rules.IsSubnetEVM:
 		if len(ethHeader.Extra) != params.DynamicFeeExtraDataSize {
 			return fmt.Errorf(
 				"expected header ExtraData to be len %d but got %d",
@@ -82,9 +82,9 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		}
 	}
 
-	if rules.IsEVM {
+	if rules.IsSubnetEVM {
 		if ethHeader.BaseFee == nil {
-			return errNilBaseFeeEVM
+			return errNilBaseFeeSubnetEVM
 		}
 		if bfLen := ethHeader.BaseFee.BitLen(); bfLen > 256 {
 			return fmt.Errorf("too large base fee: bitlen %d", bfLen)
@@ -112,7 +112,7 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return errEmptyBlock
 	}
 
-	if !rules.IsEVM {
+	if !rules.IsSubnetEVM {
 		// Make sure that all the txs have the correct fee set.
 		for _, tx := range txs {
 			if tx.GasPrice().Cmp(legacyMinGasPrice) < 0 {
@@ -127,12 +127,12 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return fmt.Errorf("block timestamp is too far in the future: %d > allowed %d", blockTimestamp, maxBlockTime)
 	}
 
-	if rules.IsEVM {
+	if rules.IsSubnetEVM {
 		switch {
 		// Make sure BlockGasCost is not nil
 		// NOTE: ethHeader.BlockGasCost correctness is checked in header verification
 		case ethHeader.BlockGasCost == nil:
-			return errNilBlockGasCostEVM
+			return errNilBlockGasCostSubnetEVM
 		case !ethHeader.BlockGasCost.IsUint64():
 			return fmt.Errorf("too large blockGasCost: %d", ethHeader.BlockGasCost)
 		}

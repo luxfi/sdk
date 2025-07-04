@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
   "name": "@luxdefi/evm-contracts",
-=======
-  "name": "@avalabs/evm-contracts",
->>>>>>> fd08c47 (Update import path)
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/mocha": "^9.0.0",
@@ -35,7 +31,7 @@
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-waffle": "^2.0.6",
     "@types/node": "^16.7.1",
-    "@luxdefi/core": "^3.17.0",
+    "@luxdefi/luxjs": "^3.17.0",
     "ethers": "^5.4.5",
     "hardhat": "2.17.1",
     "ts-node": "^10.9.1",

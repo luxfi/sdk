@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -37,14 +37,10 @@ import (
 	"sync"
 	"time"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/accounts"
->>>>>>> fd08c47 (Update import path)
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/accounts"
 )
 
 // Minimum amount of time between cache reloads. This limit applies if the platform does

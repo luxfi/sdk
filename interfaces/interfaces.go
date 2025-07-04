@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,12 +32,8 @@ import (
 	"errors"
 	"math/big"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/core/types"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/core/types"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.

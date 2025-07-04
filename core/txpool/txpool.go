@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -43,10 +43,6 @@ import (
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/metrics"
 	"github.com/luxdefi/evm/params"
-<<<<<<< HEAD
-	"github.com/luxdefi/evm/precompile"
-=======
->>>>>>> fd08c47 (Update import path)
 	"github.com/luxdefi/evm/precompile/contracts/feemanager"
 	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
 	"github.com/luxdefi/evm/utils"
@@ -122,7 +118,7 @@ var (
 var (
 	evictionInterval      = time.Minute      // Time interval to check for evictable transactions
 	statsReportInterval   = 8 * time.Second  // Time interval to report transaction pool stats
-	baseFeeUpdateInterval = 10 * time.Second // Time interval at which to schedule a base fee update for the tx pool after EVM is enabled
+	baseFeeUpdateInterval = 10 * time.Second // Time interval at which to schedule a base fee update for the tx pool after SubnetEVM is enabled
 )
 
 var (
@@ -1436,7 +1432,7 @@ func (pool *TxPool) runReorg(done chan struct{}, reset *txpoolResetRequest, dirt
 	// because of another transaction (e.g. higher gas price).
 	if reset != nil {
 		pool.demoteUnexecutables()
-		if reset.newHead != nil && pool.chainconfig.IsEVM(reset.newHead.Time) {
+		if reset.newHead != nil && pool.chainconfig.IsSubnetEVM(reset.newHead.Time) {
 			if err := pool.updateBaseFeeAt(reset.newHead); err != nil {
 				log.Error("error at updating base fee in tx pool", "error", err)
 			}
@@ -1582,8 +1578,8 @@ func (pool *TxPool) reset(oldHead, newHead *types.Header) {
 	rules := pool.chainconfig.LuxRules(next, newHead.Time)
 
 	pool.rules.Store(&rules)
-	pool.eip2718.Store(rules.IsEVM)
-	pool.eip1559.Store(rules.IsEVM)
+	pool.eip2718.Store(rules.IsSubnetEVM)
+	pool.eip1559.Store(rules.IsSubnetEVM)
 	pool.eip3860.Store(rules.IsDUpgrade)
 }
 
@@ -1850,13 +1846,13 @@ func (pool *TxPool) demoteUnexecutables() {
 }
 
 func (pool *TxPool) startPeriodicFeeUpdate() {
-	if pool.chainconfig.EVMTimestamp == nil {
+	if pool.chainconfig.SubnetEVMTimestamp == nil {
 		return
 	}
 
 	// Call updateBaseFee here to ensure that there is not a [baseFeeUpdateInterval] delay
-	// when starting up in EVM before the base fee is updated.
-	if time.Now().After(utils.Uint64ToTime(pool.chainconfig.EVMTimestamp)) {
+	// when starting up in Subnet EVM before the base fee is updated.
+	if time.Now().After(utils.Uint64ToTime(pool.chainconfig.SubnetEVMTimestamp)) {
 		pool.updateBaseFee()
 	}
 
@@ -1869,7 +1865,7 @@ func (pool *TxPool) periodicBaseFeeUpdate() {
 
 	// Sleep until its time to start the periodic base fee update or the tx pool is shutting down
 	select {
-	case <-time.After(time.Until(utils.Uint64ToTime(pool.chainconfig.EVMTimestamp))):
+	case <-time.After(time.Until(utils.Uint64ToTime(pool.chainconfig.SubnetEVMTimestamp))):
 	case <-pool.generalShutdownChan:
 		return // Return early if shutting down
 	}

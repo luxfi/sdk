@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -1048,8 +1048,8 @@ func overrideConfig(original *params.ChainConfig, override *params.ChainConfig) 
 	*copy = *original
 	canon := true
 
-	if timestamp := override.EVMTimestamp; timestamp != nil {
-		copy.EVMTimestamp = timestamp
+	if timestamp := override.SubnetEVMTimestamp; timestamp != nil {
+		copy.SubnetEVMTimestamp = timestamp
 		canon = false
 	}
 	if timestamp := override.DUpgradeTimestamp; timestamp != nil {

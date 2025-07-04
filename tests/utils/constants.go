@@ -1,4 +1,4 @@
-// Copyright (C) 2021-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -6,17 +6,10 @@ package utils
 import "time"
 
 const (
-<<<<<<< HEAD
-	// Timeout to boot the Lux Node node
+	// Timeout to boot the Lux node
 	BootLuxNodeTimeout = 5 * time.Minute
 
-	// Timeout for the health API to check the Lux Node is ready
-=======
-	// Timeout to boot the Luxd node
-	BootLuxNodeTimeout = 5 * time.Minute
-
-	// Timeout for the health API to check the Luxd is ready
->>>>>>> b36c20f (Update executable to luxd)
+	// Timeout for the health API to check the Lux is ready
 	HealthCheckTimeout = 5 * time.Second
 
 	DefaultLocalNodeURI = "http://127.0.0.1:9650"

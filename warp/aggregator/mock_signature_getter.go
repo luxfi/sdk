@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	ids "github.com/luxdefi/node/ids"
 	bls "github.com/luxdefi/node/utils/crypto/bls"
+	ids "github.com/luxdefi/node/ids"
 	warp "github.com/luxdefi/node/vms/platformvm/warp"
 	gomock "go.uber.org/mock/gomock"
 )

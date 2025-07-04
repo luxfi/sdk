@@ -1,6 +1,6 @@
 # EVM Package
 
-The EVM package implements the Luxd VM interface.
+The EVM package implements the Lux VM interface.
 
 ## VM
 
@@ -12,12 +12,12 @@ The VM creates APIs for the node through the function `CreateHandlers()`. Create
 
 ## Block Handling
 
-The VM implements `buildBlock`, `parseBlock`, and `getBlock` and uses the `chain` package from Luxd to construct a metered state, which uses these functions to implement an efficient caching layer and maintain the required invariants for blocks that get returned to the consensus engine.
+The VM implements `buildBlock`, `parseBlock`, and `getBlock` and uses the `chain` package from Lux to construct a metered state, which uses these functions to implement an efficient caching layer and maintain the required invariants for blocks that get returned to the consensus engine.
 
 To do this, the VM uses a modified version of the Ethereum RLP block type [here](../../core/types/block.go) and uses the core package's BlockChain type [here](../../core/blockchain.go) to handle the insertion and storage of blocks into the chain.
 
 ## Block
 
-The Block type implements the Luxd ChainVM Block interface. The key functions for this interface are `Verify()`, `Accept()`, `Reject()`, and `Status()`.
+The Block type implements the Lux ChainVM Block interface. The key functions for this interface are `Verify()`, `Accept()`, `Reject()`, and `Status()`.
 
-The Block type wraps the stateless block type [here](../../core/types/block.go) and implements these functions to allow the consensus engine to verify blocks as valid, perform consensus, and mark them as accepted or rejected. See the documentation in Luxd for the more detailed VM invariants that are maintained here.
+The Block type wraps the stateless block type [here](../../core/types/block.go) and implements these functions to allow the consensus engine to verify blocks as valid, perform consensus, and mark them as accepted or rejected. See the documentation in Lux for the more detailed VM invariants that are maintained here.

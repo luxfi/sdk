@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package runner
@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	runner_sdk "github.com/luxdefi/netrunner/client"
-	"github.com/luxdefi/netrunner/rpcpb"
-	runner_server "github.com/luxdefi/netrunner/server"
+	runner_sdk "github.com/luxdefi/lux-network-runner/client"
+	"github.com/luxdefi/lux-network-runner/rpcpb"
+	runner_server "github.com/luxdefi/lux-network-runner/server"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/utils/logging"
 	"github.com/luxdefi/node/utils/wrappers"
@@ -34,11 +34,7 @@ type Subnet struct {
 
 type ANRConfig struct {
 	LogLevel            string
-<<<<<<< HEAD
-	Lux NodeExecPath string
-=======
-	LuxdExecPath string
->>>>>>> b36c20f (Update executable to luxd)
+	LuxExecPath string
 	PluginDir           string
 	GlobalNodeConfig    string
 	GlobalCChainConfig  string
@@ -58,26 +54,16 @@ type NetworkManager struct {
 	serverCtxCancel context.CancelFunc
 }
 
-// NewDefaultANRConfig returns a default config for launching the netrunner manager
+// NewDefaultANRConfig returns a default config for launching the lux-network-runner manager
 // with both a server and client.
 // By default, it expands $GOPATH/src/github.com/luxdefi/node/build/ directory to extract
-<<<<<<< HEAD
-// the Lux NodeExecPath and PluginDir arguments.
+// the LuxExecPath and PluginDir arguments.
 // If the LUXD_BUILD_PATH environment variable is set, it overrides the default location for
-// the Lux NodeExecPath and PluginDir arguments.
+// the LuxExecPath and PluginDir arguments.
 func NewDefaultANRConfig() ANRConfig {
 	defaultConfig := ANRConfig{
 		LogLevel:            "info",
-		Lux NodeExecPath: os.ExpandEnv("$GOPATH/src/github.com/luxdefi/node/build/node"),
-=======
-// the LuxdExecPath and PluginDir arguments.
-// If the LUXD_BUILD_PATH environment variable is set, it overrides the default location for
-// the LuxdExecPath and PluginDir arguments.
-func NewDefaultANRConfig() ANRConfig {
-	defaultConfig := ANRConfig{
-		LogLevel:            "info",
-		LuxdExecPath: os.ExpandEnv("$GOPATH/src/github.com/luxdefi/node/build/node"),
->>>>>>> b36c20f (Update executable to luxd)
+		LuxExecPath: os.ExpandEnv("$GOPATH/src/github.com/luxdefi/node/build/node"),
 		PluginDir:           os.ExpandEnv("$GOPATH/src/github.com/luxdefi/node/build/plugins"),
 		GlobalNodeConfig: `{
 			"log-display-level":"info",
@@ -90,11 +76,7 @@ func NewDefaultANRConfig() ANRConfig {
 	}
 	// If LUXD_BUILD_PATH is populated, override location set by GOPATH
 	if envBuildPath, exists := os.LookupEnv("LUXD_BUILD_PATH"); exists {
-<<<<<<< HEAD
-		defaultConfig.Lux NodeExecPath = fmt.Sprintf("%s/node", envBuildPath)
-=======
-		defaultConfig.LuxdExecPath = fmt.Sprintf("%s/node", envBuildPath)
->>>>>>> b36c20f (Update executable to luxd)
+		defaultConfig.LuxExecPath = fmt.Sprintf("%s/node", envBuildPath)
 		defaultConfig.PluginDir = fmt.Sprintf("%s/plugins", envBuildPath)
 	}
 	return defaultConfig
@@ -223,11 +205,7 @@ func (n *NetworkManager) StartDefaultNetwork(ctx context.Context) (<-chan struct
 		return nil, err
 	}
 
-<<<<<<< HEAD
-	log.Info("Sending 'start'", "Lux NodeExecPath", n.ANRConfig.Lux NodeExecPath)
-=======
-	log.Info("Sending 'start'", "LuxdExecPath", n.ANRConfig.LuxdExecPath)
->>>>>>> b36c20f (Update executable to luxd)
+	log.Info("Sending 'start'", "LuxExecPath", n.ANRConfig.LuxExecPath)
 
 	// Start cluster
 	opts := []runner_sdk.OpOption{
@@ -241,11 +219,7 @@ func (n *NetworkManager) StartDefaultNetwork(ctx context.Context) (<-chan struct
 	}
 	resp, err := n.anrClient.Start(
 		ctx,
-<<<<<<< HEAD
-		n.ANRConfig.Lux NodeExecPath,
-=======
-		n.ANRConfig.LuxdExecPath,
->>>>>>> b36c20f (Update executable to luxd)
+		n.ANRConfig.LuxExecPath,
 		opts...,
 	)
 	if err != nil {
@@ -256,11 +230,7 @@ func (n *NetworkManager) StartDefaultNetwork(ctx context.Context) (<-chan struct
 }
 
 // SetupNetwork constructs blockchains with the given [blockchainSpecs] and adds them to the network manager.
-<<<<<<< HEAD
-// Uses [execPath] as the Lux Node binary execution path for any started nodes.
-=======
-// Uses [execPath] as the Luxd binary execution path for any started nodes.
->>>>>>> b36c20f (Update executable to luxd)
+// Uses [execPath] as the Lux binary execution path for any started nodes.
 // Note: this assumes that the default network has already been constructed.
 func (n *NetworkManager) SetupNetwork(ctx context.Context, execPath string, blockchainSpecs []*rpcpb.BlockchainSpec) error {
 	// timeout according to how many blockchains we're creating
@@ -397,11 +367,7 @@ func RegisterFiveNodeSubnetRun() func() *Subnet {
 		gomega.Expect(err).Should(gomega.BeNil())
 		err = manager.SetupNetwork(
 			ctx,
-<<<<<<< HEAD
-			config.Lux NodeExecPath,
-=======
-			config.LuxdExecPath,
->>>>>>> b36c20f (Update executable to luxd)
+			config.LuxExecPath,
 			[]*rpcpb.BlockchainSpec{
 				{
 					VmName:      evm.IDStr,
