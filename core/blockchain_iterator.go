@@ -32,7 +32,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 type blockAndState struct {

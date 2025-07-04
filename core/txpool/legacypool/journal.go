@@ -32,7 +32,7 @@ import (
 	"io/fs"
 	"os"
 <<<<<<< HEAD:core/txpool/journal.go
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"

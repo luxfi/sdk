@@ -6,16 +6,16 @@ package warp
 import (
 	"fmt"
 <<<<<<< HEAD:x/warp/contract_warp_handler.go
-	"github.com/luxdefi/node/utils/set"
-	"github.com/luxdefi/node/vms/platformvm/warp"
-	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/predicate"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 =======
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/vm"
 >>>>>>> v0.7.5:precompile/contracts/warp/contract_warp_handler.go
 )
 

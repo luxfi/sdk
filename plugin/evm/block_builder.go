@@ -6,12 +6,12 @@ package evm
 import (
 	"sync"
 	"time"
-	"github.com/luxdefi/node/utils/timer"
+	"github.com/luxfi/node/utils/timer"
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/txpool"
 	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/node/snow"
-	commonEng "github.com/luxdefi/node/snow/engine/common"
+	"github.com/luxfi/node/snow"
+	commonEng "github.com/luxfi/node/snow/engine/common"
 	"github.com/ethereum/go-ethereum/log"
 )
 

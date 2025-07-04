@@ -23,7 +23,7 @@ import (
 <<<<<<< HEAD:consensus/misc/eip4844_test.go
 	"github.com/luxdefi/evm/params"
 =======
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 >>>>>>> v0.7.5:consensus/misc/eip4844/eip4844_test.go
 )
 

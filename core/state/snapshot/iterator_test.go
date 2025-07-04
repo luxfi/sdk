@@ -33,7 +33,7 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
-	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/common"
 )
 

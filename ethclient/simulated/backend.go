@@ -21,11 +21,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxdefi/node/utils/timer/mockable"
+	"github.com/luxfi/node/utils/timer/mockable"
 	ethereum "github.com/luxdefi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/constants"
 	"github.com/luxdefi/evm/core"

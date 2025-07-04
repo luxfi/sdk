@@ -11,7 +11,7 @@ import (
 	"github.com/luxdefi/evm/cmd/simulator/key"
 	"github.com/luxdefi/evm/cmd/simulator/metrics"
 	"github.com/luxdefi/evm/cmd/simulator/txs"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/ethclient"
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"

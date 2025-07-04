@@ -34,9 +34,9 @@ import (
 	"math/big"
 	"testing"
 	"github.com/luxdefi/evm/consensus/dummy"
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/core/vm"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 )

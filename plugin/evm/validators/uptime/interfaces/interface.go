@@ -4,8 +4,8 @@
 package interfaces
 
 import (
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/snow/uptime"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/uptime"
 	validatorsstateinterfaces "github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
 )
 

@@ -28,7 +28,7 @@ package core
 
 import (
 	"sync"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // txSenderCacherRequest is a request for recovering transaction senders with a

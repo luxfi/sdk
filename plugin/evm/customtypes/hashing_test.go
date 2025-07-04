@@ -34,9 +34,9 @@ import (
 	mrand "math/rand"
 	"testing"
 <<<<<<< HEAD:core/types/hashing_test.go
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/trie"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -44,7 +44,7 @@ import (
 =======
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
 	"github.com/luxdefi/evm/interfaces/trie"
-	"github.com/luxdefi/evm/interfaces/triedb"
+	"github.com/ethereum/go-ethereum/triedb"
 >>>>>>> v0.7.5:plugin/evm/customtypes/hashing_test.go
 )
 

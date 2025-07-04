@@ -11,14 +11,14 @@ import (
 	"time"
 	"golang.org/x/sync/semaphore"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/node/codec"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/network/p2p"
-	"github.com/luxdefi/node/snow/engine/common"
-	"github.com/luxdefi/node/snow/validators"
-	"github.com/luxdefi/node/utils"
-	"github.com/luxdefi/node/utils/set"
-	"github.com/luxdefi/node/version"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/utils"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/version"
 	"github.com/luxdefi/evm/peer/stats"
 	"github.com/luxdefi/evm/plugin/evm/message"
 )
@@ -572,7 +572,7 @@ func (n *network) nextRequestID() uint32 {
 
 // IsNetworkRequest checks if the given requestID is a request for this network handler (even-numbered requestIDs)
 // SDK requests are odd-numbered requestIDs
-// (see invariant: https://github.com/luxdefi/node/blob/v1.13.0/network/p2p/router.go#L83)
+// (see invariant: https://github.com/luxfi/node/blob/v1.13.0/network/p2p/router.go#L83)
 func IsNetworkRequest(requestID uint32) bool {
 	return requestID%2 == 0
 }

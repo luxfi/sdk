@@ -7,9 +7,9 @@ package aggregator
 import (
 	context "context"
 	reflect "reflect"
-	bls "github.com/luxdefi/node/utils/crypto/bls"
-	ids "github.com/luxdefi/node/ids"
-	warp "github.com/luxdefi/node/vms/platformvm/warp"
+	bls "github.com/luxfi/node/utils/crypto/bls"
+	ids "github.com/luxfi/node/ids"
+	warp "github.com/luxfi/node/vms/platformvm/warp"
 	gomock "go.uber.org/mock/gomock"
 )
 

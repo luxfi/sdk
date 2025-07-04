@@ -10,17 +10,15 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-<<<<<<< HEAD
+	
 	"github.com/luxdefi/evm/tests/utils/runner"
 	"github.com/ethereum/go-ethereum/log"
-=======
->>>>>>> v0.7.5
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/require"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/tests/fixture/e2e"
-	"github.com/luxdefi/node/tests/fixture/tmpnet"
-	"github.com/luxdefi/node/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/tests/fixture/e2e"
+	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxdefi/evm/tests"
 	"github.com/luxdefi/evm/tests/utils"
 )

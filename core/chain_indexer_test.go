@@ -34,8 +34,8 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

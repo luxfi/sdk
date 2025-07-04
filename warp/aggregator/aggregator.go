@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/node/utils/crypto/bls"
-	"github.com/luxdefi/node/utils/set"
-	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/utils/crypto/bls"
+	"github.com/luxfi/node/utils/set"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 )
 
 type AggregateSignatureResult struct {

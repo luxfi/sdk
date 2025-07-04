@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"testing"
 	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/eth/tracers/logger"
 	"github.com/luxdefi/evm/internal/ethapi"
 	"github.com/luxdefi/evm/params"

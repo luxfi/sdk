@@ -30,9 +30,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"github.com/luxdefi/evm/accounts"
-	"github.com/luxdefi/evm/accounts/external"
-	"github.com/luxdefi/evm/accounts/keystore"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/external"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/log"
 )
 

@@ -4,10 +4,10 @@
 package message
 
 import (
-	"github.com/luxdefi/node/codec"
-	"github.com/luxdefi/node/codec/linearcodec"
-	"github.com/luxdefi/node/utils/units"
-	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/node/utils/wrappers"
 )
 
 const (

@@ -29,10 +29,10 @@ package blobpool
 import (
 	"math/big"
 <<<<<<< HEAD:core/rawdb/databases_non64bit.go
-	"github.com/luxdefi/evm/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 =======
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/params"

@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/luxdefi/node/config"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/config"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/tests/fixture/tmpnet"
 
 	"github.com/luxdefi/evm/plugin/evm"
 )

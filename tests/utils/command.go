@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"github.com/luxdefi/node/api/health"
+	"github.com/luxfi/node/api/health"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"

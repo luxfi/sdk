@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/luxdefi/evm/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

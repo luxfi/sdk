@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxdefi/evm/utils"
 )
 

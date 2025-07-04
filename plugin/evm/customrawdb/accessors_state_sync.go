@@ -5,15 +5,12 @@ package customrawdb
 
 import (
 	"encoding/binary"
-<<<<<<< HEAD:core/rawdb/accessors_state_sync.go
-	"github.com/luxdefi/node/utils/wrappers"
-	"github.com/luxdefi/evm/ethdb"
+	
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
-=======
-	ethrawdb "github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/interfaces/ethdb"
->>>>>>> v0.7.5:plugin/evm/customrawdb/accessors_state_sync.go
 )
 
 // ReadSyncRoot reads the root corresponding to the main trie of an in-progress

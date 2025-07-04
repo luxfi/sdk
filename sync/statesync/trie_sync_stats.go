@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-	utils_math "github.com/luxdefi/node/utils/math"
-	"github.com/luxdefi/evm/metrics"
+	utils_math "github.com/luxfi/node/utils/math"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

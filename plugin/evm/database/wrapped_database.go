@@ -6,8 +6,8 @@ package database
 import (
 	"errors"
 
-	"github.com/luxdefi/node/database"
-	"github.com/luxdefi/evm/interfaces/ethdb"
+	"github.com/luxfi/node/database"
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 var (

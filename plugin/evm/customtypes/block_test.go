@@ -39,7 +39,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"golang.org/x/crypto/sha3"
 =======
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/internal/blocktest"
 	// This test file has to be in package types_test to avoid a circular
 	// dependency when importing `params`. We dot-import the package to mimic

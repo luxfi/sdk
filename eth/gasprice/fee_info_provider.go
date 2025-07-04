@@ -30,7 +30,7 @@ import (
 	"context"
 	"math/big"
 	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/rpc"
 	lru "github.com/hashicorp/golang-lru"
 )

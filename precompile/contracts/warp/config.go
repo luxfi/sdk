@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-<<<<<<< HEAD:x/warp/config.go
-	"github.com/luxdefi/node/vms/platformvm/warp"
-	"github.com/luxdefi/node/vms/platformvm/warp/payload"
+	
+	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/predicate"
@@ -17,14 +17,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/log"
-=======
 )
 
 const (
 	WarpDefaultQuorumNumerator uint64 = 67
 	WarpQuorumNumeratorMinimum uint64 = 33
 	WarpQuorumDenominator      uint64 = 100
->>>>>>> v0.7.5:precompile/contracts/warp/config.go
 )
 
 var (

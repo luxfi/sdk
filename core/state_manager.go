@@ -30,8 +30,8 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/ethdb"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/common"
 )
 

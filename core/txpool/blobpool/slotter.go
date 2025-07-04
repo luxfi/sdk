@@ -44,7 +44,7 @@ func newSlotter() func() (uint32, bool) {
 		finished := slotsize > maxBlobsPerTransaction*blobSize+txMaxSize
 
 <<<<<<< HEAD:ethdb/pebble/pebble_test.go
-	"github.com/luxdefi/evm/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxdefi/evm/ethdb/dbtest"
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/vfs"

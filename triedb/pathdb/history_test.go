@@ -32,10 +32,10 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxdefi/evm/interfaces/trie/testutil"
-	"github.com/luxdefi/evm/interfaces/trie/triestate"
+	"github.com/ethereum/go-ethereum/trie/triestate"
 )
 
 // randomStateSet generates a random state change set.

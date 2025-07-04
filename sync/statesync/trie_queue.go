@@ -4,8 +4,8 @@
 package statesync
 
 import (
-	"github.com/luxdefi/evm/core/rawdb"
-	"github.com/luxdefi/evm/ethdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/common"
 )
 

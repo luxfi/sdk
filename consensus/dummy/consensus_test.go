@@ -7,7 +7,7 @@ import (
 	"math"
 	"math/big"
 	"testing"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 )

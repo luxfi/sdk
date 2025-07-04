@@ -9,10 +9,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/interfaces/core/vm"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/params/extras"

@@ -33,10 +33,10 @@ import (
 	"time"
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
-	"github.com/luxdefi/evm/core/vm"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxdefi/evm/eth/tracers"
-	"github.com/luxdefi/evm/trie"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

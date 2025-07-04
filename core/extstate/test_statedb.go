@@ -5,7 +5,7 @@ package extstate
 import (
 	"testing"
 <<<<<<< HEAD:core/state/test_statedb.go
-	"github.com/luxdefi/evm/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/ethereum/go-ethereum/common"
 =======

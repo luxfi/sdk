@@ -5,7 +5,7 @@ package handlers
 
 import (
 	"github.com/luxdefi/evm/core/state/snapshot"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 

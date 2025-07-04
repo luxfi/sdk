@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxdefi/node/utils/math"
-	"github.com/luxdefi/evm/core/types"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	"github.com/luxfi/node/utils/math"
+	"github.com/ethereum/go-ethereum/core/types"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/params/extras"
 )

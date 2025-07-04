@@ -4,7 +4,7 @@
 package customrawdb
 
 import (
-	"github.com/luxdefi/node/utils/wrappers"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/ethereum/go-ethereum/common"
 )
 

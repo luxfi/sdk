@@ -102,7 +102,7 @@ import (
 	"errors"
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/accounts/abi/bind"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/event"

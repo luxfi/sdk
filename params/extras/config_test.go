@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/node/snow"
-	"github.com/luxdefi/node/upgrade"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/upgrade"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/contracts/txallowlist"

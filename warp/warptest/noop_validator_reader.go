@@ -7,7 +7,7 @@ package warptest
 import (
 	"time"
 
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/luxdefi/evm/plugin/evm/validators/interfaces"
 	stateinterfaces "github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
 )

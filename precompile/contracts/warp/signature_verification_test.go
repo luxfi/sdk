@@ -8,21 +8,21 @@ import (
 	"math"
 	"testing"
 <<<<<<< HEAD:x/warp/signature_verification_test.go
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/snow/validators"
-	"github.com/luxdefi/node/utils/crypto/bls"
-	"github.com/luxdefi/node/utils/set"
-	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/utils/crypto/bls"
+	"github.com/luxfi/node/utils/set"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 =======
-	"github.com/luxdefi/node/snow/validators/validatorsmock"
-	avalancheWarp "github.com/luxdefi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/snow/validators/validatorsmock"
+	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
 >>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
 <<<<<<< HEAD:x/warp/signature_verification_test.go
-// This test copies the test coverage from https://github.com/luxdefi/node/blob/v1.10.0/vms/platformvm/warp/signature_test.go#L137.
+// This test copies the test coverage from https://github.com/luxfi/node/blob/v1.10.0/vms/platformvm/warp/signature_test.go#L137.
 // These tests are only expected to fail if there is a breaking change in Lux that unexpectedly changes behavior.
 =======
 type signatureTest struct {
@@ -35,7 +35,7 @@ type signatureTest struct {
 	canonicalErr error
 }
 
-// This test copies the test coverage from https://github.com/luxdefi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
+// This test copies the test coverage from https://github.com/luxfi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
 // These tests are only expected to fail if there is a breaking change in AvalancheGo that unexpectedly changes behavior.
 >>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 func TestSignatureVerification(t *testing.T) {

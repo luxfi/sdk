@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"github.com/luxdefi/node/version"
+	"github.com/luxfi/node/version"
 	"github.com/stretchr/testify/assert"
 )
 

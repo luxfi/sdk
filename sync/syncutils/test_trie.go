@@ -8,19 +8,19 @@ import (
 	"math/rand"
 	"testing"
 <<<<<<< HEAD:trie/test_trie.go
-	"github.com/luxdefi/node/utils/wrappers"
-	"github.com/luxdefi/evm/accounts/keystore"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/luxfi/node/utils/wrappers"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/trie/trienode"
 =======
 	"github.com/luxdefi/evm/interfaces/trie"
-	"github.com/luxdefi/evm/interfaces/trie/trienode"
-	"github.com/luxdefi/evm/interfaces/triedb"
+	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/luxdefi/evm/internal/testutils"
 	"github.com/holiman/uint256"
 >>>>>>> v0.7.5:sync/syncutils/test_trie.go
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
 )

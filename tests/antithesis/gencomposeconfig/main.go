@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxdefi/node/tests/antithesis"
-	"github.com/luxdefi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/tests/antithesis"
+	"github.com/luxfi/node/tests/fixture/tmpnet"
 
 	"github.com/luxdefi/evm/tests/utils"
 )

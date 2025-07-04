@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxdefi/node/snow"
-	"github.com/luxdefi/node/upgrade"
-	"github.com/luxdefi/node/utils/constants"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/node/utils/constants"
 	"github.com/ethereum/go-ethereum/common"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/utils"
 )

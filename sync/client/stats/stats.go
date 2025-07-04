@@ -6,7 +6,7 @@ package stats
 import (
 	"fmt"
 	"time"
-	"github.com/luxdefi/evm/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/luxdefi/evm/plugin/evm/message"
 )
 

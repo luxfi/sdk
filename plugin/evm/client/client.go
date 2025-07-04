@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
 
-	"github.com/luxdefi/node/api"
-	"github.com/luxdefi/node/ids"
-	"github.com/luxdefi/node/utils/rpc"
+	"github.com/luxfi/node/api"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxdefi/evm/plugin/evm/config"
 )
 

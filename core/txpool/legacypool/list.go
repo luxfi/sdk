@@ -35,11 +35,11 @@ import (
 	"sync/atomic"
 	"time"
 <<<<<<< HEAD:core/txpool/list.go
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/common"
 =======
 	"github.com/holiman/uint256"
-	"golang.org/x/exp/slices"
+	"slices"
 >>>>>>> v0.7.5:core/txpool/legacypool/list.go
 )
 

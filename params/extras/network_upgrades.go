@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/luxdefi/node/upgrade"
-	ethparams "github.com/luxdefi/evm/interfaces/params"
+	"github.com/luxfi/node/upgrade"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxdefi/evm/utils"
 )
 
@@ -160,11 +160,11 @@ func (n *NetworkUpgrades) IsGranite(time uint64) bool {
 
 func (n *NetworkUpgrades) Description() string {
 	var banner string
-	banner += fmt.Sprintf(" - SubnetEVM Timestamp:          @%-10v (https://github.com/luxdefi/node/releases/tag/v1.10.0)\n", ptrToString(n.SubnetEVMTimestamp))
-	banner += fmt.Sprintf(" - Durango Timestamp:            @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(n.DurangoTimestamp))
-	banner += fmt.Sprintf(" - Etna Timestamp:               @%-10v (https://github.com/luxdefi/node/releases/tag/v1.12.0)\n", ptrToString(n.EtnaTimestamp))
-	banner += fmt.Sprintf(" - Fortuna Timestamp:            @%-10v (https://github.com/luxdefi/node/releases/tag/v1.13.0)\n", ptrToString(n.FortunaTimestamp))
-	banner += fmt.Sprintf(" - Granite Timestamp:            @%-10v (https://github.com/luxdefi/node/releases/tag/v1.14.0)\n", ptrToString(n.GraniteTimestamp))
+	banner += fmt.Sprintf(" - SubnetEVM Timestamp:          @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(n.SubnetEVMTimestamp))
+	banner += fmt.Sprintf(" - Durango Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.11.0)\n", ptrToString(n.DurangoTimestamp))
+	banner += fmt.Sprintf(" - Etna Timestamp:               @%-10v (https://github.com/luxfi/node/releases/tag/v1.12.0)\n", ptrToString(n.EtnaTimestamp))
+	banner += fmt.Sprintf(" - Fortuna Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.13.0)\n", ptrToString(n.FortunaTimestamp))
+	banner += fmt.Sprintf(" - Granite Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.14.0)\n", ptrToString(n.GraniteTimestamp))
 	return banner
 }
 

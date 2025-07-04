@@ -7,7 +7,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/ethclient"
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"

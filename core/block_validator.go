@@ -31,9 +31,9 @@ import (
 	"fmt"
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/trie"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and
