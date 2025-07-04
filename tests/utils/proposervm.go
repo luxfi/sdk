@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethclient"
 	"github.com/luxdefi/evm/params"
@@ -41,11 +40,11 @@ func IssueTxsToActivateProposerVMFork(
 	}
 	defer sub.Unsubscribe()
 
-	gasPrice := big.NewInt(params.MinGasPrice)
+	gasPrice := big.NewInt(legacy.BaseFee)
 	txSigner := types.LatestSignerForChainID(chainID)
 	for i := 0; i < numTriggerTxs; i++ {
 		tx := types.NewTransaction(
-			nonce, addr, common.Big1, params.TxGas, gasPrice, nil)
+			nonce, addr, common.Big1, ethparams.TxGas, gasPrice, nil)
 		triggerTx, err := types.SignTx(tx, txSigner, fundedKey)
 		if err != nil {
 			return err

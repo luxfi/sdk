@@ -5,9 +5,7 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"testing"
-
 	"github.com/luxdefi/node/database/memdb"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/snow/choices"
@@ -24,9 +22,11 @@ import (
 )
 
 func TestMessageSignatureHandler(t *testing.T) {
+	testutils.WithMetrics(t)
+
 	database := memdb.New()
 	snowCtx := utils.TestSnowContext()
-	blsSecretKey, err := bls.NewSecretKey()
+	blsSecretKey, err := localsigner.New()
 	require.NoError(t, err)
 	warpSigner := luxWarp.NewSigner(blsSecretKey, snowCtx.NetworkID, snowCtx.ChainID)
 
@@ -35,16 +35,17 @@ func TestMessageSignatureHandler(t *testing.T) {
 	offchainMessage, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, addressedPayload.Bytes())
 	require.NoError(t, err)
 
-	backend, err := warp.NewBackend(snowCtx.NetworkID, snowCtx.ChainID, warpSigner, &block.TestVM{TestVM: common.TestVM{T: t}}, database, 100, [][]byte{offchainMessage.Bytes()})
+	messageSignatureCache := lru.NewCache[ids.ID, []byte](100)
+	backend, err := warp.NewBackend(snowCtx.NetworkID, snowCtx.ChainID, warpSigner, warptest.EmptyBlockClient, warptest.NoOpValidatorReader{}, database, messageSignatureCache, [][]byte{offchainMessage.Bytes()})
 	require.NoError(t, err)
 
 	msg, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, []byte("test"))
 	require.NoError(t, err)
 	messageID := msg.ID()
 	require.NoError(t, backend.AddMessage(msg))
-	signature, err := backend.GetMessageSignature(messageID)
+	signature, err := backend.GetMessageSignature(context.TODO(), msg)
 	require.NoError(t, err)
-	offchainSignature, err := backend.GetMessageSignature(offchainMessage.ID())
+	offchainSignature, err := backend.GetMessageSignature(context.TODO(), offchainMessage)
 	require.NoError(t, err)
 
 	unknownMessageID := ids.GenerateTestID()
@@ -62,12 +63,12 @@ func TestMessageSignatureHandler(t *testing.T) {
 				}, signature[:]
 			},
 			verifyStats: func(t *testing.T, stats *handlerStats) {
-				require.EqualValues(t, 1, stats.messageSignatureRequest.Count())
-				require.EqualValues(t, 1, stats.messageSignatureHit.Count())
-				require.EqualValues(t, 0, stats.messageSignatureMiss.Count())
-				require.EqualValues(t, 0, stats.blockSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.blockSignatureHit.Count())
-				require.EqualValues(t, 0, stats.blockSignatureMiss.Count())
+				require.EqualValues(t, 1, stats.messageSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 1, stats.messageSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureMiss.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureMiss.Snapshot().Count())
 			},
 		},
 		"offchain message": {
@@ -77,12 +78,12 @@ func TestMessageSignatureHandler(t *testing.T) {
 				}, offchainSignature[:]
 			},
 			verifyStats: func(t *testing.T, stats *handlerStats) {
-				require.EqualValues(t, 1, stats.messageSignatureRequest.Count())
-				require.EqualValues(t, 1, stats.messageSignatureHit.Count())
-				require.EqualValues(t, 0, stats.messageSignatureMiss.Count())
-				require.EqualValues(t, 0, stats.blockSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.blockSignatureHit.Count())
-				require.EqualValues(t, 0, stats.blockSignatureMiss.Count())
+				require.EqualValues(t, 1, stats.messageSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 1, stats.messageSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureMiss.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureMiss.Snapshot().Count())
 			},
 		},
 		"unknown message": {
@@ -92,12 +93,12 @@ func TestMessageSignatureHandler(t *testing.T) {
 				}, emptySignature[:]
 			},
 			verifyStats: func(t *testing.T, stats *handlerStats) {
-				require.EqualValues(t, 1, stats.messageSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.messageSignatureHit.Count())
-				require.EqualValues(t, 1, stats.messageSignatureMiss.Count())
-				require.EqualValues(t, 0, stats.blockSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.blockSignatureHit.Count())
-				require.EqualValues(t, 0, stats.blockSignatureMiss.Count())
+				require.EqualValues(t, 1, stats.messageSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 1, stats.messageSignatureMiss.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureMiss.Snapshot().Count())
 			},
 		},
 	}
@@ -105,7 +106,6 @@ func TestMessageSignatureHandler(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			handler := NewSignatureRequestHandler(backend, message.Codec)
-			handler.stats.Clear()
 
 			request, expectedResponse := test.setup()
 			responseBytes, err := handler.OnMessageSignatureRequest(context.Background(), ids.GenerateTestNodeID(), 1, request)
@@ -128,39 +128,30 @@ func TestMessageSignatureHandler(t *testing.T) {
 }
 
 func TestBlockSignatureHandler(t *testing.T) {
+	testutils.WithMetrics(t)
+
 	database := memdb.New()
 	snowCtx := utils.TestSnowContext()
-	blsSecretKey, err := bls.NewSecretKey()
+	blsSecretKey, err := localsigner.New()
 	require.NoError(t, err)
 
 	warpSigner := luxWarp.NewSigner(blsSecretKey, snowCtx.NetworkID, snowCtx.ChainID)
 	blkID := ids.GenerateTestID()
-	testVM := &block.TestVM{
-		TestVM: common.TestVM{T: t},
-		GetBlockF: func(ctx context.Context, i ids.ID) (snowman.Block, error) {
-			if i == blkID {
-				return &snowman.TestBlock{
-					TestDecidable: choices.TestDecidable{
-						IDV:     blkID,
-						StatusV: choices.Accepted,
-					},
-				}, nil
-			}
-			return nil, errors.New("invalid blockID")
-		},
-	}
+	blockClient := warptest.MakeBlockClient(blkID)
+	messageSignatureCache := lru.NewCache[ids.ID, []byte](100)
 	backend, err := warp.NewBackend(
 		snowCtx.NetworkID,
 		snowCtx.ChainID,
 		warpSigner,
-		testVM,
+		blockClient,
+		warptest.NoOpValidatorReader{},
 		database,
-		100,
+		messageSignatureCache,
 		nil,
 	)
 	require.NoError(t, err)
 
-	signature, err := backend.GetBlockSignature(blkID)
+	signature, err := backend.GetBlockSignature(context.TODO(), blkID)
 	require.NoError(t, err)
 	unknownMessageID := ids.GenerateTestID()
 
@@ -177,12 +168,12 @@ func TestBlockSignatureHandler(t *testing.T) {
 				}, signature[:]
 			},
 			verifyStats: func(t *testing.T, stats *handlerStats) {
-				require.EqualValues(t, 0, stats.messageSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.messageSignatureHit.Count())
-				require.EqualValues(t, 0, stats.messageSignatureMiss.Count())
-				require.EqualValues(t, 1, stats.blockSignatureRequest.Count())
-				require.EqualValues(t, 1, stats.blockSignatureHit.Count())
-				require.EqualValues(t, 0, stats.blockSignatureMiss.Count())
+				require.EqualValues(t, 0, stats.messageSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureMiss.Snapshot().Count())
+				require.EqualValues(t, 1, stats.blockSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 1, stats.blockSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureMiss.Snapshot().Count())
 			},
 		},
 		"unknown block": {
@@ -192,12 +183,12 @@ func TestBlockSignatureHandler(t *testing.T) {
 				}, emptySignature[:]
 			},
 			verifyStats: func(t *testing.T, stats *handlerStats) {
-				require.EqualValues(t, 0, stats.messageSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.messageSignatureHit.Count())
-				require.EqualValues(t, 0, stats.messageSignatureMiss.Count())
-				require.EqualValues(t, 1, stats.blockSignatureRequest.Count())
-				require.EqualValues(t, 0, stats.blockSignatureHit.Count())
-				require.EqualValues(t, 1, stats.blockSignatureMiss.Count())
+				require.EqualValues(t, 0, stats.messageSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 0, stats.messageSignatureMiss.Snapshot().Count())
+				require.EqualValues(t, 1, stats.blockSignatureRequest.Snapshot().Count())
+				require.EqualValues(t, 0, stats.blockSignatureHit.Snapshot().Count())
+				require.EqualValues(t, 1, stats.blockSignatureMiss.Snapshot().Count())
 			},
 		},
 	}
@@ -205,7 +196,6 @@ func TestBlockSignatureHandler(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			handler := NewSignatureRequestHandler(backend, message.Codec)
-			handler.stats.Clear()
 
 			request, expectedResponse := test.setup()
 			responseBytes, err := handler.OnBlockSignatureRequest(context.Background(), ids.GenerateTestNodeID(), 1, request)

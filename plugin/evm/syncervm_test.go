@@ -11,10 +11,8 @@ import (
 	"sync"
 	"testing"
 	"time"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/luxdefi/node/database"
 	"github.com/luxdefi/node/database/prefixdb"
 	"github.com/luxdefi/node/ids"
@@ -23,7 +21,6 @@ import (
 	commonEng "github.com/luxdefi/node/snow/engine/common"
 	"github.com/luxdefi/node/snow/engine/snowman/block"
 	"github.com/luxdefi/node/utils/set"
-
 	"github.com/luxdefi/evm/accounts/keystore"
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/constants"
@@ -49,7 +46,7 @@ func TestSkipStateSync(t *testing.T) {
 		stateSyncMinBlocks: 300, // must be greater than [syncableInterval] to skip sync
 		syncMode:           block.StateSyncSkipped,
 	}
-	vmSetup := createSyncServerAndClientVMs(t, test)
+	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
 
 	testSyncerVM(t, vmSetup, test)
 }
@@ -61,18 +58,26 @@ func TestStateSyncFromScratch(t *testing.T) {
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
 		syncMode:           block.StateSyncStatic,
 	}
-	vmSetup := createSyncServerAndClientVMs(t, test)
+	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
+
+	testSyncerVM(t, vmSetup, test)
+}
+
+func TestStateSyncFromScratchExceedParent(t *testing.T) {
+	rand.Seed(1)
+	numToGen := parentsToGet + uint64(32)
+	test := syncTest{
+		syncableInterval:   numToGen,
+		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
+		syncMode:           block.StateSyncStatic,
+	}
+	vmSetup := createSyncServerAndClientVMs(t, test, int(numToGen))
 
 	testSyncerVM(t, vmSetup, test)
 }
 
 func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	rand.Seed(1)
-	// Hack: registering metrics uses global variables, so we need to disable metrics here so that we can initialize the VM twice.
-	metrics.Enabled = false
-	defer func() {
-		metrics.Enabled = true
-	}()
 
 	var lock sync.Mutex
 	reqCount := 0
@@ -87,7 +92,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 			reqCount++
 			// Fail all requests after number 50 to interrupt the sync
 			if reqCount > 50 {
-				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID); err != nil {
+				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID, commonEng.ErrTimeout); err != nil {
 					panic(err)
 				}
 				cancel := syncerVM.StateSyncClient.(*stateSyncerClient).cancel
@@ -102,7 +107,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		},
 		expectedErr: context.Canceled,
 	}
-	vmSetup := createSyncServerAndClientVMs(t, test)
+	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
 
 	// Perform sync resulting in early termination.
 	testSyncerVM(t, vmSetup, test)
@@ -112,8 +117,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	test.expectedErr = nil
 
 	syncDisabledVM := &VM{}
-	appSender := &commonEng.SenderTest{T: t}
-	appSender.SendAppGossipF = func(context.Context, []byte) error { return nil }
+	appSender := &enginetest.Sender{T: t}
+	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
 	appSender.SendAppRequestF = func(ctx context.Context, nodeSet set.Set[ids.NodeID], requestID uint32, request []byte) error {
 		nodeID, hasItem := nodeSet.Pop()
 		if !hasItem {
@@ -122,7 +127,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		go vmSetup.serverVM.AppRequest(ctx, nodeID, requestID, time.Now().Add(1*time.Second), request)
 		return nil
 	}
-	// Disable metrics to prevent duplicate registerer
+	// Reset metrics to allow re-initialization
+	vmSetup.syncerVM.ctx.Metrics = metrics.NewPrefixGatherer()
 	stateSyncDisabledConfigJSON := `{"state-sync-enabled":false}`
 	if err := syncDisabledVM.Initialize(
 		context.Background(),
@@ -187,6 +193,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		`{"state-sync-enabled":true, "state-sync-min-blocks":%d}`,
 		test.stateSyncMinBlocks,
 	)
+	// Reset metrics to allow re-initialization
+	vmSetup.syncerVM.ctx.Metrics = metrics.NewPrefixGatherer()
 	if err := syncReEnabledVM.Initialize(
 		context.Background(),
 		vmSetup.syncerVM.ctx,
@@ -228,7 +236,6 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 }
 
 func TestVMShutdownWhileSyncing(t *testing.T) {
-	t.Skip("FLAKY")
 	var (
 		lock    sync.Mutex
 		vmSetup *syncVMSetup
@@ -254,36 +261,34 @@ func TestVMShutdownWhileSyncing(t *testing.T) {
 		},
 		expectedErr: context.Canceled,
 	}
-	vmSetup = createSyncServerAndClientVMs(t, test)
+	vmSetup = createSyncServerAndClientVMs(t, test, parentsToGet)
 	// Perform sync resulting in early termination.
 	testSyncerVM(t, vmSetup, test)
 }
 
-func createSyncServerAndClientVMs(t *testing.T, test syncTest) *syncVMSetup {
-	var (
-		require = require.New(t)
-	)
+func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *syncVMSetup {
+	require := require.New(t)
 	// configure [serverVM]
 	_, serverVM, _, serverAppSender := GenesisVM(t, true, genesisJSONLatest, "", "")
 	t.Cleanup(func() {
 		log.Info("Shutting down server VM")
 		require.NoError(serverVM.Shutdown(context.Background()))
 	})
-	generateAndAcceptBlocks(t, serverVM, parentsToGet, func(i int, gen *core.BlockGen) {
+	generateAndAcceptBlocks(t, serverVM, numBlocks, func(i int, gen *core.BlockGen) {
 		b, err := predicate.NewResults().Bytes()
 		if err != nil {
 			t.Fatal(err)
 		}
 		gen.AppendExtra(b)
 
-		tx := types.NewTransaction(gen.TxNonce(testEthAddrs[0]), testEthAddrs[1], common.Big1, params.TxGas, big.NewInt(testMinGasPrice), nil)
+		tx := types.NewTransaction(gen.TxNonce(testEthAddrs[0]), testEthAddrs[1], common.Big1, ethparams.TxGas, big.NewInt(testMinGasPrice), nil)
 		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(serverVM.chainConfig.ChainID), testKeys[0])
 		require.NoError(err)
 		gen.AddTx(signedTx)
-	})
+	}, nil)
 
 	// make some accounts
-	trieDB := trie.NewDatabase(serverVM.chaindb)
+	trieDB := triedb.NewDatabase(serverVM.chaindb, nil)
 	root, accounts := statesync.FillAccountsWithOverlappingStorage(t, trieDB, types.EmptyRootHash, 1000, 16)
 
 	// patch serverVM's lastAcceptedBlock to have the new root
@@ -295,14 +300,13 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest) *syncVMSetup {
 	require.NoError(err)
 	internalBlock, err := serverVM.parseBlock(context.Background(), blockBytes)
 	require.NoError(err)
-	internalBlock.(*Block).SetStatus(choices.Accepted)
 	require.NoError(serverVM.State.SetLastAcceptedBlock(internalBlock))
 
 	// patch syncableInterval for test
 	serverVM.StateSyncServer.(*stateSyncServer).syncableInterval = test.syncableInterval
 
 	// initialise [syncerVM] with blank genesis state
-	stateSyncEnabledJSON := fmt.Sprintf(`{"state-sync-enabled":true, "state-sync-min-blocks": %d}`, test.stateSyncMinBlocks)
+	stateSyncEnabledJSON := fmt.Sprintf(`{"state-sync-enabled":true, "state-sync-min-blocks": %d, "tx-lookup-limit": %d}`, test.stateSyncMinBlocks, 4)
 	syncerEngineChan, syncerVM, syncerDB, syncerAppSender := GenesisVM(t, false, genesisJSONLatest, stateSyncEnabledJSON, "")
 	shutdownOnceSyncerVM := &shutdownOnceVM{VM: syncerVM}
 	t.Cleanup(func() {
@@ -357,12 +361,12 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest) *syncVMSetup {
 // off of a server VM.
 type syncVMSetup struct {
 	serverVM        *VM
-	serverAppSender *commonEng.SenderTest
+	serverAppSender *enginetest.Sender
 
-	fundedAccounts map[*keystore.Key]*types.StateAccount
+	fundedAccounts map[*testutils.Key]*types.StateAccount
 
 	syncerVM             *VM
-	syncerDB             database.Database
+	syncerDB             avalanchedatabase.Database
 	syncerEngineChan     <-chan commonEng.Message
 	shutdownOnceSyncerVM *shutdownOnceVM
 }
@@ -407,7 +411,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	syncMode, err := parsedSummary.Accept(context.Background())
 	require.NoError(err, "error accepting state summary")
-	require.Equal(syncMode, test.syncMode)
+	require.Equal(test.syncMode, syncMode)
 	if syncMode == block.StateSyncSkipped {
 		return
 	}
@@ -420,7 +424,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	if test.expectedErr != nil {
 		require.ErrorIs(err, test.expectedErr)
 		// Note we re-open the database here to avoid a closed error when the test is for a shutdown VM.
-		chaindb := Database{prefixdb.NewNested(ethDBPrefix, syncerVM.db)}
+		chaindb := database.WrapDatabase(prefixdb.NewNested(ethDBPrefix, syncerVM.versiondb))
 		assertSyncPerformedHeights(t, chaindb, map[uint64]struct{}{})
 		return
 	}
@@ -433,6 +437,21 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	require.Equal(serverVM.LastAcceptedBlock().ID(), syncerVM.LastAcceptedBlock().ID(), "blockID mismatch between syncer and server")
 	require.True(syncerVM.blockChain.HasState(syncerVM.blockChain.LastAcceptedBlock().Root()), "unavailable state for last accepted block")
 	assertSyncPerformedHeights(t, syncerVM.chaindb, map[uint64]struct{}{retrievedSummary.Height(): {}})
+
+	lastNumber := syncerVM.blockChain.LastAcceptedBlock().NumberU64()
+	// check the last block is indexed
+	lastSyncedBlock := rawdb.ReadBlock(syncerVM.chaindb, rawdb.ReadCanonicalHash(syncerVM.chaindb, lastNumber), lastNumber)
+	for _, tx := range lastSyncedBlock.Transactions() {
+		index := rawdb.ReadTxLookupEntry(syncerVM.chaindb, tx.Hash())
+		require.NotNilf(index, "Miss transaction indices, number %d hash %s", lastNumber, tx.Hash().Hex())
+	}
+
+	// tail should be the last block synced
+	if syncerVM.ethConfig.TransactionHistory != 0 {
+		tail := lastSyncedBlock.NumberU64()
+
+		core.CheckTxIndices(t, &tail, tail, syncerVM.chaindb, true)
+	}
 
 	blocksToBuild := 10
 	txsPerBlock := 10
@@ -454,11 +473,22 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 				break
 			}
 		}
-	})
+	},
+		func(block *types.Block) {
+			if syncerVM.ethConfig.TransactionHistory != 0 {
+				tail := block.NumberU64() - syncerVM.ethConfig.TransactionHistory + 1
+				// tail should be the minimum last synced block, since we skipped it to the last block
+				if tail < lastSyncedBlock.NumberU64() {
+					tail = lastSyncedBlock.NumberU64()
+				}
+				core.CheckTxIndices(t, &tail, block.NumberU64(), syncerVM.chaindb, true)
+			}
+		},
+	)
 
 	// check we can transition to [NormalOp] state and continue to process blocks.
 	require.NoError(syncerVM.SetState(context.Background(), snow.NormalOp))
-	require.True(syncerVM.bootstrapped)
+	require.True(syncerVM.bootstrapped.Get())
 
 	// Generate blocks after we have entered normal consensus as well
 	generateAndAcceptBlocks(t, syncerVM, blocksToBuild, func(_ int, gen *core.BlockGen) {
@@ -476,7 +506,18 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 				break
 			}
 		}
-	})
+	},
+		func(block *types.Block) {
+			if syncerVM.ethConfig.TransactionHistory != 0 {
+				tail := block.NumberU64() - syncerVM.ethConfig.TransactionHistory + 1
+				// tail should be the minimum last synced block, since we skipped it to the last block
+				if tail < lastSyncedBlock.NumberU64() {
+					tail = lastSyncedBlock.NumberU64()
+				}
+				core.CheckTxIndices(t, &tail, block.NumberU64(), syncerVM.chaindb, true)
+			}
+		},
+	)
 }
 
 // patchBlock returns a copy of [blk] with [root] and updates [db] to
@@ -499,7 +540,7 @@ func patchBlock(blk *types.Block, root common.Hash, db ethdb.Database) *types.Bl
 // generateAndAcceptBlocks uses [core.GenerateChain] to generate blocks, then
 // calls Verify and Accept on each generated block
 // TODO: consider using this helper function in vm_test.go and elsewhere in this package to clean up tests
-func generateAndAcceptBlocks(t *testing.T, vm *VM, numBlocks int, gen func(int, *core.BlockGen)) {
+func generateAndAcceptBlocks(t *testing.T, vm *VM, numBlocks int, gen func(int, *core.BlockGen), accepted func(*types.Block)) {
 	t.Helper()
 
 	// acceptExternalBlock defines a function to parse, verify, and accept a block once it has been
@@ -518,6 +559,10 @@ func generateAndAcceptBlocks(t *testing.T, vm *VM, numBlocks int, gen func(int, 
 		}
 		if err := vmBlock.Accept(context.Background()); err != nil {
 			t.Fatal(err)
+		}
+
+		if accepted != nil {
+			accepted(block)
 		}
 	}
 	_, _, err := core.GenerateChain(
@@ -542,12 +587,12 @@ func generateAndAcceptBlocks(t *testing.T, vm *VM, numBlocks int, gen func(int, 
 // assertSyncPerformedHeights iterates over all heights the VM has synced to and
 // verifies it matches [expected].
 func assertSyncPerformedHeights(t *testing.T, db ethdb.Iteratee, expected map[uint64]struct{}) {
-	it := rawdb.NewSyncPerformedIterator(db)
+	it := customrawdb.NewSyncPerformedIterator(db)
 	defer it.Release()
 
 	found := make(map[uint64]struct{}, len(expected))
 	for it.Next() {
-		found[rawdb.UnpackSyncPerformedKey(it.Key())] = struct{}{}
+		found[customrawdb.UnpackSyncPerformedKey(it.Key())] = struct{}{}
 	}
 	require.NoError(t, it.Error())
 	require.Equal(t, expected, found)

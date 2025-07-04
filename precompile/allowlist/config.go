@@ -5,13 +5,13 @@ package allowlist
 
 import (
 	"fmt"
-
+	"slices"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
 )
 
-var ErrCannotAddManagersBeforeDUpgrade = fmt.Errorf("cannot add managers before DUpgrade")
+var ErrCannotAddManagersBeforeDurango = fmt.Errorf("cannot add managers before Durango")
 
 // AllowListConfig specifies the initial set of addresses with Admin or Enabled roles.
 type AllowListConfig struct {
@@ -50,15 +50,7 @@ func (c *AllowListConfig) Equal(other *AllowListConfig) bool {
 
 // areEqualAddressLists returns true iff [a] and [b] have the same addresses in the same order.
 func areEqualAddressLists(current []common.Address, other []common.Address) bool {
-	if len(current) != len(other) {
-		return false
-	}
-	for i, address := range current {
-		if address != other[i] {
-			return false
-		}
-	}
-	return true
+	return slices.Equal(current, other)
 }
 
 // Verify returns an error if there is an overlapping address between admin and enabled roles
@@ -86,10 +78,10 @@ func (c *AllowListConfig) Verify(chainConfig precompileconfig.ChainConfig, upgra
 	}
 
 	if len(c.ManagerAddresses) != 0 && upgrade.Timestamp() != nil {
-		// If the config attempts to activate a manager before the DUpgrade, fail verification
+		// If the config attempts to activate a manager before the Durango, fail verification
 		timestamp := *upgrade.Timestamp()
-		if !chainConfig.IsDUpgrade(timestamp) {
-			return ErrCannotAddManagersBeforeDUpgrade
+		if !chainConfig.IsDurango(timestamp) {
+			return ErrCannotAddManagersBeforeDurango
 		}
 	}
 

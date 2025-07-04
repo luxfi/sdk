@@ -30,7 +30,6 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/ethereum/go-ethereum/common"
@@ -41,12 +40,12 @@ func init() {
 }
 
 const (
-	// tipBufferSize is the number of recent accepted tries to keep in the TrieDB
+	// TipBufferSize is the number of recent accepted tries to keep in the TrieDB
 	// dirties cache at tip (only applicable in [pruning] mode).
 	//
 	// Keeping extra tries around at tip enables clients to query data from
 	// recent trie roots.
-	tipBufferSize = 32
+	TipBufferSize = 32
 
 	// flushWindow is the distance to the [commitInterval] when we start
 	// optimistically flushing trie nodes to disk (only applicable in [pruning]
@@ -67,7 +66,7 @@ type TrieWriter interface {
 type TrieDB interface {
 	Dereference(root common.Hash) error
 	Commit(root common.Hash, report bool) error
-	Size() (common.StorageSize, common.StorageSize)
+	Size() (common.StorageSize, common.StorageSize, common.StorageSize)
 	Cap(limit common.StorageSize) error
 }
 
@@ -79,7 +78,7 @@ func NewTrieWriter(db TrieDB, config *CacheConfig) TrieWriter {
 			targetCommitSize: common.StorageSize(config.TrieDirtyCommitTarget) * 1024 * 1024,
 			imageCap:         4 * 1024 * 1024,
 			commitInterval:   config.CommitInterval,
-			tipBuffer:        NewBoundedBuffer(tipBufferSize, db.Dereference),
+			tipBuffer:        NewBoundedBuffer(TipBufferSize, db.Dereference),
 		}
 		cm.flushStepSize = (cm.memoryCap - cm.targetCommitSize) / common.StorageSize(flushWindow)
 		return cm
@@ -126,7 +125,7 @@ type cappedMemoryTrieWriter struct {
 func (cm *cappedMemoryTrieWriter) InsertTrie(block *types.Block) error {
 	// The use of [Cap] in [InsertTrie] prevents exceeding the configured memory
 	// limit (and OOM) in case there is a large backlog of processing (unaccepted) blocks.
-	nodes, imgs := cm.TrieDB.Size()
+	_, nodes, imgs := cm.TrieDB.Size() // all memory is contained within the nodes return for hashdb
 	if nodes <= cm.memoryCap && imgs <= cm.imageCap {
 		return nil
 	}
@@ -174,7 +173,7 @@ func (cm *cappedMemoryTrieWriter) AcceptTrie(block *types.Block) error {
 		return nil
 	}
 	targetMemory := cm.targetCommitSize + cm.flushStepSize*common.StorageSize(distanceFromCommit)
-	nodes, _ := cm.TrieDB.Size()
+	_, nodes, _ := cm.TrieDB.Size()
 	if nodes <= targetMemory {
 		return nil
 	}

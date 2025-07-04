@@ -31,7 +31,6 @@ import (
 	crand "crypto/rand"
 	"math/rand"
 	"testing"
-
 	"github.com/luxdefi/evm/ethdb/memorydb"
 	"github.com/luxdefi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
@@ -246,7 +245,7 @@ func TestInsertAndMerge(t *testing.T) {
 func emptyLayer() *diskLayer {
 	return &diskLayer{
 		diskdb: memorydb.New(),
-		cache:  utils.NewMeteredCache(500*1024, "", "", 0),
+		cache:  utils.NewMeteredCache(500*1024, "", 0),
 	}
 }
 

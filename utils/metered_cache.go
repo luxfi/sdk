@@ -5,11 +5,8 @@ package utils
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"sync/atomic"
 	"time"
-
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/luxdefi/evm/metrics"
 	"github.com/ethereum/go-ethereum/common"
@@ -35,37 +32,15 @@ type MeteredCache struct {
 	updateFrequency uint64
 }
 
-func dirSize(path string) (int64, error) {
-	var size int64
-	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			size += info.Size()
-		}
-		return nil
-	})
-	return size, err
-}
-
 // NewMeteredCache returns a new MeteredCache that will update stats to the
 // provided namespace once per each [updateFrequency] operations.
 // Note: if [updateFrequency] is passed as 0, it will be treated as 1.
-func NewMeteredCache(size int, journal string, namespace string, updateFrequency uint64) *MeteredCache {
-	var cache *fastcache.Cache
-	if journal == "" {
-		cache = fastcache.New(size)
-	} else {
-		dirSize, err := dirSize(journal)
-		log.Info("attempting to load cache from disk", "path", journal, "dirSize", common.StorageSize(dirSize), "err", err)
-		cache = fastcache.LoadFromFileOrNew(journal, size)
-	}
+func NewMeteredCache(size int, namespace string, updateFrequency uint64) *MeteredCache {
 	if updateFrequency == 0 {
 		updateFrequency = 1 // avoid division by zero
 	}
 	mc := &MeteredCache{
-		Cache:           cache,
+		Cache:           fastcache.New(size),
 		namespace:       namespace,
 		updateFrequency: updateFrequency,
 	}
@@ -82,7 +57,7 @@ func NewMeteredCache(size int, journal string, namespace string, updateFrequency
 	return mc
 }
 
-// updateStats updates metrics from fastcache
+// updateStatsIfNeeded updates metrics from fastcache
 func (mc *MeteredCache) updateStatsIfNeeded() {
 	if mc.namespace == "" {
 		return

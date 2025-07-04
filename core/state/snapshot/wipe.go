@@ -29,7 +29,6 @@ package snapshot
 import (
 	"bytes"
 	"time"
-
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/ethereum/go-ethereum/common"
@@ -43,7 +42,7 @@ import (
 func WipeSnapshot(db ethdb.KeyValueStore, full bool) chan struct{} {
 	// Wipe the snapshot root marker synchronously
 	if full {
-		rawdb.DeleteSnapshotBlockHash(db)
+		customrawdb.DeleteSnapshotBlockHash(db)
 		rawdb.DeleteSnapshotRoot(db)
 	}
 	// Wipe everything else asynchronously

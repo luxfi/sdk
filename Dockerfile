@@ -1,11 +1,9 @@
-# syntax=docker/dockerfile:experimental
-
 # ============= Setting up base Stage ================
 # Set required LUX_VERSION parameter in build image script
 ARG LUX_VERSION
 
 # ============= Compilation Stage ================
-FROM golang:1.20.10-bullseye AS builder
+FROM --platform=$BUILDPLATFORM golang:1.23.9-bookworm AS builder
 
 WORKDIR /build
 
@@ -19,11 +17,37 @@ RUN go mod download && go mod tidy -compat=1.20
 # Copy the code into the container
 COPY . .
 
+# Ensure pre-existing builds are not available for inclusion in the final image
+RUN [ -d ./build ] && rm -rf ./build/* || true
+
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+# Configure a cross-compiler if the target platform differs from the build platform.
+#
+# build_env.sh is used to capture the environmental changes required by the build step since RUN
+# environment state is not otherwise persistent.
+RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] && [ "$BUILDPLATFORM" != "linux/arm64" ]; then \
+  apt-get update && apt-get install -y gcc-aarch64-linux-gnu && \
+  echo "export CC=aarch64-linux-gnu-gcc" > ./build_env.sh \
+  ; elif [ "$TARGETPLATFORM" = "linux/amd64" ] && [ "$BUILDPLATFORM" != "linux/amd64" ]; then \
+  apt-get update && apt-get install -y gcc-x86-64-linux-gnu && \
+  echo "export CC=x86_64-linux-gnu-gcc" > ./build_env.sh \
+  ; else \
+  echo "export CC=gcc" > ./build_env.sh \
+  ; fi
+
 # Pass in SUBNET_EVM_COMMIT as an arg to allow the build script to set this externally
 ARG SUBNET_EVM_COMMIT
 ARG CURRENT_BRANCH
 
-RUN export SUBNET_EVM_COMMIT=$SUBNET_EVM_COMMIT && export CURRENT_BRANCH=$CURRENT_BRANCH && ./scripts/build.sh /build/srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy
+RUN . ./build_env.sh && \
+  echo "{CC=$CC, TARGETPLATFORM=$TARGETPLATFORM, BUILDPLATFORM=$BUILDPLATFORM}" && \
+  export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) && \
+  export CURRENT_BRANCH=$CURRENT_BRANCH && \
+  export SUBNET_EVM_COMMIT=$SUBNET_EVM_COMMIT && \
+  ./scripts/build.sh build/subnet-evm
 
 # ============= Cleanup Stage ================
 FROM luxdefi/node:$LUX_VERSION AS builtImage

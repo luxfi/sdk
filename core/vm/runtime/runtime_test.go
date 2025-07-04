@@ -32,7 +32,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/core"
@@ -45,7 +44,6 @@ import (
 	"github.com/luxdefi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/asm"
-
 	// force-load js tracers to trigger registration
 	_ "github.com/luxdefi/evm/eth/tracers/js"
 )
@@ -370,12 +368,12 @@ func benchmarkNonModifyingCode(gas uint64, code []byte, name string, tracerCode 
 	//cfg.State.CreateAccount(cfg.Origin)
 	// set the receiver's (the executing contract) code for execution.
 	cfg.State.SetCode(destination, code)
-	vmenv.Call(sender, destination, nil, gas, cfg.Value)
+	vmenv.Call(sender, destination, nil, gas, uint256.MustFromBig(cfg.Value))
 
 	b.Run(name, func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			vmenv.Call(sender, destination, nil, gas, cfg.Value)
+			vmenv.Call(sender, destination, nil, gas, uint256.MustFromBig(cfg.Value))
 		}
 	})
 }
@@ -679,7 +677,7 @@ func TestColdAccountAccessCost(t *testing.T) {
 			for ii, op := range tracer.StructLogs() {
 				t.Logf("%d: %v %d", ii, op.OpName(), op.GasCost)
 			}
-			t.Fatalf("tescase %d, gas report wrong, step %d, have %d want %d", i, tc.step, have, want)
+			t.Fatalf("testcase %d, gas report wrong, step %d, have %d want %d", i, tc.step, have, want)
 		}
 	}
 }

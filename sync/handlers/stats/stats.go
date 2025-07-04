@@ -5,7 +5,6 @@ package stats
 
 import (
 	"time"
-
 	"github.com/luxdefi/evm/metrics"
 )
 

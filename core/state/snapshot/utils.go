@@ -30,7 +30,6 @@ import (
 	"bytes"
 	"fmt"
 	"time"
-
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/ethereum/go-ethereum/common"

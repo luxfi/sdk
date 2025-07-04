@@ -6,7 +6,6 @@ package utils
 import (
 	"bytes"
 	"testing"
-
 	"github.com/luxdefi/node/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"

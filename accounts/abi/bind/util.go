@@ -30,7 +30,6 @@ import (
 	"context"
 	"errors"
 	"time"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
@@ -50,7 +49,7 @@ func WaitMined(ctx context.Context, b DeployBackend, tx *types.Transaction) (*ty
 			return receipt, nil
 		}
 
-		if errors.Is(err, interfaces.NotFound) {
+		if errors.Is(err, ethereum.NotFound) {
 			logger.Trace("Transaction not yet mined")
 		} else {
 			logger.Trace("Receipt retrieval failed", "err", err)

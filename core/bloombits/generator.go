@@ -28,7 +28,6 @@ package bloombits
 
 import (
 	"errors"
-
 	"github.com/luxdefi/evm/core/types"
 )
 

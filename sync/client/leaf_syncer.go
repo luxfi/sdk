@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/luxdefi/evm/plugin/evm/message"
 	"github.com/luxdefi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"

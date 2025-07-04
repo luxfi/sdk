@@ -7,7 +7,6 @@ package aggregator
 import (
 	context "context"
 	reflect "reflect"
-
 	bls "github.com/luxdefi/node/utils/crypto/bls"
 	ids "github.com/luxdefi/node/ids"
 	warp "github.com/luxdefi/node/vms/platformvm/warp"
@@ -18,6 +17,7 @@ import (
 type MockSignatureGetter struct {
 	ctrl     *gomock.Controller
 	recorder *MockSignatureGetterMockRecorder
+	isgomock struct{}
 }
 
 // MockSignatureGetterMockRecorder is the mock recorder for MockSignatureGetter.
@@ -38,16 +38,16 @@ func (m *MockSignatureGetter) EXPECT() *MockSignatureGetterMockRecorder {
 }
 
 // GetSignature mocks base method.
-func (m *MockSignatureGetter) GetSignature(arg0 context.Context, arg1 ids.NodeID, arg2 *warp.UnsignedMessage) (*bls.Signature, error) {
+func (m *MockSignatureGetter) GetSignature(ctx context.Context, nodeID ids.NodeID, unsignedWarpMessage *warp.UnsignedMessage) (*bls.Signature, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSignature", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetSignature", ctx, nodeID, unsignedWarpMessage)
 	ret0, _ := ret[0].(*bls.Signature)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetSignature indicates an expected call of GetSignature.
-func (mr *MockSignatureGetterMockRecorder) GetSignature(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockSignatureGetterMockRecorder) GetSignature(ctx, nodeID, unsignedWarpMessage any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSignature", reflect.TypeOf((*MockSignatureGetter)(nil).GetSignature), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSignature", reflect.TypeOf((*MockSignatureGetter)(nil).GetSignature), ctx, nodeID, unsignedWarpMessage)
 }

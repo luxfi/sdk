@@ -7,19 +7,39 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
-
+<<<<<<< HEAD
 	"github.com/luxdefi/evm/tests/utils/runner"
 	"github.com/ethereum/go-ethereum/log"
+=======
+>>>>>>> v0.7.5
 	ginkgo "github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
+	"github.com/luxdefi/node/ids"
+	"github.com/luxdefi/node/tests/fixture/e2e"
+	"github.com/luxdefi/node/tests/fixture/tmpnet"
+	"github.com/luxdefi/node/utils/set"
+	"github.com/luxdefi/evm/tests"
+	"github.com/luxdefi/evm/tests/utils"
 )
 
-var getSubnet func() *runner.Subnet
+const (
+	// The load test requires 5 nodes
+	nodeCount = 5
+
+	subnetAName = "load-subnet-a"
+)
+
+var (
+	flagVars     *e2e.FlagVars
+	repoRootPath = tests.GetRepoRootPath("tests/load")
+)
 
 func init() {
-	getSubnet = runner.RegisterFiveNodeSubnetRun()
+	// Configures flags used to configure tmpnet
+	flagVars = e2e.RegisterFlags()
 }
 
 func TestE2E(t *testing.T) {
@@ -28,25 +48,55 @@ func TestE2E(t *testing.T) {
 }
 
 var _ = ginkgo.Describe("[Load Simulator]", ginkgo.Ordered, func() {
-	ginkgo.It("basic subnet load test", ginkgo.Label("load"), func() {
-		subnetDetails := getSubnet()
-		blockchainID := subnetDetails.BlockchainID
+	require := require.New(ginkgo.GinkgoT())
 
-		nodeURIs := subnetDetails.ValidatorURIs
+	var env *e2e.TestEnvironment
+
+	ginkgo.BeforeAll(func() {
+		tc := e2e.NewTestContext()
+		genesisPath := filepath.Join(repoRootPath, "tests/load/genesis/genesis.json")
+
+		nodes := utils.NewTmpnetNodes(nodeCount)
+		env = e2e.NewTestEnvironment(
+			tc,
+			flagVars,
+			utils.NewTmpnetNetwork(
+				"subnet-evm-small-load",
+				nodes,
+				tmpnet.FlagsMap{},
+				utils.NewTmpnetSubnet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),
+			),
+		)
+	})
+
+	ginkgo.It("basic subnet load test", ginkgo.Label("load"), func() {
+		network := env.GetNetwork()
+
+		subnet := network.GetSubnet(subnetAName)
+		require.NotNil(subnet)
+		blockchainID := subnet.Chains[0].ChainID
+
+		nodeURIs := env.GetNodeURIs()
+		validatorIDs := set.NewSet[ids.NodeID](len(subnet.ValidatorIDs))
+		validatorIDs.Add(subnet.ValidatorIDs...)
 		rpcEndpoints := make([]string, 0, len(nodeURIs))
-		for _, uri := range nodeURIs {
-			rpcEndpoints = append(rpcEndpoints, fmt.Sprintf("%s/ext/bc/%s/rpc", uri, blockchainID))
+		for _, nodeURI := range nodeURIs {
+			if !validatorIDs.Contains(nodeURI.NodeID) {
+				continue
+			}
+			rpcEndpoints = append(rpcEndpoints, fmt.Sprintf("%s/ext/bc/%s/rpc", nodeURI.URI, blockchainID))
 		}
 		commaSeparatedRPCEndpoints := strings.Join(rpcEndpoints, ",")
 		err := os.Setenv("RPC_ENDPOINTS", commaSeparatedRPCEndpoints)
-		gomega.Expect(err).Should(gomega.BeNil())
+		require.NoError(err)
 
 		log.Info("Running load simulator...", "rpcEndpoints", commaSeparatedRPCEndpoints)
 		cmd := exec.Command("./scripts/run_simulator.sh")
+		cmd.Dir = repoRootPath
 		log.Info("Running load simulator script", "cmd", cmd.String())
 
 		out, err := cmd.CombinedOutput()
 		fmt.Printf("\nCombined output:\n\n%s\n", string(out))
-		gomega.Expect(err).Should(gomega.BeNil())
+		require.NoError(err)
 	})
 })

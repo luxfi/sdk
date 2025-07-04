@@ -5,7 +5,6 @@ package allowlist
 
 import (
 	"testing"
-
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
@@ -164,12 +163,12 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			ReadOnly:    false,
 			ExpectedErr: ErrCannotModifyAllowList.Error(),
 		},
-		"no role set manager pre-DUpgrade": {
+		"no role set manager pre-Durango": {
 			Caller:     TestNoRoleAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -187,7 +186,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -200,12 +199,12 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			ReadOnly:    false,
 			ExpectedErr: ErrCannotModifyAllowList.Error(),
 		},
-		"enabled role set manager pre-DUpgrade": {
+		"enabled role set manager pre-Durango": {
 			Caller:     TestEnabledAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -223,7 +222,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -247,7 +246,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			},
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			SuppliedGas: 0,
@@ -266,7 +265,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			ExpectedRes: []byte{},
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			SuppliedGas: ModifyAllowListGasCost + AllowListEventGasCost,
@@ -327,7 +326,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -371,7 +370,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -436,7 +435,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -473,7 +472,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			},
 			SuppliedGas: ModifyAllowListGasCost,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrWriteProtection.Error(),
+			ExpectedErr: vm.ErrWriteProtection.Error(),
 		},
 		"admin set no role insufficient gas": {
 			Caller:     TestAdminAddr,
@@ -486,7 +485,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			},
 			SuppliedGas: ModifyAllowListGasCost - 1,
 			ReadOnly:    false,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
 		"no role read allow list": {
 			Caller:     TestNoRoleAddr,
@@ -535,7 +534,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 				return input
 			}, SuppliedGas: ReadAllowListGasCost - 1,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
 		"initial config sets admins": {
 			Config: mkConfigWithAllowList(
@@ -579,12 +578,12 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 				require.Equal(t, EnabledRole, GetAllowListStatus(state, contractAddress, TestNoRoleAddr))
 			},
 		},
-		"admin set admin pre-DUpgrade": {
+		"admin set admin pre-Durango": {
 			Caller:     TestAdminAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -602,12 +601,12 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 				require.Len(t, data, 0)
 			},
 		},
-		"admin set enabled pre-DUpgrade": {
+		"admin set enabled pre-Durango": {
 			Caller:     TestAdminAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -625,12 +624,12 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 				require.Len(t, data, 0)
 			},
 		},
-		"admin set no role pre-DUpgrade": {
+		"admin set no role pre-Durango": {
 			Caller:     TestAdminAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -705,8 +704,8 @@ func assertSetRoleEvent(t testing.TB, logsTopics [][]common.Hash, logsData [][]b
 	require.Len(t, topics, 4)
 	require.Equal(t, AllowListABI.Events["RoleSet"].ID, topics[0])
 	require.Equal(t, role.Hash(), topics[1])
-	require.Equal(t, addr.Hash(), topics[2])
-	require.Equal(t, caller.Hash(), topics[3])
+	require.Equal(t, common.BytesToHash(addr[:]), topics[2])
+	require.Equal(t, common.BytesToHash(caller[:]), topics[3])
 	data := logsData[0]
 	require.Equal(t, oldRole.Bytes(), data)
 }

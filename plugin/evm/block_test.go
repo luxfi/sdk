@@ -6,7 +6,6 @@ package evm
 import (
 	"math/big"
 	"testing"
-
 	"github.com/luxdefi/node/database/memdb"
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/types"
@@ -23,9 +22,9 @@ func TestHandlePrecompileAccept(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	db := memdb.New()
+	db := rawdb.NewMemoryDatabase()
 	vm := &VM{
-		chaindb:     Database{db},
+		chaindb:     db,
 		chainConfig: params.TestChainConfig,
 	}
 
@@ -89,10 +88,10 @@ func TestHandlePrecompileAccept(t *testing.T) {
 
 	// Call handlePrecompileAccept
 	blk := vm.newBlock(ethBlock)
-	rules := &params.Rules{
+	rules := extras.Rules{
 		AccepterPrecompiles: map[common.Address]precompileconfig.Accepter{
 			precompileAddr: mockAccepter,
 		},
 	}
-	require.NoError(blk.handlePrecompileAccept(rules, nil))
+	require.NoError(blk.handlePrecompileAccept(rules))
 }

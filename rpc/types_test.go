@@ -145,7 +145,6 @@ func TestBlockNumberOrHash_WithNumber_MarshalAndUnmarshal(t *testing.T) {
 		{"earliest", int64(EarliestBlockNumber)},
 	}
 	for _, test := range tests {
-		test := test
 		t.Run(test.name, func(t *testing.T) {
 			bnh := BlockNumberOrHashWithNumber(BlockNumber(test.number))
 			marshalled, err := json.Marshal(bnh)
@@ -161,5 +160,26 @@ func TestBlockNumberOrHash_WithNumber_MarshalAndUnmarshal(t *testing.T) {
 				t.Fatalf("wrong result: expected %v, got %v", bnh, unmarshalled)
 			}
 		})
+	}
+}
+
+func TestBlockNumberOrHash_StringAndUnmarshal(t *testing.T) {
+	tests := []BlockNumberOrHash{
+		BlockNumberOrHashWithNumber(math.MaxInt64),
+		BlockNumberOrHashWithNumber(PendingBlockNumber),
+		BlockNumberOrHashWithNumber(LatestBlockNumber),
+		BlockNumberOrHashWithNumber(EarliestBlockNumber),
+		BlockNumberOrHashWithNumber(32),
+		BlockNumberOrHashWithHash(common.Hash{0xaa}, false),
+	}
+	for _, want := range tests {
+		marshalled, _ := json.Marshal(want.String())
+		var have BlockNumberOrHash
+		if err := json.Unmarshal(marshalled, &have); err != nil {
+			t.Fatalf("cannot unmarshal (%v): %v", string(marshalled), err)
+		}
+		if !reflect.DeepEqual(want, have) {
+			t.Fatalf("wrong result: have %v, want %v", have, want)
+		}
 	}
 }

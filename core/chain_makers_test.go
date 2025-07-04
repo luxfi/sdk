@@ -29,7 +29,6 @@ package core
 import (
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/types"
@@ -48,31 +47,33 @@ func ExampleGenerateChain() {
 		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
 		addr3   = crypto.PubkeyToAddress(key3.PublicKey)
 		db      = rawdb.NewMemoryDatabase()
+		genDb   = rawdb.NewMemoryDatabase()
 	)
 
 	// Ensure that key1 has some funds in the genesis block.
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  GenesisAlloc{addr1: {Balance: big.NewInt(1000000)}},
+		Alloc:  types.GenesisAlloc{addr1: {Balance: big.NewInt(1000000)}},
 	}
+	genesis := gspec.MustCommit(genDb, triedb.NewDatabase(genDb, triedb.HashDefaults))
 
 	// This call generates a chain of 3 blocks. The function runs for
 	// each block and adds different features to gen based on the
 	// block index.
 	signer := types.HomesteadSigner{}
-	_, chain, _, err := GenerateChainWithGenesis(gspec, dummy.NewCoinbaseFaker(), 3, 10, func(i int, gen *BlockGen) {
+	chain, _, err := GenerateChain(gspec.Config, genesis, dummy.NewCoinbaseFaker(), genDb, 3, 10, func(i int, gen *BlockGen) {
 		switch i {
 		case 0:
 			// In block 1, addr1 sends addr2 some ether.
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), params.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		case 1:
 			// In block 2, addr1 sends some more ether to addr2.
 			// addr2 passes it on to addr3.
-			tx1, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(1000), params.TxGas, nil, nil), signer, key1)
+			tx1, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(1000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx1)
 		case 2:
-			tx2, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr2), addr3, big.NewInt(1000), params.TxGas, nil, nil), signer, key2)
+			tx2, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr2), addr3, big.NewInt(1000), ethparams.TxGas, nil, nil), signer, key2)
 			gen.AddTx(tx2)
 		}
 	})
@@ -81,7 +82,7 @@ func ExampleGenerateChain() {
 	}
 
 	// Import the chain. This runs all block validation rules.
-	blockchain, _ := NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
+	blockchain, _ := NewBlockChain(db, DefaultCacheConfigWithScheme(rawdb.HashScheme), gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
 	defer blockchain.Stop()
 
 	if i, err := blockchain.InsertChain(chain); err != nil {

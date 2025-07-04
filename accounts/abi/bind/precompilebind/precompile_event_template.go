@@ -11,7 +11,6 @@ package {{.Package}}
 
 import (
 	"math/big"
-
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -58,7 +57,7 @@ accessibleState.GetStateDB().AddLog(
 {{range .Contract.Events}}
 	{{$event := .}}
 	{{$createdDataStruct := false}}
-	{{$topicCount := 0}}
+	{{$topicCount := 1}}
 	{{- range .Normalized.Inputs}}
 		{{- if .Indexed}}
 			{{$topicCount = add $topicCount 1}}
@@ -81,8 +80,9 @@ accessibleState.GetStateDB().AddLog(
 	// The gas cost of the non-indexed data depends on the data type and the data size.
 	func Get{{.Normalized.Name}}EventGasCost({{if $createdDataStruct}} data {{.Normalized.Name}}EventData{{end}}) uint64 {
 		gas := contract.LogGas // base gas cost
-		{{if $topicCount | lt 0}}
+		{{if $topicCount | lt 1}}
 		// Add topics gas cost ({{$topicCount}} topics)
+		// Topics always include the signature hash of the event. The rest are the indexed event arguments.
 		gas += contract.LogTopicGas * {{$topicCount}}
 		{{end}}
 

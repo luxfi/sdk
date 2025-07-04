@@ -10,10 +10,7 @@ SUBNET_EVM_PATH=$(
     cd .. && pwd
 )
 
-# Load the versions
-source "$SUBNET_EVM_PATH"/scripts/versions.sh
-
 # Load the constants
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
-go test ./precompile/contracts/... -bench=./... -timeout="10m" $@
+go test ./precompile/contracts/... -bench=./... -timeout="10m" "$@"

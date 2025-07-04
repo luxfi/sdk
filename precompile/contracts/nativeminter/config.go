@@ -6,7 +6,6 @@ package nativeminter
 import (
 	"fmt"
 	"math/big"
-
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/utils"

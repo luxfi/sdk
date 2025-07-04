@@ -12,7 +12,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 	"github.com/luxdefi/node/api/health"
 	"github.com/luxdefi/node/api/info"
 	"github.com/luxdefi/node/genesis"
@@ -24,7 +23,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
 )
 
 type SubnetSuite struct {
@@ -70,8 +69,8 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 		gomega.Expect(err).Should(gomega.BeNil())
 		log.Info("Starting Lux node", "wd", wd)
 		cmd, err := RunCommand("./scripts/run.sh")
+		require.NoError(err)
 		startCmd = cmd
-		gomega.Expect(err).Should(gomega.BeNil())
 
 		// Assumes that startCmd will launch a node with HTTP Port at [utils.DefaultLocalNodeURI]
 		healthClient := health.NewClient(DefaultLocalNodeURI)
@@ -80,19 +79,18 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 		gomega.Expect(healthy).Should(gomega.BeTrue())
 		log.Info("Lux node is healthy")
 
-		gomega.Expect(err).NotTo(gomega.HaveOccurred())
 		blockchainIDs := make(map[string]string)
 		for alias, file := range genesisFiles {
 			blockchainIDs[alias] = CreateNewSubnet(ctx, file)
 		}
 
 		blockchainIDsBytes, err := json.Marshal(blockchainIDs)
-		gomega.Expect(err).NotTo(gomega.HaveOccurred())
+		require.NoError(err)
 		return blockchainIDsBytes
 	}, func(ctx ginkgo.SpecContext, data []byte) {
 		blockchainIDs := make(map[string]string)
 		err := json.Unmarshal(data, &blockchainIDs)
-		gomega.Expect(err).NotTo(gomega.HaveOccurred())
+		require.NoError(err)
 
 		globalSuite.SetBlockchainIDs(blockchainIDs)
 	})
@@ -111,6 +109,8 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 // CreateNewSubnet creates a new subnet and EVM blockchain with the given genesis file.
 // returns the ID of the new created blockchain.
 func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
+	require := require.New(ginkgo.GinkgoT())
+
 	kc := secp256k1fx.NewKeychain(genesis.EWOQKey)
 
 	// MakeWallet fetches the available UTXOs owned by [kc] on the network
@@ -132,18 +132,18 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 	}
 
 	wd, err := os.Getwd()
-	gomega.Expect(err).Should(gomega.BeNil())
+	require.NoError(err)
 	log.Info("Reading genesis file", "filePath", genesisFilePath, "wd", wd)
 	genesisBytes, err := os.ReadFile(genesisFilePath)
-	gomega.Expect(err).Should(gomega.BeNil())
+	require.NoError(err)
 
 	log.Info("Creating new subnet")
 	createSubnetTx, err := pWallet.IssueCreateSubnetTx(owner)
-	gomega.Expect(err).Should(gomega.BeNil())
+	require.NoError(err)
 
 	genesis := &core.Genesis{}
 	err = json.Unmarshal(genesisBytes, genesis)
-	gomega.Expect(err).Should(gomega.BeNil())
+	require.NoError(err)
 
 	log.Info("Creating new EVM blockchain", "genesis", genesis)
 	createChainTx, err := pWallet.IssueCreateChainTx(
@@ -153,14 +153,14 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 		nil,
 		"testChain",
 	)
-	gomega.Expect(err).Should(gomega.BeNil())
+	require.NoError(err)
 	createChainTxID := createChainTx.ID()
 
 	// Confirm the new blockchain is ready by waiting for the readiness endpoint
 	infoClient := info.NewClient(DefaultLocalNodeURI)
 	bootstrapped, err := info.AwaitBootstrapped(ctx, infoClient, createChainTxID.String(), 2*time.Second)
-	gomega.Expect(err).Should(gomega.BeNil())
-	gomega.Expect(bootstrapped).Should(gomega.BeTrue())
+	require.NoError(err)
+	require.True(bootstrapped)
 
 	// Return the blockchainID of the newly created blockchain
 	return createChainTxID.String()

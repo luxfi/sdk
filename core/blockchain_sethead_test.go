@@ -31,7 +31,6 @@ package core
 
 import (
 	"testing"
-
 	"github.com/luxdefi/evm/core/types"
 )
 

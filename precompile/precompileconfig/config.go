@@ -52,21 +52,14 @@ type Predicater interface {
 	VerifyPredicate(predicateContext *PredicateContext, predicateBytes []byte) error
 }
 
-// SharedMemoryWriter defines an interface to allow a precompile's Accepter to write operations
-// into shared memory to be committed atomically on block accept.
-type SharedMemoryWriter interface {
-	AddSharedMemoryRequests(chainID ids.ID, requests *atomic.Requests)
-}
-
 type WarpMessageWriter interface {
 	AddMessage(unsignedMessage *warp.UnsignedMessage) error
 }
 
 // AcceptContext defines the context passed in to a precompileconfig's Accepter
 type AcceptContext struct {
-	SnowCtx      *snow.Context
-	SharedMemory SharedMemoryWriter
-	Warp         WarpMessageWriter
+	SnowCtx *snow.Context
+	Warp    WarpMessageWriter
 }
 
 // Accepter is an optional interface for StatefulPrecompiledContracts to implement.
@@ -86,6 +79,6 @@ type ChainConfig interface {
 	GetFeeConfig() commontype.FeeConfig
 	// AllowedFeeRecipients returns true if fee recipients are allowed in the genesis.
 	AllowedFeeRecipients() bool
-	// IsDUpgrade returns true if the time is after the DUpgrade.
-	IsDUpgrade(time uint64) bool
+	// IsDurango returns true if the time is after Durango.
+	IsDurango(time uint64) bool
 }

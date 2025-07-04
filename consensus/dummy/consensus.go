@@ -4,12 +4,10 @@
 package dummy
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"math/big"
 	"time"
-
 	"github.com/luxdefi/node/utils/timer/mockable"
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/core/state"
@@ -23,11 +21,10 @@ import (
 var (
 	allowedFutureBlockTime = 10 * time.Second // Max time from current time allowed for blocks, before they're considered future blocks
 
-	errInvalidBlockTime     = errors.New("timestamp less than parent's")
-	errUnclesUnsupported    = errors.New("uncles unsupported")
-	errBlockGasCostNil      = errors.New("block gas cost is nil")
-	errBlockGasCostTooLarge = errors.New("block gas cost is not uint64")
-	errBaseFeeNil           = errors.New("base fee is nil")
+	ErrInsufficientBlockGas = errors.New("insufficient gas to cover the block cost")
+
+	errInvalidBlockTime  = errors.New("timestamp less than parent's")
+	errUnclesUnsupported = errors.New("uncles unsupported")
 )
 
 type Mode struct {
@@ -42,6 +39,16 @@ type (
 		consensusMode Mode
 	}
 )
+
+func NewDummyEngine(
+	mode Mode,
+	clock *mockable.Clock,
+) *DummyEngine {
+	return &DummyEngine{
+		clock:         clock,
+		consensusMode: mode,
+	}
+}
 
 func NewETHFaker() *DummyEngine {
 	return &DummyEngine{
@@ -69,6 +76,13 @@ func NewFakerWithMode(mode Mode) *DummyEngine {
 	}
 }
 
+func NewFakerWithModeAndClock(mode Mode, clock *mockable.Clock) *DummyEngine {
+	return &DummyEngine{
+		clock:         clock,
+		consensusMode: mode,
+	}
+}
+
 func NewCoinbaseFaker() *DummyEngine {
 	return &DummyEngine{
 		clock:         &mockable.Clock{},
@@ -84,8 +98,8 @@ func NewFullFaker() *DummyEngine {
 }
 
 // verifyCoinbase checks that the coinbase is valid for the given [header] and [parent].
-func (self *DummyEngine) verifyCoinbase(config *params.ChainConfig, header *types.Header, parent *types.Header, chain consensus.ChainHeaderReader) error {
-	if self.consensusMode.ModeSkipCoinbase {
+func (eng *DummyEngine) verifyCoinbase(header *types.Header, parent *types.Header, chain consensus.ChainHeaderReader) error {
+	if eng.consensusMode.ModeSkipCoinbase {
 		return nil
 	}
 	// get the coinbase configured at parent
@@ -101,20 +115,12 @@ func (self *DummyEngine) verifyCoinbase(config *params.ChainConfig, header *type
 	// we fetch the configured coinbase at the parent's state
 	// to check against the coinbase in [header].
 	if configuredAddressAtParent != header.Coinbase {
-		return fmt.Errorf("%w: %v does not match required coinbase address %v", vmerrs.ErrInvalidCoinbase, header.Coinbase, configuredAddressAtParent)
+		return fmt.Errorf("%w: %v does not match required coinbase address %v", vmerrors.ErrInvalidCoinbase, header.Coinbase, configuredAddressAtParent)
 	}
 	return nil
 }
 
-func (self *DummyEngine) verifyHeaderGasFields(config *params.ChainConfig, header *types.Header, parent *types.Header, chain consensus.ChainHeaderReader) error {
-	// Verify that the gas limit is <= 2^63-1
-	if header.GasLimit > params.MaxGasLimit {
-		return fmt.Errorf("invalid gasLimit: have %v, max %v", header.GasLimit, params.MaxGasLimit)
-	}
-	// Verify that the gasUsed is <= gasLimit
-	if header.GasUsed > header.GasLimit {
-		return fmt.Errorf("invalid gasUsed: have %d, gasLimit %d", header.GasUsed, header.GasLimit)
-	}
+func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, parent *types.Header, chain consensus.ChainHeaderReader) error {
 	// We verify the current block by checking the parent fee config
 	// this is because the current block cannot set the fee config for itself
 	// Fee config might depend on the state when precompile is activated
@@ -124,104 +130,64 @@ func (self *DummyEngine) verifyHeaderGasFields(config *params.ChainConfig, heade
 	if err != nil {
 		return err
 	}
-	if config.IsSubnetEVM(header.Time) {
-		expectedGasLimit := feeConfig.GasLimit.Uint64()
-		if header.GasLimit != expectedGasLimit {
-			return fmt.Errorf("expected gas limit to be %d, but found %d", expectedGasLimit, header.GasLimit)
-		}
-	} else {
-		// Verify that the gas limit remains within allowed bounds
-		diff := int64(parent.GasLimit) - int64(header.GasLimit)
-		if diff < 0 {
-			diff *= -1
-		}
-		limit := parent.GasLimit / params.GasLimitBoundDivisor
-
-		if uint64(diff) >= limit || header.GasLimit < params.MinGasLimit {
-			return fmt.Errorf("invalid gas limit: have %d, want %d += %d", header.GasLimit, parent.GasLimit, limit)
-		}
-		// Verify BaseFee is not present before Subnet EVM
-		if header.BaseFee != nil {
-			return fmt.Errorf("invalid baseFee before fork: have %d, want <nil>", header.BaseFee)
-		}
-		if header.BlockGasCost != nil {
-			return fmt.Errorf("invalid blockGasCost before fork: have %d, want <nil>", header.BlockGasCost)
-		}
-		return nil
+	if err := customheader.VerifyGasUsed(config, feeConfig, parent, header); err != nil {
+		return err
+	}
+	if err := customheader.VerifyGasLimit(config, feeConfig, parent, header); err != nil {
+		return err
+	}
+	if err := customheader.VerifyExtraPrefix(config, parent, header); err != nil {
+		return err
 	}
 
-	// Verify baseFee and rollupWindow encoding as part of header verification
-	// starting in Subnet EVM
-	expectedRollupWindowBytes, expectedBaseFee, err := CalcBaseFee(config, feeConfig, parent, header.Time)
+	// Verify header.BaseFee matches the expected value.
+	expectedBaseFee, err := customheader.BaseFee(config, feeConfig, parent, header.Time)
 	if err != nil {
 		return fmt.Errorf("failed to calculate base fee: %w", err)
 	}
-	if len(header.Extra) < len(expectedRollupWindowBytes) || !bytes.Equal(expectedRollupWindowBytes, header.Extra[:len(expectedRollupWindowBytes)]) {
-		return fmt.Errorf("expected rollup window bytes: %x, found %x", expectedRollupWindowBytes, header.Extra)
-	}
-	if header.BaseFee == nil {
-		return errors.New("expected baseFee to be non-nil")
-	}
-	if bfLen := header.BaseFee.BitLen(); bfLen > 256 {
-		return fmt.Errorf("too large base fee: bitlen %d", bfLen)
-	}
-	if header.BaseFee.Cmp(expectedBaseFee) != 0 {
+	if !utils.BigEqual(header.BaseFee, expectedBaseFee) {
 		return fmt.Errorf("expected base fee (%d), found (%d)", expectedBaseFee, header.BaseFee)
 	}
 
 	// Enforce BlockGasCost constraints
-	expectedBlockGasCost := calcBlockGasCost(
-		feeConfig.TargetBlockRate,
-		feeConfig.MinBlockGasCost,
-		feeConfig.MaxBlockGasCost,
-		feeConfig.BlockGasCostStep,
-		parent.BlockGasCost,
-		parent.Time, header.Time,
+	expectedBlockGasCost := customheader.BlockGasCost(
+		config,
+		feeConfig,
+		parent,
+		header.Time,
 	)
-	if header.BlockGasCost == nil {
-		return errBlockGasCostNil
-	}
-	if !header.BlockGasCost.IsUint64() {
-		return errBlockGasCostTooLarge
-	}
-	if header.BlockGasCost.Cmp(expectedBlockGasCost) != 0 {
-		return fmt.Errorf("invalid block gas cost: have %d, want %d", header.BlockGasCost, expectedBlockGasCost)
+	headerExtra := customtypes.GetHeaderExtra(header)
+	if !utils.BigEqual(headerExtra.BlockGasCost, expectedBlockGasCost) {
+		return fmt.Errorf("invalid block gas cost: have %d, want %d", headerExtra.BlockGasCost, expectedBlockGasCost)
 	}
 	return nil
 }
 
 // modified from consensus.go
-func (self *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, uncle bool) error {
-	config := chain.Config()
+func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, uncle bool) error {
 	// Ensure that we do not verify an uncle
 	if uncle {
 		return errUnclesUnsupported
 	}
-	switch {
-	case config.IsDUpgrade(header.Time):
-		if len(header.Extra) < params.DynamicFeeExtraDataSize {
-			return fmt.Errorf("expected extra-data field length >= %d, found %d", params.DynamicFeeExtraDataSize, len(header.Extra))
-		}
-	case config.IsSubnetEVM(header.Time):
-		if len(header.Extra) != params.DynamicFeeExtraDataSize {
-			return fmt.Errorf("expected extra-data field to be: %d, but found %d", params.DynamicFeeExtraDataSize, len(header.Extra))
-		}
-	default:
-		if uint64(len(header.Extra)) > params.MaximumExtraDataSize {
-			return fmt.Errorf("extra-data too long: %d > %d", len(header.Extra), params.MaximumExtraDataSize)
-		}
+
+	// Verify the extra data is well-formed.
+	config := params.GetExtra(chain.Config())
+	rules := config.GetAvalancheRules(header.Time)
+	if err := customheader.VerifyExtra(rules, header.Extra); err != nil {
+		return err
 	}
+
 	// Ensure gas-related header fields are correct
-	if err := self.verifyHeaderGasFields(config, header, parent, chain); err != nil {
+	if err := verifyHeaderGasFields(config, header, parent, chain); err != nil {
 		return err
 	}
 	// Ensure that coinbase is valid
-	if err := self.verifyCoinbase(config, header, parent, chain); err != nil {
+	if err := eng.verifyCoinbase(header, parent, chain); err != nil {
 		return err
 	}
 
 	// Verify the header's timestamp
-	if header.Time > uint64(self.clock.Time().Add(allowedFutureBlockTime).Unix()) {
+	if header.Time > uint64(eng.clock.Time().Add(allowedFutureBlockTime).Unix()) {
 		return consensus.ErrFutureBlock
 	}
 	// Verify the header's timestamp is not earlier than parent's
@@ -233,24 +199,41 @@ func (self *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header 
 	if diff := new(big.Int).Sub(header.Number, parent.Number); diff.Cmp(big.NewInt(1)) != 0 {
 		return consensus.ErrInvalidNumber
 	}
-	// Verify the existence / non-existence of excessDataGas
-	cancun := chain.Config().IsCancun(header.Time)
-	if cancun && header.ExcessDataGas == nil {
-		return errors.New("missing excessDataGas")
-	}
-	if !cancun && header.ExcessDataGas != nil {
-		return fmt.Errorf("invalid excessDataGas: have %d, expected nil", header.ExcessDataGas)
+	// Verify the existence / non-existence of excessBlobGas
+	cancun := chain.Config().IsCancun(header.Number, header.Time)
+	if !cancun {
+		switch {
+		case header.ExcessBlobGas != nil:
+			return fmt.Errorf("invalid excessBlobGas: have %d, expected nil", *header.ExcessBlobGas)
+		case header.BlobGasUsed != nil:
+			return fmt.Errorf("invalid blobGasUsed: have %d, expected nil", *header.BlobGasUsed)
+		case header.ParentBeaconRoot != nil:
+			return fmt.Errorf("invalid parentBeaconRoot, have %#x, expected nil", *header.ParentBeaconRoot)
+		}
+	} else {
+		if header.ParentBeaconRoot == nil {
+			return errors.New("header is missing beaconRoot")
+		}
+		if *header.ParentBeaconRoot != (common.Hash{}) {
+			return fmt.Errorf("invalid parentBeaconRoot, have %#x, expected empty", *header.ParentBeaconRoot)
+		}
+		if err := eip4844.VerifyEIP4844Header(parent, header); err != nil {
+			return err
+		}
+		if *header.BlobGasUsed > 0 { // VerifyEIP4844Header ensures BlobGasUsed is non-nil
+			return fmt.Errorf("blobs not enabled on avalanche networks: used %d blob gas, expected 0", *header.BlobGasUsed)
+		}
 	}
 	return nil
 }
 
-func (self *DummyEngine) Author(header *types.Header) (common.Address, error) {
+func (*DummyEngine) Author(header *types.Header) (common.Address, error) {
 	return header.Coinbase, nil
 }
 
-func (self *DummyEngine) VerifyHeader(chain consensus.ChainHeaderReader, header *types.Header) error {
+func (eng *DummyEngine) VerifyHeader(chain consensus.ChainHeaderReader, header *types.Header) error {
 	// If we're running a full engine faking, accept any input as valid
-	if self.consensusMode.ModeSkipHeader {
+	if eng.consensusMode.ModeSkipHeader {
 		return nil
 	}
 	// Short circuit if the header is known, or it's parent not
@@ -263,28 +246,28 @@ func (self *DummyEngine) VerifyHeader(chain consensus.ChainHeaderReader, header 
 		return consensus.ErrUnknownAncestor
 	}
 	// Sanity checks passed, do a proper verification
-	return self.verifyHeader(chain, header, parent, false)
+	return eng.verifyHeader(chain, header, parent, false)
 }
 
-func (self *DummyEngine) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
+func (*DummyEngine) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
 	if len(block.Uncles()) > 0 {
 		return errUnclesUnsupported
 	}
 	return nil
 }
 
-func (self *DummyEngine) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
+func (*DummyEngine) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
 	header.Difficulty = big.NewInt(1)
 	return nil
 }
 
-func (self *DummyEngine) verifyBlockFee(
+func (eng *DummyEngine) verifyBlockFee(
 	baseFee *big.Int,
 	requiredBlockGasCost *big.Int,
 	txs []*types.Transaction,
 	receipts []*types.Receipt,
 ) error {
-	if self.consensusMode.ModeSkipBlockFee {
+	if eng.consensusMode.ModeSkipBlockFee {
 		return nil
 	}
 	if baseFee == nil || baseFee.Sign() <= 0 {
@@ -323,47 +306,46 @@ func (self *DummyEngine) verifyBlockFee(
 	// set by the base fee of this block.
 	blockGas := new(big.Int).Div(totalBlockFee, baseFee)
 
-	// Require that the amount of gas purchased by the effective tips within the block, [blockGas],
-	// covers at least [requiredBlockGasCost].
+	// Require that the amount of gas purchased by the effective tips within the
+	// block covers at least `requiredBlockGasCost`.
 	//
-	// NOTE: To determine the [requiredBlockFee], multiply [requiredBlockGasCost]
-	// by [baseFee].
+	// NOTE: To determine the required block fee, multiply
+	// `requiredBlockGasCost` by `baseFee`.
 	if blockGas.Cmp(requiredBlockGasCost) < 0 {
-		return fmt.Errorf(
-			"insufficient gas (%d) to cover the block cost (%d) at base fee (%d) (total block fee: %d)",
-			blockGas, requiredBlockGasCost, baseFee, totalBlockFee,
+		return fmt.Errorf("%w: expected %d but got %d",
+			ErrInsufficientBlockGas,
+			requiredBlockGasCost,
+			blockGas,
 		)
 	}
 	return nil
 }
 
-func (self *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
-	if chain.Config().IsSubnetEVM(block.Time()) {
-		// we use the parent to determine the fee config
-		// since the current block has not been finalized yet.
-		feeConfig, _, err := chain.GetFeeConfigAt(parent)
-		if err != nil {
-			return err
-		}
-
-		// Calculate the expected blockGasCost for this block.
-		// Note: this is a deterministic transtion that defines an exact block fee for this block.
-		blockGasCost := calcBlockGasCost(
-			feeConfig.TargetBlockRate,
-			feeConfig.MinBlockGasCost,
-			feeConfig.MaxBlockGasCost,
-			feeConfig.BlockGasCostStep,
-			parent.BlockGasCost,
-			parent.Time, block.Time(),
-		)
-		// Verify the BlockGasCost set in the header matches the calculated value.
-		if blockBlockGasCost := block.BlockGasCost(); blockBlockGasCost == nil || !blockBlockGasCost.IsUint64() || blockBlockGasCost.Cmp(blockGasCost) != 0 {
-			return fmt.Errorf("invalid blockGasCost: have %d, want %d", blockBlockGasCost, blockGasCost)
-		}
+func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
+	config := params.GetExtra(chain.Config())
+	timestamp := block.Time()
+	// we use the parent to determine the fee config
+	// since the current block has not been finalized yet.
+	feeConfig, _, err := chain.GetFeeConfigAt(parent)
+	if err != nil {
+		return err
+	}
+	// Verify the BlockGasCost set in the header matches the expected value.
+	blockGasCost := customtypes.BlockGasCost(block)
+	expectedBlockGasCost := customheader.BlockGasCost(
+		config,
+		feeConfig,
+		parent,
+		timestamp,
+	)
+	if !utils.BigEqual(blockGasCost, expectedBlockGasCost) {
+		return fmt.Errorf("invalid blockGasCost: have %d, want %d", blockGasCost, expectedBlockGasCost)
+	}
+	if config.IsSubnetEVM(timestamp) {
 		// Verify the block fee was paid.
-		if err := self.verifyBlockFee(
+		if err := eng.verifyBlockFee(
 			block.BaseFee(),
-			block.BlockGasCost(),
+			blockGasCost,
 			block.Transactions(),
 			receipts,
 		); err != nil {
@@ -374,35 +356,44 @@ func (self *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *type
 	return nil
 }
 
-func (self *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, state *state.StateDB, txs []*types.Transaction,
+func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, state *state.StateDB, txs []*types.Transaction,
 	uncles []*types.Header, receipts []*types.Receipt,
 ) (*types.Block, error) {
-	if chain.Config().IsSubnetEVM(header.Time) {
-		// we use the parent to determine the fee config
-		// since the current block has not been finalized yet.
-		feeConfig, _, err := chain.GetFeeConfigAt(parent)
-		if err != nil {
-			return nil, err
-		}
-		// Calculate the required block gas cost for this block.
-		header.BlockGasCost = calcBlockGasCost(
-			feeConfig.TargetBlockRate,
-			feeConfig.MinBlockGasCost,
-			feeConfig.MaxBlockGasCost,
-			feeConfig.BlockGasCostStep,
-			parent.BlockGasCost,
-			parent.Time, header.Time,
-		)
+	// we use the parent to determine the fee config
+	// since the current block has not been finalized yet.
+	feeConfig, _, err := chain.GetFeeConfigAt(parent)
+	if err != nil {
+		return nil, err
+	}
+	config := params.GetExtra(chain.Config())
+
+	// Calculate the required block gas cost for this block.
+	headerExtra := customtypes.GetHeaderExtra(header)
+	headerExtra.BlockGasCost = customheader.BlockGasCost(
+		config,
+		feeConfig,
+		parent,
+		header.Time,
+	)
+	if config.IsSubnetEVM(header.Time) {
 		// Verify that this block covers the block fee.
-		if err := self.verifyBlockFee(
+		if err := eng.verifyBlockFee(
 			header.BaseFee,
-			header.BlockGasCost,
+			headerExtra.BlockGasCost,
 			txs,
 			receipts,
 		); err != nil {
 			return nil, err
 		}
 	}
+
+	// finalize the header.Extra
+	extraPrefix, err := customheader.ExtraPrefix(config, parent, header)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate new header.Extra: %w", err)
+	}
+	header.Extra = append(extraPrefix, header.Extra...)
+
 	// commit the final state root
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 
@@ -412,10 +403,10 @@ func (self *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, 
 	), nil
 }
 
-func (self *DummyEngine) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {
+func (*DummyEngine) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {
 	return big.NewInt(1)
 }
 
-func (self *DummyEngine) Close() error {
+func (*DummyEngine) Close() error {
 	return nil
 }

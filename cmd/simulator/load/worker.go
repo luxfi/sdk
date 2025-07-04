@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"time"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethclient"
 	"github.com/luxdefi/evm/interfaces"
@@ -21,7 +20,7 @@ type ethereumTxWorker struct {
 	acceptedNonce uint64
 	address       common.Address
 
-	sub      interfaces.Subscription
+	sub      ethereum.Subscription
 	newHeads chan *types.Header
 }
 

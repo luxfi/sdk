@@ -24,8 +24,10 @@ awscpu
 .idea/
 
 *logs/
+!*customlogs/
 
 .vscode*
+workspace.code-workspace
 
 *.pb*
 

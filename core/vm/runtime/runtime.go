@@ -29,7 +29,6 @@ package runtime
 import (
 	"math"
 	"math/big"
-
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/core/types"
@@ -54,6 +53,10 @@ type Config struct {
 	Debug       bool
 	EVMConfig   vm.Config
 	BaseFee     *big.Int
+	BlobBaseFee *big.Int
+	BlobHashes  []common.Hash
+	BlobFeeCap  *big.Int
+	Random      *common.Hash
 
 	State     *state.StateDB
 	GetHashFn func(n uint64) common.Hash
@@ -62,21 +65,27 @@ type Config struct {
 // sets defaults on the config
 func setDefaults(cfg *Config) {
 	if cfg.ChainConfig == nil {
-		cfg.ChainConfig = &params.ChainConfig{
-			ChainID:             big.NewInt(1),
-			HomesteadBlock:      new(big.Int),
-			EIP150Block:         new(big.Int),
-			EIP155Block:         new(big.Int),
-			EIP158Block:         new(big.Int),
-			ByzantiumBlock:      new(big.Int),
-			ConstantinopleBlock: new(big.Int),
-			PetersburgBlock:     new(big.Int),
-			IstanbulBlock:       new(big.Int),
-			MuirGlacierBlock:    new(big.Int),
-			MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-				SubnetEVMTimestamp: new(uint64),
+		cfg.ChainConfig = params.WithExtra(
+			&params.ChainConfig{
+				ChainID:             big.NewInt(1),
+				HomesteadBlock:      new(big.Int),
+				EIP150Block:         new(big.Int),
+				EIP155Block:         new(big.Int),
+				EIP158Block:         new(big.Int),
+				ByzantiumBlock:      new(big.Int),
+				ConstantinopleBlock: new(big.Int),
+				PetersburgBlock:     new(big.Int),
+				IstanbulBlock:       new(big.Int),
+				MuirGlacierBlock:    new(big.Int),
+				BerlinBlock:         new(big.Int),
+				LondonBlock:         new(big.Int),
 			},
-		}
+			&extras.ChainConfig{
+				NetworkUpgrades: extras.NetworkUpgrades{
+					SubnetEVMTimestamp: new(uint64),
+				},
+			},
+		)
 	}
 
 	if cfg.Difficulty == nil {
@@ -100,7 +109,10 @@ func setDefaults(cfg *Config) {
 		}
 	}
 	if cfg.BaseFee == nil {
-		cfg.BaseFee = new(big.Int).Set(params.DefaultFeeConfig.MinBaseFee)
+		cfg.BaseFee = big.NewInt(legacy.BaseFee)
+	}
+	if cfg.BlobBaseFee == nil {
+		cfg.BlobBaseFee = big.NewInt(ethparams.BlobTxMinBlobGasprice)
 	}
 }
 
@@ -138,7 +150,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 		common.BytesToAddress([]byte("contract")),
 		input,
 		cfg.GasLimit,
-		cfg.Value,
+		uint256.MustFromBig(cfg.Value),
 	)
 	return ret, cfg.State, err
 }
@@ -168,7 +180,7 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 		sender,
 		input,
 		cfg.GasLimit,
-		cfg.Value,
+		uint256.MustFromBig(cfg.Value),
 	)
 	return code, address, leftOverGas, err
 }
@@ -183,7 +195,7 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 
 	var (
 		vmenv   = NewEnv(cfg)
-		sender  = cfg.State.GetOrNewStateObject(cfg.Origin)
+		sender  = vm.AccountRef(cfg.Origin)
 		statedb = cfg.State
 		rules   = cfg.ChainConfig.LuxRules(vmenv.Context.BlockNumber, vmenv.Context.Time)
 	)
@@ -198,7 +210,7 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 		address,
 		input,
 		cfg.GasLimit,
-		cfg.Value,
+		uint256.MustFromBig(cfg.Value),
 	)
 	return ret, leftOverGas, err
 }

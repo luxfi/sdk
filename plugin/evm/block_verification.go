@@ -7,15 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-
 	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/trie"
 )
 
-var legacyMinGasPrice = big.NewInt(params.MinGasPrice)
+var legacyMinGasPrice = big.NewInt(legacy.BaseFee)
 
 type BlockValidator interface {
 	SyntacticVerify(b *Block, rules params.Rules) error
@@ -28,18 +26,19 @@ func NewBlockValidator() BlockValidator {
 }
 
 func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
+	rulesExtra := params.GetRulesExtra(rules)
 	if b == nil || b.ethBlock == nil {
 		return errInvalidBlock
 	}
+	ethHeader := b.ethBlock.Header()
+	blockHash := b.ethBlock.Hash()
 
-	// Skip verification of the genesis block since it
-	// should already be marked as accepted
-	if b.ethBlock.Hash() == b.vm.genesisHash {
+	// Skip verification of the genesis block since it should already be marked as accepted.
+	if blockHash == b.vm.genesisHash {
 		return nil
 	}
 
 	// Perform block and header sanity checks
-	ethHeader := b.ethBlock.Header()
 	if ethHeader.Number == nil || !ethHeader.Number.IsUint64() {
 		return errInvalidBlock
 	}
@@ -58,31 +57,12 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return fmt.Errorf("invalid mix digest: %v", ethHeader.MixDigest)
 	}
 
-	switch {
-	case rules.IsDUpgrade:
-		if len(ethHeader.Extra) < params.DynamicFeeExtraDataSize {
-			return fmt.Errorf(
-				"expected header ExtraData to be len >= %d but got %d",
-				params.DynamicFeeExtraDataSize, len(ethHeader.Extra),
-			)
-		}
-	case rules.IsSubnetEVM:
-		if len(ethHeader.Extra) != params.DynamicFeeExtraDataSize {
-			return fmt.Errorf(
-				"expected header ExtraData to be len %d but got %d",
-				params.DynamicFeeExtraDataSize, len(ethHeader.Extra),
-			)
-		}
-	default:
-		if len(ethHeader.Extra) > int(params.MaximumExtraDataSize) {
-			return fmt.Errorf(
-				"expected header ExtraData to be <= %d but got %d",
-				params.MaximumExtraDataSize, len(ethHeader.Extra),
-			)
-		}
+	// Verify the extra data is well-formed.
+	if err := header.VerifyExtra(rulesExtra.AvalancheRules, ethHeader.Extra); err != nil {
+		return err
 	}
 
-	if rules.IsSubnetEVM {
+	if rulesExtra.IsSubnetEVM {
 		if ethHeader.BaseFee == nil {
 			return errNilBaseFeeSubnetEVM
 		}
@@ -106,13 +86,14 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 	if len(b.ethBlock.Uncles()) > 0 {
 		return errUnclesUnsupported
 	}
+
 	// Block must not be empty
 	txs := b.ethBlock.Transactions()
 	if len(txs) == 0 {
 		return errEmptyBlock
 	}
 
-	if !rules.IsSubnetEVM {
+	if !rulesExtra.IsSubnetEVM {
 		// Make sure that all the txs have the correct fee set.
 		for _, tx := range txs {
 			if tx.GasPrice().Cmp(legacyMinGasPrice) < 0 {
@@ -127,24 +108,44 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return fmt.Errorf("block timestamp is too far in the future: %d > allowed %d", blockTimestamp, maxBlockTime)
 	}
 
-	if rules.IsSubnetEVM {
+	if rulesExtra.IsSubnetEVM {
+		blockGasCost := customtypes.GetHeaderExtra(ethHeader).BlockGasCost
 		switch {
 		// Make sure BlockGasCost is not nil
 		// NOTE: ethHeader.BlockGasCost correctness is checked in header verification
-		case ethHeader.BlockGasCost == nil:
+		case blockGasCost == nil:
 			return errNilBlockGasCostSubnetEVM
-		case !ethHeader.BlockGasCost.IsUint64():
-			return fmt.Errorf("too large blockGasCost: %d", ethHeader.BlockGasCost)
+		case !blockGasCost.IsUint64():
+			return fmt.Errorf("too large blockGasCost: %d", blockGasCost)
 		}
 	}
 
-	// Verify the existence / non-existence of excessDataGas
-	if rules.IsCancun && ethHeader.ExcessDataGas == nil {
-		return errors.New("missing excessDataGas")
+	// Verify the existence / non-existence of excessBlobGas
+	cancun := rules.IsCancun
+	if !cancun && ethHeader.ExcessBlobGas != nil {
+		return fmt.Errorf("invalid excessBlobGas: have %d, expected nil", *ethHeader.ExcessBlobGas)
 	}
-	if !rules.IsCancun && ethHeader.ExcessDataGas != nil {
-		return fmt.Errorf("invalid excessDataGas: have %d, expected nil", ethHeader.ExcessDataGas)
+	if !cancun && ethHeader.BlobGasUsed != nil {
+		return fmt.Errorf("invalid blobGasUsed: have %d, expected nil", *ethHeader.BlobGasUsed)
 	}
-
+	if cancun && ethHeader.ExcessBlobGas == nil {
+		return errors.New("header is missing excessBlobGas")
+	}
+	if cancun && ethHeader.BlobGasUsed == nil {
+		return errors.New("header is missing blobGasUsed")
+	}
+	if !cancun && ethHeader.ParentBeaconRoot != nil {
+		return fmt.Errorf("invalid parentBeaconRoot: have %x, expected nil", *ethHeader.ParentBeaconRoot)
+	}
+	// TODO: decide what to do after Cancun
+	// currently we are enforcing it to be empty hash
+	if cancun {
+		switch {
+		case ethHeader.ParentBeaconRoot == nil:
+			return errors.New("header is missing parentBeaconRoot")
+		case *ethHeader.ParentBeaconRoot != (common.Hash{}):
+			return fmt.Errorf("invalid parentBeaconRoot: have %x, expected empty hash", ethHeader.ParentBeaconRoot)
+		}
+	}
 	return nil
 }

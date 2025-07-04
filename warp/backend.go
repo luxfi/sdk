@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/luxdefi/node/cache"
 	"github.com/luxdefi/node/database"
 	"github.com/luxdefi/node/ids"
@@ -23,12 +22,12 @@ import (
 var (
 	_                         Backend = &backend{}
 	errParsingOffChainMessage         = errors.New("failed to parse off-chain message")
+
+	messageCacheSize = 500
 )
 
-const batchSize = ethdb.IdealBatchSize
-
 type BlockClient interface {
-	GetBlock(ctx context.Context, blockID ids.ID) (snowman.Block, error)
+	GetAcceptedBlock(ctx context.Context, blockID ids.ID) (snowman.Block, error)
 }
 
 // Backend tracks signature-eligible warp messages and provides an interface to fetch them.
@@ -37,17 +36,16 @@ type Backend interface {
 	// AddMessage signs [unsignedMessage] and adds it to the warp backend database
 	AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error
 
-	// GetMessageSignature returns the signature of the requested message hash.
-	GetMessageSignature(messageID ids.ID) ([bls.SignatureLen]byte, error)
+	// GetMessageSignature validates the message and returns the signature of the requested message.
+	GetMessageSignature(ctx context.Context, message *avalancheWarp.UnsignedMessage) ([]byte, error)
 
-	// GetBlockSignature returns the signature of the requested message hash.
-	GetBlockSignature(blockID ids.ID) ([bls.SignatureLen]byte, error)
+	// GetBlockSignature returns the signature of a hash payload containing blockID if it's the ID of an accepted block.
+	GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error)
 
 	// GetMessage retrieves the [unsignedMessage] from the warp backend database if available
 	GetMessage(messageHash ids.ID) (*luxWarp.UnsignedMessage, error)
 
-	// Clear clears the entire db
-	Clear() error
+	acp118.Verifier
 }
 
 // backend implements Backend, keeps track of warp messages, and generates message signatures.
@@ -69,8 +67,9 @@ func NewBackend(
 	sourceChainID ids.ID,
 	warpSigner luxWarp.Signer,
 	blockClient BlockClient,
+	validatorReader interfaces.ValidatorReader,
 	db database.Database,
-	cacheSize int,
+	signatureCache cache.Cacher[ids.ID, []byte],
 	offchainMessages [][]byte,
 ) (Backend, error) {
 	b := &backend{
@@ -94,6 +93,14 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 			return fmt.Errorf("%w at index %d: %w", errParsingOffChainMessage, i, err)
 		}
 
+		if unsignedMsg.NetworkID != b.networkID {
+			return fmt.Errorf("%w at index %d", avalancheWarp.ErrWrongNetworkID, i)
+		}
+
+		if unsignedMsg.SourceChainID != b.sourceChainID {
+			return fmt.Errorf("%w at index %d", avalancheWarp.ErrWrongSourceChainID, i)
+		}
+
 		_, err = payload.ParseAddressedCall(unsignedMsg.Payload)
 		if err != nil {
 			return fmt.Errorf("%w at index %d as AddressedCall: %w", errParsingOffChainMessage, i, err)
@@ -113,6 +120,7 @@ func (b *backend) Clear() error {
 
 func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 	messageID := unsignedMessage.ID()
+	log.Debug("Adding warp message to backend", "messageID", messageID)
 
 	// In the case when a node restarts, and possibly changes its bls key, the cache gets emptied but the database does not.
 	// So to avoid having incorrect signatures saved in the database after a bls key change, we save the full message in the database.
@@ -121,58 +129,50 @@ func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 		return fmt.Errorf("failed to put warp signature in db: %w", err)
 	}
 
-	var signature [bls.SignatureLen]byte
-	sig, err := b.warpSigner.Sign(unsignedMessage)
-	if err != nil {
+	if _, err := b.signMessage(unsignedMessage); err != nil {
 		return fmt.Errorf("failed to sign warp message: %w", err)
 	}
-
-	copy(signature[:], sig)
-	b.messageSignatureCache.Put(messageID, signature)
-	log.Debug("Adding warp message to backend", "messageID", messageID)
 	return nil
 }
 
-func (b *backend) GetMessageSignature(messageID ids.ID) ([bls.SignatureLen]byte, error) {
+func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *avalancheWarp.UnsignedMessage) ([]byte, error) {
+	messageID := unsignedMessage.ID()
+
 	log.Debug("Getting warp message from backend", "messageID", messageID)
-	if sig, ok := b.messageSignatureCache.Get(messageID); ok {
+	if sig, ok := b.signatureCache.Get(messageID); ok {
 		return sig, nil
 	}
 
-	unsignedMessage, err := b.GetMessage(messageID)
-	if err != nil {
-		return [bls.SignatureLen]byte{}, err
+	if err := b.Verify(ctx, unsignedMessage, nil); err != nil {
+		return nil, fmt.Errorf("failed to validate warp message: %w", err)
 	}
-
-	var signature [bls.SignatureLen]byte
-	sig, err := b.warpSigner.Sign(unsignedMessage)
-	if err != nil {
-		return [bls.SignatureLen]byte{}, fmt.Errorf("failed to sign warp message: %w", err)
-	}
-
-	copy(signature[:], sig)
-	b.messageSignatureCache.Put(messageID, signature)
-	return signature, nil
+	return b.signMessage(unsignedMessage)
 }
 
-func (b *backend) GetBlockSignature(blockID ids.ID) ([bls.SignatureLen]byte, error) {
+func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error) {
 	log.Debug("Getting block from backend", "blockID", blockID)
-	if sig, ok := b.blockSignatureCache.Get(blockID); ok {
+
+	blockHashPayload, err := payload.NewHash(blockID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
+	}
+
+	unsignedMessage, err := avalancheWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new unsigned warp message: %w", err)
+	}
+
+	if sig, ok := b.signatureCache.Get(unsignedMessage.ID()); ok {
 		return sig, nil
 	}
 
-	block, err := b.blockClient.GetBlock(context.TODO(), blockID)
-	if err != nil {
-		return [bls.SignatureLen]byte{}, fmt.Errorf("failed to get block %s: %w", blockID, err)
-	}
-	if block.Status() != choices.Accepted {
-		return [bls.SignatureLen]byte{}, fmt.Errorf("block %s was not accepted", blockID)
+	if err := b.verifyBlockMessage(ctx, blockHashPayload); err != nil {
+		return nil, fmt.Errorf("failed to validate block message: %w", err)
 	}
 
-	var signature [bls.SignatureLen]byte
-	blockHashPayload, err := payload.NewHash(blockID)
+	sig, err := b.signMessage(unsignedMessage)
 	if err != nil {
-		return [bls.SignatureLen]byte{}, fmt.Errorf("failed to create new block hash payload: %w", err)
+		return nil, fmt.Errorf("failed to sign block message: %w", err)
 	}
 	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
@@ -198,7 +198,7 @@ func (b *backend) GetMessage(messageID ids.ID) (*luxWarp.UnsignedMessage, error)
 
 	unsignedMessageBytes, err := b.db.Get(messageID[:])
 	if err != nil {
-		return nil, fmt.Errorf("failed to get warp message %s from db: %w", messageID.String(), err)
+		return nil, err
 	}
 
 	unsignedMessage, err := luxWarp.ParseUnsignedMessage(unsignedMessageBytes)
@@ -208,4 +208,14 @@ func (b *backend) GetMessage(messageID ids.ID) (*luxWarp.UnsignedMessage, error)
 	b.messageCache.Put(messageID, unsignedMessage)
 
 	return unsignedMessage, nil
+}
+
+func (b *backend) signMessage(unsignedMessage *avalancheWarp.UnsignedMessage) ([]byte, error) {
+	sig, err := b.warpSigner.Sign(unsignedMessage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign warp message: %w", err)
+	}
+
+	b.signatureCache.Put(unsignedMessage.ID(), sig)
+	return sig, nil
 }

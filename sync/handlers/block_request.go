@@ -7,19 +7,20 @@ import (
 	"bytes"
 	"context"
 	"time"
-
 	"github.com/luxdefi/node/codec"
 	"github.com/luxdefi/node/ids"
-
 	"github.com/luxdefi/evm/plugin/evm/message"
 	"github.com/luxdefi/evm/sync/handlers/stats"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )
 
-// parentLimit specifies how many parents to retrieve and send given a starting hash
-// This value overrides any specified limit in blockRequest.Parents if it is greater than this value
-const parentLimit = uint16(64)
+const (
+	// parentLimit specifies how many parents to retrieve and send given a starting hash
+	// This value overrides any specified limit in blockRequest.Parents if it is greater than this value
+	parentLimit           = uint16(64)
+	targetMessageByteSize = units.MiB - units.KiB // Target total block bytes slightly under original network codec max size of 1MB
+)
 
 // BlockRequestHandler is a peer.RequestHandler for message.BlockRequest
 // serving requested blocks starting at specified hash
@@ -52,6 +53,7 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID ids.Nod
 		parents = parentLimit
 	}
 	blocks := make([][]byte, 0, parents)
+	totalBytes := 0
 
 	// ensure metrics are captured properly on all return paths
 	defer func() {
@@ -84,7 +86,13 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID ids.Nod
 			return nil, nil
 		}
 
+		if buf.Len()+totalBytes > targetMessageByteSize && len(blocks) > 0 {
+			log.Debug("Skipping block due to max total bytes size", "totalBlockDataSize", totalBytes, "blockSize", buf.Len(), "maxTotalBytesSize", targetMessageByteSize)
+			break
+		}
+
 		blocks = append(blocks, buf.Bytes())
+		totalBytes += buf.Len()
 		hash = block.ParentHash()
 		height--
 	}

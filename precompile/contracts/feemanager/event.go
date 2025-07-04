@@ -6,7 +6,6 @@ package feemanager
 
 import (
 	"math/big"
-
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/ethereum/go-ethereum/common"

@@ -31,11 +31,9 @@ import (
 	"errors"
 	"math/big"
 	"testing"
-
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/stretchr/testify/require"
-
 	"github.com/luxdefi/evm/params"
 	"github.com/luxdefi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
@@ -94,7 +92,7 @@ func TestFeeHistory(t *testing.T) {
 				ChainID:   params.TestChainConfig.ChainID,
 				Nonce:     b.TxNonce(addr),
 				To:        &common.Address{},
-				Gas:       params.TxGas,
+				Gas:       ethparams.TxGas,
 				GasFeeCap: feeCap,
 				GasTipCap: tip,
 				Data:      []byte{},

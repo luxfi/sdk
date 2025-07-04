@@ -33,7 +33,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
 	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/luxdefi/evm/internal/flags"
 	"github.com/ethereum/go-ethereum/cmd/utils"
@@ -242,7 +241,7 @@ func abigen(c *cli.Context) error {
 }
 
 func main() {
-	log.Root().SetHandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	log.SetDefault(log.NewLogger(log.NewTerminalHandlerWithLevel(os.Stderr, log.LevelInfo, true)))
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)

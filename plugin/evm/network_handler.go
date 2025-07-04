@@ -5,7 +5,6 @@ package evm
 
 import (
 	"context"
-
 	"github.com/luxdefi/node/codec"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/evm/ethdb"
@@ -31,7 +30,7 @@ type networkHandler struct {
 func newNetworkHandler(
 	provider syncHandlers.SyncDataProvider,
 	diskDB ethdb.KeyValueReader,
-	evmTrieDB *trie.Database,
+	evmTrieDB *triedb.Database,
 	warpBackend warp.Backend,
 	networkCodec codec.Manager,
 ) message.RequestHandler {
@@ -44,7 +43,7 @@ func newNetworkHandler(
 	}
 }
 
-func (n networkHandler) HandleTrieLeafsRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
+func (n networkHandler) HandleStateTrieLeafsRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
 	return n.stateTrieLeafsRequestHandler.OnLeafsRequest(ctx, nodeID, requestID, leafsRequest)
 }
 

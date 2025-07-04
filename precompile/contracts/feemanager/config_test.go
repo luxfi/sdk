@@ -6,7 +6,6 @@ package feemanager
 import (
 	"math/big"
 	"testing"
-
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/precompileconfig"

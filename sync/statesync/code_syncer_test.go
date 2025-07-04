@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-
 	"github.com/luxdefi/node/utils"
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/ethdb/memorydb"
@@ -44,7 +43,7 @@ func testCodeSyncer(t *testing.T, test codeSyncerTest) {
 	mockClient := statesyncclient.NewMockClient(message.Codec, nil, codeRequestHandler, nil)
 	mockClient.GetCodeIntercept = test.getCodeIntercept
 
-	clientDB := memorydb.New()
+	clientDB := rawdb.NewMemoryDatabase()
 
 	codeSyncer := newCodeSyncer(CodeSyncerConfig{
 		MaxOutstandingCodeHashes: DefaultMaxOutstandingCodeHashes,
@@ -134,7 +133,7 @@ func TestCodeSyncerAddsInProgressCodeHashes(t *testing.T) {
 	codeHash := crypto.Keccak256Hash(codeBytes)
 	testCodeSyncer(t, codeSyncerTest{
 		setupCodeSyncer: func(c *codeSyncer) {
-			rawdb.AddCodeToFetch(c.DB, codeHash)
+			customrawdb.AddCodeToFetch(c.DB, codeHash)
 		},
 		codeRequestHashes: nil,
 		codeByteSlices:    [][]byte{codeBytes},
@@ -155,7 +154,7 @@ func TestCodeSyncerAddsMoreInProgressThanQueueSize(t *testing.T) {
 	testCodeSyncer(t, codeSyncerTest{
 		setupCodeSyncer: func(c *codeSyncer) {
 			for _, codeHash := range codeHashes {
-				rawdb.AddCodeToFetch(c.DB, codeHash)
+				customrawdb.AddCodeToFetch(c.DB, codeHash)
 			}
 			c.codeHashes = make(chan common.Hash, numCodeSlices/2)
 		},

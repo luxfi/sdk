@@ -6,7 +6,6 @@ package precompileconfig
 
 import (
 	reflect "reflect"
-
 	commontype "github.com/luxdefi/evm/commontype"
 	common "github.com/ethereum/go-ethereum/common"
 	gomock "go.uber.org/mock/gomock"
@@ -16,6 +15,7 @@ import (
 type MockPredicater struct {
 	ctrl     *gomock.Controller
 	recorder *MockPredicaterMockRecorder
+	isgomock struct{}
 }
 
 // MockPredicaterMockRecorder is the mock recorder for MockPredicater.
@@ -36,38 +36,39 @@ func (m *MockPredicater) EXPECT() *MockPredicaterMockRecorder {
 }
 
 // PredicateGas mocks base method.
-func (m *MockPredicater) PredicateGas(arg0 []byte) (uint64, error) {
+func (m *MockPredicater) PredicateGas(predicateBytes []byte) (uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PredicateGas", arg0)
+	ret := m.ctrl.Call(m, "PredicateGas", predicateBytes)
 	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // PredicateGas indicates an expected call of PredicateGas.
-func (mr *MockPredicaterMockRecorder) PredicateGas(arg0 interface{}) *gomock.Call {
+func (mr *MockPredicaterMockRecorder) PredicateGas(predicateBytes any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PredicateGas", reflect.TypeOf((*MockPredicater)(nil).PredicateGas), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PredicateGas", reflect.TypeOf((*MockPredicater)(nil).PredicateGas), predicateBytes)
 }
 
 // VerifyPredicate mocks base method.
-func (m *MockPredicater) VerifyPredicate(arg0 *PredicateContext, arg1 []byte) error {
+func (m *MockPredicater) VerifyPredicate(predicateContext *PredicateContext, predicateBytes []byte) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyPredicate", arg0, arg1)
+	ret := m.ctrl.Call(m, "VerifyPredicate", predicateContext, predicateBytes)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // VerifyPredicate indicates an expected call of VerifyPredicate.
-func (mr *MockPredicaterMockRecorder) VerifyPredicate(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockPredicaterMockRecorder) VerifyPredicate(predicateContext, predicateBytes any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyPredicate", reflect.TypeOf((*MockPredicater)(nil).VerifyPredicate), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyPredicate", reflect.TypeOf((*MockPredicater)(nil).VerifyPredicate), predicateContext, predicateBytes)
 }
 
 // MockConfig is a mock of Config interface.
 type MockConfig struct {
 	ctrl     *gomock.Controller
 	recorder *MockConfigMockRecorder
+	isgomock struct{}
 }
 
 // MockConfigMockRecorder is the mock recorder for MockConfig.
@@ -96,7 +97,7 @@ func (m *MockConfig) Equal(arg0 Config) bool {
 }
 
 // Equal indicates an expected call of Equal.
-func (mr *MockConfigMockRecorder) Equal(arg0 interface{}) *gomock.Call {
+func (mr *MockConfigMockRecorder) Equal(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Equal", reflect.TypeOf((*MockConfig)(nil).Equal), arg0)
 }
@@ -152,7 +153,7 @@ func (m *MockConfig) Verify(arg0 ChainConfig) error {
 }
 
 // Verify indicates an expected call of Verify.
-func (mr *MockConfigMockRecorder) Verify(arg0 interface{}) *gomock.Call {
+func (mr *MockConfigMockRecorder) Verify(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockConfig)(nil).Verify), arg0)
 }
@@ -161,6 +162,7 @@ func (mr *MockConfigMockRecorder) Verify(arg0 interface{}) *gomock.Call {
 type MockChainConfig struct {
 	ctrl     *gomock.Controller
 	recorder *MockChainConfigMockRecorder
+	isgomock struct{}
 }
 
 // MockChainConfigMockRecorder is the mock recorder for MockChainConfig.
@@ -208,24 +210,25 @@ func (mr *MockChainConfigMockRecorder) GetFeeConfig() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeeConfig", reflect.TypeOf((*MockChainConfig)(nil).GetFeeConfig))
 }
 
-// IsDUpgrade mocks base method.
-func (m *MockChainConfig) IsDUpgrade(arg0 uint64) bool {
+// IsDurango mocks base method.
+func (m *MockChainConfig) IsDurango(time uint64) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsDUpgrade", arg0)
+	ret := m.ctrl.Call(m, "IsDurango", time)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
-// IsDUpgrade indicates an expected call of IsDUpgrade.
-func (mr *MockChainConfigMockRecorder) IsDUpgrade(arg0 interface{}) *gomock.Call {
+// IsDurango indicates an expected call of IsDurango.
+func (mr *MockChainConfigMockRecorder) IsDurango(time any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsDUpgrade", reflect.TypeOf((*MockChainConfig)(nil).IsDUpgrade), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsDurango", reflect.TypeOf((*MockChainConfig)(nil).IsDurango), time)
 }
 
 // MockAccepter is a mock of Accepter interface.
 type MockAccepter struct {
 	ctrl     *gomock.Controller
 	recorder *MockAccepterMockRecorder
+	isgomock struct{}
 }
 
 // MockAccepterMockRecorder is the mock recorder for MockAccepter.
@@ -246,15 +249,15 @@ func (m *MockAccepter) EXPECT() *MockAccepterMockRecorder {
 }
 
 // Accept mocks base method.
-func (m *MockAccepter) Accept(arg0 *AcceptContext, arg1 common.Hash, arg2 uint64, arg3 common.Hash, arg4 int, arg5 []common.Hash, arg6 []byte) error {
+func (m *MockAccepter) Accept(acceptCtx *AcceptContext, blockHash common.Hash, blockNumber uint64, txHash common.Hash, logIndex int, topics []common.Hash, logData []byte) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Accept", arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+	ret := m.ctrl.Call(m, "Accept", acceptCtx, blockHash, blockNumber, txHash, logIndex, topics, logData)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Accept indicates an expected call of Accept.
-func (mr *MockAccepterMockRecorder) Accept(arg0, arg1, arg2, arg3, arg4, arg5, arg6 interface{}) *gomock.Call {
+func (mr *MockAccepterMockRecorder) Accept(acceptCtx, blockHash, blockNumber, txHash, logIndex, topics, logData any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Accept", reflect.TypeOf((*MockAccepter)(nil).Accept), arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Accept", reflect.TypeOf((*MockAccepter)(nil).Accept), acceptCtx, blockHash, blockNumber, txHash, logIndex, topics, logData)
 }

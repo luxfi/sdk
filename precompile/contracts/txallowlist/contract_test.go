@@ -5,15 +5,14 @@ package txallowlist
 
 import (
 	"testing"
-
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/precompile/allowlist"
 )
 
 func TestTxAllowListRun(t *testing.T) {
-	allowlist.RunPrecompileWithAllowListTests(t, Module, state.NewTestStateDB, nil)
+	allowlist.RunPrecompileWithAllowListTests(t, Module, extstate.NewTestStateDB, nil)
 }
 
 func BenchmarkTxAllowList(b *testing.B) {
-	allowlist.BenchPrecompileWithAllowList(b, Module, state.NewTestStateDB, nil)
+	allowlist.BenchPrecompileWithAllowList(b, Module, extstate.NewTestStateDB, nil)
 }

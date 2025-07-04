@@ -6,10 +6,8 @@ package handlers
 import (
 	"context"
 	"time"
-
 	"github.com/luxdefi/node/codec"
 	"github.com/luxdefi/node/ids"
-
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/ethdb"
 	"github.com/luxdefi/evm/plugin/evm/message"

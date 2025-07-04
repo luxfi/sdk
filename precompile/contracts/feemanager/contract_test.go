@@ -6,7 +6,6 @@ package feemanager
 import (
 	"math/big"
 	"testing"
-
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/core/state"
 	"github.com/luxdefi/evm/precompile/allowlist"
@@ -260,7 +259,7 @@ var (
 			},
 			SuppliedGas: SetFeeConfigGasCost,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrWriteProtection.Error(),
+			ExpectedErr: vm.ErrWriteProtection.Error(),
 		},
 		"readOnly setFeeConfig with allow role fails": {
 			Caller:     allowlist.TestEnabledAddr,
@@ -273,7 +272,7 @@ var (
 			},
 			SuppliedGas: SetFeeConfigGasCost,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrWriteProtection.Error(),
+			ExpectedErr: vm.ErrWriteProtection.Error(),
 		},
 		"readOnly setFeeConfig with admin role fails": {
 			Caller:     allowlist.TestAdminAddr,
@@ -286,7 +285,7 @@ var (
 			},
 			SuppliedGas: SetFeeConfigGasCost,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrWriteProtection.Error(),
+			ExpectedErr: vm.ErrWriteProtection.Error(),
 		},
 		"insufficient gas setFeeConfig from admin": {
 			Caller:     allowlist.TestAdminAddr,
@@ -299,9 +298,9 @@ var (
 			},
 			SuppliedGas: SetFeeConfigGasCost - 1,
 			ReadOnly:    false,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
-		"set config with extra padded bytes should fail before DUpgrade": {
+		"set config with extra padded bytes should fail before Durango": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
@@ -313,7 +312,7 @@ var (
 			},
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			SuppliedGas: SetFeeConfigGasCost,
@@ -324,7 +323,7 @@ var (
 				mbc.EXPECT().Timestamp().Return(uint64(0)).AnyTimes()
 			},
 		},
-		"set config with extra padded bytes should succeed with DUpgrade": {
+		"set config with extra padded bytes should succeed with Durango": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
@@ -336,7 +335,7 @@ var (
 			},
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			SuppliedGas: SetFeeConfigGasCost + FeeConfigChangedEventGasCost,
@@ -363,7 +362,7 @@ var (
 			Input:      common.Hex2Bytes(regressionBytes),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			SuppliedGas: SetFeeConfigGasCost,
@@ -374,13 +373,13 @@ var (
 				mbc.EXPECT().Timestamp().Return(uint64(0)).AnyTimes()
 			},
 		},
-		"setFeeConfig regression test should succeed after DUpgrade": {
+		"setFeeConfig regression test should succeed after Durango": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			Input:      common.Hex2Bytes(regressionBytes),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(true).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(true).AnyTimes()
 				return config
 			},
 			SuppliedGas: SetFeeConfigGasCost + FeeConfigChangedEventGasCost,
@@ -400,12 +399,12 @@ var (
 				assertFeeEvent(t, logsTopics, logsData, allowlist.TestEnabledAddr, zeroFeeConfig, regressionFeeConfig)
 			},
 		},
-		"set config should not emit event before DUpgrade": {
+		"set config should not emit event before Durango": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			ChainConfigFn: func(ctrl *gomock.Controller) precompileconfig.ChainConfig {
 				config := precompileconfig.NewMockChainConfig(ctrl)
-				config.EXPECT().IsDUpgrade(gomock.Any()).Return(false).AnyTimes()
+				config.EXPECT().IsDurango(gomock.Any()).Return(false).AnyTimes()
 				return config
 			},
 			InputFn: func(t testing.TB) []byte {
@@ -426,11 +425,11 @@ var (
 )
 
 func TestFeeManager(t *testing.T) {
-	allowlist.RunPrecompileWithAllowListTests(t, Module, state.NewTestStateDB, tests)
+	allowlist.RunPrecompileWithAllowListTests(t, Module, extstate.NewTestStateDB, tests)
 }
 
 func BenchmarkFeeManager(b *testing.B) {
-	allowlist.BenchPrecompileWithAllowList(b, Module, state.NewTestStateDB, tests)
+	allowlist.BenchPrecompileWithAllowList(b, Module, extstate.NewTestStateDB, tests)
 }
 
 func assertFeeEvent(
@@ -447,7 +446,7 @@ func assertFeeEvent(
 	topics := logsTopics[0]
 	require.Len(t, topics, 2)
 	require.Equal(t, FeeManagerABI.Events["FeeConfigChanged"].ID, topics[0])
-	require.Equal(t, sender.Hash(), topics[1])
+	require.Equal(t, common.BytesToHash(sender[:]), topics[1])
 
 	logData := logsData[0]
 	oldFeeConfig, resFeeConfig, err := UnpackFeeConfigChangedEventData(logData)

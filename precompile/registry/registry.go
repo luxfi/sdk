@@ -8,15 +8,10 @@ package registry
 // with the registry.
 import (
 	_ "github.com/luxdefi/evm/precompile/contracts/deployerallowlist"
-
 	_ "github.com/luxdefi/evm/precompile/contracts/nativeminter"
-
 	_ "github.com/luxdefi/evm/precompile/contracts/txallowlist"
-
 	_ "github.com/luxdefi/evm/precompile/contracts/feemanager"
-
 	_ "github.com/luxdefi/evm/precompile/contracts/rewardmanager"
-
 	_ "github.com/luxdefi/evm/x/warp"
 	// ADD YOUR PRECOMPILE HERE
 	// _ "github.com/luxdefi/evm/precompile/contracts/yourprecompile"

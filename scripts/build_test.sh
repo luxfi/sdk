@@ -3,17 +3,13 @@
 set -o errexit
 set -o nounset
 set -o pipefail
-
-export GOGC=25
+# TODO(marun) Ensure the working directory is the repository root or a non-canonical set of tests may be executed
 
 # Root directory
 SUBNET_EVM_PATH=$(
     cd "$(dirname "${BASH_SOURCE[0]}")"
     cd .. && pwd
 )
-
-# Load the versions
-source "$SUBNET_EVM_PATH"/scripts/versions.sh
 
 # Load the constants
 source "$SUBNET_EVM_PATH"/scripts/constants.sh

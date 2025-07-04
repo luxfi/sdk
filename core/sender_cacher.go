@@ -28,7 +28,6 @@ package core
 
 import (
 	"sync"
-
 	"github.com/luxdefi/evm/core/types"
 )
 

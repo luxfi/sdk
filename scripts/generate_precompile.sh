@@ -9,7 +9,6 @@ if ! [[ "$0" =~ scripts/generate_precompile.sh ]]; then
   exit 255
 fi
 
-# Load the versions
 SUBNET_EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
@@ -18,4 +17,4 @@ SUBNET_EVM_PATH=$(
 # Load the constants
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
-go run ./cmd/precompilegen/main.go $@
+go run ./cmd/precompilegen/main.go "$@"

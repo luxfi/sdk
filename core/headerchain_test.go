@@ -31,7 +31,6 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
-
 	"github.com/luxdefi/evm/consensus"
 	"github.com/luxdefi/evm/consensus/dummy"
 	"github.com/luxdefi/evm/core/rawdb"
@@ -75,7 +74,7 @@ func TestHeaderInsertion(t *testing.T) {
 	var (
 		db    = rawdb.NewMemoryDatabase()
 		gspec = &Genesis{
-			BaseFee: big.NewInt(params.TestInitialBaseFee),
+			BaseFee: big.NewInt(legacy.BaseFee),
 			Config:  params.TestChainConfig,
 		}
 	)

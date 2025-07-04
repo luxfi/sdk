@@ -7,11 +7,8 @@ import (
 	"context"
 	"errors"
 	"testing"
-
 	"github.com/stretchr/testify/require"
-
 	"go.uber.org/mock/gomock"
-
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/utils/crypto/bls"
 	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
@@ -23,7 +20,7 @@ func newValidator(t testing.TB, weight uint64) (*bls.SecretKey, *luxWarp.Validat
 	pk := bls.PublicFromSecretKey(sk)
 	return sk, &luxWarp.Validator{
 		PublicKey:      pk,
-		PublicKeyBytes: bls.PublicKeyToBytes(pk),
+		PublicKeyBytes: bls.PublicKeyToCompressedBytes(pk),
 		Weight:         weight,
 		NodeIDs:        []ids.NodeID{ids.GenerateTestNodeID()},
 	}
@@ -51,7 +48,9 @@ func TestAggregateSignatures(t *testing.T) {
 		vdr2: sig2,
 		vdr3: sig3,
 	}
-	nonVdrSk, err := bls.NewSecretKey()
+	nonVdrSk, err := localsigner.New()
+	require.NoError(t, err)
+	nonVdrSig, err := nonVdrSk.Sign(unsignedMsg.Bytes())
 	require.NoError(t, err)
 	nonVdrSig := bls.Sign(nonVdrSk, unsignedMsg.Bytes())
 	vdrs := []*luxWarp.Validator{
@@ -230,7 +229,7 @@ func TestAggregateSignatures(t *testing.T) {
 			expectedErr:     nil,
 		},
 		{
-			name: "early termination of signature fetching on parent context cancelation",
+			name: "early termination of signature fetching on parent context cancellation",
 			contextWithCancelFunc: func() (context.Context, context.CancelFunc) {
 				ctx, cancel := context.WithCancel(context.Background())
 				cancel()

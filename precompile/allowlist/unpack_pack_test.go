@@ -6,7 +6,6 @@ package allowlist
 import (
 	"fmt"
 	"testing"
-
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -187,7 +186,7 @@ func FuzzPackReadAllowListOutputTest(f *testing.F) {
 func OldPackReadAllowList(address common.Address) []byte {
 	input := make([]byte, 0, contract.SelectorLen+common.HashLength)
 	input = append(input, readAllowListSignature...)
-	input = append(input, address.Hash().Bytes()...)
+	input = append(input, common.BytesToHash(address[:]).Bytes()...)
 	return input
 }
 
@@ -215,7 +214,7 @@ func OldPackModifyAllowList(address common.Address, role Role) ([]byte, error) {
 		return nil, fmt.Errorf("cannot pack modify list input with invalid role: %s", role)
 	}
 
-	input = append(input, address.Hash().Bytes()...)
+	input = append(input, common.BytesToHash(address[:]).Bytes()...)
 	return input, nil
 }
 

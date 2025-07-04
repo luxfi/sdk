@@ -19,7 +19,6 @@ package core
 import (
 	"context"
 	"time"
-
 	"github.com/luxdefi/evm/core/bloombits"
 	"github.com/luxdefi/evm/core/rawdb"
 	"github.com/luxdefi/evm/core/types"

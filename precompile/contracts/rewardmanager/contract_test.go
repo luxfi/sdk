@@ -5,11 +5,10 @@ package rewardmanager
 
 import (
 	"testing"
-
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxdefi/evm/interfaces/core/vm"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
-
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/constants"
 	"github.com/luxdefi/evm/core/state"
@@ -82,7 +81,7 @@ var (
 				assertFeeRecipientsAllowed(t, logsTopics, logsData, allowlist.TestEnabledAddr)
 			},
 		},
-		"set fee recipients should not emit events pre-DUpgrade": {
+		"set fee recipients should not emit events pre-Durango": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
@@ -95,7 +94,7 @@ var (
 				mockChainConfig := precompileconfig.NewMockChainConfig(ctrl)
 				mockChainConfig.EXPECT().GetFeeConfig().AnyTimes().Return(commontype.ValidTestFeeConfig)
 				mockChainConfig.EXPECT().AllowedFeeRecipients().AnyTimes().Return(false)
-				mockChainConfig.EXPECT().IsDUpgrade(gomock.Any()).AnyTimes().Return(false)
+				mockChainConfig.EXPECT().IsDurango(gomock.Any()).AnyTimes().Return(false)
 				return mockChainConfig
 			},
 			SuppliedGas: AllowFeeRecipientsGasCost,
@@ -170,7 +169,7 @@ var (
 				assertRewardAddressChanged(t, logsTopics, logsData, allowlist.TestManagerAddr, common.Address{}, rewardAddress)
 			},
 		},
-		"change reward address should not emit events pre-DUpgrade": {
+		"change reward address should not emit events pre-Durango": {
 			Caller:     allowlist.TestManagerAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
@@ -183,7 +182,7 @@ var (
 				mockChainConfig := precompileconfig.NewMockChainConfig(ctrl)
 				mockChainConfig.EXPECT().GetFeeConfig().AnyTimes().Return(commontype.ValidTestFeeConfig)
 				mockChainConfig.EXPECT().AllowedFeeRecipients().AnyTimes().Return(false)
-				mockChainConfig.EXPECT().IsDUpgrade(gomock.Any()).AnyTimes().Return(false)
+				mockChainConfig.EXPECT().IsDurango(gomock.Any()).AnyTimes().Return(false)
 				return mockChainConfig
 			},
 			SuppliedGas: SetRewardAddressGasCost,
@@ -238,7 +237,7 @@ var (
 				assertRewardsDisabled(t, logsTopics, logsData, allowlist.TestEnabledAddr)
 			},
 		},
-		"disable rewards should not emit event pre-DUpgrade": {
+		"disable rewards should not emit event pre-Durango": {
 			Caller:     allowlist.TestManagerAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
@@ -251,7 +250,7 @@ var (
 				mockChainConfig := precompileconfig.NewMockChainConfig(ctrl)
 				mockChainConfig.EXPECT().GetFeeConfig().AnyTimes().Return(commontype.ValidTestFeeConfig)
 				mockChainConfig.EXPECT().AllowedFeeRecipients().AnyTimes().Return(false)
-				mockChainConfig.EXPECT().IsDUpgrade(gomock.Any()).AnyTimes().Return(false)
+				mockChainConfig.EXPECT().IsDurango(gomock.Any()).AnyTimes().Return(false)
 				return mockChainConfig
 			},
 			SuppliedGas: SetRewardAddressGasCost,
@@ -364,9 +363,9 @@ var (
 			},
 			SuppliedGas: AllowFeeRecipientsGasCost,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrWriteProtection.Error(),
+			ExpectedErr: vm.ErrWriteProtection.Error(),
 		},
-		"readOnly set reward addresss with allowed role fails": {
+		"readOnly set reward address with allowed role fails": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
@@ -377,7 +376,7 @@ var (
 			},
 			SuppliedGas: SetRewardAddressGasCost,
 			ReadOnly:    true,
-			ExpectedErr: vmerrs.ErrWriteProtection.Error(),
+			ExpectedErr: vm.ErrWriteProtection.Error(),
 		},
 		"insufficient gas set reward address from allowed role": {
 			Caller:     allowlist.TestEnabledAddr,
@@ -390,7 +389,7 @@ var (
 			},
 			SuppliedGas: SetRewardAddressGasCost + RewardAddressChangedEventGasCost - 1,
 			ReadOnly:    false,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
 		"insufficient gas allow fee recipients from allowed role": {
 			Caller:     allowlist.TestEnabledAddr,
@@ -403,7 +402,7 @@ var (
 			},
 			SuppliedGas: AllowFeeRecipientsGasCost + FeeRecipientsAllowedEventGasCost - 1,
 			ReadOnly:    false,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
 		"insufficient gas read current reward address from allowed role": {
 			Caller:     allowlist.TestEnabledAddr,
@@ -416,7 +415,7 @@ var (
 			},
 			SuppliedGas: CurrentRewardAddressGasCost - 1,
 			ReadOnly:    false,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
 		"insufficient gas are fee recipients allowed from allowed role": {
 			Caller:     allowlist.TestEnabledAddr,
@@ -429,17 +428,17 @@ var (
 			},
 			SuppliedGas: AreFeeRecipientsAllowedGasCost - 1,
 			ReadOnly:    false,
-			ExpectedErr: vmerrs.ErrOutOfGas.Error(),
+			ExpectedErr: vm.ErrOutOfGas.Error(),
 		},
 	}
 )
 
 func TestRewardManagerRun(t *testing.T) {
-	allowlist.RunPrecompileWithAllowListTests(t, Module, state.NewTestStateDB, tests)
+	allowlist.RunPrecompileWithAllowListTests(t, Module, extstate.NewTestStateDB, tests)
 }
 
 func BenchmarkRewardManager(b *testing.B) {
-	allowlist.BenchPrecompileWithAllowList(b, Module, state.NewTestStateDB, tests)
+	allowlist.BenchPrecompileWithAllowList(b, Module, extstate.NewTestStateDB, tests)
 }
 
 func assertRewardAddressChanged(
@@ -454,9 +453,9 @@ func assertRewardAddressChanged(
 	topics := logsTopics[0]
 	require.Len(t, topics, 4)
 	require.Equal(t, RewardManagerABI.Events["RewardAddressChanged"].ID, topics[0])
-	require.Equal(t, caller.Hash(), topics[1])
-	require.Equal(t, oldAddress.Hash(), topics[2])
-	require.Equal(t, newAddress.Hash(), topics[3])
+	require.Equal(t, common.BytesToHash(caller[:]), topics[1])
+	require.Equal(t, common.BytesToHash(oldAddress[:]), topics[2])
+	require.Equal(t, common.BytesToHash(newAddress[:]), topics[3])
 	require.Len(t, logsData[0], 0)
 }
 
@@ -470,7 +469,7 @@ func assertRewardsDisabled(
 	topics := logsTopics[0]
 	require.Len(t, topics, 2)
 	require.Equal(t, RewardManagerABI.Events["RewardsDisabled"].ID, topics[0])
-	require.Equal(t, caller.Hash(), topics[1])
+	require.Equal(t, common.BytesToHash(caller[:]), topics[1])
 	require.Len(t, logsData[0], 0)
 }
 
@@ -484,6 +483,6 @@ func assertFeeRecipientsAllowed(
 	topics := logsTopics[0]
 	require.Len(t, topics, 2)
 	require.Equal(t, RewardManagerABI.Events["FeeRecipientsAllowed"].ID, topics[0])
-	require.Equal(t, caller.Hash(), topics[1])
+	require.Equal(t, common.BytesToHash(caller[:]), topics[1])
 	require.Len(t, logsData[0], 0)
 }

@@ -32,9 +32,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
 	_ "embed"
-
 	"github.com/luxdefi/evm/accounts/abi/bind"
 	"github.com/luxdefi/evm/accounts/abi/bind/precompilebind"
 	"github.com/luxdefi/evm/internal/flags"
@@ -189,7 +187,7 @@ func precompilegen(c *cli.Context) error {
 }
 
 func main() {
-	log.Root().SetHandler(log.LvlFilterHandler(log.LvlInfo, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	log.SetDefault(log.NewLogger(log.NewTerminalHandlerWithLevel(os.Stderr, log.LevelInfo, true)))
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)

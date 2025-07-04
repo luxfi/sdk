@@ -30,7 +30,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/core/asm"
+	"github.com/luxdefi/evm/interfaces/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

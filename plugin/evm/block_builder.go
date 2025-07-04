@@ -6,12 +6,10 @@ package evm
 import (
 	"sync"
 	"time"
-
 	"github.com/luxdefi/node/utils/timer"
 	"github.com/luxdefi/evm/core"
 	"github.com/luxdefi/evm/core/txpool"
 	"github.com/luxdefi/evm/params"
-
 	"github.com/luxdefi/node/snow"
 	commonEng "github.com/luxdefi/node/snow/engine/common"
 	"github.com/ethereum/go-ethereum/log"
@@ -27,8 +25,7 @@ type blockBuilder struct {
 	ctx         *snow.Context
 	chainConfig *params.ChainConfig
 
-	txPool   *txpool.TxPool
-	gossiper Gossiper
+	txPool *txpool.TxPool
 
 	shutdownChan <-chan struct{}
 	shutdownWg   *sync.WaitGroup
@@ -56,7 +53,6 @@ func (vm *VM) NewBlockBuilder(notifyBuildBlockChan chan<- commonEng.Message) *bl
 		ctx:                  vm.ctx,
 		chainConfig:          vm.chainConfig,
 		txPool:               vm.txPool,
-		gossiper:             vm.gossiper,
 		shutdownChan:         vm.shutdownChan,
 		shutdownWg:           &vm.shutdownWg,
 		notifyBuildBlockChan: notifyBuildBlockChan,
@@ -100,7 +96,9 @@ func (b *blockBuilder) handleGenerateBlock() {
 // needToBuild returns true if there are outstanding transactions to be issued
 // into a block.
 func (b *blockBuilder) needToBuild() bool {
-	size := b.txPool.PendingSize()
+	size := b.txPool.PendingSize(txpool.PendingFilter{
+		MinTip: uint256.MustFromBig(b.txPool.GasTip()),
+	})
 	return size > 0
 }
 
@@ -144,7 +142,7 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 	// txSubmitChan is invoked when new transactions are issued as well as on re-orgs which
 	// may orphan transactions that were previously in a preferred block.
 	txSubmitChan := make(chan core.NewTxsEvent)
-	b.txPool.SubscribeNewTxsEvent(txSubmitChan)
+	b.txPool.SubscribeTransactions(txSubmitChan, true)
 
 	b.shutdownWg.Add(1)
 	go b.ctx.Log.RecoverAndPanic(func() {
@@ -152,20 +150,9 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 
 		for {
 			select {
-			case ethTxsEvent := <-txSubmitChan:
+			case <-txSubmitChan:
 				log.Trace("New tx detected, trying to generate a block")
 				b.signalTxsReady()
-
-				if b.gossiper != nil && len(ethTxsEvent.Txs) > 0 {
-					// [GossipTxs] will block unless [gossiper.txsToGossipChan] (an
-					// unbuffered channel) is listened on
-					if err := b.gossiper.GossipTxs(ethTxsEvent.Txs); err != nil {
-						log.Warn(
-							"failed to gossip new eth transactions",
-							"err", err,
-						)
-					}
-				}
 			case <-b.shutdownChan:
 				b.buildBlockTimer.Stop()
 				return

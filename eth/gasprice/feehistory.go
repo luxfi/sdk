@@ -31,8 +31,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"sort"
-
+	"slices"
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
@@ -45,27 +44,21 @@ var (
 	errBeyondHistoricalLimit = errors.New("request beyond historical limit")
 )
 
-// txGasAndReward is sorted in ascending order based on reward
-type (
-	txGasAndReward struct {
-		gasUsed uint64
-		reward  *big.Int
-	}
-	sortGasAndReward []txGasAndReward
-	slimBlock        struct {
-		GasUsed  uint64
-		GasLimit uint64
-		BaseFee  *big.Int
-		Txs      []txGasAndReward
-	}
+const (
+	maxQueryLimit = 100
 )
 
-func (s sortGasAndReward) Len() int { return len(s) }
-func (s sortGasAndReward) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
+// txGasAndReward is sorted in ascending order based on reward
+type txGasAndReward struct {
+	gasUsed uint64
+	reward  *big.Int
 }
-func (s sortGasAndReward) Less(i, j int) bool {
-	return s[i].reward.Cmp(s[j].reward) < 0
+
+type slimBlock struct {
+	GasUsed  uint64
+	GasLimit uint64
+	BaseFee  *big.Int
+	Txs      []txGasAndReward
 }
 
 // processBlock prepares a [slimBlock] from a retrieved block and list of
@@ -77,12 +70,14 @@ func processBlock(block *types.Block, receipts types.Receipts) *slimBlock {
 	}
 	sb.GasUsed = block.GasUsed()
 	sb.GasLimit = block.GasLimit()
-	sorter := make(sortGasAndReward, len(block.Transactions()))
+	sorter := make([]txGasAndReward, len(block.Transactions()))
 	for i, tx := range block.Transactions() {
 		reward, _ := tx.EffectiveGasTip(sb.BaseFee)
 		sorter[i] = txGasAndReward{gasUsed: receipts[i].GasUsed, reward: reward}
 	}
-	sort.Stable(sorter)
+	slices.SortStableFunc(sorter, func(a, b txGasAndReward) int {
+		return a.reward.Cmp(b.reward)
+	})
 	sb.Txs = sorter
 	return &sb
 }
@@ -181,6 +176,9 @@ func (oracle *Oracle) FeeHistory(ctx context.Context, blocks uint64, unresolvedL
 	if blocks < 1 {
 		return common.Big0, nil, nil, nil, nil // returning with no data and no error means there are no retrievable blocks
 	}
+	if len(rewardPercentiles) > maxQueryLimit {
+		return common.Big0, nil, nil, nil, fmt.Errorf("%w: over the query limit %d", errInvalidPercentile, maxQueryLimit)
+	}
 	if blocks > oracle.maxCallBlockHistory {
 		log.Warn("Sanitizing fee history length", "requested", blocks, "truncated", oracle.maxCallBlockHistory)
 		blocks = oracle.maxCallBlockHistory
@@ -189,8 +187,8 @@ func (oracle *Oracle) FeeHistory(ctx context.Context, blocks uint64, unresolvedL
 		if p < 0 || p > 100 {
 			return common.Big0, nil, nil, nil, fmt.Errorf("%w: %f", errInvalidPercentile, p)
 		}
-		if i > 0 && p < rewardPercentiles[i-1] {
-			return common.Big0, nil, nil, nil, fmt.Errorf("%w: #%d:%f > #%d:%f", errInvalidPercentile, i-1, rewardPercentiles[i-1], i, p)
+		if i > 0 && p <= rewardPercentiles[i-1] {
+			return common.Big0, nil, nil, nil, fmt.Errorf("%w: #%d:%f >= #%d:%f", errInvalidPercentile, i-1, rewardPercentiles[i-1], i, p)
 		}
 	}
 	lastBlock, blocks, err := oracle.resolveBlockRange(ctx, unresolvedLastBlock, blocks)

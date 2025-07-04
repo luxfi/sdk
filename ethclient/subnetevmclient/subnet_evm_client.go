@@ -32,7 +32,6 @@ import (
 	"math/big"
 	"runtime"
 	"runtime/debug"
-
 	"github.com/luxdefi/evm/core/types"
 	"github.com/luxdefi/evm/ethclient"
 	"github.com/luxdefi/evm/interfaces"
@@ -55,7 +54,7 @@ func New(c *rpc.Client) *Client {
 
 // CreateAccessList tries to create an access list for a specific transaction based on the
 // current pending state of the blockchain.
-func (ec *Client) CreateAccessList(ctx context.Context, msg interfaces.CallMsg) (*types.AccessList, uint64, string, error) {
+func (ec *Client) CreateAccessList(ctx context.Context, msg ethereum.CallMsg) (*types.AccessList, uint64, string, error) {
 	type accessListResult struct {
 		Accesslist *types.AccessList `json:"accessList"`
 		Error      string            `json:"error,omitempty"`
@@ -105,6 +104,11 @@ func (ec *Client) GetProof(ctx context.Context, account common.Address, keys []s
 		StorageProof []storageResult `json:"storageProof"`
 	}
 
+	// Avoid keys being 'null'.
+	if keys == nil {
+		keys = []string{}
+	}
+
 	var res accountResult
 	err := ec.c.CallContext(ctx, &res, "eth_getProof", account, keys, ethclient.ToBlockNumArg(blockNumber))
 	// Turn hexutils back to normal datatypes
@@ -147,7 +151,7 @@ type OverrideAccount struct {
 // overrides specifies a map of contract states that should be overwritten before executing
 // the message call.
 // Please use ethclient.CallContract instead if you don't need the override functionality.
-func (ec *Client) CallContract(ctx context.Context, msg interfaces.CallMsg, blockNumber *big.Int, overrides *map[common.Address]OverrideAccount) ([]byte, error) {
+func (ec *Client) CallContract(ctx context.Context, msg ethereum.CallMsg, blockNumber *big.Int, overrides *map[common.Address]OverrideAccount) ([]byte, error) {
 	var hex hexutil.Bytes
 	err := ec.c.CallContext(
 		ctx, &hex, "eth_call", toCallArg(msg),
@@ -175,13 +179,13 @@ func (ec *Client) SubscribePendingTransactions(ctx context.Context, ch chan<- co
 	return ec.c.EthSubscribe(ctx, ch, "newPendingTransactions")
 }
 
-func toCallArg(msg interfaces.CallMsg) interface{} {
+func toCallArg(msg ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
 		"to":   msg.To,
 	}
 	if len(msg.Data) > 0 {
-		arg["data"] = hexutil.Bytes(msg.Data)
+		arg["input"] = hexutil.Bytes(msg.Data)
 	}
 	if msg.Value != nil {
 		arg["value"] = (*hexutil.Big)(msg.Value)
@@ -191,6 +195,21 @@ func toCallArg(msg interfaces.CallMsg) interface{} {
 	}
 	if msg.GasPrice != nil {
 		arg["gasPrice"] = (*hexutil.Big)(msg.GasPrice)
+	}
+	if msg.GasFeeCap != nil {
+		arg["maxFeePerGas"] = (*hexutil.Big)(msg.GasFeeCap)
+	}
+	if msg.GasTipCap != nil {
+		arg["maxPriorityFeePerGas"] = (*hexutil.Big)(msg.GasTipCap)
+	}
+	if msg.AccessList != nil {
+		arg["accessList"] = msg.AccessList
+	}
+	if msg.BlobGasFeeCap != nil {
+		arg["maxFeePerBlobGas"] = (*hexutil.Big)(msg.BlobGasFeeCap)
+	}
+	if msg.BlobHashes != nil {
+		arg["blobVersionedHashes"] = msg.BlobHashes
 	}
 	return arg
 }
