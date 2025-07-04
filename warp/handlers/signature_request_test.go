@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited. All rights reserved.
+// (c) 2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -16,13 +16,9 @@ import (
 	"github.com/luxdefi/node/snow/engine/snowman/block"
 	"github.com/luxdefi/node/utils/crypto/bls"
 	luxWarp "github.com/luxdefi/node/vms/platformvm/warp"
-<<<<<<< HEAD
 	"github.com/luxdefi/node/vms/platformvm/warp/payload"
 	"github.com/luxdefi/evm/plugin/evm/message"
 	"github.com/luxdefi/evm/utils"
-=======
-	"github.com/luxdefi/evm/plugin/evm/message"
->>>>>>> fd08c47 (Update import path)
 	"github.com/luxdefi/evm/warp"
 	"github.com/stretchr/testify/require"
 )

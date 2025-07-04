@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited.
+// (c) 2023, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,10 +32,7 @@ import (
 	"os"
 
 	"github.com/luxdefi/evm/cmd/evm/internal/compiler"
-<<<<<<< HEAD
-=======
 
->>>>>>> fd08c47 (Update import path)
 	"github.com/urfave/cli/v2"
 )
 

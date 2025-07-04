@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -149,31 +149,6 @@ func precompilegen(c *cli.Context) error {
 	if err != nil {
 		utils.Fatalf("Failed to generate precompile: %v", err)
 	}
-
-	if outFlagStr == "" {
-		outFlagStr = filepath.Join("./precompile/contracts", pkg)
-	}
-
-	abifilename := ""
-	abipath := ""
-	// we should not generate the abi file if output is set to stdout
-	if !isOutStdout {
-		// get file name from the output path
-		abifilename = "contract.abi"
-		abipath = filepath.Join(outFlagStr, abifilename)
-	}
-	// if output is set to stdout, we should not generate the test codes
-	generateTests := !isOutStdout
-
-	// Generate the contract precompile
-	bindedFiles, err := precompilebind.PrecompileBind(types, string(abi), bins, sigs, pkg, lang, libs, aliases, abifilename, generateTests)
-	if err != nil {
-		utils.Fatalf("Failed to generate precompile: %v", err)
-	}
-
-	configCode := bindedFiles.Config
-	contractCode := bindedFiles.Contract
-	moduleCode := bindedFiles.Module
 
 	// Either flush it out to a file or display on the standard output
 	// Skip displaying test codes here.

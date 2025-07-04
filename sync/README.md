@@ -32,7 +32,7 @@ State sync code is structured as follows:
 - `plugin/evm/`: The engine expects the VM to implement `StateSyncableVM` interface,
   - `StateSyncServer`: Contains methods executed on nodes _serving_ state sync requests.
   - `StateSyncClient`: Contains methods executed on nodes joining the network via state sync, and orchestrates the top level steps of the sync.
-- `peer`: Contains abstractions used by `sync/statesync` to send requests to peers (`AppRequest`) and receive responses from peers (`AppResponse`).
+- `peer`: Contains abstractions used by `sync/statesync` to send requests to peers (`AppRequest`) and receive responses from peers (`AppResponse`). 
 - `message`: Contains structs that are serialized and sent over the network during state sync.
 
 
@@ -46,26 +46,18 @@ The above information is called a _state summary_, and each syncable block corre
 
 
 1. The engine calls `StateSyncEnabled`. The VM returns `true` to initiate state sync, or `false` to start  bootstrapping. In `evm`, this is controlled by the `state-sync-enabled` flag.
-<<<<<<< HEAD
-2. The engine calls `GetOngoingSyncStateSummary`. If the VM has a previously interrupted sync to resume it returns that summary. Otherwise, it returns `ErrNotFound`.  By default, `evm` will resume an interrupted sync.
-3. The engine samples peers for their latest available summaries, then verifies the correctness and availability of each sampled summary with validators. The messaging flow is documented [here](https://github.com/luxdefi/node/blob/master/snow/engine/snowman/block/README.md).
-4. The engine calls `Accept` on the chosen summary. The VM may return `false` to skip syncing to this summary (`evm` skips state sync for less than `defaultStateSyncMinBlocks = 300_000` blocks). If the VM decides to perform the sync, it must return `true` without blocking and fetch the state from its peers asynchronously.
-5. The VM sends `common.StateSyncDone` on the `toEngine` channel on completion.
-6. The engine calls `VM.SetState(Bootstrapping)`. Then, blocks after the syncable block are processed one by one.
-=======
 1. The engine calls `GetOngoingSyncStateSummary`. If the VM has a previously interrupted sync to resume it returns that summary. Otherwise, it returns `ErrNotFound`.  By default, `evm` will resume an interrupted sync.
-1. The engine samples peers for their latest available summaries, then verifies the correctness and availablility of each sampled summary with validators. The messaging flow is documented [here](https://github.com/luxdefi/node/blob/master/snow/engine/snowman/block/README.md).
+1. The engine samples peers for their latest available summaries, then verifies the correctness and availability of each sampled summary with validators. The messaging flow is documented [here](https://github.com/luxdefi/node/blob/master/snow/engine/snowman/block/README.md).
 1. The engine calls `Accept` on the chosen summary. The VM may return `false` to skip syncing to this summary (`evm` skips state sync for less than `defaultStateSyncMinBlocks = 300_000` blocks). If the VM decides to perform the sync, it must return `true` without blocking and fetch the state from its peers asynchronously.
 1. The VM sends `common.StateSyncDone` on the `toEngine` channel on completion.
 1. The engine calls `VM.SetState(Bootstrapping)`. Then, blocks after the syncable block are processed one by one.
->>>>>>> fd08c47 (Update import path)
 
 ## Syncing state
 The following steps are executed by the VM to sync its state from peers (see `stateSyncClient.StateSync`):
 1. Wipe snapshot data
-2. Sync 256 parents of the syncable block (see `BlockRequest`),
-3. Sync the EVM state: account trie, code, and storage tries,
-4. Update in-memory and on-disk pointers.
+1. Sync 256 parents of the syncable block (see `BlockRequest`),
+1. Sync the EVM state: account trie, code, and storage tries,
+1. Update in-memory and on-disk pointers.
 
 Steps 3 and 4 involve syncing tries. To sync trie data, the VM will send a series of `LeafRequests` to its peers. Each request specifies:
 - `Root` of the trie to sync,
@@ -120,4 +112,4 @@ While state sync is faster than normal bootstrapping, the process may take sever
 | `state-sync-skip-resume` | `bool` | set to true to avoid resuming an ongoing sync | `false` |
 | `state-sync-min-blocks` | `uint64` | Minimum number of blocks the chain must be ahead of local state to prefer state sync over bootstrapping | `300,000` |
 | `state-sync-server-trie-cache` | `int` | Size of trie cache to serve state sync data in MB. Should be set to multiples of `64`. | `64` |
-| `state-sync-ids` | `string` | a comma seperated list of `NodeID-` prefixed node IDs to sync data from. If not provided, peers are randomly selected. | |
+| `state-sync-ids` | `string` | a comma separated list of `NodeID-` prefixed node IDs to sync data from. If not provided, peers are randomly selected. | |

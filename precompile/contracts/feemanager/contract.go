@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package feemanager
@@ -9,14 +9,7 @@ import (
 	"fmt"
 	"math/big"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	"github.com/luxdefi/evm/accounts/abi"
-=======
->>>>>>> fd08c47 (Update import path)
-=======
-	"github.com/luxdefi/evm/accounts/abi"
->>>>>>> d5328b4 (Sync upstream)
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/allowlist"
 	"github.com/luxdefi/evm/precompile/contract"

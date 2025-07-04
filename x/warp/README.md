@@ -10,11 +10,7 @@ Lux Warp Messaging uses BLS Multi-Signatures with Public-Key Aggregation where e
 
 Every node tracking a Subnet has read access to the Lux P-Chain. This provides weighted sets of BLS Public Keys that correspond to the validator sets of each Subnet on the Lux Network. Lux Warp Messaging provides a basic primitive for signing and verifying messages between Subnets: the receiving network can verify whether an aggregation of signatures from a set of source Subnet validators represents a threshold of stake large enough for the receiving network to process the message.
 
-<<<<<<< HEAD
-For more details on Lux Warp Messaging, see the Lux Node [Warp README](https://github.com/luxdefi/node/blob/warp-readme/vms/platformvm/warp/README.md).
-=======
-For more details on Lux Warp Messaging, see the Luxd [Warp README](https://github.com/luxdefi/node/blob/warp-readme/vms/platformvm/warp/README.md).
->>>>>>> b36c20f (Update executable to luxd)
+For more details on Lux Warp Messaging, see the Lux [Warp README](https://github.com/luxdefi/node/blob/warp-readme/vms/platformvm/warp/README.md).
 
 ## Integrating Lux Warp Messaging into the EVM
 
@@ -121,7 +117,7 @@ The Lux P-Chain tracks only its current state and reverse diff layers (reversing
 
 Therefore, we need a heuristic to ensure that the network can correctly re-process old blocks (note: re-processing old blocks is a requirement to perform bootstrapping and is used in some VMs to serve or verify historical data).
 
-As a result, we require that the block itself provides a deterministic hint which determines which Lux Warp Messages were considered valid/invalid during the block's execution. This ensures that we can always re-process blocks and use the hint to decide whether an Lux Warp Message should be treated as valid/invalid even after the P-Chain state that was used at the original execution time may no longer support fast lookups.
+As a result, we require that the block itself provides a deterministic hint which determines which Lux Warp Messages were considered valid/invalid during the block's execution. This ensures that we can always re-process blocks and use the hint to decide whether a Lux Warp Message should be treated as valid/invalid even after the P-Chain state that was used at the original execution time may no longer support fast lookups.
 
 To provide that hint, we've explored two designs:
 

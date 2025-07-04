@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Implements solidity tests.
@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxdefi/netrunner/rpcpb"
+	"github.com/luxdefi/lux-network-runner/rpcpb"
 	"github.com/luxdefi/node/api/info"
 	"github.com/luxdefi/node/ids"
 	"github.com/luxdefi/node/snow/validators"
@@ -134,16 +134,12 @@ var _ = ginkgo.BeforeSuite(func() {
 	require.NoError(err)
 	warpChainConfigPath = f.Name()
 
-	// Construct the network using the netrunner
+	// Construct the network using the lux-network-runner
 	_, err = manager.StartDefaultNetwork(ctx)
 	require.NoError(err)
 	err = manager.SetupNetwork(
 		ctx,
-<<<<<<< HEAD
-		config.Lux NodeExecPath,
-=======
-		config.LuxdExecPath,
->>>>>>> b36c20f (Update executable to luxd)
+		config.LuxExecPath,
 		[]*rpcpb.BlockchainSpec{
 			{
 				VmName:      evm.IDStr,

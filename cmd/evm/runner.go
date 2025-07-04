@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited.
+// (c) 2023, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -248,7 +248,7 @@ func runCmd(ctx *cli.Context) error {
 	if chainConfig != nil {
 		runtimeConfig.ChainConfig = chainConfig
 	} else {
-		runtimeConfig.ChainConfig = params.EVMDefaultChainConfig // NOTE: Replaced AllEthashProtocolChanges with EVMDefaultChainConfig here
+		runtimeConfig.ChainConfig = params.SubnetEVMDefaultChainConfig // NOTE: Replaced AllEthashProtocolChanges with SubnetEVMDefaultChainConfig here
 	}
 
 	var hexInput []byte

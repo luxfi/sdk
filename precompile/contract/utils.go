@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package contract
@@ -10,13 +10,6 @@ import (
 
 	"github.com/luxdefi/evm/accounts/abi"
 	"github.com/luxdefi/evm/vmerrs"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	"github.com/ethereum/go-ethereum/common"
->>>>>>> fd08c47 (Update import path)
-=======
->>>>>>> d5328b4 (Sync upstream)
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -336,7 +336,7 @@ func makeHeader(chain consensus.ChainReader, config *params.ChainConfig, parent 
 		Time:   time,
 	}
 
-	if chain.Config().IsEVM(time) {
+	if chain.Config().IsSubnetEVM(time) {
 		feeConfig, _, err := chain.GetFeeConfigAt(parent.Header())
 		if err != nil {
 			panic(err)

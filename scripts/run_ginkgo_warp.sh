@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-# This script assumes that an Lux Node and Subnet-EVM binaries are available in the standard location
+# This script assumes that a Lux and EVM binaries are available in the standard location
 # within the $GOPATH
-# The Lux Node and PluginDir paths can be specified via the environment variables used in ./scripts/run.sh.
-=======
-# This script assumes that an Luxd and Subnet-EVM binaries are available in the standard location
-=======
-# This script assumes that an Luxd and EVM binaries are available in the standard location
->>>>>>> fd08c47 (Update import path)
-# within the $GOPATH
-# The Luxd and PluginDir paths can be specified via the environment variables used in ./scripts/run.sh.
->>>>>>> b36c20f (Update executable to luxd)
+# The Lux and PluginDir paths can be specified via the environment variables used in ./scripts/run.sh.
 
 # Load the versions
 SUBNET_EVM_PATH=$(

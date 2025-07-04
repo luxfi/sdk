@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -12,9 +12,9 @@ import (
 	"github.com/luxdefi/evm/core/txpool"
 	"github.com/luxdefi/evm/params"
 
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxdefi/node/snow"
 	commonEng "github.com/luxdefi/node/snow/engine/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 const (

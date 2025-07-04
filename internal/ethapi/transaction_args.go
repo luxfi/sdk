@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -168,9 +168,9 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	}
 	// Now attempt to fill in default value depending on whether London is active or not.
 	head := b.CurrentHeader()
-	if b.ChainConfig().IsEVM(head.Time) {
+	if b.ChainConfig().IsSubnetEVM(head.Time) {
 		// London is active, set maxPriorityFeePerGas and maxFeePerGas.
-		if err := args.setEVMFeeDefault(ctx, head, b); err != nil {
+		if err := args.setSubnetEVMFeeDefault(ctx, head, b); err != nil {
 			return err
 		}
 	} else {
@@ -188,8 +188,8 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	return nil
 }
 
-// setEVMFeeDefault fills in reasonable default fee values for unspecified fields.
-func (args *TransactionArgs) setEVMFeeDefault(ctx context.Context, head *types.Header, b feeBackend) error {
+// setSubnetEVMFeeDefault fills in reasonable default fee values for unspecified fields.
+func (args *TransactionArgs) setSubnetEVMFeeDefault(ctx context.Context, head *types.Header, b feeBackend) error {
 	// Set maxPriorityFeePerGas if it is missing.
 	if args.MaxPriorityFeePerGas == nil {
 		tip, err := b.SuggestGasTipCap(ctx)

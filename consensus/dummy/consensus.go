@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dummy
@@ -124,7 +124,7 @@ func (self *DummyEngine) verifyHeaderGasFields(config *params.ChainConfig, heade
 	if err != nil {
 		return err
 	}
-	if config.IsEVM(header.Time) {
+	if config.IsSubnetEVM(header.Time) {
 		expectedGasLimit := feeConfig.GasLimit.Uint64()
 		if header.GasLimit != expectedGasLimit {
 			return fmt.Errorf("expected gas limit to be %d, but found %d", expectedGasLimit, header.GasLimit)
@@ -140,7 +140,7 @@ func (self *DummyEngine) verifyHeaderGasFields(config *params.ChainConfig, heade
 		if uint64(diff) >= limit || header.GasLimit < params.MinGasLimit {
 			return fmt.Errorf("invalid gas limit: have %d, want %d += %d", header.GasLimit, parent.GasLimit, limit)
 		}
-		// Verify BaseFee is not present before EVM
+		// Verify BaseFee is not present before Subnet EVM
 		if header.BaseFee != nil {
 			return fmt.Errorf("invalid baseFee before fork: have %d, want <nil>", header.BaseFee)
 		}
@@ -151,7 +151,7 @@ func (self *DummyEngine) verifyHeaderGasFields(config *params.ChainConfig, heade
 	}
 
 	// Verify baseFee and rollupWindow encoding as part of header verification
-	// starting in EVM
+	// starting in Subnet EVM
 	expectedRollupWindowBytes, expectedBaseFee, err := CalcBaseFee(config, feeConfig, parent, header.Time)
 	if err != nil {
 		return fmt.Errorf("failed to calculate base fee: %w", err)
@@ -202,7 +202,7 @@ func (self *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header 
 		if len(header.Extra) < params.DynamicFeeExtraDataSize {
 			return fmt.Errorf("expected extra-data field length >= %d, found %d", params.DynamicFeeExtraDataSize, len(header.Extra))
 		}
-	case config.IsEVM(header.Time):
+	case config.IsSubnetEVM(header.Time):
 		if len(header.Extra) != params.DynamicFeeExtraDataSize {
 			return fmt.Errorf("expected extra-data field to be: %d, but found %d", params.DynamicFeeExtraDataSize, len(header.Extra))
 		}
@@ -288,10 +288,10 @@ func (self *DummyEngine) verifyBlockFee(
 		return nil
 	}
 	if baseFee == nil || baseFee.Sign() <= 0 {
-		return fmt.Errorf("invalid base fee (%d) in EVM", baseFee)
+		return fmt.Errorf("invalid base fee (%d) in SubnetEVM", baseFee)
 	}
 	if requiredBlockGasCost == nil || !requiredBlockGasCost.IsUint64() {
-		return fmt.Errorf("invalid block gas cost (%d) in EVM", requiredBlockGasCost)
+		return fmt.Errorf("invalid block gas cost (%d) in SubnetEVM", requiredBlockGasCost)
 	}
 
 	var (
@@ -338,7 +338,7 @@ func (self *DummyEngine) verifyBlockFee(
 }
 
 func (self *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
-	if chain.Config().IsEVM(block.Time()) {
+	if chain.Config().IsSubnetEVM(block.Time()) {
 		// we use the parent to determine the fee config
 		// since the current block has not been finalized yet.
 		feeConfig, _, err := chain.GetFeeConfigAt(parent)
@@ -377,7 +377,7 @@ func (self *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *type
 func (self *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, state *state.StateDB, txs []*types.Transaction,
 	uncles []*types.Header, receipts []*types.Receipt,
 ) (*types.Block, error) {
-	if chain.Config().IsEVM(header.Time) {
+	if chain.Config().IsSubnetEVM(header.Time) {
 		// we use the parent to determine the fee config
 		// since the current block has not been finalized yet.
 		feeConfig, _, err := chain.GetFeeConfigAt(parent)

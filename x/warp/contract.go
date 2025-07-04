@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited. All rights reserved.
+// (c) 2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -227,7 +227,7 @@ func UnpackSendWarpMessageOutput(output []byte) (common.Hash, error) {
 	return unpacked, nil
 }
 
-// sendWarpMessage constructs an Lux Warp Message containing an AddressedPayload and emits a log to signal validators that they should
+// sendWarpMessage constructs a Lux Warp Message containing an AddressedPayload and emits a log to signal validators that they should
 // be willing to sign this message.
 func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, SendWarpMessageGasCost); err != nil {

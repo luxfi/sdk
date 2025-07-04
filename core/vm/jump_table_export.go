@@ -26,8 +26,8 @@ func LookupInstructionSet(rules params.Rules) (JumpTable, error) {
 	switch {
 	case rules.IsDUpgrade:
 		return newDUpgradeInstructionSet(), nil
-	case rules.IsEVM:
-		return newEVMInstructionSet(), nil
+	case rules.IsSubnetEVM:
+		return newSubnetEVMInstructionSet(), nil
 	case rules.IsIstanbul:
 		return newIstanbulInstructionSet(), nil
 	case rules.IsConstantinople:

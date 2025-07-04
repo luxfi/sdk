@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -74,7 +74,7 @@ func setDefaults(cfg *Config) {
 			IstanbulBlock:       new(big.Int),
 			MuirGlacierBlock:    new(big.Int),
 			MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-				EVMTimestamp: new(uint64),
+				SubnetEVMTimestamp: new(uint64),
 			},
 		}
 	}

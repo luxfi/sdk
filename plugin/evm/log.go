@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited. All rights reserved.
+// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -18,30 +18,30 @@ const (
 	timeFormat = "2006-01-02T15:04:05-0700"
 )
 
-type EVMLogger struct {
+type SubnetEVMLogger struct {
 	log.Handler
 }
 
 // InitLogger initializes logger with alias and sets the log level and format with the original [os.StdErr] interface
 // along with the context logger.
-func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (EVMLogger, error) {
-	logFormat := EVMTermFormat(alias)
+func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (SubnetEVMLogger, error) {
+	logFormat := SubnetEVMTermFormat(alias)
 	if jsonFormat {
-		logFormat = EVMJSONFormat(alias)
+		logFormat = SubnetEVMJSONFormat(alias)
 	}
 
 	// Create handler
 	logHandler := log.StreamHandler(writer, logFormat)
-	c := EVMLogger{Handler: logHandler}
+	c := SubnetEVMLogger{Handler: logHandler}
 
 	if err := c.SetLogLevel(level); err != nil {
-		return EVMLogger{}, err
+		return SubnetEVMLogger{}, err
 	}
 	return c, nil
 }
 
 // SetLogLevel sets the log level of initialized log handler.
-func (c *EVMLogger) SetLogLevel(level string) error {
+func (c *SubnetEVMLogger) SetLogLevel(level string) error {
 	// Set log level
 	logLevel, err := log.LvlFromString(level)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *EVMLogger) SetLogLevel(level string) error {
 	return nil
 }
 
-func EVMTermFormat(alias string) log.Format {
+func SubnetEVMTermFormat(alias string) log.Format {
 	prefix := fmt.Sprintf("<%s Chain>", alias)
 	return log.FormatFunc(func(r *log.Record) []byte {
 		location := fmt.Sprintf("%+v", r.Call)
@@ -61,7 +61,7 @@ func EVMTermFormat(alias string) log.Format {
 	})
 }
 
-func EVMJSONFormat(alias string) log.Format {
+func SubnetEVMJSONFormat(alias string) log.Format {
 	prefix := fmt.Sprintf("%s Chain", alias)
 	return log.FormatFunc(func(r *log.Record) []byte {
 		props := make(map[string]interface{}, 5+len(r.Ctx)/2)

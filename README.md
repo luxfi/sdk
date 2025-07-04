@@ -1,4 +1,4 @@
-# EVM
+# Subnet EVM
 
 [![Build + Test + Release](https://github.com/luxdefi/evm/actions/workflows/lint-tests-release.yml/badge.svg)](https://github.com/luxdefi/evm/actions/workflows/lint-tests-release.yml)
 [![CodeQL](https://github.com/luxdefi/evm/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/luxdefi/evm/actions/workflows/codeql-analysis.yml)
@@ -7,106 +7,59 @@
 Each blockchain is an instance of a Virtual Machine (VM), much like an object in an object-oriented language is an instance of a class.
 That is, the VM defines the behavior of the blockchain.
 
-<<<<<<< HEAD
-Subnet EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines Subnet Contract Chains. Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxdefi/coreth).
-=======
-EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the Subnet Contract Chains. EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxdefi/coreth).
->>>>>>> fd08c47 (Update import path)
+Subnet EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the Subnet Contract Chains. Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxdefi/coreth).
 
 This chain implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality.
 
 ## Building
 
-The EVM runs in a separate process from the main Luxd process and communicates with it over a local gRPC connection.
+The Subnet EVM runs in a separate process from the main Lux process and communicates with it over a local gRPC connection.
 
-<<<<<<< HEAD
-### Lux Node Compatibility
-
-```text
-[v0.1.0] Lux Node@v1.7.0-v1.7.4 (Protocol Version: 9)
-[v0.1.1-v0.1.2] Lux Node@v1.7.5-v1.7.6 (Protocol Version: 10)
-[v0.2.0] Lux Node@v1.7.7-v1.7.9 (Protocol Version: 11)
-[v0.2.1] Lux Node@v1.7.10 (Protocol Version: 12)
-[v0.2.2] Lux Node@v1.7.11-v1.7.12 (Protocol Version: 14)
-[v0.2.3] Lux Node@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.4] Lux Node@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.5] Lux Node@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.6] Lux Node@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.7] Lux Node@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.8] Lux Node@v1.7.13-v1.7.18 (Protocol Version: 15)
-[v0.2.9] Lux Node@v1.7.13-v1.7.18 (Protocol Version: 15)
-[v0.3.0] Lux Node@v1.8.0-v1.8.6 (Protocol Version: 16)
-[v0.4.0] Lux Node@v1.9.0 (Protocol Version: 17)
-[v0.4.1] Lux Node@v1.9.1 (Protocol Version: 18)
-[v0.4.2] Lux Node@v1.9.1 (Protocol Version: 18)
-[v0.4.3] Lux Node@v1.9.2-v1.9.3 (Protocol Version: 19)
-[v0.4.4] Lux Node@v1.9.2-v1.9.3 (Protocol Version: 19)
-[v0.4.5] Lux Node@v1.9.4 (Protocol Version: 20)
-[v0.4.6] Lux Node@v1.9.4 (Protocol Version: 20)
-[v0.4.7] Lux Node@v1.9.5 (Protocol Version: 21)
-[v0.4.8] Lux Node@v1.9.6-v1.9.8 (Protocol Version: 22)
-[v0.4.9] Lux Node@v1.9.9 (Protocol Version: 23)
-[v0.4.10] Lux Node@v1.9.9 (Protocol Version: 23)
-[v0.4.11] Lux Node@v1.9.10-v1.9.16 (Protocol Version: 24)
-[v0.4.12] Lux Node@v1.9.10-v1.9.16 (Protocol Version: 24)
-[v0.5.0] Lux Node@v1.10.0 (Protocol Version: 25)
-[v0.5.1] Lux Node@v1.10.1-v1.10.4 (Protocol Version: 26)
-[v0.5.2] Lux Node@v1.10.1-v1.10.4 (Protocol Version: 26)
-[v0.5.3] Lux Node@v1.10.5-v1.10.8 (Protocol Version: 27)
-[v0.5.4] Lux Node@v1.10.9-v1.10.12 (Protocol Version: 28)
-[v0.5.5] Lux Node@v1.10.9-v1.10.12 (Protocol Version: 28)
-[v0.5.6] Lux Node@v1.10.9-v1.10.12 (Protocol Version: 28)
-[v0.5.7] Lux Node@v1.10.13-v1.10.14 (Protocol Version: 29)
-[v0.5.8] Lux Node@v1.10.13-v1.10.14 (Protocol Version: 29)
-[v0.5.9] Lux Node@v1.10.15-v1.10.17 (Protocol Version: 30)
-[v0.5.10] Lux Node@v1.10.15-v1.10.17 (Protocol Version: 30)
-=======
-### Luxd Compatibility
+### Lux Compatibility
 
 ```text
-[v0.1.0] Luxd@v1.7.0-v1.7.4 (Protocol Version: 9)
-[v0.1.1-v0.1.2] Luxd@v1.7.5-v1.7.6 (Protocol Version: 10)
-[v0.2.0] Luxd@v1.7.7-v1.7.9 (Protocol Version: 11)
-[v0.2.1] Luxd@v1.7.10 (Protocol Version: 12)
-[v0.2.2] Luxd@v1.7.11-v1.7.12 (Protocol Version: 14)
-[v0.2.3] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.4] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.5] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.6] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.7] Luxd@v1.7.13-v1.7.16 (Protocol Version: 15)
-[v0.2.8] Luxd@v1.7.13-v1.7.18 (Protocol Version: 15)
-[v0.2.9] Luxd@v1.7.13-v1.7.18 (Protocol Version: 15)
-[v0.3.0] Luxd@v1.8.0-v1.8.6 (Protocol Version: 16)
-[v0.4.0] Luxd@v1.9.0 (Protocol Version: 17)
-[v0.4.1] Luxd@v1.9.1 (Protocol Version: 18)
-[v0.4.2] Luxd@v1.9.1 (Protocol Version: 18)
-[v0.4.3] Luxd@v1.9.2-v1.9.3 (Protocol Version: 19)
-[v0.4.4] Luxd@v1.9.2-v1.9.3 (Protocol Version: 19)
-[v0.4.5] Luxd@v1.9.4 (Protocol Version: 20)
-[v0.4.6] Luxd@v1.9.4 (Protocol Version: 20)
-[v0.4.7] Luxd@v1.9.5 (Protocol Version: 21)
-[v0.4.8] Luxd@v1.9.6-v1.9.8 (Protocol Version: 22)
-[v0.4.9] Luxd@v1.9.9 (Protocol Version: 23)
-[v0.4.10] Luxd@v1.9.9 (Protocol Version: 23)
-[v0.4.11] Luxd@v1.9.10-v1.9.16 (Protocol Version: 24)
-[v0.4.12] Luxd@v1.9.10-v1.9.16 (Protocol Version: 24)
-[v0.5.0] Luxd@v1.10.0 (Protocol Version: 25)
-[v0.5.1] Luxd@v1.10.1-v1.10.4 (Protocol Version: 26)
-[v0.5.2] Luxd@v1.10.1-v1.10.4 (Protocol Version: 26)
-[v0.5.3] Luxd@v1.10.5-v1.10.8 (Protocol Version: 27)
-[v0.5.4] Luxd@v1.10.9-v1.10.12 (Protocol Version: 28)
-[v0.5.5] Luxd@v1.10.9-v1.10.12 (Protocol Version: 28)
-[v0.5.6] Luxd@v1.10.9-v1.10.12 (Protocol Version: 28)
-[v0.5.7] Luxd@v1.10.13-v1.10.14 (Protocol Version: 29)
-[v0.5.8] Luxd@v1.10.13-v1.10.14 (Protocol Version: 29)
-[v0.5.9] Luxd@v1.10.15-v1.10.17 (Protocol Version: 30)
-[v0.5.10] Luxd@v1.10.15-v1.10.17 (Protocol Version: 30)
->>>>>>> b36c20f (Update executable to luxd)
+[v0.1.0] Lux@v1.7.0-v1.7.4 (Protocol Version: 9)
+[v0.1.1-v0.1.2] Lux@v1.7.5-v1.7.6 (Protocol Version: 10)
+[v0.2.0] Lux@v1.7.7-v1.7.9 (Protocol Version: 11)
+[v0.2.1] Lux@v1.7.10 (Protocol Version: 12)
+[v0.2.2] Lux@v1.7.11-v1.7.12 (Protocol Version: 14)
+[v0.2.3] Lux@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.4] Lux@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.5] Lux@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.6] Lux@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.7] Lux@v1.7.13-v1.7.16 (Protocol Version: 15)
+[v0.2.8] Lux@v1.7.13-v1.7.18 (Protocol Version: 15)
+[v0.2.9] Lux@v1.7.13-v1.7.18 (Protocol Version: 15)
+[v0.3.0] Lux@v1.8.0-v1.8.6 (Protocol Version: 16)
+[v0.4.0] Lux@v1.9.0 (Protocol Version: 17)
+[v0.4.1] Lux@v1.9.1 (Protocol Version: 18)
+[v0.4.2] Lux@v1.9.1 (Protocol Version: 18)
+[v0.4.3] Lux@v1.9.2-v1.9.3 (Protocol Version: 19)
+[v0.4.4] Lux@v1.9.2-v1.9.3 (Protocol Version: 19)
+[v0.4.5] Lux@v1.9.4 (Protocol Version: 20)
+[v0.4.6] Lux@v1.9.4 (Protocol Version: 20)
+[v0.4.7] Lux@v1.9.5 (Protocol Version: 21)
+[v0.4.8] Lux@v1.9.6-v1.9.8 (Protocol Version: 22)
+[v0.4.9] Lux@v1.9.9 (Protocol Version: 23)
+[v0.4.10] Lux@v1.9.9 (Protocol Version: 23)
+[v0.4.11] Lux@v1.9.10-v1.9.16 (Protocol Version: 24)
+[v0.4.12] Lux@v1.9.10-v1.9.16 (Protocol Version: 24)
+[v0.5.0] Lux@v1.10.0 (Protocol Version: 25)
+[v0.5.1] Lux@v1.10.1-v1.10.4 (Protocol Version: 26)
+[v0.5.2] Lux@v1.10.1-v1.10.4 (Protocol Version: 26)
+[v0.5.3] Lux@v1.10.5-v1.10.8 (Protocol Version: 27)
+[v0.5.4] Lux@v1.10.9-v1.10.12 (Protocol Version: 28)
+[v0.5.5] Lux@v1.10.9-v1.10.12 (Protocol Version: 28)
+[v0.5.6] Lux@v1.10.9-v1.10.12 (Protocol Version: 28)
+[v0.5.7] Lux@v1.10.13-v1.10.14 (Protocol Version: 29)
+[v0.5.8] Lux@v1.10.13-v1.10.14 (Protocol Version: 29)
+[v0.5.9] Lux@v1.10.15-v1.10.17 (Protocol Version: 30)
+[v0.5.10] Lux@v1.10.15-v1.10.17 (Protocol Version: 30)
 ```
 
 ## API
 
-The EVM supports the following API namespaces:
+The Subnet EVM supports the following API namespaces:
 
 - `eth`
 - `personal`
@@ -114,23 +67,23 @@ The EVM supports the following API namespaces:
 - `debug`
 
 Only the `eth` namespace is enabled by default.
-EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxdefi/coreth).
+Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxdefi/coreth).
 Full documentation for the C-Chain's API can be found [here](https://docs.lux.network/apis/node/apis/c-chain).
 
 ## Compatibility
 
-The EVM is compatible with almost all Ethereum tooling, including [Remix](https://docs.lux.network/build/dapp/smart-contracts/remix-deploy), [Metamask](https://docs.lux.network/build/dapp/chain-settings), and [Foundry](https://docs.lux.network/build/dapp/smart-contracts/toolchains/foundry).
+The Subnet EVM is compatible with almost all Ethereum tooling, including [Remix](https://docs.lux.network/build/dapp/smart-contracts/remix-deploy), [Metamask](https://docs.lux.network/build/dapp/chain-settings), and [Foundry](https://docs.lux.network/build/dapp/smart-contracts/toolchains/foundry).
 
-## Differences Between EVM and Coreth
+## Differences Between Subnet EVM and Coreth
 
 - Added configurable fees and gas limits in genesis
-- Merged Lux hardforks into the single "EVM" hardfork
+- Merged Lux hardforks into the single "Subnet EVM" hardfork
 - Removed Atomic Txs and Shared Memory
 - Removed Multicoin Contract and State
 
 ## Block Format
 
-To support these changes, there have been a number of changes to the EVM block format compared to what exists on the C-Chain and Ethereum. Here we list the changes to the block format as compared to Ethereum.
+To support these changes, there have been a number of changes to the SubnetEVM block format compared to what exists on the C-Chain and Ethereum. Here we list the changes to the block format as compared to Ethereum.
 
 ### Block Header
 
@@ -161,7 +114,7 @@ This will clone and checkout to `master` branch.
 
 ### Run Local Network
 
-To run a local network, it is recommended to use the [lux-cli](https://github.com/luxdefi/lux-cli#lux-cli) to set up an instance of EVM on an local Lux Network.
+To run a local network, it is recommended to use the [lux-cli](https://github.com/luxdefi/lux-cli#lux-cli) to set up an instance of EVM on a local Lux Network.
 
 There are two options when using the Lux-CLI:
 

@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2021, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -319,7 +319,7 @@ func TestStateProcessorErrors(t *testing.T) {
 					IstanbulBlock:       big.NewInt(0),
 					MuirGlacierBlock:    big.NewInt(0),
 					MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-						EVMTimestamp: utils.NewUint64(0),
+						SubnetEVMTimestamp: utils.NewUint64(0),
 						DUpgradeTimestamp:  utils.NewUint64(0),
 					},
 					FeeConfig: params.DefaultFeeConfig,
@@ -387,7 +387,7 @@ func TestBadTxAllowListBlock(t *testing.T) {
 			IstanbulBlock:       big.NewInt(0),
 			MuirGlacierBlock:    big.NewInt(0),
 			MandatoryNetworkUpgrades: params.MandatoryNetworkUpgrades{
-				EVMTimestamp: utils.NewUint64(0),
+				SubnetEVMTimestamp: utils.NewUint64(0),
 			},
 			GenesisPrecompiles: params.Precompiles{
 				txallowlist.ConfigKey: txallowlist.NewConfig(utils.NewUint64(0), nil, nil, nil),
@@ -465,7 +465,7 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 		UncleHash: types.EmptyUncleHash,
 	}
 
-	if config.IsEVM(header.Time) {
+	if config.IsSubnetEVM(header.Time) {
 		header.Extra, header.BaseFee, _ = dummy.CalcBaseFee(config, config.FeeConfig, parent.Header(), header.Time)
 		header.BlockGasCost = big.NewInt(0)
 	}

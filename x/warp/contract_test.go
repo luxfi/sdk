@@ -1,4 +1,4 @@
-// (c) 2023-2024, Lux Partners Limited. All rights reserved.
+// (c) 2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -18,10 +18,7 @@ import (
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/testutils"
 	"github.com/luxdefi/evm/predicate"
-<<<<<<< HEAD
 	"github.com/luxdefi/evm/utils"
-=======
->>>>>>> fd08c47 (Update import path)
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
@@ -157,12 +154,14 @@ func TestSendWarpMessage(t *testing.T) {
 				require.Equal(t, topics[0], WarpABI.Events["SendWarpMessage"].ID)
 				require.Equal(t, topics[1], callerAddr.Hash())
 				require.Equal(t, topics[2], common.Hash(unsignedWarpMessage.ID()))
+
 				require.Len(t, logsData, 1)
 				logData := logsData[0]
 				unsignedWarpMsg, err := UnpackSendWarpEventDataToMessage(logData)
 				require.NoError(t, err)
 				addressedPayload, err := payload.ParseAddressedCall(unsignedWarpMsg.Payload)
 				require.NoError(t, err)
+
 				require.Equal(t, common.BytesToAddress(addressedPayload.SourceAddress), callerAddr)
 				require.Equal(t, unsignedWarpMsg.SourceChainID, blockchainID)
 				require.Equal(t, addressedPayload.Payload, sendWarpMessagePayload)
@@ -690,6 +689,7 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 				require.NoError(t, err)
 				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
 				require.NoError(t, err)
+
 				state.SetPredicateStorageSlots(ContractAddress, [][]byte{predicate.PackPredicate(warpMessage.Bytes())})
 			},
 			SetupBlockContext: func(mbc *contract.MockBlockContext) {

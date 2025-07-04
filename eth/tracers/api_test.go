@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -226,7 +226,7 @@ func TestTraceCall(t *testing.T) {
 	// Initialize test accounts
 	accounts := newAccounts(3)
 	genesis := &core.Genesis{
-		Config: params.TestEVMConfig, // TODO: go-ethereum has not enabled Shanghai yet, so we use EVM here so tests pass.
+		Config: params.TestSubnetEVMConfig, // TODO: go-ethereum has not enabled Shanghai yet, so we use SubnetEVM here so tests pass.
 		Alloc: core.GenesisAlloc{
 			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
 			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
@@ -493,7 +493,7 @@ func TestTracingWithOverrides(t *testing.T) {
 	accounts := newAccounts(3)
 	storageAccount := common.Address{0x13, 37}
 	genesis := &core.Genesis{
-		Config: params.TestEVMConfig, // TODO: go-ethereum has not enabled Shanghai yet, so we use EVM here so tests pass.
+		Config: params.TestSubnetEVMConfig, // TODO: go-ethereum has not enabled Shanghai yet, so we use SubnetEVM here so tests pass.
 		Alloc: core.GenesisAlloc{
 			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
 			accounts[1].addr: {Balance: big.NewInt(params.Ether)},

@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,18 +34,11 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/precompile/contracts/nativeminter"
 	"github.com/luxdefi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
 	"github.com/luxdefi/evm/utils"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/precompile/contracts/nativeminter"
-	"github.com/luxdefi/evm/precompile/contracts/rewardmanager"
-	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
-	"github.com/luxdefi/evm/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -124,11 +117,11 @@ func TestCheckCompatible(t *testing.T) {
 		},
 		{
 			stored:        TestChainConfig,
-			new:           TestPreEVMConfig,
+			new:           TestPreSubnetEVMConfig,
 			headBlock:     0,
 			headTimestamp: 0,
 			wantErr: &ConfigCompatError{
-				What:         "EVM fork block timestamp",
+				What:         "SubnetEVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
 				NewTime:      nil,
 				RewindToTime: 0,
@@ -136,11 +129,11 @@ func TestCheckCompatible(t *testing.T) {
 		},
 		{
 			stored:        TestChainConfig,
-			new:           TestPreEVMConfig,
+			new:           TestPreSubnetEVMConfig,
 			headBlock:     10,
 			headTimestamp: 100,
 			wantErr: &ConfigCompatError{
-				What:         "EVM fork block timestamp",
+				What:         "SubnetEVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
 				NewTime:      nil,
 				RewindToTime: 0,
@@ -159,12 +152,11 @@ func TestCheckCompatible(t *testing.T) {
 func TestConfigRules(t *testing.T) {
 	c := &ChainConfig{
 		MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(500),
+			SubnetEVMTimestamp: utils.NewUint64(500),
 		},
 	}
 
 	var stamp uint64
-<<<<<<< HEAD
 	if r := c.LuxRules(big.NewInt(0), stamp); r.IsSubnetEVM {
 		t.Errorf("expected %v to not be evm", stamp)
 	}
@@ -174,17 +166,6 @@ func TestConfigRules(t *testing.T) {
 	}
 	stamp = math.MaxInt64
 	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
-=======
-	if r := c.LuxRules(big.NewInt(0), stamp); r.IsEVM {
-		t.Errorf("expected %v to not be evm", stamp)
-	}
-	stamp = 500
-	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsEVM {
-		t.Errorf("expected %v to be evm", stamp)
-	}
-	stamp = math.MaxInt64
-	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsEVM {
->>>>>>> fd08c47 (Update import path)
 		t.Errorf("expected %v to be evm", stamp)
 	}
 }
@@ -292,7 +273,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 			IstanbulBlock:       big.NewInt(0),
 			MuirGlacierBlock:    big.NewInt(0),
 			MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
-				EVMTimestamp: utils.NewUint64(0),
+				SubnetEVMTimestamp: utils.NewUint64(0),
 				DUpgradeTimestamp:  utils.NewUint64(0),
 			},
 			GenesisPrecompiles: Precompiles{},

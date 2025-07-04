@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package allowlist
@@ -9,26 +9,9 @@ import (
 	"fmt"
 	"math/big"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
-=======
-	"github.com/ethereum/go-ethereum/common"
-<<<<<<< HEAD
-	"github.com/luxdefi/subnet-evm/precompile/contract"
-	"github.com/luxdefi/subnet-evm/vmerrs"
->>>>>>> 9e0b39d (Update deps)
-=======
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/vmerrs"
->>>>>>> fd08c47 (Update import path)
-=======
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
->>>>>>> d5328b4 (Sync upstream)
 )
 
 // AllowList is an abstraction that allows other precompiles to manage
@@ -76,14 +59,10 @@ func SetAllowListRole(stateDB contract.StateDB, precompileAddr, address common.A
 }
 
 func PackModifyAllowList(address common.Address, role Role) ([]byte, error) {
-<<<<<<< HEAD
 	funcName, err := role.GetSetterFunctionName()
 	if err != nil {
 		return nil, err
 	}
-=======
-	funcName := role.GetSetterFunctionName()
->>>>>>> d5328b4 (Sync upstream)
 	return AllowListABI.Pack(funcName, address)
 }
 
@@ -92,8 +71,6 @@ func UnpackModifyAllowListInput(input []byte, r Role, useStrictMode bool) (commo
 		return common.Address{}, fmt.Errorf("invalid input length for modifying allow list: %d", len(input))
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	funcName, err := r.GetSetterFunctionName()
 	if err != nil {
 		return common.Address{}, err
@@ -101,26 +78,6 @@ func UnpackModifyAllowListInput(input []byte, r Role, useStrictMode bool) (commo
 	var modifyAddress common.Address
 	err = AllowListABI.UnpackInputIntoInterface(&modifyAddress, funcName, input, useStrictMode)
 	return modifyAddress, err
-=======
-	addressKey := common.BytesToHash(address.Bytes())
-	input = append(input, addressKey.Bytes()...)
-	return input, nil
-}
-
-// PackReadAllowList packs [address] into the input data to the read allow list function
-func PackReadAllowList(address common.Address) []byte {
-	input := make([]byte, 0, contract.SelectorLen+common.HashLength)
-	input = append(input, readAllowListSignature...)
-	addressKey := common.BytesToHash(address.Bytes())
-	input = append(input, addressKey.Bytes()...)
-	return input
->>>>>>> 9e0b39d (Update deps)
-=======
-	funcName := r.GetSetterFunctionName()
-	var modifyAddress common.Address
-	err := AllowListABI.UnpackInputIntoInterface(&modifyAddress, funcName, input, useStrictMode)
-	return modifyAddress, err
->>>>>>> d5328b4 (Sync upstream)
 }
 
 // createAllowListRoleSetter returns an execution function for setting the allow list status of the input address argument to [role].
@@ -152,7 +109,6 @@ func createAllowListRoleSetter(precompileAddr common.Address, role Role) contrac
 		if !callerStatus.CanModify(modifyStatus, role) {
 			return nil, remainingGas, fmt.Errorf("%w: modify address: %s, from role: %s, to role: %s", ErrCannotModifyAllowList, callerAddr, modifyStatus, role)
 		}
-
 		if contract.IsDUpgradeActivated(evm) {
 			if remainingGas, err = contract.DeductGas(remainingGas, AllowListEventGasCost); err != nil {
 				return nil, 0, err
@@ -235,7 +191,6 @@ func CreateAllowListFunctions(precompileAddr common.Address) []*contract.Statefu
 
 	for name, method := range AllowListABI.Methods {
 		var fn *contract.StatefulPrecompileFunction
-<<<<<<< HEAD
 		if name == "readAllowList" {
 			fn = contract.NewStatefulPrecompileFunction(method.ID, createReadAllowList(precompileAddr))
 		} else if adminFnName, _ := AdminRole.GetSetterFunctionName(); name == adminFnName {
@@ -247,27 +202,9 @@ func CreateAllowListFunctions(precompileAddr common.Address) []*contract.Statefu
 		} else if managerFnName, _ := ManagerRole.GetSetterFunctionName(); name == managerFnName {
 			fn = contract.NewStatefulPrecompileFunctionWithActivator(method.ID, createAllowListRoleSetter(precompileAddr, ManagerRole), contract.IsDUpgradeActivated)
 		} else {
-=======
-		switch name {
-		case AdminRole.GetSetterFunctionName():
-			fn = contract.NewStatefulPrecompileFunction(method.ID, createAllowListRoleSetter(precompileAddr, AdminRole))
-		case EnabledRole.GetSetterFunctionName():
-			fn = contract.NewStatefulPrecompileFunction(method.ID, createAllowListRoleSetter(precompileAddr, EnabledRole))
-		case NoRole.GetSetterFunctionName():
-			fn = contract.NewStatefulPrecompileFunction(method.ID, createAllowListRoleSetter(precompileAddr, NoRole))
-		case "readAllowList":
-			fn = contract.NewStatefulPrecompileFunction(method.ID, createReadAllowList(precompileAddr))
-		case ManagerRole.GetSetterFunctionName():
-			fn = contract.NewStatefulPrecompileFunctionWithActivator(method.ID, createAllowListRoleSetter(precompileAddr, ManagerRole), contract.IsDUpgradeActivated)
-		default:
->>>>>>> d5328b4 (Sync upstream)
 			panic(fmt.Sprintf("unexpected method name: %s", name))
 		}
 		functions = append(functions, fn)
 	}
-<<<<<<< HEAD
-=======
-
->>>>>>> d5328b4 (Sync upstream)
 	return functions
 }

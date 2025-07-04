@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,28 +32,12 @@ import (
 	"fmt"
 	"math/big"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	"github.com/luxdefi/node/snow"
-=======
-	"github.com/ethereum/go-ethereum/common"
->>>>>>> d5328b4 (Sync upstream)
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/utils"
-<<<<<<< HEAD
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/node/snow"
 	"github.com/luxdefi/evm/commontype"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/utils"
-=======
-	"github.com/luxdefi/node/snow"
->>>>>>> d5328b4 (Sync upstream)
 )
 
 const maxJSONLen = 64 * 1024 * 1024 // 64MB
@@ -61,7 +45,7 @@ const maxJSONLen = 64 * 1024 * 1024 // 64MB
 var (
 	errNonGenesisForkByHeight = errors.New("evm only supports forking by height at the genesis block")
 
-	EVMChainID = big.NewInt(43214)
+	SubnetEVMChainID = big.NewInt(43214)
 
 	// For legacy tests
 	MinGasPrice        int64 = 225_000_000_000
@@ -86,10 +70,10 @@ var (
 )
 
 var (
-	// EVMDefaultConfig is the default configuration
+	// SubnetEVMDefaultConfig is the default configuration
 	// without any network upgrades.
-	EVMDefaultChainConfig = &ChainConfig{
-		ChainID:            EVMChainID,
+	SubnetEVMDefaultChainConfig = &ChainConfig{
+		ChainID:            SubnetEVMChainID,
 		FeeConfig:          DefaultFeeConfig,
 		AllowFeeRecipients: false,
 
@@ -107,11 +91,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-<<<<<<< HEAD
 		LuxContext:          LuxContext{utils.TestSnowContext()},
-=======
-		LuxContext:          LuxContext{snow.DefaultContextTest()},
->>>>>>> d5328b4 (Sync upstream)
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -125,24 +105,15 @@ var (
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
-			EVMTimestamp:      utils.NewUint64(0),
-			DUpgradeTimestamp: utils.NewUint64(0),
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DUpgradeTimestamp:  utils.NewUint64(0),
 		},
 		GenesisPrecompiles: Precompiles{},
 		UpgradeConfig:      UpgradeConfig{},
 	}
 
-<<<<<<< HEAD
 	TestSubnetEVMConfig = &ChainConfig{
 		LuxContext:          LuxContext{utils.TestSnowContext()},
-=======
-	TestEVMConfig = &ChainConfig{
-<<<<<<< HEAD
-		LuxContext:    LuxContext{snow.DefaultContextTest()},
->>>>>>> fd08c47 (Update import path)
-=======
-		LuxContext:          LuxContext{snow.DefaultContextTest()},
->>>>>>> d5328b4 (Sync upstream)
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -156,23 +127,14 @@ var (
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(0),
+			SubnetEVMTimestamp: utils.NewUint64(0),
 		},
 		GenesisPrecompiles: Precompiles{},
 		UpgradeConfig:      UpgradeConfig{},
 	}
 
-<<<<<<< HEAD
 	TestPreSubnetEVMConfig = &ChainConfig{
 		LuxContext:               LuxContext{utils.TestSnowContext()},
-=======
-	TestPreEVMConfig = &ChainConfig{
-<<<<<<< HEAD
-		LuxContext:         LuxContext{snow.DefaultContextTest()},
->>>>>>> fd08c47 (Update import path)
-=======
-		LuxContext:               LuxContext{snow.DefaultContextTest()},
->>>>>>> d5328b4 (Sync upstream)
 		ChainID:                  big.NewInt(1),
 		FeeConfig:                DefaultFeeConfig,
 		AllowFeeRecipients:       false,
@@ -316,7 +278,7 @@ func (c *ChainConfig) Description() string {
 		banner += fmt.Sprintf(" - Muir Glacier:                #%-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/muir-glacier.md)\n", c.MuirGlacierBlock)
 	}
 	banner += "Mandatory Upgrades:\n"
-	banner += fmt.Sprintf(" - EVM Timestamp:           @%-10v (https://github.com/luxdefi/node/releases/tag/v1.10.0)\n", ptrToString(c.EVMTimestamp))
+	banner += fmt.Sprintf(" - SubnetEVM Timestamp:           @%-10v (https://github.com/luxdefi/node/releases/tag/v1.10.0)\n", ptrToString(c.SubnetEVMTimestamp))
 	banner += fmt.Sprintf(" - DUpgrade Timestamp:            @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(c.DUpgradeTimestamp))
 	banner += fmt.Sprintf(" - Cancun Timestamp:              @%-10v (https://github.com/luxdefi/node/releases/tag/v1.11.0)\n", ptrToString(c.CancunTime))
 	banner += "\n"
@@ -402,10 +364,10 @@ func (c *ChainConfig) IsIstanbul(num *big.Int) bool {
 	return utils.IsBlockForked(c.IstanbulBlock, num)
 }
 
-// IsEVM returns whether [time] represents a block
-// with a timestamp after the EVM upgrade time.
-func (c *ChainConfig) IsEVM(time uint64) bool {
-	return utils.IsTimestampForked(c.EVMTimestamp, time)
+// IsSubnetEVM returns whether [time] represents a block
+// with a timestamp after the SubnetEVM upgrade time.
+func (c *ChainConfig) IsSubnetEVM(time uint64) bool {
+	return utils.IsTimestampForked(c.SubnetEVMTimestamp, time)
 }
 
 // IsDUpgrade returns whether [time] represents a block
@@ -499,11 +461,6 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 		{name: "petersburgBlock", block: c.PetersburgBlock},
 		{name: "istanbulBlock", block: c.IstanbulBlock},
 		{name: "muirGlacierBlock", block: c.MuirGlacierBlock, optional: true},
-	}
-
-	// Check that forks are enabled in order
-	if err := checkForks(ethForks, true); err != nil {
-		return err
 	}
 
 	// Check that forks are enabled in order
@@ -759,8 +716,8 @@ type Rules struct {
 	IsCancun                                                bool
 
 	// Rules for Lux releases
-	IsEVM      bool
-	IsDUpgrade bool
+	IsSubnetEVM bool
+	IsDUpgrade  bool
 
 	// ActivePrecompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.
@@ -806,7 +763,7 @@ func (c *ChainConfig) rules(num *big.Int, timestamp uint64) Rules {
 func (c *ChainConfig) LuxRules(blockNum *big.Int, timestamp uint64) Rules {
 	rules := c.rules(blockNum, timestamp)
 
-	rules.IsEVM = c.IsEVM(timestamp)
+	rules.IsSubnetEVM = c.IsSubnetEVM(timestamp)
 	rules.IsDUpgrade = c.IsDUpgrade(timestamp)
 
 	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].

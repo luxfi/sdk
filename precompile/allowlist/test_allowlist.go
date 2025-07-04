@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited. All rights reserved.
+// (c) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package allowlist
@@ -6,12 +6,12 @@ package allowlist
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxdefi/evm/precompile/contract"
 	"github.com/luxdefi/evm/precompile/modules"
 	"github.com/luxdefi/evm/precompile/precompileconfig"
 	"github.com/luxdefi/evm/precompile/testutils"
 	"github.com/luxdefi/evm/vmerrs"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -525,7 +525,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]testutils.Pr
 			ReadOnly:    true,
 			ExpectedRes: common.Hash(NoRole).Bytes(),
 		},
-		"admin read allow list out of gas": {
+		"radmin read allow list out of gas": {
 			Caller:     TestAdminAddr,
 			BeforeHook: SetDefaultRoles(contractAddress),
 			InputFn: func(t testing.TB) []byte {

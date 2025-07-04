@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -328,10 +328,10 @@ func TestSuggestTipCapMinGas(t *testing.T) {
 	}, defaultOracleConfig())
 }
 
-// Regression test to ensure that SuggestPrice does not panic with activation of EVM
+// Regression test to ensure that SuggestPrice does not panic with activation of Subnet EVM
 // Note: support for gas estimation without activated hard forks has been deprecated, but we still
 // ensure that the call does not panic.
-func TestSuggestGasPriceEVM(t *testing.T) {
+func TestSuggestGasPriceSubnetEVM(t *testing.T) {
 	config := Config{
 		Blocks:     20,
 		Percentile: 60,

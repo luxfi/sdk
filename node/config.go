@@ -1,4 +1,4 @@
-// (c) 2021-2024, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,16 +31,10 @@ import (
 	"os"
 	"path/filepath"
 
-<<<<<<< HEAD
-=======
 	"github.com/luxdefi/evm/accounts"
 	"github.com/luxdefi/evm/accounts/external"
 	"github.com/luxdefi/evm/accounts/keystore"
->>>>>>> fd08c47 (Update import path)
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/accounts"
-	"github.com/luxdefi/evm/accounts/external"
-	"github.com/luxdefi/evm/accounts/keystore"
 )
 
 // Config represents a small collection of configuration values to fine tune the
@@ -66,7 +60,7 @@ type Config struct {
 	// InsecureUnlockAllowed allows user to unlock accounts in unsafe http environment.
 	InsecureUnlockAllowed bool `toml:",omitempty"`
 
-	EVMVersion string
+	SubnetEVMVersion string
 }
 
 // ExtRPCEnabled returns the indicator whether node enables the external

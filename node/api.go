@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Partners Limited.
+// (c) 2019-2020, Ava Labs, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -56,7 +56,7 @@ type web3API struct {
 
 // ClientVersion returns the node name
 func (s *web3API) ClientVersion() string {
-	return s.stack.config.EVMVersion
+	return s.stack.config.SubnetEVMVersion
 }
 
 // Sha3 applies the ethereum sha3 implementation on the input.
