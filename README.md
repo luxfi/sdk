@@ -1,4 +1,4 @@
-# Subnet EVM
+# Lux EVM
 
 [![Build + Test + Release](https://github.com/luxfi/evm/actions/workflows/lint-tests-release.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/lint-tests-release.yml)
 [![CodeQL](https://github.com/luxfi/evm/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/codeql-analysis.yml)
@@ -7,13 +7,13 @@
 Each blockchain is an instance of a Virtual Machine (VM), much like an object in an object-oriented language is an instance of a class.
 That is, the VM defines the behavior of the blockchain.
 
-Subnet EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the Subnet Contract Chains. Subnet EVM is a simplified version of [Geth VM (C-Chain)](https://github.com/luxfi/geth).
+EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the EVM Contract Chains. Lux EVM is a customizable version of [Lux Ethereum VM (C-Chain)](https://github.com/luxfi/geth).
 
 This chain implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality.
 
 ## Building
 
-The Subnet EVM runs in a separate process from the main Lux process and communicates with it over a local gRPC connection.
+The EVM runs in a separate process from the main Lux process and communicates with it over a local gRPC connection.
 
 ### Lux Compatibility
 
@@ -74,7 +74,7 @@ Full documentation for the C-Chain's API can be found [here](https://docs.lux.ne
 
 The Subnet EVM is compatible with almost all Ethereum tooling, including [Remix](https://docs.lux.network/build/dapp/smart-contracts/remix-deploy), [Metamask](https://docs.lux.network/build/dapp/chain-settings), and [Foundry](https://docs.lux.network/build/dapp/smart-contracts/toolchains/foundry).
 
-## Differences Between Subnet EVM and Geth
+## Differences Between Lux EVM and Lux Geth
 
 - Added configurable fees and gas limits in genesis
 - Merged Lux hardforks into the single "Subnet EVM" hardfork
