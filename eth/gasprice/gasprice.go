@@ -255,7 +255,7 @@ func (oracle *Oracle) SuggestPrice(ctx context.Context) (*big.Int, error) {
 		return nil, err
 	}
 	if nextBaseFee == nil {
-		// This occurs if Subnet-EVM has not been scheduled yet
+		// This occurs if EVM has not been scheduled yet
 		return tip, nil
 	}
 

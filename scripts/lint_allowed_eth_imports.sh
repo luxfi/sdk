@@ -9,7 +9,7 @@ set -o pipefail
 # 2. Ignore lines that import libevm with a named import starting with "eth" or by _ import.
 # 3. Sort the unique results
 # 4. Print out the difference between the search results and the list of specified allowed package imports from libevm.
-libevm_regexp='"github.com/ava-labs/libevm/.*"'
+libevm_regexp='"github.com/luxfi/libevm/.*"'
 extra_imports=$(find . -type f \( -name "*.go" \) ! -name "mocks.go" ! -path "simulator" ! -path "./core/main_test.go" ! -name "gen_*.go" -print0 |
   xargs -0 grep "${libevm_regexp}" |
   grep -v 'eth\w\+ "' |
@@ -22,9 +22,9 @@ if [ -n "${extra_imports}" ]; then
     exit 1
 fi
 
-extra_imports=$(grep -r --include='*.go' '"github.com/ava-labs/coreth/.*"' -o -h || true | sort -u)
+extra_imports=$(grep -r --include='*.go' '"github.com/luxfi/geth/.*"' -o -h || true | sort -u)
 if [ -n "${extra_imports}" ]; then
-    echo "subnet-evm should not import packages from coreth:"
+    echo "evm should not import packages from geth:"
     echo "${extra_imports}"
     exit 1
 fi

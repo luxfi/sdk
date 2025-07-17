@@ -7,7 +7,7 @@
 Each blockchain is an instance of a Virtual Machine (VM), much like an object in an object-oriented language is an instance of a class.
 That is, the VM defines the behavior of the blockchain.
 
-Subnet EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the Subnet Contract Chains. Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxfi/coreth).
+Subnet EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the Subnet Contract Chains. Subnet EVM is a simplified version of [Geth VM (C-Chain)](https://github.com/luxfi/geth).
 
 This chain implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality.
 
@@ -67,14 +67,14 @@ The Subnet EVM supports the following API namespaces:
 - `debug`
 
 Only the `eth` namespace is enabled by default.
-Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxfi/coreth).
+Subnet EVM is a simplified version of [Geth VM (C-Chain)](https://github.com/luxfi/geth).
 Full documentation for the C-Chain's API can be found [here](https://docs.lux.network/apis/node/apis/c-chain).
 
 ## Compatibility
 
 The Subnet EVM is compatible with almost all Ethereum tooling, including [Remix](https://docs.lux.network/build/dapp/smart-contracts/remix-deploy), [Metamask](https://docs.lux.network/build/dapp/chain-settings), and [Foundry](https://docs.lux.network/build/dapp/smart-contracts/toolchains/foundry).
 
-## Differences Between Subnet EVM and Coreth
+## Differences Between Subnet EVM and Geth
 
 - Added configurable fees and gas limits in genesis
 - Merged Lux hardforks into the single "Subnet EVM" hardfork

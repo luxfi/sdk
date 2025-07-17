@@ -1,6 +1,6 @@
 # Validators
 
-The Validators package is a collection of structs and functions to manage the state and uptime of validators in the Subnet-EVM. It consists of the following components:
+The Validators package is a collection of structs and functions to manage the state and uptime of validators in the EVM. It consists of the following components:
 
 - State package : The state package stores the validator state and uptime information.
 - Uptime package: The uptime package manages the uptime tracking of the validators.
@@ -10,7 +10,7 @@ The Validators package is a collection of structs and functions to manage the st
 
 The state package stores the validator state and uptime information. The state package implements a CRUD interface for validators. The implementation tracks validators by their validationIDs and assumes they're unique per node and their validation period. The state implementation also assumes NodeIDs are unique in the tracked set. The state implementation only allows existing validator's `weight` and `IsActive` fields to be updated; all other fields should be constant and if any other field changes, the state manager errors and does not update the validator.
 
-For L1 validators, an `active` status implies the validator balance on the P-Chain is sufficient to cover the continuous validation fee. When an L1 validator balance is depleted, it is marked as `inactive` on the P-Chain and this information is passed to the Subnet-EVM's state.
+For L1 validators, an `active` status implies the validator balance on the P-Chain is sufficient to cover the continuous validation fee. When an L1 validator balance is depleted, it is marked as `inactive` on the P-Chain and this information is passed to the EVM's state.
 
 The state interface allows a listener to register state changes including validator addition, removal, and active status change. The listener always receives the full state when it first subscribes.
 
@@ -18,7 +18,7 @@ The package defines how to serialize the data according to the codec. It can rea
 
 ## Uptime Package
 
-The uptime package manages the uptime tracking of the L1 validators. It wraps [AvalancheGo's uptime tracking manager](https://pkg.go.dev/github.com/ava-labs/avalanchego/snow/uptime) under the hood and additionally introduces pausable uptime manager interface. The pausable uptime manager interface allows the manager to pause the uptime tracking for a specific validator when it becomes `inactive` and resume it when it becomes `active` again.
+The uptime package manages the uptime tracking of the L1 validators. It wraps [AvalancheGo's uptime tracking manager](https://pkg.go.dev/github.com/luxfi/avalanchego/snow/uptime) under the hood and additionally introduces pausable uptime manager interface. The pausable uptime manager interface allows the manager to pause the uptime tracking for a specific validator when it becomes `inactive` and resume it when it becomes `active` again.
 
 The uptime package must be run on at least one L1 node, referred to in this document as the "tracker node".
 
@@ -26,7 +26,7 @@ Uptime tracking works as follows:
 
 ### StartTracking
 
-Nodes can start uptime tracking with the `StartTracking` method once they're bootstrapped. This method updates the uptime of up-to-date validators by adding the duration between their last updated time and tracker node's initializing time to their uptime. This effectively adds the tracker node's offline duration to the validator's uptime and optimistically assumes that the validators are online during this period. Subnet-EVM's pausable manager does not directly modify this behavior and it also updates validators that were paused/inactive before the node initialized. The pausable uptime manager assumes peers are online and `active` when the tracker nodes are offline.
+Nodes can start uptime tracking with the `StartTracking` method once they're bootstrapped. This method updates the uptime of up-to-date validators by adding the duration between their last updated time and tracker node's initializing time to their uptime. This effectively adds the tracker node's offline duration to the validator's uptime and optimistically assumes that the validators are online during this period. EVM's pausable manager does not directly modify this behavior and it also updates validators that were paused/inactive before the node initialized. The pausable uptime manager assumes peers are online and `active` when the tracker nodes are offline.
 
 ### Connected
 
@@ -56,6 +56,6 @@ The `CalculateUptime` method calculates a node's uptime based on its connection 
 
 `Manager` struct in `validators` package is responsible for managing the state of the validators by fetching the information from P-Chain state (via `GetCurrentValidatorSet` in chain context) and updating the state accordingly. It dispatches a `goroutine` to sync the validator state every 60 seconds. The manager fetches the up-to-date validator set from P-Chain and performs the sync operation. The sync operation first performs removing the validators from the state that are not in the P-Chain validator set. Then it adds new validators and updates the existing validators in the state. This order of operations ensures that the uptimes of validators being removed and re-added under same nodeIDs are updated in the same sync operation despite having different validationIDs.
 
-P-Chain's `GetCurrentValidatorSet` can report both L1 and Subnet validators. Subnet-EVM's uptime manager also tracks both of these validator types. So even if a the Subnet has not yet been converted to an L1, the uptime and validator state tracking is still performed by Subnet-EVM.
+P-Chain's `GetCurrentValidatorSet` can report both L1 and Subnet validators. EVM's uptime manager also tracks both of these validator types. So even if a the Subnet has not yet been converted to an L1, the uptime and validator state tracking is still performed by EVM.
 
 Validator Manager persists the state to disk at the end of every sync operation. The VM also persists the validator database when the node is shutting down.

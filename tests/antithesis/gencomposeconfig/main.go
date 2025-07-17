@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/evm/tests/utils"
 )
 
-const baseImageName = "antithesis-subnet-evm"
+const baseImageName = "antithesis-evm"
 
 // Creates docker-compose.yml and its associated volumes in the target path.
 func main() {
@@ -26,10 +26,10 @@ func main() {
 
 	genesisPath := filepath.Join(cwd, "tests/load/genesis/genesis.json")
 
-	// Create a network with a subnet-evm subnet
+	// Create a network with a evm subnet
 	network := tmpnet.LocalNetworkOrPanic()
 	network.Subnets = []*tmpnet.Subnet{
-		utils.NewTmpnetSubnet("subnet-evm", genesisPath, utils.DefaultChainConfig, network.Nodes...),
+		utils.NewTmpnetSubnet("evm", genesisPath, utils.DefaultChainConfig, network.Nodes...),
 	}
 
 	if err := antithesis.GenerateComposeConfig(network, baseImageName); err != nil {

@@ -17,7 +17,7 @@ VERSION="${1:-}"
 
 if [[ -n "${VERSION}" ]]; then
   echo "Ensuring AvalancheGo version $VERSION in go.mod"
-  go get "github.com/ava-labs/avalanchego@${VERSION}"
+  go get "github.com/luxfi/avalanchego@${VERSION}"
   go mod tidy
 fi
 
@@ -30,11 +30,11 @@ if [[ -n "${GITHUB_TOKEN:-}" ]]; then
   # Using an auth token avoids being rate limited when run in CI
   CURL_ARGS+=(-H "Authorization: token ${GITHUB_TOKEN}")
 fi
-CURL_URL="https://api.github.com/repos/ava-labs/avalanchego/commits/${AVALANCHE_VERSION}"
+CURL_URL="https://api.github.com/repos/luxfi/avalanchego/commits/${AVALANCHE_VERSION}"
 FULL_AVALANCHE_VERSION="$("${CURL_ARGS[@]}" "${CURL_URL}" | grep '"sha":' | head -n1 | cut -d'"' -f4)"
 
 # Ensure the custom action version matches the avalanche version
 WORKFLOW_PATH=".github/workflows/tests.yml"
-CUSTOM_ACTION="ava-labs/avalanchego/.github/actions/run-monitored-tmpnet-cmd"
+CUSTOM_ACTION="luxfi/avalanchego/.github/actions/run-monitored-tmpnet-cmd"
 echo "Ensuring AvalancheGo version ${FULL_AVALANCHE_VERSION} for ${CUSTOM_ACTION} custom action in ${WORKFLOW_PATH} "
 sed -i.bak "s|\(uses: ${CUSTOM_ACTION}\)@.*|\1@${FULL_AVALANCHE_VERSION}|g" "${WORKFLOW_PATH}" && rm -f "${WORKFLOW_PATH}.bak"

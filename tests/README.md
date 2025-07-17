@@ -2,7 +2,7 @@
 
 The `load/` and `warp/` paths contain end-to-end (e2e) tests that use
 the [tmpnet
-fixture](https://github.com/ava-labs/avalanchego/blob/master/tests/fixture/tmpnet/README.md). By
+fixture](https://github.com/luxfi/avalanchego/blob/master/tests/fixture/tmpnet/README.md). By
 default both test suites use the tmpnet fixture to create a temporary
 network that exists for only the duration of their execution.
 
@@ -13,10 +13,10 @@ test runs to minimize the setup cost involved:
 # From the root of a clone of avalanchego, build the tmpnetctl cli
 $ ./scripts/build_tmpnetctl.sh
 
-# Start a new temporary network configured with subnet-evm's default plugin path
+# Start a new temporary network configured with evm's default plugin path
 $ ./build/tmpnetctl start-network --avalanche-path=./build/avalanchego
 
-# From the root of a clone of subnet-evm, execute the warp test suite against the existing network
+# From the root of a clone of evm, execute the warp test suite against the existing network
 $ ginkgo -vv ./tests/warp -- --use-existing-network --network-dir=$HOME/.tmpnet/networks/latest
 
 # To stop the temporary network when no longer needed, execute the following from the root of the clone of avalanchego
@@ -32,8 +32,8 @@ having to set them up.
 
 Logs and metrics can be optionally collected for tmpnet networks and
 viewed in grafana. The details of configuration and usage for
-subnet-evm mirror those of avalanchego and the same
-[documentation](https://github.com/ava-labs/avalanchego/blob/master/tests/fixture/tmpnet/README.md#Monitoring)
+evm mirror those of avalanchego and the same
+[documentation](https://github.com/luxfi/avalanchego/blob/master/tests/fixture/tmpnet/README.md#Monitoring)
 applies.
 
 ## Optional Dev Shell

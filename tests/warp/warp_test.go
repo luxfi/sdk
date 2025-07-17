@@ -95,7 +95,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		tc,
 		flagVars,
 		utils.NewTmpnetNetwork(
-			"subnet-evm-warp-e2e",
+			"evm-warp-e2e",
 			nodes,
 			tmpnet.FlagsMap{},
 			utils.NewTmpnetSubnet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),
@@ -291,7 +291,7 @@ func (w *warpTest) initClients() {
 }
 
 func (w *warpTest) getBlockHashAndNumberFromTxReceipt(ctx context.Context, client ethclient.Client, tx *types.Transaction) (common.Hash, uint64) {
-	// This uses the EVM client to fetch a block from Coreth (when testing the C-Chain), so we use this
+	// This uses the EVM client to fetch a block from Geth (when testing the C-Chain), so we use this
 	// workaround to get the correct block hash. Note the client recalculates the block hash locally, which results
 	// in a different block hash due to small differences in the block format.
 	require := require.New(ginkgo.GinkgoT())

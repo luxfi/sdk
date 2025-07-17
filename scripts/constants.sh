@@ -8,7 +8,7 @@ set -euo pipefail
 # Set the PATHS
 GOPATH="$(go env GOPATH)"
 DEFAULT_PLUGIN_DIR="${HOME}/.avalanchego/plugins"
-DEFAULT_VM_NAME="subnet-evm"
+DEFAULT_VM_NAME="evm"
 DEFAULT_VM_ID="srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
 
 # Lux docker hub
@@ -32,7 +32,7 @@ fi
 # Don't export them as they're used in the context of other calls
 if [[ -z ${AVALANCHE_VERSION:-} ]]; then
   # Get module details from go.mod
-  MODULE_DETAILS="$(go list -m "github.com/ava-labs/avalanchego" 2>/dev/null)"
+  MODULE_DETAILS="$(go list -m "github.com/luxfi/avalanchego" 2>/dev/null)"
 
   AVALANCHE_VERSION="$(echo "${MODULE_DETAILS}" | awk '{print $2}')"
 

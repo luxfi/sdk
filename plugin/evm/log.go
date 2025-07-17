@@ -71,7 +71,7 @@ func (s *SubnetEVMLogger) SetLogLevel(level string) error {
 
 // locationTrims are trimmed for display to avoid unwieldy log lines.
 var locationTrims = []string{
-	"subnet-evm/",
+	"evm/",
 }
 
 func trimPrefixes(s string) string {

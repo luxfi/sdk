@@ -47,7 +47,7 @@ func main() {
 		tc,
 		// TODO(marun) Centralize network configuration for all test types
 		utils.NewTmpnetNetwork(
-			"antithesis-subnet-evm",
+			"antithesis-evm",
 			nil,
 			tmpnet.FlagsMap{},
 		),
@@ -55,7 +55,7 @@ func main() {
 			repoRootPath := tests.GetRepoRootPath("tests/antithesis")
 			genesisPath := filepath.Join(repoRootPath, "tests/load/genesis/genesis.json")
 			return []*tmpnet.Subnet{
-				utils.NewTmpnetSubnet("subnet-evm", genesisPath, utils.DefaultChainConfig, nodes...),
+				utils.NewTmpnetSubnet("evm", genesisPath, utils.DefaultChainConfig, nodes...),
 			}
 		},
 	)

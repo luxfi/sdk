@@ -25,7 +25,7 @@ bash -x "${SUBNET_EVM_PATH}"/scripts/build_antithesis_images.sh
 
 # Test the images
 AVALANCHEGO_CLONE_PATH="${AVALANCHEGO_CLONE_PATH:-${SUBNET_EVM_PATH}/avalanchego}"
-export IMAGE_NAME="antithesis-subnet-evm-config"
+export IMAGE_NAME="antithesis-evm-config"
 export DEBUG="${DEBUG:-}"
 set -x
 # shellcheck source=/dev/null

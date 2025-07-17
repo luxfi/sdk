@@ -54,7 +54,7 @@ func TestMustNotImport(t *testing.T) {
 		// so clients (e.g., wallets, e2e tests) can import them without pulling in
 		// the entire VM logic.
 		// Importing these packages configures libevm globally and it is not
-		// possible to do so for both coreth and subnet-evm, where the client may
+		// possible to do so for both geth and evm, where the client may
 		// wish to connect to multiple chains.
 		"plugin/evm/client": {"core", "plugin/evm/customtypes", "params"},
 		"plugin/evm/config": {"core", "params", "plugin/evm/customtypes"},
