@@ -27,7 +27,7 @@
 package runtime
 
 import (
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/core/vm"
 )
 

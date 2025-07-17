@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/txpool/blobpool"
-	"github.com/luxdefi/evm/core/txpool/legacypool"
-	"github.com/luxdefi/evm/eth/gasprice"
-	"github.com/luxdefi/evm/miner"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/txpool/blobpool"
+	"github.com/luxfi/evm/core/txpool/legacypool"
+	"github.com/luxfi/evm/eth/gasprice"
+	"github.com/luxfi/evm/miner"
 )
 
 // MarshalTOML marshals as TOML.

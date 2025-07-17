@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/uptime"
 	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxdefi/evm/plugin/evm/validators/uptime/interfaces"
+	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 	"github.com/stretchr/testify/require"
 )
 

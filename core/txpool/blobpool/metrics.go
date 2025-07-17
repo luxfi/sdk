@@ -27,10 +27,10 @@
 package blobpool
 
 import (
-	"github.com/luxdefi/evm/interfaces/metrics"
+	"github.com/luxfi/evm/interfaces/metrics"
 
 	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/luxdefi/evm/interfaces/core/txpool/blobpool"
+	_ "github.com/luxfi/evm/interfaces/core/txpool/blobpool"
 )
 
 // ====== If resolving merge conflicts ======

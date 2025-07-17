@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/utils/set"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/luxdefi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/luxfi/node/codec"

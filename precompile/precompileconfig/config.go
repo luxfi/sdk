@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/snow/engine/snowman/block"
 	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxdefi/evm/commontype"
+	"github.com/luxfi/evm/commontype"
 	"github.com/ethereum/go-ethereum/common"
 )
 

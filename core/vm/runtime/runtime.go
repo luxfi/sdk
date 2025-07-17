@@ -30,10 +30,10 @@ import (
 	"math"
 	"math/big"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

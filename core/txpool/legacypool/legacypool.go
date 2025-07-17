@@ -41,19 +41,19 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/interfaces/metrics"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/core/txpool"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/plugin/evm/header"
-	"github.com/luxdefi/evm/precompile/contracts/feemanager"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/txpool"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/precompile/contracts/feemanager"
+	"github.com/luxfi/evm/utils"
 	"github.com/holiman/uint256"
 
 	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/luxdefi/evm/interfaces/core/txpool/legacypool"
+	_ "github.com/luxfi/evm/interfaces/core/txpool/legacypool"
 )
 
 const (

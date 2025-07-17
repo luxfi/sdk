@@ -7,17 +7,15 @@ import (
 	"encoding/json"
 	"math/big"
 	"testing"
-<<<<<<< HEAD:params/precompile_config_test.go
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/precompile/contracts/deployerallowlist"
-	"github.com/luxdefi/evm/precompile/contracts/feemanager"
-	"github.com/luxdefi/evm/precompile/contracts/nativeminter"
-	"github.com/luxdefi/evm/precompile/contracts/rewardmanager"
-	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
-	"github.com/luxdefi/evm/utils"
+
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
+	"github.com/luxfi/evm/precompile/contracts/feemanager"
+	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
-=======
->>>>>>> v0.7.5:params/extras/precompile_config_test.go
 	"github.com/stretchr/testify/require"
 )
 

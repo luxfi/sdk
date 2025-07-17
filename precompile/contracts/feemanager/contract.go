@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/precompile/allowlist"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/precompile/allowlist"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 )
 

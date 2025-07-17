@@ -33,8 +33,8 @@ import (
 	"reflect"
 	"testing"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )

@@ -13,7 +13,7 @@ import (
 =======
 >>>>>>> v0.7.5
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/luxdefi/evm/interfaces/metrics"
+	"github.com/luxfi/evm/interfaces/metrics"
 	dto "github.com/prometheus/client_model/go"
 )
 

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"testing"
 <<<<<<< HEAD:x/warp/config_test.go
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/precompile/testutils"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/testutils"
+	"github.com/luxfi/evm/utils"
 =======
 >>>>>>> v0.7.5:precompile/contracts/warp/config_test.go
 	"go.uber.org/mock/gomock"

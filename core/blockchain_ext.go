@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package core
 
-import "github.com/luxdefi/evm/interfaces/metrics"
+import "github.com/luxfi/evm/interfaces/metrics"
 
 // getOrOverrideAsRegisteredCounter searches for a metric already registered
 // with `name`. If a metric is found and it is a [metrics.Counter], it is returned. If a

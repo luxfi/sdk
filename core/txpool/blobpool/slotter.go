@@ -45,7 +45,7 @@ func newSlotter() func() (uint32, bool) {
 
 <<<<<<< HEAD:ethdb/pebble/pebble_test.go
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxdefi/evm/ethdb/dbtest"
+	"github.com/luxfi/evm/ethdb/dbtest"
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/vfs"
 )

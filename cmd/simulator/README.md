@@ -7,7 +7,7 @@ When building developing your own blockchain using `evm`, you may want to analyz
 To build the load simulator, navigate to the base of the simulator directory:
 
 ```bash
-cd $GOPATH/src/github.com/luxdefi/evm/cmd/simulator
+cd $GOPATH/src/github.com/luxfi/evm/cmd/simulator
 ```
 
 Build the simulator:
@@ -30,7 +30,7 @@ v0.1.0
 
 To run the load simulator, you must first start an EVM based network. The load simulator works on both the C-Chain and EVM, so we will start a single node network and run the load simulator on the C-Chain.
 
-To start a single node network, follow the instructions from the Lux [README](https://github.com/luxdefi/node#building-node) to build from source.
+To start a single node network, follow the instructions from the Lux [README](https://github.com/luxfi/node#building-node) to build from source.
 
 Once you've built Lux, open the Lux directory in a separate terminal window and run a single node non-staking network with the following command:
 

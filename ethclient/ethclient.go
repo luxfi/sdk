@@ -34,10 +34,10 @@ import (
 	"fmt"
 	"math/big"
 	"github.com/luxfi/node/ids"
-	"github.com/luxdefi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/interfaces"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )

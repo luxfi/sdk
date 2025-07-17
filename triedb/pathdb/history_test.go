@@ -34,7 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/luxdefi/evm/interfaces/trie/testutil"
+	"github.com/luxfi/evm/interfaces/trie/testutil"
 	"github.com/ethereum/go-ethereum/trie/triestate"
 )
 

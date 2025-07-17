@@ -8,8 +8,8 @@ import (
 
 	"github.com/luxfi/node/database/memdb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxdefi/evm/plugin/evm/validators/state"
-	"github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/evm/plugin/evm/validators/state"
+	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 

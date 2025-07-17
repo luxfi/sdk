@@ -42,8 +42,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 =======
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
-	"github.com/luxdefi/evm/interfaces/trie"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/trie"
 	"github.com/ethereum/go-ethereum/triedb"
 >>>>>>> v0.7.5:plugin/evm/customtypes/hashing_test.go
 )

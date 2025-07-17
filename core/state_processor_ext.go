@@ -9,12 +9,12 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/core/extstate"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/stateupgrade"
+	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/stateupgrade"
 )
 
 // ApplyPrecompileActivations checks if any of the precompiles specified by the chain config are enabled or disabled by the block

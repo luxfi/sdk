@@ -30,7 +30,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxdefi/evm/interfaces/core/asm"
+	"github.com/luxfi/evm/interfaces/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

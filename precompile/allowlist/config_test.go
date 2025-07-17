@@ -5,7 +5,7 @@ package allowlist_test
 
 import (
 	"testing"
-	"github.com/luxdefi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/modules"
 )
 
 var testModule = modules.Module{

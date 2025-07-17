@@ -6,8 +6,8 @@ package modules
 import (
 	"fmt"
 	"sort"
-	"github.com/luxdefi/evm/constants"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/constants"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 

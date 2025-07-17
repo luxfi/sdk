@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/node/wallet/subnet/primary"
-	"github.com/luxdefi/evm/warp/messages"
+	"github.com/luxfi/evm/warp/messages"
 
 	p2pmessage "github.com/luxfi/node/message"
 )

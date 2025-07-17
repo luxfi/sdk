@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/node/utils/crypto/bls"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxdefi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/plugin/evm/message"
 )
 
 const (

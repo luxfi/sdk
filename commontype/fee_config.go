@@ -6,7 +6,7 @@ package commontype
 import (
 	"fmt"
 	"math/big"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 )
 

@@ -33,10 +33,10 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 )
 
-const ourPath = "github.com/luxdefi/evm" // Path to our module
+const ourPath = "github.com/luxfi/evm" // Path to our module
 
 // These variables are set at build-time by the linker when the build is
 // done by build/ci.go.

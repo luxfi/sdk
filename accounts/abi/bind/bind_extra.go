@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/luxdefi/evm/accounts/abi"
+	"github.com/luxfi/evm/accounts/abi"
 )
 
 type (

@@ -20,10 +20,10 @@ import (
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/plugin/evm/config"
-	"github.com/luxdefi/evm/plugin/evm/database"
+	"github.com/luxfi/evm/plugin/evm/config"
+	"github.com/luxfi/evm/plugin/evm/database"
 )
 
 const (

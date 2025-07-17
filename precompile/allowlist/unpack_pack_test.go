@@ -6,7 +6,7 @@ package allowlist
 import (
 	"fmt"
 	"testing"
-	"github.com/luxdefi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/contract"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"

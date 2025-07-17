@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package prometheus
 
-import "github.com/luxdefi/evm/interfaces/metrics"
+import "github.com/luxfi/evm/interfaces/metrics"
 
 var _ Registry = metrics.Registry(nil)
 

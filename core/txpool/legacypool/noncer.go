@@ -29,7 +29,7 @@ package legacypool
 import (
 	"sync"
 <<<<<<< HEAD:core/txpool/noncer.go
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/common"
 =======
 >>>>>>> v0.7.5:core/txpool/legacypool/noncer.go

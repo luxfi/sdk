@@ -10,7 +10,7 @@ def fix_go_file(filepath):
     original_content = content
     
     # Replace luxdefi/node with luxfi/node
-    content = content.replace('github.com/luxdefi/node', 'github.com/luxfi/node')
+    content = content.replace('github.com/luxfi/node', 'github.com/luxfi/node')
     
     # Write back if changed
     if content != original_content:

@@ -8,8 +8,8 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/params/extras"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/params/extras"
 )
 
 var errEstimateBaseFeeWithoutActivation = errors.New("cannot estimate base fee for chain without activation scheduled")

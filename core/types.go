@@ -28,7 +28,7 @@ package core
 
 import (
 	"sync/atomic"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 )

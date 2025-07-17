@@ -27,7 +27,7 @@
 package pathdb
 
 import (
-	"github.com/luxdefi/evm/interfaces/metrics"
+	"github.com/luxfi/evm/interfaces/metrics"
 
 	// Force libevm metrics of the same name to be registered first.
 	_ "github.com/ethereum/go-ethereum/triedb/pathdb"

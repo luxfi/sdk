@@ -11,9 +11,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/params/extras"
-	"github.com/luxdefi/evm/plugin/evm/upgrade/subnetevm"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
 )
 
 var (

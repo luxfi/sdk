@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 	
-	"github.com/luxdefi/evm/tests/utils/runner"
+	"github.com/luxfi/evm/tests/utils/runner"
 	"github.com/ethereum/go-ethereum/log"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/require"
@@ -19,8 +19,8 @@ import (
 	"github.com/luxfi/node/tests/fixture/e2e"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxdefi/evm/tests"
-	"github.com/luxdefi/evm/tests/utils"
+	"github.com/luxfi/evm/tests"
+	"github.com/luxfi/evm/tests/utils"
 )
 
 const (

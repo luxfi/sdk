@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 )
 

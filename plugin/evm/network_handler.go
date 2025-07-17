@@ -9,12 +9,12 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/luxdefi/evm/plugin/evm/message"
-	syncHandlers "github.com/luxdefi/evm/sync/handlers"
-	syncStats "github.com/luxdefi/evm/sync/handlers/stats"
+	"github.com/luxfi/evm/plugin/evm/message"
+	syncHandlers "github.com/luxfi/evm/sync/handlers"
+	syncStats "github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/ethereum/go-ethereum/trie"
-	"github.com/luxdefi/evm/warp"
-	warpHandlers "github.com/luxdefi/evm/warp/handlers"
+	"github.com/luxfi/evm/warp"
+	warpHandlers "github.com/luxfi/evm/warp/handlers"
 )
 
 var _ message.RequestHandler = &networkHandler{}

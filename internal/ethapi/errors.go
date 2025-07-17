@@ -31,7 +31,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/accounts/abi"
+	"github.com/luxfi/evm/accounts/abi"
 )
 
 // revertError is an API error that encompasses an EVM revert with JSON error

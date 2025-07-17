@@ -33,9 +33,9 @@ import (
 =======
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
 >>>>>>> v0.7.5:core/txpool/blobpool/interface.go
 )
 

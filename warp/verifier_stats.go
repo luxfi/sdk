@@ -4,7 +4,7 @@
 package warp
 
 import (
-	"github.com/luxdefi/evm/interfaces/metrics"
+	"github.com/luxfi/evm/interfaces/metrics"
 )
 
 type verifierStats struct {

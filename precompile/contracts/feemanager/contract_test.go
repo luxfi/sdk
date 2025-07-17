@@ -6,13 +6,13 @@ package feemanager
 import (
 	"math/big"
 	"testing"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/precompile/allowlist"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/precompile/testutils"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/precompile/allowlist"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/testutils"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -355,7 +355,7 @@ var (
 				assertFeeEvent(t, logsTopics, logsData, allowlist.TestEnabledAddr, zeroFeeConfig, testFeeConfig)
 			},
 		},
-		// from https://github.com/luxdefi/evm/issues/487
+		// from https://github.com/luxfi/evm/issues/487
 		"setFeeConfig regression test should fail before DUpgrade": {
 			Caller:     allowlist.TestEnabledAddr,
 			BeforeHook: allowlist.SetDefaultRoles(Module.Address),

@@ -5,10 +5,10 @@ package allowlist_test
 
 import (
 	"testing"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
 )
 

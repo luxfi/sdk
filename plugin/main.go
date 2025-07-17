@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/node/version"
-	"github.com/luxdefi/evm/plugin/evm"
-	"github.com/luxdefi/evm/plugin/runner"
+	"github.com/luxfi/evm/plugin/evm"
+	"github.com/luxfi/evm/plugin/runner"
 )
 
 func main() {

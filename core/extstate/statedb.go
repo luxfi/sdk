@@ -7,8 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/predicate"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/predicate"
 )
 
 type VmStateDB interface {

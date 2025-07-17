@@ -10,9 +10,9 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxdefi/evm/peer"
-	"github.com/luxdefi/evm/warp/aggregator"
-	"github.com/luxdefi/evm/warp/validators"
+	"github.com/luxfi/evm/peer"
+	"github.com/luxfi/evm/warp/aggregator"
+	"github.com/luxfi/evm/warp/validators"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
 )

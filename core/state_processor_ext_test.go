@@ -8,16 +8,16 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/consensus/dummy"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/params/extras"
-	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/utils"
 )
 
 // TestBadTxAllowListBlock tests the output generated when the

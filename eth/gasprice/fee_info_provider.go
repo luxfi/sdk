@@ -29,9 +29,9 @@ package gasprice
 import (
 	"context"
 	"math/big"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/rpc"
 	lru "github.com/hashicorp/golang-lru"
 )
 

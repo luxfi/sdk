@@ -13,13 +13,13 @@ import (
 	"github.com/ethereum/go-ethereum/libevm"
 	"github.com/ethereum/go-ethereum/libevm/legacy"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/params/extras"
-	customheader "github.com/luxdefi/evm/plugin/evm/header"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/precompile/contracts/deployerallowlist"
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/predicate"
+	"github.com/luxfi/evm/params/extras"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/predicate"
 )
 
 type RulesExtra extras.Rules

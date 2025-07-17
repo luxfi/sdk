@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"testing"
 <<<<<<< HEAD:params/state_upgrade_test.go
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 =======

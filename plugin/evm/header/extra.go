@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/params/extras"
-	"github.com/luxdefi/evm/plugin/evm/upgrade/subnetevm"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
 )
 
 const (

@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/rpc"
 )
 
 // This example configures a HTTP-based RPC client with two options - one setting the

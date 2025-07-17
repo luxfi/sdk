@@ -32,7 +32,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxdefi/evm/interfaces/core/asm"
+	"github.com/luxfi/evm/interfaces/core/asm"
 	"github.com/urfave/cli/v2"
 )
 

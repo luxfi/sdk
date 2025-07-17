@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 <<<<<<< HEAD:params/precompile_upgrade.go
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 =======
 	ethparams "github.com/ethereum/go-ethereum/params"

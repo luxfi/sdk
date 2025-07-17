@@ -28,22 +28,22 @@ package backends
 
 import (
 	"context"
-	"github.com/luxdefi/evm/eth"
-	"github.com/luxdefi/evm/vmerrs"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/accounts/abi/bind"
-	"github.com/luxdefi/evm/consensus/dummy"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/bloombits"
+	"github.com/luxfi/evm/eth"
+	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/bloombits"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/eth/filters"
+	"github.com/luxfi/evm/eth/filters"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxdefi/evm/interfaces"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -70,7 +70,7 @@ var (
 )
 
 // SimulatedBackend is a simulated blockchain.
-// Deprecated: use package github.com/luxdefi/evm/ethclient/simulated instead.
+// Deprecated: use package github.com/luxfi/evm/ethclient/simulated instead.
 type SimulatedBackend struct {
 	*simulated.Backend
 	simulated.Client
@@ -87,7 +87,7 @@ func (b *SimulatedBackend) Fork(ctx context.Context, parentHash common.Hash) err
 // A simulated backend always uses chainID 1337.
 //
 // Deprecated: please use simulated.Backend from package
-// github.com/luxdefi/evm/ethclient/simulated instead.
+// github.com/luxfi/evm/ethclient/simulated instead.
 func NewSimulatedBackend(alloc types.GenesisAlloc, gasLimit uint64) *SimulatedBackend {
 	b := simulated.NewBackend(alloc, simulated.WithBlockGasLimit(gasLimit))
 	return &SimulatedBackend{
