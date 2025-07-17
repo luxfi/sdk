@@ -38,15 +38,13 @@ require (
 	github.com/urfave/cli/v2 v2.27.5
 	go.uber.org/goleak v1.3.0
 	go.uber.org/mock v0.5.0
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.36.0
 	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
-	golang.org/x/mod v0.22.0
+	golang.org/x/mod v0.25.0
 	golang.org/x/sync v0.12.0
 	golang.org/x/time v0.9.0
 	golang.org/x/tools v0.29.0
 	google.golang.org/protobuf v1.35.2
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
-
-replace github.com/luxfi/node => /Users/z/work/lux/node
