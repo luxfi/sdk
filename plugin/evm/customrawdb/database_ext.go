@@ -46,7 +46,7 @@ func InspectDatabase(db ethdb.Database, keyPrefix, keyStart []byte) error {
 			newRows := make([][]string, 0, len(rows))
 			for _, row := range rows {
 				switch db, cat := row[0], row[1]; {
-				// Discard rows specific to libevm (geth) but irrelevant to subnet-evm.
+				// Discard rows specific to libevm (geth) but irrelevant to evm.
 				case db == "Key-Value store" && (cat == "Difficulties" || cat == "Beacon sync headers"):
 				case db == "Ancient store (Chain)":
 				default:

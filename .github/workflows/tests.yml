@@ -112,7 +112,7 @@ jobs:
       - name: Install AvalancheGo Release
         shell: bash
         run: BASEDIR=/tmp/e2e-test AVALANCHEGO_BUILD_PATH=/tmp/e2e-test/avalanchego ./scripts/install_avalanchego_release.sh
-      - name: Build Subnet-EVM Plugin Binary
+      - name: Build EVM Plugin Binary
         shell: bash
         run: ./scripts/build.sh
       - name: Run E2E Precompile Tests
@@ -122,7 +122,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: subnet-evm-e2e-logs-precompile
+          name: evm-e2e-logs-precompile
           path: /tmp/e2e-test/precompile-data
           retention-days: 5
   e2e_warp:
@@ -153,11 +153,11 @@ jobs:
       - name: Install AvalancheGo Release
         shell: bash
         run: BASEDIR=/tmp/e2e-test AVALANCHEGO_BUILD_PATH=/tmp/e2e-test/avalanchego ./scripts/install_avalanchego_release.sh
-      - name: Build Subnet-EVM Plugin Binary
+      - name: Build EVM Plugin Binary
         shell: bash
         run: ./scripts/build.sh
       - name: Run Warp E2E Tests
-        uses: ava-labs/avalanchego/.github/actions/run-monitored-tmpnet-cmd@092cf182dd92b66a8ab882b657d3ae52b174c913
+        uses: luxfi/avalanchego/.github/actions/run-monitored-tmpnet-cmd@092cf182dd92b66a8ab882b657d3ae52b174c913
         with:
           run: ./scripts/run_ginkgo_warp.sh
           run_env: AVALANCHEGO_BUILD_PATH=/tmp/e2e-test/avalanchego
@@ -181,11 +181,11 @@ jobs:
       - name: Install AvalancheGo Release
         shell: bash
         run: BASEDIR=/tmp/e2e-test AVALANCHEGO_BUILD_PATH=/tmp/e2e-test/avalanchego ./scripts/install_avalanchego_release.sh
-      - name: Build Subnet-EVM Plugin Binary
+      - name: Build EVM Plugin Binary
         shell: bash
         run: ./scripts/build.sh
       - name: Run E2E Load Tests
-        uses: ava-labs/avalanchego/.github/actions/run-monitored-tmpnet-cmd@092cf182dd92b66a8ab882b657d3ae52b174c913
+        uses: luxfi/avalanchego/.github/actions/run-monitored-tmpnet-cmd@092cf182dd92b66a8ab882b657d3ae52b174c913
         with:
           run: ./scripts/run_ginkgo_load.sh
           run_env: AVALANCHEGO_BUILD_PATH=/tmp/e2e-test/avalanchego
@@ -217,7 +217,7 @@ jobs:
       - name: Install AvalancheGo Release
         shell: bash
         run: BASEDIR=/tmp/e2e-test AVALANCHEGO_BUILD_PATH=/tmp/e2e-test/avalanchego ./scripts/install_avalanchego_release.sh
-      - name: Build Subnet-EVM Plugin Binary
+      - name: Build EVM Plugin Binary
         shell: bash
         run: ./scripts/build.sh
       - name: Check that the antithesis workload is sane

@@ -10,4 +10,4 @@ cd "${REPO_ROOT}"
 . ./scripts/versions.sh
 
 echo "Running tmpnetctl @ ${AVALANCHE_VERSION}"
-go run github.com/ava-labs/avalanchego/tests/fixture/tmpnet/tmpnetctl@"${AVALANCHE_VERSION}" "${@}"
+go run github.com/luxfi/avalanchego/tests/fixture/tmpnet/tmpnetctl@"${AVALANCHE_VERSION}" "${@}"

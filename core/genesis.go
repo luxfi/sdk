@@ -180,10 +180,10 @@ func SetupGenesisBlock(
 	}
 
 	// Notes on the following line:
-	// - this is needed in coreth to handle the case where existing nodes do not
+	// - this is needed in geth to handle the case where existing nodes do not
 	//   have the Berlin or London forks initialized by block number on disk.
-	//   See https://github.com/ava-labs/coreth/pull/667/files
-	// - this is not needed in subnet-evm but it does not impact it either
+	//   See https://github.com/luxfi/geth/pull/667/files
+	// - this is not needed in evm but it does not impact it either
 	params.SetEthUpgrades(storedcfg, params.GetExtra(storedcfg).NetworkUpgrades)
 	// Check config compatibility and write the config. Compatibility errors
 	// are returned to the caller unless we're already at block zero.

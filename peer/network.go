@@ -561,7 +561,7 @@ func (n *network) AddHandler(protocol uint64, handler p2p.Handler) error {
 // invariant: peer/network must use explicitly even request ids.
 // for this reason, [n.requestID] is initialized as zero and incremented by 2.
 // This is for backwards-compatibility while the SDK router exists with the
-// legacy coreth handlers to avoid a (very) narrow edge case where request ids
+// legacy geth handlers to avoid a (very) narrow edge case where request ids
 // can overlap, resulting in a dropped timeout.
 func (n *network) nextRequestID() uint32 {
 	next := n.requestIDGen

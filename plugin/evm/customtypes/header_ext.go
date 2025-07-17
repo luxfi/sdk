@@ -30,7 +30,7 @@ func WithHeaderExtra(h *ethtypes.Header, extra *HeaderExtra) *ethtypes.Header {
 	return h
 }
 
-// HeaderExtra is a struct that contains extra fields used by Subnet-EVM
+// HeaderExtra is a struct that contains extra fields used by EVM
 // in the block header.
 // This type uses [HeaderSerializable] to encode and decode the extra fields
 // along with the upstream type for compatibility with existing network blocks.

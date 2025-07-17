@@ -8,7 +8,7 @@ Lux Warp Messaging offers a basic primitive to enable Cross-Subnet communication
 Avalanche Warp Messaging offers a basic primitive to enable Cross-L1 communication on the Avalanche Network.
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
-It is intended to allow communication between arbitrary Custom Virtual Machines (including, but not limited to EVM and Coreth).
+It is intended to allow communication between arbitrary Custom Virtual Machines (including, but not limited to EVM and Geth).
 
 <<<<<<< HEAD:x/warp/README.md
 ## How does Lux Warp Messaging Work
@@ -65,7 +65,7 @@ Additionally, the `SourceChainID` is excluded because anyone parsing the chain c
 <<<<<<< HEAD:x/warp/README.md
 The actual `message` is the entire [Lux Warp Unsigned Message](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/luxfi/node/tree/v1.10.15/vms/platformvm/warp/payload). The unsigned message is emitted as the unindexed data in the log.
 =======
-The actual `message` is the entire [Avalanche Warp Unsigned Message](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/ava-labs/avalanchego/tree/master/vms/platformvm/warp/payload#readme). The unsigned message is emitted as the unindexed data in the log.
+The actual `message` is the entire [Avalanche Warp Unsigned Message](https://github.com/luxfi/avalanchego/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/luxfi/avalanchego/tree/master/vms/platformvm/warp/payload#readme). The unsigned message is emitted as the unindexed data in the log.
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 #### getVerifiedMessage
@@ -96,12 +96,12 @@ The `blockchainID` in Lux refers to the txID that created the blockchain on the 
 <<<<<<< HEAD:x/warp/README.md
 Lux Warp Messages are encoded as a signed Lux [Warp Message](https://github.com/luxfi/node/blob/v1.10.4/vms/platformvm/warp/message.go#L7) where the [UnsignedMessage](https://github.com/luxfi/node/blob/v1.10.4/vms/platformvm/warp/unsigned_message.go#L14)'s payload includes an [AddressedPayload](../../../warp/payload/payload.go).
 =======
-Avalanche Warp Messages are encoded as a signed Avalanche [Warp Message](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/message.go) where the [UnsignedMessage](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/unsigned_message.go)'s payload includes an [AddressedPayload](https://github.com/ava-labs/avalanchego/blob/master/vms/platformvm/warp/payload/payload.go).
+Avalanche Warp Messages are encoded as a signed Avalanche [Warp Message](https://github.com/luxfi/avalanchego/blob/master/vms/platformvm/warp/message.go) where the [UnsignedMessage](https://github.com/luxfi/avalanchego/blob/master/vms/platformvm/warp/unsigned_message.go)'s payload includes an [AddressedPayload](https://github.com/luxfi/avalanchego/blob/master/vms/platformvm/warp/payload/payload.go).
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 Since the predicate is encoded into the [Transaction Access List](https://eips.ethereum.org/EIPS/eip-2930), it is packed into 32 byte hashes intended to declare storage slots that should be pre-warmed into the cache prior to transaction execution.
 
-Therefore, we use the [Predicate Utils](https://github.com/ava-labs/subnet-evm/blob/master/predicate/Predicate.md) package to encode the actual byte slice of size N into the access list.
+Therefore, we use the [Predicate Utils](https://github.com/luxfi/evm/blob/master/predicate/Predicate.md) package to encode the actual byte slice of size N into the access list.
 
 ### Performance Optimization: Primary Network to Avalanche L1
 

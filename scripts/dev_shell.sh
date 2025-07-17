@@ -13,6 +13,6 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$SCRIPT_DIR"/constants.sh
 
 # Start a dev shell with the avalanchego flake
-FLAKE="github:ava-labs/avalanchego?ref=${AVALANCHE_VERSION}"
+FLAKE="github:luxfi/avalanchego?ref=${AVALANCHE_VERSION}"
 echo "Starting nix shell for ${FLAKE}"
 nix develop "${FLAKE}" "${@}"

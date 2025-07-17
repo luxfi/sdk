@@ -1,17 +1,17 @@
 ---
-title: Subnet-EVM API
+title: EVM API
 ---
 
-[Subnet-EVM](https://github.com/ava-labs/subnet-evm) APIs are identical to
-[Coreth](https://build.avax.network/docs/api-reference/c-chain/api) C-Chain APIs, except Avalanche Specific APIs
-starting with `avax`. Subnet-EVM also supports standard Ethereum APIs as well. For more
-information about Coreth APIs see [GitHub](https://github.com/ava-labs/coreth).
+[EVM](https://github.com/luxfi/evm) APIs are identical to
+[Geth](https://build.avax.network/docs/api-reference/c-chain/api) C-Chain APIs, except Avalanche Specific APIs
+starting with `avax`. EVM also supports standard Ethereum APIs as well. For more
+information about Geth APIs see [GitHub](https://github.com/luxfi/geth).
 
-Subnet-EVM has some additional APIs that are not available in Coreth.
+EVM has some additional APIs that are not available in Geth.
 
 ## `eth_feeConfig`
 
-Subnet-EVM comes with an API request for getting fee config at a specific block. You can use this
+EVM comes with an API request for getting fee config at a specific block. You can use this
 API to check your activated fee config.
 
 **Signature:**
@@ -63,7 +63,7 @@ curl -X POST --data '{
 `internal-blockchain` namespace.
 
 This API exists on the C-Chain as well, but in addition to the normal Chain Config returned by the
-C-Chain `eth_getChainConfig` on `subnet-evm` additionally returns the upgrade config, which specifies
+C-Chain `eth_getChainConfig` on `evm` additionally returns the upgrade config, which specifies
 network upgrades activated after the genesis. **Signature:**
 
 ```bash

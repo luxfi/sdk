@@ -2,8 +2,8 @@
 
 ## When to release
 
-- When [AvalancheGo](https://github.com/ava-labs/avalanchego/releases) increases its RPC chain VM protocol version, which you can also check in [its `version/compatibility.json`](https://github.com/ava-labs/avalanchego/blob/master/version/compatibility.json)
-- When Subnet-EVM needs to release a new feature or bug fix.
+- When [AvalancheGo](https://github.com/luxfi/avalanchego/releases) increases its RPC chain VM protocol version, which you can also check in [its `version/compatibility.json`](https://github.com/luxfi/avalanchego/blob/master/version/compatibility.json)
+- When EVM needs to release a new feature or bug fix.
 
 ## Procedure
 
@@ -28,9 +28,9 @@ export VERSION=v0.7.3
 
 1. Update the [RELEASES.md](../../RELEASES.md) file with the new release version `$VERSION`.
 1. Modify the [plugin/evm/version.go](../../plugin/evm/version.go) `Version` global string variable and set it to the desired `$VERSION`.
-1. Ensure the AvalancheGo version used in [go.mod](../../go.mod) is [its last release](https://github.com/ava-labs/avalanchego/releases). If not, upgrade it with, for example:
+1. Ensure the AvalancheGo version used in [go.mod](../../go.mod) is [its last release](https://github.com/luxfi/avalanchego/releases). If not, upgrade it with, for example:
     ```bash
-      go get github.com/ava-labs/avalanchego@v1.13.0
+      go get github.com/luxfi/avalanchego@v1.13.0
       go mod tidy
     ```
     And fix any errors that may arise from the upgrade. If it requires significant changes, you may want to create a separate PR for the upgrade and wait for it to be merged before continuing with this procedure.
@@ -44,16 +44,16 @@ export VERSION=v0.7.3
     💁 If you are unsure about the RPC chain VM protocol version, set the version to `0`, for example `"v0.7.3": 0`, and then run:
 
     ```bash
-    go test -run ^TestCompatibility$ github.com/ava-labs/subnet-evm/plugin/evm
+    go test -run ^TestCompatibility$ github.com/luxfi/evm/plugin/evm
     ```
 
     This will fail with an error similar to:
 
     ```text
-    compatibility.json has subnet-evm version v0.7.3 stated as compatible with RPC chain VM protocol version 0 but AvalancheGo protocol version is 39
+    compatibility.json has evm version v0.7.3 stated as compatible with RPC chain VM protocol version 0 but AvalancheGo protocol version is 39
     ```
 
-    This message can help you figure out what the correct RPC chain VM protocol version (here `39`) has to be in compatibility.json for your current release. Alternatively, you can refer to the [Avalanchego repository `version/compatibility.json` file](https://github.com/ava-labs/avalanchego/blob/main/version/compatibility.json) to find the RPC chain VM protocol version matching the AvalancheGo version we use here.
+    This message can help you figure out what the correct RPC chain VM protocol version (here `39`) has to be in compatibility.json for your current release. Alternatively, you can refer to the [Avalanchego repository `version/compatibility.json` file](https://github.com/luxfi/avalanchego/blob/main/version/compatibility.json) to find the RPC chain VM protocol version matching the AvalancheGo version we use here.
 1. Specify the AvalancheGo compatibility in the [README.md relevant section](../../README.md#avalanchego-compatibility). For example we would add:
 
     ```text
@@ -72,7 +72,7 @@ export VERSION=v0.7.3
 1. Create a pull request (PR) from your branch targeting master, for example using [`gh`](https://cli.github.com/):
 
     ```bash
-    gh pr create --repo github.com/ava-labs/subnet-evm --base master --title "chore: release $VERSION_RC"
+    gh pr create --repo github.com/luxfi/evm --base master --title "chore: release $VERSION_RC"
     ```
 
 1. Wait for the PR checks to pass with
@@ -103,7 +103,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 
 #### Local deployment
 
-💁 If your machine is too low on resources (memory, disk, CPU, network), or the subnet is quite big to bootstrap (notably *dfk*, *shrapnel* and *gunzilla*), you can run an [AWS EC2 instance](https://github.com/ava-labs/eng-resources/blob/main/dev-node-setup.md) with the following steps.
+💁 If your machine is too low on resources (memory, disk, CPU, network), or the subnet is quite big to bootstrap (notably *dfk*, *shrapnel* and *gunzilla*), you can run an [AWS EC2 instance](https://github.com/luxfi/eng-resources/blob/main/dev-node-setup.md) with the following steps.
 
 1. Find the Dispatch and Echo L1s blockchain ID and subnet ID:
     - [Dispatch L1 details](https://subnets-test.avax.network/dispatch/details). Its subnet id is `7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5`.
@@ -149,7 +149,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
         VM id: meq3bv7qCMZZ69L8xZRLwyKnWp6chRwyscq8VPtHWignRQVVF
         ```
 
-1. In the subnet-evm directory, build the VM using
+1. In the evm directory, build the VM using
 
     ```bash
     ./scripts/build.sh vm.bin
@@ -164,10 +164,10 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
     rm vm.bin
     ```
 
-1. Clone [AvalancheGo](https://github.com/ava-labs/avalanchego):
+1. Clone [AvalancheGo](https://github.com/luxfi/avalanchego):
 
     ```bash
-    git clone git@github.com:ava-labs/avalanchego.git
+    git clone git@github.com:luxfi/avalanchego.git
     ```
 
 1. Build AvalancheGo using those VM ids:
@@ -254,7 +254,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 
 #### Canary deployment
 
-1. Create a branch from the `main` branch of [the externals plugin builder repository](https://github.com/ava-labs/external-plugins-builder).
+1. Create a branch from the `main` branch of [the externals plugin builder repository](https://github.com/luxfi/external-plugins-builder).
 
     ```bash
     git checkout main
@@ -277,10 +277,10 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 1. Open a pull request targeting `main`, for example using [`gh`](https://cli.github.com/):
 
     ```bash
-    gh pr create --repo github.com/ava-labs/external-plugins-builder --base main --title "Bump echo and dispatch to $VERSION_RC"
+    gh pr create --repo github.com/luxfi/external-plugins-builder --base main --title "Bump echo and dispatch to $VERSION_RC"
     ```
 
-1. Once the PR checks pass, you can squash and merge it. The [Subnet EVM build Github action](https://github.com/ava-labs/external-plugins-builder/actions/workflows/subnet-evm-image-build.yaml) then creates [one or more pull requests in devops-argocd](https://github.com/ava-labs/devops-argocd/pulls), for example `Auto image update for testnet/echo` and `Auto image update for testnet/dispatch`.
+1. Once the PR checks pass, you can squash and merge it. The [Subnet EVM build Github action](https://github.com/luxfi/external-plugins-builder/actions/workflows/evm-image-build.yaml) then creates [one or more pull requests in devops-argocd](https://github.com/luxfi/devops-argocd/pulls), for example `Auto image update for testnet/echo` and `Auto image update for testnet/dispatch`.
 1. Once an automatically created pull request gets merged, it will be deployed, you can then monitor:
     - For Dispatch:
         - [Deployment progress](https://app.datadoghq.com/container-images?query=short_image:dispatch)
@@ -327,7 +327,7 @@ Following the previous example in the [Release candidate section](#release-candi
     ```
 
 1. Create a new release on Github, either using:
-    - the [Github web interface](https://github.com/ava-labs/subnet-evm/releases/new)
+    - the [Github web interface](https://github.com/luxfi/evm/releases/new)
         1. In the "Choose a tag" box, select the tag previously created `$VERSION` (`v0.7.3`)
         1. Pick the previous tag, for example as `v0.7.2`.
         1. Set the "Release title" to `$VERSION` (`v0.7.3`)
@@ -370,10 +370,10 @@ Following the previous example in the [Release candidate section](#release-candi
         gh release create "$VERSION" --notes-start-tag "$PREVIOUS_VERSION" --notes-from-tag "$VERSION" --title "$VERSION" --notes "$NOTES" --verify-tag
         ```
 
-1. Monitor the [release Github workflow](https://github.com/ava-labs/subnet-evm/actions/workflows/release.yml) to ensure the GoReleaser step succeeds and check the binaries are then published to [the releases page](https://github.com/ava-labs/subnet-evm/releases). In case this fails, you can trigger the workflow manually:
-    1. Go to [github.com/ava-labs/subnet-evm/actions/workflows/release.yml](https://github.com/ava-labs/subnet-evm/actions/workflows/release.yml)
+1. Monitor the [release Github workflow](https://github.com/luxfi/evm/actions/workflows/release.yml) to ensure the GoReleaser step succeeds and check the binaries are then published to [the releases page](https://github.com/luxfi/evm/releases). In case this fails, you can trigger the workflow manually:
+    1. Go to [github.com/luxfi/evm/actions/workflows/release.yml](https://github.com/luxfi/evm/actions/workflows/release.yml)
     1. Click on the "Run workflow" button
     1. Enter the branch name, usually with goreleaser related fixes
     1. Enter the tag name `$VERSION` (i.e. `v0.7.3`)
-1. Monitor the [Publish Docker image workflow](https://github.com/ava-labs/subnet-evm/actions/workflows/publish_docker.yml) succeeds. Note this workflow is triggered when pushing the tag, unlike Goreleaser which triggers when publishing the release.
-1. Finally, [create a release for precompile-evm](https://github.com/ava-labs/precompile-evm/blob/main/docs/releasing/README.md)
+1. Monitor the [Publish Docker image workflow](https://github.com/luxfi/evm/actions/workflows/publish_docker.yml) succeeds. Note this workflow is triggered when pushing the tag, unlike Goreleaser which triggers when publishing the release.
+1. Finally, [create a release for precompile-evm](https://github.com/luxfi/precompile-evm/blob/main/docs/releasing/README.md)

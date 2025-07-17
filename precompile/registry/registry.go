@@ -20,8 +20,8 @@ import (
 // This list is kept just for reference. The actual addresses defined in respective packages of precompiles.
 // Note: it is important that none of these addresses conflict with each other or any other precompiles
 // in core/vm/contracts.go.
-// The first stateful precompiles were added in coreth to support nativeAssetCall and nativeAssetBalance. New stateful precompiles
-// originating in coreth will continue at this prefix, so we reserve this range in evm so that they can be migrated into
+// The first stateful precompiles were added in geth to support nativeAssetCall and nativeAssetBalance. New stateful precompiles
+// originating in geth will continue at this prefix, so we reserve this range in evm so that they can be migrated into
 // evm without issue.
 // These start at the address: 0x0100000000000000000000000000000000000000 and will increment by 1.
 // Optional precompiles implemented in evm start at 0x0200000000000000000000000000000000000000 and will increment by 1

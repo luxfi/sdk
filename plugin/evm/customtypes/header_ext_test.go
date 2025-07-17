@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	// TODO(arr4n) These tests were originally part of the `subnet-evm/core/types`
+	// TODO(arr4n) These tests were originally part of the `evm/core/types`
 	// package so assume the presence of identifiers. A dot-import reduces PR
 	// noise during the refactoring.
 	. "github.com/ethereum/go-ethereum/core/types"
@@ -28,7 +28,7 @@ func TestHeaderRLP(t *testing.T) {
 
 	got := testHeaderEncodeDecode(t, rlp.EncodeToBytes, rlp.DecodeBytes)
 
-	// Golden data from original subnet-evm implementation, before integration of
+	// Golden data from original evm implementation, before integration of
 	// libevm. WARNING: changing these values can break backwards compatibility
 	// with extreme consequences as block-hash calculation may break.
 	const (

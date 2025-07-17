@@ -18,12 +18,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          path: subnet-evm
+          path: evm
           ref: ${{ github.event.inputs.tag }}
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: "./subnet-evm/go.mod"
+          go-version-file: "./evm/go.mod"
       - name: Set up arm64 cross compiler
         run: |
           sudo apt-get -y update
@@ -52,7 +52,7 @@ jobs:
           distribution: goreleaser
           version: v2.5.1
           args: release --clean --config ../goreleaser/.goreleaser.yml
-          workdir: ./subnet-evm/
+          workdir: ./evm/
         env:
           # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

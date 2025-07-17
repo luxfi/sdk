@@ -1,6 +1,6 @@
 ---
 name: Feature specification
-about: Discussion on design and implementation of new features for subnet-evm.
+about: Discussion on design and implementation of new features for evm.
 title: ''
 labels: enhancement
 assignees: ''

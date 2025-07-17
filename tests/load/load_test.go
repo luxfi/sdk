@@ -59,7 +59,7 @@ var _ = ginkgo.Describe("[Load Simulator]", ginkgo.Ordered, func() {
 			tc,
 			flagVars,
 			utils.NewTmpnetNetwork(
-				"subnet-evm-small-load",
+				"evm-small-load",
 				nodes,
 				tmpnet.FlagsMap{},
 				utils.NewTmpnetSubnet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),

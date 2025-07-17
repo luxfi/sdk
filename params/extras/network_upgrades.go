@@ -26,7 +26,7 @@ type NetworkUpgrades struct {
 	DurangoTimestamp *uint64 `json:"durangoTimestamp,omitempty"`
 	// Placeholder for EtnaTimestamp
 	EtnaTimestamp *uint64 `json:"etnaTimestamp,omitempty"`
-	// Fortuna has no effect on Subnet-EVM by itself, but is included for completeness.
+	// Fortuna has no effect on EVM by itself, but is included for completeness.
 	FortunaTimestamp *uint64 `json:"fortunaTimestamp,omitempty"`
 	// Granite is a placeholder for the next upgrade.
 	GraniteTimestamp *uint64 `json:"graniteTimestamp,omitempty"`
@@ -193,8 +193,8 @@ func getDefaultNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
 		SubnetEVMTimestamp: utils.NewUint64(0),
 		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.DurangoTime),
 		EtnaTimestamp:      utils.TimeToNewUint64(agoUpgrade.EtnaTime),
-		FortunaTimestamp:   nil, // Fortuna is optional and has no effect on Subnet-EVM
-		GraniteTimestamp:   nil, // Granite is optional and has no effect on Subnet-EVM
+		FortunaTimestamp:   nil, // Fortuna is optional and has no effect on EVM
+		GraniteTimestamp:   nil, // Granite is optional and has no effect on EVM
 	}
 }
 

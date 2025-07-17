@@ -37,10 +37,10 @@ jobs:
           username: ${{ secrets.ANTITHESIS_USERNAME }}
           password: ${{ secrets.ANTITHESIS_PASSWORD }}
           github_token: ${{ secrets.ANTITHESIS_GH_PAT }}
-          config_image: antithesis-subnet-evm-config:${{ github.event.inputs.image_tag || 'latest' }}
-          images: antithesis-subnet-evm-workload:${{ github.event.inputs.image_tag || 'latest' }};antithesis-subnet-evm-node:${{ github.event.inputs.image_tag || 'latest' }}
+          config_image: antithesis-evm-config:${{ github.event.inputs.image_tag || 'latest' }}
+          images: antithesis-evm-workload:${{ github.event.inputs.image_tag || 'latest' }};antithesis-evm-node:${{ github.event.inputs.image_tag || 'latest' }}
           email_recipients: ${{ github.event.inputs.recipients || secrets.ANTITHESIS_RECIPIENTS }}
           # Duration is in hours
           additional_parameters: |-
             custom.duration=${{ github.event.inputs.duration || '7.5' }}
-            custom.workload=subnet-evm
+            custom.workload=evm

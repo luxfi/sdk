@@ -47,7 +47,7 @@ RUN . ./build_env.sh && \
   export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) && \
   export CURRENT_BRANCH=$CURRENT_BRANCH && \
   export SUBNET_EVM_COMMIT=$SUBNET_EVM_COMMIT && \
-  ./scripts/build.sh build/subnet-evm
+  ./scripts/build.sh build/evm
 
 # ============= Cleanup Stage ================
 FROM luxdefi/node:$LUX_VERSION AS builtImage

@@ -50,7 +50,7 @@ type hooks struct{}
 // This allows using the same jump table as upstream.
 // Then we set Difficulty to 0 as it is post Merge in upstream.
 // Additionally we wrap the StateDB with the appropriate StateDB wrapper,
-// which is used in subnet-evm to process historical pre-AP1 blocks with the
+// which is used in evm to process historical pre-AP1 blocks with the
 // [StateDbAP1.GetCommittedState] method as it was historically.
 func (hooks) OverrideNewEVMArgs(args *vm.NewEVMArgs) *vm.NewEVMArgs {
 	rules := args.ChainConfig.Rules(args.BlockContext.BlockNumber, params.IsMergeTODO, args.BlockContext.Time)

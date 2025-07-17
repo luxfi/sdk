@@ -22,7 +22,7 @@ function clone_avalanchego {
     git fetch
   else
     echo "creating new clone"
-    git clone https://github.com/ava-labs/avalanchego.git "${AVALANCHEGO_CLONE_PATH}"
+    git clone https://github.com/luxfi/avalanchego.git "${AVALANCHEGO_CLONE_PATH}"
     cd "${AVALANCHEGO_CLONE_PATH}"
   fi
   # Branch will be reset to $avalanche_version if it already exists
