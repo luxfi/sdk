@@ -2,6 +2,11 @@ module github.com/luxfi/evm
 
 go 1.23.9
 
+replace (
+	github.com/luxfi/node => /Users/z/work/lux/node
+	github.com/luxfi/geth => /Users/z/work/lux/geth
+)
+
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.2
 	github.com/antithesishq/antithesis-sdk-go v0.4.4
