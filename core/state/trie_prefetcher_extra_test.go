@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/libevm/stateconf"
+	"github.com/ava-labs/libevm/stateconf"
 	"github.com/luxfi/evm/interfaces/metrics"
 	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/luxfi/evm/core/state/snapshot"

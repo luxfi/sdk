@@ -10,8 +10,7 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "github.com/ava-labs/avalanchego" # manually updated
-      - dependency-name: "github.com/ava-labs/libevm" # manually updated
+      - dependency-name: "github.com/luxfi/node" # manually updated
       - dependency-name: "github.com/VictoriaMetrics/fastcache" # geth dependency
       - dependency-name: "github.com/hashicorp/go-bexpr" # geth dependency
       - dependency-name: "github.com/holiman/*" # geth dependency
@@ -29,7 +28,7 @@ updates:
     schedule:
       interval: weekly
     ignore:
-      - dependency-name: "ava-labs/avalanchego/.github/actions/run-monitored-tmpnet-cmd" # manually updated
+      - dependency-name: "luxfi/node/.github/actions/run-monitored-tmpnet-cmd" # manually updated
       - dependency-name: "golangci/golangci-lint-action"
         versions:
           - ">=7.0.0" # versions from 7.0.0 only support golangci-lint v2.x.x
