@@ -7,14 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-<<<<<<< HEAD:params/precompile_upgrade.go
+
+	"github.com/ethereum/go-ethereum/common"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-=======
-	ethparams "github.com/ethereum/go-ethereum/params"
->>>>>>> v0.7.5:params/extras/precompile_upgrade.go
 )
 
 var errNoKey = errors.New("PrecompileUpgrade cannot be empty")
