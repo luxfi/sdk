@@ -31,9 +31,9 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"github.com/luxdefi/evm/core/bloombits"
+	"github.com/luxfi/evm/core/bloombits"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
 )
 

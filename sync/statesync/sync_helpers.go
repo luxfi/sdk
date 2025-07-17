@@ -5,7 +5,7 @@ package statesync
 
 import (
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/luxdefi/evm/core/state/snapshot"
+	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/trie"

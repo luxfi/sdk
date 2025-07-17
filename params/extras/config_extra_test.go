@@ -6,7 +6,7 @@ package extras
 import (
 	"testing"
 
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/assert"
 )
 

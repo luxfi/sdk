@@ -8,7 +8,7 @@ import (
 	"errors"
 
 	"github.com/luxfi/node/ids"
-	"github.com/luxdefi/evm/peer"
+	"github.com/luxfi/evm/peer"
 
 	"github.com/luxfi/node/version"
 )

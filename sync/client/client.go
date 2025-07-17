@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 	"github.com/luxfi/node/ids"
-	"github.com/luxdefi/evm/ethdb/memorydb"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/sync/client/stats"
+	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/version"
 	"github.com/ethereum/go-ethereum/common"
@@ -21,8 +21,8 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxdefi/evm/peer"
-	"github.com/luxdefi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/peer"
+	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/ethereum/go-ethereum/trie"
 )
 

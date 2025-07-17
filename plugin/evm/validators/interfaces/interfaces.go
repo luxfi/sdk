@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/node/ids"
 	avalancheuptime "github.com/luxfi/node/snow/uptime"
-	stateinterfaces "github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
+	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
 type ValidatorReader interface {

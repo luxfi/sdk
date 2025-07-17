@@ -33,11 +33,11 @@ package core
 import (
 	"math/big"
 	"testing"
-	"github.com/luxdefi/evm/consensus/dummy"
+	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 )
 

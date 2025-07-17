@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/utils/constants"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/require"
 )
 

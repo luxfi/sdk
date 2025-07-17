@@ -32,8 +32,8 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/utils"
 )
 
 // Forks table defines supported forks and their chain config.

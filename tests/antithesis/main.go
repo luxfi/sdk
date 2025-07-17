@@ -26,10 +26,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/accounts/abi/bind"
-	"github.com/luxdefi/evm/ethclient"
-	"github.com/luxdefi/evm/tests"
-	"github.com/luxdefi/evm/tests/utils"
+	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/evm/tests"
+	"github.com/luxfi/evm/tests/utils"
 
 	ago_tests "github.com/luxfi/node/tests"
 	timerpkg "github.com/luxfi/node/utils/timer"

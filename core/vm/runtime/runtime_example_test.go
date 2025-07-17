@@ -28,7 +28,7 @@ package runtime_test
 
 import (
 	"fmt"
-	"github.com/luxdefi/evm/core/vm/runtime"
+	"github.com/luxfi/evm/core/vm/runtime"
 	"github.com/ethereum/go-ethereum/common"
 )
 

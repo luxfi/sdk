@@ -5,11 +5,11 @@ package allowlist
 
 import (
 	"testing"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/precompile/testutils"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/testutils"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

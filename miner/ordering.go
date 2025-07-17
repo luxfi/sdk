@@ -32,7 +32,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/core/txpool"
+	"github.com/luxfi/evm/core/txpool"
 	"github.com/holiman/uint256"
 )
 

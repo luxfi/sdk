@@ -34,11 +34,11 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/holiman/uint256"
 	"slices"

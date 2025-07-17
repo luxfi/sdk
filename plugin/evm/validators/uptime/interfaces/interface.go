@@ -6,7 +6,7 @@ package interfaces
 import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/uptime"
-	validatorsstateinterfaces "github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
+	validatorsstateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
 type PausableManager interface {

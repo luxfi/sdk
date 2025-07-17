@@ -13,12 +13,12 @@ package {{.Package}}
 import (
 	"testing"
 	"math/big"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	{{- if .Contract.AllowList}}
-	"github.com/luxdefi/evm/precompile/allowlist"
+	"github.com/luxfi/evm/precompile/allowlist"
 	{{- end}}
-	"github.com/luxdefi/evm/precompile/testutils"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/precompile/testutils"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )

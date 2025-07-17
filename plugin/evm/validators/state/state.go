@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/uptime"
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
 var _ uptime.State = &state{}

@@ -31,21 +31,19 @@ import (
 	"math/big"
 	"reflect"
 	"testing"
-<<<<<<< HEAD:core/types/block_test.go
-	"github.com/luxdefi/evm/params"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"golang.org/x/crypto/sha3"
-=======
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/internal/blocktest"
+	"github.com/luxfi/evm/internal/blocktest"
+	"github.com/luxfi/evm/params"
 	// This test file has to be in package types_test to avoid a circular
 	// dependency when importing `params`. We dot-import the package to mimic
 	// regular same-package behaviour.
-	. "github.com/luxdefi/evm/plugin/evm/customtypes"
->>>>>>> v0.7.5:plugin/evm/customtypes/block_test.go
+	. "github.com/luxfi/evm/plugin/evm/customtypes"
+	"golang.org/x/crypto/sha3"
 )
 
 func TestBlockEncoding(t *testing.T) {

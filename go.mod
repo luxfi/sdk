@@ -1,4 +1,4 @@
-module github.com/luxdefi/evm
+module github.com/luxfi/evm
 
 go 1.23.9
 

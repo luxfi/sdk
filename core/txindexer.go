@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 )

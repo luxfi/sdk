@@ -33,7 +33,7 @@ import (
 	"math/big"
 	"slices"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

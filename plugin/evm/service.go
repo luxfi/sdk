@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxdefi/evm/plugin/evm/client"
+	"github.com/luxfi/evm/plugin/evm/client"
 )
 
 type ValidatorsAPI struct {

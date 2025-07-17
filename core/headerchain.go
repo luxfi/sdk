@@ -32,11 +32,11 @@ import (
 	"math/big"
 	mrand "math/rand"
 	"sync/atomic"
-	"github.com/luxdefi/evm/consensus"
+	"github.com/luxfi/evm/consensus"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/lru"
 )

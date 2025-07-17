@@ -32,20 +32,20 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/consensus"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/eth/tracers"
-	"github.com/luxdefi/evm/eth/tracers/logger"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/evm/eth/tracers/logger"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/asm"
 	// force-load js tracers to trigger registration
-	_ "github.com/luxdefi/evm/eth/tracers/js"
+	_ "github.com/luxfi/evm/eth/tracers/js"
 )
 
 func TestDefaults(t *testing.T) {

@@ -28,9 +28,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/accounts/abi/bind"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 	"github.com/stretchr/testify/require"
 )
 

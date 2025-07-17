@@ -27,8 +27,8 @@
 package node
 
 import (
-	"github.com/luxdefi/evm/internal/debug"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/internal/debug"
+	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 )

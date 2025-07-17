@@ -38,9 +38,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/log"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
 )
 
 // Options are the contextual parameters to execute the requested call.

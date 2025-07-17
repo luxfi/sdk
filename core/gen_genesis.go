@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math/big"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"

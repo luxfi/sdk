@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	ethlog "github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/log"
+	"github.com/luxfi/evm/log"
 	"log/slog"
 )
 

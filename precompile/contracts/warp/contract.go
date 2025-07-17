@@ -10,10 +10,10 @@ import (
 <<<<<<< HEAD:x/warp/contract.go
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/precompile/contract"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 =======

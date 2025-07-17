@@ -29,10 +29,10 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/luxdefi/evm/consensus"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/trie"
 )
 

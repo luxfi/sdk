@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/tests/antithesis"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 
-	"github.com/luxdefi/evm/tests/utils"
+	"github.com/luxfi/evm/tests/utils"
 )
 
 const baseImageName = "antithesis-subnet-evm"

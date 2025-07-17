@@ -33,7 +33,7 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/libevm/stateconf"
@@ -42,7 +42,7 @@ import (
 	"github.com/ethereum/go-ethereum/trie/triestate"
 	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/ethereum/go-ethereum/triedb/database"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 )
 
 const (

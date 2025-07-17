@@ -33,8 +33,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"github.com/luxdefi/evm/cmd/evm/internal/t8ntool"
-	"github.com/luxdefi/evm/internal/cmdtest"
+	"github.com/luxfi/evm/cmd/evm/internal/t8ntool"
+	"github.com/luxfi/evm/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
 )
 

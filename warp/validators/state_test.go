@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/utils/constants"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

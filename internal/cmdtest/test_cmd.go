@@ -42,7 +42,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/luxdefi/evm/internal/reexec"
+	"github.com/luxfi/evm/internal/reexec"
 )
 
 func NewTestCmd(t *testing.T, data interface{}) *TestCmd {

@@ -37,11 +37,11 @@ import (
 	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/log"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/state"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/plugin/evm/vmerrors"
-	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/vmerrors"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 )
 
 var (

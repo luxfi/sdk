@@ -5,7 +5,7 @@ package extras
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 )
 
 type Rules struct {

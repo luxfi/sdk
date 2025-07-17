@@ -30,7 +30,7 @@ import (
 	"fmt"
 	"strings"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/tests"
+	"github.com/luxfi/evm/tests"
 	"github.com/urfave/cli/v2"
 )
 

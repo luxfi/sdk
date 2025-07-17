@@ -30,10 +30,10 @@ import (
 	"math/big"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/node/snow"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/utils"
 )
 
 const maxJSONLen = 64 * 1024 * 1024 // 64MB

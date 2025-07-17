@@ -6,8 +6,8 @@ package extras
 import (
 	"encoding/json"
 
-	"github.com/luxdefi/evm/precompile/modules"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 )
 
 type Precompiles map[string]precompileconfig.Config

@@ -6,7 +6,7 @@ builds:
     binary: evm
     flags:
       - -v
-    ldflags: -X github.com/luxdefi/evm/plugin/evm.Version=v{{.Version}}
+    ldflags: -X github.com/luxfi/evm/plugin/evm.Version=v{{.Version}}
     goos:
       - linux
       - darwin

@@ -30,7 +30,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 )
 
 // txWithKey is a helper-struct, to allow us to use the types.Transaction along with

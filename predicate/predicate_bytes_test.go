@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"testing"
 	"github.com/luxfi/node/utils"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/stretchr/testify/require"
 )
 

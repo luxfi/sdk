@@ -7,7 +7,7 @@ package contract
 import (
 	"math/big"
 	"github.com/luxfi/node/snow"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
 )
 

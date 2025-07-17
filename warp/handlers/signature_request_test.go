@@ -15,9 +15,9 @@ import (
 	"github.com/luxfi/node/utils/crypto/bls"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxdefi/evm/plugin/evm/message"
-	"github.com/luxdefi/evm/utils"
-	"github.com/luxdefi/evm/warp"
+	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/warp"
 	"github.com/stretchr/testify/require"
 )
 

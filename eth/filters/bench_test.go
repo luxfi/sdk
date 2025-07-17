@@ -31,7 +31,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	"github.com/luxdefi/evm/core/bloombits"
+	"github.com/luxfi/evm/core/bloombits"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"

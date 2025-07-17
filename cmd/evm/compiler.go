@@ -31,7 +31,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxdefi/evm/cmd/evm/internal/compiler"
+	"github.com/luxfi/evm/cmd/evm/internal/compiler"
 
 	"github.com/urfave/cli/v2"
 )

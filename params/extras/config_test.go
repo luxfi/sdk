@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/upgrade"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

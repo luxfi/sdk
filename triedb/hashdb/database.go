@@ -46,7 +46,7 @@ import (
 	"github.com/ethereum/go-ethereum/trie/triestate"
 	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/ethereum/go-ethereum/triedb/database"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 )
 
 const (

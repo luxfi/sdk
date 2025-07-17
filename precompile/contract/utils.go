@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 

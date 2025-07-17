@@ -19,8 +19,8 @@ import (
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
-	"github.com/luxdefi/evm/peer/stats"
-	"github.com/luxdefi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/peer/stats"
+	"github.com/luxfi/evm/plugin/evm/message"
 )
 
 // Minimum amount of time to handle a request

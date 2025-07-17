@@ -9,8 +9,8 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/crypto/bls"
-	"github.com/luxdefi/evm/plugin/evm/message"
-	"github.com/luxdefi/evm/warp"
+	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/warp"
 	"github.com/ethereum/go-ethereum/log"
 )
 

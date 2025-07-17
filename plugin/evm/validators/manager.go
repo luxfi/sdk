@@ -15,10 +15,10 @@ import (
 	avalancheuptime "github.com/luxfi/node/snow/uptime"
 	avalanchevalidators "github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/utils/timer/mockable"
-	validators "github.com/luxdefi/evm/plugin/evm/validators/state"
-	stateinterfaces "github.com/luxdefi/evm/plugin/evm/validators/state/interfaces"
-	"github.com/luxdefi/evm/plugin/evm/validators/uptime"
-	uptimeinterfaces "github.com/luxdefi/evm/plugin/evm/validators/uptime/interfaces"
+	validators "github.com/luxfi/evm/plugin/evm/validators/state"
+	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/evm/plugin/evm/validators/uptime"
+	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
 	"github.com/ethereum/go-ethereum/log"
 )

@@ -8,10 +8,10 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/params/extras"
-	"github.com/luxdefi/evm/plugin/evm/customtypes"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -22,10 +22,10 @@ import (
 	"strings"
 	"testing"
 
-	ethereum "github.com/luxdefi/evm/interfaces"
+	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/core/types"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 )
 
 // Tests that the simulator starts with the initial gas limit in the genesis block,

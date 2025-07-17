@@ -9,8 +9,8 @@ import (
 	"time"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
-	"github.com/luxdefi/evm/plugin/evm/message"
-	"github.com/luxdefi/evm/sync/handlers/stats"
+	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

@@ -31,8 +31,8 @@ import (
 	crand "crypto/rand"
 	"math/rand"
 	"testing"
-	"github.com/luxdefi/evm/ethdb/memorydb"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

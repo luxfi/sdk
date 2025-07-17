@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"sync"
 	"testing"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/stretchr/testify/require"
 )
 

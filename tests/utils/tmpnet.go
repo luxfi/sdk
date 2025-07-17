@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 
-	"github.com/luxdefi/evm/plugin/evm"
+	"github.com/luxfi/evm/plugin/evm"
 )
 
 var DefaultChainConfig = map[string]any{

@@ -9,12 +9,12 @@ import (
 	"math/big"
 	"time"
 	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxdefi/evm/consensus"
-	"github.com/luxdefi/evm/core/state"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/trie"
-	"github.com/luxdefi/evm/vmerrs"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 )
 

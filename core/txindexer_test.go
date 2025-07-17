@@ -22,13 +22,13 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxdefi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/consensus/dummy"
-	"github.com/luxdefi/evm/params"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/params"
 	"github.com/stretchr/testify/require"
 )
 

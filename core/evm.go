@@ -29,10 +29,10 @@ package core
 import (
 	"bytes"
 	"math/big"
-	"github.com/luxdefi/evm/consensus"
+	"github.com/luxfi/evm/consensus"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/predicate"
+	"github.com/luxfi/evm/predicate"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	//"github.com/ethereum/go-ethereum/log"

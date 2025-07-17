@@ -24,7 +24,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxdefi/evm/eth/tracers"
+	"github.com/luxfi/evm/eth/tracers"
 )
 
 // traceWriter is an vm.EVMLogger which also holds an inner logger/tracer.

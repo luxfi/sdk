@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/node/utils/constants"
 	"github.com/ethereum/go-ethereum/common"
 	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/utils"
 )
 
 var (

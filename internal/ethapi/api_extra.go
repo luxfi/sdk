@@ -13,11 +13,11 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/luxdefi/evm/commontype"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/params/extras"
-	"github.com/luxdefi/evm/rpc"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/rpc"
 )
 
 func (s *BlockChainAPI) GetChainConfig(ctx context.Context) *params.ChainConfigWithUpgradesJSON {

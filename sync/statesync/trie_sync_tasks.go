@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxdefi/evm/sync/syncutils"
+	"github.com/luxfi/evm/sync/syncutils"
 	"github.com/ethereum/go-ethereum/trie"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"

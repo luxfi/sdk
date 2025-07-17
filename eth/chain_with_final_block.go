@@ -3,7 +3,7 @@ package eth
 
 import (
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 )
 
 const blocksToKeep = 604_800 // Approx. 2 weeks worth of blocks assuming 2s block time

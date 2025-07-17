@@ -41,7 +41,7 @@ import (
 	"math/big"
 	"os"
 	"strconv"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 

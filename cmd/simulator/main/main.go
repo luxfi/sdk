@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"github.com/luxdefi/evm/cmd/simulator/config"
-	"github.com/luxdefi/evm/cmd/simulator/load"
+	"github.com/luxfi/evm/cmd/simulator/config"
+	"github.com/luxfi/evm/cmd/simulator/load"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/spf13/pflag"
 )

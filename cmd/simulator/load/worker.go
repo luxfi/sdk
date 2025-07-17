@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/ethclient"
-	"github.com/luxdefi/evm/interfaces"
+	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

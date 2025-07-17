@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/node/utils/wrappers"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/ethdb"
-	syncclient "github.com/luxdefi/evm/sync/client"
+	syncclient "github.com/luxfi/evm/sync/client"
 	"github.com/ethereum/go-ethereum/trie"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

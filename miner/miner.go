@@ -29,12 +29,12 @@ package miner
 
 import (
 	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxdefi/evm/consensus"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/core/txpool"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/txpool"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/event"
 )

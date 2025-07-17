@@ -31,7 +31,7 @@ import (
 	"errors"
 	"math/big"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
 )
 

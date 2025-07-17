@@ -14,9 +14,9 @@ import (
 	"github.com/luxfi/node/snow/engine/enginetest"
 	avagovalidators "github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/snow/validators/validatorstest"
-	"github.com/luxdefi/evm/core"
-	"github.com/luxdefi/evm/plugin/evm/validators"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/plugin/evm/validators"
+	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

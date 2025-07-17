@@ -29,13 +29,13 @@ package tracers
 import (
 	"math/big"
 	"testing"
-	"github.com/luxdefi/evm/core"
+	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxdefi/evm/eth/tracers/logger"
-	"github.com/luxdefi/evm/params"
-	"github.com/luxdefi/evm/tests"
+	"github.com/luxfi/evm/eth/tracers/logger"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/tests"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

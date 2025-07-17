@@ -26,7 +26,7 @@
 
 package bind
 
-import "github.com/luxdefi/evm/accounts/abi"
+import "github.com/luxfi/evm/accounts/abi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {
@@ -100,10 +100,10 @@ import (
 	"math/big"
 	"strings"
 	"errors"
-	"github.com/luxdefi/evm/accounts/abi"
-	"github.com/luxdefi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxdefi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/event"
 )

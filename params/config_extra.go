@@ -8,8 +8,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxdefi/evm/params/extras"
-	"github.com/luxdefi/evm/utils"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/utils"
 )
 
 const (

@@ -42,7 +42,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 
 	// Side effect: registration of libevm extras.
-	_ "github.com/luxdefi/evm/plugin/evm/customtypes"
+	_ "github.com/luxfi/evm/plugin/evm/customtypes"
 )
 
 func TestNewID(t *testing.T) {
