@@ -1,4 +1,4 @@
-// (c) 2019-2024, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2024, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package ethapi
@@ -142,7 +142,7 @@ type ActivePrecompilesResult struct {
 
 type ActiveRulesResult struct {
 	EthRules          params.Rules                       `json:"ethRules"`
-	AvalancheRules    extras.AvalancheRules              `json:"avalancheRules"`
+	AvalancheRules    extras.AvalancheRules              `json:"luxRules"`
 	ActivePrecompiles map[string]ActivePrecompilesResult `json:"precompiles"`
 }
 

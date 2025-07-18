@@ -1,4 +1,4 @@
-// (c) 2025, Ava Labs, Inc. All rights reserved.
+// (c) 2025, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 //go:build tools

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc.
+// (c) 2019-2020, Hanzo Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -66,7 +66,7 @@ func NewDefaultConfig() Config {
 		RPCGasCap:                 25000000,
 		RPCEVMTimeout:             5 * time.Second,
 		GPO:                       DefaultFullGPOConfig,
-		RPCTxFeeCap:               1, // 1 AVAX
+		RPCTxFeeCap:               1, // 1 LUX
 	}
 }
 

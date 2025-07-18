@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Module to facilitate the registration of precompiles and their configuration.

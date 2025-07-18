@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -37,7 +37,7 @@ type Backend interface {
 	AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error
 
 	// GetMessageSignature validates the message and returns the signature of the requested message.
-	GetMessageSignature(ctx context.Context, message *avalancheWarp.UnsignedMessage) ([]byte, error)
+	GetMessageSignature(ctx context.Context, message *luxWarp.UnsignedMessage) ([]byte, error)
 
 	// GetBlockSignature returns the signature of a hash payload containing blockID if it's the ID of an accepted block.
 	GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error)
@@ -94,11 +94,11 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 		}
 
 		if unsignedMsg.NetworkID != b.networkID {
-			return fmt.Errorf("%w at index %d", avalancheWarp.ErrWrongNetworkID, i)
+			return fmt.Errorf("%w at index %d", luxWarp.ErrWrongNetworkID, i)
 		}
 
 		if unsignedMsg.SourceChainID != b.sourceChainID {
-			return fmt.Errorf("%w at index %d", avalancheWarp.ErrWrongSourceChainID, i)
+			return fmt.Errorf("%w at index %d", luxWarp.ErrWrongSourceChainID, i)
 		}
 
 		_, err = payload.ParseAddressedCall(unsignedMsg.Payload)
@@ -135,7 +135,7 @@ func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 	return nil
 }
 
-func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *avalancheWarp.UnsignedMessage) ([]byte, error) {
+func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
 	messageID := unsignedMessage.ID()
 
 	log.Debug("Getting warp message from backend", "messageID", messageID)
@@ -157,7 +157,7 @@ func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte
 		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}
 
-	unsignedMessage, err := avalancheWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new unsigned warp message: %w", err)
 	}
@@ -210,7 +210,7 @@ func (b *backend) GetMessage(messageID ids.ID) (*luxWarp.UnsignedMessage, error)
 	return unsignedMessage, nil
 }
 
-func (b *backend) signMessage(unsignedMessage *avalancheWarp.UnsignedMessage) ([]byte, error) {
+func (b *backend) signMessage(unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
 	sig, err := b.warpSigner.Sign(unsignedMessage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign warp message: %w", err)

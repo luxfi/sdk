@@ -17,8 +17,8 @@ build_and_test() {
   local vm_id="${2}"
   local multiarch_image="${3}"
   # The local image name will be used to build a local image if the
-  # current avalanchego version lacks a published image.
-  local avalanchego_local_image_name="${4}"
+  # current luxd version lacks a published image.
+  local luxd_local_image_name="${4}"
 
   if [[ "${multiarch_image}" == true ]]; then
     local arches="linux/amd64,linux/arm64"
@@ -35,7 +35,7 @@ build_and_test() {
     BUILD_IMAGE_ID="${imgtag}" \
     VM_ID=$"${vm_id}" \
     IMAGE_NAME="${imagename}" \
-    AVALANCHEGO_LOCAL_IMAGE_NAME="${avalanchego_local_image_name}" \
+    LUXD_LOCAL_IMAGE_NAME="${luxd_local_image_name}" \
     ./scripts/build_docker_image.sh
 
   echo "listing images"
@@ -50,7 +50,7 @@ build_and_test() {
   for arch in "${archarray[@]}"; do
     for target_image in "${target_images[@]}"; do
       echo "checking sanity of image $target_image for $arch by running '${VM_ID} version'"
-      docker run -t --rm --platform "$arch" "$target_image" /avalanchego/build/plugins/"${VM_ID}" --version
+      docker run -t --rm --platform "$arch" "$target_image" /luxd/build/plugins/"${VM_ID}" --version
     done
   done
 }
@@ -58,7 +58,7 @@ build_and_test() {
 VM_ID="${VM_ID:-${DEFAULT_VM_ID}}"
 
 echo "checking build of single-arch image"
-build_and_test "evm_avalanchego" "${VM_ID}" false "avalanchego"
+build_and_test "evm_luxd" "${VM_ID}" false "luxd"
 
 echo "starting local docker registry to allow verification of multi-arch image builds"
 REGISTRY_CONTAINER_ID="$(docker run --rm -d -P registry:2)"
@@ -78,4 +78,4 @@ function cleanup {
 trap cleanup EXIT
 
 echo "checking build of multi-arch images"
-build_and_test "localhost:${REGISTRY_PORT}/evm_avalanchego" "${VM_ID}" true "localhost:${REGISTRY_PORT}/avalanchego"
+build_and_test "localhost:${REGISTRY_PORT}/evm_luxd" "${VM_ID}" true "localhost:${REGISTRY_PORT}/luxd"

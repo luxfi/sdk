@@ -1,4 +1,4 @@
-// (c) 2024, Ava Labs, Inc. All rights reserved.
+// (c) 2024, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/snow/engine/common"
-	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 )
 
@@ -22,7 +22,7 @@ const (
 
 // Verify verifies the signature of the message
 // It also implements the acp118.Verifier interface
-func (b *backend) Verify(ctx context.Context, unsignedMessage *avalancheWarp.UnsignedMessage, _ []byte) *common.AppError {
+func (b *backend) Verify(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage, _ []byte) *common.AppError {
 	messageID := unsignedMessage.ID()
 	// Known on-chain messages should be signed
 	if _, err := b.GetMessage(messageID); err == nil {

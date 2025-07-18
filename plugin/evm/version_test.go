@@ -29,7 +29,7 @@ func TestCompatibility(t *testing.T) {
 			filepath.Base(compatibilityFile), Version)
 	}
 	if rpcChainVMVersion != version.RPCChainVMProtocol {
-		t.Fatalf("%s has evm version %s stated as compatible with RPC chain VM protocol version %d but AvalancheGo protocol version is %d",
+		t.Fatalf("%s has evm version %s stated as compatible with RPC chain VM protocol version %d but Lux protocol version is %d",
 			filepath.Base(compatibilityFile), Version, rpcChainVMVersion, version.RPCChainVMProtocol)
 	}
 }

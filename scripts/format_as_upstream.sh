@@ -7,7 +7,7 @@ set -x
 
 script_dir=$(dirname "$0")
 
-commit_msg_remove_header="format: remove avalanche header"
+commit_msg_remove_header="format: remove lux header"
 commit_msg_add_upstream="format: add upstream go-ethereum"
 commit_msg_rename_packages_to_upstream="format: rename packages to upstream"
 
@@ -24,7 +24,7 @@ if git status --porcelain | grep -q '^ M'; then
     exit 1
 fi
 
-sed_command='/\/\/ (c) [0-9]*\(-[0-9]*\)\{0,1\}, Ava Labs, Inc.$/,+9d'
+sed_command='/\/\/ (c) [0-9]*\(-[0-9]*\)\{0,1\}, Hanzo Industries, Inc.$/,+9d'
 find . -name '*.go' -exec sed -i '' -e "${sed_command}" {} \;
 git add -u .
 make_commit "${commit_msg_remove_header}"

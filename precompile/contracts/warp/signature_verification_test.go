@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/node/utils/set"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/snow/validators/validatorsmock"
-	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -25,13 +25,13 @@ type signatureTest struct {
 	stateF       func(*gomock.Controller) validators.State
 	quorumNum    uint64
 	quorumDen    uint64
-	msgF         func(*require.Assertions) *avalancheWarp.Message
+	msgF         func(*require.Assertions) *luxWarp.Message
 	verifyErr    error
 	canonicalErr error
 }
 
 // This test copies the test coverage from https://github.com/luxfi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
-// These tests are only expected to fail if there is a breaking change in AvalancheGo that unexpectedly changes behavior.
+// These tests are only expected to fail if there is a breaking change in Lux that unexpectedly changes behavior.
 func TestSignatureVerification(t *testing.T) {
 	tests := []signatureTest{
 		{
@@ -126,7 +126,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrWeightOverflow,
-			canonicalErr: avalancheWarp.ErrWeightOverflow,
+			canonicalErr: luxWarp.ErrWeightOverflow,
 		},
 		{
 			name: "invalid bit set index",
@@ -157,7 +157,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrInvalidBitSet,
-			verifyErr: avalancheWarp.ErrInvalidBitSet,
+			verifyErr: luxWarp.ErrInvalidBitSet,
 		},
 		{
 			name: "unknown index",
@@ -191,7 +191,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrUnknownValidator,
-			verifyErr: avalancheWarp.ErrUnknownValidator,
+			verifyErr: luxWarp.ErrUnknownValidator,
 		},
 		{
 			name: "insufficient weight",
@@ -238,7 +238,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrInsufficientWeight,
-			verifyErr: avalancheWarp.ErrInsufficientWeight,
+			verifyErr: luxWarp.ErrInsufficientWeight,
 		},
 		{
 			name: "can't parse sig",
@@ -273,7 +273,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrParseSignature,
-			verifyErr: avalancheWarp.ErrParseSignature,
+			verifyErr: luxWarp.ErrParseSignature,
 		},
 		{
 			name: "no validators",
@@ -356,7 +356,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrInvalidSignature,
-			verifyErr: avalancheWarp.ErrInvalidSignature,
+			verifyErr: luxWarp.ErrInvalidSignature,
 		},
 		{
 			name: "invalid signature (missing one)",
@@ -398,7 +398,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrInvalidSignature,
-			verifyErr: avalancheWarp.ErrInvalidSignature,
+			verifyErr: luxWarp.ErrInvalidSignature,
 		},
 		{
 			name: "invalid signature (extra one)",
@@ -447,7 +447,7 @@ func TestSignatureVerification(t *testing.T) {
 				return msg
 			},
 			err: luxWarp.ErrInvalidSignature,
-			verifyErr: avalancheWarp.ErrInvalidSignature,
+			verifyErr: luxWarp.ErrInvalidSignature,
 		},
 		{
 			name: "valid signature",
@@ -675,7 +675,7 @@ func TestSignatureVerification(t *testing.T) {
 			msg := tt.msgF(require)
 			pChainState := tt.stateF(ctrl)
 
-			validatorSet, err := avalancheWarp.GetCanonicalValidatorSetFromChainID(
+			validatorSet, err := luxWarp.GetCanonicalValidatorSetFromChainID(
 				context.Background(),
 				pChainState,
 				pChainHeight,

@@ -1,4 +1,4 @@
-// (c) 2025, Ava Labs, Inc. All rights reserved.
+// (c) 2025, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -83,7 +83,7 @@ type Config struct {
 	// Airdrop
 	AirdropFile string `json:"airdrop"`
 
-	// Subnet EVM APIs
+	// Lux EVM APIs
 	SnowmanAPIEnabled bool   `json:"snowman-api-enabled"`
 	WarpAPIEnabled    bool   `json:"warp-api-enabled"`
 	AdminAPIEnabled   bool   `json:"admin-api-enabled"`

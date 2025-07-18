@@ -90,7 +90,7 @@ else
 
       if [[ $CHECKOUT_STATUS -ne 0 ]]; then
         echo
-        echo "'${AVALANCHE_VERSION}' is not a valid release tag, commit hash, or branch name"
+        echo "'${LUX_VERSION}' is not a valid release tag, commit hash, or branch name"
         exit 1
       fi
     fi
@@ -120,7 +120,7 @@ mkdir -p ${LUXD_BUILD_PATH}
 
 cp ${BUILD_DIR}/node ${LUXD_PATH}
 
-cp "${BUILD_DIR}"/avalanchego "${AVALANCHEGO_PATH}"
+cp "${BUILD_DIR}"/luxd "${LUXD_PATH}"
 
 echo "Installed Lux release ${LUX_VERSION}"
 echo "Lux Path: ${LUXD_PATH}"

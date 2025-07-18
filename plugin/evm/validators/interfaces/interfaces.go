@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2024, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package interfaces
@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/ids"
-	avalancheuptime "github.com/luxfi/node/snow/uptime"
+	luxuptime "github.com/luxfi/node/snow/uptime"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
@@ -22,7 +22,7 @@ type ValidatorReader interface {
 
 type Manager interface {
 	stateinterfaces.StateReader
-	avalancheuptime.Manager
+	luxuptime.Manager
 	// Initialize initializes the validator manager
 	// by syncing the validator state with the current validator set
 	// and starting the uptime tracking.

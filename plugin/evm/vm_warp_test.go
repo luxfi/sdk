@@ -856,11 +856,11 @@ func TestClearWarpDB(t *testing.T) {
 
 	// use multiple messages to test that all messages get cleared
 	payloads := [][]byte{[]byte("test1"), []byte("test2"), []byte("test3"), []byte("test4"), []byte("test5")}
-	messages := []*avalancheWarp.UnsignedMessage{}
+	messages := []*luxWarp.UnsignedMessage{}
 
 	// add all messages
 	for _, payload := range payloads {
-		unsignedMsg, err := avalancheWarp.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, payload)
+		unsignedMsg, err := luxWarp.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, payload)
 		require.NoError(t, err)
 		err = vm.warpBackend.AddMessage(unsignedMsg)
 		require.NoError(t, err)

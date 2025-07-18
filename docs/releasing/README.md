@@ -2,7 +2,7 @@
 
 ## When to release
 
-- When [AvalancheGo](https://github.com/luxfi/avalanchego/releases) increases its RPC chain VM protocol version, which you can also check in [its `version/compatibility.json`](https://github.com/luxfi/avalanchego/blob/master/version/compatibility.json)
+- When [Lux](https://github.com/luxfi/node/releases) increases its RPC chain VM protocol version, which you can also check in [its `version/compatibility.json`](https://github.com/luxfi/node/blob/master/version/compatibility.json)
 - When EVM needs to release a new feature or bug fix.
 
 ## Procedure
@@ -28,14 +28,14 @@ export VERSION=v0.7.3
 
 1. Update the [RELEASES.md](../../RELEASES.md) file with the new release version `$VERSION`.
 1. Modify the [plugin/evm/version.go](../../plugin/evm/version.go) `Version` global string variable and set it to the desired `$VERSION`.
-1. Ensure the AvalancheGo version used in [go.mod](../../go.mod) is [its last release](https://github.com/luxfi/avalanchego/releases). If not, upgrade it with, for example:
+1. Ensure the Lux version used in [go.mod](../../go.mod) is [its last release](https://github.com/luxfi/node/releases). If not, upgrade it with, for example:
     ```bash
-      go get github.com/luxfi/avalanchego@v1.13.0
+      go get github.com/luxfi/node@v1.13.0
       go mod tidy
     ```
     And fix any errors that may arise from the upgrade. If it requires significant changes, you may want to create a separate PR for the upgrade and wait for it to be merged before continuing with this procedure.
 
-1. Add an entry in the object in [compatibility.json](../../compatibility.json), adding the target release `$VERSION` as key and the AvalancheGo RPC chain VM protocol version as value, to the `"rpcChainVMProtocolVersion"` JSON object. For example, we would add:
+1. Add an entry in the object in [compatibility.json](../../compatibility.json), adding the target release `$VERSION` as key and the Lux RPC chain VM protocol version as value, to the `"rpcChainVMProtocolVersion"` JSON object. For example, we would add:
 
     ```json
     "v0.7.3": 39,
@@ -50,15 +50,15 @@ export VERSION=v0.7.3
     This will fail with an error similar to:
 
     ```text
-    compatibility.json has evm version v0.7.3 stated as compatible with RPC chain VM protocol version 0 but AvalancheGo protocol version is 39
+    compatibility.json has evm version v0.7.3 stated as compatible with RPC chain VM protocol version 0 but Lux protocol version is 39
     ```
 
-    This message can help you figure out what the correct RPC chain VM protocol version (here `39`) has to be in compatibility.json for your current release. Alternatively, you can refer to the [Avalanchego repository `version/compatibility.json` file](https://github.com/luxfi/avalanchego/blob/main/version/compatibility.json) to find the RPC chain VM protocol version matching the AvalancheGo version we use here.
-1. Specify the AvalancheGo compatibility in the [README.md relevant section](../../README.md#avalanchego-compatibility). For example we would add:
+    This message can help you figure out what the correct RPC chain VM protocol version (here `39`) has to be in compatibility.json for your current release. Alternatively, you can refer to the [Avalanchego repository `version/compatibility.json` file](https://github.com/luxfi/node/blob/main/version/compatibility.json) to find the RPC chain VM protocol version matching the Lux version we use here.
+1. Specify the Lux compatibility in the [README.md relevant section](../../README.md#luxd-compatibility). For example we would add:
 
     ```text
     ...
-    [v0.7.3] AvalancheGo@v1.12.2/1.13.0-fuji/1.13.0 (Protocol Version: 39)
+    [v0.7.3] Lux@v1.12.2/1.13.0-fuji/1.13.0 (Protocol Version: 39)
     ```
 
 1. Commit your changes and push the branch
@@ -84,7 +84,7 @@ export VERSION=v0.7.3
 1. Squash and merge your release branch into `master`, for example:
 
     ```bash
-    gh pr merge "releases/$VERSION" --squash --delete-branch --subject "chore: release $VERSION" --body "\n- Update AvalancheGo from v1.12.3 to v1.13.0"
+    gh pr merge "releases/$VERSION" --squash --delete-branch --subject "chore: release $VERSION" --body "\n- Update Lux from v1.12.3 to v1.13.0"
     ```
 
 1. Create and push a tag from the `master` branch:
@@ -106,8 +106,8 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 💁 If your machine is too low on resources (memory, disk, CPU, network), or the subnet is quite big to bootstrap (notably *dfk*, *shrapnel* and *gunzilla*), you can run an [AWS EC2 instance](https://github.com/luxfi/eng-resources/blob/main/dev-node-setup.md) with the following steps.
 
 1. Find the Dispatch and Echo L1s blockchain ID and subnet ID:
-    - [Dispatch L1 details](https://subnets-test.avax.network/dispatch/details). Its subnet id is `7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5`.
-    - [Echo L1 details](https://subnets-test.avax.network/echo/details). Its subnet id is `i9gFpZQHPLcGfZaQLiwFAStddQD7iTKBpFfurPFJsXm1CkTZK`.
+    - [Dispatch L1 details](https://subnets-test.lux.network/dispatch/details). Its subnet id is `7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5`.
+    - [Echo L1 details](https://subnets-test.lux.network/echo/details). Its subnet id is `i9gFpZQHPLcGfZaQLiwFAStddQD7iTKBpFfurPFJsXm1CkTZK`.
 1. Get the blockchain ID and VM ID of the Echo and Dispatch L1s with:
     - Dispatch:
 
@@ -117,7 +117,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
             "method": "platform.getBlockchains",
             "params": {},
             "id": 1
-        }'  https://api.avax-test.network/ext/bc/P | \
+        }'  https://api.lux-test.network/ext/bc/P | \
         jq -r '.result.blockchains[] | select(.subnetID=="7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5") |  "\(.name)\nBlockchain id: \(.id)\nVM id: \(.vmID)\n"'
         ```
 
@@ -137,7 +137,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
             "method": "platform.getBlockchains",
             "params": {},
             "id": 1
-        }'  https://api.avax-test.network/ext/bc/P | \
+        }'  https://api.lux-test.network/ext/bc/P | \
         jq -r '.result.blockchains[] | select(.subnetID=="i9gFpZQHPLcGfZaQLiwFAStddQD7iTKBpFfurPFJsXm1CkTZK") |  "\(.name)\nBlockchain id: \(.id)\nVM id: \(.vmID)\n"'
         ```
 
@@ -158,69 +158,69 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 1. Copy the VM binary to the plugins directory, naming it with the VM ID:
 
     ```bash
-    mkdir -p ~/.avalanchego/plugins
-    cp vm.bin ~/.avalanchego/plugins/mDtV8ES8wRL1j2m6Kvc1qRFAvnpq4kufhueAY1bwbzVhk336o
-    cp vm.bin ~/.avalanchego/plugins/meq3bv7qCMZZ69L8xZRLwyKnWp6chRwyscq8VPtHWignRQVVF
+    mkdir -p ~/.luxd/plugins
+    cp vm.bin ~/.luxd/plugins/mDtV8ES8wRL1j2m6Kvc1qRFAvnpq4kufhueAY1bwbzVhk336o
+    cp vm.bin ~/.luxd/plugins/meq3bv7qCMZZ69L8xZRLwyKnWp6chRwyscq8VPtHWignRQVVF
     rm vm.bin
     ```
 
-1. Clone [AvalancheGo](https://github.com/luxfi/avalanchego):
+1. Clone [Lux](https://github.com/luxfi/node):
 
     ```bash
-    git clone git@github.com:luxfi/avalanchego.git
+    git clone git@github.com:luxfi/node.git
     ```
 
-1. Build AvalancheGo using those VM ids:
+1. Build Lux using those VM ids:
 
     ```bash
-    cd avalanchego
+    cd luxd
     ./scripts/build.sh
     ```
 
-1. Get upgrades for each L1 and write them out to `~/.avalanchego/configs/chains/<blockchain-id>/upgrade.json`:
+1. Get upgrades for each L1 and write them out to `~/.luxd/configs/chains/<blockchain-id>/upgrade.json`:
 
     ```bash
-    mkdir -p ~/.avalanchego/configs/chains/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY
+    mkdir -p ~/.luxd/configs/chains/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY
     curl -X POST --silent --header 'Content-Type: application/json' --data '{
         "jsonrpc": "2.0",
         "method": "eth_getChainConfig",
         "params": [],
         "id": 1
-    }' https://subnets.avax.network/dispatch/testnet/rpc | \
-    jq -r '.result.upgrades' > ~/.avalanchego/configs/chains/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/upgrade.json
+    }' https://subnets.lux.network/dispatch/testnet/rpc | \
+    jq -r '.result.upgrades' > ~/.luxd/configs/chains/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/upgrade.json
     ```
 
     Note it is possible there is no upgrades so the upgrade.json might just be `{}`.
 
     ```bash
-    mkdir -p ~/.avalanchego/configs/chains/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp
+    mkdir -p ~/.luxd/configs/chains/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp
     curl -X POST --silent --header 'Content-Type: application/json' --data '{
         "jsonrpc": "2.0",
         "method": "eth_getChainConfig",
         "params": [],
         "id": 1
-    }' https://subnets.avax.network/echo/testnet/rpc | \
-    jq -r '.result.upgrades' > ~/.avalanchego/configs/chains/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/upgrade.json
+    }' https://subnets.lux.network/echo/testnet/rpc | \
+    jq -r '.result.upgrades' > ~/.luxd/configs/chains/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/upgrade.json
     ```
 
 1. (Optional) You can tweak the `config.json` for each L1 if you want to test a particular feature for example.
-    - Dispatch: `~/.avalanchego/configs/chains/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/config.json`
-    - Echo: `~/.avalanchego/configs/chains/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/config.json`
-1. (Optional) If you want to reboostrap completely the chain, you can remove `~/.avalanchego/chainData/<blockchain-id>/db/pebbledb`, for example:
-    - Dispatch: `rm -r ~/.avalanchego/chainData/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/db/pebbledb`
-    - Echo: `rm -r ~/.avalanchego/chainData/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/db/pebbledb`
+    - Dispatch: `~/.luxd/configs/chains/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/config.json`
+    - Echo: `~/.luxd/configs/chains/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/config.json`
+1. (Optional) If you want to reboostrap completely the chain, you can remove `~/.luxd/chainData/<blockchain-id>/db/pebbledb`, for example:
+    - Dispatch: `rm -r ~/.luxd/chainData/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/db/pebbledb`
+    - Echo: `rm -r ~/.luxd/chainData/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/db/pebbledb`
 
-    AvalancheGo keeps its database in `~/.avalanchego/db/fuji/v1.4.5/*.ldb` which you should not delete.
-1. Build AvalancheGo:
+    Lux keeps its database in `~/.luxd/db/fuji/v1.4.5/*.ldb` which you should not delete.
+1. Build Lux:
 
     ```bash
     ./scripts/build.sh
     ```
 
-1. Run AvalancheGo tracking the Dispatch and Echo Subnet IDs:
+1. Run Lux tracking the Dispatch and Echo Subnet IDs:
 
     ```bash
-    ./build/avalanchego --network-id=fuji --partial-sync-primary-network --public-ip=127.0.0.1 \
+    ./build/luxd --network-id=fuji --partial-sync-primary-network --public-ip=127.0.0.1 \
     --track-subnets=7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5,i9gFpZQHPLcGfZaQLiwFAStddQD7iTKBpFfurPFJsXm1CkTZK
     ```
 
@@ -264,7 +264,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 
 1. Modify [`configs/dispatch.yml`] and [`configs/echo.yml`] similarly by:
     - changing the `app_version` to `$VERSION_RC`
-    - if necessary, change the `avalanchego_version`
+    - if necessary, change the `luxd_version`
     - if necessary, change the `golang_version`
 1. Commit your changes and push the branch
 
@@ -280,7 +280,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
     gh pr create --repo github.com/luxfi/external-plugins-builder --base main --title "Bump echo and dispatch to $VERSION_RC"
     ```
 
-1. Once the PR checks pass, you can squash and merge it. The [Subnet EVM build Github action](https://github.com/luxfi/external-plugins-builder/actions/workflows/evm-image-build.yaml) then creates [one or more pull requests in devops-argocd](https://github.com/luxfi/devops-argocd/pulls), for example `Auto image update for testnet/echo` and `Auto image update for testnet/dispatch`.
+1. Once the PR checks pass, you can squash and merge it. The [Lux EVM build Github action](https://github.com/luxfi/external-plugins-builder/actions/workflows/evm-image-build.yaml) then creates [one or more pull requests in devops-argocd](https://github.com/luxfi/devops-argocd/pulls), for example `Auto image update for testnet/echo` and `Auto image update for testnet/dispatch`.
 1. Once an automatically created pull request gets merged, it will be deployed, you can then monitor:
     - For Dispatch:
         - [Deployment progress](https://app.datadoghq.com/container-images?query=short_image:dispatch)
@@ -295,8 +295,8 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 1. Launch a test transaction:
     1. If you have no wallet setup, create a new one using the [Core wallet](https://core.app/)
     1. Go to the settings and enable **Testnet Mode**
-    1. You need DIS (Dispatch) and ECH (Echo) testnet tokens. If you don't have one or the other, send your C-chain AVAX address to one of the team members who can send you some DIS/ECH testnet tokens. The portfolio section of the core wallet should then show the DIS and ECH tokens available.
-    1. For both Dispatch and Echo, in the "Command center", select **Send**, enter your own C-Chain AVAX address in the **Send To** field, set the **Amount** to 0 and click on **Send**. Finally, select a maximum network fee, usually *Slow* works, and click on **Approve**.
+    1. You need DIS (Dispatch) and ECH (Echo) testnet tokens. If you don't have one or the other, send your C-chain LUX address to one of the team members who can send you some DIS/ECH testnet tokens. The portfolio section of the core wallet should then show the DIS and ECH tokens available.
+    1. For both Dispatch and Echo, in the "Command center", select **Send**, enter your own C-Chain LUX address in the **Send To** field, set the **Amount** to 0 and click on **Send**. Finally, select a maximum network fee, usually *Slow* works, and click on **Approve**.
 1. You should then see the transaction impact the logs and metrics, for example
 
     ```log
@@ -334,9 +334,9 @@ Following the previous example in the [Release candidate section](#release-candi
         1. Set the description using this format:
 
             ```markdown
-            # AvalancheGo Compatibility
+            # Lux Compatibility
 
-            The plugin version is unchanged at 39 and is compatible with AvalancheGo version v1.13.0.
+            The plugin version is unchanged at 39 and is compatible with Lux version v1.13.0.
 
             # Breaking changes
 
@@ -354,9 +354,9 @@ Following the previous example in the [Release candidate section](#release-candi
 
         ```bash
         PREVIOUS_VERSION=v0.7.2
-        NOTES="# AvalancheGo Compatibility
+        NOTES="# Lux Compatibility
 
-        The plugin version is unchanged at 39 and is compatible with AvalancheGo version v1.13.0.
+        The plugin version is unchanged at 39 and is compatible with Lux version v1.13.0.
 
         # Breaking changes
 

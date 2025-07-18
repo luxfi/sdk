@@ -1,4 +1,4 @@
-# Subnet EVM Contracts
+# Lux EVM Contracts
 
 CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha) AND ARE NOT AUDITED. USE AT YOUR OWN RISK!
 
@@ -6,9 +6,9 @@ CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_relea
 
 Lux is an open-source platform for launching decentralized applications and enterprise blockchain deployments in one interoperable, highly scalable ecosystem. Lux gives you complete control on both the network and application layers&mdash;helping you build anything you can imagine.
 
-The Lux Network is composed of many subnets and chains. Chains in subnets run with customizable virtual machines. One of these virtual machines is Subnet EVM. The Subnet EVM's API is almost identical to an Ethereum node's API. Subnet EVM brings its own features like minting native tokens via contracts, restrincting contract deployer etc. These features are presented with `Stateful Precompile Contracts`. These contracts are precompiled and deployed when they're activated.
+The Lux Network is composed of many subnets and chains. Chains in subnets run with customizable virtual machines. One of these virtual machines is Lux EVM. The Lux EVM's API is almost identical to an Ethereum node's API. Lux EVM brings its own features like minting native tokens via contracts, restrincting contract deployer etc. These features are presented with `Stateful Precompile Contracts`. These contracts are precompiled and deployed when they're activated.
 
-The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Lux's Subnet EVM. We'll be building smart contracts with development environment [Hardhat](https://hardhat.org).
+The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Lux's Lux EVM. We'll be building smart contracts with development environment [Hardhat](https://hardhat.org).
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ npm install
 
 `AllowList.sol` is the base contract which provided AllowList precompile capabilities to inheriting contracts.
 
-`ERC20NativeMinter.sol` is based on [Open Zeppelin](https://openzeppelin.com) [ERC20](https://eips.ethereum.org/EIPS/eip-20) contract powered by native minting capabilities of Subnet EVM. ERC20 is a popular smart contract interface. It uses `INativeMinter` interface to interact with `NativeMinter` precompile.
+`ERC20NativeMinter.sol` is based on [Open Zeppelin](https://openzeppelin.com) [ERC20](https://eips.ethereum.org/EIPS/eip-20) contract powered by native minting capabilities of Lux EVM. ERC20 is a popular smart contract interface. It uses `INativeMinter` interface to interact with `NativeMinter` precompile.
 
 `ExampleDeployerList` shows how `ContractDeployerAllowList` precompile can be used in a smart contract. It uses `IAllowList` to interact with `ContractDeployerAllowList` precompile. When the precompile is activated only those allowed can deploy contracts.
 

@@ -14,9 +14,9 @@ SUBNET_EVM_PATH=$(
 source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
 EXTRA_ARGS=()
-AVALANCHEGO_BUILD_PATH="${AVALANCHEGO_BUILD_PATH:-}"
-if [[ -n "${AVALANCHEGO_BUILD_PATH}" ]]; then
-  EXTRA_ARGS=("--avalanchego-path=${AVALANCHEGO_BUILD_PATH}/avalanchego")
+LUXD_BUILD_PATH="${LUXD_BUILD_PATH:-}"
+if [[ -n "${LUXD_BUILD_PATH}" ]]; then
+  EXTRA_ARGS=("--luxd-path=${LUXD_BUILD_PATH}/luxd")
   echo "Running with extra args:" "${EXTRA_ARGS[@]}"
 fi
 

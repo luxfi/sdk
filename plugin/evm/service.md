@@ -3,8 +3,8 @@ title: EVM API
 ---
 
 [EVM](https://github.com/luxfi/evm) APIs are identical to
-[Geth](https://build.avax.network/docs/api-reference/c-chain/api) C-Chain APIs, except Avalanche Specific APIs
-starting with `avax`. EVM also supports standard Ethereum APIs as well. For more
+[Geth](https://build.lux.network/docs/api-reference/c-chain/api) C-Chain APIs, except Avalanche Specific APIs
+starting with `lux`. EVM also supports standard Ethereum APIs as well. For more
 information about Geth APIs see [GitHub](https://github.com/luxfi/geth).
 
 EVM has some additional APIs that are not available in Geth.
@@ -237,7 +237,7 @@ curl -X POST --data '{
       "IsIstanbul": true,
       "IsCancun": true
     },
-    "avalancheRules": {
+    "luxRules": {
       "IsSubnetEVM": true,
       "IsDurango": true,
       "IsEUpgrade": true
