@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 )
 
-// SnowmanAPI introduces snowman specific functionality to the evm
-type SnowmanAPI struct{ vm *VM }
+// ChainAPI introduces snowman specific functionality to the evm
+type ChainAPI struct{ vm *VM }
 
 // GetAcceptedFrontReply defines the reply that will be sent from the
 // GetAcceptedFront API call
@@ -22,7 +22,7 @@ type GetAcceptedFrontReply struct {
 }
 
 // GetAcceptedFront returns the last accepted block's hash and height
-func (api *SnowmanAPI) GetAcceptedFront(ctx context.Context) (*GetAcceptedFrontReply, error) {
+func (api *ChainAPI) GetAcceptedFront(ctx context.Context) (*GetAcceptedFrontReply, error) {
 	blk := api.vm.blockChain.LastConsensusAcceptedBlock()
 	return &GetAcceptedFrontReply{
 		Hash:   blk.Hash(),
@@ -31,7 +31,7 @@ func (api *SnowmanAPI) GetAcceptedFront(ctx context.Context) (*GetAcceptedFrontR
 }
 
 // IssueBlock to the chain
-func (api *SnowmanAPI) IssueBlock(ctx context.Context) error {
+func (api *ChainAPI) IssueBlock(ctx context.Context) error {
 	log.Info("Issuing a new block")
 	api.vm.builder.signalTxsReady()
 	return nil

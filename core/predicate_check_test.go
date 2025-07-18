@@ -6,7 +6,7 @@ package core
 import (
 	"errors"
 	"testing"
-	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/set"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/params"

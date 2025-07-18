@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/choices"
 	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxfi/evm/core/state/snapshot"
