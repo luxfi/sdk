@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
 )
 
@@ -74,7 +75,7 @@ func RegisterNodeRun() {
 		log.Info("Starting Lux node", "wd", wd)
 		cmd, err := RunCommand("./scripts/run.sh")
 		startCmd = cmd
-		require.NoError(err)
+		gomega.Expect(err).Should(gomega.BeNil())
 
 		// Assumes that startCmd will launch a node with HTTP Port at [utils.DefaultLocalNodeURI]
 		healthClient := health.NewClient(DefaultLocalNodeURI)
@@ -85,8 +86,8 @@ func RegisterNodeRun() {
 	})
 
 	ginkgo.AfterSuite(func() {
-		require.NotNil(startCmd)
-		require.NoError(startCmd.Stop())
+		gomega.Expect(startCmd).ShouldNot(gomega.BeNil())
+		gomega.Expect(startCmd.Stop()).Should(gomega.Succeed())
 		// TODO add a new node to bootstrap off of the existing node and ensure it can bootstrap all subnets
 		// created during the test
 	})

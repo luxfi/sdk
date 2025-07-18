@@ -109,7 +109,7 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 		return nil, err
 	}
 
-	state := warpValidators.NewState(a.state, a.sourceSubnetID, a.sourceChainID, a.requirePrimaryNetworkSigners())
+	state := validators.NewState(&a.state, a.sourceSubnetID, a.sourceChainID, a.requirePrimaryNetworkSigners())
 	validatorSet, err := warp.GetCanonicalValidatorSetFromSubnetID(ctx, state, pChainHeight, subnetID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validator set: %w", err)

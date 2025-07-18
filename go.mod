@@ -3,9 +3,9 @@ module github.com/luxfi/evm
 go 1.24.5
 
 replace (
-	github.com/luxfi/geth => /home/z/work/lux/geth
-	github.com/luxfi/netrunner => /home/z/work/lux/netrunner
-	github.com/luxfi/node => /home/z/work/lux/node
+	github.com/luxfi/geth => /Users/z/work/lux/geth
+	github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
+	github.com/luxfi/node => /Users/z/work/lux/node
 )
 
 require (
@@ -25,9 +25,9 @@ require (
 	github.com/holiman/billy v0.0.0-20240216141850-2abb0c79d3c4
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/geth v0.13.7
+	github.com/luxfi/geth v0.15.4
 	github.com/luxfi/netrunner v0.0.0-00010101000000-000000000000
-	github.com/luxfi/node v1.12.3-name-fortuna.0
+	github.com/luxfi/node v1.13.2
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -54,7 +54,7 @@ require (
 require (
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/NYTimes/gziphandler v1.1.1 // indirect
+	github.com/StephenButtolph/canoto v0.17.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.20.0 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
@@ -114,7 +114,6 @@ require (
 	github.com/moby/sys/reexec v0.1.0 // indirect
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nbutton23/zxcvbn-go v0.0.0-20180912185939-ae427f1e4c1d // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect

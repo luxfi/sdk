@@ -37,7 +37,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 	"github.com/ethereum/go-ethereum/log"
 	"golang.org/x/time/rate"
 )

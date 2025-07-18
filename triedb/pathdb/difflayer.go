@@ -33,7 +33,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/luxfi/geth/trie/triestate"
 )
 
 // diffLayer represents a collection of modifications made to the in-memory tries
@@ -47,7 +46,7 @@ type diffLayer struct {
 	id     uint64                                    // Corresponding state id
 	block  uint64                                    // Associated block number
 	nodes  map[common.Hash]map[string]*trienode.Node // Cached trie nodes indexed by owner and path
-	states *triestate.Set                            // Associated state change set for building history
+	states *Set                            // Associated state change set for building history
 	memory uint64                                    // Approximate guess as to how much memory we use
 
 	parent layer        // Parent layer modified by this one, never nil, **can be changed**
@@ -55,7 +54,7 @@ type diffLayer struct {
 }
 
 // newDiffLayer creates a new diff layer on top of an existing layer.
-func newDiffLayer(parent layer, root common.Hash, id uint64, block uint64, nodes map[common.Hash]map[string]*trienode.Node, states *triestate.Set) *diffLayer {
+func newDiffLayer(parent layer, root common.Hash, id uint64, block uint64, nodes map[common.Hash]map[string]*trienode.Node, states *Set) *diffLayer {
 	var (
 		size  int64
 		count int
@@ -76,7 +75,8 @@ func newDiffLayer(parent layer, root common.Hash, id uint64, block uint64, nodes
 		count += len(subset)
 	}
 	if states != nil {
-		dl.memory += uint64(states.Size())
+		// FIXME: Can't access unexported stateSet field
+		// dl.memory += states.stateSet.size
 	}
 	dirtyWriteMeter.Mark(size)
 	diffLayerNodesMeter.Mark(int64(count))
@@ -148,7 +148,7 @@ func (dl *diffLayer) Node(owner common.Hash, path []byte, hash common.Hash) ([]b
 
 // update implements the layer interface, creating a new layer on top of the
 // existing layer tree with the specified data items.
-func (dl *diffLayer) update(root common.Hash, id uint64, block uint64, nodes map[common.Hash]map[string]*trienode.Node, states *triestate.Set) *diffLayer {
+func (dl *diffLayer) update(root common.Hash, id uint64, block uint64, nodes map[common.Hash]map[string]*trienode.Node, states *Set) *diffLayer {
 	return newDiffLayer(dl, root, id, block, nodes, states)
 }
 

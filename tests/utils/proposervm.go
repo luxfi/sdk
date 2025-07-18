@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	ethparams "github.com/ethereum/go-ethereum/params"
 )
 
 const numTriggerTxs = 2 // Number of txs needed to activate the proposer VM fork
@@ -40,7 +41,7 @@ func IssueTxsToActivateProposerVMFork(
 	}
 	defer sub.Unsubscribe()
 
-	gasPrice := big.NewInt(legacy.BaseFee)
+	gasPrice := big.NewInt(params.TestInitialBaseFee)
 	txSigner := types.LatestSignerForChainID(chainID)
 	for i := 0; i < numTriggerTxs; i++ {
 		tx := types.NewTransaction(

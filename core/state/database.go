@@ -27,16 +27,9 @@
 package state
 
 import (
-	"errors"
-	"fmt"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/luxfi/evm/trie/trienode"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/lru"
-	ethstate "github.com/luxfi/geth/core/state"
+	ethstate "github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/triedb"
 )
 
 type (
@@ -45,13 +38,17 @@ type (
 )
 
 func NewDatabase(db ethdb.Database) ethstate.Database {
-	return ethstate.NewDatabase(db)
+	triedb := triedb.NewDatabase(db, &triedb.Config{
+		Preimages: true,
+	})
+	return ethstate.NewDatabase(triedb, nil)
 }
 
 func NewDatabaseWithConfig(db ethdb.Database, config *triedb.Config) ethstate.Database {
-	return ethstate.NewDatabaseWithConfig(db, config)
+	triedb := triedb.NewDatabase(db, config)
+	return ethstate.NewDatabase(triedb, nil)
 }
 
 func NewDatabaseWithNodeDB(db ethdb.Database, triedb *triedb.Database) ethstate.Database {
-	return ethstate.NewDatabaseWithNodeDB(db, triedb)
+	return ethstate.NewDatabase(triedb, nil)
 }

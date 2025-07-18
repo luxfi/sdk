@@ -6,15 +6,15 @@ package customtypes
 import (
 	"io"
 
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
-var extras = ethtypes.RegisterExtras[
-	HeaderExtra, *HeaderExtra,
-	ethtypes.NOOPBlockBodyHooks, *ethtypes.NOOPBlockBodyHooks,
-	noopStateAccountExtras,
-]()
+// TODO: RegisterExtras API doesn't exist in go-ethereum v1.16.1
+// var extras = ethtypes.RegisterExtras[
+// 	HeaderExtra, *HeaderExtra,
+// 	ethtypes.NOOPBlockBodyHooks, *ethtypes.NOOPBlockBodyHooks,
+// 	noopStateAccountExtras,
+// ]()
 
 type noopStateAccountExtras struct{}
 

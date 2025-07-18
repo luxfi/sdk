@@ -29,13 +29,13 @@ type MessageMetric interface {
 }
 
 type messageMetric struct {
-	requested       metrics.Counter // Number of times a request has been sent
-	succeeded       metrics.Counter // Number of times a request has succeeded
-	failed          metrics.Counter // Number of times a request failed (does not include invalid responses)
-	invalidResponse metrics.Counter // Number of times a request failed due to an invalid response
-	received        metrics.Counter // Number of items that have been received
+	requested       *metrics.Counter // Number of times a request has been sent
+	succeeded       *metrics.Counter // Number of times a request has succeeded
+	failed          *metrics.Counter // Number of times a request failed (does not include invalid responses)
+	invalidResponse *metrics.Counter // Number of times a request failed due to an invalid response
+	received        *metrics.Counter // Number of items that have been received
 
-	requestLatency metrics.Timer // Latency for this request
+	requestLatency *metrics.Timer // Latency for this request
 }
 
 func NewMessageMetric(name string) MessageMetric {

@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/node/snow/validators/validatorstest"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/crypto/bls"
+	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/warp"
 )
@@ -26,11 +26,11 @@ var (
 )
 
 func TestSnowContext() *snow.Context {
-	sk, err := bls.NewSecretKey()
+	signer, err := localsigner.New()
 	if err != nil {
 		panic(err)
 	}
-	pk := bls.PublicFromSecretKey(sk)
+	pk := signer.PublicKey()
 	networkID := constants.UnitTestID
 	chainID := testChainID
 
@@ -43,7 +43,7 @@ func TestSnowContext() *snow.Context {
 		CChainID:        testCChainID,
 		NetworkUpgrades: upgradetest.GetConfig(upgradetest.Latest),
 		PublicKey:       pk,
-		WarpSigner:      warp.NewSigner(sk, networkID, chainID),
+		WarpSigner:      warp.NewSigner(signer, networkID, chainID),
 		Log:             logging.NoLog{},
 		BCLookup:        ids.NewAliaser(),
 		Metrics:         metrics.NewPrefixGatherer(),

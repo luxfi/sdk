@@ -34,7 +34,7 @@ import (
 	"runtime/debug"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/ethclient"
-	"github.com/luxfi/evm/interfaces"
+	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

@@ -7,8 +7,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/core/tracing"
+	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/predicate"
 )
 
 type VmStateDB interface {
@@ -36,10 +38,41 @@ func New(vm VmStateDB) *StateDB {
 	}
 }
 
+// AddBalance wrapper to match precompile interface (2 params instead of 3)
+func (s *StateDB) AddBalance(addr common.Address, amount *uint256.Int) {
+	// Call the underlying AddBalance with a default reason
+	s.vmStateDB.AddBalance(addr, amount, tracing.BalanceChangeUnspecified)
+}
+
+// SetState wrapper to match precompile interface (no return value)
+func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
+	s.vmStateDB.SetState(addr, key, value)
+}
+
+// SetNonce wrapper to match precompile interface (2 params instead of 3)
+func (s *StateDB) SetNonce(addr common.Address, nonce uint64) {
+	// Call the underlying SetNonce with a default reason
+	s.vmStateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
+}
+
 func (s *StateDB) Prepare(rules params.Rules, sender, coinbase common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {
-	rulesExtra := params.GetRulesExtra(rules)
-	s.predicateStorageSlots = predicate.PreparePredicateStorageSlots(rulesExtra, list)
-	s.vmStateDB.Prepare(rules, sender, coinbase, dst, precompiles, list)
+	// FIXME: GetRulesExtra doesn't exist in current params package
+	// rulesExtra := params.GetRulesExtra(rules)
+	// s.predicateStorageSlots = predicate.PreparePredicateStorageSlots(rulesExtra, list)
+	// For now, convert our Rules to ethereum Rules
+	ethRules := ethparams.Rules{
+		ChainID:          rules.ChainID,
+		IsHomestead:      rules.IsHomestead,
+		IsEIP150:         rules.IsEIP150,
+		IsEIP155:         rules.IsEIP155,
+		IsEIP158:         rules.IsEIP158,
+		IsByzantium:      rules.IsByzantium,
+		IsConstantinople: rules.IsConstantinople,
+		IsPetersburg:     rules.IsPetersburg,
+		IsIstanbul:       rules.IsIstanbul,
+		IsCancun:         rules.IsCancun,
+	}
+	s.vmStateDB.Prepare(ethRules, sender, coinbase, dst, precompiles, list)
 }
 
 // GetLogData returns the underlying topics and data from each log included in the [StateDB].

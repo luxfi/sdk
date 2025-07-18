@@ -40,11 +40,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
 	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/luxfi/geth/trie/triestate"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/triedb/database"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -111,8 +107,9 @@ type Config struct {
 	ReferenceRootAtomicallyOnUpdate bool   // Whether to reference the root node on update
 }
 
-func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
-	return New(diskdb, &c, trie.MerkleResolver{})
+// BackendConstructor returns a new trie database backend
+func (c Config) BackendConstructor(diskdb ethdb.Database) *Database {
+	return New(diskdb, &c, nil)
 }
 
 // Defaults is the default setting for database if it's not specified.
@@ -646,7 +643,7 @@ func (db *Database) Initialized(genesisRoot common.Hash) bool {
 // account trie with multiple storage tries if necessary.
 // If ReferenceRootAtomicallyOnUpdate was enabled in the config, it will also add a reference from
 // the root to the metaroot while holding the db's lock.
-func (db *Database) Update(root common.Hash, parent common.Hash, block uint64, nodes *trienode.MergedNodeSet, states *triestate.Set, _ ...stateconf.TrieDBUpdateOption) error {
+func (db *Database) Update(root common.Hash, parent common.Hash, block uint64, nodes *trienode.MergedNodeSet, states *trienode.NodeSet) error {
 	// Ensure the parent state is present and signal a warning if not.
 	if parent != types.EmptyRootHash {
 		if blob, _ := db.node(parent); len(blob) == 0 {
@@ -739,7 +736,7 @@ func (db *Database) Scheme() string {
 
 // Reader retrieves a node reader belonging to the given state root.
 // An error will be returned if the requested state is not available.
-func (db *Database) Reader(root common.Hash) (database.Reader, error) {
+func (db *Database) Reader(root common.Hash) (*reader, error) {
 	if _, err := db.node(root); err != nil {
 		return nil, fmt.Errorf("state %#x is not available, %v", root, err)
 	}

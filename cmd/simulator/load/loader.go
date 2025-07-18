@@ -23,6 +23,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"golang.org/x/sync/errgroup"
 )
 

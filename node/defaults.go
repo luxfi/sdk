@@ -13,24 +13,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+
 package node
 
-package memorydb
-
-import (
-	"testing"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxfi/evm/ethdb/dbtest"
-)
-
-func TestMemoryDB(t *testing.T) {
-	t.Run("DatabaseSuite", func(t *testing.T) {
-		dbtest.TestDatabaseSuite(t, func() ethdb.KeyValueStore {
-			return New()
-		})
-	})
-// DefaultConfig contains reasonable default settings.
-var DefaultConfig = Config{
-	BatchRequestLimit:    1000,
-	BatchResponseMaxSize: 25 * 1000 * 1000,
-}
+// This file contains default values for node configuration

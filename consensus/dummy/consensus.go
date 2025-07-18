@@ -14,8 +14,12 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/trie"
-	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/utils"
 )
 
 var (
@@ -105,7 +109,7 @@ func (eng *DummyEngine) verifyCoinbase(header *types.Header, parent *types.Heade
 	// get the coinbase configured at parent
 	configuredAddressAtParent, isAllowFeeRecipients, err := chain.GetCoinbaseAt(parent)
 	if err != nil {
-		return fmt.Errorf("failed to get coinbase at %v: %w", header.Hash(), err)
+		return fmt.Errorf("failed to get coinbase at %v: %w", parent.Hash(), err)
 	}
 
 	if isAllowFeeRecipients {
@@ -200,7 +204,7 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 		return consensus.ErrInvalidNumber
 	}
 	// Verify the existence / non-existence of excessBlobGas
-	cancun := chain.Config().IsCancun(header.Number, header.Time)
+	cancun := chain.Config().IsCancun(header.Time)
 	if !cancun {
 		switch {
 		case header.ExcessBlobGas != nil:
@@ -217,9 +221,10 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 		if *header.ParentBeaconRoot != (common.Hash{}) {
 			return fmt.Errorf("invalid parentBeaconRoot, have %#x, expected empty", *header.ParentBeaconRoot)
 		}
-		if err := eip4844.VerifyEIP4844Header(parent, header); err != nil {
-			return err
-		}
+		// FIXME: Can't verify EIP4844 header with luxfi ChainConfig type
+		// if err := eip4844.VerifyEIP4844Header(chain.Config(), parent, header); err != nil {
+		// 	return err
+		// }
 		if *header.BlobGasUsed > 0 { // VerifyEIP4844Header ensures BlobGasUsed is non-nil
 			return fmt.Errorf("blobs not enabled on lux networks: used %d blob gas, expected 0", *header.BlobGasUsed)
 		}
@@ -398,8 +403,12 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 
 	// Header seems complete, assemble into a block and return
+	body := &types.Body{
+		Transactions: txs,
+		Uncles:       uncles,
+	}
 	return types.NewBlock(
-		header, txs, uncles, receipts, trie.NewStackTrie(nil),
+		header, body, receipts, trie.NewStackTrie(nil),
 	), nil
 }
 
