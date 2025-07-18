@@ -8,8 +8,8 @@ on:
         default: ""
         required: false
         type: string
-      avalanche_version:
-        description: "The SHA or tag of avalanchego to use for the base image (must be compatible with the version in go.mod)"
+      lux_version:
+        description: "The SHA or tag of luxd to use for the base image (must be compatible with the version in go.mod)"
         default: ""
         required: false
         type: string
@@ -39,10 +39,10 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-          IMAGE_NAME: "avaplatform/evm_avalanchego"
+          IMAGE_NAME: "luxfi/evm"
           VM_ID: ${{ inputs.vm_id }}
           PUBLISH: 1
           PLATFORMS: "linux/amd64,linux/arm64"
-          AVALANCHE_VERSION: ${{ inputs.avalanche_version }}
+          AVALANCHE_VERSION: ${{ inputs.lux_version }}
           ALLOW_TAG_LATEST: ${{ github.event_name != 'workflow_dispatch' || inputs.allow_tag_latest }}
         run: scripts/build_docker_image.sh

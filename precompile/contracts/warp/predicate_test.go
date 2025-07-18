@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -25,7 +25,7 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/node/snow/validators/validatorstest"
 	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
-	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -110,7 +110,7 @@ type testValidator struct {
 	sk     *bls.SecretKey
 	vdr    *luxWarp.Validator
 	sk     bls.Signer
-	vdr    *avalancheWarp.Validator
+	vdr    *luxWarp.Validator
 }
 
 func (v *testValidator) Compare(o *testValidator) int {

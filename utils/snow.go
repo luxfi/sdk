@@ -1,22 +1,36 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
 
 import (
+	"context"
+	"errors"
+
 	"github.com/luxfi/node/api/metrics"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/snow/validators/validatorstest"
+	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/vms/platformvm/warp"
+)
+
+var (
+	testChainID  = ids.ID{5, 4, 3, 2, 1}
+	testCChainID = ids.ID{1, 2, 3, 4, 5}
+	testXChainID = ids.ID{2, 3, 4, 5, 6}
 )
 
 func TestSnowContext() *snow.Context {
-	sk, err := localsigner.New()
+	sk, err := bls.NewSecretKey()
 	if err != nil {
 		panic(err)
 	}
-	pk := sk.PublicKey()
+	pk := bls.PublicFromSecretKey(sk)
 	networkID := constants.UnitTestID
 	chainID := testChainID
 
@@ -64,9 +78,6 @@ func NewTestValidatorState() *validatorstest.State {
 		},
 		GetValidatorSetF: func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			return map[ids.NodeID]*validators.GetValidatorOutput{}, nil
-		},
-		GetCurrentValidatorSetF: func(context.Context, ids.ID) (map[ids.ID]*validators.GetCurrentValidatorOutput, uint64, error) {
-			return map[ids.ID]*validators.GetCurrentValidatorOutput{}, 0, nil
 		},
 	}
 }

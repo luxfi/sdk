@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -121,7 +121,7 @@ func init() {
 	testEthAddrs = append(testEthAddrs, addr1, addr2)
 }
 
-// BuildGenesisTest returns the genesis bytes for Subnet EVM VM to be used in testing
+// BuildGenesisTest returns the genesis bytes for Lux EVM VM to be used in testing
 func buildGenesisTest(t *testing.T, genesisJSON string) []byte {
 	ss := CreateStaticService()
 
@@ -303,7 +303,7 @@ func TestVMUpgrades(t *testing.T) {
 		expectedGasPrice *big.Int
 	}{
 		{
-			name:             "Subnet EVM",
+			name:             "Lux EVM",
 			genesis:          genesisJSONSubnetEVM,
 			expectedGasPrice: big.NewInt(0),
 		},
@@ -1916,7 +1916,7 @@ func TestConfigureLogLevel(t *testing.T) {
 }
 
 // Regression test to ensure we can build blocks if we are starting with the
-// Subnet EVM ruleset in genesis.
+// Lux EVM ruleset in genesis.
 func TestBuildSubnetEVMBlock(t *testing.T) {
 	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
 

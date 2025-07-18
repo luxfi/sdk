@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package extras
@@ -186,7 +186,7 @@ func (n *NetworkUpgrades) GetAvalancheRules(time uint64) AvalancheRules {
 	}
 }
 
-// getDefaultNetworkUpgrades returns the network upgrades for the specified avalanchego upgrades.
+// getDefaultNetworkUpgrades returns the network upgrades for the specified luxd upgrades.
 // Nil values are used to indicate optional upgrades.
 func getDefaultNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
 	return NetworkUpgrades{

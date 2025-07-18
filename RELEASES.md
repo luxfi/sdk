@@ -8,7 +8,7 @@
 
 - Major refactor to use [`libevm`](https://github.com/luxfi/libevm) for EVM execution, database access, types & chain configuration. This improves maintainability and enables keeping up with upstream changes more easily.
 - Wrapped database with `corruptabledb` to prevent corruption of the database.
-- Updated dockerhub image name to `avaplatform/evm_avalanchego` and tags to accommodate the new versioning scheme: {evm version}_{avalanchego version}
+- Updated dockerhub image name to `luxfi/evm` and tags to accommodate the new versioning scheme: {evm version}_{luxd version}
 - Updated golang version to 1.23.9
 - Fixed a bug in mempool where the min fee was not updated after restart
 
@@ -16,9 +16,9 @@
 
 This version is backwards compatible to v0.7.0. It is optional, but encouraged.
 
-### AvalancheGo Compatibility
+### Lux Compatibility
 
-The plugin version is unchanged at 39 and is compatible with AvalancheGo version v1.13.0.
+The plugin version is unchanged at 39 and is compatible with Lux version v1.13.0.
 
 ### Breaking changes
 
@@ -30,7 +30,7 @@ The plugin version is unchanged at 39 and is compatible with AvalancheGo version
 
 - Add `Fortuna` upgrade as optional and defaulting to a `nil` timestamp  (#1494, #1498)
 - Docker images Debian base upgraded from Bullseye (11) to Bookworm (12) (#1497)
-- AvalancheGo version upgraded from `v1.12.3-0.20250218154446-f1ec9a13b90a` to `v1.13.0`
+- Lux version upgraded from `v1.12.3-0.20250218154446-f1ec9a13b90a` to `v1.13.0`
 - plugin/evm/client: add `NewClientWithURL` function (#1509)
 
 ### Fixes
@@ -53,9 +53,9 @@ The plugin version is unchanged at 39 and is compatible with AvalancheGo version
 
 This version is backwards compatible to [v0.7.0](https://github.com/luxfi/evm/releases/tag/v0.7.0). It is optional, **but strongly encouraged as it's fixing an important bug in uptime tracking.**
 
-### AvalancheGo Compatibility
+### Lux Compatibility
 
-The plugin version is unchanged at 39 and is compatible with AvalancheGo version v1.12.2.
+The plugin version is unchanged at 39 and is compatible with Lux version v1.12.2.
 
 ### Updates
 
@@ -69,7 +69,7 @@ This release focuses on code quality improvements and post-Etna cleanups.
 
 ### Compatibility
 
-The plugin version is **updated** to 39 and is compatible with AvalancheGo version v1.12.2.
+The plugin version is **updated** to 39 and is compatible with Lux version v1.12.2.
 
 ### Updates
 
@@ -96,24 +96,24 @@ This release focuses on Standalone DB and database configs.
 
 This version is backwards compatible to [v0.6.0](https://github.com/luxfi/evm/releases/tag/v0.6.0). It is optional, but encouraged.
 
-The plugin version is unchanged at 37 and is compatible with AvalancheGo versions v1.11.12.
+The plugin version is unchanged at 37 and is compatible with Lux versions v1.11.12.
 
 ### Updates
 
-* Added Standalone DB creation in chain data directory (`~/.avalanchego/chainData/{chain-ID}/db/`). EVM will create seperate databases for chains by default if there is no accepted blocks previously
+* Added Standalone DB creation in chain data directory (`~/.luxd/chainData/{chain-ID}/db/`). EVM will create seperate databases for chains by default if there is no accepted blocks previously
 * Refactored Warp Backend to support new payload types
 * Refactored TrieDB reference root configuration
-* Bumped AvalancheGo dependency to v1.11.12
+* Bumped Lux dependency to v1.11.12
 * Bumped minimum Golang version to v1.22.8
 
 ### Configs
 
 * Added following new database options:
-  * `"use-standalone-database"` (`bool`): If true it enables creation of standalone database. If false it uses the GRPC Database provided by AvalancheGo. Default is nil and creates the standalone database only if there is no accepted block in the AvalancheGo database (node has not accepted any blocks for this chain)
+  * `"use-standalone-database"` (`bool`): If true it enables creation of standalone database. If false it uses the GRPC Database provided by Lux. Default is nil and creates the standalone database only if there is no accepted block in the Lux database (node has not accepted any blocks for this chain)
   * `"database-type"` (`string`): Specifies the type of database to use. Must be one of `pebbledb`, `leveldb` or `memdb`. memdb is an in-memory, non-persisted database. Default is `pebbledb`
-  * `"database-config-file"` (`string`): Path to the database config file. Config file is changed for every database type. See [docs](https://docs.avax.network/api-reference/avalanche-go-configs-flags#database-config) for available configs per database type. Ignored if --config-file-content is specified
+  * `"database-config-file"` (`string`): Path to the database config file. Config file is changed for every database type. See [docs](https://docs.lux.network/api-reference/lux-go-configs-flags#database-config) for available configs per database type. Ignored if --config-file-content is specified
   * `"database-config-file-content"` (`string`): As an alternative to `database-config-file`, it allows specifying base64 encoded database config content
-  * `"database-path"` (`string`): Specifies the directory to which the standalone database is persisted. Defaults to "`$HOME/.avalanchego/chainData/{chainID}`"
+  * `"database-path"` (`string`): Specifies the directory to which the standalone database is persisted. Defaults to "`$HOME/.luxd/chainData/{chainID}`"
   * `"database-read-only"` (`bool`) : Specifies if the standalone database should be a read-only type. Defaults to false
 
 ### Fixes

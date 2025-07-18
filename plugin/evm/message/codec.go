@@ -1,4 +1,4 @@
-// (c) 2019-2022, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2022, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -12,7 +12,7 @@ import (
 
 const (
 	Version        = uint16(0)
-	maxMessageSize = 2*units.MiB - 64*units.KiB // Subtract 64 KiB from p2p network cap to leave room for encoding overhead from AvalancheGo
+	maxMessageSize = 2*units.MiB - 64*units.KiB // Subtract 64 KiB from p2p network cap to leave room for encoding overhead from Lux
 )
 
 var (

@@ -7,7 +7,7 @@ set -x
 
 script_dir=$(dirname "$0")
 
-sed_command="1{/The go-ethereum Authors/{r ${script_dir}/avalanche_header.txt
+sed_command="1{/The go-ethereum Authors/{r ${script_dir}/lux_header.txt
         N
     }
 }"

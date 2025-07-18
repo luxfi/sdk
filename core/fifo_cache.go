@@ -1,4 +1,4 @@
-// (c) 2021, Ava Labs, Inc. All rights reserved.
+// (c) 2021, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package core

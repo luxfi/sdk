@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package config
@@ -26,7 +26,7 @@ const (
 	defaultSyncableCommitInterval                 = defaultCommitInterval * 4
 	defaultSnapshotWait                           = false
 	defaultRpcGasCap                              = 50_000_000 // Default to 50M Gas Limit
-	defaultRpcTxFeeCap                            = 100        // 100 AVAX
+	defaultRpcTxFeeCap                            = 100        // 100 LUX
 	defaultMetricsExpensiveEnabled                = true
 	defaultApiMaxDuration                         = 0 // Default to no maximum API call duration
 	defaultWsCpuRefillRate                        = 0 // Default to no maximum WS CPU usage
@@ -92,7 +92,7 @@ type Config struct {
 	// Airdrop
 	AirdropFile string `json:"airdrop"`
 
-	// Subnet EVM APIs
+	// Lux EVM APIs
 	SnowmanAPIEnabled    bool   `json:"snowman-api-enabled"`
 	ValidatorsAPIEnabled bool   `json:"validators-api-enabled"`
 	AdminAPIEnabled      bool   `json:"admin-api-enabled"`

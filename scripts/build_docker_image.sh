@@ -27,7 +27,7 @@ source "$SUBNET_EVM_PATH"/scripts/constants.sh
 
 # ALLOW_TAG_LATEST is used to tag the image as 'latest' if set to true.
 # It only works if the image is built from the master branch. This is to avoid
-# tagging images from a manual triggered build as 'latest' with older avalanchego versions.
+# tagging images from a manual triggered build as 'latest' with older luxd versions.
 ALLOW_TAG_LATEST="${ALLOW_TAG_LATEST:-}"
 
 # buildx (BuildKit) improves the speed and UI of builds over the legacy builder and
@@ -71,39 +71,39 @@ fi
 VM_ID=${VM_ID:-"${DEFAULT_VM_ID}"}
 
 # Default to the release image. Will need to be overridden when testing against unreleased versions.
-AVALANCHEGO_NODE_IMAGE="${AVALANCHEGO_NODE_IMAGE:-${AVALANCHEGO_IMAGE_NAME}:${AVALANCHE_VERSION}}"
+LUXD_NODE_IMAGE="${LUXD_NODE_IMAGE:-${LUXD_IMAGE_NAME}:${LUX_VERSION}}"
 
-# Build the avalanchego image if it cannot be pulled. This will usually be due to
-# AVALANCHE_VERSION being not yet merged since the image is published post-merge.
-if ! docker pull "${AVALANCHEGO_NODE_IMAGE}"; then
-  # Build a multi-arch avalanchego image if the evm image build is multi-arch
+# Build the luxd image if it cannot be pulled. This will usually be due to
+# LUX_VERSION being not yet merged since the image is published post-merge.
+if ! docker pull "${LUXD_NODE_IMAGE}"; then
+  # Build a multi-arch luxd image if the evm image build is multi-arch
   BUILD_MULTI_ARCH="$([[ "$PLATFORMS" =~ , ]] && echo 1 || echo "")"
 
   # - Use a image name without a repository (i.e. without 'avaplatform/' prefix ) to build a
   #   local single-arch image that will not be pushed.
   # - Use a image name with a repository to build a multi-arch image that will be pushed.
-  AVALANCHEGO_LOCAL_IMAGE_NAME="${AVALANCHEGO_LOCAL_IMAGE_NAME:-avalanchego}"
+  LUXD_LOCAL_IMAGE_NAME="${LUXD_LOCAL_IMAGE_NAME:-luxd}"
 
-  if [[ -n "${BUILD_MULTI_ARCH}" && "${AVALANCHEGO_LOCAL_IMAGE_NAME}" != *"/"* ]]; then
+  if [[ -n "${BUILD_MULTI_ARCH}" && "${LUXD_LOCAL_IMAGE_NAME}" != *"/"* ]]; then
     echo "ERROR: Multi-arch images must be pushed to a registry."
     exit 1
   fi
 
-  AVALANCHEGO_NODE_IMAGE="${AVALANCHEGO_LOCAL_IMAGE_NAME}:${AVALANCHE_VERSION}"
-  echo "Building ${AVALANCHEGO_NODE_IMAGE} locally"
+  LUXD_NODE_IMAGE="${LUXD_LOCAL_IMAGE_NAME}:${LUX_VERSION}"
+  echo "Building ${LUXD_NODE_IMAGE} locally"
 
-  source "${SUBNET_EVM_PATH}"/scripts/lib_avalanchego_clone.sh
-  clone_avalanchego "${AVALANCHE_VERSION}"
+  source "${SUBNET_EVM_PATH}"/scripts/lib_luxd_clone.sh
+  clone_luxd "${LUX_VERSION}"
   SKIP_BUILD_RACE=1 \
-    DOCKER_IMAGE="${AVALANCHEGO_LOCAL_IMAGE_NAME}" \
+    DOCKER_IMAGE="${LUXD_LOCAL_IMAGE_NAME}" \
     BUILD_MULTI_ARCH="${BUILD_MULTI_ARCH}" \
-    "${AVALANCHEGO_CLONE_PATH}"/scripts/build_image.sh
+    "${LUXD_CLONE_PATH}"/scripts/build_image.sh
 fi
 
-echo "Building Docker Image: $IMAGE_NAME:$BUILD_IMAGE_ID based of AvalancheGo@$AVALANCHE_VERSION"
+echo "Building Docker Image: $IMAGE_NAME:$BUILD_IMAGE_ID based of Lux@$LUX_VERSION"
 ${DOCKER_CMD} -t "$IMAGE_NAME:$BUILD_IMAGE_ID" -t "$IMAGE_NAME:${DOCKERHUB_TAG}" \
   "$SUBNET_EVM_PATH" -f "$SUBNET_EVM_PATH/Dockerfile" \
-  --build-arg AVALANCHEGO_NODE_IMAGE="$AVALANCHEGO_NODE_IMAGE" \
+  --build-arg LUXD_NODE_IMAGE="$LUXD_NODE_IMAGE" \
   --build-arg SUBNET_EVM_COMMIT="$SUBNET_EVM_COMMIT" \
   --build-arg CURRENT_BRANCH="$CURRENT_BRANCH" \
   --build-arg VM_ID="$VM_ID"

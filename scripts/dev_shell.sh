@@ -7,12 +7,12 @@ set -euo pipefail
 #   https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#install-nix
 #
 
-# Load AVALANCHE_VERSION
+# Load LUX_VERSION
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=/scripts/constants.sh
 source "$SCRIPT_DIR"/constants.sh
 
-# Start a dev shell with the avalanchego flake
-FLAKE="github:luxfi/avalanchego?ref=${AVALANCHE_VERSION}"
+# Start a dev shell with the luxd flake
+FLAKE="github:luxfi/node?ref=${LUX_VERSION}"
 echo "Starting nix shell for ${FLAKE}"
 nix develop "${FLAKE}" "${@}"

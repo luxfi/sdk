@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2024, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow"
-	avalancheuptime "github.com/luxfi/node/snow/uptime"
-	avalanchevalidators "github.com/luxfi/node/snow/validators"
+	luxuptime "github.com/luxfi/node/snow/uptime"
+	luxvalidators "github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/utils/timer/mockable"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
@@ -47,7 +47,7 @@ func NewManager(
 	}
 
 	// Initialize uptime manager
-	uptimeManager := uptime.NewPausableManager(avalancheuptime.NewManager(validatorState, clock))
+	uptimeManager := uptime.NewPausableManager(luxuptime.NewManager(validatorState, clock))
 	validatorState.RegisterListener(uptimeManager)
 
 	return &manager{
@@ -135,7 +135,7 @@ func (m *manager) sync(ctx context.Context) error {
 }
 
 // loadValidators loads the [validators] into the validator state [validatorState]
-func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*avalanchevalidators.GetCurrentValidatorOutput) error {
+func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*luxvalidators.GetCurrentValidatorOutput) error {
 	currentValidationIDs := validatorState.GetValidationIDs()
 	// first check if we need to delete any existing validators
 	for vID := range currentValidationIDs {

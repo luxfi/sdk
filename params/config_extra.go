@@ -1,4 +1,4 @@
-// (c) 2024 Ava Labs, Inc. All rights reserved.
+// (c) 2024 Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package params
@@ -16,7 +16,7 @@ const (
 	maxJSONLen = 64 * 1024 * 1024 // 64MB
 
 	// TODO: Value to pass to geth's Rules by default where the appropriate
-	// context is not available in the avalanche code. (similar to context.TODO())
+	// context is not available in the lux code. (similar to context.TODO())
 	IsMergeTODO = true
 )
 
@@ -31,18 +31,18 @@ var (
 // TODO: Prior to Cancun, Avalanche upgrades are referenced inline in the
 // code in place of their Ethereum counterparts. The original Ethereum names
 // should be restored for maintainability.
-func SetEthUpgrades(c *ChainConfig, avalancheUpgrades extras.NetworkUpgrades) {
+func SetEthUpgrades(c *ChainConfig, luxUpgrades extras.NetworkUpgrades) {
 	if c.BerlinBlock == nil {
 		c.BerlinBlock = big.NewInt(0)
 	}
 	if c.LondonBlock == nil {
 		c.LondonBlock = big.NewInt(0)
 	}
-	if avalancheUpgrades.DurangoTimestamp != nil {
-		c.ShanghaiTime = utils.NewUint64(*avalancheUpgrades.DurangoTimestamp)
+	if luxUpgrades.DurangoTimestamp != nil {
+		c.ShanghaiTime = utils.NewUint64(*luxUpgrades.DurangoTimestamp)
 	}
-	if avalancheUpgrades.EtnaTimestamp != nil {
-		c.CancunTime = utils.NewUint64(*avalancheUpgrades.EtnaTimestamp)
+	if luxUpgrades.EtnaTimestamp != nil {
+		c.CancunTime = utils.NewUint64(*luxUpgrades.EtnaTimestamp)
 	}
 }
 

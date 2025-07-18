@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -231,7 +231,7 @@ type VM struct {
 	multiGatherer nodeMetrics.MultiGatherer
 	sdkMetrics    *prometheus.Registry
 
-	bootstrapped avalancheUtils.Atomic[bool]
+	bootstrapped luxUtils.Atomic[bool]
 
 	logger SubnetEVMLogger
 	// State sync server and client
@@ -245,7 +245,7 @@ type VM struct {
 	// Initialize only sets these if nil so they can be overridden in tests
 	p2pSender          commonEng.AppSender
 	ethTxGossipHandler p2p.Handler
-	ethTxPushGossiper  avalancheUtils.Atomic[*gossip.PushGossiper[*GossipEthTx]]
+	ethTxPushGossiper  luxUtils.Atomic[*gossip.PushGossiper[*GossipEthTx]]
 	ethTxPullGossiper  gossip.Gossiper
 
 	validatorsManager interfaces.Manager
@@ -297,7 +297,7 @@ func (vm *VM) Initialize(
 	}
 	vm.logger = subnetEVMLogger
 
-	log.Info("Initializing Subnet EVM VM", "Version", Version, "libevm version", ethparams.LibEVMVersion, "Config", vm.config)
+	log.Info("Initializing Lux EVM VM", "Version", Version, "libevm version", ethparams.LibEVMVersion, "Config", vm.config)
 
 	if deprecateMsg != "" {
 		log.Warn("Deprecation Warning", "msg", deprecateMsg)

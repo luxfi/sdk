@@ -22,6 +22,6 @@ else
     exit 1
 fi
 
-# Build Subnet EVM, which is run as a subprocess
-echo "Building Subnet EVM @ GitCommit: $SUBNET_EVM_COMMIT at $BINARY_PATH"
+# Build Lux EVM, which is run as a subprocess
+echo "Building Lux EVM @ GitCommit: $SUBNET_EVM_COMMIT at $BINARY_PATH"
 go build -ldflags "-X github.com/luxfi/evm/plugin/evm.GitCommit=$SUBNET_EVM_COMMIT $STATIC_LD_FLAGS" -o "$BINARY_PATH" "plugin/"*.go

@@ -1,4 +1,4 @@
-// (c) 2019-2021, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2021, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/config"
 	"github.com/luxfi/evm/plugin/evm/database"
 	"github.com/luxfi/node/api/metrics"
-	avalanchedatabase "github.com/luxfi/node/database"
+	luxdatabase "github.com/luxfi/node/database"
 	"github.com/luxfi/node/database/pebbledb"
 	"github.com/luxfi/node/database/leveldb"
 	"github.com/luxfi/node/database/prefixdb"
@@ -49,7 +49,7 @@ type DatabaseConfig struct {
 // initializeDBs initializes the databases used by the VM.
 // If [useStandaloneDB] is true, the chain will use a standalone database for its state.
 // Otherwise, the chain will use the provided [avaDB] for its state.
-func (vm *VM) initializeDBs(avaDB avalanchedatabase.Database) error {
+func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 	db := avaDB
 	// skip standalone database initialization if we are running in unit tests
 	if vm.ctx.NetworkID != constants.UnitTestID {
@@ -117,7 +117,7 @@ func (vm *VM) inspectDatabases() error {
 
 // useStandaloneDatabase returns true if the chain can and should use a standalone database
 // other than given by [db] in Initialize()
-func (vm *VM) useStandaloneDatabase(acceptedDB avalanchedatabase.Database) (bool, error) {
+func (vm *VM) useStandaloneDatabase(acceptedDB luxdatabase.Database) (bool, error) {
 	// no config provided, use default
 	standaloneDBFlag := vm.config.UseStandaloneDatabase
 	if standaloneDBFlag != nil {
@@ -126,7 +126,7 @@ func (vm *VM) useStandaloneDatabase(acceptedDB avalanchedatabase.Database) (bool
 
 	// check if the chain can use a standalone database
 	_, err := acceptedDB.Get(lastAcceptedKey)
-	if err == avalanchedatabase.ErrNotFound {
+	if err == luxdatabase.ErrNotFound {
 		// If there is nothing in the database, we can use the standalone database
 		return true, nil
 	}
@@ -167,7 +167,7 @@ func getDatabaseConfig(config config.Config, chainDataDir string) (DatabaseConfi
 	}, nil
 }
 
-func inspectDB(db avalanchedatabase.Database, label string) error {
+func inspectDB(db luxdatabase.Database, label string) error {
 	it := db.NewIterator()
 	defer it.Release()
 
@@ -197,7 +197,7 @@ func inspectDB(db avalanchedatabase.Database, label string) error {
 	return nil
 }
 
-func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger logging.Logger) (avalanchedatabase.Database, error) {
+func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger logging.Logger) (luxdatabase.Database, error) {
 	dbPath := filepath.Join(dbConfig.Path, dbConfig.Name)
 
 	dbConfigBytes := dbConfig.Config
@@ -220,7 +220,7 @@ func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGather
 		}
 	}
 
-	var db avalanchedatabase.Database
+	var db luxdatabase.Database
 	switch dbConfig.Name {
 	case pebbledb.Name:
 		db, err = pebbledb.New(dbPath, dbConfigBytes, logger, gatherer)

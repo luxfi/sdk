@@ -6,8 +6,8 @@ set -euo pipefail
 REPO_ROOT=$(cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 cd "${REPO_ROOT}"
 
-# Set AVALANCHE_VERSION
+# Set LUX_VERSION
 . ./scripts/versions.sh
 
-echo "Running tmpnetctl @ ${AVALANCHE_VERSION}"
-go run github.com/luxfi/avalanchego/tests/fixture/tmpnet/tmpnetctl@"${AVALANCHE_VERSION}" "${@}"
+echo "Running tmpnetctl @ ${LUX_VERSION}"
+go run github.com/luxfi/node/tests/fixture/tmpnet/tmpnetctl@"${LUX_VERSION}" "${@}"

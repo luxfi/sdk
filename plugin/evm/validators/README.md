@@ -18,7 +18,7 @@ The package defines how to serialize the data according to the codec. It can rea
 
 ## Uptime Package
 
-The uptime package manages the uptime tracking of the L1 validators. It wraps [AvalancheGo's uptime tracking manager](https://pkg.go.dev/github.com/luxfi/avalanchego/snow/uptime) under the hood and additionally introduces pausable uptime manager interface. The pausable uptime manager interface allows the manager to pause the uptime tracking for a specific validator when it becomes `inactive` and resume it when it becomes `active` again.
+The uptime package manages the uptime tracking of the L1 validators. It wraps [Lux's uptime tracking manager](https://pkg.go.dev/github.com/luxfi/node/snow/uptime) under the hood and additionally introduces pausable uptime manager interface. The pausable uptime manager interface allows the manager to pause the uptime tracking for a specific validator when it becomes `inactive` and resume it when it becomes `active` again.
 
 The uptime package must be run on at least one L1 node, referred to in this document as the "tracker node".
 
@@ -30,13 +30,13 @@ Nodes can start uptime tracking with the `StartTracking` method once they're boo
 
 ### Connected
 
-The AvalancheGo uptime manager records the time when a peer is connected to the tracker node. When a paused/ `inactive` validator is connected, the pausable uptime manager does not directly invoke the `Connected` method on the AvalancheGo uptime manager, thus the connection time is not directly recorded. Instead, the pausable uptime manager waits for the validator to increase its continuous validation fee balance and resume operation. When the validator resumes, the tracker node records the resumed time and starts tracking the uptime of the validator.
+The Lux uptime manager records the time when a peer is connected to the tracker node. When a paused/ `inactive` validator is connected, the pausable uptime manager does not directly invoke the `Connected` method on the Lux uptime manager, thus the connection time is not directly recorded. Instead, the pausable uptime manager waits for the validator to increase its continuous validation fee balance and resume operation. When the validator resumes, the tracker node records the resumed time and starts tracking the uptime of the validator.
 
 Note: The uptime manager does not check if the connected peer is a validator or not. It records the connection time assuming that a non-validator peer can become a validator whilst they're connected to the uptime manager.
 
 ### Disconnected
 
-When a peer validator is disconnected, the AvalancheGo uptime manager updates the uptime of the validator by adding the duration between the connection time and the disconnection time to the uptime of the validator. When a validator is paused/`inactive`, the pausable uptime manager handles the `inactive` peers as if they were disconnected. Thus the uptime manager assumes that no paused peers can be disconnected again from the pausable uptime manager.
+When a peer validator is disconnected, the Lux uptime manager updates the uptime of the validator by adding the duration between the connection time and the disconnection time to the uptime of the validator. When a validator is paused/`inactive`, the pausable uptime manager handles the `inactive` peers as if they were disconnected. Thus the uptime manager assumes that no paused peers can be disconnected again from the pausable uptime manager.
 
 ### Pause
 
@@ -46,7 +46,7 @@ The pausable uptime manager can listen for validator status changes by subscribi
 
 When a paused validator peer resumes, meaning its status becomes `active`, the pausable uptime manager resumes the uptime tracking of the validator. It treats the peer as if it is connected to the tracker node.
 
-Note: The pausable uptime manager holds the set of connected peers that tracks the connected peers in the p2p layer. This set is used to start tracking the uptime of the paused/`inactive` validators when they resume; this is because the AvalancheGo uptime manager thinks that the peer is completely disconnected when it is paused. The pausable uptime manager is able to reconnect them to the inner manager by using this additional connected set.
+Note: The pausable uptime manager holds the set of connected peers that tracks the connected peers in the p2p layer. This set is used to start tracking the uptime of the paused/`inactive` validators when they resume; this is because the Lux uptime manager thinks that the peer is completely disconnected when it is paused. The pausable uptime manager is able to reconnect them to the inner manager by using this additional connected set.
 
 ### CalculateUptime
 

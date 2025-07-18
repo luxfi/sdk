@@ -1,4 +1,4 @@
-// (c) 2022, Ava Labs, Inc. All rights reserved.
+// (c) 2022, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -19,13 +19,13 @@ type MeteredCache struct {
 	namespace string
 
 	// stats to be surfaced
-	entriesCount metrics.Gauge
-	bytesSize    metrics.Gauge
-	collisions   metrics.Gauge
-	gets         metrics.Gauge
-	sets         metrics.Gauge
-	misses       metrics.Gauge
-	statsTime    metrics.Gauge
+	entriesCount *metrics.Gauge
+	bytesSize    *metrics.Gauge
+	collisions   *metrics.Gauge
+	gets         *metrics.Gauge
+	sets         *metrics.Gauge
+	misses       *metrics.Gauge
+	statsTime    *metrics.Gauge
 
 	// count all operations to decide when to update stats
 	ops             uint64

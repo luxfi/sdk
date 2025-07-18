@@ -1,4 +1,4 @@
-// (c) 2019-2021, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2021, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -10,7 +10,7 @@ import (
 var (
 	// GitCommit is set by the build script
 	GitCommit string
-	// Version is the version of Subnet EVM
+	// Version is the version of Lux EVM
 	Version string = "v0.7.5"
 )
 

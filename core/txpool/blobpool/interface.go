@@ -1,4 +1,4 @@
-// (c) 2024, Ava Labs, Inc.
+// (c) 2024, Hanzo Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.

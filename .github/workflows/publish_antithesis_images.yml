@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: us-central1-docker.pkg.dev
-  REPOSITORY: molten-verve-216720/avalanche-repository
+  REPOSITORY: molten-verve-216720/lux-repository
 
 jobs:
   antithesis:

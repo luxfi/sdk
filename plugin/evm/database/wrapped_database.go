@@ -1,4 +1,4 @@
-// (c) 2019-2020, Ava Labs, Inc. All rights reserved.
+// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package database
@@ -28,7 +28,7 @@ func (db ethDbWrapper) Stat(string) (string, error) { return "", database.ErrNot
 func (db ethDbWrapper) NewBatch() ethdb.Batch { return wrappedBatch{db.Database.NewBatch()} }
 
 // NewBatchWithSize implements ethdb.Database
-// TODO: propagate size through avalanchego Database interface
+// TODO: propagate size through luxd Database interface
 func (db ethDbWrapper) NewBatchWithSize(size int) ethdb.Batch {
 	return wrappedBatch{db.Database.NewBatch()}
 }
@@ -42,7 +42,7 @@ func (db ethDbWrapper) NewSnapshot() (ethdb.Snapshot, error) {
 // Note: This method assumes that the prefix is NOT part of the start, so there's
 // no need for the caller to prepend the prefix to the start.
 func (db ethDbWrapper) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
-	// avalanchego's database implementation assumes that the prefix is part of the
+	// luxd's database implementation assumes that the prefix is part of the
 	// start, so it is added here (if it is provided).
 	if len(prefix) > 0 {
 		newStart := make([]byte, len(prefix)+len(start))

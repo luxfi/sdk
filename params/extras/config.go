@@ -1,4 +1,4 @@
-// (c) 2024 Ava Labs, Inc. All rights reserved.
+// (c) 2024 Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package extras
@@ -107,7 +107,7 @@ func copyAndSet(c *ChainConfig, set func(*ChainConfig)) *ChainConfig {
 }
 
 // UpgradeConfig includes the following configs that may be specified in upgradeBytes:
-// - Timestamps that enable avalanche network upgrades,
+// - Timestamps that enable lux network upgrades,
 // - Enabling or disabling precompiles as network upgrades.
 type UpgradeConfig struct {
 	// Config for timestamps that enable network upgrades.
@@ -133,7 +133,7 @@ type ChainConfig struct {
 	FeeConfig          commontype.FeeConfig `json:"feeConfig"`                    // Set the configuration for the dynamic fee algorithm
 	AllowFeeRecipients bool                 `json:"allowFeeRecipients,omitempty"` // Allows fees to be collected by block builders.
 	GenesisPrecompiles Precompiles          `json:"-"`                            // Config for enabling precompiles from genesis. JSON encode/decode will be handled by the custom marshaler/unmarshaler.
-	UpgradeConfig      `json:"-"`           // Config specified in upgradeBytes (avalanche network upgrades or enable/disabling precompiles). Not serialized.
+	UpgradeConfig      `json:"-"`           // Config specified in upgradeBytes (lux network upgrades or enable/disabling precompiles). Not serialized.
 }
 
 func (c *ChainConfig) CheckConfigCompatible(newConfig *ethparams.ChainConfig, headNumber *big.Int, headTimestamp uint64) *ethparams.ConfigCompatError {

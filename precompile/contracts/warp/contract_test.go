@@ -1,4 +1,4 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
+// (c) 2023, Hanzo Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
-	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/stretchr/testify/require"
@@ -98,7 +98,7 @@ func TestSendWarpMessage(t *testing.T) {
 		sendWarpMessagePayload,
 	)
 	require.NoError(t, err)
-	unsignedWarpMessage, err := avalancheWarp.NewUnsignedMessage(
+	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
 		defaultSnowCtx.NetworkID,
 		blockchainID,
 		sendWarpMessageAddressedPayload.Bytes(),
@@ -749,7 +749,7 @@ func TestPackEvents(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	unsignedWarpMessage, err := avalancheWarp.NewUnsignedMessage(
+	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
 		networkID,
 		sourceChainID,
 		addressedPayload.Bytes(),

@@ -7,7 +7,7 @@ set -x
 
 script_dir=$(dirname "$0")
 
-commit_msg_remove_header="format: remove avalanche header"
+commit_msg_remove_header="format: remove lux header"
 commit_msg_remove_upstream="format: remove upstream go-ethereum"
 commit_msg_rename_packages_as_fork="format: rename packages as fork"
 
