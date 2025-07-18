@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/snow/choices"
 	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/set"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/luxfi/evm/consensus/dummy"

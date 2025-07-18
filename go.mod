@@ -2,12 +2,6 @@ module github.com/luxfi/evm
 
 go 1.24.5
 
-replace (
-	github.com/luxfi/geth => /Users/z/work/lux/geth
-	github.com/luxfi/netrunner => /Users/z/work/lux/netrunner
-	github.com/luxfi/node => /Users/z/work/lux/node
-)
-
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
 	github.com/davecgh/go-spew v1.1.1
@@ -26,8 +20,8 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/geth v0.15.4
-	github.com/luxfi/netrunner v0.0.0-00010101000000-000000000000
-	github.com/luxfi/node v1.13.2
+	github.com/luxfi/netrunner v1.6.0
+	github.com/luxfi/node v1.13.5
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/onsi/ginkgo/v2 v2.23.4

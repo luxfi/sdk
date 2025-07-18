@@ -84,7 +84,7 @@ type Config struct {
 	AirdropFile string `json:"airdrop"`
 
 	// Lux EVM APIs
-	SnowmanAPIEnabled bool   `json:"snowman-api-enabled"`
+	ChainAPIEnabled bool   `json:"chain-api-enabled"`
 	WarpAPIEnabled    bool   `json:"warp-api-enabled"`
 	AdminAPIEnabled   bool   `json:"admin-api-enabled"`
 	AdminAPIDir       string `json:"admin-api-dir"`

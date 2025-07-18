@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/snow/choices"
-	"github.com/luxfi/node/snow/consensus/snowman"
+	"github.com/luxfi/node/consensus/chain"
 	commonEng "github.com/luxfi/node/snow/engine/common"
 	"github.com/luxfi/node/snow/validators"
 	luxConstants "github.com/luxfi/node/utils/constants"
@@ -338,7 +338,7 @@ func TestVMUpgrades(t *testing.T) {
 	}
 }
 
-func issueAndAccept(t *testing.T, issuer <-chan commonEng.Message, vm *VM) snowman.Block {
+func issueAndAccept(t *testing.T, issuer <-chan commonEng.Message, vm *VM) chain.Block {
 	t.Helper()
 	<-issuer
 
