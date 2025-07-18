@@ -7,21 +7,18 @@ import (
 	"encoding/binary"
 	"math/rand"
 	"testing"
-<<<<<<< HEAD:trie/test_trie.go
-	"github.com/luxfi/node/utils/wrappers"
+	
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxfi/evm/trie/trienode"
-=======
-	"github.com/luxfi/evm/interfaces/trie"
-	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/luxfi/evm/internal/testutils"
-	"github.com/holiman/uint256"
->>>>>>> v0.7.5:sync/syncutils/test_trie.go
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/holiman/uint256"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/evm/interfaces/trie"
+	"github.com/luxfi/evm/internal/testutils"
+	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/stretchr/testify/assert"
 )
 

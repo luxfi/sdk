@@ -6,13 +6,11 @@ package warp
 import (
 	"fmt"
 	"testing"
-<<<<<<< HEAD:x/warp/config_test.go
+	
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/testutils"
 	"github.com/luxfi/evm/utils"
-=======
->>>>>>> v0.7.5:precompile/contracts/warp/config_test.go
 	"go.uber.org/mock/gomock"
 )
 

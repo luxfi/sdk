@@ -33,19 +33,15 @@ import (
 	"math/big"
 	mrand "math/rand"
 	"testing"
-<<<<<<< HEAD:core/types/hashing_test.go
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/interfaces/trie"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-=======
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/evm/interfaces/trie"
 	"github.com/ethereum/go-ethereum/triedb"
->>>>>>> v0.7.5:plugin/evm/customtypes/hashing_test.go
 )
 
 func TestDeriveSha(t *testing.T) {

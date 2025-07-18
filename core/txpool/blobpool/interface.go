@@ -28,15 +28,13 @@ package blobpool
 
 import (
 	"math/big"
-<<<<<<< HEAD:core/rawdb/databases_non64bit.go
-	"github.com/ethereum/go-ethereum/ethdb"
-=======
+	
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/params"
->>>>>>> v0.7.5:core/txpool/blobpool/interface.go
 )
 
 // BlockChain defines the minimal set of methods needed to back a blob pool with

@@ -28,11 +28,8 @@ package legacypool
 
 import (
 	"sync"
-<<<<<<< HEAD:core/txpool/noncer.go
 	"github.com/luxfi/evm/core/state"
 	"github.com/ethereum/go-ethereum/common"
-=======
->>>>>>> v0.7.5:core/txpool/legacypool/noncer.go
 )
 
 // noncer is a tiny virtual state database to manage the executable nonces of

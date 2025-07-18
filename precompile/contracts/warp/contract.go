@@ -7,7 +7,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-<<<<<<< HEAD:x/warp/contract.go
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/evm/accounts/abi"
@@ -16,10 +15,8 @@ import (
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
-=======
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
->>>>>>> v0.7.5:precompile/contracts/warp/contract.go
 )
 
 const (

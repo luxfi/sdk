@@ -6,14 +6,12 @@ package extras
 import (
 	"fmt"
 	"reflect"
-<<<<<<< HEAD:params/state_upgrade.go
-	"github.com/luxfi/evm/utils"
+	
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
-=======
 	ethparams "github.com/ethereum/go-ethereum/params"
->>>>>>> v0.7.5:params/extras/state_upgrade.go
+	"github.com/luxfi/evm/utils"
 )
 
 // StateUpgrade describes the modifications to be made to the state during

@@ -7,24 +7,19 @@ import (
 	"context"
 	"math"
 	"testing"
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/luxfi/node/utils/set"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-=======
 	"github.com/luxfi/node/snow/validators/validatorsmock"
 	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 // This test copies the test coverage from https://github.com/luxfi/node/blob/v1.10.0/vms/platformvm/warp/signature_test.go#L137.
 // These tests are only expected to fail if there is a breaking change in Lux that unexpectedly changes behavior.
-=======
 type signatureTest struct {
 	name         string
 	stateF       func(*gomock.Controller) validators.State
@@ -37,7 +32,6 @@ type signatureTest struct {
 
 // This test copies the test coverage from https://github.com/luxfi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
 // These tests are only expected to fail if there is a breaking change in AvalancheGo that unexpectedly changes behavior.
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 func TestSignatureVerification(t *testing.T) {
 	tests := []signatureTest{
 		{
@@ -131,11 +125,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrWeightOverflow,
-=======
 			canonicalErr: avalancheWarp.ErrWeightOverflow,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "invalid bit set index",
@@ -165,11 +156,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrInvalidBitSet,
-=======
 			verifyErr: avalancheWarp.ErrInvalidBitSet,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "unknown index",
@@ -202,11 +190,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrUnknownValidator,
-=======
 			verifyErr: avalancheWarp.ErrUnknownValidator,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "insufficient weight",
@@ -252,11 +237,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrInsufficientWeight,
-=======
 			verifyErr: avalancheWarp.ErrInsufficientWeight,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "can't parse sig",
@@ -290,11 +272,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrParseSignature,
-=======
 			verifyErr: avalancheWarp.ErrParseSignature,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "no validators",
@@ -376,11 +355,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrInvalidSignature,
-=======
 			verifyErr: avalancheWarp.ErrInvalidSignature,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "invalid signature (missing one)",
@@ -421,11 +397,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrInvalidSignature,
-=======
 			verifyErr: avalancheWarp.ErrInvalidSignature,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "invalid signature (extra one)",
@@ -473,11 +446,8 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-<<<<<<< HEAD:x/warp/signature_verification_test.go
 			err: luxWarp.ErrInvalidSignature,
-=======
 			verifyErr: avalancheWarp.ErrInvalidSignature,
->>>>>>> v0.7.5:precompile/contracts/warp/signature_verification_test.go
 		},
 		{
 			name: "valid signature",

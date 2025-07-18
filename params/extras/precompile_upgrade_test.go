@@ -6,13 +6,11 @@ package extras
 import (
 	"math/big"
 	"testing"
-<<<<<<< HEAD:params/precompile_upgrade_test.go
+	
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
-=======
->>>>>>> v0.7.5:params/extras/precompile_upgrade_test.go
 	"github.com/stretchr/testify/require"
 )
 

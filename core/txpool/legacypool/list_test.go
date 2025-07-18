@@ -30,13 +30,10 @@ import (
 	"math/big"
 	"math/rand"
 	"testing"
-<<<<<<< HEAD:core/txpool/list_test.go
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-=======
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
->>>>>>> v0.7.5:core/txpool/legacypool/list_test.go
 )
 
 // Tests that transactions can be added to strict lists and list contents and

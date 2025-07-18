@@ -11,19 +11,19 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
+	"github.com/luxfi/evm/plugin/evm/config"
+	"github.com/luxfi/evm/plugin/evm/database"
 	"github.com/luxfi/node/api/metrics"
 	avalanchedatabase "github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/factory"
 	"github.com/luxfi/node/database/pebbledb"
+	"github.com/luxfi/node/database/leveldb"
 	"github.com/luxfi/node/database/prefixdb"
 	"github.com/luxfi/node/database/versiondb"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxfi/evm/plugin/evm/config"
-	"github.com/luxfi/evm/plugin/evm/database"
 )
 
 const (
@@ -220,16 +220,15 @@ func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGather
 		}
 	}
 
-	db, err := factory.New(
-		dbConfig.Name,
-		dbPath,
-		dbConfig.ReadOnly,
-		dbConfigBytes,
-		gatherer,
-		logger,
-		dbMetricsPrefix,
-		meterDBGatherer,
-	)
+	var db avalanchedatabase.Database
+	switch dbConfig.Name {
+	case pebbledb.Name:
+		db, err = pebbledb.New(dbPath, dbConfigBytes, logger, gatherer)
+	case leveldb.Name:
+		db, err = leveldb.New(dbPath, dbConfigBytes, logger, gatherer)
+	default:
+		return nil, fmt.Errorf("unknown database type: %s", dbConfig.Name)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create database: %w", err)
 	}

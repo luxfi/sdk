@@ -31,13 +31,11 @@ import (
 	"io"
 	"io/fs"
 	"os"
-<<<<<<< HEAD:core/txpool/journal.go
-	"github.com/ethereum/go-ethereum/core/types"
+	
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
-=======
->>>>>>> v0.7.5:core/txpool/legacypool/journal.go
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // errNoActiveJournal is returned if a transaction is attempted to be inserted

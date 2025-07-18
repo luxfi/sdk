@@ -39,7 +39,6 @@ func init() {
 	}
 }
 
-<<<<<<< HEAD
 func TestClearDB(t *testing.T) {
 	db := memdb.New()
 
@@ -84,8 +83,6 @@ func TestClearDB(t *testing.T) {
 	}
 }
 
-=======
->>>>>>> v0.7.5
 func TestAddAndGetValidMessage(t *testing.T) {
 	db := memdb.New()
 
