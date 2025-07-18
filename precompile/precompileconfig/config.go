@@ -5,8 +5,6 @@
 package precompileconfig
 
 import (
-	"github.com/luxfi/node/chains/atomic"
-	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/snow/engine/snowman/block"
 	"github.com/luxfi/node/vms/platformvm/warp"

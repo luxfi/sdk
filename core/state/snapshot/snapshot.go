@@ -36,8 +36,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/luxfi/evm/utils"
+	"github.com/ethereum/go-ethereum/triedb"
+	ethsnapshot "github.com/ethereum/go-ethereum/core/state/snapshot"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )
@@ -311,13 +311,16 @@ func (t *Tree) Snapshots(blockHash common.Hash, limits int, nodisk bool) []Snaps
 	return ret
 }
 
+// SnapshotUpdateOption is an option to be passed to the Update method.
+type SnapshotUpdateOption interface{}
+
 type blockHashes struct {
 	blockHash       common.Hash
 	parentBlockHash common.Hash
 }
 
-func WithBlockHashes(blockHash, parentBlockHash common.Hash) stateconf.SnapshotUpdateOption {
-	return stateconf.WithSnapshotUpdatePayload(blockHashes{blockHash, parentBlockHash})
+func WithBlockHashes(blockHash, parentBlockHash common.Hash) SnapshotUpdateOption {
+	return blockHashes{blockHash, parentBlockHash}
 }
 
 // Update adds a new snapshot into the tree, if that can be linked to an existing
@@ -328,16 +331,15 @@ func (t *Tree) Update(
 	destructs map[common.Hash]struct{},
 	accounts map[common.Hash][]byte,
 	storage map[common.Hash]map[common.Hash][]byte,
-	opts ...stateconf.SnapshotUpdateOption,
+	opts ...SnapshotUpdateOption,
 ) error {
 	if len(opts) == 0 {
 		return fmt.Errorf("missing block hashes")
 	}
 
-	payload := stateconf.ExtractSnapshotUpdatePayload(opts[0])
-	p, ok := payload.(blockHashes)
+	p, ok := opts[0].(blockHashes)
 	if !ok {
-		return fmt.Errorf("invalid block hashes payload type: %T", payload)
+		return fmt.Errorf("invalid block hashes payload type: %T", opts[0])
 	}
 
 	return t.UpdateWithBlockHashes(p.blockHash, blockRoot, p.parentBlockHash, destructs, accounts, storage)
@@ -634,7 +636,7 @@ func diffToDisk(bottom *diffLayer) (*diskLayer, bool, error) {
 	base.abortGeneration()
 
 	// Put the deletion in the batch writer, flush all updates in the final step.
-	customrawdb.DeleteSnapshotBlockHash(batch)
+	DeleteSnapshotBlockHash(batch)
 	rawdb.DeleteSnapshotRoot(batch)
 
 	// Mark the original base as stale as we're going to create a new wrapper
@@ -726,7 +728,7 @@ func diffToDisk(bottom *diffLayer) (*diskLayer, bool, error) {
 		}
 	}
 	// Update the snapshot block marker and write any remainder data
-	customrawdb.WriteSnapshotBlockHash(batch, bottom.blockHash)
+	WriteSnapshotBlockHash(batch, bottom.blockHash)
 	rawdb.WriteSnapshotRoot(batch, bottom.root)
 
 	// Write out the generator progress marker and report

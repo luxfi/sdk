@@ -4,26 +4,44 @@
 package params
 
 import (
-	"encoding/json"
-	"errors"
 	"math/big"
+	"sync"
 
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
 )
 
 const (
-	maxJSONLen = 64 * 1024 * 1024 // 64MB
-
 	// TODO: Value to pass to geth's Rules by default where the appropriate
 	// context is not available in the lux code. (similar to context.TODO())
 	IsMergeTODO = true
 )
 
 var (
-	DefaultChainID   = big.NewInt(43214)
-	DefaultFeeConfig = extras.DefaultFeeConfig
+	DefaultChainID = big.NewInt(43214)
+	
+	// Simple payloads system to store extra data per ChainConfig
+	payloads = &chainConfigPayloads{
+		extras: make(map[*ChainConfig]*extras.ChainConfig),
+	}
 )
+
+type chainConfigPayloads struct {
+	mu     sync.RWMutex
+	extras map[*ChainConfig]*extras.ChainConfig
+}
+
+func (p *chainConfigPayloads) Get(c *ChainConfig) *extras.ChainConfig {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.extras[c]
+}
+
+func (p *chainConfigPayloads) Set(c *ChainConfig, extra *extras.ChainConfig) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.extras[c] = extra
+}
 
 // SetEthUpgrades enables Etheruem network upgrades using the same time as
 // the Avalanche network upgrade that enables them.
@@ -47,10 +65,10 @@ func SetEthUpgrades(c *ChainConfig, luxUpgrades extras.NetworkUpgrades) {
 }
 
 func GetExtra(c *ChainConfig) *extras.ChainConfig {
-	ex := payloads.ChainConfig.Get(c)
+	ex := payloads.Get(c)
 	if ex == nil {
 		ex = &extras.ChainConfig{}
-		payloads.ChainConfig.Set(c, ex)
+		payloads.Set(c, ex)
 	}
 	return ex
 }
@@ -63,77 +81,8 @@ func Copy(c *ChainConfig) ChainConfig {
 
 // WithExtra sets the extra payload on `c` and returns the modified argument.
 func WithExtra(c *ChainConfig, extra *extras.ChainConfig) *ChainConfig {
-	payloads.ChainConfig.Set(c, extra)
+	payloads.Set(c, extra)
 	return c
-}
-
-type ChainConfigWithUpgradesJSON struct {
-	ChainConfig
-	UpgradeConfig extras.UpgradeConfig `json:"upgrades,omitempty"`
-}
-
-// MarshalJSON implements json.Marshaler. This is a workaround for the fact that
-// the embedded ChainConfig struct has a MarshalJSON method, which prevents
-// the default JSON marshalling from working for UpgradeConfig.
-// TODO: consider removing this method by allowing external tag for the embedded
-// ChainConfig struct.
-func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
-	// embed the ChainConfig struct into the response
-	chainConfigJSON, err := json.Marshal(&cu.ChainConfig)
-	if err != nil {
-		return nil, err
-	}
-	if len(chainConfigJSON) > maxJSONLen {
-		return nil, errors.New("value too large")
-	}
-
-	type upgrades struct {
-		UpgradeConfig extras.UpgradeConfig `json:"upgrades"`
-	}
-
-	upgradeJSON, err := json.Marshal(upgrades{cu.UpgradeConfig})
-	if err != nil {
-		return nil, err
-	}
-	if len(upgradeJSON) > maxJSONLen {
-		return nil, errors.New("value too large")
-	}
-
-	// merge the two JSON objects
-	mergedJSON := make([]byte, 0, len(chainConfigJSON)+len(upgradeJSON)+1)
-	mergedJSON = append(mergedJSON, chainConfigJSON[:len(chainConfigJSON)-1]...)
-	mergedJSON = append(mergedJSON, ',')
-	mergedJSON = append(mergedJSON, upgradeJSON[1:]...)
-	return mergedJSON, nil
-}
-
-func (cu *ChainConfigWithUpgradesJSON) UnmarshalJSON(input []byte) error {
-	var cc ChainConfig
-	if err := json.Unmarshal(input, &cc); err != nil {
-		return err
-	}
-
-	type upgrades struct {
-		UpgradeConfig extras.UpgradeConfig `json:"upgrades"`
-	}
-
-	var u upgrades
-	if err := json.Unmarshal(input, &u); err != nil {
-		return err
-	}
-	cu.ChainConfig = cc
-	cu.UpgradeConfig = u.UpgradeConfig
-	return nil
-}
-
-// ToWithUpgradesJSON converts the ChainConfig to ChainConfigWithUpgradesJSON with upgrades explicitly displayed.
-// ChainConfig does not include upgrades in its JSON output.
-// This is a workaround for showing upgrades in the JSON output.
-func ToWithUpgradesJSON(c *ChainConfig) *ChainConfigWithUpgradesJSON {
-	return &ChainConfigWithUpgradesJSON{
-		ChainConfig:   *c,
-		UpgradeConfig: GetExtra(c).UpgradeConfig,
-	}
 }
 
 func SetNetworkUpgradeDefaults(c *ChainConfig) {

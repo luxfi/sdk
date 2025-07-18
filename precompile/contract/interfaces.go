@@ -9,6 +9,8 @@ import (
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/holiman/uint256"
 )
 
 // StatefulPrecompiledContract is the interface for executing a precompiled contract

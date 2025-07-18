@@ -36,6 +36,7 @@ import (
 	"github.com/luxfi/evm/trie/trienode"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/lru"
+	ethstate "github.com/luxfi/geth/core/state"
 )
 
 type (

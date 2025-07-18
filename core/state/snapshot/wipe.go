@@ -42,7 +42,7 @@ import (
 func WipeSnapshot(db ethdb.KeyValueStore, full bool) chan struct{} {
 	// Wipe the snapshot root marker synchronously
 	if full {
-		customrawdb.DeleteSnapshotBlockHash(db)
+		DeleteSnapshotBlockHash(db)
 		rawdb.DeleteSnapshotRoot(db)
 	}
 	// Wipe everything else asynchronously

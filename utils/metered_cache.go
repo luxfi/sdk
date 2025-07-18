@@ -9,8 +9,6 @@ import (
 	"time"
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
 )
 
 // MeteredCache wraps *fastcache.Cache and periodically pulls stats from it.

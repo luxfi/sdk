@@ -6,10 +6,12 @@ package nativeminter
 import (
 	"fmt"
 	"math/big"
+	
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/holiman/uint256"
 )
 
 var _ contract.Configurator = &configurator{}
