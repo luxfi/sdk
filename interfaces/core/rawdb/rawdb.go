@@ -1,6 +1,7 @@
 package rawdb
 
-import "github.com/ethereum/go-ethereum/core/rawdb"
+import "github.com/ethereum/go-ethereum/ethdb"
 
 // Re-export rawdb types
-type Interface = rawdb.Database
+type Database = ethdb.Database
+type Interface = ethdb.Database

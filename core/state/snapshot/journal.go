@@ -33,7 +33,7 @@ import (
 	"time"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -58,7 +58,7 @@ type journalGenerator struct {
 func loadSnapshot(diskdb ethdb.KeyValueStore, triedb *triedb.Database, cache int, blockHash, root common.Hash, noBuild bool) (snapshot, bool, error) {
 	// Retrieve the block number and hash of the snapshot, failing if no snapshot
 	// is present in the database (or crashed mid-update).
-	baseBlockHash := customrawdb.ReadSnapshotBlockHash(diskdb)
+	baseBlockHash := ReadSnapshotBlockHash(diskdb)
 	if baseBlockHash == (common.Hash{}) {
 		return nil, false, errors.New("missing or corrupted snapshot, no snapshot block hash")
 	}

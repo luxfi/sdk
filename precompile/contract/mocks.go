@@ -10,6 +10,8 @@ import (
 	snow "github.com/luxfi/node/snow"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
 	common "github.com/ethereum/go-ethereum/common"
+	types "github.com/ethereum/go-ethereum/core/types"
+	"github.com/holiman/uint256"
 	gomock "go.uber.org/mock/gomock"
 )
 

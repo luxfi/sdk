@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/ethereum/go-ethereum/common"
-	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/utils"
+	gethparams "github.com/luxfi/geth/params"
 )
 
 var (
@@ -136,24 +136,14 @@ type ChainConfig struct {
 	UpgradeConfig      `json:"-"`           // Config specified in upgradeBytes (lux network upgrades or enable/disabling precompiles). Not serialized.
 }
 
-func (c *ChainConfig) CheckConfigCompatible(newConfig *ethparams.ChainConfig, headNumber *big.Int, headTimestamp uint64) *ethparams.ConfigCompatError {
+func (c *ChainConfig) CheckConfigCompatible(newConfig *ChainConfig, headNumber *big.Int, headTimestamp uint64) *gethparams.ConfigCompatError {
 	if c == nil {
 		return nil
 	}
-	newcfg, ok := newConfig.Hooks().(*ChainConfig)
-	if !ok {
-		// Proper registration of the extras on the libevm side should prevent this from happening.
-		// Return an error to prevent the chain from starting, just in case.
-		return ethparams.NewTimestampCompatError(
-			fmt.Sprintf("ChainConfig.Hooks() is not of the expected type *extras.ChainConfig, got %T", newConfig.Hooks()),
-			utils.NewUint64(0),
-			nil,
-		)
-	}
-	return c.checkConfigCompatible(newcfg, headNumber, headTimestamp)
+	return c.checkConfigCompatible(newConfig, headNumber, headTimestamp)
 }
 
-func (c *ChainConfig) checkConfigCompatible(newcfg *ChainConfig, headNumber *big.Int, headTimestamp uint64) *ethparams.ConfigCompatError {
+func (c *ChainConfig) checkConfigCompatible(newcfg *ChainConfig, headNumber *big.Int, headTimestamp uint64) *gethparams.ConfigCompatError {
 	if err := c.checkNetworkUpgradesCompatible(&newcfg.NetworkUpgrades, headTimestamp); err != nil {
 		return err
 	}

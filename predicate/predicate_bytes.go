@@ -5,7 +5,7 @@ package predicate
 
 import (
 	"fmt"
-	"github.com/luxfi/evm/params"
+	
 	"github.com/ethereum/go-ethereum/common"
 )
 
