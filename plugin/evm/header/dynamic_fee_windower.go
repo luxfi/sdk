@@ -9,7 +9,6 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
@@ -63,7 +62,10 @@ func baseFeeFromWindow(config *extras.ChainConfig, feeConfig commontype.FeeConfi
 		num.Mul(num, parent.BaseFee)
 		num.Div(num, parentGasTargetBig)
 		num.Div(num, baseFeeChangeDenominator)
-		baseFeeDelta := math.BigMax(num, common.Big1)
+		baseFeeDelta := num
+		if num.Cmp(common.Big1) < 0 {
+			baseFeeDelta = common.Big1
+		}
 
 		baseFee.Add(baseFee, baseFeeDelta)
 	} else {
@@ -72,7 +74,10 @@ func baseFeeFromWindow(config *extras.ChainConfig, feeConfig commontype.FeeConfi
 		num.Mul(num, parent.BaseFee)
 		num.Div(num, parentGasTargetBig)
 		num.Div(num, baseFeeChangeDenominator)
-		baseFeeDelta := math.BigMax(num, common.Big1)
+		baseFeeDelta := num
+		if num.Cmp(common.Big1) < 0 {
+			baseFeeDelta = common.Big1
+		}
 
 		if timestamp < parent.Time {
 			// This should never happen as the fee window calculations should

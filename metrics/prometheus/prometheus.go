@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 	
-	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
 )
@@ -66,10 +66,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 	name = strings.ReplaceAll(name, "/", "_")
 
 	switch m := metric.(type) {
-	case metrics.NilCounter, metrics.NilCounterFloat64, metrics.NilEWMA,
-		metrics.NilGauge, metrics.NilGaugeFloat64, metrics.NilGaugeInfo,
-		metrics.NilHealthcheck, metrics.NilHistogram, metrics.NilMeter,
-		metrics.NilResettingTimer, metrics.NilSample, metrics.NilTimer:
+	case nil:
 		return nil, fmt.Errorf("%w: %q metric is nil", errMetricSkip, name)
 	case metrics.Counter:
 		return &dto.MetricFamily{

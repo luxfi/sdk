@@ -4,23 +4,26 @@
 package customtypes
 
 import (
+	"bytes"
 	"io"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // GetHeaderExtra returns the [HeaderExtra] from the given [Header].
 func GetHeaderExtra(h *ethtypes.Header) *HeaderExtra {
-	return extras.Header.Get(h)
+	// TODO: extras API doesn't exist in go-ethereum v1.16.1
+	return nil
 }
 
 // SetHeaderExtra sets the given [HeaderExtra] on the [Header].
 func SetHeaderExtra(h *ethtypes.Header, extra *HeaderExtra) {
-	extras.Header.Set(h, extra)
+	// TODO: extras API doesn't exist in go-ethereum v1.16.1
 }
 
 // WithHeaderExtra sets the given [HeaderExtra] on the [Header]
@@ -208,5 +211,15 @@ type headerMarshaling struct {
 // This function MUST be exported and is used in [HeaderSerializable.EncodeJSON] which is
 // generated to the file gen_header_json.go.
 func (h *HeaderSerializable) Hash() common.Hash {
-	return ethtypes.RLPHash(h)
+	// RLPHash was removed in newer versions, manually implement it
+	return rlpHash(h)
+}
+
+// rlpHash encodes x and hashes the encoded bytes.
+func rlpHash(x interface{}) common.Hash {
+	var buf bytes.Buffer
+	if err := rlp.Encode(&buf, x); err != nil {
+		panic(err)
+	}
+	return crypto.Keccak256Hash(buf.Bytes())
 }

@@ -42,6 +42,8 @@ import (
 	"github.com/luxfi/evm/consensus"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/customlogs"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
@@ -50,6 +52,9 @@ import (
 	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/triedb/hashdb"
+	"github.com/ethereum/go-ethereum/triedb/pathdb"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/lru"
 	"github.com/ethereum/go-ethereum/event"
@@ -203,18 +208,16 @@ type CacheConfig struct {
 func (c *CacheConfig) triedbConfig() *triedb.Config {
 	config := &triedb.Config{Preimages: c.Preimages}
 	if c.StateScheme == rawdb.HashScheme || c.StateScheme == "" {
-		config.DBOverride = hashdb.Config{
-			CleanCacheSize:                  c.TrieCleanLimit * 1024 * 1024,
-			StatsPrefix:                     trieCleanCacheStatsNamespace,
-			ReferenceRootAtomicallyOnUpdate: true,
-		}.BackendConstructor
+		config.HashDB = &hashdb.Config{
+			CleanCacheSize: c.TrieCleanLimit * 1024 * 1024,
+		}
 	}
 	if c.StateScheme == rawdb.PathScheme {
-		config.DBOverride = pathdb.Config{
-			StateHistory:   c.StateHistory,
-			CleanCacheSize: c.TrieCleanLimit * 1024 * 1024,
-			DirtyCacheSize: c.TrieDirtyLimit * 1024 * 1024,
-		}.BackendConstructor
+		config.PathDB = &pathdb.Config{
+			StateHistory:    c.StateHistory,
+			TrieCleanSize:   c.TrieCleanLimit * 1024 * 1024,
+			WriteBufferSize: c.TrieDirtyLimit * 1024 * 1024,
+		}
 	}
 	return config
 }
@@ -1114,7 +1117,11 @@ func TotalFees(block *types.Block, receipts []*types.Receipt) (*big.Int, error) 
 			// legacy block, no baseFee
 			minerFee = tx.GasPrice()
 		} else {
-			minerFee = new(big.Int).Add(baseFee, tx.EffectiveGasTipValue(baseFee))
+			effectiveTip, err := tx.EffectiveGasTip(baseFee)
+			if err != nil {
+				return nil, err
+			}
+			minerFee = new(big.Int).Add(baseFee, effectiveTip)
 		}
 		feesWei.Add(feesWei, new(big.Int).Mul(new(big.Int).SetUint64(receipts[i].GasUsed), minerFee))
 	}

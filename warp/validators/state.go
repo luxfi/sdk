@@ -6,7 +6,6 @@ package validators
 import (
 	"context"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/utils/constants"
 )

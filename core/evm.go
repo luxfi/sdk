@@ -30,49 +30,19 @@ import (
 	"bytes"
 	"math/big"
 	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core/extstate"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/evm/params"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/predicate"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	//"github.com/ethereum/go-ethereum/log"
+	"github.com/holiman/uint256"
 )
 
-func init() {
-	vm.RegisterHooks(hooks{})
-}
-
-type hooks struct{}
-
-// OverrideNewEVMArgs is a hook that is called in [vm.NewEVM].
-// It allows for the modification of the EVM arguments before the EVM is created.
-// Specifically, we set Random to be the same as Difficulty since Shanghai.
-// This allows using the same jump table as upstream.
-// Then we set Difficulty to 0 as it is post Merge in upstream.
-// Additionally we wrap the StateDB with the appropriate StateDB wrapper,
-// which is used in evm to process historical pre-AP1 blocks with the
-// [StateDbAP1.GetCommittedState] method as it was historically.
-func (hooks) OverrideNewEVMArgs(args *vm.NewEVMArgs) *vm.NewEVMArgs {
-	rules := args.ChainConfig.Rules(args.BlockContext.BlockNumber, params.IsMergeTODO, args.BlockContext.Time)
-	args.StateDB = wrapStateDB(rules, args.StateDB)
-
-	if rules.IsShanghai {
-		args.BlockContext.Random = new(common.Hash)
-		args.BlockContext.Random.SetBytes(args.BlockContext.Difficulty.Bytes())
-		args.BlockContext.Difficulty = new(big.Int)
-	}
-
-	return args
-}
-
-func (hooks) OverrideEVMResetArgs(rules params.Rules, args *vm.EVMResetArgs) *vm.EVMResetArgs {
-	args.StateDB = wrapStateDB(rules, args.StateDB)
-	return args
-}
-
-func wrapStateDB(rules params.Rules, db vm.StateDB) vm.StateDB {
-	return extstate.New(db.(extstate.VmStateDB))
-}
+// REMOVED: vm.RegisterHooks and hook functions are not available in ethereum v1.16.1
+// The StateDB wrapping and other customizations need to be done when creating the EVM
 
 // ChainContext supports retrieving headers and consensus parameters from the
 // current blockchain to be used during transaction processing.
@@ -217,6 +187,6 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *uint256.Int) bool {
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
 func Transfer(db vm.StateDB, sender, recipient common.Address, amount *uint256.Int) {
-	db.SubBalance(sender, amount)
-	db.AddBalance(recipient, amount)
+	db.SubBalance(sender, amount, vm.BalanceChangeUnspecified)
+	db.AddBalance(recipient, amount, vm.BalanceChangeUnspecified)
 }

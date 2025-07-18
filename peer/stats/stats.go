@@ -15,8 +15,8 @@ type RequestHandlerStats interface {
 }
 
 type requestHandlerStats struct {
-	timeUntilDeadline metrics.Timer
-	droppedRequests   metrics.Counter
+	timeUntilDeadline *metrics.Timer
+	droppedRequests   *metrics.Counter
 }
 
 func (h *requestHandlerStats) IncDeadlineDroppedRequest() {

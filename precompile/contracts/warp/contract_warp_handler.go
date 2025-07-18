@@ -5,14 +5,14 @@ package warp
 
 import (
 	"fmt"
+	"math"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
+	ethmath "github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/vm"
 )
 
@@ -69,7 +69,7 @@ func handleWarpMessage(accessibleState contract.AccessibleState, input []byte, s
 
 	// Note: we charge for the size of the message during both predicate verification and each time the message is read during
 	// EVM execution because each execution incurs an additional read cost.
-	msgBytesGas, overflow := math.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
+	msgBytesGas, overflow := ethmath.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
 	if overflow {
 		return nil, 0, vm.ErrOutOfGas
 	}

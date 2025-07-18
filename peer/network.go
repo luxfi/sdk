@@ -77,7 +77,7 @@ type network struct {
 	outstandingRequestHandlers map[uint32]message.ResponseHandler // maps node requestID => message.ResponseHandler
 	activeAppRequests          *semaphore.Weighted                // controls maximum number of active outbound requests
 	activeCrossChainRequests   *semaphore.Weighted                // controls maximum number of active outbound cross chain requests
-	network                    *p2p.Network
+	p2pNetwork                 *p2p.Network
 	appSender                  common.AppSender                 // node AppSender for sending messages
 	codec                      codec.Manager                    // Codec used for parsing messages
 	crossChainCodec            codec.Manager                    // Codec used for parsing cross chain messages
@@ -239,14 +239,15 @@ func (n *network) SendCrossChainRequest(ctx context.Context, chainID ids.ID, req
 
 	// Send cross chain request to [chainID].
 	// On failure, release the slot from [activeCrossChainRequests] and delete request from [outstandingRequestHandlers].
-	if err := n.appSender.SendCrossChainAppRequest(ctx, chainID, requestID, request); err != nil {
-		n.activeCrossChainRequests.Release(1)
-		delete(n.outstandingRequestHandlers, requestID)
-		return err
-	}
-
-	log.Trace("sent request message to chain", "chainID", chainID, "crossChainRequestID", requestID)
-	return nil
+	// FIXME: SendCrossChainAppRequest is not available in luxfi/node v1.13.2
+	// if err := n.appSender.SendCrossChainAppRequest(ctx, chainID, requestID, request); err != nil {
+	// 	n.activeCrossChainRequests.Release(1)
+	// 	delete(n.outstandingRequestHandlers, requestID)
+	// 	return err
+	// }
+	n.activeCrossChainRequests.Release(1)
+	delete(n.outstandingRequestHandlers, requestID)
+	return errors.New("cross-chain requests not supported in current version")
 }
 
 // CrossChainAppRequest notifies the VM when another chain in the network requests for data.
@@ -259,31 +260,33 @@ func (n *network) CrossChainAppRequest(ctx context.Context, requestingChainID id
 
 	log.Trace("received CrossChainAppRequest from chain", "requestingChainID", requestingChainID, "requestID", requestID, "requestLen", len(request))
 
-	var req message.CrossChainRequest
-	if _, err := n.crossChainCodec.Unmarshal(request, &req); err != nil {
-		log.Trace("failed to unmarshal CrossChainAppRequest", "requestingChainID", requestingChainID, "requestID", requestID, "requestLen", len(request), "err", err)
-		return nil
-	}
+	// FIXME: CrossChainRequest type is not available
+	// var req message.CrossChainRequest
+	// if _, err := n.crossChainCodec.Unmarshal(request, &req); err != nil {
+	// 	log.Trace("failed to unmarshal CrossChainAppRequest", "requestingChainID", requestingChainID, "requestID", requestID, "requestLen", len(request), "err", err)
+	// 	return nil
+	// }
 
-	bufferedDeadline, err := calculateTimeUntilDeadline(deadline, n.crossChainStats)
-	if err != nil {
-		log.Trace("deadline to process CrossChainAppRequest has expired, skipping", "requestingChainID", requestingChainID, "requestID", requestID, "err", err)
-		return nil
-	}
+	// bufferedDeadline, err := calculateTimeUntilDeadline(deadline, n.crossChainStats)
+	// if err != nil {
+	// 	log.Trace("deadline to process CrossChainAppRequest has expired, skipping", "requestingChainID", requestingChainID, "requestID", requestID, "err", err)
+	// 	return nil
+	// }
 
-	log.Trace("processing incoming CrossChainAppRequest", "requestingChainID", requestingChainID, "requestID", requestID, "req", req)
-	handleCtx, cancel := context.WithDeadline(context.Background(), bufferedDeadline)
-	defer cancel()
+	// log.Trace("processing incoming CrossChainAppRequest", "requestingChainID", requestingChainID, "requestID", requestID, "req", req)
+	// handleCtx, cancel := context.WithDeadline(context.Background(), bufferedDeadline)
+	// defer cancel()
 
-	responseBytes, err := req.Handle(handleCtx, requestingChainID, requestID, n.crossChainRequestHandler)
-	switch {
-	case err != nil && err != context.DeadlineExceeded:
-		return err // Return a fatal error
-	case responseBytes != nil:
-		return n.appSender.SendCrossChainAppResponse(ctx, requestingChainID, requestID, responseBytes) // Propagate fatal error
-	default:
-		return nil
-	}
+	// responseBytes, err := req.Handle(handleCtx, requestingChainID, requestID, n.crossChainRequestHandler)
+	// switch {
+	// case err != nil && err != context.DeadlineExceeded:
+	// 	return err // Return a fatal error
+	// case responseBytes != nil:
+	// 	return n.appSender.SendCrossChainAppResponse(ctx, requestingChainID, requestID, responseBytes) // Propagate fatal error
+	// default:
+	// 	return nil
+	// }
+	return errors.New("cross-chain requests not supported in current version")
 }
 
 // CrossChainAppRequestFailed can be called by the node -> VM in following cases:
@@ -460,7 +463,14 @@ func (n *network) Gossip(gossip []byte) error {
 		return nil
 	}
 
-	return n.appSender.SendAppGossip(context.TODO(), gossip)
+	// Send gossip to all peers
+	sendConfig := common.SendConfig{
+		NodeIDs:       nil,
+		Validators:    100, // Send to all validators
+		NonValidators: 100, // Send to all non-validators
+		Peers:         0,
+	}
+	return n.appSender.SendAppGossip(context.TODO(), sendConfig, gossip)
 }
 
 // AppGossip is called by node -> VM when there is an incoming AppGossip from a peer

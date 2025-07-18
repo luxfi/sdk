@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/stretchr/testify/require"
 )

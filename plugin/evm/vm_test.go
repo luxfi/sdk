@@ -21,7 +21,6 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/luxfi/node/api/keystore"
 	"github.com/luxfi/node/chains/atomic"
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/database/memdb"

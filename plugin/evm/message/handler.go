@@ -5,7 +5,6 @@ package message
 
 import (
 	"context"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxfi/node/ids"
 )
 
@@ -33,6 +32,22 @@ type ResponseHandler interface {
 	OnResponse(response []byte) error
 	// OnFailure is invoked when there was a failure in processing a request
 	OnFailure() error
+}
+
+// CrossChainRequestHandler interface handles incoming cross chain requests
+type CrossChainRequestHandler interface {
+	HandleCrossChainRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, request []byte) ([]byte, error)
+}
+
+// GossipHandler interface handles incoming gossip messages
+type GossipHandler interface {
+	HandleGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte)
+}
+
+// GossipMessage is a marker interface for gossip messages
+type GossipMessage interface {
+	// Handle is called to process this gossip message
+	Handle(handler GossipHandler, nodeID ids.NodeID) error
 }
 
 type NoopRequestHandler struct{}

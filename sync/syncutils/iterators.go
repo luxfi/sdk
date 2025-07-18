@@ -5,6 +5,7 @@ package syncutils
 
 import (
 	"github.com/luxfi/evm/core/state/snapshot"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
 )
 

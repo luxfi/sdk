@@ -3,7 +3,10 @@
 
 package utils
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 const (
 	// Timeout to boot the Lux node
@@ -12,5 +15,10 @@ const (
 	// Timeout for the health API to check the Lux is ready
 	HealthCheckTimeout = 5 * time.Second
 
-	DefaultLocalNodeURI = "http://127.0.0.1:9650"
+	DefaultLocalNodeURI = "http://127.0.0.1:9630"
 )
+
+// GetDefaultChainURI returns the default chain URI for the given blockchain ID
+func GetDefaultChainURI(blockchainID string) string {
+	return fmt.Sprintf("%s/ext/bc/%s/rpc", DefaultLocalNodeURI, blockchainID)
+}

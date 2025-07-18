@@ -2,9 +2,9 @@
 // See the file LICENSE for licensing terms.
 package prometheus
 
-import "github.com/luxfi/evm/interfaces/metrics"
+import "github.com/ethereum/go-ethereum/metrics"
 
-var _ Registry = metrics.Registry(nil)
+var _ Registry = (*metrics.StandardRegistry)(nil)
 
 type Registry interface {
 	// Call the given function for each registered metric.

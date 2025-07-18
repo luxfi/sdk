@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/evm/cmd/simulator/txs"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/ethclient"
-	"github.com/luxfi/evm/params"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )

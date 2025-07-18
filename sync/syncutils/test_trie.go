@@ -8,16 +8,15 @@ import (
 	"math/rand"
 	"testing"
 	
-	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/holiman/uint256"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxfi/evm/interfaces/trie"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/luxfi/evm/internal/testutils"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/ethereum/go-ethereum/trie/trienode"
 	"github.com/luxfi/node/utils/wrappers"
 	"github.com/stretchr/testify/assert"
 )
@@ -63,7 +62,7 @@ func FillTrie(t *testing.T, start, numKeys int, keySize int, trieDB *triedb.Data
 	}
 
 	// Commit the root to [trieDB]
-	nextRoot, nodes, err := testTrie.Commit(false)
+	nextRoot, nodes := testTrie.Commit(false)
 	assert.NoError(t, err)
 	err = trieDB.Update(nextRoot, root, 0, trienode.NewWithNodeSet(nodes), nil)
 	assert.NoError(t, err)
@@ -180,7 +179,7 @@ func FillAccounts(
 		accounts[key] = &acc
 	}
 
-	newRoot, nodes, err := tr.Commit(false)
+	newRoot, nodes := tr.Commit(false)
 	if err != nil {
 		t.Fatalf("error committing trie: %v", err)
 	}

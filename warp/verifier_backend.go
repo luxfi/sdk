@@ -110,22 +110,15 @@ func (b *backend) verifyOffchainAddressedCall(addressedCall *payload.AddressedCa
 }
 
 func (b *backend) verifyUptimeMessage(uptimeMsg *messages.ValidatorUptime) *common.AppError {
-	vdr, currentUptime, _, err := b.validatorReader.GetValidatorAndUptime(uptimeMsg.ValidationID)
-	if err != nil {
-		return &common.AppError{
-			Code:    VerifyErrCode,
-			Message: fmt.Sprintf("failed to get uptime for validationID %s: %s", uptimeMsg.ValidationID, err.Error()),
-		}
+	// FIXME: GetValidatorAndUptime method doesn't exist in validators.State interface
+	// vdr, currentUptime, _, err := b.validatorReader.GetValidatorAndUptime(uptimeMsg.ValidationID)
+	var err error
+	if err == nil {
+		err = fmt.Errorf("GetValidatorAndUptime not implemented")
 	}
-
-	currentUptimeSeconds := uint64(currentUptime.Seconds())
-	// verify the current uptime against the total uptime in the message
-	if currentUptimeSeconds < uptimeMsg.TotalUptime {
-		return &common.AppError{
-			Code:    VerifyErrCode,
-			Message: fmt.Sprintf("current uptime %d is less than queried uptime %d for nodeID %s", currentUptimeSeconds, uptimeMsg.TotalUptime, vdr.NodeID),
-		}
+	b.stats.IncUptimeValidationFail()
+	return &common.AppError{
+		Code:    VerifyErrCode,
+		Message: fmt.Sprintf("uptime verification not implemented: %s", err.Error()),
 	}
-
-	return nil
 }

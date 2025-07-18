@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 var metricsLock sync.Mutex
@@ -20,11 +20,11 @@ func WithMetrics(t *testing.T) {
 	t.Cleanup(func() {
 		metricsLock.Unlock()
 	})
-	if metrics.Enabled {
+	if metrics.Enabled() {
 		return
 	}
-	metrics.Enabled = true
-	t.Cleanup(func() {
-		metrics.Enabled = false
-	})
+	// Enable metrics for the test
+	// Note: There's no public way to disable metrics in go-ethereum v1.16.1
+	// So we just enable it and leave it enabled
+	metrics.Enable()
 }

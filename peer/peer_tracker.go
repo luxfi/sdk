@@ -40,24 +40,24 @@ type peerInfo struct {
 // Note: is not thread safe, caller must handle synchronization.
 type peerTracker struct {
 	peers                  map[ids.NodeID]*peerInfo // all peers we are connected to
-	numTrackedPeers        metrics.Gauge
+	numTrackedPeers        *metrics.Gauge
 	trackedPeers           set.Set[ids.NodeID] // peers that we have sent a request to
-	numResponsivePeers     metrics.Gauge
+	numResponsivePeers     *metrics.Gauge
 	responsivePeers        set.Set[ids.NodeID]     // peers that responded to the last request they were sent
 	bandwidthHeap          utils_math.AveragerHeap // tracks bandwidth peers are responding with
-	averageBandwidthMetric metrics.GaugeFloat64
+	averageBandwidthMetric *metrics.GaugeFloat64
 	averageBandwidth       utils_math.Averager
 }
 
 func NewPeerTracker() *peerTracker {
 	return &peerTracker{
 		peers:                  make(map[ids.NodeID]*peerInfo),
-		numTrackedPeers:        metrics.GetOrRegisterGauge("net_tracked_peers", nil),
+		numTrackedPeers:        metrics.NewGauge(),
 		trackedPeers:           make(set.Set[ids.NodeID]),
-		numResponsivePeers:     metrics.GetOrRegisterGauge("net_responsive_peers", nil),
+		numResponsivePeers:     metrics.NewGauge(),
 		responsivePeers:        make(set.Set[ids.NodeID]),
 		bandwidthHeap:          utils_math.NewMaxAveragerHeap(),
-		averageBandwidthMetric: metrics.GetOrRegisterGaugeFloat64("net_average_bandwidth", nil),
+		averageBandwidthMetric: metrics.NewGaugeFloat64(),
 		averageBandwidth:       utils_math.NewAverager(0, bandwidthHalflife, time.Now()),
 	}
 }

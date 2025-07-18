@@ -33,14 +33,18 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/interfaces"
+	ethereum "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
+
+// NotFound is the error returned when an item is not found.
+var NotFound = errors.New("not found")
 
 // Verify that Client implements required interfaces
 var (
@@ -195,7 +199,7 @@ func (ec *client) BlockReceipts(ctx context.Context, blockNrOrHash rpc.BlockNumb
 	var r []*types.Receipt
 	err := ec.c.CallContext(ctx, &r, "eth_getBlockReceipts", blockNrOrHash.String())
 	if err == nil && r == nil {
-		return nil, ethereum.NotFound
+		return nil, NotFound
 	}
 	return r, err
 }
@@ -220,7 +224,7 @@ func (ec *client) getBlock(ctx context.Context, method string, args ...interface
 	}
 	// When the block is not found, the API returns JSON null.
 	if head == nil {
-		return nil, ethereum.NotFound
+		return nil, NotFound
 	}
 
 	var body rpcBlock
@@ -283,7 +287,7 @@ func (ec *client) HeaderByHash(ctx context.Context, hash common.Hash) (*types.He
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByHash", hash, false)
 	if err == nil && head == nil {
-		err = ethereum.NotFound
+		err = NotFound
 	}
 	return head, err
 }
@@ -294,7 +298,7 @@ func (ec *client) HeaderByNumber(ctx context.Context, number *big.Int) (*types.H
 	var head *types.Header
 	err := ec.c.CallContext(ctx, &head, "eth_getBlockByNumber", ToBlockNumArg(number), false)
 	if err == nil && head == nil {
-		err = ethereum.NotFound
+		err = NotFound
 	}
 	return head, err
 }
@@ -324,7 +328,7 @@ func (ec *client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *
 	if err != nil {
 		return nil, false, err
 	} else if json == nil {
-		return nil, false, ethereum.NotFound
+		return nil, false, NotFound
 	} else if _, r, _ := json.tx.RawSignatureValues(); r == nil {
 		return nil, false, errors.New("server returned transaction without signature")
 	}
@@ -376,7 +380,7 @@ func (ec *client) TransactionInBlock(ctx context.Context, blockHash common.Hash,
 		return nil, err
 	}
 	if json == nil {
-		return nil, ethereum.NotFound
+		return nil, NotFound
 	} else if _, r, _ := json.tx.RawSignatureValues(); r == nil {
 		return nil, errors.New("server returned transaction without signature")
 	}
@@ -392,7 +396,7 @@ func (ec *client) TransactionReceipt(ctx context.Context, txHash common.Hash) (*
 	var r *types.Receipt
 	err := ec.c.CallContext(ctx, &r, "eth_getTransactionReceipt", txHash)
 	if err == nil && r == nil {
-		return nil, ethereum.NotFound
+		return nil, NotFound
 	}
 	return r, err
 }

@@ -32,7 +32,7 @@ import (
 
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
@@ -165,10 +165,14 @@ func (b *nodebuffer) revert(db ethdb.KeyValueReader, nodes map[common.Hash]map[s
 				// In case of database rollback, don't panic if this "clean"
 				// node occurs which is not present in buffer.
 				var nhash common.Hash
+				var nodeData []byte
 				if owner == (common.Hash{}) {
-					_, nhash = rawdb.ReadAccountTrieNode(db, []byte(path))
+					nodeData = rawdb.ReadAccountTrieNode(db, []byte(path))
 				} else {
-					_, nhash = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
+					nodeData = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
+				}
+				if len(nodeData) > 0 {
+					nhash = crypto.Keccak256Hash(nodeData)
 				}
 				// Ignore the clean node in the case described above.
 				if nhash == n.Hash {

@@ -30,9 +30,9 @@ import (
 	"context"
 	"errors"
 	"time"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	ethereum "github.com/luxfi/geth/interfaces"
 	"github.com/ethereum/go-ethereum/log"
 )
 

@@ -33,7 +33,6 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/geth/trie/triestate"
 	"slices"
 )
 
@@ -259,28 +258,31 @@ type history struct {
 }
 
 // newHistory constructs the state history object with provided state change set.
-func newHistory(root common.Hash, parent common.Hash, block uint64, states *triestate.Set) *history {
+func newHistory(root common.Hash, parent common.Hash, block uint64, states *Set) *history {
 	var (
 		accountList []common.Address
 		storageList = make(map[common.Address][]common.Hash)
 		incomplete  []common.Address
 	)
-	for addr := range states.Accounts {
-		accountList = append(accountList, addr)
-	}
+	// FIXME: Can't access unexported stateSet field
+	// for addr := range states.stateSet.accountData {
+	// 	accountList = append(accountList, common.BytesToAddress(addr.Bytes()))
+	// }
 	slices.SortFunc(accountList, common.Address.Cmp)
 
-	for addr, slots := range states.Storages {
-		slist := make([]common.Hash, 0, len(slots))
-		for slotHash := range slots {
-			slist = append(slist, slotHash)
-		}
-		slices.SortFunc(slist, common.Hash.Cmp)
-		storageList[addr] = slist
-	}
-	for addr := range states.Incomplete {
-		incomplete = append(incomplete, addr)
-	}
+	// FIXME: Can't access unexported stateSet field
+	// for addr, slots := range states.stateSet.storageData {
+	// 	slist := make([]common.Hash, 0, len(slots))
+	// 	for slotHash := range slots {
+	// 		slist = append(slist, slotHash)
+	// 	}
+	// 	slices.SortFunc(slist, common.Hash.Cmp)
+	// 	storageList[common.BytesToAddress(addr.Bytes())] = slist
+	// }
+	// FIXME: Incomplete doesn't exist in StateSetWithOrigin
+	// for addr := range states.Incomplete {
+	// 	incomplete = append(incomplete, addr)
+	// }
 	slices.SortFunc(incomplete, common.Address.Cmp)
 
 	return &history{
@@ -291,9 +293,9 @@ func newHistory(root common.Hash, parent common.Hash, block uint64, states *trie
 			block:      block,
 			incomplete: incomplete,
 		},
-		accounts:    states.Accounts,
+		accounts:    make(map[common.Address][]byte), // FIXME: Convert from states.stateSet.accountData
 		accountList: accountList,
-		storages:    states.Storages,
+		storages:    make(map[common.Address]map[common.Hash][]byte), // FIXME: Convert from states.stateSet.storageData
 		storageList: storageList,
 	}
 }

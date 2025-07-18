@@ -32,7 +32,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/core/types"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 var (
