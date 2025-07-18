@@ -40,7 +40,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxfi/evm/interfaces/trie/testutil"
 	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/trie/triestate"
+	"github.com/luxfi/geth/trie/triestate"
 	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 )

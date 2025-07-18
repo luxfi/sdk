@@ -7,7 +7,6 @@ import (
 	"math"
 	"math/big"
 	"testing"
-<<<<<<< HEAD:x/warp/contract_test.go
 	"github.com/luxfi/node/ids"
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
@@ -21,11 +20,9 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
-=======
 	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/luxfi/evm/core/extstate"
->>>>>>> v0.7.5:precompile/contracts/warp/contract_test.go
 	"github.com/stretchr/testify/require"
 )
 

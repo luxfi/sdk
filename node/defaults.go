@@ -15,7 +15,6 @@
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 package node
 
-<<<<<<< HEAD:ethdb/memorydb/memorydb_test.go
 package memorydb
 
 import (
@@ -30,10 +29,8 @@ func TestMemoryDB(t *testing.T) {
 			return New()
 		})
 	})
-=======
 // DefaultConfig contains reasonable default settings.
 var DefaultConfig = Config{
 	BatchRequestLimit:    1000,
 	BatchResponseMaxSize: 25 * 1000 * 1000,
->>>>>>> v0.7.5:node/defaults.go
 }

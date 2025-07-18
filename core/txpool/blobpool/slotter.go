@@ -43,7 +43,6 @@ func newSlotter() func() (uint32, bool) {
 		slotsize += blobSize
 		finished := slotsize > maxBlobsPerTransaction*blobSize+txMaxSize
 
-<<<<<<< HEAD:ethdb/pebble/pebble_test.go
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/ethdb/dbtest"
 	"github.com/cockroachdb/pebble"
@@ -78,8 +77,6 @@ func BenchmarkPebbleDB(b *testing.B) {
 			db: db,
 		}
 	})
-=======
 		return slotsize, finished
 	}
->>>>>>> v0.7.5:core/txpool/blobpool/slotter.go
 }

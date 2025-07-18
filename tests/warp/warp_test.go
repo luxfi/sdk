@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"github.com/luxfi/lux-network-runner/rpcpb"
+	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow/validators"
@@ -107,15 +107,12 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 }, func(envBytes []byte) {
 	// Run in every ginkgo process
 
-<<<<<<< HEAD
 // BeforeSuite starts the default network and adds 10 new nodes as validators with BLS keys
 // registered on the P-Chain.
 // Adds two disjoint sets of 5 of the new validator nodes to validate two new subnets with a
 // a single EVM blockchain.
 var _ = ginkgo.BeforeSuite(func() {
 	ctx := context.Background()
-=======
->>>>>>> v0.7.5
 	require := require.New(ginkgo.GinkgoT())
 	tc := e2e.NewTestContext()
 

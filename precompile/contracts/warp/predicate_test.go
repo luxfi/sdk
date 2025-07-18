@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-<<<<<<< HEAD:x/warp/predicate_test.go
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/snow"
 	"github.com/luxfi/node/snow/engine/snowman/block"
@@ -24,11 +23,9 @@ import (
 	"github.com/luxfi/evm/precompile/testutils"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
-=======
 	"github.com/luxfi/node/snow/validators/validatorstest"
 	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
 	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
->>>>>>> v0.7.5:precompile/contracts/warp/predicate_test.go
 	"github.com/stretchr/testify/require"
 )
 
@@ -110,13 +107,10 @@ func init() {
 
 type testValidator struct {
 	nodeID ids.NodeID
-<<<<<<< HEAD:x/warp/predicate_test.go
 	sk     *bls.SecretKey
 	vdr    *luxWarp.Validator
-=======
 	sk     bls.Signer
 	vdr    *avalancheWarp.Validator
->>>>>>> v0.7.5:precompile/contracts/warp/predicate_test.go
 }
 
 func (v *testValidator) Compare(o *testValidator) int {
@@ -143,7 +137,6 @@ func newTestValidator() *testValidator {
 	}
 }
 
-<<<<<<< HEAD:x/warp/predicate_test.go
 type signatureTest struct {
 	name      string
 	stateF    func(*gomock.Controller) validators.State
@@ -153,8 +146,6 @@ type signatureTest struct {
 	err       error
 }
 
-=======
->>>>>>> v0.7.5:precompile/contracts/warp/predicate_test.go
 // createWarpMessage constructs a signed warp message using the global variable [unsignedMsg]
 // and the first [numKeys] signatures from [blsSignatures]
 func createWarpMessage(numKeys int) *luxWarp.Message {

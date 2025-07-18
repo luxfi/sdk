@@ -5,7 +5,6 @@ package warp
 
 import (
 	"fmt"
-<<<<<<< HEAD:x/warp/contract_warp_handler.go
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
@@ -14,9 +13,7 @@ import (
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
-=======
 	"github.com/ethereum/go-ethereum/core/vm"
->>>>>>> v0.7.5:precompile/contracts/warp/contract_warp_handler.go
 )
 
 var (

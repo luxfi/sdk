@@ -20,11 +20,8 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
-<<<<<<< HEAD:consensus/misc/eip4844_test.go
+	
 	"github.com/luxfi/evm/params"
-=======
-	ethparams "github.com/ethereum/go-ethereum/params"
->>>>>>> v0.7.5:consensus/misc/eip4844/eip4844_test.go
 )
 
 func TestCalcExcessBlobGas(t *testing.T) {

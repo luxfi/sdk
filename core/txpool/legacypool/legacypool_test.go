@@ -38,7 +38,6 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-<<<<<<< HEAD:core/txpool/txpool_test.go
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
@@ -50,12 +49,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/event"
-=======
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/interfaces/trie"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/holiman/uint256"
->>>>>>> v0.7.5:core/txpool/legacypool/legacypool_test.go
 )
 
 var (

@@ -8,12 +8,9 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-<<<<<<< HEAD
-	"github.com/ethereum/go-ethereum/metrics"
-=======
->>>>>>> v0.7.5
-	"github.com/prometheus/client_golang/prometheus"
+	
 	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
 )
 

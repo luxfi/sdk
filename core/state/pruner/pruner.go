@@ -427,7 +427,6 @@ func findBloomFilter(datadir string) (string, common.Hash, error) {
 	}
 	return stateBloomPath, stateBloomRoot, nil
 }
-<<<<<<< HEAD
 
 const warningLog = `
 
@@ -448,5 +447,3 @@ func deleteCleanTrieCache(path string) {
 	os.RemoveAll(path)
 	log.Info("Deleted trie clean cache", "path", path)
 }
-=======
->>>>>>> v0.7.5

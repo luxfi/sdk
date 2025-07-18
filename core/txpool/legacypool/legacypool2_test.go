@@ -29,17 +29,14 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"testing"
-<<<<<<< HEAD:core/txpool/txpool2_test.go
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
+	
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/event"
-=======
-	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/holiman/uint256"
->>>>>>> v0.7.5:core/txpool/legacypool/legacypool2_test.go
+	"github.com/luxfi/evm/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/evm/interfaces/core/rawdb"
 )
 
 func pricedValuedTransaction(nonce uint64, value int64, gaslimit uint64, gasprice *big.Int, key *ecdsa.PrivateKey) *types.Transaction {

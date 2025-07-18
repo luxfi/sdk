@@ -7,12 +7,9 @@ import (
 	"encoding/json"
 	"math/big"
 	"testing"
-<<<<<<< HEAD:params/state_upgrade_test.go
 	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
-=======
->>>>>>> v0.7.5:params/extras/state_upgrade_test.go
 	"github.com/stretchr/testify/require"
 )
 
