@@ -31,12 +31,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
-	"github.com/ethereum/go-ethereum/log"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/crypto/kzg4844"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -83,7 +83,7 @@ func ValidateTransaction(tx *types.Transaction, head *types.Header, signer types
 	if !opts.Config.IsLondon(head.Number) && tx.Type() == types.DynamicFeeTxType {
 		return fmt.Errorf("%w: type %d rejected, pool not yet in London", core.ErrTxTypeNotSupported, tx.Type())
 	}
-	if !opts.Config.IsCancun(head.Number, head.Time) && tx.Type() == types.BlobTxType {
+	if !opts.Config.IsCancun(head.Time) && tx.Type() == types.BlobTxType {
 		return fmt.Errorf("%w: type %d rejected, pool not yet in Cancun", core.ErrTxTypeNotSupported, tx.Type())
 	}
 	// Check whether the init code size has been exceeded
@@ -122,7 +122,7 @@ func ValidateTransaction(tx *types.Transaction, head *types.Header, signer types
 	}
 	// Ensure the transaction has more gas than the bare minimum needed to cover
 	// the transaction metadata
-	intrGas, err := core.IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, opts.Config.Rules(head.Number, params.IsMergeTODO, head.Time))
+	intrGas, err := core.IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, opts.Config.Rules(head.Number, head.Time))
 	if err != nil {
 		return err
 	}
@@ -148,8 +148,8 @@ func ValidateTransaction(tx *types.Transaction, head *types.Header, signer types
 		if len(hashes) == 0 {
 			return fmt.Errorf("blobless blob transaction")
 		}
-		if len(hashes) > ethparams.MaxBlobGasPerBlock/ethparams.BlobTxBlobGasPerBlob {
-			return fmt.Errorf("too many blobs in transaction: have %d, permitted %d", len(hashes), ethparams.MaxBlobGasPerBlock/ethparams.BlobTxBlobGasPerBlob)
+		if len(hashes) > 6 { // MaxBlobGasPerBlock/BlobTxBlobGasPerBlob
+			return fmt.Errorf("too many blobs in transaction: have %d, permitted %d", len(hashes), 6)
 		}
 		// Ensure commitments, proofs and hashes are valid
 		if err := validateBlobSidecar(hashes, sidecar); err != nil {
@@ -181,7 +181,7 @@ func validateBlobSidecar(hashes []common.Hash, sidecar *types.BlobTxSidecar) err
 	// Blob commitments match with the hashes in the transaction, verify the
 	// blobs themselves via KZG
 	for i := range sidecar.Blobs {
-		if err := kzg4844.VerifyBlobProof(sidecar.Blobs[i], sidecar.Commitments[i], sidecar.Proofs[i]); err != nil {
+		if err := kzg4844.VerifyBlobProof(&sidecar.Blobs[i], sidecar.Commitments[i], sidecar.Proofs[i]); err != nil {
 			return fmt.Errorf("invalid blob %d: %v", i, err)
 		}
 	}

@@ -10,11 +10,12 @@ import (
 	"sync"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/utils/set"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	statesyncclient "github.com/luxfi/evm/sync/client"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 const (

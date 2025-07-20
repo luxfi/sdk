@@ -35,7 +35,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 )
 
 var (

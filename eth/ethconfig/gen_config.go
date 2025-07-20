@@ -5,7 +5,7 @@ package ethconfig
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool/blobpool"
 	"github.com/luxfi/evm/core/txpool/legacypool"

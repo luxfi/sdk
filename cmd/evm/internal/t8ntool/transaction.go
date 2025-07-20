@@ -34,13 +34,15 @@ import (
 	"os"
 	"strings"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/tests"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -116,7 +118,7 @@ func Transaction(ctx *cli.Context) error {
 			return NewError(ErrorIO, errors.New("only rlp supported"))
 		}
 	}
-	signer := types.MakeSigner(chainConfig, new(big.Int), 0)
+	signer := types.LatestSigner(vm.ConvertChainConfig(chainConfig))
 	// We now have the transactions in 'body', which is supposed to be an
 	// rlp list of transactions
 	it, err := rlp.NewListIterator([]byte(body))

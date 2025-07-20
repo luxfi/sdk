@@ -33,12 +33,12 @@ import (
 	mrand "math/rand"
 	"sync/atomic"
 	"github.com/luxfi/evm/consensus"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/lru"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/lru"
 )
 
 const (
@@ -201,7 +201,7 @@ func (hc *HeaderChain) SetGenesis(head *types.Header) {
 // Config retrieves the header chain's chain configuration.
 func (hc *HeaderChain) Config() *params.ChainConfig { return hc.config }
 
-// Engine retrieves the header chain's consensus engine.
+// Engine retrieves the header chain's consensus common.
 func (hc *HeaderChain) Engine() consensus.Engine { return hc.engine }
 
 // GetBlock implements consensus.ChainReader, and returns nil for every input as

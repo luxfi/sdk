@@ -5,9 +5,9 @@ package predicate
 
 import (
 	"math/big"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // NewPredicateTx returns a transaction with the predicateAddress/predicateBytes tuple

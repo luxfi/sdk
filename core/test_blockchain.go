@@ -10,20 +10,48 @@ import (
 	"time"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/holiman/uint256"
 )
+
+// convertToEthChainConfig converts luxfi ChainConfig to ethereum ChainConfig for testing
+func testConvertToEthChainConfig(config *params.ChainConfig) *ethparams.ChainConfig {
+	return &ethparams.ChainConfig{
+		ChainID:             config.ChainID,
+		HomesteadBlock:      config.HomesteadBlock,
+		EIP150Block:         config.EIP150Block,
+		EIP155Block:         config.EIP155Block,
+		EIP158Block:         config.EIP158Block,
+		ByzantiumBlock:      config.ByzantiumBlock,
+		ConstantinopleBlock: config.ConstantinopleBlock,
+		PetersburgBlock:     config.PetersburgBlock,
+		IstanbulBlock:       config.IstanbulBlock,
+		MuirGlacierBlock:    config.MuirGlacierBlock,
+		BerlinBlock:         config.BerlinBlock,
+		LondonBlock:         config.LondonBlock,
+		// Add Cancun time if needed
+		CancunTime: func() *uint64 {
+			if config.CancunTime != nil {
+				return config.CancunTime
+			}
+			return nil
+		}(),
+	}
+}
 
 type ChainTest struct {
 	Name     string
@@ -1296,7 +1324,7 @@ func TestGenerateChainInvalidBlockFee(t *testing.T, create func(db ethdb.Databas
 	t.Cleanup(blockchain.Stop)
 
 	// This call generates a chain of 3 blocks.
-	signer := types.LatestSigner(params.TestChainConfig)
+	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
 	_, _, _, err = GenerateChainWithGenesis(gspec, blockchain.engine, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
 		tx := types.NewTx(&types.DynamicFeeTx{
 			ChainID:   params.TestChainConfig.ChainID,
@@ -1337,7 +1365,7 @@ func TestInsertChainInvalidBlockFee(t *testing.T, create func(db ethdb.Database,
 	t.Cleanup(blockchain.Stop)
 
 	// This call generates a chain of 3 blocks.
-	signer := types.LatestSigner(params.TestChainConfig)
+	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
 	eng := dummy.NewFakerWithMode(dummy.Mode{ModeSkipBlockFee: true, ModeSkipCoinbase: true})
 	_, chain, _, err := GenerateChainWithGenesis(gspec, eng, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
 		tx := types.NewTx(&types.DynamicFeeTx{
@@ -1381,7 +1409,7 @@ func TestInsertChainValidBlockFee(t *testing.T, create func(db ethdb.Database, g
 	t.Cleanup(blockchain.Stop)
 
 	// This call generates a chain of 3 blocks.
-	signer := types.LatestSigner(params.TestChainConfig)
+	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
 	tip := big.NewInt(50000 * params.GWei)
 	transfer := big.NewInt(10000)
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
@@ -1471,7 +1499,7 @@ func TestStatefulPrecompiles(t *testing.T, create func(db ethdb.Database, gspec 
 	}
 	defer blockchain.Stop()
 
-	signer := types.LatestSigner(params.TestChainConfig)
+	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
 	tip := big.NewInt(50000 * params.GWei)
 
 	// Simple framework to add a test that the stateful precompile works as expected

@@ -7,8 +7,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 // ChainAPI introduces snowman specific functionality to the evm

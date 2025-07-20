@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 

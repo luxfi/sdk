@@ -29,13 +29,16 @@ package runtime
 import (
 	"math"
 	"math/big"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
+	"github.com/holiman/uint256"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running
@@ -109,7 +112,7 @@ func setDefaults(cfg *Config) {
 		}
 	}
 	if cfg.BaseFee == nil {
-		cfg.BaseFee = big.NewInt(legacy.BaseFee)
+		cfg.BaseFee = big.NewInt(ethparams.InitialBaseFee)
 	}
 	if cfg.BlobBaseFee == nil {
 		cfg.BlobBaseFee = big.NewInt(ethparams.BlobTxMinBlobGasprice)
@@ -133,8 +136,9 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	var (
 		address = common.BytesToAddress([]byte("contract"))
 		vmenv   = NewEnv(cfg)
-		sender  = vm.AccountRef(cfg.Origin)
-		rules   = cfg.ChainConfig.LuxRules(vmenv.Context.BlockNumber, vmenv.Context.Time)
+		sender  = cfg.Origin
+		ethCfg  = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
+		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetAvalancheRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
@@ -167,8 +171,9 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 	}
 	var (
 		vmenv  = NewEnv(cfg)
-		sender = vm.AccountRef(cfg.Origin)
-		rules  = cfg.ChainConfig.LuxRules(vmenv.Context.BlockNumber, vmenv.Context.Time)
+		sender = cfg.Origin
+		ethCfg = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
+		rules  = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetAvalancheRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
@@ -195,9 +200,10 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 
 	var (
 		vmenv   = NewEnv(cfg)
-		sender  = vm.AccountRef(cfg.Origin)
+		sender  = cfg.Origin
 		statedb = cfg.State
-		rules   = cfg.ChainConfig.LuxRules(vmenv.Context.BlockNumber, vmenv.Context.Time)
+		ethCfg  = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
+		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetAvalancheRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)

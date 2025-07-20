@@ -9,9 +9,9 @@ import (
 
 	"github.com/luxfi/node/api/metrics"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/validators"
-	"github.com/luxfi/node/snow/validators/validatorstest"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/validators"
+	"github.com/luxfi/node/consensus/validators/validatorstest"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
@@ -25,7 +25,7 @@ var (
 	testXChainID = ids.ID{2, 3, 4, 5, 6}
 )
 
-func TestSnowContext() *snow.Context {
+func TestSnowContext() *consensus.Context {
 	signer, err := localsigner.New()
 	if err != nil {
 		panic(err)
@@ -34,7 +34,7 @@ func TestSnowContext() *snow.Context {
 	networkID := constants.UnitTestID
 	chainID := testChainID
 
-	ctx := &snow.Context{
+	ctx := &consensus.Context{
 		NetworkID:       networkID,
 		SubnetID:        ids.Empty,
 		ChainID:         chainID,

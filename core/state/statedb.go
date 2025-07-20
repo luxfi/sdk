@@ -29,94 +29,33 @@ package state
 
 import (
 	"github.com/luxfi/evm/core/state/snapshot"
-	ethstate "github.com/ethereum/go-ethereum/core/state"
-	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
+	ethstate "github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/common"
 )
 
-// StateDB structs within the ethereum protocol are used to store anything
-// within the merkle trie. StateDBs take care of caching and storing
-// nested states. It's the general query interface to retrieve:
-//
-// * Contracts
-// * Accounts
-//
-// Once the state is committed, tries cached in stateDB (including account
-// trie, storage tries) will no longer be functional. A new state instance
-// must be created with new root and updated database for accessing post-
-// commit states.
+// StateDB wraps go-ethereum's StateDB with minimal extensions
 type StateDB struct {
 	*ethstate.StateDB
-
-	// The tx context
-	thash   common.Hash
-	txIndex int
-
-	// Some fields remembered as they are used in tests
-	db    Database
-	snaps *snapshot.Tree
+	thash common.Hash
 }
 
 // New creates a new state from a given trie.
 func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) {
-	stateDB, err := ethstate.New(root, db)
+	ethStateDB, err := ethstate.New(root, db)
 	if err != nil {
 		return nil, err
 	}
-	return &StateDB{
-		StateDB: stateDB,
-		db:      db,
-		snaps:   snaps,
-	}, nil
+	return &StateDB{StateDB: ethStateDB}, nil
 }
 
-type workerPool struct {
-	*utils.BoundedWorkers
-}
-
-func (wp *workerPool) Done() {
-	// Done is guaranteed to only be called after all work is already complete,
-	// so we call Wait for goroutines to finish before returning.
-	wp.BoundedWorkers.Wait()
-}
-
-// WithConcurrentWorkers is commented out as PrefetcherOption doesn't exist in ethereum v1.16.1
-// func WithConcurrentWorkers(prefetchers int) ethstate.PrefetcherOption {
-// 	pool := &workerPool{
-// 		BoundedWorkers: utils.NewBoundedWorkers(prefetchers),
-// 	}
-// 	return ethstate.WithWorkerPools(func() ethstate.WorkerPool { return pool })
-// }
-
-// GetState retrieves a value from the given account's storage trie.
-func (s *StateDB) GetState(addr common.Address, hash common.Hash) common.Hash {
-	return s.StateDB.GetState(addr, hash)
-}
-
-func (s *StateDB) SetState(addr common.Address, key, value common.Hash) common.Hash {
-	return s.StateDB.SetState(addr, key, value)
-}
-
-// SetTxContext sets the current transaction hash and index which are
-// used when the EVM emits new state logs. It should be invoked before
-// transaction execution.
-func (s *StateDB) SetTxContext(thash common.Hash, ti int) {
-	s.thash = thash
-	s.txIndex = ti
-	s.StateDB.SetTxContext(thash, ti)
-}
-
-// GetTxHash returns the current tx hash on the StateDB set by SetTxContext.
+// GetTxHash returns the current transaction hash
 func (s *StateDB) GetTxHash() common.Hash {
 	return s.thash
 }
 
-func (s *StateDB) Copy() *StateDB {
-	return &StateDB{
-		StateDB: s.StateDB.Copy(),
-		db:      s.db,
-		snaps:   s.snaps,
-		thash:   s.thash,
-		txIndex: s.txIndex,
-	}
+// SetTxContext sets the current transaction hash and index
+func (s *StateDB) SetTxContext(thash common.Hash, ti int) {
+	s.thash = thash
+	s.StateDB.SetTxContext(thash, ti)
 }
+

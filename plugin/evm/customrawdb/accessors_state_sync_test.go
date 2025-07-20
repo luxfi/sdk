@@ -6,7 +6,7 @@ package customrawdb
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	ethrawdb "github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/stretchr/testify/require"
 )

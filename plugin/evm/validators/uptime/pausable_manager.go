@@ -6,11 +6,11 @@ package uptime
 import (
 	"errors"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow/uptime"
+	"github.com/luxfi/node/consensus/uptime"
 	"github.com/luxfi/node/utils/set"
 )
 

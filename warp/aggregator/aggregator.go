@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/luxfi/node/utils/set"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"

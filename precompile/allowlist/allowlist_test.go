@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var (

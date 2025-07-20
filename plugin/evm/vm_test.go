@@ -15,10 +15,10 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/luxfi/node/chains/atomic"
@@ -26,18 +26,18 @@ import (
 	"github.com/luxfi/node/database/memdb"
 	"github.com/luxfi/node/database/prefixdb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/choices"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/choices"
 	"github.com/luxfi/node/consensus/chain"
-	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/validators"
+	commonEng "github.com/luxfi/node/consensus/engine"
+	"github.com/luxfi/node/consensus/validators"
 	luxConstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/luxfi/node/utils/formatting"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/components/chain"
 	"github.com/luxfi/evm/accounts/abi"
-	accountKeystore "github.com/ethereum/go-ethereum/accounts/keystore"
+	accountKeystore "github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
@@ -45,7 +45,7 @@ import (
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/eth"
 	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/precompile/allowlist"
@@ -54,7 +54,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
 	luxdconstants "github.com/luxfi/node/utils/constants"
@@ -141,7 +141,7 @@ func buildGenesisTest(t *testing.T, genesisJSON string) []byte {
 	return genesisBytes
 }
 
-func NewContext() *snow.Context {
+func NewContext() *consensus.Context {
 	ctx := utils.TestSnowContext()
 	ctx.NetworkID = testNetworkID
 	ctx.NodeID = ids.GenerateTestNodeID()
@@ -179,7 +179,7 @@ func NewContext() *snow.Context {
 func setupGenesis(
 	t *testing.T,
 	genesisJSON string,
-) (*snow.Context,
+) (*consensus.Context,
 	database.Database,
 	[]byte,
 	chan commonEng.Message,
@@ -235,8 +235,8 @@ func GenesisVM(t *testing.T,
 	require.NoError(t, err, "error initializing GenesisVM")
 
 	if finishBootstrapping {
-		require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-		require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+		require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
+		require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
 	}
 
 	return issuer, vm, dbManager, appSender
@@ -666,7 +666,7 @@ func TestSetPreferenceRace(t *testing.T) {
 	}
 
 	// The blocks must be verified in order. This invariant is maintained
-	// in the consensus engine.
+	// in the consensus common.
 	if err := vm1BlkC.Verify(context.Background()); err != nil {
 		t.Fatalf("VM1 BlkC failed verification: %s", err)
 	}
@@ -3119,8 +3119,8 @@ func TestStandaloneDB(t *testing.T) {
 	)
 	defer vm.Shutdown(context.Background())
 	require.NoError(t, err, "error initializing VM")
-	require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
+	require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
 
 	// Issue a block
 	acceptedBlockEvent := make(chan core.ChainEvent, 1)
@@ -3290,11 +3290,11 @@ func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, issuer c
 	}
 
 	if finishBootstrapping {
-		err = restartedVM.SetState(context.Background(), snow.Bootstrapping)
+		err = restartedVM.SetState(context.Background(), consensus.Bootstrapping)
 		if err != nil {
 			return nil, err
 		}
-		err = restartedVM.SetState(context.Background(), snow.NormalOp)
+		err = restartedVM.SetState(context.Background(), consensus.NormalOp)
 		if err != nil {
 			return nil, err
 		}

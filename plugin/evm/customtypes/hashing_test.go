@@ -34,14 +34,14 @@ import (
 	mrand "math/rand"
 	"testing"
 	
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/interfaces/trie"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/triedb"
 )
 
 func TestDeriveSha(t *testing.T) {

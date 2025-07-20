@@ -10,20 +10,20 @@ import (
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/database/versiondb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow/choices"
-	commonEng "github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/consensus/choices"
+	commonEng "github.com/luxfi/node/consensus/engine"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/eth"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	syncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/statesync"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -210,7 +210,7 @@ func (client *stateSyncerClient) acceptSyncSummary(proposedSummary message.SyncS
 		}
 		// notify engine regardless of whether err == nil,
 		// this error will be propagated to the engine when it calls
-		// vm.SetState(snow.Bootstrapping)
+		// vm.SetState(consensus.Bootstrapping)
 		log.Info("stateSync completed, notifying engine", "err", client.stateSyncErr)
 		client.toEngine <- commonEng.StateSyncDone
 	}()

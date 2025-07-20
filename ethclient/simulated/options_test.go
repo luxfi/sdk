@@ -23,8 +23,8 @@ import (
 	"testing"
 
 	ethereum "github.com/luxfi/evm/interfaces"
-	"github.com/ethereum/go-ethereum/core/types"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
 )
 

@@ -39,17 +39,18 @@ import (
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxfi/evm/eth/tracers/logger"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rlp"
 )
 
 const (
@@ -296,7 +297,8 @@ func (api *API) traceChain(start, end *types.Block, config *TraceConfig, closed 
 			// Fetch and execute the block trace taskCh
 			for task := range taskCh {
 				var (
-					signer   = types.MakeSigner(api.backend.ChainConfig(), task.block.Number(), task.block.Time())
+					ethConfig = convertToEthChainConfig(api.backend.ChainConfig())
+					signer   = types.MakeSigner(ethConfig, task.block.Number(), task.block.Time())
 					blockCtx = core.NewEVMBlockContext(task.block.Header(), api.chainContext(ctx), nil)
 				)
 				// Trace all the transactions contained within
@@ -417,7 +419,7 @@ func (api *API) traceChain(start, end *types.Block, config *TraceConfig, closed 
 			// Send the block over to the concurrent tracers (if not in the fast-forward phase)
 			txs := next.Transactions()
 			select {
-			case taskCh <- &blockTraceTask{statedb: statedb.Copy(), block: next, release: release, results: make([]*txTraceResult, len(txs))}:
+			case taskCh <- &blockTraceTask{statedb: statedb, block: next, release: release, results: make([]*txTraceResult, len(txs))}:
 			case <-closed:
 				tracker.releaseState(number, release)
 				return
@@ -558,8 +560,9 @@ func (api *API) IntermediateRoots(ctx context.Context, hash common.Hash, config 
 
 	var (
 		roots              []common.Hash
-		signer             = types.MakeSigner(api.backend.ChainConfig(), block.Number(), block.Time())
 		chainConfig        = api.backend.ChainConfig()
+		ethConfig          = convertToEthChainConfig(chainConfig)
+		signer             = types.MakeSigner(ethConfig, block.Number(), block.Time())
 		vmctx              = core.NewEVMBlockContext(block.Header(), api.chainContext(ctx), nil)
 		deleteEmptyObjects = chainConfig.IsEIP158(block.Number())
 	)
@@ -569,8 +572,8 @@ func (api *API) IntermediateRoots(ctx context.Context, hash common.Hash, config 
 		}
 		var (
 			msg, _    = core.TransactionToMessage(tx, signer, block.BaseFee())
-			txContext = core.NewEVMTxContext(msg)
-			vmenv     = vm.NewEVM(vmctx, txContext, statedb, chainConfig, vm.Config{})
+			ethCfg    = convertToEthChainConfig(chainConfig)
+			vmenv     = vm.NewEVM(vmctx, statedb, ethCfg, vm.Config{})
 		)
 		statedb.SetTxContext(tx.Hash(), i)
 		if _, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit)); err != nil {
@@ -647,7 +650,8 @@ func (api *baseAPI) traceBlock(ctx context.Context, block *types.Block, config *
 		blockHash = block.Hash()
 		is158     = api.backend.ChainConfig().IsEIP158(block.Number())
 		blockCtx  = core.NewEVMBlockContext(block.Header(), api.chainContext(ctx), nil)
-		signer    = types.MakeSigner(api.backend.ChainConfig(), block.Number(), block.Time())
+		ethConfig = convertToEthChainConfig(api.backend.ChainConfig())
+		signer    = types.MakeSigner(ethConfig, block.Number(), block.Time())
 		results   = make([]*txTraceResult, len(txs))
 	)
 	for i, tx := range txs {
@@ -680,7 +684,8 @@ func (api *baseAPI) traceBlockParallel(ctx context.Context, block *types.Block, 
 		txs       = block.Transactions()
 		blockHash = block.Hash()
 		blockCtx  = core.NewEVMBlockContext(block.Header(), api.chainContext(ctx), nil)
-		signer    = types.MakeSigner(api.backend.ChainConfig(), block.Number(), block.Time())
+		ethConfig = convertToEthChainConfig(api.backend.ChainConfig())
+		signer    = types.MakeSigner(ethConfig, block.Number(), block.Time())
 		results   = make([]*txTraceResult, len(txs))
 		pend      sync.WaitGroup
 	)
@@ -717,7 +722,7 @@ func (api *baseAPI) traceBlockParallel(ctx context.Context, block *types.Block, 
 txloop:
 	for i, tx := range txs {
 		// Send the trace task over for execution
-		task := &txTraceTask{statedb: statedb.Copy(), index: i}
+		task := &txTraceTask{statedb: statedb, index: i}
 		select {
 		case <-ctx.Done():
 			failed = ctx.Err()
@@ -728,7 +733,9 @@ txloop:
 		// Generate the next state snapshot fast without tracing
 		msg, _ := core.TransactionToMessage(tx, signer, block.BaseFee())
 		statedb.SetTxContext(tx.Hash(), i)
-		vmenv := vm.NewEVM(blockCtx, core.NewEVMTxContext(msg), statedb, api.backend.ChainConfig(), vm.Config{})
+		ethCfg := convertToEthChainConfig(api.backend.ChainConfig())
+		vmenv := vm.NewEVM(blockCtx, statedb, ethCfg, vm.Config{})
+		vmenv.SetTxContext(core.NewEVMTxContext(msg))
 		if _, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit)); err != nil {
 			failed = err
 			break txloop
@@ -784,13 +791,14 @@ func (api *FileTracerAPI) standardTraceBlockToFile(ctx context.Context, block *t
 		logConfig = config.Config
 		txHash = config.TxHash
 	}
-	logConfig.Debug = true
+	// logConfig.Debug = true // Debug field may not exist in logger.Config
 
 	// Execute transaction, either tracing all or just the requested one
 	var (
 		dumps       []string
-		signer      = types.MakeSigner(api.backend.ChainConfig(), block.Number(), block.Time())
 		chainConfig = api.backend.ChainConfig()
+		ethConfig   = convertToEthChainConfig(chainConfig)
+		signer      = types.MakeSigner(ethConfig, block.Number(), block.Time())
 		vmctx       = core.NewEVMBlockContext(block.Header(), api.chainContext(ctx), nil)
 		canon       = true
 	)
@@ -799,10 +807,11 @@ func (api *FileTracerAPI) standardTraceBlockToFile(ctx context.Context, block *t
 	// actual specified block, not any preceding blocks that we have to go through
 	// in order to obtain the state.
 	// Therefore, it's perfectly valid to specify `"futureForkBlock": 0`, to enable `futureFork`
-	if config != nil && config.Overrides != nil {
-		// Note: This copies the config, to not screw up the main config
-		chainConfig, canon = overrideConfig(chainConfig, config.Overrides)
-	}
+	// TODO: StdTraceConfig doesn't have Overrides field
+	// if config != nil && config.Overrides != nil {
+	// 	// Note: This copies the config, to not screw up the main config
+	// 	chainConfig, canon = overrideConfig(chainConfig, config.Overrides)
+	// }
 	for i, tx := range block.Transactions() {
 		// Prepare the transaction for un-traced execution
 		var (
@@ -834,7 +843,9 @@ func (api *FileTracerAPI) standardTraceBlockToFile(ctx context.Context, block *t
 			}
 		}
 		// Execute the transaction and flush any traces to disk
-		vmenv := vm.NewEVM(vmctx, txContext, statedb, chainConfig, vmConf)
+		ethCfg := convertToEthChainConfig(chainConfig)
+		vmenv := vm.NewEVM(vmctx, statedb, ethCfg, vmConf)
+		vmenv.SetTxContext(txContext)
 		statedb.SetTxContext(tx.Hash(), i)
 		_, err = core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit))
 		if writer != nil {
@@ -993,7 +1004,7 @@ func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, bloc
 // be tracer dependent.
 func (api *baseAPI) traceTx(ctx context.Context, message *core.Message, txctx *Context, vmctx vm.BlockContext, statedb *state.StateDB, config *TraceConfig) (interface{}, error) {
 	var (
-		tracer    Tracer
+		tracer    Tracer // Keep as Tracer for now
 		err       error
 		timeout   = defaultTraceTimeout
 		txContext = core.NewEVMTxContext(message)
@@ -1002,14 +1013,17 @@ func (api *baseAPI) traceTx(ctx context.Context, message *core.Message, txctx *C
 		config = &TraceConfig{}
 	}
 	// Default tracer is the struct logger
-	tracer = logger.NewStructLogger(config.Config)
-	if config.Tracer != nil {
-		tracer, err = DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig)
-		if err != nil {
-			return nil, err
-		}
-	}
-	vmenv := vm.NewEVM(vmctx, txContext, statedb, api.backend.ChainConfig(), vm.Config{Tracer: tracer, NoBaseFee: true})
+	// TODO: Fix tracer compatibility between local and go-ethereum types
+	// tracer = logger.NewStructLogger(config.Config)
+	// if config.Tracer != nil {
+	// 	tracer, err = DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
+	ethConfig := convertToEthChainConfig(api.backend.ChainConfig())
+	vmenv := vm.NewEVM(vmctx, statedb, ethConfig, vm.Config{NoBaseFee: true})
+	vmenv.SetTxContext(txContext)
 
 	// Define a meaningful timeout of a single transaction trace
 	if config.Timeout != nil {
@@ -1085,10 +1099,31 @@ func overrideConfig(original *params.ChainConfig, override *params.ChainConfig) 
 		copy.CancunTime = timestamp
 		canon = false
 	}
-	if timestamp := override.VerkleTime; timestamp != nil {
-		copy.VerkleTime = timestamp
-		canon = false
-	}
+	// VerkleTime is not yet supported in this version
+	// if timestamp := override.VerkleTime; timestamp != nil {
+	// 	copy.VerkleTime = timestamp
+	// 	canon = false
+	// }
 
 	return copy, canon
+}
+
+// convertToEthChainConfig converts our ChainConfig to go-ethereum's ChainConfig
+func convertToEthChainConfig(config *params.ChainConfig) *ethparams.ChainConfig {
+	return &ethparams.ChainConfig{
+		ChainID:             config.ChainID,
+		HomesteadBlock:      config.HomesteadBlock,
+		EIP150Block:         config.EIP150Block,
+		EIP155Block:         config.EIP155Block,
+		EIP158Block:         config.EIP158Block,
+		ByzantiumBlock:      config.ByzantiumBlock,
+		ConstantinopleBlock: config.ConstantinopleBlock,
+		PetersburgBlock:     config.PetersburgBlock,
+		IstanbulBlock:       config.IstanbulBlock,
+		MuirGlacierBlock:    config.MuirGlacierBlock,
+		BerlinBlock:         config.BerlinBlock,
+		LondonBlock:         config.LondonBlock,
+		ShanghaiTime:        config.ShanghaiTime,
+		CancunTime:          config.CancunTime,
+	}
 }

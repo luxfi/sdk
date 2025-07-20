@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 )
 
 var metricsLock sync.Mutex

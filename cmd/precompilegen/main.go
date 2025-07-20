@@ -36,8 +36,8 @@ import (
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/accounts/abi/bind/precompilebind"
 	"github.com/luxfi/evm/internal/flags"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/cmd/utils"
+	"github.com/luxfi/geth/log"
 	"github.com/urfave/cli/v2"
 )
 

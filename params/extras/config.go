@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/constants"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/utils"
 	gethparams "github.com/luxfi/geth/params"
@@ -122,7 +122,7 @@ type UpgradeConfig struct {
 
 // AvalancheContext provides Avalanche specific context directly into the EVM.
 type AvalancheContext struct {
-	SnowCtx *snow.Context
+	SnowCtx *consensus.Context
 }
 
 type ChainConfig struct {

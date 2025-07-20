@@ -11,11 +11,11 @@ import (
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/ethclient"
-	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 // DistributeFunds ensures that each address in keys has at least [minFundsPerAddr] by sending funds

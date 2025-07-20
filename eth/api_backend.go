@@ -31,23 +31,25 @@ import (
 	"errors"
 	"math/big"
 	"time"
-	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/evm/core/txpool"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/eth/gasprice"
 	"github.com/luxfi/evm/eth/tracers"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/event"
 )
 
 var ErrUnfinalizedData = errors.New("cannot query unfinalized data")
@@ -313,7 +315,7 @@ func (b *EthAPIBackend) GetEVM(ctx context.Context, msg *core.Message, state *st
 	} else {
 		context = core.NewEVMBlockContext(header, b.eth.BlockChain(), nil)
 	}
-	return vm.NewEVM(context, txContext, state, b.ChainConfig(), *vmConfig)
+	return vm.NewEVMWithStateDB(context, txContext, state, b.ChainConfig(), *vmConfig)
 }
 
 func (b *EthAPIBackend) SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription {
@@ -370,8 +372,8 @@ func (b *EthAPIBackend) GetPoolTransactions() (types.Transactions, error) {
 	pending := b.eth.txPool.Pending(txpool.PendingFilter{})
 	var txs types.Transactions
 	for _, batch := range pending {
-		for _, lazy := range batch {
-			if tx := lazy.Resolve(); tx != nil {
+		for _, tx := range batch {
+			if tx != nil {
 				txs = append(txs, tx)
 			}
 		}
@@ -423,7 +425,7 @@ func (b *EthAPIBackend) TxPoolContentFrom(addr common.Address) ([]*types.Transac
 }
 
 func (b *EthAPIBackend) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Subscription {
-	return b.eth.txPool.SubscribeTransactions(ch, true)
+	return b.eth.txPool.SubscribeNewTxsEvent(ch)
 }
 
 func (b *EthAPIBackend) EstimateBaseFee(ctx context.Context) (*big.Int, error) {
@@ -525,9 +527,9 @@ func (b *EthAPIBackend) StateAtTransaction(ctx context.Context, block *types.Blo
 	return b.eth.stateAtTransaction(ctx, block, txIndex, reexec)
 }
 
-func (b *EthAPIBackend) MinRequiredTip(ctx context.Context, header *types.Header) (*big.Int, error) {
+func (b *EthAPIBackend) MinRequiredTip(ctx context.Context, h *types.Header) (*big.Int, error) {
 	config := params.GetExtra(b.ChainConfig())
-	return customheader.EstimateRequiredTip(config, header)
+	return header.EstimateRequiredTip(config, h)
 }
 
 func (b *EthAPIBackend) isLatestAndAllowed(number rpc.BlockNumber) bool {

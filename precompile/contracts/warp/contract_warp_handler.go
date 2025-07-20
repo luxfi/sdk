@@ -11,9 +11,9 @@ import (
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/predicate"
-	"github.com/ethereum/go-ethereum/common"
-	ethmath "github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/common"
+	ethmath "github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/vm"
 )
 
 var (

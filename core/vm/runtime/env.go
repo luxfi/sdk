@@ -28,7 +28,8 @@ package runtime
 
 import (
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/vm"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {
@@ -52,5 +53,7 @@ func NewEnv(cfg *Config) *vm.EVM {
 		Random:      cfg.Random,
 	}
 
-	return vm.NewEVM(blockContext, txContext, cfg.State, cfg.ChainConfig, cfg.EVMConfig)
+	evm := vm.NewEVM(blockContext, cfg.State, &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}, cfg.EVMConfig)
+	evm.SetTxContext(txContext)
+	return evm
 }

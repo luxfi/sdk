@@ -6,8 +6,8 @@ package core
 import (
 	"math/big"
 	"testing"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"
 )
 

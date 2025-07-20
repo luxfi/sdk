@@ -30,9 +30,9 @@ import (
 	"math/big"
 	"math/rand"
 	"testing"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/common"
 	"github.com/holiman/uint256"
 )
 

@@ -2,7 +2,7 @@
 
 package customtypes
 
-import "github.com/ethereum/go-ethereum/rlp"
+import "github.com/luxfi/geth/rlp"
 import "io"
 
 func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {

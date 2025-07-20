@@ -9,11 +9,11 @@ import (
 
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/engine/enginetest"
-	avagovalidators "github.com/luxfi/node/snow/validators"
-	"github.com/luxfi/node/snow/validators/validatorstest"
+	"github.com/luxfi/node/consensus"
+	commonEng "github.com/luxfi/node/consensus/engine"
+	"github.com/luxfi/node/consensus/engine/enginetest"
+	avagovalidators "github.com/luxfi/node/consensus/validators"
+	"github.com/luxfi/node/consensus/validators/validatorstest"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/utils"
@@ -78,14 +78,14 @@ func TestValidatorState(t *testing.T) {
 	require.NoError(err, "error initializing GenesisVM")
 
 	// Test case 1: state should not be populated until bootstrapped
-	require.NoError(vm.SetState(context.Background(), snow.Bootstrapping))
+	require.NoError(vm.SetState(context.Background(), consensus.Bootstrapping))
 	require.Equal(0, vm.validatorsManager.GetValidationIDs().Len())
 	_, _, err = vm.validatorsManager.CalculateUptime(testNodeIDs[0])
 	require.ErrorIs(database.ErrNotFound, err)
 	require.False(vm.validatorsManager.StartedTracking())
 
 	// Test case 2: state should be populated after bootstrapped
-	require.NoError(vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(vm.SetState(context.Background(), consensus.NormalOp))
 	require.Len(vm.validatorsManager.GetValidationIDs(), 3)
 	_, _, err = vm.validatorsManager.CalculateUptime(testNodeIDs[0])
 	require.NoError(err)
@@ -144,8 +144,8 @@ func TestValidatorState(t *testing.T) {
 		},
 	}
 	// set VM as bootstrapped
-	require.NoError(vm.SetState(context.Background(), snow.Bootstrapping))
-	require.NoError(vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(vm.SetState(context.Background(), consensus.Bootstrapping))
+	require.NoError(vm.SetState(context.Background(), consensus.NormalOp))
 
 	vm.ctx.ValidatorState = testState
 

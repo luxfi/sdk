@@ -17,13 +17,13 @@ import (
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	ethcrypto "github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/common"
+	ethcrypto "github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
 	"golang.org/x/sync/errgroup"
 )
 

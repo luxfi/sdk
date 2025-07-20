@@ -27,10 +27,10 @@
 package pathdb
 
 import (
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 
 	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/ethereum/go-ethereum/triedb/pathdb"
+	_ "github.com/luxfi/geth/triedb/pathdb"
 )
 
 // ====== If resolving merge conflicts ======

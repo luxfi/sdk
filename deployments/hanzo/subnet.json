@@ -1,0 +1,9 @@
+{
+  "subnetID": "",
+  "chainID": 36963,
+  "vmID": "subnetevm",
+  "vmGenesis": "genesis.json",
+  "blockchainName": "Hanzo AI Network",
+  "tokenName": "AI Token",
+  "tokenSymbol": "AI"
+}

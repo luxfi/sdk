@@ -33,13 +33,13 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -172,7 +172,7 @@ func (i *bbInput) ToBlock() *types.Block {
 	})
 }
 
-// SealBlock seals the given block using the configured engine.
+// SealBlock seals the given block using the configured common.
 func (i *bbInput) SealBlock(block *types.Block) (*types.Block, error) {
 	switch {
 	case i.Clique != nil:

@@ -2,7 +2,7 @@
 package eth
 
 import (
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
 )
 

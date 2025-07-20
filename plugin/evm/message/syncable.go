@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/luxfi/node/ids"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 )
 

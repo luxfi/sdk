@@ -10,13 +10,14 @@ import (
 	"fmt"
 	"sync"
 	"github.com/luxfi/node/utils/wrappers"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
 	syncclient "github.com/luxfi/evm/sync/client"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 var (
@@ -70,7 +71,7 @@ func NewTrieToSync(sync *stateSync, root common.Hash, account common.Hash, syncT
 		root:         root,
 		account:      account,
 		batch:        batch,
-		stackTrie:    trie.NewStackTrie(&trie.StackTrieOptions{Writer: writeFn}),
+		stackTrie:    trie.NewStackTrie(writeFn),
 		isMainTrie:   (root == sync.root),
 		task:         syncTask,
 		segmentsDone: make(map[int]struct{}),
@@ -217,7 +218,7 @@ func (t *trieToSync) segmentFinished(ctx context.Context, idx int) error {
 
 	// when the trie is finished, this hashes any remaining nodes in the stack
 	// trie and creates the root
-	actualRoot := t.stackTrie.Commit()
+	actualRoot := t.stackTrie.Hash()
 	if actualRoot != t.root {
 		return fmt.Errorf("unexpected root, expected=%s, actual=%s, account=%s", t.root, actualRoot, t.account)
 	}

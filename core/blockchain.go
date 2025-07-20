@@ -40,25 +40,28 @@ import (
 	"time"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/customlogs"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/internal/version"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/triedb/hashdb"
-	"github.com/ethereum/go-ethereum/triedb/pathdb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/lru"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/pathdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/lru"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 )
 
 // ====== If resolving merge conflicts ======
@@ -1318,7 +1321,22 @@ func (bc *BlockChain) InsertBlockManual(block *types.Block, writes bool) error {
 
 func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	start := time.Now()
-	bc.senderCacher.Recover(types.MakeSigner(bc.chainConfig, block.Number(), block.Time()), block.Transactions())
+	// Create a temporary ethereum ChainConfig for signer
+	ethConfig := &ethparams.ChainConfig{
+		ChainID: bc.chainConfig.ChainID,
+		EIP155Block: bc.chainConfig.EIP155Block,
+		EIP158Block: bc.chainConfig.EIP158Block,
+		HomesteadBlock: bc.chainConfig.HomesteadBlock,
+		ByzantiumBlock: bc.chainConfig.ByzantiumBlock,
+		ConstantinopleBlock: bc.chainConfig.ConstantinopleBlock,
+		PetersburgBlock: bc.chainConfig.PetersburgBlock,
+		IstanbulBlock: bc.chainConfig.IstanbulBlock,
+		BerlinBlock: bc.chainConfig.BerlinBlock,
+		LondonBlock: bc.chainConfig.LondonBlock,
+		ShanghaiTime: bc.chainConfig.ShanghaiTime,
+		CancunTime: bc.chainConfig.CancunTime,
+	}
+	bc.senderCacher.Recover(types.MakeSigner(ethConfig, block.Number(), block.Time()), block.Transactions())
 
 	substart := time.Now()
 	err := bc.engine.VerifyHeader(bc, block.Header())
@@ -1373,7 +1391,8 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	blockStateInitTimer.Inc(time.Since(substart).Milliseconds())
 
 	// Enable prefetching to pull in trie node paths while processing transactions
-	statedb.StartPrefetcher("chain", state.WithConcurrentWorkers(bc.cacheConfig.TriePrefetcherParallelism))
+	// WithConcurrentWorkers is not available in ethereum v1.16.1
+	statedb.StartPrefetcher("chain", nil)
 	defer statedb.StopPrefetcher()
 
 	// Process block using the parent state as reference point
@@ -1397,18 +1416,11 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	vtime := time.Since(vstart)
 
 	// Update the metrics touched during block processing and validation
-	accountReadTimer.Inc(statedb.AccountReads.Milliseconds())                  // Account reads are complete(in processing)
-	storageReadTimer.Inc(statedb.StorageReads.Milliseconds())                  // Storage reads are complete(in processing)
-	snapshotAccountReadTimer.Inc(statedb.SnapshotAccountReads.Milliseconds())  // Account reads are complete(in processing)
-	snapshotStorageReadTimer.Inc(statedb.SnapshotStorageReads.Milliseconds())  // Storage reads are complete(in processing)
-	accountUpdateTimer.Inc(statedb.AccountUpdates.Milliseconds())              // Account updates are complete(in validation)
-	storageUpdateTimer.Inc(statedb.StorageUpdates.Milliseconds())              // Storage updates are complete(in validation)
-	accountHashTimer.Inc(statedb.AccountHashes.Milliseconds())                 // Account hashes are complete(in validation)
-	storageHashTimer.Inc(statedb.StorageHashes.Milliseconds())                 // Storage hashes are complete(in validation)
-	triehash := statedb.AccountHashes + statedb.StorageHashes                  // The time spent on tries hashing
-	trieUpdate := statedb.AccountUpdates + statedb.StorageUpdates              // The time spent on tries update
-	trieRead := statedb.SnapshotAccountReads + statedb.AccountReads            // The time spent on account read
-	trieRead += statedb.SnapshotStorageReads + statedb.StorageReads            // The time spent on storage read
+	// NOTE: State metrics are not available in the wrapped StateDB implementation
+	// These would need to be implemented in the StateDB wrapper if needed
+	var triehash time.Duration = 0
+	var trieUpdate time.Duration = 0
+	var trieRead time.Duration = 0
 	blockExecutionTimer.Inc((ptime - trieRead).Milliseconds())                 // The time spent on EVM processing
 	blockValidationTimer.Inc((vtime - (triehash + trieUpdate)).Milliseconds()) // The time spent on block validation
 	blockTrieOpsTimer.Inc((triehash + trieUpdate + trieRead).Milliseconds())   // The time spent on trie operations
@@ -1459,7 +1471,22 @@ func (bc *BlockChain) collectUnflattenedLogs(b *types.Block, removed bool) [][]*
 		blobGasPrice = eip4844.CalcBlobFee(*excessBlobGas)
 	}
 	receipts := rawdb.ReadRawReceipts(bc.db, b.Hash(), b.NumberU64())
-	if err := receipts.DeriveFields(bc.chainConfig, b.Hash(), b.NumberU64(), b.Time(), b.BaseFee(), blobGasPrice, b.Transactions()); err != nil {
+	// Create a temporary ethereum ChainConfig for receipts
+	ethConfig := &ethparams.ChainConfig{
+		ChainID: bc.chainConfig.ChainID,
+		EIP155Block: bc.chainConfig.EIP155Block,
+		EIP158Block: bc.chainConfig.EIP158Block,
+		HomesteadBlock: bc.chainConfig.HomesteadBlock,
+		ByzantiumBlock: bc.chainConfig.ByzantiumBlock,
+		ConstantinopleBlock: bc.chainConfig.ConstantinopleBlock,
+		PetersburgBlock: bc.chainConfig.PetersburgBlock,
+		IstanbulBlock: bc.chainConfig.IstanbulBlock,
+		BerlinBlock: bc.chainConfig.BerlinBlock,
+		LondonBlock: bc.chainConfig.LondonBlock,
+		ShanghaiTime: bc.chainConfig.ShanghaiTime,
+		CancunTime: bc.chainConfig.CancunTime,
+	}
+	if err := receipts.DeriveFields(ethConfig, b.Hash(), b.NumberU64(), b.Time(), b.BaseFee(), blobGasPrice, b.Transactions()); err != nil {
 		log.Error("Failed to derive block receipts fields", "hash", b.Hash(), "number", b.NumberU64(), "err", err)
 	}
 
@@ -1732,7 +1759,8 @@ func (bc *BlockChain) reprocessBlock(parent *types.Block, current *types.Block) 
 	}
 
 	// Enable prefetching to pull in trie node paths while processing transactions
-	statedb.StartPrefetcher("chain", state.WithConcurrentWorkers(bc.cacheConfig.TriePrefetcherParallelism))
+	// WithConcurrentWorkers is not available in ethereum v1.16.1
+	statedb.StartPrefetcher("chain", nil)
 	defer statedb.StopPrefetcher()
 
 	// Process previously stored block
@@ -1757,7 +1785,7 @@ func (bc *BlockChain) commitWithSnap(
 	// blockHashes must be passed through [state.StateDB]'s Commit since snapshots
 	// are based on the block hash.
 	snapshotOpt := snapshot.WithBlockHashes(current.Hash(), current.ParentHash())
-	root, err := statedb.Commit(current.NumberU64(), bc.chainConfig.IsEIP158(current.Number()), stateconf.WithSnapshotUpdateOpts(snapshotOpt))
+	root, err := statedb.Commit(current.NumberU64(), bc.chainConfig.IsEIP158(current.Number()), true)
 	if err != nil {
 		return common.Hash{}, err
 	}

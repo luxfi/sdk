@@ -42,41 +42,6 @@ func newSlotter() func() (uint32, bool) {
 	return func() (size uint32, done bool) {
 		slotsize += blobSize
 		finished := slotsize > maxBlobsPerTransaction*blobSize+txMaxSize
-
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/luxfi/evm/ethdb/dbtest"
-	"github.com/cockroachdb/pebble"
-	"github.com/cockroachdb/pebble/vfs"
-)
-
-func TestPebbleDB(t *testing.T) {
-	t.Run("DatabaseSuite", func(t *testing.T) {
-		dbtest.TestDatabaseSuite(t, func() ethdb.KeyValueStore {
-			db, err := pebble.Open("", &pebble.Options{
-				FS: vfs.NewMem(),
-			})
-			if err != nil {
-				t.Fatal(err)
-			}
-			return &Database{
-				db: db,
-			}
-		})
-	})
-}
-
-func BenchmarkPebbleDB(b *testing.B) {
-	dbtest.BenchDatabaseSuite(b, func() ethdb.KeyValueStore {
-		db, err := pebble.Open("", &pebble.Options{
-			FS: vfs.NewMem(),
-		})
-		if err != nil {
-			b.Fatal(err)
-		}
-		return &Database{
-			db: db,
-		}
-	})
 		return slotsize, finished
 	}
 }

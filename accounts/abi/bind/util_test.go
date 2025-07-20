@@ -35,9 +35,9 @@ import (
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/accounts/abi/bind/backends"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 )
 
 var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")

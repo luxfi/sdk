@@ -34,12 +34,12 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 )
 
 // ChainIndexerBackend defines the methods needed to process chain segments in

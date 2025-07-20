@@ -116,3 +116,25 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 
 	GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
 }
+
+// GetRulesExtra returns the Avalanche-specific rules for the given Ethereum rules.
+func GetRulesExtra(rules Rules) *extras.Rules {
+	// Create a ChainConfig from the Rules to get the extra data
+	chainID := rules.ChainID
+	if chainID == nil {
+		chainID = DefaultChainID
+	}
+	
+	// Create a minimal ChainConfig to get extras
+	// This is a workaround since Rules doesn't have direct access to ChainConfig
+	tempConfig := &ChainConfig{ChainID: chainID}
+	extra := GetExtra(tempConfig)
+	
+	// Create rules based on the Avalanche upgrades
+	return &extras.Rules{
+		AvalancheRules: extra.GetAvalancheRules(0), // Using 0 as we don't have timestamp in Rules
+		Precompiles:    rules.ActivePrecompiles,
+		Predicaters:    rules.Predicaters,
+		AccepterPrecompiles: rules.AccepterPrecompiles,
+	}
+}

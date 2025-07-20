@@ -16,27 +16,27 @@ import (
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/database/prefixdb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/choices"
-	commonEng "github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/choices"
+	commonEng "github.com/luxfi/node/consensus/engine"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/set"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/predicate"
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/statesync"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 )
 
 func TestSkipStateSync(t *testing.T) {
@@ -312,7 +312,7 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	t.Cleanup(func() {
 		require.NoError(shutdownOnceSyncerVM.Shutdown(context.Background()))
 	})
-	require.NoError(syncerVM.SetState(context.Background(), snow.StateSyncing))
+	require.NoError(syncerVM.SetState(context.Background(), consensus.StateSyncing))
 	enabled, err := syncerVM.StateSyncEnabled(context.Background())
 	require.NoError(err)
 	require.True(enabled)
@@ -432,7 +432,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	// set [syncerVM] to bootstrapping and verify the last accepted block has been updated correctly
 	// and that we can bootstrap and process some blocks.
-	require.NoError(syncerVM.SetState(context.Background(), snow.Bootstrapping))
+	require.NoError(syncerVM.SetState(context.Background(), consensus.Bootstrapping))
 	require.Equal(serverVM.LastAcceptedBlock().Height(), syncerVM.LastAcceptedBlock().Height(), "block height mismatch between syncer and server")
 	require.Equal(serverVM.LastAcceptedBlock().ID(), syncerVM.LastAcceptedBlock().ID(), "blockID mismatch between syncer and server")
 	require.True(syncerVM.blockChain.HasState(syncerVM.blockChain.LastAcceptedBlock().Root()), "unavailable state for last accepted block")
@@ -487,7 +487,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	)
 
 	// check we can transition to [NormalOp] state and continue to process blocks.
-	require.NoError(syncerVM.SetState(context.Background(), snow.NormalOp))
+	require.NoError(syncerVM.SetState(context.Background(), consensus.NormalOp))
 	require.True(syncerVM.bootstrapped.Get())
 
 	// Generate blocks after we have entered normal consensus as well

@@ -31,7 +31,7 @@ package core
 
 import (
 	"testing"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 )
 
 // verifyNoGaps checks that there are no gaps after the initial set of blocks in

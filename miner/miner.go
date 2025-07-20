@@ -32,11 +32,11 @@ import (
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/event"
 )
 
 // Backend wraps all methods required for mining.

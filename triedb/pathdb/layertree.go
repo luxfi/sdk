@@ -31,8 +31,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/trie/trienode"
 )
 
 // layerTree is a group of state layers identified by the state root.

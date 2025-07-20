@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/warp"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 )
 
 // SignatureRequestHandler serves warp signature requests. It is a peer.RequestHandler for message.MessageSignatureRequest.

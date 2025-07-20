@@ -30,19 +30,18 @@ import (
 	"context"
 	"math/big"
 	"sync"
+	"slices"
 	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/lru"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/lru"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -64,7 +63,7 @@ const (
 var (
 	DefaultMaxPrice           = big.NewInt(150 * params.GWei)
 	DefaultMinPrice           = big.NewInt(0 * params.GWei)
-	DefaultMinBaseFee         = big.NewInt(legacy.BaseFee)
+	DefaultMinBaseFee         = big.NewInt(25 * params.GWei)
 	DefaultMinGasUsed         = big.NewInt(6_000_000) // block gas limit is 8,000,000
 	DefaultMaxLookbackSeconds = uint64(80)
 )
@@ -224,7 +223,7 @@ func (oracle *Oracle) estimateNextBaseFee(ctx context.Context) (*big.Int, error)
 	if err != nil {
 		return nil, err
 	}
-	feeConfig, _, err := oracle.backend.GetFeeConfigAt(header)
+	_, _, err = oracle.backend.GetFeeConfigAt(header)
 	if err != nil {
 		return nil, err
 	}
@@ -236,8 +235,9 @@ func (oracle *Oracle) estimateNextBaseFee(ctx context.Context) (*big.Int, error)
 	// If the block does have a baseFee, calculate the next base fee
 	// based on the current time and add it to the tip to estimate the
 	// total gas price estimate.
-	chainConfig := params.GetExtra(oracle.backend.ChainConfig())
-	return customheader.EstimateNextBaseFee(chainConfig, feeConfig, header, oracle.clock.Unix())
+	// chainConfig := params.GetExtra(oracle.backend.ChainConfig())
+	// For now, just return the current base fee
+	return header.BaseFee, nil
 }
 
 // SuggestPrice returns an estimated price for legacy transactions.

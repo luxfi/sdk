@@ -11,21 +11,21 @@ import (
 	"math/big"
 	"testing"
 	"time"
-	"github.com/luxfi/node/snow"
-	commonEng "github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/consensus"
+	commonEng "github.com/luxfi/node/consensus/engine"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/components/chain"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -106,10 +106,10 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 		}
 	}()
 	// Set the VM's state to NormalOp to initialize the tx pool.
-	if err := vm.SetState(context.Background(), snow.Bootstrapping); err != nil {
+	if err := vm.SetState(context.Background(), consensus.Bootstrapping); err != nil {
 		t.Fatal(err)
 	}
-	if err := vm.SetState(context.Background(), snow.NormalOp); err != nil {
+	if err := vm.SetState(context.Background(), consensus.NormalOp); err != nil {
 		t.Fatal(err)
 	}
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
@@ -197,8 +197,8 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	)
 	require.NoError(t, err, "error initializing GenesisVM")
 
-	require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
+	require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {

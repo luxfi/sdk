@@ -32,8 +32,8 @@ import (
 	"fmt"
 	"math/big"
 	
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/node/snow"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/modules"
@@ -183,7 +183,7 @@ type UpgradeConfig struct {
 
 // LuxContext provides Lux specific context directly into the EVM.
 type LuxContext struct {
-	SnowCtx *snow.Context
+	SnowCtx *consensus.Context
 }
 
 // ChainConfig is the core config which determines the blockchain settings.
@@ -378,6 +378,27 @@ func (c *ChainConfig) IsPetersburg(num *big.Int) bool {
 // IsIstanbul returns whether num is either equal to the Istanbul fork block or greater.
 func (c *ChainConfig) IsIstanbul(num *big.Int) bool {
 	return utils.IsBlockForked(c.IstanbulBlock, num)
+}
+
+// IsBerlin returns whether num is either equal to the Berlin fork block or greater.
+func (c *ChainConfig) IsBerlin(num *big.Int) bool {
+	return utils.IsBlockForked(c.BerlinBlock, num)
+}
+
+// IsLondon returns whether num is either equal to the London fork block or greater.
+func (c *ChainConfig) IsLondon(num *big.Int) bool {
+	return utils.IsBlockForked(c.LondonBlock, num)
+}
+
+// IsShanghai returns whether time represents a block with a timestamp after the Shanghai upgrade time.
+func (c *ChainConfig) IsShanghai(num *big.Int, time uint64) bool {
+	// For now, we'll consider Shanghai active if SubnetEVM is active
+	return c.IsSubnetEVM(time)
+}
+
+// Rules returns the Ethereum chainrules to use for the given block number and timestamp.
+func (c *ChainConfig) Rules(num *big.Int, timestamp uint64) Rules {
+	return c.rules(num, timestamp)
 }
 
 // IsSubnetEVM returns whether [time] represents a block

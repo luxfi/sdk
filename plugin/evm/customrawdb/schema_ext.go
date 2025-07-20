@@ -5,7 +5,7 @@ package customrawdb
 
 import (
 	"github.com/luxfi/node/utils/wrappers"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var (

@@ -30,10 +30,10 @@ import (
 	_ "embed"
 	"math/big"
 	"testing"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/require"
 )
 

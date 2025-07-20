@@ -34,12 +34,12 @@ import (
 	"strings"
 	"sync"
 	"github.com/luxfi/evm/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/event"
 	ethereum "github.com/luxfi/evm/interfaces"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/luxfi/geth/rpc"
 )
 
 const basefeeWiggleMultiplier = 2

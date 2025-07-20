@@ -35,20 +35,25 @@ import (
 	"strconv"
 	"strings"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/pathdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/core/tracing"
 	"golang.org/x/crypto/sha3"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/holiman/uint256"
 )
 
 // StateTest checks transaction processing without block context.
@@ -276,7 +281,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 		// - the block body is verified against the header in block_validator.go:ValidateBody
 		// Here, we just do this shortcut smaller fix, since state tests do not
 		// utilize those codepaths
-		if len(msg.BlobHashes)*ethparams.BlobTxBlobGasPerBlob > ethparams.MaxBlobGasPerBlock {
+		if len(msg.BlobHashes)*128*1024 > 6*128*1024 { // Blob gas calculation
 			return state, common.Hash{}, errors.New("blob gas exceeds maximum")
 		}
 	}
@@ -288,7 +293,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 		if err != nil {
 			return state, common.Hash{}, err
 		}
-		if _, err := types.Sender(types.LatestSigner(config), &ttx); err != nil {
+		if _, err := types.Sender(types.LatestSigner(&ethparams.ChainConfig{ChainID: config.ChainID}), &ttx); err != nil {
 			return state, common.Hash{}, err
 		}
 	}
@@ -299,15 +304,18 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	context.GetHash = vmTestBlockHash
 	context.BaseFee = baseFee
 	context.Random = nil
-	if config.IsLondon(new(big.Int)) && t.json.Env.Random != nil {
+	if config.IsSubnetEVM(block.Time()) && t.json.Env.Random != nil {
 		rnd := common.BigToHash(t.json.Env.Random)
 		context.Random = &rnd
 		context.Difficulty = big.NewInt(0)
 	}
-	if config.IsCancun(new(big.Int), block.Time()) && t.json.Env.ExcessBlobGas != nil {
-		context.BlobBaseFee = eip4844.CalcBlobFee(*t.json.Env.ExcessBlobGas)
+	if config.IsCancun(block.Time()) && t.json.Env.ExcessBlobGas != nil {
+		// Calculate blob fee based on excess blob gas
+		excess := uint256.MustFromBig(new(big.Int).SetUint64(*t.json.Env.ExcessBlobGas))
+		context.BlobBaseFee = new(big.Int).Div(excess.ToBig(), big.NewInt(128))
 	}
-	evm := vm.NewEVM(context, txContext, state.StateDB, config, vmconfig)
+	evm := vm.NewEVM(context, state.StateDB, &ethparams.ChainConfig{ChainID: config.ChainID}, vmconfig)
+	evm.SetTxContext(txContext)
 
 	// Execute the message.
 	snapshot := state.StateDB.Snapshot()
@@ -322,10 +330,10 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	// - the coinbase self-destructed, or
 	// - there are only 'bad' transactions, which aren't executed. In those cases,
 	//   the coinbase gets no txfee, so isn't created, and thus needs to be touched
-	state.StateDB.AddBalance(block.Coinbase(), new(uint256.Int))
+	state.StateDB.AddBalance(block.Coinbase(), new(uint256.Int), tracing.BalanceChangeUnspecified)
 
 	// Commit state mutations into database.
-	root, _ = state.StateDB.Commit(block.NumberU64(), config.IsEIP158(block.Number()))
+	root, _ = state.StateDB.Commit(block.NumberU64(), config.IsEIP158(block.Number()), false)
 	return state, root, err
 }
 
@@ -411,8 +419,13 @@ func (tx *stTransaction) toMessage(ps stPostState, baseFee *big.Int) (*core.Mess
 		if tx.MaxPriorityFeePerGas == nil {
 			tx.MaxPriorityFeePerGas = tx.MaxFeePerGas
 		}
-		gasPrice = math.BigMin(new(big.Int).Add(tx.MaxPriorityFeePerGas, baseFee),
-			tx.MaxFeePerGas)
+		// Use minimum of (maxPriorityFee + baseFee) and maxFee
+		sum := new(big.Int).Add(tx.MaxPriorityFeePerGas, baseFee)
+		if sum.Cmp(tx.MaxFeePerGas) > 0 {
+			gasPrice = tx.MaxFeePerGas
+		} else {
+			gasPrice = sum
+		}
 	}
 	if gasPrice == nil {
 		return nil, errors.New("no gas price provided")
@@ -449,7 +462,7 @@ func vmTestBlockHash(n uint64) common.Hash {
 // StateTestState groups all the state database objects together for use in tests.
 type StateTestState struct {
 	StateDB   *state.StateDB
-	TrieDB    *triedb.Database
+	TrieDB    *triedb.Database // trie database
 	Snapshots *snapshot.Tree
 }
 
@@ -457,23 +470,23 @@ type StateTestState struct {
 func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bool, scheme string) StateTestState {
 	tconf := &triedb.Config{Preimages: true}
 	if scheme == rawdb.HashScheme {
-		tconf.DBOverride = hashdb.Defaults.BackendConstructor
+		tconf.HashDB = hashdb.Defaults
 	} else {
-		tconf.DBOverride = pathdb.Defaults.BackendConstructor
+		tconf.PathDB = pathdb.Defaults
 	}
-	triedb := triedb.NewDatabase(db, tconf)
-	sdb := state.NewDatabaseWithNodeDB(db, triedb)
+	tdb := triedb.NewDatabase(db, tconf)
+	sdb := state.NewDatabaseWithNodeDB(db, tdb)
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
 		statedb.SetCode(addr, a.Code)
-		statedb.SetNonce(addr, a.Nonce)
-		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance))
+		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeUnspecified)
+		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceChangeUnspecified)
 		for k, v := range a.Storage {
 			statedb.SetState(addr, k, v)
 		}
 	}
 	// Commit and re-open to start with a clean state.
-	root, _ := statedb.Commit(0, false)
+	root, _ := statedb.Commit(0, false, false)
 
 	// If snapshot is requested, initialize the snapshotter and use it in state.
 	var snaps *snapshot.Tree
@@ -484,10 +497,10 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 			AsyncBuild: false,
 			SkipVerify: true,
 		}
-		snaps, _ = snapshot.New(snapconfig, db, triedb, common.Hash{}, root)
+		snaps, _ = snapshot.New(snapconfig, db, tdb, common.Hash{}, root)
 	}
 	statedb, _ = state.New(root, sdb, snaps)
-	return StateTestState{statedb, triedb, snaps}
+	return StateTestState{statedb, tdb, snaps}
 }
 
 // Close should be called when the state is no longer needed, ie. after running the test.

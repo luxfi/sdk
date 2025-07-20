@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/evm/peer"
 	"github.com/luxfi/evm/warp/aggregator"
 	"github.com/luxfi/evm/warp/validators"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/log"
 )
 
 var errNoValidators = errors.New("cannot aggregate signatures from subnet with no validators")

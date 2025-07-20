@@ -35,15 +35,15 @@ import (
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/eth/tracers/logger"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	// "github.com/ethereum/go-ethereum/core/asm" // TODO: asm package not available
+	"github.com/luxfi/geth/common"
+	// "github.com/luxfi/geth/core/asm" // TODO: asm package not available
 	// force-load js tracers to trigger registration
 	_ "github.com/luxfi/evm/eth/tracers/js"
 )
@@ -236,7 +236,7 @@ type dummyChain struct {
 	counter int
 }
 
-// Engine retrieves the chain's consensus engine.
+// Engine retrieves the chain's consensus common.
 func (d *dummyChain) Engine() consensus.Engine {
 	return nil
 }
@@ -608,7 +608,7 @@ func TestEip2929Cases(t *testing.T) {
 
 // TestColdAccountAccessCost test that the cold account access cost is reported
 // correctly
-// see: https://github.com/ethereum/go-ethereum/issues/22649
+// see: https://github.com/luxfi/geth/issues/22649
 func TestColdAccountAccessCost(t *testing.T) {
 	for i, tc := range []struct {
 		code []byte

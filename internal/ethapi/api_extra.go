@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
@@ -21,7 +21,7 @@ import (
 )
 
 func (s *BlockChainAPI) GetChainConfig(ctx context.Context) *params.ChainConfigWithUpgradesJSON {
-	return params.ToWithUpgradesJSON(s.b.ChainConfig())
+	return s.b.ChainConfig().ToWithUpgradesJSON()
 }
 
 type DetailedExecutionResult struct {
@@ -154,7 +154,7 @@ func (s *BlockChainAPI) GetActiveRulesAt(ctx context.Context, blockTimestamp *ui
 	} else {
 		timestamp = *blockTimestamp
 	}
-	rules := s.b.ChainConfig().Rules(common.Big0, params.IsMergeTODO, timestamp)
+	rules := s.b.ChainConfig().Rules(common.Big0, timestamp)
 	res := ActiveRulesResult{
 		EthRules:       rules,
 		AvalancheRules: params.GetRulesExtra(rules).AvalancheRules,

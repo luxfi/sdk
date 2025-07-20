@@ -30,9 +30,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"os"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 	bloomfilter "github.com/holiman/bloomfilter/v2"
 )
 

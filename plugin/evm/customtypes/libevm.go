@@ -6,7 +6,7 @@ package customtypes
 import (
 	"io"
 
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/rlp"
 )
 
 // TODO: RegisterExtras API doesn't exist in go-ethereum v1.16.1

@@ -11,17 +11,17 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/luxfi/evm/sync/syncutils"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 const (
