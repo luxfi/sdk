@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"sync"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	syncclient "github.com/luxfi/evm/sync/client"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
 	"golang.org/x/sync/errgroup"
 )
 

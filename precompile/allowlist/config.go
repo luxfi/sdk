@@ -8,7 +8,7 @@ import (
 	"slices"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var ErrCannotAddManagersBeforeDurango = fmt.Errorf("cannot add managers before Durango")

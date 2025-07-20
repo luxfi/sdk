@@ -4,9 +4,9 @@
 package statesync
 
 import (
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // trieQueue persists storage trie roots with their associated

@@ -34,30 +34,30 @@ import (
 	"sync"
 	"time"
 	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state/pruner"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/eth/ethconfig"
 	"github.com/luxfi/evm/eth/filters"
 	"github.com/luxfi/evm/eth/gasprice"
 	"github.com/luxfi/evm/eth/tracers"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/internal/shutdowncheck"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/node"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 )
 
 // Config contains the configuration options of the ETH protocol.
@@ -386,7 +386,7 @@ func (s *Ethereum) Stop() error {
 	close(s.closeBloomHandler)
 	s.txPool.Close()
 	s.blockchain.Stop()
-	s.engine.Close()
+	s.common.Close()
 
 	// Clean shutdown marker as the last thing before closing db
 	s.shutdownTracker.Stop()

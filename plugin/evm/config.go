@@ -9,8 +9,8 @@ import (
 	"time"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/eth"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
 	"github.com/spf13/cast"
 )
 

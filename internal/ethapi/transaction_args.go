@@ -34,13 +34,19 @@ import (
 	"fmt"
 	"math/big"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/crypto/kzg4844"
+	"github.com/luxfi/geth/log"
+	"github.com/holiman/uint256"
+)
+
+const (
+	maxBlobsPerTransaction = 6 // Maximum number of blobs per transaction
 )
 
 // TransactionArgs represents the arguments to construct a new transaction
@@ -57,7 +63,7 @@ type TransactionArgs struct {
 
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	// "input" is the newer name and should be preferred by clients.
-	// Issue detail: https://github.com/ethereum/go-ethereum/issues/15628
+	// Issue detail: https://github.com/luxfi/geth/issues/15628
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
 
@@ -142,7 +148,7 @@ func (args *TransactionArgs) setDefaults(ctx context.Context, b Backend, skipGas
 		if skipGasEstimation { // Skip gas usage estimation if a precise gas limit is not critical, e.g., in non-transaction calls.
 			gas := hexutil.Uint64(b.RPCGasCap())
 			if gas == 0 {
-				gas = hexutil.Uint64(math.MaxUint64 / 2)
+				gas = hexutil.Uint64(^uint64(0) / 2) // math.MaxUint64 / 2
 			}
 			args.Gas = &gas
 		} else { // Estimate the gas usage otherwise.
@@ -206,7 +212,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	}
 	// If the tx has completely specified a fee mechanism, no default is needed.
 	// This allows users who are not yet synced past London to get defaults for
-	// other tx values. See https://github.com/ethereum/go-ethereum/pull/23274
+	// other tx values. See https://github.com/luxfi/geth/pull/23274
 	// for more information.
 	eip1559ParamsSet := args.MaxFeePerGas != nil && args.MaxPriorityFeePerGas != nil
 	// Sanity check the EIP-1559 fee parameters if present.
@@ -334,12 +340,12 @@ func (args *TransactionArgs) setBlobTxSidecar(ctx context.Context, b Backend) er
 		commitments := make([]kzg4844.Commitment, n)
 		proofs := make([]kzg4844.Proof, n)
 		for i, b := range args.Blobs {
-			c, err := kzg4844.BlobToCommitment(b)
+			c, err := kzg4844.BlobToCommitment(&b)
 			if err != nil {
 				return fmt.Errorf("blobs[%d]: error computing commitment: %v", i, err)
 			}
 			commitments[i] = c
-			p, err := kzg4844.ComputeBlobProof(b, c)
+			p, err := kzg4844.ComputeBlobProof(&b, c)
 			if err != nil {
 				return fmt.Errorf("blobs[%d]: error computing proof: %v", i, err)
 			}
@@ -349,7 +355,7 @@ func (args *TransactionArgs) setBlobTxSidecar(ctx context.Context, b Backend) er
 		args.Proofs = proofs
 	} else {
 		for i, b := range args.Blobs {
-			if err := kzg4844.VerifyBlobProof(b, args.Commitments[i], args.Proofs[i]); err != nil {
+			if err := kzg4844.VerifyBlobProof(&b, args.Commitments[i], args.Proofs[i]); err != nil {
 				return fmt.Errorf("failed to verify blob proof: %v", err)
 			}
 		}
@@ -386,7 +392,7 @@ func (args *TransactionArgs) ToMessage(globalGasCap uint64, baseFee *big.Int) (*
 	// Set default gas & gas price if none were set
 	gas := globalGasCap
 	if gas == 0 {
-		gas = uint64(math.MaxUint64 / 2)
+		gas = uint64(^uint64(0) / 2) // math.MaxUint64 / 2
 	}
 	if args.Gas != nil {
 		gas = uint64(*args.Gas)
@@ -427,7 +433,13 @@ func (args *TransactionArgs) ToMessage(globalGasCap uint64, baseFee *big.Int) (*
 			// Backfill the legacy gasPrice for EVM execution, unless we're all zeroes
 			gasPrice = new(big.Int)
 			if gasFeeCap.BitLen() > 0 || gasTipCap.BitLen() > 0 {
-				gasPrice = math.BigMin(new(big.Int).Add(gasTipCap, baseFee), gasFeeCap)
+				// Use minimum of (gasTipCap + baseFee) and gasFeeCap
+				sum := new(big.Int).Add(gasTipCap, baseFee)
+				if sum.Cmp(gasFeeCap) > 0 {
+					gasPrice = gasFeeCap
+				} else {
+					gasPrice = sum
+				}
 			}
 		}
 	}

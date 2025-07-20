@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package prometheus
 
-import "github.com/ethereum/go-ethereum/metrics"
+import "github.com/luxfi/geth/metrics"
 
 var _ Registry = (*metrics.StandardRegistry)(nil)
 

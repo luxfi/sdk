@@ -8,11 +8,11 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	ethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/rlp"
 )
 
 // GetHeaderExtra returns the [HeaderExtra] from the given [Header].
@@ -152,7 +152,7 @@ func (h *HeaderSerializable) updateToExtras(extras *HeaderExtra) {
 }
 
 //go:generate go run github.com/fjl/gencodec -type HeaderSerializable -field-override headerMarshaling -out gen_header_serializable_json.go
-//go:generate go run github.com/ethereum/go-ethereum/rlp/rlpgen@739ba847f6f407f63fd6a24175b24e56fea583a1 -type HeaderSerializable -out gen_header_serializable_rlp.go
+//go:generate go run github.com/luxfi/geth/rlp/rlpgen@739ba847f6f407f63fd6a24175b24e56fea583a1 -type HeaderSerializable -out gen_header_serializable_rlp.go
 
 // HeaderSerializable defines the header of a block in the Ethereum blockchain,
 // as it is to be serialized into RLP and JSON. Note it must be exported so that

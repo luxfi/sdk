@@ -32,9 +32,10 @@ import (
 	"fmt"
 	"math/big"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/plugin/evm/customlogs"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // Filter can be used to retrieve and filter logs.

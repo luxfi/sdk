@@ -13,12 +13,12 @@ import (
 	"testing"
 
 	"github.com/luxfi/node/database"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/interfaces/metrics"
-	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/triedb/hashdb"
 	"github.com/stretchr/testify/require"
@@ -169,7 +169,7 @@ func addKVs(
 		return nil, common.Hash{}, fmt.Errorf("creating state with snapshot: %w", err)
 	}
 	if prefetchers > 0 {
-		statedb.StartPrefetcher(namespace, WithConcurrentWorkers(prefetchers))
+		statedb.StartPrefetcher(namespace, nil)
 		defer statedb.StopPrefetcher()
 	}
 	for _, address := range []common.Address{address1, address2} {
@@ -183,8 +183,7 @@ func addKVs(
 			statedb.SetState(address, common.BytesToHash(key), common.BytesToHash(value))
 		}
 	}
-	snapshotOpt := snapshot.WithBlockHashes(fakeHash(block+1), fakeHash(block))
-	root, err = statedb.Commit(block+1, true, stateconf.WithSnapshotUpdateOpts(snapshotOpt))
+	root, err = statedb.Commit(block+1, true)
 	if err != nil {
 		return nil, common.Hash{}, fmt.Errorf("committing with snap: %w", err)
 	}

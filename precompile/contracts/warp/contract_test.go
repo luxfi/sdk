@@ -19,9 +19,9 @@ import (
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/stretchr/testify/require"
 )

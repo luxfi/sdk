@@ -33,11 +33,11 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/log"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -222,8 +222,9 @@ func run(ctx context.Context, call *core.Message, opts *Options) (*core.Executio
 		evmContext = core.NewEVMBlockContext(opts.Header, opts.Chain, nil)
 
 		dirtyState = opts.State.Copy()
-		evm        = vm.NewEVM(evmContext, msgContext, dirtyState, opts.Config, vm.Config{NoBaseFee: true})
+		evm        = vm.NewEVM(evmContext, dirtyState, &ethparams.ChainConfig{ChainID: opts.Config.ChainID}, vm.Config{NoBaseFee: true})
 	)
+	evm.SetTxContext(msgContext)
 	// Monitor the outer context and interrupt the EVM upon cancellation. To avoid
 	// a dangling goroutine until the outer estimation finishes, create an internal
 	// context for the lifetime of this method call.

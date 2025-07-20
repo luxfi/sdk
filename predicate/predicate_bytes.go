@@ -6,7 +6,7 @@ package predicate
 import (
 	"fmt"
 	
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // EndByte is used as a delimiter for the bytes packed into a precompile predicate.

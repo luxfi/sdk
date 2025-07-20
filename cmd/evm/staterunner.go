@@ -32,11 +32,11 @@ import (
 	"fmt"
 	"os"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/eth/tracers/logger"
 	"github.com/luxfi/evm/tests"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 	"github.com/urfave/cli/v2"
 )
 

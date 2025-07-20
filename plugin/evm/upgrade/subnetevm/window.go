@@ -11,7 +11,7 @@ import (
 	"math"
 
 	"github.com/luxfi/node/utils/wrappers"
-	safemath "github.com/ethereum/go-ethereum/common/math"
+	safemath "github.com/luxfi/geth/common/math"
 )
 
 const (

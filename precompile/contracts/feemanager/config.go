@@ -7,7 +7,7 @@ import (
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var _ precompileconfig.Config = &Config{}

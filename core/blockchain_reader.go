@@ -31,18 +31,18 @@ import (
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/constants"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/params"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/event"
 )
 
 // CurrentHeader retrieves the current head header of the canonical chain. The
@@ -190,7 +190,22 @@ func (bc *BlockChain) GetReceiptsByHash(hash common.Hash) types.Receipts {
 	if header == nil {
 		return nil
 	}
-	receipts := rawdb.ReadReceipts(bc.db, hash, *number, header.Time, bc.chainConfig)
+	// Create ethereum ChainConfig for rawdb
+	ethConfig := &ethparams.ChainConfig{
+		ChainID: bc.chainConfig.ChainID,
+		EIP155Block: bc.chainConfig.EIP155Block,
+		EIP158Block: bc.chainConfig.EIP158Block,
+		HomesteadBlock: bc.chainConfig.HomesteadBlock,
+		ByzantiumBlock: bc.chainConfig.ByzantiumBlock,
+		ConstantinopleBlock: bc.chainConfig.ConstantinopleBlock,
+		PetersburgBlock: bc.chainConfig.PetersburgBlock,
+		IstanbulBlock: bc.chainConfig.IstanbulBlock,
+		BerlinBlock: bc.chainConfig.BerlinBlock,
+		LondonBlock: bc.chainConfig.LondonBlock,
+		ShanghaiTime: bc.chainConfig.ShanghaiTime,
+		CancunTime: bc.chainConfig.CancunTime,
+	}
+	receipts := rawdb.ReadReceipts(bc.db, hash, *number, header.Time, ethConfig)
 	if receipts == nil {
 		return nil
 	}
@@ -218,7 +233,7 @@ func (bc *BlockChain) GetTransactionLookup(hash common.Hash) (*rawdb.LegacyTxLoo
 	if item, exist := bc.txLookupCache.Get(hash); exist {
 		return item.lookup, item.transaction, nil
 	}
-	tx, blockHash, blockNumber, txIndex := rawdb.ReadTransaction(bc.db, hash)
+	tx, blockHash, blockNumber, txIndex := rawdb.ReadCanonicalTransaction(bc.db, hash)
 	if tx == nil {
 		// The transaction is already indexed, the transaction is either
 		// not existent or not in the range of index, returning null.
@@ -266,7 +281,7 @@ func (bc *BlockChain) StateAt(root common.Hash) (*state.StateDB, error) {
 // Config retrieves the chain's fork configuration.
 func (bc *BlockChain) Config() *params.ChainConfig { return bc.chainConfig }
 
-// Engine retrieves the blockchain's consensus engine.
+// Engine retrieves the blockchain's consensus common.
 func (bc *BlockChain) Engine() consensus.Engine { return bc.engine }
 
 // Snapshots returns the blockchain snapshot tree.

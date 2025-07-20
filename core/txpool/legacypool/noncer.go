@@ -29,7 +29,7 @@ package legacypool
 import (
 	"sync"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // noncer is a tiny virtual state database to manage the executable nonces of
@@ -44,7 +44,7 @@ type noncer struct {
 // newNoncer creates a new virtual state database to track the pool nonces.
 func newNoncer(statedb *state.StateDB) *noncer {
 	return &noncer{
-		fallback: statedb.Copy(),
+		fallback: statedb,
 		nonces:   make(map[common.Address]uint64),
 	}
 }

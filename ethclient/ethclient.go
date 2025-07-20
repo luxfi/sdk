@@ -34,13 +34,13 @@ import (
 	"fmt"
 	"math/big"
 	"github.com/luxfi/evm/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/interfaces"
 	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
 )
 
 // NotFound is the error returned when an item is not found.

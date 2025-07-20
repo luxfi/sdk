@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 	"golang.org/x/sync/semaphore"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/consensus/engine"
+	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
@@ -31,12 +31,12 @@ var (
 	errExpiredRequest                          = errors.New("expired request")
 	_                     Network              = &network{}
 	_                     validators.Connector = &network{}
-	_                     common.AppHandler    = &network{}
+	_                     engine.AppHandler    = &network{}
 )
 
 type Network interface {
 	validators.Connector
-	common.AppHandler
+	engine.AppHandler
 
 	// SendAppRequestAny synchronously sends request to an arbitrary peer with a
 	// node version greater than or equal to minVersion.
@@ -78,7 +78,7 @@ type network struct {
 	activeAppRequests          *semaphore.Weighted                // controls maximum number of active outbound requests
 	activeCrossChainRequests   *semaphore.Weighted                // controls maximum number of active outbound cross chain requests
 	p2pNetwork                 *p2p.Network
-	appSender                  common.AppSender                 // node AppSender for sending messages
+	appSender                  engine.AppSender                 // node AppSender for sending messages
 	codec                      codec.Manager                    // Codec used for parsing messages
 	crossChainCodec            codec.Manager                    // Codec used for parsing cross chain messages
 	appRequestHandler          message.RequestHandler           // maps request type => handler
@@ -99,7 +99,7 @@ type network struct {
 	closed utils.Atomic[bool]
 }
 
-func NewNetwork(p2pNetwork *p2p.Network, appSender common.AppSender, codec codec.Manager, self ids.NodeID, maxActiveAppRequests int64) Network {
+func NewNetwork(p2pNetwork *p2p.Network, appSender engine.AppSender, codec codec.Manager, self ids.NodeID, maxActiveAppRequests int64) Network {
 	return &network{
 		appSender:                  appSender,
 		codec:                      codec,
@@ -403,7 +403,7 @@ func (n *network) AppResponse(ctx context.Context, nodeID ids.NodeID, requestID 
 // - request times out before a response is provided
 // error returned by this function is expected to be treated as fatal by the engine
 // returns error only when the response handler returns an error
-func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *common.AppError) error {
+func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *engine.AppError) error {
 	log.Debug("received AppRequestFailed from peer", "nodeID", nodeID, "requestID", requestID)
 
 	handler, exists := n.markRequestFulfilled(requestID)
@@ -464,7 +464,7 @@ func (n *network) Gossip(gossip []byte) error {
 	}
 
 	// Send gossip to all peers
-	sendConfig := common.SendConfig{
+	sendConfig := engine.SendConfig{
 		NodeIDs:       nil,
 		Validators:    100, // Send to all validators
 		NonValidators: 100, // Send to all non-validators

@@ -9,12 +9,12 @@ import (
 	"testing"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/require"
 )
 

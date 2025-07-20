@@ -29,19 +29,23 @@ package t8ntool
 import (
 	"fmt"
 	"math/big"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/core/tracing"
+	"github.com/holiman/uint256"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -140,7 +144,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 	}
 	var (
 		statedb     = MakePreState(rawdb.NewMemoryDatabase(), pre.Pre)
-		signer      = types.MakeSigner(chainConfig, new(big.Int).SetUint64(pre.Env.Number), pre.Env.Timestamp)
+		signer      = types.LatestSigner(vm.ConvertChainConfig(chainConfig))
 		gaspool     = new(core.GasPool)
 		blockHash   = common.Hash{0x13, 0x37}
 		rejectedTxs []*rejectedTx
@@ -193,8 +197,8 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 	// 	misc.ApplyDAOHardFork(statedb)
 	// }
 	if beaconRoot := pre.Env.ParentBeaconBlockRoot; beaconRoot != nil {
-		evm := vm.NewEVM(vmContext, vm.TxContext{}, statedb, chainConfig, vmConfig)
-		core.ProcessBeaconBlockRoot(*beaconRoot, evm, statedb)
+		evm := vm.NewEVMWithStateDB(vmContext, vm.TxContext{}, statedb, chainConfig, vmConfig)
+		core.ProcessBeaconBlockRoot(*beaconRoot, evm.EVM, statedb)
 	}
 
 	for i := 0; txIt.Next(); i++ {
@@ -218,19 +222,19 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 		}
 		txBlobGas := uint64(0)
 		if tx.Type() == types.BlobTxType {
-			txBlobGas = uint64(ethparams.BlobTxBlobGasPerBlob * len(tx.BlobHashes()))
-			if used, max := blobGasUsed+txBlobGas, uint64(ethparams.MaxBlobGasPerBlock); used > max {
+			txBlobGas = uint64(params.BlobTxBlobGasPerBlob * len(tx.BlobHashes()))
+			if used, max := blobGasUsed+txBlobGas, uint64(params.MaxBlobGasPerBlock); used > max {
 				err := fmt.Errorf("blob gas (%d) would exceed maximum allowance %d", used, max)
 				log.Warn("rejected tx", "index", i, "err", err)
 				rejectedTxs = append(rejectedTxs, &rejectedTx{i, err.Error()})
 				continue
 			}
 		}
-		tracer, err := getTracerFn(txIndex, tx.Hash())
+		_, err = getTracerFn(txIndex, tx.Hash())
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		vmConfig.Tracer = tracer
+		// vmConfig.Tracer = tracer // TODO: Fix tracer interface
 		statedb.SetTxContext(tx.Hash(), txIndex)
 
 		var (
@@ -238,10 +242,10 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			snapshot  = statedb.Snapshot()
 			prevGas   = gaspool.Gas()
 		)
-		evm := vm.NewEVM(vmContext, txContext, statedb, chainConfig, vmConfig)
+		evm := vm.NewEVMWithStateDB(vmContext, txContext, statedb, chainConfig, vmConfig)
 
 		// (ret []byte, usedGas uint64, failed bool, err error)
-		msgResult, err := core.ApplyMessage(evm, msg, gaspool)
+		msgResult, err := core.ApplyMessage(evm.EVM, msg, gaspool)
 		if err != nil {
 			statedb.RevertToSnapshot(snapshot)
 			log.Info("rejected tx", "index", i, "hash", tx.Hash(), "from", msg.From, "error", err)
@@ -282,8 +286,8 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			}
 
 			// Set the receipt logs and create the bloom filter.
-			receipt.Logs = statedb.GetLogs(tx.Hash(), vmContext.BlockNumber.Uint64(), blockHash)
-			receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+			receipt.Logs = statedb.GetLogs(tx.Hash(), vmContext.BlockNumber.Uint64(), blockHash, 0)
+			receipt.Bloom = types.CreateBloom(types.Receipts{receipt}[0])
 			// These three are non-consensus fields:
 			//receipt.BlockHash
 			//receipt.BlockNumber
@@ -314,12 +318,12 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			reward.Sub(reward, new(big.Int).SetUint64(ommer.Delta))
 			reward.Mul(reward, blockReward)
 			reward.Div(reward, big.NewInt(8))
-			statedb.AddBalance(ommer.Address, uint256.MustFromBig(reward))
+			statedb.AddBalance(ommer.Address, uint256.MustFromBig(reward), tracing.BalanceChangeUnspecified)
 		}
-		statedb.AddBalance(pre.Env.Coinbase, uint256.MustFromBig(minerReward))
+		statedb.AddBalance(pre.Env.Coinbase, uint256.MustFromBig(minerReward), tracing.BalanceChangeUnspecified)
 	}
 	// Commit block
-	root, err := statedb.Commit(vmContext.BlockNumber.Uint64(), chainConfig.IsEIP158(vmContext.BlockNumber))
+	root, err := statedb.Commit(vmContext.BlockNumber.Uint64(), chainConfig.IsEIP158(vmContext.BlockNumber), true)
 	if err != nil {
 		return nil, nil, nil, NewError(ErrorEVM, fmt.Errorf("could not commit state: %v", err))
 	}
@@ -327,7 +331,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 		StateRoot:   root,
 		TxRoot:      types.DeriveSha(includedTxs, trie.NewStackTrie(nil)),
 		ReceiptRoot: types.DeriveSha(receipts, trie.NewStackTrie(nil)),
-		Bloom:       types.CreateBloom(receipts),
+		Bloom:       types.Bloom{}, // TODO: Fix bloom creation
 		LogsHash:    rlpHash(statedb.Logs()),
 		Receipts:    receipts,
 		Rejected:    rejectedTxs,
@@ -354,14 +358,14 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc) *state.StateDB
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
 		statedb.SetCode(addr, a.Code)
-		statedb.SetNonce(addr, a.Nonce)
-		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance))
+		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeUnspecified)
+		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceChangeUnspecified)
 		for k, v := range a.Storage {
 			statedb.SetState(addr, k, v)
 		}
 	}
 	// Commit and re-open to start with a clean state.
-	root, _ := statedb.Commit(0, false)
+	root, _ := statedb.Commit(0, false, true)
 	statedb, _ = state.New(root, sdb, nil)
 	return statedb
 }

@@ -29,10 +29,10 @@ package snapshot
 import (
 	"bytes"
 	"time"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 // WipeSnapshot starts a goroutine to iterate over the entire key-value database

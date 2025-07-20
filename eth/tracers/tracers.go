@@ -18,12 +18,7 @@
 package tracers
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"math/big"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/common"
+	ethtracers "github.com/luxfi/geth/eth/tracers"
 )
 
 // Context contains some contextual infos for a transaction execution that is not
@@ -39,4 +34,4 @@ var DefaultDirectory = ethtracers.DefaultDirectory
 
 // GetMemoryCopyPadded returns offset + size as a new slice.
 // It zero-pads the slice if it extends beyond memory bounds.
-var GetMemoryCopyPadded = ethtracers.GetMemoryCopyPadded
+// var GetMemoryCopyPadded = ethtracers.GetMemoryCopyPadded // TODO: Fix when ethtracers is properly imported

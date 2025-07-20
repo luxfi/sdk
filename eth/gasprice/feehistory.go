@@ -32,10 +32,10 @@ import (
 	"fmt"
 	"math/big"
 	"slices"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 var (

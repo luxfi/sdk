@@ -34,11 +34,11 @@ import (
 	"math/big"
 	"testing"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // rewindTest is a test case for chain rollback upon user request.
@@ -545,7 +545,7 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 			StateScheme:               scheme,
 		}
 	)
-	defer engine.Close()
+	defer common.Close()
 	if snapshots {
 		config.SnapshotLimit = 256
 		config.SnapshotWait = true

@@ -11,16 +11,16 @@ import (
 
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	luxuptime "github.com/luxfi/node/snow/uptime"
-	luxvalidators "github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/consensus"
+	luxuptime "github.com/luxfi/node/consensus/uptime"
+	luxvalidators "github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/utils/timer/mockable"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 )
 
 type manager struct {
-	chainCtx *snow.Context
+	chainCtx *consensus.Context
 	stateinterfaces.State
 	uptimeinterfaces.PausableManager
 }
@@ -37,7 +37,7 @@ type manager struct {
 // that manages the validator state and the uptime manager.
 // Manager is not thread safe and should be used with the VM locked.
 func NewManager(
-	ctx *snow.Context,
+	ctx *consensus.Context,
 	db database.Database,
 	clock *mockable.Clock,
 ) (*manager, error) {

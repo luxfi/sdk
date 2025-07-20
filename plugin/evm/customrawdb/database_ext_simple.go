@@ -4,7 +4,7 @@
 package customrawdb
 
 import (
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 )
 
 // InspectDatabase traverses the entire database and checks the size

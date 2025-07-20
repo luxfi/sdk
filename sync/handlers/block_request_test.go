@@ -10,13 +10,13 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/rlp"
 	"github.com/stretchr/testify/assert"
 )
 

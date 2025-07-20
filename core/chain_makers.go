@@ -31,17 +31,19 @@ import (
 	"math/big"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
+	"github.com/luxfi/evm/plugin/evm/header"
 )
 
 // BlockGen creates blocks for testing.
@@ -108,7 +110,9 @@ func (b *BlockGen) SetParentBeaconRoot(root common.Hash) {
 	b.header.ParentBeaconRoot = &root
 	var (
 		blockContext = NewEVMBlockContext(b.header, b.cm, &b.header.Coinbase)
-		vmenv        = vm.NewEVM(blockContext, vm.TxContext{}, b.statedb, b.cm.config, vm.Config{})
+		// Convert to ethereum ChainConfig for VM
+		ethConfig    = convertToEthChainConfig(b.cm.config)
+		vmenv        = vm.NewEVM(blockContext, b.statedb, ethConfig, vm.Config{})
 	)
 	ProcessBeaconBlockRoot(root, vmenv, b.statedb)
 }
@@ -202,7 +206,8 @@ func (b *BlockGen) Gas() uint64 {
 
 // Signer returns a valid signer instance for the current block.
 func (b *BlockGen) Signer() types.Signer {
-	return types.MakeSigner(b.cm.config, b.header.Number, b.header.Time)
+	ethConfig := convertToEthChainConfig(b.cm.config)
+	return types.MakeSigner(ethConfig, b.header.Number, b.header.Time)
 }
 
 // AddUncheckedReceipt forcefully adds a receipts to the block without a
@@ -299,7 +304,7 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 		}
 
 		// Write state changes to db
-		root, err := statedb.Commit(b.header.Number.Uint64(), config.IsEIP158(b.header.Number))
+		root, err := statedb.Commit(b.header.Number.Uint64(), config.IsEIP158(b.header.Number), false)
 		if err != nil {
 			panic(fmt.Sprintf("state write error: %v", err))
 		}
@@ -340,9 +345,11 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 		}
 		var blobGasPrice *big.Int
 		if block.ExcessBlobGas() != nil {
-			blobGasPrice = eip4844.CalcBlobFee(*block.ExcessBlobGas())
+			ethConfig := convertToEthChainConfig(config)
+			blobGasPrice = eip4844.CalcBlobFee(ethConfig, block.Header())
 		}
-		if err := receipts.DeriveFields(config, block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
+		ethConfig := convertToEthChainConfig(config)
+		if err := receipts.DeriveFields(ethConfig, block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
 			panic(err)
 		}
 
@@ -398,16 +405,9 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 		BaseFee:    baseFee,
 	}
 
-	if cm.config.IsCancun(header.Number, header.Time) {
-		var (
-			parentExcessBlobGas uint64
-			parentBlobGasUsed   uint64
-		)
-		if parent.ExcessBlobGas() != nil {
-			parentExcessBlobGas = *parent.ExcessBlobGas()
-			parentBlobGasUsed = *parent.BlobGasUsed()
-		}
-		excessBlobGas := eip4844.CalcExcessBlobGas(parentExcessBlobGas, parentBlobGasUsed)
+	if cm.config.IsCancun(header.Time) {
+		ethConfig := convertToEthChainConfig(cm.config)
+		excessBlobGas := eip4844.CalcExcessBlobGas(ethConfig, parent.Header(), header.Time)
 		header.ExcessBlobGas = &excessBlobGas
 		header.BlobGasUsed = new(uint64)
 		header.ParentBeaconRoot = new(common.Hash)
@@ -501,4 +501,24 @@ func (cm *chainMaker) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig
 
 func (cm *chainMaker) GetCoinbaseAt(parent *types.Header) (common.Address, bool, error) {
 	return constants.BlackholeAddr, params.GetExtra(cm.config).AllowFeeRecipients, nil
+}
+
+// convertToEthChainConfig converts a Lux ChainConfig to ethereum ChainConfig
+func convertToEthChainConfig(config *params.ChainConfig) *ethparams.ChainConfig {
+	return &ethparams.ChainConfig{
+		ChainID:             config.ChainID,
+		HomesteadBlock:      config.HomesteadBlock,
+		EIP150Block:         config.EIP150Block,
+		EIP155Block:         config.EIP155Block,
+		EIP158Block:         config.EIP158Block,
+		ByzantiumBlock:      config.ByzantiumBlock,
+		ConstantinopleBlock: config.ConstantinopleBlock,
+		PetersburgBlock:     config.PetersburgBlock,
+		IstanbulBlock:       config.IstanbulBlock,
+		MuirGlacierBlock:    config.MuirGlacierBlock,
+		BerlinBlock:         config.BerlinBlock,
+		LondonBlock:         config.LondonBlock,
+		ShanghaiTime:        config.ShanghaiTime,
+		CancunTime:          config.CancunTime,
+	}
 }

@@ -39,13 +39,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxfi/evm/interfaces/metrics"
-	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/metrics"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
@@ -64,7 +64,7 @@ const (
 	// maxBlobsPerTransaction is the maximum number of blobs a single transaction
 	// is allowed to contain. Whilst the spec states it's unlimited, the block
 	// data slots are protocol bound, which implicitly also limit this.
-	maxBlobsPerTransaction = ethparams.MaxBlobGasPerBlock / ethparams.BlobTxBlobGasPerBlob
+	maxBlobsPerTransaction = 6 // MaxBlobGasPerBlock / BlobTxBlobGasPerBlob
 
 	// txAvgSize is an approximate byte size of a transaction metadata to avoid
 	// tiny overflows causing all txs to move a shelf higher, wasting disk space.
@@ -337,7 +337,7 @@ func New(config Config, chain BlockChain) *BlobPool {
 	// Create the transaction pool with its initial settings
 	return &BlobPool{
 		config: config,
-		signer: types.LatestSigner(chain.Config()),
+		signer: types.LatestSigner(&ethparams.ChainConfig{ChainID: chain.Config().ChainID}),
 		chain:  chain,
 		lookup: make(map[common.Hash]uint64),
 		index:  make(map[common.Address][]*blobTxMeta),
@@ -844,7 +844,7 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 		}
 	}
 	// Flush out any blobs from limbo that are older than the latest finality
-	if p.chain.Config().IsCancun(p.head.Number, p.head.Time) {
+	if p.chain.Config().IsCancun(p.head.Time) {
 		p.limbo.finalize(p.chain.CurrentFinalBlock())
 	}
 	feeConfig, _, err := p.chain.GetFeeConfigAt(p.head)

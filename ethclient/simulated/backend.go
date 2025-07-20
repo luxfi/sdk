@@ -23,9 +23,9 @@ import (
 
 	"github.com/luxfi/node/utils/timer/mockable"
 	ethereum "github.com/luxfi/evm/interfaces"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"

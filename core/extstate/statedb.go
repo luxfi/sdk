@@ -4,11 +4,11 @@
 package extstate
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/core/tracing"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/core/tracing"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
 )
@@ -53,6 +53,12 @@ func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
 func (s *StateDB) SetNonce(addr common.Address, nonce uint64) {
 	// Call the underlying SetNonce with a default reason
 	s.vmStateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
+}
+
+// SetCode wrapper to match stateupgrade interface (no return value)
+func (s *StateDB) SetCode(addr common.Address, code []byte) {
+	// Call the underlying SetCode and discard the return value
+	_ = s.vmStateDB.SetCode(addr, code)
 }
 
 func (s *StateDB) Prepare(rules params.Rules, sender, coinbase common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {

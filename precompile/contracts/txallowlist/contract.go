@@ -6,7 +6,7 @@ package txallowlist
 import (
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // Singleton StatefulPrecompiledContract for W/R access to the tx allow list.

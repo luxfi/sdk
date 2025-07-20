@@ -32,7 +32,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/internal/version"
 	"github.com/luxfi/evm/params"
 	"github.com/mattn/go-isatty"

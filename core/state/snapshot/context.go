@@ -34,8 +34,8 @@ import (
 
 	"log/slog"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 // generatorStats is a collection of statistics gathered by the snapshot generator

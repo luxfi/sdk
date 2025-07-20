@@ -32,11 +32,11 @@ import (
 	"math/big"
 	"testing"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/stretchr/testify/require"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func TestFeeHistory(t *testing.T) {

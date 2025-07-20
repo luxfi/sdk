@@ -7,10 +7,10 @@ package contract
 import (
 	big "math/big"
 	reflect "reflect"
-	snow "github.com/luxfi/node/snow"
+	"github.com/luxfi/node/consensus"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
-	common "github.com/ethereum/go-ethereum/common"
-	types "github.com/ethereum/go-ethereum/core/types"
+	common "github.com/luxfi/geth/common"
+	types "github.com/luxfi/geth/core/types"
 	"github.com/holiman/uint256"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -134,10 +134,10 @@ func (mr *MockAccessibleStateMockRecorder) GetChainConfig() *gomock.Call {
 }
 
 // GetSnowContext mocks base method.
-func (m *MockAccessibleState) GetSnowContext() *snow.Context {
+func (m *MockAccessibleState) GetSnowContext() *consensus.Context {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSnowContext")
-	ret0, _ := ret[0].(*snow.Context)
+	ret0, _ := ret[0].(*consensus.Context)
 	return ret0
 }
 

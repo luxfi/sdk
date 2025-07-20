@@ -30,14 +30,14 @@ import (
 	"bytes"
 	"math/big"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core/extstate"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/core/tracing"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/predicate"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 	"github.com/holiman/uint256"
 )
 
@@ -47,7 +47,7 @@ import (
 // ChainContext supports retrieving headers and consensus parameters from the
 // current blockchain to be used during transaction processing.
 type ChainContext interface {
-	// Engine retrieves the chain's consensus engine.
+	// Engine retrieves the chain's consensus common.
 	Engine() consensus.Engine
 
 	// GetHeader returns the header corresponding to the hash/number argument pair.
@@ -79,14 +79,14 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 // This function is used to create a BlockContext when the header Extra data is not fully formed yet and it's more efficient to pass in predicateResults
 // directly rather than re-encode the latest results when executing each individual transaction.
 func NewEVMBlockContextWithPredicateResults(header *types.Header, chain ChainContext, author *common.Address, predicateBytes []byte) vm.BlockContext {
-	blockCtx := NewEVMBlockContext(header, chain, author)
-	// Note this only sets the block context, which is the hand-off point for
-	// the EVM. The actual header is not modified.
-	blockCtx.Header.Extra = customheader.SetPredicateBytesInExtra(
+	// Create a new header with the predicate bytes set in the extra field
+	modifiedHeader := types.CopyHeader(header)
+	modifiedHeader.Extra = customheader.SetPredicateBytesInExtra(
 		bytes.Clone(header.Extra),
 		predicateBytes,
 	)
-	return blockCtx
+	// Use the modified header to create the block context
+	return NewEVMBlockContext(modifiedHeader, chain, author)
 }
 
 func newEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address, extra []byte) vm.BlockContext {
@@ -119,11 +119,6 @@ func newEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		BaseFee:     baseFee,
 		BlobBaseFee: blobBaseFee,
 		GasLimit:    header.GasLimit,
-		Header: &types.Header{
-			Number: new(big.Int).Set(header.Number),
-			Time:   header.Time,
-			Extra:  extra,
-		},
 	}
 }
 
@@ -187,6 +182,6 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *uint256.Int) bool {
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
 func Transfer(db vm.StateDB, sender, recipient common.Address, amount *uint256.Int) {
-	db.SubBalance(sender, amount, vm.BalanceChangeUnspecified)
-	db.AddBalance(recipient, amount, vm.BalanceChangeUnspecified)
+	db.SubBalance(sender, amount, tracing.BalanceChangeUnspecified)
+	db.AddBalance(recipient, amount, tracing.BalanceChangeUnspecified)
 }

@@ -30,12 +30,12 @@ import (
 	"math/big"
 	"testing"
 	
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/event"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 )
 

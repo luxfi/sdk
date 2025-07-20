@@ -7,10 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/luxfi/geth/trie"
 )
 
 var legacyMinGasPrice = big.NewInt(legacy.BaseFee)

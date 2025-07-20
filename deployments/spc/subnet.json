@@ -1,0 +1,9 @@
+{
+  "subnetID": "",
+  "chainID": 36911,
+  "vmID": "subnetevm",
+  "vmGenesis": "genesis.json",
+  "blockchainName": "Sparkle Pony Club",
+  "tokenName": "SPC",
+  "tokenSymbol": "SPC"
+}

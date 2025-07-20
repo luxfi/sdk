@@ -36,16 +36,16 @@ import (
 	"strings"
 	"time"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 )
 
 // EthereumAPI provides an API to access Ethereum full node-related information.

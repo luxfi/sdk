@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/luxfi/geth/common/math"
 	"github.com/stretchr/testify/require"
 )
 

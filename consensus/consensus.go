@@ -31,9 +31,9 @@ import (
 	"math/big"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // ChainHeaderReader defines a small collection of methods needed to access the local
@@ -71,7 +71,7 @@ type ChainReader interface {
 	GetBlock(hash common.Hash, number uint64) *types.Block
 }
 
-// Engine is an algorithm agnostic consensus engine.
+// Engine is an algorithm agnostic consensus common.
 type Engine interface {
 	// Author retrieves the Ethereum address of the account that minted the given
 	// block, which may be different from the header's coinbase if a consensus
@@ -79,7 +79,7 @@ type Engine interface {
 	Author(header *types.Header) (common.Address, error)
 
 	// VerifyHeader checks whether a header conforms to the consensus rules of a
-	// given engine.
+	// given common.
 	//
 	// NOTE: VerifyHeader does not validate the correctness of fields that rely
 	// on the contents of the block (as opposed to the current and/or parent
@@ -87,11 +87,11 @@ type Engine interface {
 	VerifyHeader(chain ChainHeaderReader, header *types.Header) error
 
 	// VerifyUncles verifies that the given block's uncles conform to the consensus
-	// rules of a given engine.
+	// rules of a given common.
 	VerifyUncles(chain ChainReader, block *types.Block) error
 
 	// Prepare initializes the consensus fields of a block header according to the
-	// rules of a particular engine. The changes are executed inline.
+	// rules of a particular common. The changes are executed inline.
 	Prepare(chain ChainHeaderReader, header *types.Header) error
 
 	// Finalize runs any post-transaction state modifications (e.g. block rewards)
@@ -113,6 +113,6 @@ type Engine interface {
 	// that a new block should have.
 	CalcDifficulty(chain ChainHeaderReader, time uint64, parent *types.Header) *big.Int
 
-	// Close terminates any background threads maintained by the consensus engine.
+	// Close terminates any background threads maintained by the consensus common.
 	Close() error
 }

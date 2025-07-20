@@ -13,9 +13,9 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 	warpValidators "github.com/luxfi/evm/warp/validators"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/log"
 )
 
 const (

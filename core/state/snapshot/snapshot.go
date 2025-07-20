@@ -33,13 +33,13 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/triedb"
-	ethsnapshot "github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/geth/triedb"
+	ethsnapshot "github.com/luxfi/geth/core/state/snapshot"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 const (

@@ -30,10 +30,10 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
-	ethsnapshot "github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
+	ethsnapshot "github.com/luxfi/geth/core/state/snapshot"
+	"github.com/luxfi/geth/common"
 )
 
 // Iterator is an iterator to step over all the accounts or the specific

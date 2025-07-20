@@ -6,10 +6,10 @@ package contract
 
 import (
 	"math/big"
-	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/ethereum/go-ethereum/common"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/common"
+	ethtypes "github.com/luxfi/geth/core/types"
 	"github.com/holiman/uint256"
 )
 
@@ -52,7 +52,7 @@ type StateDB interface {
 type AccessibleState interface {
 	GetStateDB() StateDB
 	GetBlockContext() BlockContext
-	GetSnowContext() *snow.Context
+	GetSnowContext() *consensus.Context
 	GetChainConfig() precompileconfig.ChainConfig
 }
 

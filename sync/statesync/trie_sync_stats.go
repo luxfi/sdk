@@ -8,9 +8,10 @@ import (
 	"sync"
 	"time"
 	utils_math "github.com/luxfi/node/utils/math"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/node/utils/timer"
+	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -35,9 +36,9 @@ type trieSyncStats struct {
 	remainingLeafs map[*trieSegment]uint64
 
 	// metrics
-	totalLeafs     metrics.Counter
-	triesSegmented metrics.Counter
-	leafsRateGauge metrics.Gauge
+	totalLeafs     *metrics.Counter
+	triesSegmented *metrics.Counter
+	leafsRateGauge *metrics.Gauge
 }
 
 func newTrieSyncStats() *trieSyncStats {

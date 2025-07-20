@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 	"github.com/luxfi/evm/core"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/stretchr/testify/require"
 )

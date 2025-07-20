@@ -32,18 +32,23 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
+	"github.com/holiman/uint256"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/core/tracing"
 )
 
 //go:generate go run github.com/fjl/gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -152,7 +157,8 @@ func SetupGenesisBlock(
 	// is initialized with an external ancient store. Commit genesis state
 	// in this case.
 	header := rawdb.ReadHeader(db, stored, 0)
-	if header.Root != types.EmptyRootHash && !triedb.Initialized(header.Root) {
+	// Check if genesis state is already initialized
+	if header.Root != types.EmptyRootHash && !rawdb.HasLegacyTrieNode(db, header.Root) {
 		// Ensure the stored genesis matches with the given one.
 		hash := genesis.ToBlock().Hash()
 		if hash != stored {
@@ -205,8 +211,8 @@ func SetupGenesisBlock(
 	} else {
 		compatErr := storedcfg.CheckCompatible(newcfg, height, timestamp)
 		if compatErr != nil && ((height != 0 && compatErr.RewindToBlock != 0) || (timestamp != 0 && compatErr.RewindToTime != 0)) {
-			storedData, _ := params.ToWithUpgradesJSON(storedcfg).MarshalJSON()
-			newData, _ := params.ToWithUpgradesJSON(newcfg).MarshalJSON()
+			storedData, _ := storedcfg.ToWithUpgradesJSON().MarshalJSON()
+			newData, _ := newcfg.ToWithUpgradesJSON().MarshalJSON()
 			log.Error("found mismatch between config on database vs. new config", "storedConfig", string(storedData), "newConfig", string(newData), "err", compatErr)
 			return newcfg, stored, compatErr
 		}
@@ -220,7 +226,8 @@ func SetupGenesisBlock(
 // IsVerkle indicates whether the state is already stored in a verkle
 // tree at genesis time.
 func (g *Genesis) IsVerkle() bool {
-	return g.Config.IsVerkle(new(big.Int).SetUint64(g.Number), g.Timestamp)
+	// IsVerkle is not implemented in luxfi/evm
+	return false
 }
 
 // ToBlock returns the genesis block according to genesis specification.
@@ -233,10 +240,8 @@ func (g *Genesis) trieConfig() *triedb.Config {
 	if !g.IsVerkle() {
 		return nil
 	}
-	return &triedb.Config{
-		DBOverride: pathdb.Defaults.BackendConstructor,
-		IsVerkle:   true,
-	}
+	// Return nil for non-verkle tries
+	return nil
 }
 
 // TODO: migrate this function to "flush" for more similarity with upstream.
@@ -257,7 +262,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 		airdropAmount := uint256.MustFromBig(g.AirdropAmount)
 		for _, alloc := range airdrop {
-			statedb.SetBalance(alloc.Address, airdropAmount)
+			statedb.AddBalance(alloc.Address, airdropAmount, tracing.BalanceIncreaseGenesisBalance)
 		}
 		log.Debug(
 			"applied airdrop allocation",
@@ -290,9 +295,11 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	// Do custom allocation after airdrop in case an address shows up in standard
 	// allocation
 	for addr, account := range g.Alloc {
-		statedb.SetBalance(addr, uint256.MustFromBig(account.Balance))
+		statedb.AddBalance(addr, uint256.MustFromBig(account.Balance), tracing.BalanceIncreaseGenesisBalance)
 		statedb.SetCode(addr, account.Code)
-		statedb.SetNonce(addr, account.Nonce)
+		if account.Nonce > 0 {
+			statedb.SetNonce(addr, account.Nonce, tracing.NonceChangeUnspecified)
+		}
 		for key, value := range account.Storage {
 			statedb.SetState(addr, key, value)
 		}
@@ -307,7 +314,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		head.Difficulty = ethparams.GenesisDifficulty
 	}
 	if conf := g.Config; conf != nil {
-		num := new(big.Int).SetUint64(g.Number)
+		// num := new(big.Int).SetUint64(g.Number) // unused after IsCancun API change
 		if params.GetExtra(conf).IsSubnetEVM(g.Timestamp) {
 			if g.BaseFee != nil {
 				head.BaseFee = g.BaseFee
@@ -315,7 +322,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 				head.BaseFee = new(big.Int).Set(params.GetExtra(g.Config).FeeConfig.MinBaseFee)
 			}
 		}
-		if conf.IsCancun(num, g.Timestamp) {
+		if conf.IsCancun(g.Timestamp) {
 			// EIP-4788: The parentBeaconBlockRoot of the genesis block is always
 			// the zero hash. This is because the genesis block does not have a parent
 			// by definition.
@@ -332,14 +339,14 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 	}
 
-	statedb.Commit(0, false)
+	statedb.Commit(0, false, false)
 	// Commit newly generated states into disk if it's not empty.
 	if root != types.EmptyRootHash {
 		if err := triedb.Commit(root, true); err != nil {
 			panic(fmt.Sprintf("unable to commit genesis block: %v", err))
 		}
 	}
-	return types.NewBlock(head, nil, nil, nil, trie.NewStackTrie(nil))
+	return types.NewBlock(head, &types.Body{}, nil, trie.NewStackTrie(nil))
 }
 
 // Commit writes the block and state of a genesis specification to the database.

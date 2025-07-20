@@ -10,9 +10,9 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/node/snow"
-	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/node/consensus"
+	commonEng "github.com/luxfi/node/consensus/engine"
+	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 )
 
 type blockBuilder struct {
-	ctx         *snow.Context
+	ctx         *consensus.Context
 	chainConfig *params.ChainConfig
 
 	txPool *txpool.TxPool
@@ -31,7 +31,7 @@ type blockBuilder struct {
 	shutdownWg   *sync.WaitGroup
 
 	// A message is sent on this channel when a new block
-	// is ready to be build. This notifies the consensus engine.
+	// is ready to be build. This notifies the consensus common.
 	notifyBuildBlockChan chan<- commonEng.Message
 
 	// [buildBlockLock] must be held when accessing [buildSent]
@@ -115,11 +115,11 @@ func (b *blockBuilder) markBuilding() {
 	case b.notifyBuildBlockChan <- commonEng.PendingTxs:
 		b.buildSent = true
 	default:
-		log.Error("Failed to push PendingTxs notification to the consensus engine.")
+		log.Error("Failed to push PendingTxs notification to the consensus common.")
 	}
 }
 
-// signalTxsReady sends a PendingTxs notification to the consensus engine.
+// signalTxsReady sends a PendingTxs notification to the consensus common.
 // If BuildBlock has not been called since the last PendingTxs message was sent,
 // signalTxsReady will not send a duplicate.
 func (b *blockBuilder) signalTxsReady() {

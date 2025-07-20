@@ -36,12 +36,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/prque"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/metrics"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
@@ -283,7 +284,7 @@ func New(config Config, chain BlockChain) *LegacyPool {
 		config:              config,
 		chain:               chain,
 		chainconfig:         chain.Config(),
-		signer:              types.LatestSigner(chain.Config()),
+		signer:              types.LatestSigner(&ethparams.ChainConfig{ChainID: chain.Config().ChainID}),
 		pending:             make(map[common.Address]*list),
 		queue:               make(map[common.Address]*list),
 		beats:               make(map[common.Address]time.Time),
@@ -698,7 +699,6 @@ func (pool *LegacyPool) validateTx(tx *types.Transaction, local bool) error {
 		State: pool.currentState,
 		Rules: pool.chainconfig.Rules(
 			pool.currentHead.Load().Number,
-			params.IsMergeTODO,
 			pool.currentHead.Load().Time,
 		),
 		MinimumFee: pool.minimumFee,

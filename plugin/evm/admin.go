@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"github.com/luxfi/node/api"
 	"github.com/luxfi/node/utils/profiler"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 )
 
 // Admin is the API service for admin API calls

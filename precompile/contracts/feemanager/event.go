@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // FeeConfigChangedEventGasCost is the gas cost of a FeeConfigChanged event.

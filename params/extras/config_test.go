@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/upgrade"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/stretchr/testify/assert"
@@ -147,7 +147,7 @@ func TestChainConfigVerify(t *testing.T) {
 				NetworkUpgrades: NetworkUpgrades{
 					SubnetEVMTimestamp: nil,
 				},
-				AvalancheContext: AvalancheContext{SnowCtx: &snow.Context{}},
+				AvalancheContext: AvalancheContext{SnowCtx: &consensus.Context{}},
 			},
 			errRegex: "^invalid network upgrades: ",
 		},
@@ -160,7 +160,7 @@ func TestChainConfigVerify(t *testing.T) {
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),
 				},
-				AvalancheContext: AvalancheContext{SnowCtx: &snow.Context{
+				AvalancheContext: AvalancheContext{SnowCtx: &consensus.Context{
 					NetworkUpgrades: upgrade.Config{
 						DurangoTime: time.Unix(2, 0),
 						EtnaTime:    time.Unix(3, 0),

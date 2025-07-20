@@ -7,9 +7,9 @@ import (
 	"math"
 	"math/big"
 	"testing"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var testFeeConfig = commontype.FeeConfig{
@@ -119,7 +119,7 @@ func TestVerifyBlockFee(t *testing.T) {
 			bigBlockGasCost := new(big.Int).SetUint64(blockGasCost)
 
 			engine := NewFaker()
-			if err := engine.verifyBlockFee(test.baseFee, bigBlockGasCost, test.txs, test.receipts); err != nil {
+			if err := common.verifyBlockFee(test.baseFee, bigBlockGasCost, test.txs, test.receipts); err != nil {
 				if !test.shouldErr {
 					t.Fatalf("Unexpected error: %s", err)
 				}

@@ -34,23 +34,27 @@ import (
 	"math/big"
 	"strings"
 	"time"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/luxfi/evm/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/luxfi/evm/accounts/scwallet"
-	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/luxfi/evm/eth/tracers/logger"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/eth/gasestimator"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/geth/trie"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/holiman/uint256"
-	"github.com/tyler-smith/go-bip39"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/core/tracing"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 // estimateGasErrorRatio is the amount of overestimation eth_estimateGas is
@@ -105,7 +109,7 @@ type feeHistoryResult struct {
 }
 
 // FeeHistory returns the fee market history.
-func (s *EthereumAPI) FeeHistory(ctx context.Context, blockCount math.HexOrDecimal64, lastBlock rpc.BlockNumber, rewardPercentiles []float64) (*feeHistoryResult, error) {
+func (s *EthereumAPI) FeeHistory(ctx context.Context, blockCount hexutil.Uint64, lastBlock rpc.BlockNumber, rewardPercentiles []float64) (*feeHistoryResult, error) {
 	oldest, reward, baseFee, gasUsed, err := s.b.FeeHistory(ctx, uint64(blockCount), lastBlock, rewardPercentiles)
 	if err != nil {
 		return nil, err
@@ -394,11 +398,11 @@ func (s *PersonalAccountAPI) UnlockAccount(ctx context.Context, addr common.Addr
 	// When the API is exposed by external RPC(http, ws etc), unless the user
 	// explicitly specifies to allow the insecure account unlocking, otherwise
 	// it is disabled.
-	if s.b.ExtRPCEnabled() && !s.b.AccountManager().Config().InsecureUnlockAllowed {
+	if s.b.ExtRPCEnabled() {
 		return false, errors.New("account unlock with HTTP access is forbidden")
 	}
 
-	const max = uint64(time.Duration(math.MaxInt64) / time.Second)
+	const max = uint64(time.Duration(1<<63-1) / time.Second) // math.MaxInt64
 	var d time.Duration
 	if duration == nil {
 		d = 300 * time.Second
@@ -561,44 +565,26 @@ func (s *PersonalAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.By
 
 // InitializeWallet initializes a new wallet at the provided URL, by generating and returning a new private key.
 func (s *PersonalAccountAPI) InitializeWallet(ctx context.Context, url string) (string, error) {
-	wallet, err := s.am.Wallet(url)
+	_, err := s.am.Wallet(url)
 	if err != nil {
 		return "", err
 	}
 
-	entropy, err := bip39.NewEntropy(256)
-	if err != nil {
-		return "", err
-	}
-
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return "", err
-	}
-
-	seed := bip39.NewSeed(mnemonic, "")
-
-	switch wallet := wallet.(type) {
-	case *scwallet.Wallet:
-		return mnemonic, wallet.Initialize(seed)
-	default:
-		return "", errors.New("specified wallet does not support initialization")
-	}
+	// TODO: scwallet implementation is incomplete
+	// Smart card wallet initialization not implemented
+	return "", errors.New("smart card wallet initialization not supported")
 }
 
 // Unpair deletes a pairing between wallet and geth.
 func (s *PersonalAccountAPI) Unpair(ctx context.Context, url string, pin string) error {
-	wallet, err := s.am.Wallet(url)
+	_, err := s.am.Wallet(url)
 	if err != nil {
 		return err
 	}
 
-	switch wallet := wallet.(type) {
-	case *scwallet.Wallet:
-		return wallet.Unpair([]byte(pin))
-	default:
-		return errors.New("specified wallet does not support pairing")
-	}
+	// TODO: scwallet implementation is incomplete
+	// Smart card wallet unpairing not implemented
+	return errors.New("smart card wallet unpairing not supported")
 }
 
 // BlockChainAPI provides an API to access Ethereum blockchain data.
@@ -927,7 +913,7 @@ func (s *BlockChainAPI) GetBlockReceipts(ctx context.Context, blockNrOrHash rpc.
 	}
 
 	// Derive the sender.
-	signer := types.MakeSigner(s.b.ChainConfig(), block.Number(), block.Time())
+	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: s.b.ChainConfig().ChainID}, block.Number(), block.Time())
 
 	result := make([]map[string]interface{}, len(receipts))
 	for i, receipt := range receipts {
@@ -962,7 +948,7 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 	for addr, account := range *diff {
 		// Override account nonce.
 		if account.Nonce != nil {
-			state.SetNonce(addr, uint64(*account.Nonce))
+			state.SetNonce(addr, uint64(*account.Nonce), tracing.NonceChangeUnspecified)
 		}
 		// Override account(contract) code.
 		if account.Code != nil {
@@ -971,7 +957,7 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 		// Override account balance.
 		if account.Balance != nil {
 			u256Balance, _ := uint256.FromBig((*big.Int)(*account.Balance))
-			state.SetBalance(addr, u256Balance)
+			state.SetBalance(addr, u256Balance, tracing.BalanceChangeUnspecified)
 		}
 		if account.State != nil && account.StateDiff != nil {
 			return fmt.Errorf("account %s has both 'state' and 'stateDiff'", addr.Hex())
@@ -1101,7 +1087,7 @@ func doCall(ctx context.Context, b Backend, args TransactionArgs, state *state.S
 	}()
 
 	// Execute the message.
-	gp := new(core.GasPool).AddGas(math.MaxUint64)
+	gp := new(core.GasPool).AddGas(^uint64(0)) // math.MaxUint64
 	result, err := core.ApplyMessage(evm, msg, gp)
 	if err := state.Error(); err != nil {
 		return nil, err
@@ -1346,7 +1332,7 @@ type RPCTransaction struct {
 // newRPCTransaction returns a transaction that will serialize to the RPC
 // representation, with the given location metadata set (if available).
 func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber uint64, blockTime uint64, index uint64, baseFee *big.Int, config *params.ChainConfig) *RPCTransaction {
-	signer := types.MakeSigner(config, new(big.Int).SetUint64(blockNumber), blockTime)
+	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: config.ChainID}, new(big.Int).SetUint64(blockNumber), blockTime)
 	from, _ := types.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
 	result := &RPCTransaction{
@@ -1476,6 +1462,8 @@ type accessListResult struct {
 
 // CreateAccessList creates an EIP-2930 type AccessList for the given transaction.
 // Reexec and BlockNrOrHash can be specified to create the accessList on top of a certain state.
+// TODO: AccessListTracer not available, temporarily disabled
+/*
 func (s *BlockChainAPI) CreateAccessList(ctx context.Context, args TransactionArgs, blockNrOrHash *rpc.BlockNumberOrHash) (*accessListResult, error) {
 	bNrOrHash := rpc.BlockNumberOrHashWithNumber(rpc.LatestBlockNumber)
 	if blockNrOrHash != nil {
@@ -1513,7 +1501,26 @@ func AccessList(ctx context.Context, b Backend, blockNrOrHash rpc.BlockNumberOrH
 		to = crypto.CreateAddress(args.from(), uint64(*args.Nonce))
 	}
 	// Retrieve the precompiles since they don't need to be added to the access list
-	precompiles := vm.ActivePrecompiles(b.ChainConfig().LuxRules(header.Number, header.Time))
+	luxRules := b.ChainConfig().LuxRules(header.Number, header.Time)
+	ethRules := ethparams.Rules{
+		ChainID: b.ChainConfig().ChainID,
+		IsHomestead: luxRules.IsHomestead,
+		IsEIP150: luxRules.IsEIP150,
+		IsEIP155: luxRules.IsEIP155,
+		IsEIP158: luxRules.IsEIP158,
+		IsByzantium: luxRules.IsByzantium,
+		IsConstantinople: luxRules.IsConstantinople,
+		IsPetersburg: luxRules.IsPetersburg,
+		IsIstanbul: luxRules.IsIstanbul,
+		IsBerlin: false, // Not available in lux rules
+		IsLondon: false, // Not available in lux rules
+		IsMerge: false, // Not available in lux rules
+		IsShanghai: false, // Not available in lux rules
+		IsCancun: luxRules.IsCancun,
+		IsPrague: false, // Not available in lux rules
+		IsVerkle: false, // Not available in lux rules
+	}
+	precompiles := vm.ActivePrecompiles(ethRules)
 
 	// Create an initial tracer
 	prevTracer := logger.NewAccessListTracer(nil, args.from(), to, precompiles)
@@ -1548,6 +1555,7 @@ func AccessList(ctx context.Context, b Backend, blockNrOrHash rpc.BlockNumberOrH
 		prevTracer = tracer
 	}
 }
+*/
 
 // TransactionAPI exposes methods for reading and creating transaction data.
 type TransactionAPI struct {
@@ -1560,7 +1568,7 @@ type TransactionAPI struct {
 func NewTransactionAPI(b Backend, nonceLock *AddrLocker) *TransactionAPI {
 	// The signer used by the API should always be the 'latest' known one because we expect
 	// signers to be backwards-compatible with old transactions.
-	signer := types.LatestSigner(b.ChainConfig())
+	signer := types.LatestSigner(&ethparams.ChainConfig{ChainID: b.ChainConfig().ChainID})
 	return &TransactionAPI{b, nonceLock, signer}
 }
 
@@ -1694,7 +1702,7 @@ func (s *TransactionAPI) GetTransactionReceipt(ctx context.Context, hash common.
 	receipt := receipts[index]
 
 	// Derive the sender.
-	signer := types.MakeSigner(s.b.ChainConfig(), header.Number, header.Time)
+	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: s.b.ChainConfig().ChainID}, header.Number, header.Time)
 	return marshalReceipt(receipt, blockHash, blockNumber, signer, tx, int(index)), nil
 }
 
@@ -1769,7 +1777,7 @@ func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 	}
 	// Print a log with full tx details for manual investigations and interventions
 	head := b.CurrentBlock()
-	signer := types.MakeSigner(b.ChainConfig(), head.Number, head.Time)
+	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: b.ChainConfig().ChainID}, head.Number, head.Time)
 	from, err := types.Sender(signer, tx)
 	if err != nil {
 		return common.Hash{}, err

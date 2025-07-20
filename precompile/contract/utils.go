@@ -8,8 +8,8 @@ import (
 	"regexp"
 	"strings"
 	"github.com/luxfi/evm/accounts/abi"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/core/vm"
 )
 
 // Gas costs for stateful precompiles
