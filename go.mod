@@ -2,11 +2,7 @@ module github.com/luxfi/evm
 
 go 1.24.5
 
-replace (
-	github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/netrunner => ../netrunner
-)
+replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
@@ -24,9 +20,9 @@ require (
 	github.com/holiman/billy v0.0.0-20240216141850-2abb0c79d3c4
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/geth v0.15.31
-	github.com/luxfi/netrunner v1.7.7
-	github.com/luxfi/node v1.13.9
+	github.com/luxfi/geth v0.15.40
+	github.com/luxfi/netrunner v1.7.12
+	github.com/luxfi/node v1.13.13
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/onsi/ginkgo/v2 v2.23.4
