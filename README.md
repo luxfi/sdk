@@ -83,7 +83,7 @@ The Lux EVM is compatible with almost all Ethereum tooling, including [Remix](ht
 
 ## Block Format
 
-To support these changes, there have been a number of changes to the SubnetEVM block format compared to what exists on the C-Chain and Ethereum. Here we list the changes to the block format as compared to Ethereum.
+To support these changes, there have been a number of changes to the EVM block format compared to what exists on the C-Chain and Ethereum. Here we list the changes to the block format as compared to Ethereum.
 
 ### Block Header
 

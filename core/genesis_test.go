@@ -66,8 +66,8 @@ func TestSetupGenesis(t *testing.T) {
 }
 
 func testSetupGenesis(t *testing.T, scheme string) {
-	preSubnetConfig := params.Copy(params.TestPreSubnetEVMChainConfig)
-	params.GetExtra(&preSubnetConfig).SubnetEVMTimestamp = utils.NewUint64(100)
+	preSubnetConfig := params.Copy(params.TestPreEVMChainConfig)
+	params.GetExtra(&preSubnetConfig).EVMTimestamp = utils.NewUint64(100)
 	var (
 		customghash = common.HexToHash("0x4a12fe7bf8d40d152d7e9de22337b115186a4662aa3a97217b36146202bbfc66")
 		customg     = Genesis{
@@ -81,7 +81,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 	)
 
 	rollbackpreSubnetConfig := params.Copy(&preSubnetConfig)
-	params.GetExtra(&rollbackpreSubnetConfig).SubnetEVMTimestamp = utils.NewUint64(90)
+	params.GetExtra(&rollbackpreSubnetConfig).EVMTimestamp = utils.NewUint64(90)
 	oldcustomg.Config = &rollbackpreSubnetConfig
 
 	tests := []struct {
@@ -130,8 +130,8 @@ func testSetupGenesis(t *testing.T, scheme string) {
 		{
 			name: "incompatible config for lux fork in DB",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				// Commit the 'old' genesis block with SubnetEVM transition at 90.
-				// Advance to block #4, past the SubnetEVM transition block of customg.
+				// Commit the 'old' genesis block with EVM transition at 90.
+				// Advance to block #4, past the EVM transition block of customg.
 				tdb := triedb.NewDatabase(db, newDbConfig(scheme))
 				genesis, err := oldcustomg.Commit(db, tdb)
 				if err != nil {
@@ -159,7 +159,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 			wantHash:   customghash,
 			wantConfig: customg.Config,
 			wantErr: &ethparams.ConfigCompatError{
-				What:         "SubnetEVM fork block timestamp",
+				What:         "EVM fork block timestamp",
 				StoredTime:   u64(90),
 				NewTime:      u64(100),
 				RewindToTime: 89,

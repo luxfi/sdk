@@ -41,8 +41,8 @@ func newTimestampCompatError(what string, storedtime, newtime *uint64) *gethpara
 // Avalanche specific network upgrades are also included here.
 // (nil = no fork, 0 = already activated)
 type NetworkUpgrades struct {
-	// SubnetEVMTimestamp is a placeholder that activates Avalanche Upgrades prior to ApricotPhase6
-	SubnetEVMTimestamp *uint64 `json:"subnetEVMTimestamp,omitempty"`
+	// EVMTimestamp is a placeholder that activates Avalanche Upgrades prior to ApricotPhase6
+	EVMTimestamp *uint64 `json:"evmTimestamp,omitempty"`
 	// Durango activates the Shanghai Execution Spec Upgrade from Ethereum (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md#included-eips)
 	// and Avalanche Warp Messaging.
 	// Note: EIP-4895 is excluded since withdrawals are not relevant to the Avalanche C-Chain or Subnets running the EVM.
@@ -60,8 +60,8 @@ func (n *NetworkUpgrades) Equal(other *NetworkUpgrades) bool {
 }
 
 func (n *NetworkUpgrades) checkNetworkUpgradesCompatible(newcfg *NetworkUpgrades, time uint64) *gethparams.ConfigCompatError {
-	if isForkTimestampIncompatible(n.SubnetEVMTimestamp, newcfg.SubnetEVMTimestamp, time) {
-		return newTimestampCompatError("SubnetEVM fork block timestamp", n.SubnetEVMTimestamp, newcfg.SubnetEVMTimestamp)
+	if isForkTimestampIncompatible(n.EVMTimestamp, newcfg.EVMTimestamp, time) {
+		return newTimestampCompatError("EVM fork block timestamp", n.EVMTimestamp, newcfg.EVMTimestamp)
 	}
 	if isForkTimestampIncompatible(n.DurangoTimestamp, newcfg.DurangoTimestamp, time) {
 		return newTimestampCompatError("Durango fork block timestamp", n.DurangoTimestamp, newcfg.DurangoTimestamp)
@@ -81,7 +81,7 @@ func (n *NetworkUpgrades) checkNetworkUpgradesCompatible(newcfg *NetworkUpgrades
 
 func (n *NetworkUpgrades) forkOrder() []fork {
 	return []fork{
-		{name: "subnetEVMTimestamp", timestamp: n.SubnetEVMTimestamp},
+		{name: "evmTimestamp", timestamp: n.EVMTimestamp},
 		{name: "durangoTimestamp", timestamp: n.DurangoTimestamp},
 		{name: "etnaTimestamp", timestamp: n.EtnaTimestamp},
 		{name: "fortunaTimestamp", timestamp: n.FortunaTimestamp, optional: true},
@@ -98,8 +98,8 @@ func (n *NetworkUpgrades) SetDefaults(agoUpgrades upgrade.Config) {
 	// This is because in prior versions, upgrades were not modifiable and were directly set to their default values.
 	// Most of the tools and configurations just provide these as 0, so it is safer to treat 0 as nil and set to default
 	// to prevent premature activations of the network upgrades for live networks.
-	if n.SubnetEVMTimestamp == nil || *n.SubnetEVMTimestamp == 0 {
-		n.SubnetEVMTimestamp = defaults.SubnetEVMTimestamp
+	if n.EVMTimestamp == nil || *n.EVMTimestamp == 0 {
+		n.EVMTimestamp = defaults.EVMTimestamp
 	}
 	if n.DurangoTimestamp == nil || *n.DurangoTimestamp == 0 {
 		n.DurangoTimestamp = defaults.DurangoTimestamp
@@ -115,8 +115,8 @@ func (n *NetworkUpgrades) SetDefaults(agoUpgrades upgrade.Config) {
 // verifyNetworkUpgrades checks that the network upgrades are well formed.
 func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) error {
 	defaults := getDefaultNetworkUpgrades(agoUpgrades)
-	if err := verifyWithDefault(n.SubnetEVMTimestamp, defaults.SubnetEVMTimestamp); err != nil {
-		return fmt.Errorf("SubnetEVM fork block timestamp is invalid: %w", err)
+	if err := verifyWithDefault(n.EVMTimestamp, defaults.EVMTimestamp); err != nil {
+		return fmt.Errorf("EVM fork block timestamp is invalid: %w", err)
 	}
 	if err := verifyWithDefault(n.DurangoTimestamp, defaults.DurangoTimestamp); err != nil {
 		return fmt.Errorf("Durango fork block timestamp is invalid: %w", err)
@@ -134,8 +134,8 @@ func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) erro
 }
 
 func (n *NetworkUpgrades) Override(o *NetworkUpgrades) {
-	if o.SubnetEVMTimestamp != nil {
-		n.SubnetEVMTimestamp = o.SubnetEVMTimestamp
+	if o.EVMTimestamp != nil {
+		n.EVMTimestamp = o.EVMTimestamp
 	}
 	if o.DurangoTimestamp != nil {
 		n.DurangoTimestamp = o.DurangoTimestamp
@@ -151,10 +151,10 @@ func (n *NetworkUpgrades) Override(o *NetworkUpgrades) {
 	}
 }
 
-// IsSubnetEVM returns whether [time] represents a block
-// with a timestamp after the SubnetEVM upgrade time.
-func (n NetworkUpgrades) IsSubnetEVM(time uint64) bool {
-	return isTimestampForked(n.SubnetEVMTimestamp, time)
+// IsEVM returns whether [time] represents a block
+// with a timestamp after the EVM upgrade time.
+func (n NetworkUpgrades) IsEVM(time uint64) bool {
+	return isTimestampForked(n.EVMTimestamp, time)
 }
 
 // IsDurango returns whether [time] represents a block
@@ -183,7 +183,7 @@ func (n *NetworkUpgrades) IsGranite(time uint64) bool {
 
 func (n *NetworkUpgrades) Description() string {
 	var banner string
-	banner += fmt.Sprintf(" - SubnetEVM Timestamp:          @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(n.SubnetEVMTimestamp))
+	banner += fmt.Sprintf(" - EVM Timestamp:          @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(n.EVMTimestamp))
 	banner += fmt.Sprintf(" - Durango Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.11.0)\n", ptrToString(n.DurangoTimestamp))
 	banner += fmt.Sprintf(" - Etna Timestamp:               @%-10v (https://github.com/luxfi/node/releases/tag/v1.12.0)\n", ptrToString(n.EtnaTimestamp))
 	banner += fmt.Sprintf(" - Fortuna Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.13.0)\n", ptrToString(n.FortunaTimestamp))
@@ -192,7 +192,7 @@ func (n *NetworkUpgrades) Description() string {
 }
 
 type AvalancheRules struct {
-	IsSubnetEVM bool
+	IsEVM bool
 	IsDurango   bool
 	IsEtna      bool
 	IsFortuna   bool
@@ -201,7 +201,7 @@ type AvalancheRules struct {
 
 func (n *NetworkUpgrades) GetAvalancheRules(time uint64) AvalancheRules {
 	return AvalancheRules{
-		IsSubnetEVM: n.IsSubnetEVM(time),
+		IsEVM: n.IsEVM(time),
 		IsDurango:   n.IsDurango(time),
 		IsEtna:      n.IsEtna(time),
 		IsFortuna:   n.IsFortuna(time),
@@ -213,7 +213,7 @@ func (n *NetworkUpgrades) GetAvalancheRules(time uint64) AvalancheRules {
 // Nil values are used to indicate optional upgrades.
 func getDefaultNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
 	return NetworkUpgrades{
-		SubnetEVMTimestamp: utils.NewUint64(0),
+		EVMTimestamp: utils.NewUint64(0),
 		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.DurangoTime),
 		EtnaTimestamp:      utils.TimeToNewUint64(agoUpgrade.EtnaTime),
 		FortunaTimestamp:   nil, // Fortuna is optional and has no effect on EVM

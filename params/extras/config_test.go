@@ -30,7 +30,7 @@ func TestChainConfigDescription(t *testing.T) {
 		"empty": {
 			config: &ChainConfig{},
 			wantRegex: `Avalanche Upgrades \(timestamp based\)\:
- - SubnetEVM Timestamp: ( )+@nil( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
+ - EVM Timestamp: ( )+@nil( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
 Upgrade Config: {}
 Fee Config: {}
@@ -40,7 +40,7 @@ $`,
 		"set": {
 			config: &ChainConfig{
 				NetworkUpgrades: NetworkUpgrades{
-					SubnetEVMTimestamp: pointer(uint64(1)),
+					EVMTimestamp: pointer(uint64(1)),
 					DurangoTimestamp:   pointer(uint64(2)),
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),
@@ -58,7 +58,7 @@ $`,
 				AllowFeeRecipients: true,
 				UpgradeConfig: UpgradeConfig{
 					NetworkUpgradeOverrides: &NetworkUpgrades{
-						SubnetEVMTimestamp: pointer(uint64(13)),
+						EVMTimestamp: pointer(uint64(13)),
 					},
 					StateUpgrades: []StateUpgrade{
 						{
@@ -73,9 +73,9 @@ $`,
 				},
 			},
 			wantRegex: `Avalanche Upgrades \(timestamp based\)\:
- - SubnetEVM Timestamp: ( )+@1( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
+ - EVM Timestamp: ( )+@1( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
-Upgrade Config: {"networkUpgradeOverrides":{"subnetEVMTimestamp":13},"stateUpgrades":\[{"blockTimestamp":14,"accounts":{"0x0f00000000000000000000000000000000000000":{"code":"0x10"}}}\]}
+Upgrade Config: {"networkUpgradeOverrides":{"evmTimestamp":13},"stateUpgrades":\[{"blockTimestamp":14,"accounts":{"0x0f00000000000000000000000000000000000000":{"code":"0x10"}}}\]}
 Fee Config: {"gasLimit":5,"targetBlockRate":6,"minBaseFee":7,"targetGas":8,"baseFeeChangeDenominator":9,"minBlockGasCost":10,"maxBlockGasCost":11,"blockGasCostStep":12}
 Allow Fee Recipients: true
 $`,
@@ -145,7 +145,7 @@ func TestChainConfigVerify(t *testing.T) {
 			config: ChainConfig{
 				FeeConfig: validFeeConfig,
 				NetworkUpgrades: NetworkUpgrades{
-					SubnetEVMTimestamp: nil,
+					EVMTimestamp: nil,
 				},
 				AvalancheContext: AvalancheContext{SnowCtx: &consensus.Context{}},
 			},
@@ -155,7 +155,7 @@ func TestChainConfigVerify(t *testing.T) {
 			config: ChainConfig{
 				FeeConfig: validFeeConfig,
 				NetworkUpgrades: NetworkUpgrades{
-					SubnetEVMTimestamp: pointer(uint64(1)),
+					EVMTimestamp: pointer(uint64(1)),
 					DurangoTimestamp:   pointer(uint64(2)),
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),

@@ -67,7 +67,7 @@ func BlockGasCostTest(t *testing.T, feeConfig commontype.FeeConfig) {
 		{
 			name:       "before_subnet_evm",
 			parentTime: 10,
-			upgrades:   extras.TestPreSubnetEVMChainConfig.NetworkUpgrades,
+			upgrades:   extras.TestPreEVMChainConfig.NetworkUpgrades,
 			parentCost: maxBlockGasCostBig,
 			timestamp:  10 + targetBlockRate + 1,
 			expected:   nil,
@@ -218,19 +218,19 @@ func BlockGasCostWithStepTest(t *testing.T, feeConfig commontype.FeeConfig) {
 func TestEstimateRequiredTip(t *testing.T) {
 	tests := []struct {
 		name               string
-		subnetEVMTimestamp *uint64
+		evmTimestamp *uint64
 		header             *types.Header
 		want               *big.Int
 		wantErr            error
 	}{
 		{
 			name:               "not_subnet_evm",
-			subnetEVMTimestamp: utils.NewUint64(1),
+			evmTimestamp: utils.NewUint64(1),
 			header:             &types.Header{},
 		},
 		{
 			name:               "nil_base_fee",
-			subnetEVMTimestamp: utils.NewUint64(0),
+			evmTimestamp: utils.NewUint64(0),
 			header: customtypes.WithHeaderExtra(
 				&types.Header{},
 				&customtypes.HeaderExtra{
@@ -241,7 +241,7 @@ func TestEstimateRequiredTip(t *testing.T) {
 		},
 		{
 			name:               "nil_block_gas_cost",
-			subnetEVMTimestamp: utils.NewUint64(0),
+			evmTimestamp: utils.NewUint64(0),
 			header: &types.Header{
 				BaseFee: big.NewInt(1),
 			},
@@ -249,7 +249,7 @@ func TestEstimateRequiredTip(t *testing.T) {
 		},
 		{
 			name:               "no_gas_used",
-			subnetEVMTimestamp: utils.NewUint64(0),
+			evmTimestamp: utils.NewUint64(0),
 			header: customtypes.WithHeaderExtra(
 				&types.Header{
 					GasUsed: 0,
@@ -263,7 +263,7 @@ func TestEstimateRequiredTip(t *testing.T) {
 		},
 		{
 			name:               "success",
-			subnetEVMTimestamp: utils.NewUint64(0),
+			evmTimestamp: utils.NewUint64(0),
 			header: customtypes.WithHeaderExtra(
 				&types.Header{
 					GasUsed: 912,
@@ -279,7 +279,7 @@ func TestEstimateRequiredTip(t *testing.T) {
 		},
 		{
 			name:               "success_rounds_up",
-			subnetEVMTimestamp: utils.NewUint64(0),
+			evmTimestamp: utils.NewUint64(0),
 			header: customtypes.WithHeaderExtra(
 				&types.Header{
 					GasUsed: 124,
@@ -301,7 +301,7 @@ func TestEstimateRequiredTip(t *testing.T) {
 
 			config := &extras.ChainConfig{
 				NetworkUpgrades: extras.NetworkUpgrades{
-					SubnetEVMTimestamp: test.subnetEVMTimestamp,
+					EVMTimestamp: test.evmTimestamp,
 				},
 			}
 			requiredTip, err := EstimateRequiredTip(config, test.header)

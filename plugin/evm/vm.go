@@ -29,7 +29,7 @@ import (
 	"github.com/luxfi/evm/eth"
 	"github.com/luxfi/evm/eth/ethconfig"
 	"github.com/luxfi/geth/metrics"
-	subnetEVMPrometheus "github.com/luxfi/evm/metrics/prometheus"
+	evmPrometheus "github.com/luxfi/evm/metrics/prometheus"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/node"
 	"github.com/luxfi/evm/params"
@@ -134,8 +134,8 @@ var (
 	errInvalidBlock                  = errors.New("invalid block")
 	errInvalidNonce                  = errors.New("invalid nonce")
 	errUnclesUnsupported             = errors.New("uncles unsupported")
-	errNilBaseFeeSubnetEVM           = errors.New("nil base fee is invalid after subnetEVM")
-	errNilBlockGasCostSubnetEVM      = errors.New("nil blockGasCost is invalid after subnetEVM")
+	errNilBaseFeeEVM           = errors.New("nil base fee is invalid after evm")
+	errNilBlockGasCostEVM      = errors.New("nil blockGasCost is invalid after evm")
 	errInvalidHeaderPredicateResults = errors.New("invalid header predicate results")
 	errInitializingLogger            = errors.New("failed to initialize logger")
 )
@@ -233,7 +233,7 @@ type VM struct {
 
 	bootstrapped luxUtils.Atomic[bool]
 
-	logger SubnetEVMLogger
+	logger EVMLogger
 	// State sync server and client
 	StateSyncServer
 	StateSyncClient
@@ -291,11 +291,11 @@ func (vm *VM) Initialize(
 	}
 	vm.chainAlias = alias
 
-	subnetEVMLogger, err := InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, vm.ctx.Log)
+	evmLogger, err := InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, vm.ctx.Log)
 	if err != nil {
 		return fmt.Errorf("%w: %w ", errInitializingLogger, err)
 	}
-	vm.logger = subnetEVMLogger
+	vm.logger = evmLogger
 
 	log.Info("Initializing Lux EVM VM", "Version", Version, "libevm version", ethparams.LibEVMVersion, "Config", vm.config)
 
@@ -334,7 +334,7 @@ func (vm *VM) Initialize(
 	}
 
 	if g.Config == nil {
-		g.Config = params.SubnetEVMDefaultChainConfig
+		g.Config = params.EVMDefaultChainConfig
 	}
 
 	// Set the Avalanche Context on the ChainConfig
@@ -554,7 +554,7 @@ func (vm *VM) initializeMetrics() error {
 	vm.multiGatherer = nodeMetrics.NewMultiGatherer()
 	// If metrics are enabled, register the default metrics regitry
 	if metrics.Enabled {
-		gatherer := subnetEVMPrometheus.Gatherer(metrics.DefaultRegistry)
+		gatherer := evmPrometheus.Gatherer(metrics.DefaultRegistry)
 		if err := vm.multiGatherer.Register(ethMetricsPrefix, gatherer); err != nil {
 			return err
 		}
@@ -571,7 +571,7 @@ func (vm *VM) initializeMetrics() error {
 
 func (vm *VM) initializeChain(lastAcceptedHash common.Hash, ethConfig ethconfig.Config) error {
 	nodecfg := &node.Config{
-		SubnetEVMVersion:      Version,
+		EVMVersion:      Version,
 		KeyStoreDir:           vm.config.KeystoreDirectory,
 		ExternalSigner:        vm.config.KeystoreExternalSigner,
 		InsecureUnlockAllowed: vm.config.KeystoreInsecureUnlockAllowed,

@@ -238,7 +238,7 @@ curl -X POST --data '{
       "IsCancun": true
     },
     "luxRules": {
-      "IsSubnetEVM": true,
+      "IsEVM": true,
       "IsDurango": true,
       "IsEUpgrade": true
     },

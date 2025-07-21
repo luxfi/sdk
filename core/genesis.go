@@ -315,7 +315,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	}
 	if conf := g.Config; conf != nil {
 		// num := new(big.Int).SetUint64(g.Number) // unused after IsCancun API change
-		if params.GetExtra(conf).IsSubnetEVM(g.Timestamp) {
+		if params.GetExtra(conf).IsEVM(g.Timestamp) {
 			if g.BaseFee != nil {
 				head.BaseFee = g.BaseFee
 			} else {

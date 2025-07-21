@@ -30,7 +30,7 @@ func GasLimit(
 	timestamp uint64,
 ) (uint64, error) {
 	switch {
-	case config.IsSubnetEVM(timestamp):
+	case config.IsEVM(timestamp):
 		return feeConfig.GasLimit.Uint64(), nil
 	default:
 		// since all chains have activated EVM,
@@ -72,7 +72,7 @@ func VerifyGasLimit(
 	header *types.Header,
 ) error {
 	switch {
-	case config.IsSubnetEVM(header.Time):
+	case config.IsEVM(header.Time):
 		expectedGasLimit := feeConfig.GasLimit.Uint64()
 		if header.GasLimit != expectedGasLimit {
 			return fmt.Errorf("%w: expected to be %d in EVM, but found %d",

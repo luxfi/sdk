@@ -54,7 +54,7 @@ const maxJSONLen = 64 * 1024 * 1024 // 64MB
 var (
 	// MainnetNetworkUpgrades defines the network upgrade timestamps for mainnet
 	MainnetNetworkUpgrades = extras.NetworkUpgrades{
-		SubnetEVMTimestamp: utils.NewUint64(0),
+		EVMTimestamp: utils.NewUint64(0),
 		DurangoTimestamp:   nil,
 		EtnaTimestamp:      nil,
 		FortunaTimestamp:   nil,
@@ -63,7 +63,7 @@ var (
 	
 	errNonGenesisForkByHeight = errors.New("evm only supports forking by height at the genesis block")
 
-	SubnetEVMChainID = big.NewInt(43214)
+	EVMChainID = big.NewInt(43214)
 
 	// For legacy tests
 	MinGasPrice        int64 = 225_000_000_000
@@ -88,9 +88,9 @@ var (
 )
 
 var (
-	// SubnetEVMDefaultConfig is the default configuration
+	// EVMDefaultConfig is the default configuration
 	// without any network upgrades.
-	SubnetEVMDefaultChainConfig = &ChainConfig{
+	EVMDefaultChainConfig = &ChainConfig{
 		ChainID:                  DefaultChainID,
 		HomesteadBlock:           big.NewInt(0),
 		EIP150Block:              big.NewInt(0),
@@ -120,12 +120,12 @@ var (
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
-			SubnetEVMTimestamp: utils.NewUint64(0),
+			EVMTimestamp: utils.NewUint64(0),
 			DurangoTimestamp:   utils.NewUint64(0),
 		},
 	}
 
-	TestSubnetEVMConfig = &ChainConfig{
+	TestEVMConfig = &ChainConfig{
 		LuxContext:          LuxContext{utils.TestSnowContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
@@ -140,11 +140,11 @@ var (
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		MandatoryNetworkUpgrades: MandatoryNetworkUpgrades{
-			SubnetEVMTimestamp: utils.NewUint64(0),
+			EVMTimestamp: utils.NewUint64(0),
 		},
 	}
 
-	TestPreSubnetEVMConfig = &ChainConfig{
+	TestPreEVMConfig = &ChainConfig{
 		LuxContext:               LuxContext{utils.TestSnowContext()},
 		ChainID:                  big.NewInt(1),
 		FeeConfig:                DefaultFeeConfig,
@@ -315,7 +315,7 @@ func (c *ChainConfig) Description() string {
 		banner += fmt.Sprintf(" - Muir Glacier:                #%-8v (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/muir-glacier.md)\n", c.MuirGlacierBlock)
 	}
 	banner += "Mandatory Upgrades:\n"
-	banner += fmt.Sprintf(" - SubnetEVM Timestamp:           @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(c.MandatoryNetworkUpgrades.SubnetEVMTimestamp))
+	banner += fmt.Sprintf(" - EVM Timestamp:           @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(c.MandatoryNetworkUpgrades.EVMTimestamp))
 	banner += fmt.Sprintf(" - Durango Timestamp:             @%-10v (https://github.com/luxfi/node/releases/tag/v1.11.0)\n", ptrToString(c.MandatoryNetworkUpgrades.DurangoTimestamp))
 	banner += fmt.Sprintf(" - Etna Timestamp:                @%-10v (https://github.com/luxfi/node/releases/tag/v1.12.0)\n", ptrToString(c.MandatoryNetworkUpgrades.EtnaTimestamp))
 	banner += "\n"
@@ -413,8 +413,8 @@ func (c *ChainConfig) IsLondon(num *big.Int) bool {
 
 // IsShanghai returns whether time represents a block with a timestamp after the Shanghai upgrade time.
 func (c *ChainConfig) IsShanghai(num *big.Int, time uint64) bool {
-	// For now, we'll consider Shanghai active if SubnetEVM is active
-	return c.IsSubnetEVM(time)
+	// For now, we'll consider Shanghai active if EVM is active
+	return c.IsEVM(time)
 }
 
 // Rules returns the Ethereum chainrules to use for the given block number and timestamp.
@@ -422,10 +422,10 @@ func (c *ChainConfig) Rules(num *big.Int, timestamp uint64) Rules {
 	return c.rules(num, timestamp)
 }
 
-// IsSubnetEVM returns whether [time] represents a block
-// with a timestamp after the SubnetEVM upgrade time.
-func (c *ChainConfig) IsSubnetEVM(time uint64) bool {
-	return utils.IsTimestampForked(c.MandatoryNetworkUpgrades.SubnetEVMTimestamp, time)
+// IsEVM returns whether [time] represents a block
+// with a timestamp after the EVM upgrade time.
+func (c *ChainConfig) IsEVM(time uint64) bool {
+	return utils.IsTimestampForked(c.MandatoryNetworkUpgrades.EVMTimestamp, time)
 }
 
 // IsDUpgrade returns whether [time] represents a block
@@ -862,7 +862,7 @@ type Rules struct {
 	IsCancun                                                bool
 
 	// Rules for Lux releases
-	IsSubnetEVM bool
+	IsEVM bool
 	IsDUpgrade  bool
 
 	// ActivePrecompiles maps addresses to stateful precompiled contracts that are enabled
@@ -909,7 +909,7 @@ func (c *ChainConfig) rules(num *big.Int, timestamp uint64) Rules {
 func (c *ChainConfig) LuxRules(blockNum *big.Int, timestamp uint64) Rules {
 	rules := c.rules(blockNum, timestamp)
 
-	rules.IsSubnetEVM = c.IsSubnetEVM(timestamp)
+	rules.IsEVM = c.IsEVM(timestamp)
 	rules.IsDUpgrade = c.IsDUpgrade(timestamp)
 
 	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].

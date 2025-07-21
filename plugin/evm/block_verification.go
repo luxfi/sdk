@@ -62,9 +62,9 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return err
 	}
 
-	if rulesExtra.IsSubnetEVM {
+	if rulesExtra.IsEVM {
 		if ethHeader.BaseFee == nil {
-			return errNilBaseFeeSubnetEVM
+			return errNilBaseFeeEVM
 		}
 		if bfLen := ethHeader.BaseFee.BitLen(); bfLen > 256 {
 			return fmt.Errorf("too large base fee: bitlen %d", bfLen)
@@ -93,7 +93,7 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return errEmptyBlock
 	}
 
-	if !rulesExtra.IsSubnetEVM {
+	if !rulesExtra.IsEVM {
 		// Make sure that all the txs have the correct fee set.
 		for _, tx := range txs {
 			if tx.GasPrice().Cmp(legacyMinGasPrice) < 0 {
@@ -108,13 +108,13 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 		return fmt.Errorf("block timestamp is too far in the future: %d > allowed %d", blockTimestamp, maxBlockTime)
 	}
 
-	if rulesExtra.IsSubnetEVM {
+	if rulesExtra.IsEVM {
 		blockGasCost := customtypes.GetHeaderExtra(ethHeader).BlockGasCost
 		switch {
 		// Make sure BlockGasCost is not nil
 		// NOTE: ethHeader.BlockGasCost correctness is checked in header verification
 		case blockGasCost == nil:
-			return errNilBlockGasCostSubnetEVM
+			return errNilBlockGasCostEVM
 		case !blockGasCost.IsUint64():
 			return fmt.Errorf("too large blockGasCost: %d", blockGasCost)
 		}

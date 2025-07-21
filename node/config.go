@@ -65,7 +65,7 @@ type Config struct {
 	// BatchResponseMaxSize is the maximum number of bytes returned from a batched rpc call.
 	BatchResponseMaxSize int `toml:",omitempty"`
 
-	SubnetEVMVersion string
+	EVMVersion string
 }
 
 // ExtRPCEnabled returns the indicator whether node enables the external

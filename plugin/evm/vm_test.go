@@ -73,9 +73,9 @@ var (
 	password        = "CjasdjhiPeirbSenfeI13" // #nosec G101
 	// Use chainId: 43111, so that it does not overlap with any Lux ChainIDs, which may have their
 	// config overridden in vm.Initialize.
-	genesisJSONSubnetEVM    = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"subnetEVMTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
-	genesisJSONDUpgrade     = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"subnetEVMTimestamp\":0,\"dUpgradeTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
-	genesisJSONPreSubnetEVM = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONEVM    = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"evmTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONDUpgrade     = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"evmTimestamp\":0,\"dUpgradeTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+	genesisJSONPreEVM = "{\"config\":{\"chainId\":43111,\"homesteadBlock\":0,\"eip150Block\":0,\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0x71562b71999873DB5b286dF957af199Ec94617F7\": {\"balance\":\"0x4192927743b88000\"}, \"0x703c4b2bD70c169f5717101CaeE543299Fc946C7\": {\"balance\":\"0x4192927743b88000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
 	genesisJSONLatest       = genesisJSONDUpgrade
 
 	firstTxAmount = new(big.Int).Mul(big.NewInt(testMinGasPrice), big.NewInt(21000*100))
@@ -102,8 +102,8 @@ var (
 		return string(b)
 	}
 
-	genesisJSONPreSubnetEVM = genesisJSON(params.TestPreSubnetEVMChainConfig)
-	genesisJSONSubnetEVM    = genesisJSON(params.TestSubnetEVMChainConfig)
+	genesisJSONPreEVM = genesisJSON(params.TestPreEVMChainConfig)
+	genesisJSONEVM    = genesisJSON(params.TestEVMChainConfig)
 	genesisJSONDurango      = genesisJSON(params.TestDurangoChainConfig)
 	genesisJSONEtna         = genesisJSON(params.TestEtnaChainConfig)
 	// genesisJSONFortuna      = genesisJSON(params.TestFortunaChainConfig)
@@ -303,7 +303,7 @@ func TestVMUpgrades(t *testing.T) {
 	}{
 		{
 			name:             "Lux EVM",
-			genesis:          genesisJSONSubnetEVM,
+			genesis:          genesisJSONEVM,
 			expectedGasPrice: big.NewInt(0),
 		},
 		{
@@ -364,7 +364,7 @@ func issueAndAccept(t *testing.T, issuer <-chan commonEng.Message, vm *VM) chain
 
 func TestBuildEthTxBlock(t *testing.T) {
 	// reduce block gas cost
-	issuer, vm, dbManager, _ := GenesisVM(t, true, genesisJSONSubnetEVM, `{"pruning-enabled":true}`, "")
+	issuer, vm, dbManager, _ := GenesisVM(t, true, genesisJSONEVM, `{"pruning-enabled":true}`, "")
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -454,7 +454,7 @@ func TestBuildEthTxBlock(t *testing.T) {
 		context.Background(),
 		utils.TestSnowContext(),
 		dbManager,
-		[]byte(genesisJSONSubnetEVM),
+		[]byte(genesisJSONEVM),
 		[]byte(""),
 		[]byte(`{"pruning-enabled":true}`),
 		issuer,
@@ -489,8 +489,8 @@ func TestBuildEthTxBlock(t *testing.T) {
 func TestSetPreferenceRace(t *testing.T) {
 	// Create two VMs which will agree on block A and then
 	// build the two distinct preferred chains above
-	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, `{"pruning-enabled":true}`, "")
-	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, `{"pruning-enabled":true}`, "")
+	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONEVM, `{"pruning-enabled":true}`, "")
+	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONEVM, `{"pruning-enabled":true}`, "")
 
 	defer func() {
 		if err := vm1.Shutdown(context.Background()); err != nil {
@@ -721,8 +721,8 @@ func TestSetPreferenceRace(t *testing.T) {
 // accept block C, which should be an orphaned block at this point and
 // get rejected.
 func TestReorgProtection(t *testing.T) {
-	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, `{"pruning-enabled":false}`, "")
-	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, `{"pruning-enabled":false}`, "")
+	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONEVM, `{"pruning-enabled":false}`, "")
+	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONEVM, `{"pruning-enabled":false}`, "")
 
 	defer func() {
 		if err := vm1.Shutdown(context.Background()); err != nil {
@@ -885,8 +885,8 @@ func TestReorgProtection(t *testing.T) {
 //	 / \
 //	B   C
 func TestNonCanonicalAccept(t *testing.T) {
-	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
-	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
+	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm1.Shutdown(context.Background()); err != nil {
@@ -1074,8 +1074,8 @@ func TestNonCanonicalAccept(t *testing.T) {
 //	    |
 //	    D
 func TestStickyPreference(t *testing.T) {
-	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
-	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
+	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm1.Shutdown(context.Background()); err != nil {
@@ -1327,8 +1327,8 @@ func TestStickyPreference(t *testing.T) {
 //	    |
 //	    D
 func TestUncleBlock(t *testing.T) {
-	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
-	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
+	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm1.Shutdown(context.Background()); err != nil {
@@ -1501,7 +1501,7 @@ func TestUncleBlock(t *testing.T) {
 // Regression test to ensure that a VM that is not able to parse a block that
 // contains no transactions.
 func TestEmptyBlock(t *testing.T) {
-	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -1559,8 +1559,8 @@ func TestEmptyBlock(t *testing.T) {
 //	    |
 //	    D
 func TestAcceptReorg(t *testing.T) {
-	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
-	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer1, vm1, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
+	issuer2, vm2, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm1.Shutdown(context.Background()); err != nil {
@@ -1754,7 +1754,7 @@ func TestAcceptReorg(t *testing.T) {
 }
 
 func TestFutureBlock(t *testing.T) {
-	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -1808,7 +1808,7 @@ func TestFutureBlock(t *testing.T) {
 }
 
 func TestLastAcceptedBlockNumberAllow(t *testing.T) {
-	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -1916,8 +1916,8 @@ func TestConfigureLogLevel(t *testing.T) {
 
 // Regression test to ensure we can build blocks if we are starting with the
 // Lux EVM ruleset in genesis.
-func TestBuildSubnetEVMBlock(t *testing.T) {
-	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+func TestBuildEVMBlock(t *testing.T) {
+	issuer, vm, _, _ := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -1999,7 +1999,7 @@ func TestBuildSubnetEVMBlock(t *testing.T) {
 
 func TestBuildAllowListActivationBlock(t *testing.T) {
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
@@ -2284,7 +2284,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 func TestTxAllowListDisablePrecompile(t *testing.T) {
 	// Setup chain params
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
 	enableAllowListTimestamp := upgrade.InitiallyActiveTime // enable at initially active time
@@ -2399,7 +2399,7 @@ func TestTxAllowListDisablePrecompile(t *testing.T) {
 func TestFeeManagerChangeFee(t *testing.T) {
 	// Setup chain params
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
 	configExtra := params.GetExtra(genesis.Config)
@@ -2522,7 +2522,7 @@ func TestFeeManagerChangeFee(t *testing.T) {
 // Test Allow Fee Recipients is disabled and, etherbase must be blackhole address
 func TestAllowFeeRecipientDisabled(t *testing.T) {
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
 	params.GetExtra(genesis.Config).AllowFeeRecipients = false // set to false initially
@@ -2582,7 +2582,7 @@ func TestAllowFeeRecipientDisabled(t *testing.T) {
 
 func TestAllowFeeRecipientEnabled(t *testing.T) {
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
 	params.GetExtra(genesis.Config).AllowFeeRecipients = true
@@ -2642,7 +2642,7 @@ func TestAllowFeeRecipientEnabled(t *testing.T) {
 
 func TestRewardManagerPrecompileSetRewardAddress(t *testing.T) {
 	genesis := &core.Genesis{}
-	require.NoError(t, genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)))
+	require.NoError(t, genesis.UnmarshalJSON([]byte(genesisJSONEVM)))
 
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		rewardmanager.ConfigKey: rewardmanager.NewConfig(utils.NewUint64(0), testEthAddrs[0:1], nil, nil, nil),
@@ -2784,7 +2784,7 @@ func TestRewardManagerPrecompileSetRewardAddress(t *testing.T) {
 
 func TestRewardManagerPrecompileAllowFeeRecipients(t *testing.T) {
 	genesis := &core.Genesis{}
-	require.NoError(t, genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)))
+	require.NoError(t, genesis.UnmarshalJSON([]byte(genesisJSONEVM)))
 
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		rewardmanager.ConfigKey: rewardmanager.NewConfig(utils.NewUint64(0), testEthAddrs[0:1], nil, nil, nil),
@@ -2914,12 +2914,12 @@ func TestRewardManagerPrecompileAllowFeeRecipients(t *testing.T) {
 }
 
 func TestSkipChainConfigCheckCompatible(t *testing.T) {
-	// The most recent network upgrade in EVM is SubnetEVM itself, which cannot be disabled for this test since it results in
+	// The most recent network upgrade in EVM is EVM itself, which cannot be disabled for this test since it results in
 	// disabling dynamic fees and causes a panic since some code assumes that this is enabled.
 	// TODO update this test when there is a future network upgrade that can be skipped in the config.
 	t.Skip("no skippable upgrades")
 
-	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONPreSubnetEVM, `{"pruning-enabled":true}`, "")
+	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONPreEVM, `{"pruning-enabled":true}`, "")
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -2954,8 +2954,8 @@ func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// use the block's timestamp instead of 0 since rewind to genesis
 	// is hardcoded to be allowed in core/genesis.go.
 	genesisWithUpgrade := &core.Genesis{}
-	require.NoError(t, json.Unmarshal([]byte(genesisJSONPreSubnetEVM), genesisWithUpgrade))
-	params.GetExtra(genesisWithUpgrade.Config).SubnetEVMTimestamp = utils.TimeToNewUint64(blk.Timestamp())
+	require.NoError(t, json.Unmarshal([]byte(genesisJSONPreEVM), genesisWithUpgrade))
+	params.GetExtra(genesisWithUpgrade.Config).EVMTimestamp = utils.TimeToNewUint64(blk.Timestamp())
 	genesisWithUpgradeBytes, err := json.Marshal(genesisWithUpgrade)
 	require.NoError(t, err)
 
@@ -2964,7 +2964,7 @@ func TestSkipChainConfigCheckCompatible(t *testing.T) {
 
 	// this will not be allowed
 	err = reinitVM.Initialize(context.Background(), vm.ctx, dbManager, genesisWithUpgradeBytes, []byte{}, []byte{}, issuer, []*commonEng.Fx{}, appSender)
-	require.ErrorContains(t, err, "mismatching SubnetEVM fork block timestamp in database")
+	require.ErrorContains(t, err, "mismatching EVM fork block timestamp in database")
 
 	// Reset metrics to allow re-initialization
 	vm.ctx.Metrics = metrics.NewPrefixGatherer()
@@ -3146,7 +3146,7 @@ func TestStandaloneDB(t *testing.T) {
 func TestFeeManagerRegressionMempoolMinFeeAfterRestart(t *testing.T) {
 	// Setup chain params
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
 	precompileActivationTime := utils.NewUint64(genesis.Timestamp + 5) // 5 seconds after genesis

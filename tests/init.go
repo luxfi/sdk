@@ -156,7 +156,7 @@ var Forks = map[string]*params.ChainConfig{
 		PetersburgBlock:     big.NewInt(0),
 		IstanbulBlock:       big.NewInt(5),
 	},
-	"Pre-SubnetEVM": {
+	"Pre-EVM": {
 		ChainID:             big.NewInt(1),
 		HomesteadBlock:      big.NewInt(0),
 		EIP150Block:         big.NewInt(0),
@@ -168,7 +168,7 @@ var Forks = map[string]*params.ChainConfig{
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 	},
-	"SubnetEVM": params.WithExtra(
+	"EVM": params.WithExtra(
 		&params.ChainConfig{
 			ChainID:             big.NewInt(1),
 			HomesteadBlock:      big.NewInt(0),
@@ -184,7 +184,7 @@ var Forks = map[string]*params.ChainConfig{
 		},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				SubnetEVMTimestamp: utils.NewUint64(0),
+				EVMTimestamp: utils.NewUint64(0),
 			},
 		},
 	),
@@ -204,7 +204,7 @@ var Forks = map[string]*params.ChainConfig{
 		},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				SubnetEVMTimestamp: utils.NewUint64(0),
+				EVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(0),
 			},
 		},
@@ -227,7 +227,7 @@ var Forks = map[string]*params.ChainConfig{
 		},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				SubnetEVMTimestamp: utils.NewUint64(0),
+				EVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(0),
 			},
 		},

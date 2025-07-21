@@ -85,7 +85,7 @@ func setDefaults(cfg *Config) {
 			},
 			&extras.ChainConfig{
 				NetworkUpgrades: extras.NetworkUpgrades{
-					SubnetEVMTimestamp: new(uint64),
+					EVMTimestamp: new(uint64),
 				},
 			},
 		)
