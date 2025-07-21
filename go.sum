@@ -301,8 +301,12 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzWu4=
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
-github.com/luxfi/node v1.13.9 h1:D7P41v4SQ6ZTjUQ+9VpYWtofThYPhV8oI9dl7+SB/Is=
-github.com/luxfi/node v1.13.9/go.mod h1:AcNHZ2EmL3oYLlvTyiAXmItiZyziapHBZKzS2/UgUWI=
+github.com/luxfi/geth v0.15.40 h1:h3tlT5P5x7199uAfWpo45by08EbQQXYIo2CqyPnwcBk=
+github.com/luxfi/geth v0.15.40/go.mod h1:IqfzUTLCcQjyeAqaBOPfqLaMknAOeCMsVvQHdXq9b/w=
+github.com/luxfi/netrunner v1.7.12 h1:DusNxGpg9amhXq1KaVFAyGCPrZ/1YH0+hAbX3uWCZY4=
+github.com/luxfi/netrunner v1.7.12/go.mod h1:hms50FSf3Hj5+HsdovaIGniTpIOX0JRy6FTTDFmTJ6E=
+github.com/luxfi/node v1.13.13 h1:d9EBufYVsUAX0djLg7GJkMWnrb4TEhSUY/rDwJEbdhc=
+github.com/luxfi/node v1.13.13/go.mod h1:hjc+249TnVTMoCySYlmwjrVA3WOLCk3s9KRx7Lz7vNE=
 github.com/magiconair/properties v1.8.6 h1:5ibWZ6iY0NctNGWo87LalDlEZ6R41TqbbDamhfG/Qzo=
 github.com/magiconair/properties v1.8.6/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
