@@ -9,7 +9,6 @@ import (
 	"math/big"
 
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -57,7 +56,7 @@ func ApplyPrecompileActivations(c *params.ChainConfig, parentTimestamp *uint64, 
 			// Set the nonce of the precompile's address (as is done when a contract is created) to ensure
 			// that it is marked as non-empty and will not be cleaned up when the statedb is finalized.
 			// SetNonce now requires a tracing.NonceChangeReason parameter
-		statedb.SetNonce(module.Address, 1, tracing.NonceChangeUnspecified)
+		statedb.SetNonce(module.Address, 1)
 			// Set the code of the precompile's address to a non-zero length byte slice to ensure that the precompile
 			// can be called from within Solidity contracts. Solidity adds a check before invoking a contract to ensure
 			// that it does not attempt to invoke a non-existent contract.

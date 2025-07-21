@@ -124,7 +124,7 @@ func (db *Database) loadJournal(diskRoot common.Hash) (layer, error) {
 // loadLayers loads a pre-existing state layer backed by a key-value store.
 func (db *Database) loadLayers() layer {
 	// Retrieve the root node of persistent state.
-	rootData := rawdb.ReadAccountTrieNode(db.diskdb, nil)
+	rootData, _ := rawdb.ReadAccountTrieNode(db.diskdb, nil)
 	var root common.Hash
 	if len(rootData) > 0 {
 		root = crypto.Keccak256Hash(rootData)
@@ -368,7 +368,7 @@ func (db *Database) Journal(root common.Hash) error {
 	}
 	// The stored state in disk might be empty, convert the
 	// root to emptyRoot in this case.
-	rootData := rawdb.ReadAccountTrieNode(db.diskdb, nil)
+	rootData, _ := rawdb.ReadAccountTrieNode(db.diskdb, nil)
 	var diskroot common.Hash
 	if len(rootData) > 0 {
 		diskroot = crypto.Keccak256Hash(rootData)

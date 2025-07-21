@@ -89,7 +89,9 @@ func ActivateableEips() []string {
 
 // NewEVM creates a new EVM instance.
 func NewEVM(blockCtx BlockContext, statedb StateDB, chainConfig *params.ChainConfig, config Config) *EVM {
-	evm := vm.NewEVM(blockCtx, statedb, chainConfig, config)
+	// Create an empty TxContext for backward compatibility
+	txCtx := vm.TxContext{}
+	evm := vm.NewEVM(blockCtx, txCtx, statedb, chainConfig, config)
 	return &EVM{EVM: evm}
 }
 
@@ -128,6 +130,6 @@ func ConvertChainConfig(cfg *luxparams.ChainConfig) *params.ChainConfig {
 // NewEVMWithStateDB creates a new EVM with luxfi chainConfig and statedb
 func NewEVMWithStateDB(blockCtx BlockContext, txCtx TxContext, statedb *state.StateDB, chainConfig *luxparams.ChainConfig, config Config) *EVM {
 	ethConfig := ConvertChainConfig(chainConfig)
-	evm := vm.NewEVM(blockCtx, statedb, ethConfig, config)
+	evm := vm.NewEVM(blockCtx, txCtx, statedb, ethConfig, config)
 	return &EVM{EVM: evm}
 }

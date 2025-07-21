@@ -40,7 +40,6 @@ import (
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/crypto/kzg4844"
-	"github.com/luxfi/geth/core/tracing"
 )
 
 // BigMin returns the smaller of x or y.
@@ -344,7 +343,7 @@ func (st *StateTransition) buyGas() error {
 
 	st.initialGas = st.msg.GasLimit
 	mgvalU256, _ := uint256.FromBig(mgval)
-	st.state.SubBalance(st.msg.From, mgvalU256, tracing.BalanceDecreaseGasBuy)
+	st.state.SubBalance(st.msg.From, mgvalU256)
 	return nil
 }
 
@@ -520,7 +519,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 
 	// Check whether the init code size has been exceeded.
 	if rulesExtra.IsDurango && contractCreation && len(msg.Data) > ethparams.MaxInitCodeSize {
-		return nil, fmt.Errorf("%w: code size %v limit %v", vm.ErrMaxInitCodeSizeExceeded, len(msg.Data), ethparams.MaxInitCodeSize)
+		return nil, fmt.Errorf("max init code size exceeded: code size %v limit %v", len(msg.Data), ethparams.MaxInitCodeSize)
 	}
 
 	// Execute the preparatory steps for state transition which includes:
@@ -528,16 +527,18 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	// - reset transient storage(eip 1153)
 	// Convert to ethereum Rules for Prepare call
 	ethRules := ethparams.Rules{
-		ChainID:          rules.ChainID,
-		IsHomestead:      rules.IsHomestead,
-		IsEIP150:         rules.IsEIP150,
-		IsEIP155:         rules.IsEIP155,
-		IsEIP158:         rules.IsEIP158,
-		IsByzantium:      rules.IsByzantium,
-		IsConstantinople: rules.IsConstantinople,
-		IsPetersburg:     rules.IsPetersburg,
-		IsIstanbul:       rules.IsIstanbul,
-		IsCancun:         rules.IsCancun,
+		ChainID: rules.ChainID,
+		EthRules: ethparams.EthRules{
+			IsHomestead:      rules.IsHomestead,
+			IsEIP150:         rules.IsEIP150,
+			IsEIP155:         rules.IsEIP155,
+			IsEIP158:         rules.IsEIP158,
+			IsByzantium:      rules.IsByzantium,
+			IsConstantinople: rules.IsConstantinople,
+			IsPetersburg:     rules.IsPetersburg,
+			IsIstanbul:       rules.IsIstanbul,
+			IsCancun:         rules.IsCancun,
+		},
 	}
 	// Get precompiles for ethereum rules
 	var precompiles []common.Address
@@ -551,11 +552,11 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 		vmerr error // vm errors do not effect consensus and are therefore not assigned to err
 	)
 	if contractCreation {
-		ret, _, st.gasRemaining, vmerr = st.evm.Create(sender, msg.Data, st.gasRemaining, value)
+		ret, _, st.gasRemaining, vmerr = st.evm.Create(vm.AccountRef(sender), msg.Data, st.gasRemaining, value)
 	} else {
 		// Increment the nonce for the next transaction
-		st.state.SetNonce(msg.From, st.state.GetNonce(msg.From)+1, tracing.NonceChangeUnspecified)
-		ret, st.gasRemaining, vmerr = st.evm.Call(sender, st.to(), msg.Data, st.gasRemaining, value)
+		st.state.SetNonce(msg.From, st.state.GetNonce(msg.From)+1)
+		ret, st.gasRemaining, vmerr = st.evm.Call(vm.AccountRef(sender), st.to(), msg.Data, st.gasRemaining, value)
 	}
 	price, overflow := uint256.FromBig(msg.GasPrice)
 	if overflow {
@@ -564,7 +565,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	gasRefund := st.refundGas(rulesExtra.IsSubnetEVM)
 	fee := new(uint256.Int).SetUint64(st.gasUsed())
 	fee.Mul(fee, price)
-	st.state.AddBalance(st.evm.Context.Coinbase, fee, tracing.BalanceIncreaseRewardTransactionFee)
+	st.state.AddBalance(st.evm.Context.Coinbase, fee)
 
 	return &ExecutionResult{
 		UsedGas:     st.gasUsed(),
@@ -589,7 +590,7 @@ func (st *StateTransition) refundGas(subnetEVM bool) uint64 {
 	// Return ETH for remaining gas, exchanged at the original rate.
 	remaining := uint256.NewInt(st.gasRemaining)
 	remaining = remaining.Mul(remaining, uint256.MustFromBig(st.msg.GasPrice))
-	st.state.AddBalance(st.msg.From, remaining, tracing.BalanceIncreaseGasReturn)
+	st.state.AddBalance(st.msg.From, remaining)
 
 	// Also return remaining gas to the block gas counter so it is
 	// available for the next transaction.

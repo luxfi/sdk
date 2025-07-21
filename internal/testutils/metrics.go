@@ -20,11 +20,10 @@ func WithMetrics(t *testing.T) {
 	t.Cleanup(func() {
 		metricsLock.Unlock()
 	})
-	if metrics.Enabled() {
+	if metrics.Enabled {
 		return
 	}
 	// Enable metrics for the test
-	// Note: There's no public way to disable metrics in go-ethereum v1.16.1
-	// So we just enable it and leave it enabled
-	metrics.Enable()
+	// Note: metrics.Enabled is a global bool variable in newer versions
+	metrics.Enabled = true
 }

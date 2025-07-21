@@ -167,9 +167,9 @@ func (b *nodebuffer) revert(db ethdb.KeyValueReader, nodes map[common.Hash]map[s
 				var nhash common.Hash
 				var nodeData []byte
 				if owner == (common.Hash{}) {
-					nodeData = rawdb.ReadAccountTrieNode(db, []byte(path))
+					nodeData, _ = rawdb.ReadAccountTrieNode(db, []byte(path))
 				} else {
-					nodeData = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
+					nodeData, _ = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
 				}
 				if len(nodeData) > 0 {
 					nhash = crypto.Keccak256Hash(nodeData)

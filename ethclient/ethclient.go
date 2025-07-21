@@ -28,6 +28,7 @@
 package ethclient
 
 import (
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"context"
 	"encoding/json"
 	"errors"
@@ -276,10 +277,12 @@ func (ec *client) getBlock(ctx context.Context, method string, args ...interface
 		}
 		txs[i] = tx.tx
 	}
-	return types.NewBlockWithHeader(head).WithBody(types.Body{
+	// Create an ethereum Body type for WithBody
+	ethBody := ethtypes.Body{
 		Transactions: txs,
 		Uncles:       uncles,
-	}), nil
+	}
+	return types.NewBlockWithHeader(head).WithBody(ethBody), nil
 }
 
 // HeaderByHash returns the block header with the given hash.

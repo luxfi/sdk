@@ -157,7 +157,10 @@ func (hc *HeaderChain) GetHeaderByHash(hash common.Hash) *types.Header {
 // In theory, if header is present in the database, all relative components
 // like td and hash->number should be present too.
 func (hc *HeaderChain) HasHeader(hash common.Hash, number uint64) bool {
-	if hc.numberCache.Contains(hash) || hc.headerCache.Contains(hash) {
+	if _, ok := hc.numberCache.Get(hash); ok {
+		return true
+	}
+	if _, ok := hc.headerCache.Get(hash); ok {
 		return true
 	}
 	return rawdb.HasHeader(hc.chainDb, hash, number)

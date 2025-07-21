@@ -13,7 +13,6 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
@@ -403,13 +402,8 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 
 	// Header seems complete, assemble into a block and return
-	body := &types.Body{
-		Transactions: txs,
-		Uncles:       uncles,
-	}
-	return types.NewBlock(
-		header, body, receipts, trie.NewStackTrie(nil),
-	), nil
+	// Use the NewBlockWithExtData function to properly handle Lux extensions
+	return types.NewBlockWithExtData(header, txs, uncles, nil, 0, nil, false), nil
 }
 
 func (*DummyEngine) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {

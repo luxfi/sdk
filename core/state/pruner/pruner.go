@@ -442,7 +442,7 @@ Check the configuration option "offline-pruning-enabled" for more details.
 `
 
 func deleteCleanTrieCache(path string) {
-	if !common.FileExist(path) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
 		log.Warn(warningLog)
 		return
 	}

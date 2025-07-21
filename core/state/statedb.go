@@ -28,8 +28,8 @@
 package state
 
 import (
-	"github.com/luxfi/evm/core/state/snapshot"
 	ethstate "github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/core/state/snapshot"
 	"github.com/luxfi/geth/common"
 )
 
@@ -41,7 +41,7 @@ type StateDB struct {
 
 // New creates a new state from a given trie.
 func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) {
-	ethStateDB, err := ethstate.New(root, db)
+	ethStateDB, err := ethstate.New(root, db, snaps)
 	if err != nil {
 		return nil, err
 	}

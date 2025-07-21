@@ -112,7 +112,8 @@ func (b *BlockGen) SetParentBeaconRoot(root common.Hash) {
 		blockContext = NewEVMBlockContext(b.header, b.cm, &b.header.Coinbase)
 		// Convert to ethereum ChainConfig for VM
 		ethConfig    = convertToEthChainConfig(b.cm.config)
-		vmenv        = vm.NewEVM(blockContext, b.statedb, ethConfig, vm.Config{})
+		txContext    = vm.TxContext{} // Empty TxContext for beacon root processing
+		vmenv        = vm.NewEVM(blockContext, txContext, b.statedb, ethConfig, vm.Config{})
 	)
 	ProcessBeaconBlockRoot(root, vmenv, b.statedb)
 }
@@ -206,8 +207,7 @@ func (b *BlockGen) Gas() uint64 {
 
 // Signer returns a valid signer instance for the current block.
 func (b *BlockGen) Signer() types.Signer {
-	ethConfig := convertToEthChainConfig(b.cm.config)
-	return types.MakeSigner(ethConfig, b.header.Number, b.header.Time)
+	return types.MakeSigner(b.cm.config.ToEthChainConfig(), b.header.Number, b.header.Time)
 }
 
 // AddUncheckedReceipt forcefully adds a receipts to the block without a
@@ -304,7 +304,7 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 		}
 
 		// Write state changes to db
-		root, err := statedb.Commit(b.header.Number.Uint64(), config.IsEIP158(b.header.Number), false)
+		root, err := statedb.Commit(b.header.Number.Uint64(), config.IsEIP158(b.header.Number))
 		if err != nil {
 			panic(fmt.Sprintf("state write error: %v", err))
 		}
@@ -345,11 +345,9 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 		}
 		var blobGasPrice *big.Int
 		if block.ExcessBlobGas() != nil {
-			ethConfig := convertToEthChainConfig(config)
-			blobGasPrice = eip4844.CalcBlobFee(ethConfig, block.Header())
+			blobGasPrice = eip4844.CalcBlobFee(*block.ExcessBlobGas())
 		}
-		ethConfig := convertToEthChainConfig(config)
-		if err := receipts.DeriveFields(ethConfig, block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
+		if err := receipts.DeriveFields(config.ToEthChainConfig(), block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
 			panic(err)
 		}
 
@@ -406,8 +404,13 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 	}
 
 	if cm.config.IsCancun(header.Time) {
-		ethConfig := convertToEthChainConfig(cm.config)
-		excessBlobGas := eip4844.CalcExcessBlobGas(ethConfig, parent.Header(), header.Time)
+		var parentExcessBlobGas uint64
+		var parentBlobGasUsed uint64
+		if parent.ExcessBlobGas() != nil {
+			parentExcessBlobGas = *parent.ExcessBlobGas()
+			parentBlobGasUsed = *parent.BlobGasUsed()
+		}
+		excessBlobGas := eip4844.CalcExcessBlobGas(parentExcessBlobGas, parentBlobGasUsed)
 		header.ExcessBlobGas = &excessBlobGas
 		header.BlobGasUsed = new(uint64)
 		header.ParentBeaconRoot = new(common.Hash)
