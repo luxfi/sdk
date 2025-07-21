@@ -645,7 +645,7 @@ func TestSetPreferenceRewind(t *testing.T, create func(db ethdb.Database, gspec 
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce2)
 		}
 		balance2 := sdb.GetBalance(addr2)
-		if balance2.Cmp(common.U2560) != 0 {
+		if balance2.Cmp(uint256.NewInt(0)) != 0 {
 			return fmt.Errorf("expected addr2 balance: 0, found balance %d", balance2)
 		}
 		return nil
@@ -845,7 +845,7 @@ func TestBuildOnVariousStages(t *testing.T, create func(db ethdb.Database, gspec
 		}
 
 		balance3 := sdb.GetBalance(addr3)
-		expectedBalance3 := common.U2560
+		expectedBalance3 := uint256.NewInt(0)
 		if balance3.Cmp(expectedBalance3) != 0 {
 			return fmt.Errorf("expected addr3 balance: %d, found balance: %d", expectedBalance3, balance3)
 		}
@@ -1115,7 +1115,7 @@ func TestAcceptBlockIdenticalStateRoot(t *testing.T, create func(db ethdb.Databa
 			return fmt.Errorf("expected addr1 nonce: 2, found nonce: %d", nonce1)
 		}
 		balance1 := sdb.GetBalance(addr1)
-		expectedBalance := common.U2560
+		expectedBalance := uint256.NewInt(0)
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
@@ -1283,7 +1283,7 @@ func TestReprocessAcceptBlockIdenticalStateRoot(t *testing.T, create func(db eth
 			return fmt.Errorf("expected addr1 nonce: 2, found nonce: %d", nonce1)
 		}
 		balance1 := sdb.GetBalance(addr1)
-		expectedBalance := common.U2560
+		expectedBalance := uint256.NewInt(0)
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
@@ -1324,7 +1324,7 @@ func TestGenerateChainInvalidBlockFee(t *testing.T, create func(db ethdb.Databas
 	t.Cleanup(blockchain.Stop)
 
 	// This call generates a chain of 3 blocks.
-	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
+	signer := types.LatestSigner(params.TestChainConfig.ToEthChainConfig())
 	_, _, _, err = GenerateChainWithGenesis(gspec, blockchain.engine, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
 		tx := types.NewTx(&types.DynamicFeeTx{
 			ChainID:   params.TestChainConfig.ChainID,
@@ -1365,7 +1365,7 @@ func TestInsertChainInvalidBlockFee(t *testing.T, create func(db ethdb.Database,
 	t.Cleanup(blockchain.Stop)
 
 	// This call generates a chain of 3 blocks.
-	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
+	signer := types.LatestSigner(params.TestChainConfig.ToEthChainConfig())
 	eng := dummy.NewFakerWithMode(dummy.Mode{ModeSkipBlockFee: true, ModeSkipCoinbase: true})
 	_, chain, _, err := GenerateChainWithGenesis(gspec, eng, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
 		tx := types.NewTx(&types.DynamicFeeTx{
@@ -1409,7 +1409,7 @@ func TestInsertChainValidBlockFee(t *testing.T, create func(db ethdb.Database, g
 	t.Cleanup(blockchain.Stop)
 
 	// This call generates a chain of 3 blocks.
-	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
+	signer := types.LatestSigner(params.TestChainConfig.ToEthChainConfig())
 	tip := big.NewInt(50000 * params.GWei)
 	transfer := big.NewInt(10000)
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
@@ -1499,7 +1499,7 @@ func TestStatefulPrecompiles(t *testing.T, create func(db ethdb.Database, gspec 
 	}
 	defer blockchain.Stop()
 
-	signer := types.LatestSigner(testConvertToEthChainConfig(params.TestChainConfig))
+	signer := types.LatestSigner(params.TestChainConfig.ToEthChainConfig())
 	tip := big.NewInt(50000 * params.GWei)
 
 	// Simple framework to add a test that the stateful precompile works as expected

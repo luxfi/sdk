@@ -52,36 +52,36 @@ type LeafsRequestHandlerStats interface {
 
 type handlerStats struct {
 	// BlockRequestHandler metrics
-	blockRequest               *metrics.Counter
-	missingBlockHash           *metrics.Counter
+	blockRequest               metrics.Counter
+	missingBlockHash           metrics.Counter
 	blocksReturned             metrics.Histogram
-	blockRequestProcessingTime *metrics.Timer
+	blockRequestProcessingTime metrics.Timer
 
 	// CodeRequestHandler stats
-	codeRequest              *metrics.Counter
-	missingCodeHash          *metrics.Counter
-	tooManyHashesRequested   *metrics.Counter
-	duplicateHashesRequested *metrics.Counter
+	codeRequest              metrics.Counter
+	missingCodeHash          metrics.Counter
+	tooManyHashesRequested   metrics.Counter
+	duplicateHashesRequested metrics.Counter
 	codeBytesReturned        metrics.Histogram
-	codeReadDuration         *metrics.Timer
+	codeReadDuration         metrics.Timer
 
 	// LeafsRequestHandler stats
-	leafsRequest               *metrics.Counter
-	invalidLeafsRequest        *metrics.Counter
+	leafsRequest               metrics.Counter
+	invalidLeafsRequest        metrics.Counter
 	leafsReturned              metrics.Histogram
-	leafsRequestProcessingTime *metrics.Timer
-	leafsReadTime              *metrics.Timer
-	snapshotReadTime           *metrics.Timer
-	generateRangeProofTime     *metrics.Timer
+	leafsRequestProcessingTime metrics.Timer
+	leafsReadTime              metrics.Timer
+	snapshotReadTime           metrics.Timer
+	generateRangeProofTime     metrics.Timer
 	proofValsReturned          metrics.Histogram
-	missingRoot                *metrics.Counter
-	trieError                  *metrics.Counter
-	proofError                 *metrics.Counter
-	snapshotReadError          *metrics.Counter
-	snapshotReadAttempt        *metrics.Counter
-	snapshotReadSuccess        *metrics.Counter
-	snapshotSegmentValid       *metrics.Counter
-	snapshotSegmentInvalid     *metrics.Counter
+	missingRoot                metrics.Counter
+	trieError                  metrics.Counter
+	proofError                 metrics.Counter
+	snapshotReadError          metrics.Counter
+	snapshotReadAttempt        metrics.Counter
+	snapshotReadSuccess        metrics.Counter
+	snapshotSegmentValid       metrics.Counter
+	snapshotSegmentInvalid     metrics.Counter
 }
 
 func (h *handlerStats) IncBlockRequest() {

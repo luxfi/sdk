@@ -49,7 +49,14 @@ func (g Genesis) MarshalJSON() ([]byte, error) {
 	if g.Alloc != nil {
 		enc.Alloc = make(map[common.UnprefixedAddress]types.Account, len(g.Alloc))
 		for k, v := range g.Alloc {
-			enc.Alloc[common.UnprefixedAddress(k)] = v
+			// Convert GenesisAccount to Account (losing MCBalance field)
+			enc.Alloc[common.UnprefixedAddress(k)] = types.Account{
+				Code:       v.Code,
+				Storage:    v.Storage,
+				Balance:    v.Balance,
+				Nonce:      v.Nonce,
+				PrivateKey: v.PrivateKey,
+			}
 		}
 	}
 	enc.AirdropHash = g.AirdropHash
@@ -121,7 +128,15 @@ func (g *Genesis) UnmarshalJSON(input []byte) error {
 	}
 	g.Alloc = make(types.GenesisAlloc, len(dec.Alloc))
 	for k, v := range dec.Alloc {
-		g.Alloc[common.Address(k)] = v
+		// Convert Account to GenesisAccount
+		g.Alloc[common.Address(k)] = types.GenesisAccount{
+			Code:       v.Code,
+			Storage:    v.Storage,
+			Balance:    v.Balance,
+			Nonce:      v.Nonce,
+			PrivateKey: v.PrivateKey,
+			MCBalance:  nil, // Set to nil as Account doesn't have MCBalance
+		}
 	}
 	if dec.AirdropHash != nil {
 		g.AirdropHash = *dec.AirdropHash

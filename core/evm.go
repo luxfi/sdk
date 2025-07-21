@@ -33,7 +33,6 @@ import (
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/core/tracing"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/geth/common"
@@ -182,6 +181,6 @@ func CanTransfer(db vm.StateDB, addr common.Address, amount *uint256.Int) bool {
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
 func Transfer(db vm.StateDB, sender, recipient common.Address, amount *uint256.Int) {
-	db.SubBalance(sender, amount, tracing.BalanceChangeUnspecified)
-	db.AddBalance(recipient, amount, tracing.BalanceChangeUnspecified)
+	db.SubBalance(sender, amount)
+	db.AddBalance(recipient, amount)
 }

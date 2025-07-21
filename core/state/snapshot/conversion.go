@@ -49,6 +49,21 @@ type trieKV struct {
 	value []byte
 }
 
+// FullAccount decodes the data on the 'slim RLP' format and returns
+// the consensus format account.
+func FullAccount(data []byte) (*types.StateAccount, error) {
+	account := new(types.SlimAccount)
+	if err := rlp.DecodeBytes(data, account); err != nil {
+		return nil, err
+	}
+	return &types.StateAccount{
+		Nonce:    account.Nonce,
+		Balance:  account.Balance,
+		Root:     common.BytesToHash(account.Root),
+		CodeHash: account.CodeHash,
+	}, nil
+}
+
 type (
 	// trieGeneratorFn is the interface of trie generation which can
 	// be implemented by different trie algorithm.
@@ -321,7 +336,7 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 					return stop(err)
 				}
 				// Fetch the next account and process it concurrently
-				account, err := types.FullAccount(it.(AccountIterator).Account())
+				account, err := FullAccount(it.(AccountIterator).Account())
 				if err != nil {
 					return stop(err)
 				}
@@ -371,13 +386,14 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 }
 
 func stackTrieGenerate(db ethdb.KeyValueWriter, scheme string, owner common.Hash, in chan trieKV, out chan common.Hash) {
-	var writer trie.OnTrieNode
+	// Use StackTrieOptions.WithWriter instead of the removed OnTrieNode API.
+	opts := trie.NewStackTrieOptions()
 	if db != nil {
-		writer = func(path []byte, hash common.Hash, blob []byte) {
+		opts = opts.WithWriter(func(path []byte, hash common.Hash, blob []byte) {
 			rawdb.WriteTrieNode(db, owner, path, hash, blob, scheme)
-		}
+		})
 	}
-	t := trie.NewStackTrie(writer)
+	t := trie.NewStackTrie(opts)
 	for leaf := range in {
 		t.Update(leaf.key[:], leaf.value)
 	}

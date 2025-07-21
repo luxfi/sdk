@@ -12,12 +12,12 @@ import "github.com/luxfi/geth/metrics"
 //
 // This is necessary for a metric defined in libevm with the same name but a
 // different type to what we expect.
-func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) *metrics.Counter {
+func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) metrics.Counter {
 	if r == nil {
 		r = metrics.DefaultRegistry
 	}
 
-	if c, ok := r.GetOrRegister(name, func() interface{} { return metrics.NewCounter() }).(*metrics.Counter); ok {
+	if c, ok := r.GetOrRegister(name, func() interface{} { return metrics.NewCounter() }).(metrics.Counter); ok {
 		return c
 	}
 	// `name` must have already been registered to be any other type

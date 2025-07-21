@@ -152,9 +152,9 @@ func (dl *diskLayer) Node(owner common.Hash, path []byte, hash common.Hash) ([]b
 		nHash common.Hash
 	)
 	if owner == (common.Hash{}) {
-		nBlob = rawdb.ReadAccountTrieNode(dl.db.diskdb, path)
+		nBlob, _ = rawdb.ReadAccountTrieNode(dl.db.diskdb, path)
 	} else {
-		nBlob = rawdb.ReadStorageTrieNode(dl.db.diskdb, owner, path)
+		nBlob, _ = rawdb.ReadStorageTrieNode(dl.db.diskdb, owner, path)
 	}
 	if len(nBlob) > 0 {
 		nHash = crypto.Keccak256Hash(nBlob)

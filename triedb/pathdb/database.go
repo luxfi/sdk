@@ -38,14 +38,16 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/triedb/database"
-	ethpathdb "github.com/luxfi/geth/triedb/pathdb"
 	"github.com/luxfi/evm/params"
 )
 
-// Type aliases for compatibility
-type (
-	StateSetWithOrigin = ethpathdb.StateSetWithOrigin
-)
+// StateSetWithOrigin wraps the state set with origin meta
+type StateSetWithOrigin struct {
+	AccountOrigin map[common.Address][]byte
+	StorageOrigin map[common.Address]map[common.Hash][]byte
+	AccountData   map[common.Address][]byte
+	StorageData   map[common.Address]map[common.Hash][]byte
+}
 
 // triestate compatibility wrapper
 type triestateCompat struct{}

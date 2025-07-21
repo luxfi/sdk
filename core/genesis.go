@@ -32,6 +32,7 @@ import (
 	"fmt"
 	"math/big"
 	"time"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/geth/core/types"
@@ -48,7 +49,6 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/holiman/uint256"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/core/tracing"
 )
 
 //go:generate go run github.com/fjl/gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -262,7 +262,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 		airdropAmount := uint256.MustFromBig(g.AirdropAmount)
 		for _, alloc := range airdrop {
-			statedb.AddBalance(alloc.Address, airdropAmount, tracing.BalanceIncreaseGenesisBalance)
+			statedb.AddBalance(alloc.Address, airdropAmount)
 		}
 		log.Debug(
 			"applied airdrop allocation",
@@ -295,10 +295,10 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	// Do custom allocation after airdrop in case an address shows up in standard
 	// allocation
 	for addr, account := range g.Alloc {
-		statedb.AddBalance(addr, uint256.MustFromBig(account.Balance), tracing.BalanceIncreaseGenesisBalance)
+		statedb.AddBalance(addr, uint256.MustFromBig(account.Balance))
 		statedb.SetCode(addr, account.Code)
 		if account.Nonce > 0 {
-			statedb.SetNonce(addr, account.Nonce, tracing.NonceChangeUnspecified)
+			statedb.SetNonce(addr, account.Nonce)
 		}
 		for key, value := range account.Storage {
 			statedb.SetState(addr, key, value)
@@ -339,14 +339,16 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 	}
 
-	statedb.Commit(0, false, false)
+	statedb.Commit(0, false)
 	// Commit newly generated states into disk if it's not empty.
 	if root != types.EmptyRootHash {
 		if err := triedb.Commit(root, true); err != nil {
 			panic(fmt.Sprintf("unable to commit genesis block: %v", err))
 		}
 	}
-	return types.NewBlock(head, &types.Body{}, nil, trie.NewStackTrie(nil))
+	// Create ethereum Body type for NewBlock
+	ethBody := &ethtypes.Body{}
+	return types.NewBlock(head, ethBody, nil, trie.NewStackTrie(nil))
 }
 
 // Commit writes the block and state of a genesis specification to the database.

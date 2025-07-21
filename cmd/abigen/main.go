@@ -184,9 +184,43 @@ func abigen(c *cli.Context) error {
 			if err != nil {
 				utils.Fatalf("Failed to read combined-json: %v", err)
 			}
-			contracts, err = compiler.ParseCombinedJSON(jsonOutput, "", "", "", "")
-			if err != nil {
-				utils.Fatalf("Failed to read contract information from json output: %v", err)
+			// Parse the combined JSON output manually
+			var combinedOutput map[string]interface{}
+			if err := json.Unmarshal(jsonOutput, &combinedOutput); err != nil {
+				utils.Fatalf("Failed to parse combined JSON: %v", err)
+			}
+			
+			contracts = make(map[string]*compiler.Contract)
+			contractsData, ok := combinedOutput["contracts"].(map[string]interface{})
+			if !ok {
+				utils.Fatalf("Invalid combined JSON format: missing contracts")
+			}
+			
+			for name, data := range contractsData {
+				contractData, ok := data.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				
+				contract := &compiler.Contract{
+					Code: "0x",
+					Info: compiler.ContractInfo{},
+				}
+				
+				// Extract bytecode
+				if bin, ok := contractData["bin"].(string); ok {
+					contract.Code = "0x" + bin
+				}
+				
+				// Extract ABI
+				if abiStr, ok := contractData["abi"].(string); ok {
+					var abi interface{}
+					if err := json.Unmarshal([]byte(abiStr), &abi); err == nil {
+						contract.Info.AbiDefinition = abi
+					}
+				}
+				
+				contracts[name] = contract
 			}
 		}
 		// Gather all non-excluded contract for binding
@@ -204,7 +238,8 @@ func abigen(c *cli.Context) error {
 			}
 			abis = append(abis, string(abi))
 			bins = append(bins, contract.Code)
-			sigs = append(sigs, contract.Hashes)
+			// sigs = append(sigs, contract.Hashes) // Hashes field no longer exists
+			sigs = append(sigs, make(map[string]string)) // Empty map for now
 			types = append(types, typeName)
 
 			// Derive the library placeholder which is a 34 character prefix of the

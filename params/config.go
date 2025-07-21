@@ -39,6 +39,7 @@ import (
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
+	ethparams "github.com/ethereum/go-ethereum/params"
 )
 
 // Type aliases for extras package types
@@ -269,6 +270,26 @@ func (c ChainConfig) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(raw)
+}
+
+// ToEthChainConfig converts Lux ChainConfig to ethereum ChainConfig
+func (c *ChainConfig) ToEthChainConfig() *ethparams.ChainConfig {
+	return &ethparams.ChainConfig{
+		ChainID:             c.ChainID,
+		HomesteadBlock:      c.HomesteadBlock,
+		EIP150Block:         c.EIP150Block,
+		EIP155Block:         c.EIP155Block,
+		EIP158Block:         c.EIP158Block,
+		ByzantiumBlock:      c.ByzantiumBlock,
+		ConstantinopleBlock: c.ConstantinopleBlock,
+		PetersburgBlock:     c.PetersburgBlock,
+		IstanbulBlock:       c.IstanbulBlock,
+		MuirGlacierBlock:    c.MuirGlacierBlock,
+		BerlinBlock:         c.BerlinBlock,
+		LondonBlock:         c.LondonBlock,
+		ShanghaiTime:        c.ShanghaiTime,
+		CancunTime:          c.CancunTime,
+	}
 }
 
 // Description returns a human-readable description of ChainConfig.

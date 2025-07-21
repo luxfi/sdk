@@ -7,7 +7,6 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/core/tracing"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
@@ -40,8 +39,8 @@ func New(vm VmStateDB) *StateDB {
 
 // AddBalance wrapper to match precompile interface (2 params instead of 3)
 func (s *StateDB) AddBalance(addr common.Address, amount *uint256.Int) {
-	// Call the underlying AddBalance with a default reason
-	s.vmStateDB.AddBalance(addr, amount, tracing.BalanceChangeUnspecified)
+	// Call the underlying AddBalance (may have changed signature)
+	s.vmStateDB.AddBalance(addr, amount)
 }
 
 // SetState wrapper to match precompile interface (no return value)
@@ -51,32 +50,33 @@ func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
 
 // SetNonce wrapper to match precompile interface (2 params instead of 3)
 func (s *StateDB) SetNonce(addr common.Address, nonce uint64) {
-	// Call the underlying SetNonce with a default reason
-	s.vmStateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
+	// Call the underlying SetNonce
+	s.vmStateDB.SetNonce(addr, nonce)
 }
 
 // SetCode wrapper to match stateupgrade interface (no return value)
 func (s *StateDB) SetCode(addr common.Address, code []byte) {
-	// Call the underlying SetCode and discard the return value
-	_ = s.vmStateDB.SetCode(addr, code)
+	// Call the underlying SetCode
+	s.vmStateDB.SetCode(addr, code)
+}
+
+// AddLog wrapper to match precompile interface
+func (s *StateDB) AddLog(log *types.Log) {
+	// The underlying StateDB has a different AddLog signature
+	// We need to call it with the components of the log
+	if log != nil {
+		s.vmStateDB.AddLog(log.Address, log.Topics, log.Data, log.BlockNumber)
+	}
 }
 
 func (s *StateDB) Prepare(rules params.Rules, sender, coinbase common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {
 	// FIXME: GetRulesExtra doesn't exist in current params package
 	// rulesExtra := params.GetRulesExtra(rules)
 	// s.predicateStorageSlots = predicate.PreparePredicateStorageSlots(rulesExtra, list)
-	// For now, convert our Rules to ethereum Rules
+	// For now, just pass an empty Rules struct
+	// TODO: Map our Rules to ethereum Rules properly
 	ethRules := ethparams.Rules{
-		ChainID:          rules.ChainID,
-		IsHomestead:      rules.IsHomestead,
-		IsEIP150:         rules.IsEIP150,
-		IsEIP155:         rules.IsEIP155,
-		IsEIP158:         rules.IsEIP158,
-		IsByzantium:      rules.IsByzantium,
-		IsConstantinople: rules.IsConstantinople,
-		IsPetersburg:     rules.IsPetersburg,
-		IsIstanbul:       rules.IsIstanbul,
-		IsCancun:         rules.IsCancun,
+		ChainID: rules.ChainID,
 	}
 	s.vmStateDB.Prepare(ethRules, sender, coinbase, dst, precompiles, list)
 }

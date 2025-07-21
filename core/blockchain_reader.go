@@ -103,7 +103,7 @@ func (bc *BlockChain) GetBody(hash common.Hash) *types.Body {
 
 // HasBlock checks if a block is fully present in the database or not.
 func (bc *BlockChain) HasBlock(hash common.Hash, number uint64) bool {
-	if bc.blockCache.Contains(hash) {
+	if cached, _ := bc.blockCache.Get(hash); cached != nil {
 		return true
 	}
 	if !bc.HasHeader(hash, number) {
@@ -117,7 +117,7 @@ func (bc *BlockChain) HasFastBlock(hash common.Hash, number uint64) bool {
 	if !bc.HasBlock(hash, number) {
 		return false
 	}
-	if bc.receiptsCache.Contains(hash) {
+	if cached, _ := bc.receiptsCache.Get(hash); cached != nil {
 		return true
 	}
 	return rawdb.HasReceipts(bc.db, hash, number)
@@ -233,7 +233,7 @@ func (bc *BlockChain) GetTransactionLookup(hash common.Hash) (*rawdb.LegacyTxLoo
 	if item, exist := bc.txLookupCache.Get(hash); exist {
 		return item.lookup, item.transaction, nil
 	}
-	tx, blockHash, blockNumber, txIndex := rawdb.ReadCanonicalTransaction(bc.db, hash)
+	tx, blockHash, blockNumber, txIndex := rawdb.ReadTransaction(bc.db, hash)
 	if tx == nil {
 		// The transaction is already indexed, the transaction is either
 		// not existent or not in the range of index, returning null.
@@ -275,7 +275,9 @@ func (bc *BlockChain) State() (*state.StateDB, error) {
 
 // StateAt returns a new mutable state based on a particular point in time.
 func (bc *BlockChain) StateAt(root common.Hash) (*state.StateDB, error) {
-	return state.New(root, bc.stateCache, bc.snaps)
+	// bc.snaps is *snapshot.Tree from evm package, but state.New expects geth's *snapshot.Tree
+	// For now, pass nil until we implement proper conversion
+	return state.New(root, bc.stateCache, nil)
 }
 
 // Config retrieves the chain's fork configuration.
