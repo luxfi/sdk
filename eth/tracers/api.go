@@ -1075,8 +1075,8 @@ func overrideConfig(original *params.ChainConfig, override *params.ChainConfig) 
 	canon := true
 
 	overrideExtra := params.GetExtra(override)
-	if timestamp := overrideExtra.SubnetEVMTimestamp; timestamp != nil {
-		params.GetExtra(copy).SubnetEVMTimestamp = timestamp
+	if timestamp := overrideExtra.EVMTimestamp; timestamp != nil {
+		params.GetExtra(copy).EVMTimestamp = timestamp
 		canon = false
 	}
 	if timestamp := overrideExtra.DurangoTimestamp; timestamp != nil {

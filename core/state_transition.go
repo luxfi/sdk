@@ -487,7 +487,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 			IsIstanbul:       ethConfig.IsIstanbul(st.evm.Context.BlockNumber),
 			IsCancun:         ethConfig.IsCancun(st.evm.Context.BlockNumber, st.evm.Context.Time),
 			// Lux specific flags - default to false since we don't have luxfi config
-			IsSubnetEVM:      false,
+			IsEVM:      false,
 			IsDUpgrade:       false,
 			// Precompile maps - empty since we don't have luxfi config
 			ActivePrecompiles:   make(map[common.Address]precompileconfig.Config),
@@ -562,7 +562,7 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	if overflow {
 		return nil, ErrGasUintOverflow
 	}
-	gasRefund := st.refundGas(rulesExtra.IsSubnetEVM)
+	gasRefund := st.refundGas(rulesExtra.IsEVM)
 	fee := new(uint256.Int).SetUint64(st.gasUsed())
 	fee.Mul(fee, price)
 	st.state.AddBalance(st.evm.Context.Coinbase, fee)
@@ -575,10 +575,10 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	}, nil
 }
 
-func (st *StateTransition) refundGas(subnetEVM bool) uint64 {
+func (st *StateTransition) refundGas(evm bool) uint64 {
 	var refund uint64
 	// Inspired by: https://gist.github.com/holiman/460f952716a74eeb9ab358bb1836d821#gistcomment-3642048
-	if !subnetEVM {
+	if !evm {
 		// Apply refund counter, capped to half of the used gas.
 		refund = st.gasUsed() / 2
 		if refund > st.state.GetRefund() {

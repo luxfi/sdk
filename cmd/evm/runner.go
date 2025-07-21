@@ -154,7 +154,7 @@ func runCmd(ctx *cli.Context) error {
 			initialGas = genesisConfig.GasLimit
 		}
 	} else {
-		genesisConfig.Config = params.TestSubnetEVMChainConfig
+		genesisConfig.Config = params.TestEVMChainConfig
 	}
 
 	db := rawdb.NewMemoryDatabase()
@@ -241,7 +241,7 @@ func runCmd(ctx *cli.Context) error {
 	if chainConfig != nil {
 		runtimeConfig.ChainConfig = chainConfig
 	} else {
-		runtimeConfig.ChainConfig = params.SubnetEVMDefaultChainConfig // NOTE: Replaced AllEthashProtocolChanges with SubnetEVMDefaultChainConfig here
+		runtimeConfig.ChainConfig = params.EVMDefaultChainConfig // NOTE: Replaced AllEthashProtocolChanges with EVMDefaultChainConfig here
 	}
 
 	var hexInput []byte

@@ -116,25 +116,25 @@ func TestCheckCompatible(t *testing.T) {
 		},
 		{
 			stored:        TestChainConfig,
-			new:           TestPreSubnetEVMChainConfig,
+			new:           TestPreEVMChainConfig,
 			headBlock:     0,
 			headTimestamp: 0,
 			wantErr: &ethparams.ConfigCompatError{
-				What:         "SubnetEVM fork block timestamp",
+				What:         "EVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
-				NewTime:      GetExtra(TestPreSubnetEVMChainConfig).NetworkUpgrades.SubnetEVMTimestamp,
+				NewTime:      GetExtra(TestPreEVMChainConfig).NetworkUpgrades.EVMTimestamp,
 				RewindToTime: 0,
 			},
 		},
 		{
 			stored:        TestChainConfig,
-			new:           TestPreSubnetEVMChainConfig,
+			new:           TestPreEVMChainConfig,
 			headBlock:     10,
 			headTimestamp: 100,
 			wantErr: &ethparams.ConfigCompatError{
-				What:         "SubnetEVM fork block timestamp",
+				What:         "EVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
-				NewTime:      GetExtra(TestPreSubnetEVMChainConfig).NetworkUpgrades.SubnetEVMTimestamp,
+				NewTime:      GetExtra(TestPreEVMChainConfig).NetworkUpgrades.EVMTimestamp,
 				RewindToTime: 0,
 			},
 		},
@@ -153,21 +153,21 @@ func TestConfigRules(t *testing.T) {
 		&ChainConfig{},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				SubnetEVMTimestamp: utils.NewUint64(500),
+				EVMTimestamp: utils.NewUint64(500),
 			},
 		},
 	)
 
 	var stamp uint64
-	if r := c.LuxRules(big.NewInt(0), stamp); r.IsSubnetEVM {
+	if r := c.LuxRules(big.NewInt(0), stamp); r.IsEVM {
 		t.Errorf("expected %v to not be evm", stamp)
 	}
 	stamp = 500
-	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
+	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsEVM {
 		t.Errorf("expected %v to be evm", stamp)
 	}
 	stamp = math.MaxInt64
-	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsSubnetEVM {
+	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsEVM {
 		t.Errorf("expected %v to be evm", stamp)
 	}
 }
@@ -281,7 +281,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 				FeeConfig:          DefaultFeeConfig,
 				AllowFeeRecipients: false,
 				NetworkUpgrades: extras.NetworkUpgrades{
-					SubnetEVMTimestamp: utils.NewUint64(0),
+					EVMTimestamp: utils.NewUint64(0),
 					DurangoTimestamp:   utils.NewUint64(0),
 				},
 				GenesisPrecompiles: extras.Precompiles{},
@@ -318,7 +318,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 		"petersburgBlock": 0,
 		"istanbulBlock": 0,
 		"muirGlacierBlock": 0,
-		"subnetEVMTimestamp": 0,
+		"evmTimestamp": 0,
 		"durangoTimestamp": 0,
 		"upgrades": {
 			"precompileUpgrades": [

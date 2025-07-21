@@ -30,14 +30,14 @@ func ExtraPrefix(
 	header *types.Header,
 ) ([]byte, error) {
 	switch {
-	case config.IsSubnetEVM(header.Time):
+	case config.IsEVM(header.Time):
 		window, err := feeWindow(config, parent, header.Time)
 		if err != nil {
 			return nil, fmt.Errorf("failed to calculate fee window: %w", err)
 		}
 		return window.Bytes(), nil
 	default:
-		// Prior to SubnetEVM there was no expected extra prefix.
+		// Prior to EVM there was no expected extra prefix.
 		return nil, nil
 	}
 }
@@ -50,7 +50,7 @@ func VerifyExtraPrefix(
 	header *types.Header,
 ) error {
 	switch {
-	case config.IsSubnetEVM(header.Time):
+	case config.IsEVM(header.Time):
 		feeWindow, err := feeWindow(config, parent, header.Time)
 		if err != nil {
 			return fmt.Errorf("calculating expected fee window: %w", err)
@@ -83,7 +83,7 @@ func VerifyExtra(rules extras.AvalancheRules, extra []byte) error {
 				extraLen,
 			)
 		}
-	case rules.IsSubnetEVM:
+	case rules.IsEVM:
 		if extraLen != subnetevm.WindowSize {
 			return fmt.Errorf(
 				"%w: expected %d but got %d",

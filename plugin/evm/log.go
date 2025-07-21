@@ -15,7 +15,7 @@ import (
 	"log/slog"
 )
 
-type SubnetEVMLogger struct {
+type EVMLogger struct {
 	ethlog.Logger
 
 	logLevel *slog.LevelVar
@@ -23,7 +23,7 @@ type SubnetEVMLogger struct {
 
 // InitLogger initializes logger with alias and sets the log level and format with the original [os.StdErr] interface
 // along with the context logger.
-func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (SubnetEVMLogger, error) {
+func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (EVMLogger, error) {
 	logLevel := &slog.LevelVar{}
 
 	var handler slog.Handler
@@ -46,20 +46,20 @@ func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (
 	}
 
 	// Create handler
-	c := SubnetEVMLogger{
+	c := EVMLogger{
 		Logger:   ethlog.NewLogger(handler),
 		logLevel: logLevel,
 	}
 
 	if err := c.SetLogLevel(level); err != nil {
-		return SubnetEVMLogger{}, err
+		return EVMLogger{}, err
 	}
 	ethlog.SetDefault(c.Logger)
 	return c, nil
 }
 
 // SetLogLevel sets the log level of initialized log handler.
-func (s *SubnetEVMLogger) SetLogLevel(level string) error {
+func (s *EVMLogger) SetLogLevel(level string) error {
 	// Set log level
 	logLevel, err := log.LvlFromString(level)
 	if err != nil {

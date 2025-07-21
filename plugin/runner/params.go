@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func subnetEVMFlagSet() *flag.FlagSet {
+func evmFlagSet() *flag.FlagSet {
 	fs := flag.NewFlagSet("evm", flag.ContinueOnError)
 
 	fs.Bool(versionKey, false, "If true, print version and quit")
@@ -22,7 +22,7 @@ func subnetEVMFlagSet() *flag.FlagSet {
 func getViper() (*viper.Viper, error) {
 	v := viper.New()
 
-	fs := subnetEVMFlagSet()
+	fs := evmFlagSet()
 	pflag.CommandLine.AddGoFlagSet(fs)
 	pflag.Parse()
 	if err := v.BindPFlags(pflag.CommandLine); err != nil {

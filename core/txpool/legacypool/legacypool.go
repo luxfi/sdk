@@ -82,7 +82,7 @@ var (
 var (
 	evictionInterval      = time.Minute      // Time interval to check for evictable transactions
 	statsReportInterval   = 8 * time.Second  // Time interval to report transaction pool stats
-	baseFeeUpdateInterval = 10 * time.Second // Time interval at which to schedule a base fee update for the tx pool after SubnetEVM is enabled
+	baseFeeUpdateInterval = 10 * time.Second // Time interval at which to schedule a base fee update for the tx pool after EVM is enabled
 )
 
 // ====== If resolving merge conflicts ======
@@ -1793,14 +1793,14 @@ func (pool *LegacyPool) demoteUnexecutables() {
 }
 
 func (pool *LegacyPool) startPeriodicFeeUpdate() {
-	subnetEVMTimestamp := params.GetExtra(pool.chainconfig).SubnetEVMTimestamp
-	if subnetEVMTimestamp == nil {
+	evmTimestamp := params.GetExtra(pool.chainconfig).EVMTimestamp
+	if evmTimestamp == nil {
 		return
 	}
 
 	// Call updateBaseFee here to ensure that there is not a [baseFeeUpdateInterval] delay
 	// when starting up in ApricotPhase3 before the base fee is updated.
-	if time.Now().After(utils.Uint64ToTime(subnetEVMTimestamp)) {
+	if time.Now().After(utils.Uint64ToTime(evmTimestamp)) {
 		pool.updateBaseFee()
 	}
 
@@ -1812,9 +1812,9 @@ func (pool *LegacyPool) periodicBaseFeeUpdate() {
 	defer pool.wg.Done()
 
 	// Sleep until its time to start the periodic base fee update or the tx pool is shutting down
-	subnetEVMTime := utils.Uint64ToTime(params.GetExtra(pool.chainconfig).SubnetEVMTimestamp)
+	evmTime := utils.Uint64ToTime(params.GetExtra(pool.chainconfig).EVMTimestamp)
 	select {
-	case <-time.After(time.Until(subnetEVMTime)):
+	case <-time.After(time.Until(evmTime)):
 	case <-pool.generalShutdownChan:
 		return // Return early if shutting down
 	}

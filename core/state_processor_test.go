@@ -373,7 +373,7 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 		BaseFee:   baseFee,
 	}
 
-	if params.GetExtra(config).IsSubnetEVM(header.Time) {
+	if params.GetExtra(config).IsEVM(header.Time) {
 		headerExtra := customtypes.GetHeaderExtra(header)
 		headerExtra.BlockGasCost = big.NewInt(0)
 	}

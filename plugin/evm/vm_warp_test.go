@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/predicate"
-	subnetEVMUtils "github.com/luxfi/evm/utils"
+	evmUtils "github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/x/warp"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
@@ -731,7 +731,7 @@ func testReceiveWarpMessage(
 }
 
 func TestMessageSignatureRequestsToVM(t *testing.T) {
-	_, vm, _, appSender := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	_, vm, _, appSender := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		err := vm.Shutdown(context.Background())
@@ -792,7 +792,7 @@ func TestMessageSignatureRequestsToVM(t *testing.T) {
 }
 
 func TestBlockSignatureRequestsToVM(t *testing.T) {
-	_, vm, _, appSender := GenesisVM(t, true, genesisJSONSubnetEVM, "", "")
+	_, vm, _, appSender := GenesisVM(t, true, genesisJSONEVM, "", "")
 
 	defer func() {
 		err := vm.Shutdown(context.Background())

@@ -48,7 +48,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	}
 
 	// initialize the VM with these upgrade bytes
-	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONSubnetEVM, "", string(upgradeBytesJSON))
+	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONEVM, "", string(upgradeBytesJSON))
 	vm.clock.Set(enableAllowListTimestamp)
 
 	// Submit a successful transaction
@@ -96,7 +96,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	vm.ctx.Metrics = metrics.NewPrefixGatherer()
 
 	if err := vm.Initialize(
-		context.Background(), vm.ctx, dbManager, []byte(genesisJSONSubnetEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender,
+		context.Background(), vm.ctx, dbManager, []byte(genesisJSONEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender,
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 
 func TestNetworkUpgradesOverriden(t *testing.T) {
 	var genesis core.Genesis
-	if err := json.Unmarshal([]byte(genesisJSONPreSubnetEVM), &genesis); err != nil {
+	if err := json.Unmarshal([]byte(genesisJSONPreEVM), &genesis); err != nil {
 		t.Fatalf("could not unmarshal genesis bytes: %s", err)
 	}
 	genesisBytes, err := json.Marshal(&genesis)
@@ -174,7 +174,7 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 
 	upgradeBytesJSON := `{
 			"networkUpgradeOverrides": {
-				"subnetEVMTimestamp": 2,
+				"evmTimestamp": 2,
 				"durangoTimestamp": 1607144402
 			}
 		}`
@@ -207,8 +207,8 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	}()
 
 	// verify upgrade overrides
-	require.False(t, vm.chainConfigExtra().IsSubnetEVM(0))
-	require.True(t, vm.chainConfigExtra().IsSubnetEVM(2))
+	require.False(t, vm.chainConfigExtra().IsEVM(0))
+	require.True(t, vm.chainConfigExtra().IsEVM(2))
 	require.False(t, vm.chainConfigExtra().IsDurango(0))
 	require.False(t, vm.chainConfigExtra().IsDurango(uint64(upgrade.InitiallyActiveTime.Unix())))
 	require.True(t, vm.chainConfigExtra().IsDurango(1607144402))
@@ -223,7 +223,7 @@ func mustMarshal(t *testing.T, v interface{}) string {
 func TestVMStateUpgrade(t *testing.T) {
 	// modify genesis to add a key to the state
 	genesis := &core.Genesis{}
-	err := json.Unmarshal([]byte(genesisJSONSubnetEVM), genesis)
+	err := json.Unmarshal([]byte(genesisJSONEVM), genesis)
 	require.NoError(t, err)
 	genesisAccount, ok := genesis.Alloc[testEthAddrs[0]]
 	require.True(t, ok)
