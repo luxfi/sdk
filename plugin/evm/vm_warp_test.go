@@ -12,7 +12,7 @@ import (
 	_ "embed"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/node/consensus/engine/linear/block"
 	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/crypto/bls"
