@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc.
+// (c) 2019-2020, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,7 +30,7 @@ import (
 	"math/rand"
 	"testing"
 	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/geth/common"
 )
 

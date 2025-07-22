@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc.
+// (c) 2019-2020, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -39,6 +39,7 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/event"
+	gethevent "github.com/ethereum/go-ethereum/event"
 	"github.com/luxfi/geth/log"
 )
 
@@ -159,10 +160,10 @@ func (p *TxPool) reserver(id int, subpool SubPool) AddressReserver {
 				return ErrAlreadyReserved
 			}
 			p.reservations[addr] = subpool
-			if metrics.Enabled() {
-				m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
-				metrics.GetOrRegisterGauge(m, nil).Inc(1)
-			}
+		if metrics.Enabled {
+			m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
+			metrics.GetOrRegisterGauge(m, nil).Inc(1)
+		}
 			return nil
 		}
 		// Ensure subpools only attempt to unreserve their own owned addresses,
@@ -176,7 +177,7 @@ func (p *TxPool) reserver(id int, subpool SubPool) AddressReserver {
 			return errors.New("address not owned")
 		}
 		delete(p.reservations, addr)
-		if metrics.Enabled() {
+		if metrics.Enabled {
 			m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
 			metrics.GetOrRegisterGauge(m, nil).Dec(1)
 		}
@@ -417,7 +418,7 @@ func (p *TxPool) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Subscrip
 	for i, subpool := range p.subpools {
 		subs[i] = subpool.SubscribeTransactions(ch, false)
 	}
-	return p.subs.Track(event.JoinSubscriptions(subs...))
+	return p.subs.Track(gethevent.JoinSubscriptions(subs...))
 }
 
 

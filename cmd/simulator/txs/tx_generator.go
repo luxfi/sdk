@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Hanzo Industries, Inc. All rights reserved.
+// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -8,7 +8,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	ethcrypto "github.com/luxfi/geth/crypto"
 )
 

@@ -1,4 +1,4 @@
-// (c) 2021-2022, Hanzo Industries, Inc. All rights reserved.
+// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package syncutils
@@ -62,7 +62,7 @@ func FillTrie(t *testing.T, start, numKeys int, keySize int, trieDB *triedb.Data
 	}
 
 	// Commit the root to [trieDB]
-	nextRoot, nodes := testTrie.Commit(false)
+	nextRoot, nodes, err := testTrie.Commit(false)
 	assert.NoError(t, err)
 	err = trieDB.Update(nextRoot, root, 0, trienode.NewWithNodeSet(nodes), nil)
 	assert.NoError(t, err)
@@ -179,7 +179,7 @@ func FillAccounts(
 		accounts[key] = &acc
 	}
 
-	newRoot, nodes := tr.Commit(false)
+	newRoot, nodes, err := tr.Commit(false)
 	if err != nil {
 		t.Fatalf("error committing trie: %v", err)
 	}

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
+// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -43,7 +43,7 @@ import (
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/evm/eth"
+	"github.com/luxfi/geth/eth"
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"

@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Hanzo Industries, Inc. All rights reserved.
+// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	ethcrypto "github.com/luxfi/geth/crypto"

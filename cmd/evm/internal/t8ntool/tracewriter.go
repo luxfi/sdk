@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/geth/eth/tracers"
 )
 
 // traceWriter is an vm.EVMLogger which also holds an inner logger/tracer.

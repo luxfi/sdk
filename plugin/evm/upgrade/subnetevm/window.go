@@ -1,4 +1,4 @@
-// (c) 2025, Hanzo Industries, Inc. All rights reserved.
+// (c) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // subnetevm defines the dynamic fee window used after subnetevm upgrade.

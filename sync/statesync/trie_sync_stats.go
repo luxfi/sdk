@@ -1,4 +1,4 @@
-// (c) 2021-2022, Hanzo Industries, Inc. All rights reserved.
+// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -36,9 +36,9 @@ type trieSyncStats struct {
 	remainingLeafs map[*trieSegment]uint64
 
 	// metrics
-	totalLeafs     *metrics.Counter
-	triesSegmented *metrics.Counter
-	leafsRateGauge *metrics.Gauge
+	totalLeafs     metrics.Counter
+	triesSegmented metrics.Counter
+	leafsRateGauge metrics.Gauge
 }
 
 func newTrieSyncStats() *trieSyncStats {

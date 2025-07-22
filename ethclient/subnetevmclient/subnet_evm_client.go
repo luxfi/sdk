@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc.
+// (c) 2019-2020, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,7 +33,7 @@ import (
 	"runtime"
 	"runtime/debug"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/common"

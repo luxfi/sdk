@@ -1,4 +1,4 @@
-// (c) 2023, Hanzo Industries, Inc. All rights reserved.
+// (c) 2023, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -10,15 +10,15 @@ import (
 
 type handlerStats struct {
 	// MessageSignatureRequestHandler metrics
-	messageSignatureRequest         *metrics.Counter
-	messageSignatureHit             *metrics.Counter
-	messageSignatureMiss            *metrics.Counter
-	messageSignatureRequestDuration *metrics.Gauge
+	messageSignatureRequest         metrics.Counter
+	messageSignatureHit             metrics.Counter
+	messageSignatureMiss            metrics.Counter
+	messageSignatureRequestDuration metrics.Gauge
 	// BlockSignatureRequestHandler metrics
-	blockSignatureRequest         *metrics.Counter
-	blockSignatureHit             *metrics.Counter
-	blockSignatureMiss            *metrics.Counter
-	blockSignatureRequestDuration *metrics.Gauge
+	blockSignatureRequest         metrics.Counter
+	blockSignatureHit             metrics.Counter
+	blockSignatureMiss            metrics.Counter
+	blockSignatureRequestDuration metrics.Gauge
 }
 
 func newStats() *handlerStats {

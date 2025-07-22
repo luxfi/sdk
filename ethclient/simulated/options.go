@@ -19,7 +19,7 @@ package simulated
 import (
 	"math/big"
 
-	"github.com/luxfi/evm/eth/ethconfig"
+	"github.com/luxfi/geth/eth/ethconfig"
 	"github.com/luxfi/evm/node"
 	"github.com/luxfi/evm/params"
 )

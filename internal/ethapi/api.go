@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc.
+// (c) 2019-2020, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -42,7 +42,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/eth/gasestimator"
+	"github.com/luxfi/geth/eth/gasestimator"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/trie"
@@ -53,8 +53,7 @@ import (
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/geth/core/tracing"
-	ethparams "github.com/luxfi/geth/params"
+	eparams "github.com/ethereum/go-ethereum/params"
 )
 
 // estimateGasErrorRatio is the amount of overestimation eth_estimateGas is
@@ -913,7 +912,7 @@ func (s *BlockChainAPI) GetBlockReceipts(ctx context.Context, blockNrOrHash rpc.
 	}
 
 	// Derive the sender.
-	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: s.b.ChainConfig().ChainID}, block.Number(), block.Time())
+	signer := types.MakeSigner(&eparams.ChainConfig{ChainID: s.b.ChainConfig().ChainID}, block.Number(), block.Time())
 
 	result := make([]map[string]interface{}, len(receipts))
 	for i, receipt := range receipts {
@@ -948,7 +947,7 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 	for addr, account := range *diff {
 		// Override account nonce.
 		if account.Nonce != nil {
-			state.SetNonce(addr, uint64(*account.Nonce), tracing.NonceChangeUnspecified)
+			state.SetNonce(addr, uint64(*account.Nonce))
 		}
 		// Override account(contract) code.
 		if account.Code != nil {
@@ -957,7 +956,7 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 		// Override account balance.
 		if account.Balance != nil {
 			u256Balance, _ := uint256.FromBig((*big.Int)(*account.Balance))
-			state.SetBalance(addr, u256Balance, tracing.BalanceChangeUnspecified)
+			state.SetBalance(addr, u256Balance)
 		}
 		if account.State != nil && account.StateDiff != nil {
 			return fmt.Errorf("account %s has both 'state' and 'stateDiff'", addr.Hex())
@@ -1332,7 +1331,7 @@ type RPCTransaction struct {
 // newRPCTransaction returns a transaction that will serialize to the RPC
 // representation, with the given location metadata set (if available).
 func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber uint64, blockTime uint64, index uint64, baseFee *big.Int, config *params.ChainConfig) *RPCTransaction {
-	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: config.ChainID}, new(big.Int).SetUint64(blockNumber), blockTime)
+	signer := types.MakeSigner(&eparams.ChainConfig{ChainID: config.ChainID}, new(big.Int).SetUint64(blockNumber), blockTime)
 	from, _ := types.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
 	result := &RPCTransaction{
@@ -1568,7 +1567,7 @@ type TransactionAPI struct {
 func NewTransactionAPI(b Backend, nonceLock *AddrLocker) *TransactionAPI {
 	// The signer used by the API should always be the 'latest' known one because we expect
 	// signers to be backwards-compatible with old transactions.
-	signer := types.LatestSigner(&ethparams.ChainConfig{ChainID: b.ChainConfig().ChainID})
+	signer := types.LatestSigner(&eparams.ChainConfig{ChainID: b.ChainConfig().ChainID})
 	return &TransactionAPI{b, nonceLock, signer}
 }
 
@@ -1702,7 +1701,7 @@ func (s *TransactionAPI) GetTransactionReceipt(ctx context.Context, hash common.
 	receipt := receipts[index]
 
 	// Derive the sender.
-	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: s.b.ChainConfig().ChainID}, header.Number, header.Time)
+	signer := types.MakeSigner(&eparams.ChainConfig{ChainID: s.b.ChainConfig().ChainID}, header.Number, header.Time)
 	return marshalReceipt(receipt, blockHash, blockNumber, signer, tx, int(index)), nil
 }
 
@@ -1777,7 +1776,7 @@ func SubmitTransaction(ctx context.Context, b Backend, tx *types.Transaction) (c
 	}
 	// Print a log with full tx details for manual investigations and interventions
 	head := b.CurrentBlock()
-	signer := types.MakeSigner(&ethparams.ChainConfig{ChainID: b.ChainConfig().ChainID}, head.Number, head.Time)
+	signer := types.MakeSigner(&eparams.ChainConfig{ChainID: b.ChainConfig().ChainID}, head.Number, head.Time)
 	from, err := types.Sender(signer, tx)
 	if err != nil {
 		return common.Hash{}, err

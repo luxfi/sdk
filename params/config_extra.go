@@ -1,4 +1,4 @@
-// (c) 2024 Hanzo Industries, Inc. All rights reserved.
+// (c) 2024 Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package params

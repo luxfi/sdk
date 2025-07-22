@@ -1,4 +1,4 @@
-// (c) 2019-2021, Hanzo Industries, Inc.
+// (c) 2019-2021, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -39,13 +39,13 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/eth/tracers"
-	"github.com/luxfi/evm/eth/tracers/logger"
+	"github.com/luxfi/geth/eth/tracers"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	// "github.com/luxfi/geth/core/asm" // TODO: asm package not available
 	// force-load js tracers to trigger registration
-	_ "github.com/luxfi/evm/eth/tracers/js"
+	_ "github.com/luxfi/geth/eth/tracers/js"
 )
 
 func TestDefaults(t *testing.T) {

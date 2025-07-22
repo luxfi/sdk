@@ -1,4 +1,4 @@
-// (c) 2023, Hanzo Industries, Inc. All rights reserved.
+// (c) 2023, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -8,13 +8,13 @@ import (
 )
 
 type verifierStats struct {
-	messageParseFail *metrics.Counter
+	messageParseFail metrics.Counter
 	// AddressedCall metrics
-	addressedCallValidationFail *metrics.Counter
+	addressedCallValidationFail metrics.Counter
 	// BlockRequest metrics
-	blockValidationFail *metrics.Counter
+	blockValidationFail metrics.Counter
 	// Uptime metrics
-	uptimeValidationFail *metrics.Counter
+	uptimeValidationFail metrics.Counter
 }
 
 func newVerifierStats() *verifierStats {

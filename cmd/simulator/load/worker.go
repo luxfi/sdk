@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Hanzo Industries, Inc. All rights reserved.
+// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"

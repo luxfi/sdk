@@ -1,4 +1,4 @@
-// (c) 2025, Hanzo Industries, Inc. All rights reserved.
+// (c) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/evm/eth"
+	"github.com/luxfi/geth/eth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/spf13/cast"

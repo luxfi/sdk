@@ -1,4 +1,4 @@
-// (c) 2023, Hanzo Industries, Inc.
+// (c) 2023, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -43,7 +43,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/core/vm/runtime"
-	"github.com/luxfi/evm/eth/tracers/logger"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/trie"

@@ -1,6 +1,13 @@
 # Makefile for Lux EVM (Subnet EVM)
 
 # Variables
+REGISTRY_TMPDIR := $(shell pwd)/build/tmp
+# Use local tmp directory for Go builds to avoid macOS permission issues
+override TMPDIR := $(REGISTRY_TMPDIR)
+REGISTRY_GOCACHE := $(shell pwd)/build/go-cache
+# Use local Go build cache to avoid permission issues on macOS
+override GOCACHE := $(REGISTRY_GOCACHE)
+export TMPDIR GOCACHE
 BINARY_NAME := evm
 PLUGIN_PATH := ~/.luxd/plugins/$(BINARY_NAME)
 VERSION := $(shell git describe --tags --always --dirty="-dev" 2>/dev/null || echo "unknown")
@@ -22,7 +29,8 @@ all: build
 build:
 	@echo "Building Lux EVM..."
 	@mkdir -p build
-	CGO_CFLAGS="$(CGO_CFLAGS)" go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) ./plugin
+	@mkdir -p $(TMPDIR) $(GOCACHE)
+	TMPDIR=$(TMPDIR) GOCACHE=$(GOCACHE) CGO_CFLAGS="$(CGO_CFLAGS)" go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) ./plugin
 
 # Build and install as plugin
 .PHONY: install
@@ -36,13 +44,15 @@ install: build
 .PHONY: test
 test:
 	@echo "Running tests..."
-	go test -v ./...
+	@mkdir -p $(TMPDIR) $(GOCACHE)
+	TMPDIR=$(TMPDIR) GOCACHE=$(GOCACHE) go test -v ./...
 
 # Run tests with coverage
 .PHONY: test-coverage
 test-coverage:
 	@echo "Running tests with coverage..."
-	go test -v -coverprofile=coverage.out ./...
+	@mkdir -p $(TMPDIR) $(GOCACHE)
+	TMPDIR=$(TMPDIR) GOCACHE=$(GOCACHE) go test -v -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 

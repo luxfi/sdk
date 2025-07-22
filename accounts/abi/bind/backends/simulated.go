@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc.
+// (c) 2019-2020, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -28,7 +28,7 @@ package backends
 
 import (
 	"context"
-	"github.com/luxfi/evm/eth"
+	"github.com/luxfi/geth/eth"
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/accounts/abi/bind"
@@ -39,7 +39,7 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/eth/filters"
+	"github.com/luxfi/geth/eth/filters"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
@@ -70,7 +70,7 @@ var (
 )
 
 // SimulatedBackend is a simulated blockchain.
-// Deprecated: use package github.com/luxfi/evm/ethclient/simulated instead.
+// Deprecated: use package github.com/luxfi/geth/ethclient/simulated instead.
 type SimulatedBackend struct {
 	*simulated.Backend
 	simulated.Client
@@ -87,7 +87,7 @@ func (b *SimulatedBackend) Fork(ctx context.Context, parentHash common.Hash) err
 // A simulated backend always uses chainID 1337.
 //
 // Deprecated: please use simulated.Backend from package
-// github.com/luxfi/evm/ethclient/simulated instead.
+// github.com/luxfi/geth/ethclient/simulated instead.
 func NewSimulatedBackend(alloc types.GenesisAlloc, gasLimit uint64) *SimulatedBackend {
 	b := simulated.NewBackend(alloc, simulated.WithBlockGasLimit(gasLimit))
 	return &SimulatedBackend{
