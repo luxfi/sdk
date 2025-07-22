@@ -63,7 +63,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/choices"
-	linear "github.com/luxfi/node/consensus/chain"
+	linear "github.com/luxfi/node/consensus/linear"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/perms"
