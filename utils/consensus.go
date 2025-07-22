@@ -25,7 +25,7 @@ var (
 	testXChainID = ids.ID{2, 3, 4, 5, 6}
 )
 
-func TestSnowContext() *consensus.Context {
+func TestConsensusContext() *consensus.Context {
 	signer, err := localsigner.New()
 	if err != nil {
 		panic(err)

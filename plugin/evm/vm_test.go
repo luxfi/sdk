@@ -142,7 +142,7 @@ func buildGenesisTest(t *testing.T, genesisJSON string) []byte {
 }
 
 func NewContext() *consensus.Context {
-	ctx := utils.TestSnowContext()
+	ctx := utils.TestConsensusContext()
 	ctx.NetworkID = testNetworkID
 	ctx.NodeID = ids.GenerateTestNodeID()
 	ctx.ChainID = testCChainID
@@ -188,7 +188,7 @@ func setupGenesis(
 	if len(genesisJSON) == 0 {
 		genesisJSON = genesisJSONLatest
 	}
-	ctx := utils.TestSnowContext()
+	ctx := utils.TestConsensusContext()
 
 	baseDB := memdb.New()
 
@@ -452,7 +452,7 @@ func TestBuildEthTxBlock(t *testing.T) {
 
 	if err := restartedVM.Initialize(
 		context.Background(),
-		utils.TestSnowContext(),
+		utils.TestConsensusContext(),
 		dbManager,
 		[]byte(genesisJSONEVM),
 		[]byte(""),
@@ -3085,7 +3085,7 @@ func TestParentBeaconRootBlock(t *testing.T) {
 
 func TestStandaloneDB(t *testing.T) {
 	vm := &VM{}
-	ctx := utils.TestSnowContext()
+	ctx := utils.TestConsensusContext()
 	baseDB := memdb.New()
 	atomicMemory := atomic.NewMemory(prefixdb.New([]byte{0}, baseDB))
 	ctx.SharedMemory = atomicMemory.NewSharedMemory(ctx.ChainID)

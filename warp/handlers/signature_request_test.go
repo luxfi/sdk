@@ -25,21 +25,21 @@ func TestMessageSignatureHandler(t *testing.T) {
 	testutils.WithMetrics(t)
 
 	database := memdb.New()
-	snowCtx := utils.TestSnowContext()
+	consensusCtx := utils.TestConsensusContext()
 	blsSecretKey, err := localsigner.New()
 	require.NoError(t, err)
-	warpSigner := luxWarp.NewSigner(blsSecretKey, snowCtx.NetworkID, snowCtx.ChainID)
+	warpSigner := luxWarp.NewSigner(blsSecretKey, consensusCtx.NetworkID, consensusCtx.ChainID)
 
 	addressedPayload, err := payload.NewAddressedCall([]byte{1, 2, 3}, []byte{1, 2, 3})
 	require.NoError(t, err)
-	offchainMessage, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, addressedPayload.Bytes())
+	offchainMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, addressedPayload.Bytes())
 	require.NoError(t, err)
 
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](100)
-	backend, err := warp.NewBackend(snowCtx.NetworkID, snowCtx.ChainID, warpSigner, warptest.EmptyBlockClient, warptest.NoOpValidatorReader{}, database, messageSignatureCache, [][]byte{offchainMessage.Bytes()})
+	backend, err := warp.NewBackend(consensusCtx.NetworkID, consensusCtx.ChainID, warpSigner, warptest.EmptyBlockClient, warptest.NoOpValidatorReader{}, database, messageSignatureCache, [][]byte{offchainMessage.Bytes()})
 	require.NoError(t, err)
 
-	msg, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, []byte("test"))
+	msg, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, []byte("test"))
 	require.NoError(t, err)
 	messageID := msg.ID()
 	require.NoError(t, backend.AddMessage(msg))
@@ -131,17 +131,17 @@ func TestBlockSignatureHandler(t *testing.T) {
 	testutils.WithMetrics(t)
 
 	database := memdb.New()
-	snowCtx := utils.TestSnowContext()
+	consensusCtx := utils.TestConsensusContext()
 	blsSecretKey, err := localsigner.New()
 	require.NoError(t, err)
 
-	warpSigner := luxWarp.NewSigner(blsSecretKey, snowCtx.NetworkID, snowCtx.ChainID)
+	warpSigner := luxWarp.NewSigner(blsSecretKey, consensusCtx.NetworkID, consensusCtx.ChainID)
 	blkID := ids.GenerateTestID()
 	blockClient := warptest.MakeBlockClient(blkID)
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](100)
 	backend, err := warp.NewBackend(
-		snowCtx.NetworkID,
-		snowCtx.ChainID,
+		consensusCtx.NetworkID,
+		consensusCtx.ChainID,
 		warpSigner,
 		blockClient,
 		warptest.NoOpValidatorReader{},

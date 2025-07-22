@@ -28,9 +28,9 @@ import (
 func TestEthTxGossip(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
-	snowCtx := utils.TestSnowContext()
+	consensusCtx := utils.TestConsensusContext()
 	validatorState := utils.NewTestValidatorState()
-	snowCtx.ValidatorState = validatorState
+	consensusCtx.ValidatorState = validatorState
 
 	responseSender := &enginetest.SenderStub{
 		SentAppResponse: make(chan []byte, 1),
@@ -41,7 +41,7 @@ func TestEthTxGossip(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		snowCtx,
+		consensusCtx,
 		memdb.New(),
 		[]byte(genesisJSONLatest),
 		nil,
@@ -104,7 +104,7 @@ func TestEthTxGossip(t *testing.T) {
 	}
 	require.NoError(client.AppRequest(ctx, set.Of(vm.ctx.NodeID), requestBytes, onResponse))
 	require.NoError(vm.AppRequest(ctx, requestingNodeID, 1, time.Time{}, <-peerSender.SentAppRequest))
-	require.NoError(network.AppResponse(ctx, snowCtx.NodeID, 1, <-responseSender.SentAppResponse))
+	require.NoError(network.AppResponse(ctx, consensusCtx.NodeID, 1, <-responseSender.SentAppResponse))
 	wg.Wait()
 
 	// Issue a tx to the VM
@@ -139,14 +139,14 @@ func TestEthTxGossip(t *testing.T) {
 	}
 	require.NoError(client.AppRequest(ctx, set.Of(vm.ctx.NodeID), requestBytes, onResponse))
 	require.NoError(vm.AppRequest(ctx, requestingNodeID, 3, time.Time{}, <-peerSender.SentAppRequest))
-	require.NoError(network.AppResponse(ctx, snowCtx.NodeID, 3, <-responseSender.SentAppResponse))
+	require.NoError(network.AppResponse(ctx, consensusCtx.NodeID, 3, <-responseSender.SentAppResponse))
 	wg.Wait()
 }
 
 func TestEthTxPushGossipOutbound(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
-	snowCtx := utils.TestSnowContext()
+	consensusCtx := utils.TestConsensusContext()
 	sender := &enginetest.SenderStub{
 		SentAppGossip: make(chan []byte, 1),
 	}
@@ -157,7 +157,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		snowCtx,
+		consensusCtx,
 		memdb.New(),
 		[]byte(genesisJSONLatest),
 		nil,
@@ -201,7 +201,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 func TestEthTxPushGossipInbound(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
-	snowCtx := utils.TestSnowContext()
+	consensusCtx := utils.TestConsensusContext()
 
 	sender := &enginetest.Sender{}
 	vm := &VM{
@@ -210,7 +210,7 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		snowCtx,
+		consensusCtx,
 		memdb.New(),
 		[]byte(genesisJSONLatest),
 		nil,

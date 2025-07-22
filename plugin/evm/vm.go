@@ -63,13 +63,18 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/chain"
+	linear "github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/vms/components/chain"
+	"github.com/luxfi/node/vms/platformvm/config"
+	"github.com/luxfi/node/utils"
+	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/node/vms/secp256k1fx"
 	commonEng "github.com/luxfi/node/consensus/engine"
 	luxJSON "github.com/luxfi/node/utils/json"
 )
@@ -121,7 +126,7 @@ const (
 var (
 	// Set last accepted key to be longer than the keys used to store accepted block IDs.
 	lastAcceptedKey    = []byte("last_accepted_key")
-	acceptedPrefix     = []byte("snowman_accepted")
+	acceptedPrefix     = []byte("linear_accepted")
 	metadataPrefix     = []byte("metadata")
 	warpPrefix         = []byte("warp")
 	ethDBPrefix        = []byte("ethdb")
@@ -159,7 +164,7 @@ var legacyApiNames = map[string]string{
 	"private-debug":     "debug",
 }
 
-// VM implements the snowman.ChainVM interface
+// VM implements the linear.ChainVM interface
 type VM struct {
 	ctx *consensus.Context
 	// contextLock is used to coordinate global VM operations.
@@ -255,7 +260,7 @@ type VM struct {
 	rpcHandlers []interface{ Stop() }
 }
 
-// Initialize implements the snowman.ChainVM interface
+// Initialize implements the linear.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
 	chainCtx *consensus.Context,
@@ -263,7 +268,6 @@ func (vm *VM) Initialize(
 	genesisBytes []byte,
 	upgradeBytes []byte,
 	configBytes []byte,
-	toEngine chan<- commonEng.Message,
 	fxs []*commonEng.Fx,
 	appSender commonEng.AppSender,
 ) error {
@@ -340,7 +344,7 @@ func (vm *VM) Initialize(
 	// Set the Lux Context on the ChainConfig
 	configExtra := params.GetExtra(g.Config)
 	configExtra.LuxContext = extras.LuxContext{
-		SnowCtx: chainCtx,
+		ConsensusCtx: chainCtx,
 	}
 
 	params.SetNetworkUpgradeDefaults(g.Config)
@@ -354,7 +358,7 @@ func (vm *VM) Initialize(
 	}
 	// Set the Lux Context on the ChainConfig
 	g.Config.LuxContext = params.LuxContext{
-		SnowCtx: chainCtx,
+		ConsensusCtx: chainCtx,
 	}
 	vm.syntacticBlockValidator = NewBlockValidator()
 
@@ -864,7 +868,7 @@ func (vm *VM) setAppRequestHandlers() {
 	vm.Network.SetRequestHandler(networkHandler)
 }
 
-// Shutdown implements the snowman.ChainVM interface
+// Shutdown implements the linear.ChainVM interface
 func (vm *VM) Shutdown(context.Context) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
@@ -914,7 +918,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 		log.Debug("Building block without context")
 	}
 	predicateCtx := &precompileconfig.PredicateContext{
-		SnowCtx:            vm.ctx,
+		ConsensusCtx:            vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}
 
@@ -1089,10 +1093,10 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 
 	// RPC APIs
 	if vm.config.ChainAPIEnabled {
-		if err := handler.RegisterName("snowman", &ChainAPI{vm}); err != nil {
+		if err := handler.RegisterName("linear", &ChainAPI{vm}); err != nil {
 			return nil, err
 		}
-		enabledAPIs = append(enabledAPIs, "snowman")
+		enabledAPIs = append(enabledAPIs, "linear")
 	}
 
 	if vm.config.WarpAPIEnabled {
@@ -1115,6 +1119,14 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 
 	vm.rpcHandlers = append(vm.rpcHandlers, handler)
 	return apis, nil
+}
+
+func (vm *VM) WaitForEvent(ctx context.Context, eventType commonEng.Event, cancel <-chan struct{}) (bool, error) {
+	return false, nil
+}
+
+func (vm *VM) NewHTTPHandler(ctx context.Context) (http.Handler, error) {
+	return nil, nil
 }
 
 func (*VM) CreateHTTP2Handler(context.Context) (http.Handler, error) {

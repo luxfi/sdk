@@ -6,7 +6,7 @@ Sparkle Pony Club (SPC) is a DeFi-focused L2 on Lux.
 - **Chain ID**: 36911
 - **Native Token**: SPC
 - **Block Time**: ~2 seconds
-- **Consensus**: Snowball (Lux consensus)
+- **Consensus**: Lux Consensus (Lux L2)
 
 ## Key Features
 - Optimized for DeFi protocols

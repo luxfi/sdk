@@ -33,7 +33,7 @@ type Config interface {
 // PredicateContext is the context passed in to the Predicater interface to verify
 // a precompile predicate within a specific ProposerVM wrapper.
 type PredicateContext struct {
-	SnowCtx *consensus.Context
+	ConsensusCtx *consensus.Context
 	// ProposerVMBlockCtx defines the ProposerVM context the predicate is verified within
 	ProposerVMBlockCtx *block.Context
 }
@@ -56,7 +56,7 @@ type WarpMessageWriter interface {
 
 // AcceptContext defines the context passed in to a precompileconfig's Accepter
 type AcceptContext struct {
-	SnowCtx *consensus.Context
+	ConsensusCtx *consensus.Context
 	Warp    WarpMessageWriter
 }
 

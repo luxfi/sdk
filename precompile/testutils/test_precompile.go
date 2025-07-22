@@ -107,12 +107,12 @@ func (test PrecompileTest) setup(t testing.TB, module modules.Module, state cont
 		blockContext.EXPECT().Number().Return(big.NewInt(0)).AnyTimes()
 		blockContext.EXPECT().Timestamp().Return(uint64(time.Now().Unix())).AnyTimes()
 	}
-	snowContext := utils.TestSnowContext()
+	consensusContext := utils.TestConsensusContext()
 
 	accessibleState := contract.NewMockAccessibleState(ctrl)
 	accessibleState.EXPECT().GetStateDB().Return(state).AnyTimes()
 	accessibleState.EXPECT().GetBlockContext().Return(blockContext).AnyTimes()
-	accessibleState.EXPECT().GetSnowContext().Return(snowContext).AnyTimes()
+	accessibleState.EXPECT().GetConsensusContext().Return(consensusContext).AnyTimes()
 	accessibleState.EXPECT().GetChainConfig().Return(chainConfig).AnyTimes()
 
 	if test.Config != nil {

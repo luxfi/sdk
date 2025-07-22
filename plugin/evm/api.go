@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/geth/log"
 )
 
-// ChainAPI introduces snowman specific functionality to the evm
+// ChainAPI introduces linear specific functionality to the evm
 type ChainAPI struct{ vm *VM }
 
 // GetAcceptedFrontReply defines the reply that will be sent from the

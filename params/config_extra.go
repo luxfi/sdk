@@ -114,7 +114,7 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 		c.MuirGlacierBlock = big.NewInt(0)
 	}
 
-	GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
+	GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).ConsensusCtx.NetworkUpgrades)
 }
 
 // GetRulesExtra returns the Lux-specific rules for the given Ethereum rules.

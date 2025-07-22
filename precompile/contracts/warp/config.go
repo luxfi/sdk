@@ -202,10 +202,10 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 
 	log.Debug("verifying warp message", "warpMsg", warpMsg, "quorumNum", quorumNumerator, "quorumDenom", WarpQuorumDenominator)
 
-	// Wrap validators.State on the chain snow context to special case the Primary Network
+	// Wrap validators.State on the chain consensus context to special case the Primary Network
 	state := warpValidators.NewState(
-		predicateContext.SnowCtx.ValidatorState,
-		predicateContext.SnowCtx.SubnetID,
+		predicateContext.ConsensusCtx.ValidatorState,
+		predicateContext.ConsensusCtx.SubnetID,
 		warpMsg.SourceChainID,
 		c.RequirePrimaryNetworkSigners,
 	)
@@ -223,7 +223,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 
 	err = warpMsg.Signature.Verify(
 		&warpMsg.UnsignedMessage,
-		predicateContext.SnowCtx.NetworkID,
+		predicateContext.ConsensusCtx.NetworkID,
 		validatorSet,
 		quorumNumerator,
 		WarpQuorumDenominator,

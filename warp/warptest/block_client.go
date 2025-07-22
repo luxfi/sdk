@@ -34,9 +34,9 @@ func MakeBlockClient(blkIDs ...ids.ID) BlockClient {
 		}
 
 		return &chaintest.Block{
-			Decidable: snowtest.Decidable{
+			Decidable: consensustest.Decidable{
 				IDV:    blkID,
-				Status: snowtest.Accepted,
+				Status: consensustest.Accepted,
 			},
 		}, nil
 	}
