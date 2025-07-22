@@ -29,8 +29,8 @@ import (
 func TestGetBlockchainID(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
 
-	defaultSnowCtx := utils.TestSnowContext()
-	blockchainID := defaultSnowCtx.ChainID
+	defaultConsensusCtx := utils.TestConsensusContext()
+	blockchainID := defaultConsensusCtx.ChainID
 
 	tests := map[string]testutils.PrecompileTest{
 		"getBlockchainID success": {
@@ -87,8 +87,8 @@ func TestGetBlockchainID(t *testing.T) {
 func TestSendWarpMessage(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
 
-	defaultSnowCtx := utils.TestSnowContext()
-	blockchainID := defaultSnowCtx.ChainID
+	defaultConsensusCtx := utils.TestConsensusContext()
+	blockchainID := defaultConsensusCtx.ChainID
 	sendWarpMessagePayload := agoUtils.RandomBytes(100)
 
 	sendWarpMessageInput, err := PackSendWarpMessage(sendWarpMessagePayload)
@@ -99,7 +99,7 @@ func TestSendWarpMessage(t *testing.T) {
 	)
 	require.NoError(t, err)
 	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
-		defaultSnowCtx.NetworkID,
+		defaultConsensusCtx.NetworkID,
 		blockchainID,
 		sendWarpMessageAddressedPayload.Bytes(),
 	)

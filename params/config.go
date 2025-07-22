@@ -106,7 +106,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		LuxContext:          LuxContext{utils.TestSnowContext()},
+		LuxContext:          LuxContext{utils.TestConsensusContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -126,7 +126,7 @@ var (
 	}
 
 	TestEVMConfig = &ChainConfig{
-		LuxContext:          LuxContext{utils.TestSnowContext()},
+		LuxContext:          LuxContext{utils.TestConsensusContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -145,7 +145,7 @@ var (
 	}
 
 	TestPreEVMConfig = &ChainConfig{
-		LuxContext:               LuxContext{utils.TestSnowContext()},
+		LuxContext:               LuxContext{utils.TestConsensusContext()},
 		ChainID:                  big.NewInt(1),
 		FeeConfig:                DefaultFeeConfig,
 		AllowFeeRecipients:       false,
@@ -184,7 +184,7 @@ type UpgradeConfig struct {
 
 // LuxContext provides Lux specific context directly into the EVM.
 type LuxContext struct {
-	SnowCtx *consensus.Context
+	ConsensusCtx *consensus.Context
 }
 
 // ChainConfig is the core config which determines the blockchain settings.

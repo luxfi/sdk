@@ -6,7 +6,7 @@ Hanzo is an AI services-focused L2 on Lux.
 - **Chain ID**: 36963
 - **Native Token**: AI
 - **Block Time**: ~2 seconds
-- **Consensus**: Snowball (Lux consensus)
+- **Consensus**: Lux Consensus (Lux L2)
 - **Total Supply**: 1,000,000,000 AI
 
 ## Key Features

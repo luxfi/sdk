@@ -147,7 +147,7 @@ func TestChainConfigVerify(t *testing.T) {
 				NetworkUpgrades: NetworkUpgrades{
 					EVMTimestamp: nil,
 				},
-				LuxContext: LuxContext{SnowCtx: &consensus.Context{}},
+				LuxContext: LuxContext{ConsensusCtx: &consensus.Context{}},
 			},
 			errRegex: "^invalid network upgrades: ",
 		},
@@ -160,7 +160,7 @@ func TestChainConfigVerify(t *testing.T) {
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),
 				},
-				LuxContext: LuxContext{SnowCtx: &consensus.Context{
+				LuxContext: LuxContext{ConsensusCtx: &consensus.Context{
 					NetworkUpgrades: upgrade.Config{
 						DurangoTime: time.Unix(2, 0),
 						EtnaTime:    time.Unix(3, 0),

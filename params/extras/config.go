@@ -38,7 +38,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		LuxContext:   LuxContext{SnowCtx: utils.TestSnowContext()},
+		LuxContext:   LuxContext{ConsensusCtx: utils.TestConsensusContext()},
 		FeeConfig:          DefaultFeeConfig,
 		NetworkUpgrades:    getDefaultNetworkUpgrades(upgrade.GetConfig(constants.UnitTestID)), // This can be changed to correct network (local, test) via VM.
 		GenesisPrecompiles: Precompiles{},
@@ -122,7 +122,7 @@ type UpgradeConfig struct {
 
 // LuxContext provides Lux specific context directly into the EVM.
 type LuxContext struct {
-	SnowCtx *consensus.Context
+	ConsensusCtx *consensus.Context
 }
 
 type ChainConfig struct {
@@ -341,7 +341,7 @@ func (c *ChainConfig) Verify() error {
 	}
 
 	// Verify the network upgrades are internally consistent given the existing chainConfig.
-	if err := c.verifyNetworkUpgrades(c.SnowCtx.NetworkUpgrades); err != nil {
+	if err := c.verifyNetworkUpgrades(c.ConsensusCtx.NetworkUpgrades); err != nil {
 		return fmt.Errorf("invalid network upgrades: %w", err)
 	}
 

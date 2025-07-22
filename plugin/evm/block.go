@@ -99,7 +99,7 @@ func (b *Block) handlePrecompileAccept(rules extras.Rules) error {
 		return fmt.Errorf("failed to fetch receipts for accepted block with non-empty root hash (%s) (Block: %s, Height: %d)", b.ethBlock.ReceiptHash(), b.ethBlock.Hash(), b.ethBlock.NumberU64())
 	}
 	acceptCtx := &precompileconfig.AcceptContext{
-		SnowCtx: b.vm.ctx,
+		ConsensusCtx: b.vm.ctx,
 		Warp:    b.vm.warpBackend,
 	}
 	for _, receipt := range receipts {
@@ -157,7 +157,7 @@ func (b *Block) syntacticVerify() error {
 // Verify implements the chain.Block interface
 func (b *Block) Verify(context.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		SnowCtx:            b.vm.ctx,
+		ConsensusCtx:            b.vm.ctx,
 		ProposerVMBlockCtx: nil,
 	}, true)
 }
@@ -188,7 +188,7 @@ func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 // VerifyWithContext implements the block.WithVerifyContext interface
 func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		SnowCtx:            b.vm.ctx,
+		ConsensusCtx:            b.vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}, true)
 }

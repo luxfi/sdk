@@ -143,7 +143,7 @@ func newBlobTxMeta(id uint64, size uint32, tx *types.Transaction) *blobTxMeta {
 
 // BlobPool is the transaction pool dedicated to EIP-4844 blob transactions.
 //
-// Blob transactions are special snowflakes that are designed for a very specific
+// Blob transactions are special consensusflakes that are designed for a very specific
 // purpose (rollups) and are expected to adhere to that specific use case. These
 // behavioural expectations allow us to design a transaction pool that is more robust
 // (i.e. resending issues) and more resilient to DoS attacks (e.g. replace-flush

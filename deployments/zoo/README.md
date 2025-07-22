@@ -6,7 +6,8 @@ ZOO is a gaming and NFT-focused L2 on Lux.
 - **Chain ID**: 200200
 - **Native Token**: ZOO
 - **Block Time**: ~2 seconds
-- **Consensus**: Snowball (Lux consensus)
+- **Consensus**: Lux Consensus (Lux L2)
+
 
 ## Key Features
 - Optimized for gaming transactions

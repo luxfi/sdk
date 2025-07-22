@@ -19,7 +19,7 @@ import (
 
 var errNoValidators = errors.New("cannot aggregate signatures from subnet with no validators")
 
-// API introduces snowman specific functionality to the evm
+// API introduces linear specific functionality to the evm
 type API struct {
 	networkID                     uint32
 	sourceSubnetID, sourceChainID ids.ID
