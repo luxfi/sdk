@@ -62,8 +62,14 @@ var (
 func ptrTo[T any](x T) *T { return &x }
 
 func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err error) {
-	metric := registry.Get(name)
-	name = strings.ReplaceAll(name, "/", "_")
+    metric := registry.Get(name)
+    name = strings.ReplaceAll(name, "/", "_")
+
+    // If metrics collection is disabled a *metrics.NilXYZ collector is
+    // returned.  These should be ignored entirely.
+    if strings.Contains(fmt.Sprintf("%T", metric), "Nil") {
+        return nil, fmt.Errorf("%w: %q disabled (nil) metric", errMetricSkip, name)
+    }
 
 	switch m := metric.(type) {
 	case nil:
@@ -194,7 +200,17 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 				},
 			}},
 		}, nil
-	default:
-		return nil, fmt.Errorf("%w: metric %q type %T", errMetricTypeNotSupported, name, metric)
+    default:
+        // Treat any disabled (nil) collector from github.com/luxfi/geth/metrics as
+        // a noop and skip it rather than returning an error. These collectors
+        // have types prefixed with "metrics.Nil" (e.g. metrics.NilHealthcheck)
+        // and are instantiated when metrics.Enabled == false. They carry no
+        // runtime data and therefore should not be surfaced to Prometheus.
+
+        if strings.HasPrefix(fmt.Sprintf("%T", metric), "metrics.Nil") {
+            return nil, fmt.Errorf("%w: %q disabled (nil) metric", errMetricSkip, name)
+        }
+
+        return nil, fmt.Errorf("%w: metric %q type %T", errMetricTypeNotSupported, name, metric)
 	}
 }
