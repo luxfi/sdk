@@ -146,6 +146,8 @@ github.com/ethereum/go-ethereum v1.16.1 h1:7684NfKCb1+IChudzdKyZJ12l1Tq4ybPZOITi
 github.com/ethereum/go-ethereum v1.16.1/go.mod h1:ngYIvmMAYdo4sGW9cGzLvSsPGhDOOzL0jK5S5iXpj0g=
 github.com/ethereum/go-verkle v0.2.2 h1:I2W0WjnrFUIzzVPwm8ykY+7pL2d4VhlsePn4j7cnFk8=
 github.com/ethereum/go-verkle v0.2.2/go.mod h1:M3b90YRnzqKyyzBEWJGqj8Qff4IDeXnzFw0P9bFw3uk=
+github.com/fatih/structtag v1.2.0 h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4=
+github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4/aAZl94=
 github.com/ferranbt/fastssz v0.1.2 h1:Dky6dXlngF6Qjc+EfDipAkE83N5I5DE68bY6O0VLNPk=
 github.com/ferranbt/fastssz v0.1.2/go.mod h1:X5UPrE2u1UJjxHA8X54u04SBwdAQjG2sFtWs39YxyWs=
 github.com/fjl/gencodec v0.1.1 h1:DhQY29Q6JLXB/GgMqE86NbOEuvckiYcJCbXFu02toms=
@@ -320,10 +322,13 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/geth v0.15.40 h1:h3tlT5P5x7199uAfWpo45by08EbQQXYIo2CqyPnwcBk=
 github.com/luxfi/geth v0.15.40/go.mod h1:IqfzUTLCcQjyeAqaBOPfqLaMknAOeCMsVvQHdXq9b/w=
+github.com/luxfi/geth v0.15.41/go.mod h1:IqfzUTLCcQjyeAqaBOPfqLaMknAOeCMsVvQHdXq9b/w=
 github.com/luxfi/netrunner v1.7.12 h1:DusNxGpg9amhXq1KaVFAyGCPrZ/1YH0+hAbX3uWCZY4=
 github.com/luxfi/netrunner v1.7.12/go.mod h1:hms50FSf3Hj5+HsdovaIGniTpIOX0JRy6FTTDFmTJ6E=
 github.com/luxfi/node v1.13.13 h1:d9EBufYVsUAX0djLg7GJkMWnrb4TEhSUY/rDwJEbdhc=
 github.com/luxfi/node v1.13.13/go.mod h1:hjc+249TnVTMoCySYlmwjrVA3WOLCk3s9KRx7Lz7vNE=
+github.com/luxfi/node v1.13.19 h1:RrOUWzYEtm4FQXfRnjnGiteNKpjhc71PCJZ0D/OCBaE=
+github.com/luxfi/node v1.13.19/go.mod h1:18mrS7CFT/4rpPkNE2kgtCETuYeZIcPXVc1sdwEitdE=
 github.com/magiconair/properties v1.8.6 h1:5ibWZ6iY0NctNGWo87LalDlEZ6R41TqbbDamhfG/Qzo=
 github.com/magiconair/properties v1.8.6/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
