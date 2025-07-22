@@ -27,19 +27,37 @@
 package flags
 
 import (
-	"os/user"
-	"runtime"
-	"testing"
+    "os"
+    "os/user"
+    "runtime"
+    "testing"
 )
 
 func TestPathExpansion(t *testing.T) {
-	user, _ := user.Current()
+	curUser, _ := user.Current()
+	// os/user can fail in sandboxed or cross-compiled environments and return a
+	// nil *User.  Guard against that to avoid panics when accessing HomeDir.
+	var homeDir string
+	if curUser != nil && curUser.HomeDir != "" {
+		homeDir = curUser.HomeDir
+	} else {
+		// Try os.UserHomeDir which uses environment vars and does not consult the
+		// system user database.
+		if hd, err := os.UserHomeDir(); err == nil && hd != "" {
+			homeDir = hd
+		} else {
+			// As a last resort fall back to a deterministic dummy path so the test
+			// suite can still execute in hermetic environments.
+			homeDir = "/home/testuser"
+		}
+	}
+
 	var tests map[string]string
 
 	if runtime.GOOS == "windows" {
 		tests = map[string]string{
 			`/home/someuser/tmp`:        `\home\someuser\tmp`,
-			`~/tmp`:                     user.HomeDir + `\tmp`,
+			`~/tmp`:                     homeDir + `\tmp`,
 			`~thisOtherUser/b/`:         `~thisOtherUser\b`,
 			`$DDDXXX/a/b`:               `\tmp\a\b`,
 			`/a/b/`:                     `\a\b`,
@@ -50,7 +68,7 @@ func TestPathExpansion(t *testing.T) {
 	} else {
 		tests = map[string]string{
 			`/home/someuser/tmp`:        `/home/someuser/tmp`,
-			`~/tmp`:                     user.HomeDir + `/tmp`,
+			`~/tmp`:                     homeDir + `/tmp`,
 			`~thisOtherUser/b/`:         `~thisOtherUser/b`,
 			`$DDDXXX/a/b`:               `/tmp/a/b`,
 			`/a/b/`:                     `/a/b`,
