@@ -1,0 +1,115 @@
+name: Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  release-linux-amd64:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Build
+        run: |
+          CGO_ENABLED=1 CGO_CFLAGS="-O -D__BLST_PORTABLE__" GOOS=linux GOARCH=amd64 go build -v -ldflags "-X github.com/luxfi/evm/plugin/evm.Version=${{ github.ref_name }}" -o evm ./plugin
+          tar -czf evm-linux-amd64.tar.gz evm
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./evm-linux-amd64.tar.gz
+          asset_name: evm-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+  release-linux-arm64:
+    needs: create-release
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Set up arm64 cross compiler
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install gcc-aarch64-linux-gnu
+      - name: Build
+        run: |
+          CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 CGO_CFLAGS="-O -D__BLST_PORTABLE__" GOOS=linux GOARCH=arm64 go build -v -ldflags "-X github.com/luxfi/evm/plugin/evm.Version=${{ github.ref_name }}" -o evm ./plugin
+          tar -czf evm-linux-arm64.tar.gz evm
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./evm-linux-arm64.tar.gz
+          asset_name: evm-linux-arm64.tar.gz
+          asset_content_type: application/gzip
+
+  release-darwin-amd64:
+    needs: create-release
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Build
+        run: |
+          CGO_ENABLED=1 CGO_CFLAGS="-O -D__BLST_PORTABLE__" GOOS=darwin GOARCH=amd64 go build -v -ldflags "-X github.com/luxfi/evm/plugin/evm.Version=${{ github.ref_name }}" -o evm ./plugin
+          tar -czf evm-darwin-amd64.tar.gz evm
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./evm-darwin-amd64.tar.gz
+          asset_name: evm-darwin-amd64.tar.gz
+          asset_content_type: application/gzip
+
+  release-darwin-arm64:
+    needs: create-release
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Build
+        run: |
+          CGO_ENABLED=1 CGO_CFLAGS="-O -D__BLST_PORTABLE__" GOOS=darwin GOARCH=arm64 go build -v -ldflags "-X github.com/luxfi/evm/plugin/evm.Version=${{ github.ref_name }}" -o evm ./plugin
+          tar -czf evm-darwin-arm64.tar.gz evm
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./evm-darwin-arm64.tar.gz
+          asset_name: evm-darwin-arm64.tar.gz
+          asset_content_type: application/gzip
