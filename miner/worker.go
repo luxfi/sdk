@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc.
+// (c) 2019-2020, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -54,6 +54,7 @@ import (
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/holiman/uint256"
 	ethparams "github.com/luxfi/geth/params"
+	eparams "github.com/ethereum/go-ethereum/params"
 )
 
 const (
@@ -233,9 +234,9 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 		return nil, fmt.Errorf("failed to create new current environment: %w", err)
 	}
 	if header.ParentBeaconRoot != nil {
-		context := core.NewEVMBlockContext(header, w.chain, nil)
+		blockCtx := core.NewEVMBlockContext(header, w.chain, nil)
 		ethConfig := &ethparams.ChainConfig{ChainID: w.chainConfig.ChainID}
-		vmenv := vm.NewEVM(context, env.state, ethConfig, vm.Config{})
+		vmenv := vm.NewEVM(blockCtx, vm.TxContext{}, env.state, ethConfig, vm.Config{})
 		core.ProcessBeaconBlockRoot(*header.ParentBeaconRoot, vmenv, env.state)
 	}
 	// Ensure we always stop prefetcher after block building is complete.
@@ -313,9 +314,9 @@ func (w *worker) createCurrentEnvironment(predicateContext *precompileconfig.Pre
 	if err != nil {
 		return nil, fmt.Errorf("calculating gas capacity: %w", err)
 	}
-	currentState.StartPrefetcher("miner", nil)
+	currentState.StartPrefetcher("miner")
 	return &environment{
-		signer:           types.MakeSigner(&ethparams.ChainConfig{ChainID: w.chainConfig.ChainID}, header.Number, header.Time),
+		signer:           types.MakeSigner(&eparams.ChainConfig{ChainID: w.chainConfig.ChainID}, header.Number, header.Time),
 		state:            currentState,
 		parent:           parent,
 		header:           header,

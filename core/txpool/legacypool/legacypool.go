@@ -1,4 +1,4 @@
-// (c) 2024, Hanzo Industries, Inc.
+// (c) 2024, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -42,7 +42,7 @@ import (
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
-	ethparams "github.com/luxfi/geth/params"
+	eparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
@@ -284,7 +284,7 @@ func New(config Config, chain BlockChain) *LegacyPool {
 		config:              config,
 		chain:               chain,
 		chainconfig:         chain.Config(),
-		signer:              types.LatestSigner(&ethparams.ChainConfig{ChainID: chain.Config().ChainID}),
+		signer:              types.LatestSigner(&eparams.ChainConfig{ChainID: chain.Config().ChainID}),
 		pending:             make(map[common.Address]*list),
 		queue:               make(map[common.Address]*list),
 		beats:               make(map[common.Address]time.Time),

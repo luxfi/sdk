@@ -1,4 +1,4 @@
-// (c) 2019-2024, Hanzo Industries, Inc.
+// (c) 2019-2024, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.

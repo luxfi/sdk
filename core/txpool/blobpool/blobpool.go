@@ -1,4 +1,4 @@
-// (c) 2024, Hanzo Industries, Inc.
+// (c) 2024, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -45,6 +45,7 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
 	ethparams "github.com/luxfi/geth/params"
+	eparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
@@ -337,7 +338,7 @@ func New(config Config, chain BlockChain) *BlobPool {
 	// Create the transaction pool with its initial settings
 	return &BlobPool{
 		config: config,
-		signer: types.LatestSigner(&ethparams.ChainConfig{ChainID: chain.Config().ChainID}),
+		signer: types.LatestSigner(&eparams.ChainConfig{ChainID: chain.Config().ChainID}),
 		chain:  chain,
 		lookup: make(map[common.Hash]uint64),
 		index:  make(map[common.Address][]*blobTxMeta),

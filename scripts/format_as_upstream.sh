@@ -24,7 +24,7 @@ if git status --porcelain | grep -q '^ M'; then
     exit 1
 fi
 
-sed_command='/\/\/ (c) [0-9]*\(-[0-9]*\)\{0,1\}, Hanzo Industries, Inc.$/,+9d'
+sed_command='/\/\/ (c) [0-9]*\(-[0-9]*\)\{0,1\}, Lux Industries, Inc.$/,+9d'
 find . -name '*.go' -exec sed -i '' -e "${sed_command}" {} \;
 git add -u .
 make_commit "${commit_msg_remove_header}"

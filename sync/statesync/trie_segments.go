@@ -1,4 +1,4 @@
-// (c) 2021-2022, Hanzo Industries, Inc. All rights reserved.
+// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -71,7 +71,7 @@ func NewTrieToSync(sync *stateSync, root common.Hash, account common.Hash, syncT
 		root:         root,
 		account:      account,
 		batch:        batch,
-		stackTrie:    trie.NewStackTrie(writeFn),
+		stackTrie:    trie.NewStackTrie(&trie.StackTrieOptions{Writer: writeFn}),
 		isMainTrie:   (root == sync.root),
 		task:         syncTask,
 		segmentsDone: make(map[int]struct{}),

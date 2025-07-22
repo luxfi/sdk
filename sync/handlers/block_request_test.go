@@ -1,4 +1,4 @@
-// (c) 2021-2022, Hanzo Industries, Inc. All rights reserved.
+// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"

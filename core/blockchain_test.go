@@ -1,4 +1,4 @@
-// (c) 2020-2021, Hanzo Industries, Inc. All rights reserved.
+// (c) 2020-2021, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package core
@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/evm/core/state/pruner"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/eth/tracers/logger"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"

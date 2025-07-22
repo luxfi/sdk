@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/geth/eth/tracers"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/precompile/contract"

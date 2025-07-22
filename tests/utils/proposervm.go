@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Hanzo Industries, Inc. All rights reserved.
+// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -8,7 +8,7 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"

@@ -1,4 +1,4 @@
-// (c) 2021-2022, Hanzo Industries, Inc. All rights reserved.
+// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -9,7 +9,7 @@ import (
 	"testing"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/handlers"

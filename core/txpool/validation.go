@@ -1,4 +1,4 @@
-// (c) 2024, Hanzo Industries, Inc.
+// (c) 2024, Lux Industries, Inc.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,17 +31,17 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/crypto/kzg4844"
-	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto/kzg4844"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
+	vmerr "github.com/luxfi/geth/vmerrs"
 )
 
 var (
@@ -88,7 +88,7 @@ func ValidateTransaction(tx *types.Transaction, head *types.Header, signer types
 	}
 	// Check whether the init code size has been exceeded
 	if opts.Config.IsShanghai(head.Number, head.Time) && tx.To() == nil && len(tx.Data()) > ethparams.MaxInitCodeSize {
-		return fmt.Errorf("%w: code size %v, limit %v", vm.ErrMaxInitCodeSizeExceeded, len(tx.Data()), ethparams.MaxInitCodeSize)
+		return fmt.Errorf("%w: code size %v, limit %v", vmerr.ErrMaxInitCodeSizeExceeded, len(tx.Data()), ethparams.MaxInitCodeSize)
 	}
 	// Transactions can't be negative. This may never happen using RLP decoded
 	// transactions but may occur for transactions created using the RPC.

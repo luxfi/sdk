@@ -1,4 +1,4 @@
-// (c) 2022 Hanzo Industries, Inc. All rights reserved.
+// (c) 2022 Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package feemanager

@@ -1,4 +1,4 @@
-// (c) 2019-2020, Hanzo Industries, Inc. All rights reserved.
+// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -26,8 +26,8 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/eth"
-	"github.com/luxfi/evm/eth/ethconfig"
+	"github.com/luxfi/geth/eth"
+	"github.com/luxfi/geth/eth/ethconfig"
 	"github.com/luxfi/geth/metrics"
 	evmPrometheus "github.com/luxfi/evm/metrics/prometheus"
 	"github.com/luxfi/evm/miner"
@@ -46,8 +46,8 @@ import (
 	// We must import this package (not referenced elsewhere) so that the native "callTracer"
 	// is added to a map of client-accessible tracers. In geth, this is done
 	// inside of cmd/geth.
-	_ "github.com/luxfi/evm/eth/tracers/js"
-	_ "github.com/luxfi/evm/eth/tracers/native"
+	_ "github.com/luxfi/geth/eth/tracers/js"
+	_ "github.com/luxfi/geth/eth/tracers/native"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	// Force-load precompiles to trigger registration
 	_ "github.com/luxfi/evm/precompile/registry"

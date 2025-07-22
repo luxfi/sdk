@@ -1,4 +1,4 @@
-// (c) 2021-2022, Hanzo Industries, Inc. All rights reserved.
+// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package evm
@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/node/vms/components/chain"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/eth"
+	"github.com/luxfi/geth/eth"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
