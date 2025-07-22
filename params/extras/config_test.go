@@ -29,7 +29,7 @@ func TestChainConfigDescription(t *testing.T) {
 		"nil": {},
 		"empty": {
 			config: &ChainConfig{},
-			wantRegex: `Avalanche Upgrades \(timestamp based\)\:
+			wantRegex: `Lux Upgrades \(timestamp based\)\:
  - EVM Timestamp: ( )+@nil( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
 Upgrade Config: {}
@@ -72,7 +72,7 @@ $`,
 					},
 				},
 			},
-			wantRegex: `Avalanche Upgrades \(timestamp based\)\:
+			wantRegex: `Lux Upgrades \(timestamp based\)\:
  - EVM Timestamp: ( )+@1( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
 Upgrade Config: {"networkUpgradeOverrides":{"evmTimestamp":13},"stateUpgrades":\[{"blockTimestamp":14,"accounts":{"0x0f00000000000000000000000000000000000000":{"code":"0x10"}}}\]}
@@ -147,7 +147,7 @@ func TestChainConfigVerify(t *testing.T) {
 				NetworkUpgrades: NetworkUpgrades{
 					EVMTimestamp: nil,
 				},
-				AvalancheContext: AvalancheContext{SnowCtx: &consensus.Context{}},
+				LuxContext: LuxContext{SnowCtx: &consensus.Context{}},
 			},
 			errRegex: "^invalid network upgrades: ",
 		},
@@ -160,7 +160,7 @@ func TestChainConfigVerify(t *testing.T) {
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),
 				},
-				AvalancheContext: AvalancheContext{SnowCtx: &consensus.Context{
+				LuxContext: LuxContext{SnowCtx: &consensus.Context{
 					NetworkUpgrades: upgrade.Config{
 						DurangoTime: time.Unix(2, 0),
 						EtnaTime:    time.Unix(3, 0),

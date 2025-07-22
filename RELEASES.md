@@ -118,6 +118,6 @@ The plugin version is unchanged at 37 and is compatible with Lux versions v1.11.
 
 ### Fixes
 
-* Fixed Eth upgrade mapping with Avalanche upgrades in genesis
+* Fixed Eth upgrade mapping with Lux upgrades in genesis
 * Fixed transaction size tracking in worker environment
 * Fixed a rare case of VM's shutting down ends up panicking in RPC server

@@ -175,7 +175,7 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 
 	// Verify the extra data is well-formed.
 	config := params.GetExtra(chain.Config())
-	rules := config.GetAvalancheRules(header.Time)
+	rules := config.GetLuxRules(header.Time)
 	if err := customheader.VerifyExtra(rules, header.Extra); err != nil {
 		return err
 	}

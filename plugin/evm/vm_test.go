@@ -86,7 +86,7 @@ var (
 		g.GasLimit = 8000000
 		g.Timestamp = uint64(upgrade.InitiallyActiveTime.Unix())
 
-		// Use chainId: 43111, so that it does not overlap with any Avalanche ChainIDs, which may have their
+		// Use chainId: 43111, so that it does not overlap with any Lux ChainIDs, which may have their
 		// config overridden in vm.Initialize.
 		cpy := *cfg
 		cpy.ChainID = big.NewInt(43111)

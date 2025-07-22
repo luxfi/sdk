@@ -38,14 +38,14 @@ func newTimestampCompatError(what string, storedtime, newtime *uint64) *gethpara
 }
 
 // NetworkUpgrades contains timestamps that enable network upgrades.
-// Avalanche specific network upgrades are also included here.
+// Lux specific network upgrades are also included here.
 // (nil = no fork, 0 = already activated)
 type NetworkUpgrades struct {
-	// EVMTimestamp is a placeholder that activates Avalanche Upgrades prior to ApricotPhase6
+	// EVMTimestamp is a placeholder that activates Lux Upgrades prior to ApricotPhase6
 	EVMTimestamp *uint64 `json:"evmTimestamp,omitempty"`
 	// Durango activates the Shanghai Execution Spec Upgrade from Ethereum (https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/shanghai.md#included-eips)
-	// and Avalanche Warp Messaging.
-	// Note: EIP-4895 is excluded since withdrawals are not relevant to the Avalanche C-Chain or Subnets running the EVM.
+	// and Lux Warp Messaging.
+	// Note: EIP-4895 is excluded since withdrawals are not relevant to the Lux C-Chain or Subnets running the EVM.
 	DurangoTimestamp *uint64 `json:"durangoTimestamp,omitempty"`
 	// Placeholder for EtnaTimestamp
 	EtnaTimestamp *uint64 `json:"etnaTimestamp,omitempty"`
@@ -191,7 +191,7 @@ func (n *NetworkUpgrades) Description() string {
 	return banner
 }
 
-type AvalancheRules struct {
+type LuxRules struct {
 	IsEVM bool
 	IsDurango   bool
 	IsEtna      bool
@@ -199,8 +199,8 @@ type AvalancheRules struct {
 	IsGranite   bool
 }
 
-func (n *NetworkUpgrades) GetAvalancheRules(time uint64) AvalancheRules {
-	return AvalancheRules{
+func (n *NetworkUpgrades) GetLuxRules(time uint64) LuxRules {
+	return LuxRules{
 		IsEVM: n.IsEVM(time),
 		IsDurango:   n.IsDurango(time),
 		IsEtna:      n.IsEtna(time),

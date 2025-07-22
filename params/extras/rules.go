@@ -9,8 +9,8 @@ import (
 )
 
 type Rules struct {
-	// Rules for Avalanche releases
-	AvalancheRules
+	// Rules for Lux releases
+	LuxRules
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.

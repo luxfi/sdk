@@ -53,12 +53,12 @@ export VERSION=v0.7.3
     compatibility.json has evm version v0.7.3 stated as compatible with RPC chain VM protocol version 0 but Lux protocol version is 39
     ```
 
-    This message can help you figure out what the correct RPC chain VM protocol version (here `39`) has to be in compatibility.json for your current release. Alternatively, you can refer to the [Avalanchego repository `version/compatibility.json` file](https://github.com/luxfi/node/blob/main/version/compatibility.json) to find the RPC chain VM protocol version matching the Lux version we use here.
+    This message can help you figure out what the correct RPC chain VM protocol version (here `39`) has to be in compatibility.json for your current release. Alternatively, you can refer to the [Luxgo repository `version/compatibility.json` file](https://github.com/luxfi/node/blob/main/version/compatibility.json) to find the RPC chain VM protocol version matching the Lux version we use here.
 1. Specify the Lux compatibility in the [README.md relevant section](../../README.md#luxd-compatibility). For example we would add:
 
     ```text
     ...
-    [v0.7.3] Lux@v1.12.2/1.13.0-fuji/1.13.0 (Protocol Version: 39)
+    [v0.7.3] Lux@v1.12.2/1.13.0-testnet/1.13.0 (Protocol Version: 39)
     ```
 
 1. Commit your changes and push the branch
@@ -99,7 +99,7 @@ export VERSION=v0.7.3
     git push origin "$VERSION"
     ```
 
-Once the tag is created, you need to test it on the Fuji testnet both locally and then as canaries, using the Dispatch and Echo subnets.
+Once the tag is created, you need to test it on the Testnet testnet both locally and then as canaries, using the Dispatch and Echo subnets.
 
 #### Local deployment
 
@@ -210,7 +210,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
     - Dispatch: `rm -r ~/.luxd/chainData/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/db/pebbledb`
     - Echo: `rm -r ~/.luxd/chainData/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/db/pebbledb`
 
-    Lux keeps its database in `~/.luxd/db/fuji/v1.4.5/*.ldb` which you should not delete.
+    Lux keeps its database in `~/.luxd/db/testnet/v1.4.5/*.ldb` which you should not delete.
 1. Build Lux:
 
     ```bash
@@ -220,7 +220,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 1. Run Lux tracking the Dispatch and Echo Subnet IDs:
 
     ```bash
-    ./build/luxd --network-id=fuji --partial-sync-primary-network --public-ip=127.0.0.1 \
+    ./build/luxd --network-id=testnet --partial-sync-primary-network --public-ip=127.0.0.1 \
     --track-subnets=7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5,i9gFpZQHPLcGfZaQLiwFAStddQD7iTKBpFfurPFJsXm1CkTZK
     ```
 

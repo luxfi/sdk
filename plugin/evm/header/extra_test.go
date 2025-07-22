@@ -180,25 +180,25 @@ func TestVerifyExtraPrefix(t *testing.T) {
 func TestVerifyExtra(t *testing.T) {
 	tests := []struct {
 		name     string
-		rules    extras.AvalancheRules
+		rules    extras.LuxRules
 		extra    []byte
 		expected error
 	}{
 		{
 			name:     "initial_valid",
-			rules:    extras.AvalancheRules{},
+			rules:    extras.LuxRules{},
 			extra:    make([]byte, maximumExtraDataSize),
 			expected: nil,
 		},
 		{
 			name:     "initial_invalid",
-			rules:    extras.AvalancheRules{},
+			rules:    extras.LuxRules{},
 			extra:    make([]byte, maximumExtraDataSize+1),
 			expected: errInvalidExtraLength,
 		},
 		{
 			name: "subnet_evm_valid",
-			rules: extras.AvalancheRules{
+			rules: extras.LuxRules{
 				IsEVM: true,
 			},
 			extra:    make([]byte, subnetevm.WindowSize),
@@ -206,7 +206,7 @@ func TestVerifyExtra(t *testing.T) {
 		},
 		{
 			name: "subnet_evm_invalid_less",
-			rules: extras.AvalancheRules{
+			rules: extras.LuxRules{
 				IsEVM: true,
 			},
 			extra:    make([]byte, subnetevm.WindowSize-1),
@@ -214,7 +214,7 @@ func TestVerifyExtra(t *testing.T) {
 		},
 		{
 			name: "subnet_evm_invalid_more",
-			rules: extras.AvalancheRules{
+			rules: extras.LuxRules{
 				IsEVM: true,
 			},
 			extra:    make([]byte, subnetevm.WindowSize+1),
@@ -222,7 +222,7 @@ func TestVerifyExtra(t *testing.T) {
 		},
 		{
 			name: "durango_valid_min",
-			rules: extras.AvalancheRules{
+			rules: extras.LuxRules{
 				IsDurango: true,
 			},
 			extra:    make([]byte, subnetevm.WindowSize),
@@ -230,7 +230,7 @@ func TestVerifyExtra(t *testing.T) {
 		},
 		{
 			name: "durango_valid_extra",
-			rules: extras.AvalancheRules{
+			rules: extras.LuxRules{
 				IsDurango: true,
 			},
 			extra:    make([]byte, subnetevm.WindowSize+1),
@@ -238,7 +238,7 @@ func TestVerifyExtra(t *testing.T) {
 		},
 		{
 			name: "durango_invalid",
-			rules: extras.AvalancheRules{
+			rules: extras.LuxRules{
 				IsDurango: true,
 			},
 			extra:    make([]byte, subnetevm.WindowSize-1),

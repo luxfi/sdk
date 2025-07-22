@@ -4,16 +4,17 @@ Deploy Avalanche L1s (formerly Subnets) that can interoperate with Lux networks.
 
 ## Overview
 
-Since Lux is built on the same Snow consensus family as Avalanche, you can run Avalanche L1s in parallel with Lux networks. From Lux's perspective, these Avalanche L1s function as L2s.
+Since Lux is built on the same consensus family as Avalanche, you can run Lux
+blockchais in parallel with Avalanche Network.
 
 ## Architecture
 
 ```
 Lux Network (Primary)
     ├── LUX C-Chain (96369)
-    ├── ZOO L2 (200200)
-    ├── SPC L2 (36911)
-    └── Hanzo L2 (36963)
+    └── Custom L1s
+         ├── DeFi L1
+         └── Gaming L1
 
 Avalanche Network (Parallel)
     ├── AVAX C-Chain
@@ -24,34 +25,32 @@ Avalanche Network (Parallel)
 
 ## Setup
 
-### 1. Run Avalanche Node
+### 1. Run Lux Node
 
-Add to `docker-compose.avalanche.yml`:
+Add to `compose.lux.yml`:
 
 ```yaml
-version: '3.8'
-
 services:
-  avalanche-node:
-    image: avaplatform/avalanchego:latest
-    container_name: avalanche-node
+  lux-node:
+    image: luxfi/node:latest
+    container_name: lux-node
     ports:
-      - "9660:9650"  # Different port from Lux
-      - "9661:9651"  # Staking port
+      - "9650:9650"  # Different port from Lux
+      - "9651:9651"  # Staking port
     volumes:
-      - ./volumes/avalanche:/data
+      - ./volumes/lux:/data
     environment:
-      - AVAX_NETWORK_ID=fuji  # or mainnet
-      - AVAX_HTTP_HOST=0.0.0.0
-      - AVAX_HTTP_PORT=9650
-      - AVAX_STAKING_PORT=9651
-      - AVAX_PUBLIC_IP=127.0.0.1
-      - AVAX_DB_DIR=/data/db
-      - AVAX_LOG_DIR=/data/logs
+      - LUX_NETWORK_ID=testnet  # or mainnet
+      - LUX_HTTP_HOST=0.0.0.0
+      - LUX_HTTP_PORT=9650
+      - LUX_STAKING_PORT=9651
+      - LUX_PUBLIC_IP=127.0.0.1
+      - LUX_DB_DIR=/data/db
+      - LUX_LOG_DIR=/data/logs
     networks:
       - lux-network
     command: [
-      "--network-id=fuji",
+      "--network-id=testnet",
       "--http-host=0.0.0.0",
       "--http-port=9650",
       "--staking-port=9651",
@@ -61,35 +60,35 @@ services:
     ]
 ```
 
-### 2. Deploy Avalanche L1
+### 2. Deploy Lux L1
 
-Using Avalanche-CLI:
+Using Lux-CLI:
 
 ```bash
-# Install Avalanche-CLI
-curl -sSfL https://raw.githubusercontent.com/ava-labs/avalanche-cli/main/scripts/install.sh | sh -s
+# Install Lux-CLI
+curl -sSfL https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh | sh -s
 
 # Create L1
-avalanche subnet create myL1 --evm
+lux subnet create myL1 --evm
 
 # Deploy to local network
-avalanche subnet deploy myL1 --local
+lux subnet deploy myL1 --local
 
-# Deploy to Fuji testnet
-avalanche subnet deploy myL1 --fuji
+# Deploy to Testnet testnet
+lux subnet deploy myL1 --testnet
 ```
 
 ### 3. Configure Cross-Chain Bridge
 
-Set up Avalanche Warp Messaging (AWM) for Lux-Avalanche communication:
+Set up Avalanche Warp Messaging (AWM) for Avalanche-Lux communication:
 
 ```solidity
-// Deploy on both Lux and Avalanche
+// Deploy on both Avalanche and Lux
 contract CrossChainBridge {
     ITeleporterMessenger public teleporter;
-    
+
     mapping(uint256 => address) public remoteContracts;
-    
+
     function sendMessage(
         uint256 destinationChainId,
         bytes calldata message
@@ -115,13 +114,13 @@ contract CrossChainBridge {
 
 ```bash
 # Start both networks
-make up  # Lux network
-docker-compose -f docker-compose.avalanche.yml up -d  # Avalanche
+make up  # Lux Network
+docker-compose -f docker-compose.lux.yml up -d  # Lux
 
 # Verify both are running
 curl -X POST --data '{"jsonrpc":"2.0","id":1,"method":"info.getNetworkID","params":[]}' \
   -H 'content-type:application/json' http://localhost:9650/ext/info
-  
+
 curl -X POST --data '{"jsonrpc":"2.0","id":1,"method":"info.getNetworkID","params":[]}' \
   -H 'content-type:application/json' http://localhost:9660/ext/info
 ```
@@ -133,10 +132,10 @@ curl -X POST --data '{"jsonrpc":"2.0","id":1,"method":"info.getNetworkID","param
 Use Teleporter/AWM for cross-chain messages:
 
 ```javascript
-// Send from Lux to Avalanche L1
+// Send from Avalanche to Lux L1
 const bridge = new ethers.Contract(BRIDGE_ADDRESS, BRIDGE_ABI, luxSigner);
 await bridge.sendMessage(
-    AVALANCHE_L1_CHAIN_ID,
+    LUX_L1_CHAIN_ID,
     ethers.utils.defaultAbiCoder.encode(
         ["address", "uint256"],
         [recipient, amount]
@@ -144,21 +143,9 @@ await bridge.sendMessage(
 );
 ```
 
-### Asset Bridging
-
-Bridge assets between networks:
-
-```javascript
-// Lock tokens on Lux, mint on Avalanche L1
-await luxBridge.lockTokens(tokenAddress, amount, avalancheL1ChainId);
-
-// Burn on Avalanche L1, unlock on Lux
-await avalancheBridge.burnTokens(tokenAddress, amount, luxChainId);
-```
-
 ## Benefits
 
-1. **Ecosystem Access**: Tap into both Lux and Avalanche ecosystems
+1. **Ecosystem Access**: Tap into both Lux and Lux ecosystems
 2. **Flexibility**: Choose consensus and validator sets per L1
 3. **Interoperability**: Native cross-chain messaging
 4. **Shared Security**: Leverage both networks' security

@@ -138,7 +138,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 		vmenv   = NewEnv(cfg)
 		sender  = cfg.Origin
 		ethCfg  = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
-		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetAvalancheRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
+		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetLuxRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
@@ -173,7 +173,7 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 		vmenv  = NewEnv(cfg)
 		sender = cfg.Origin
 		ethCfg = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
-		rules  = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetAvalancheRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
+		rules  = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetLuxRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
@@ -203,7 +203,7 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 		sender  = cfg.Origin
 		statedb = cfg.State
 		ethCfg  = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
-		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetAvalancheRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
+		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, params.GetExtra(cfg.ChainConfig).GetLuxRules(vmenv.Context.Time).IsDurango, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)

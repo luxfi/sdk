@@ -26,13 +26,13 @@ func (db ethDbWrapper) Stat() (string, error) { return "", database.ErrNotFound 
 
 // DeleteRange implements ethdb.KeyValueStore
 func (db ethDbWrapper) DeleteRange(start []byte, end []byte) error {
-	// Not supported in avalanche database
+	// Not supported in lux database
 	return nil
 }
 
 // SyncKeyValue implements ethdb.KeyValueStore
 func (db ethDbWrapper) SyncKeyValue() error {
-	// Not supported in avalanche database
+	// Not supported in lux database
 	return nil
 }
 
@@ -82,6 +82,6 @@ func (batch wrappedBatch) Replay(w ethdb.KeyValueWriter) error { return batch.Ba
 
 // DeleteRange implements ethdb.Batch
 func (batch wrappedBatch) DeleteRange(start []byte, end []byte) error {
-	// Not supported in avalanche database
+	// Not supported in lux database
 	return nil
 }

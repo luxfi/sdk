@@ -38,7 +38,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		AvalancheContext:   AvalancheContext{SnowCtx: utils.TestSnowContext()},
+		LuxContext:   LuxContext{SnowCtx: utils.TestSnowContext()},
 		FeeConfig:          DefaultFeeConfig,
 		NetworkUpgrades:    getDefaultNetworkUpgrades(upgrade.GetConfig(constants.UnitTestID)), // This can be changed to correct network (local, test) via VM.
 		GenesisPrecompiles: Precompiles{},
@@ -120,15 +120,15 @@ type UpgradeConfig struct {
 	PrecompileUpgrades []PrecompileUpgrade `json:"precompileUpgrades,omitempty"`
 }
 
-// AvalancheContext provides Avalanche specific context directly into the EVM.
-type AvalancheContext struct {
+// LuxContext provides Lux specific context directly into the EVM.
+type LuxContext struct {
 	SnowCtx *consensus.Context
 }
 
 type ChainConfig struct {
 	NetworkUpgrades // Config for timestamps that enable network upgrades.
 
-	AvalancheContext `json:"-"` // Avalanche specific context set during VM initialization. Not serialized.
+	LuxContext `json:"-"` // Lux specific context set during VM initialization. Not serialized.
 
 	FeeConfig          commontype.FeeConfig `json:"feeConfig"`                    // Set the configuration for the dynamic fee algorithm
 	AllowFeeRecipients bool                 `json:"allowFeeRecipients,omitempty"` // Allows fees to be collected by block builders.
@@ -166,7 +166,7 @@ func (c *ChainConfig) Description() string {
 	}
 	var banner string
 
-	banner += "Avalanche Upgrades (timestamp based):\n"
+	banner += "Lux Upgrades (timestamp based):\n"
 	banner += c.NetworkUpgrades.Description()
 	banner += "\n"
 
@@ -264,7 +264,7 @@ func (c *ChainConfig) MarshalJSON() ([]byte, error) {
 type fork struct {
 	name      string
 	block     *big.Int // some go-ethereum forks use block numbers
-	timestamp *uint64  // Avalanche forks use timestamps
+	timestamp *uint64  // Lux forks use timestamps
 	optional  bool     // if true, the fork may be nil and next fork is still allowed
 }
 
@@ -272,11 +272,11 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 	if c == nil {
 		return nil
 	}
-	// Note: In Avalanche, upgrades must take place via block timestamps instead
+	// Note: In Lux, upgrades must take place via block timestamps instead
 	// of block numbers since blocks are produced asynchronously. Therefore, we do
 	// not check block timestamp forks in the same way as block number forks since
 	// it would not be a meaningful comparison. Instead, we only check that the
-	// Avalanche upgrades are enabled in order.
+	// Lux upgrades are enabled in order.
 	// Note: we do not add the precompile configs here because they are optional
 	// and independent, i.e. the order in which they are enabled does not impact
 	// the correctness of the chain config.

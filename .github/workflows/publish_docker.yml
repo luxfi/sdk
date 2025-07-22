@@ -43,6 +43,6 @@ jobs:
           VM_ID: ${{ inputs.vm_id }}
           PUBLISH: 1
           PLATFORMS: "linux/amd64,linux/arm64"
-          AVALANCHE_VERSION: ${{ inputs.lux_version }}
+          LUX_VERSION: ${{ inputs.lux_version }}
           ALLOW_TAG_LATEST: ${{ github.event_name != 'workflow_dispatch' || inputs.allow_tag_latest }}
         run: scripts/build_docker_image.sh
