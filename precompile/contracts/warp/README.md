@@ -3,9 +3,9 @@
 
 Lux Warp Messaging offers a basic primitive to enable Cross-Subnet communication on the Lux Network.
 =======
-# Integrating Avalanche Warp Messaging into the EVM
+# Integrating Lux Warp Messaging into the EVM
 
-Avalanche Warp Messaging offers a basic primitive to enable Cross-L1 communication on the Avalanche Network.
+Lux Warp Messaging offers a basic primitive to enable Cross-L1 communication on the Lux Network.
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 It is intended to allow communication between arbitrary Custom Virtual Machines (including, but not limited to EVM and Geth).
@@ -13,7 +13,7 @@ It is intended to allow communication between arbitrary Custom Virtual Machines 
 <<<<<<< HEAD:x/warp/README.md
 ## How does Lux Warp Messaging Work
 =======
-## How does Avalanche Warp Messaging Work?
+## How does Lux Warp Messaging Work?
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 Lux Warp Messaging uses BLS Multi-Signatures with Public-Key Aggregation where every Lux validator registers a public key alongside its NodeID on the Lux P-Chain.
@@ -25,9 +25,9 @@ For more details on Lux Warp Messaging, see the Lux [Warp README](https://github
 
 ## Integrating Lux Warp Messaging into the EVM
 =======
-Every node tracking an Avalanche L1 has read access to the Avalanche P-Chain. This provides weighted sets of BLS Public Keys that correspond to the validator sets of each L1 on the Avalanche Network. Avalanche Warp Messaging provides a basic primitive for signing and verifying messages between L1s: the receiving network can verify whether an aggregation of signatures from a set of source L1 validators represents a threshold of stake large enough for the receiving network to process the message.
+Every node tracking an Lux L1 has read access to the Lux P-Chain. This provides weighted sets of BLS Public Keys that correspond to the validator sets of each L1 on the Lux Network. Lux Warp Messaging provides a basic primitive for signing and verifying messages between L1s: the receiving network can verify whether an aggregation of signatures from a set of source L1 validators represents a threshold of stake large enough for the receiving network to process the message.
 
-For more details on Avalanche Warp Messaging, see the Lux [Warp README](https://docs.lux.network/build/cross-chain/awm/deep-dive).
+For more details on Lux Warp Messaging, see the Lux [Warp README](https://docs.lux.network/build/cross-chain/awm/deep-dive).
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 ### Flow of Sending / Receiving a Warp Message within the EVM
@@ -65,7 +65,7 @@ Additionally, the `SourceChainID` is excluded because anyone parsing the chain c
 <<<<<<< HEAD:x/warp/README.md
 The actual `message` is the entire [Lux Warp Unsigned Message](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/luxfi/node/tree/v1.10.15/vms/platformvm/warp/payload). The unsigned message is emitted as the unindexed data in the log.
 =======
-The actual `message` is the entire [Avalanche Warp Unsigned Message](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/luxfi/node/tree/master/vms/platformvm/warp/payload#readme). The unsigned message is emitted as the unindexed data in the log.
+The actual `message` is the entire [Lux Warp Unsigned Message](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/unsigned_message.go#L14) including an [AddressedCall](https://github.com/luxfi/node/tree/master/vms/platformvm/warp/payload#readme). The unsigned message is emitted as the unindexed data in the log.
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 #### getVerifiedMessage
@@ -96,14 +96,14 @@ The `blockchainID` in Lux refers to the txID that created the blockchain on the 
 <<<<<<< HEAD:x/warp/README.md
 Lux Warp Messages are encoded as a signed Lux [Warp Message](https://github.com/luxfi/node/blob/v1.10.4/vms/platformvm/warp/message.go#L7) where the [UnsignedMessage](https://github.com/luxfi/node/blob/v1.10.4/vms/platformvm/warp/unsigned_message.go#L14)'s payload includes an [AddressedPayload](../../../warp/payload/payload.go).
 =======
-Avalanche Warp Messages are encoded as a signed Avalanche [Warp Message](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/message.go) where the [UnsignedMessage](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/unsigned_message.go)'s payload includes an [AddressedPayload](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/payload/payload.go).
+Lux Warp Messages are encoded as a signed Lux [Warp Message](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/message.go) where the [UnsignedMessage](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/unsigned_message.go)'s payload includes an [AddressedPayload](https://github.com/luxfi/node/blob/master/vms/platformvm/warp/payload/payload.go).
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 Since the predicate is encoded into the [Transaction Access List](https://eips.ethereum.org/EIPS/eip-2930), it is packed into 32 byte hashes intended to declare storage slots that should be pre-warmed into the cache prior to transaction execution.
 
 Therefore, we use the [Predicate Utils](https://github.com/luxfi/evm/blob/master/predicate/Predicate.md) package to encode the actual byte slice of size N into the access list.
 
-### Performance Optimization: Primary Network to Avalanche L1
+### Performance Optimization: Primary Network to Lux L1
 
 The Primary Network has a large validator set compared to most Subnets and L1s, which makes Warp signature collection and verification from the entire Primary Network validator set costly. All Subnets and L1s track at least one blockchain of the Primary Network, so we can instead optimize this by using the validator set of the receiving L1 instead of the Primary Network for certain Warp messages.
 
@@ -112,10 +112,10 @@ The Primary Network has a large validator set compared to most Subnets and L1s, 
 <<<<<<< HEAD:x/warp/README.md
 Since the Primary Network has the largest possible number of validators for any Subnet on Lux, it would also be the most expensive Subnet to receive and verify Lux Warp Messages from as it reaching a threshold of stake on the primary network would require many signatures. Luckily, we can do something much smarter.
 =======
-Recall that Avalanche Subnet validators must also validate the Primary Network, so it tracks all of the blockchains in the Primary Network (X, C, and P-Chains).
+Recall that Lux Subnet validators must also validate the Primary Network, so it tracks all of the blockchains in the Primary Network (X, C, and P-Chains).
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
-When an Avalanche Subnet receives a message from a blockchain on the Primary Network, we use the validator set of the receiving Subnet instead of the entire network when validating the message. 
+When an Lux Subnet receives a message from a blockchain on the Primary Network, we use the validator set of the receiving Subnet instead of the entire network when validating the message. 
 
 Sending messages from the X, C, or P-Chain remains unchanged.
 However, when the Subnet receives the message, it changes the semantics to the following:
@@ -136,7 +136,7 @@ Note: this special case is ONLY applied during Warp Message verification. The me
 
 #### L1s
 
-Avalanche L1s are only required to sync the P-Chain, but are not required to validate the Primary Network. Therefore, **for L1s, this optimization only applies to Warp messages sent by the P-Chain.** The rest of the description of this optimization in the above section applies to L1s.
+Lux L1s are only required to sync the P-Chain, but are not required to validate the Primary Network. Therefore, **for L1s, this optimization only applies to Warp messages sent by the P-Chain.** The rest of the description of this optimization in the above section applies to L1s.
 
 Note that **in order to properly verify messages from the C-Chain and X-Chain, the Warp precompile must be configured with `requirePrimaryNetworkSigners` set to `true`**. Otherwise, we will attempt to verify the message signature against the receiving L1's validator set, which is not required to track the C-Chain or X-Chain, and therefore will not in general be able to produce a valid Warp message.
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
@@ -150,7 +150,7 @@ Lux Warp Messaging depends on the Lux P-Chain state at the P-Chain height specif
 <<<<<<< HEAD:x/warp/README.md
 Verifying a message requires looking up the validator set of the source subnet on the P-Chain. To support this, Lux Warp Messaging uses the ProposerVM header, which includes the P-Chain height it was issued at as the canonical point to lookup the source subnet's validator set.
 =======
-Verifying a message requires looking up the validator set of the source L1 on the P-Chain. To support this, Avalanche Warp Messaging uses the ProposerVM header, which includes the P-Chain height it was issued at as the canonical point to lookup the source L1's validator set.
+Verifying a message requires looking up the validator set of the source L1 on the P-Chain. To support this, Lux Warp Messaging uses the ProposerVM header, which includes the P-Chain height it was issued at as the canonical point to lookup the source L1's validator set.
 >>>>>>> v0.7.5:precompile/contracts/warp/README.md
 
 This means verifying the Warp Message and therefore the state transition on a block depends on state that is external to the blockchain itself: the P-Chain.

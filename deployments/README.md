@@ -65,7 +65,7 @@ cd /home/z/work/lux/cli
 ### 3. Mainnet Deployment
 
 ```bash
-# Deploy to mainnet (requires AVAX for subnet creation)
+# Deploy to mainnet (requires LUX for subnet creation)
 ./lux subnet deploy zoo --mainnet --ledger
 
 # Add validators

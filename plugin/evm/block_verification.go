@@ -58,7 +58,7 @@ func (v blockValidator) SyntacticVerify(b *Block, rules params.Rules) error {
 	}
 
 	// Verify the extra data is well-formed.
-	if err := header.VerifyExtra(rulesExtra.AvalancheRules, ethHeader.Extra); err != nil {
+	if err := header.VerifyExtra(rulesExtra.LuxRules, ethHeader.Extra); err != nil {
 		return err
 	}
 

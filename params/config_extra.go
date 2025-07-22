@@ -44,9 +44,9 @@ func (p *chainConfigPayloads) Set(c *ChainConfig, extra *extras.ChainConfig) {
 }
 
 // SetEthUpgrades enables Etheruem network upgrades using the same time as
-// the Avalanche network upgrade that enables them.
+// the Lux network upgrade that enables them.
 //
-// TODO: Prior to Cancun, Avalanche upgrades are referenced inline in the
+// TODO: Prior to Cancun, Lux upgrades are referenced inline in the
 // code in place of their Ethereum counterparts. The original Ethereum names
 // should be restored for maintainability.
 func SetEthUpgrades(c *ChainConfig, luxUpgrades extras.NetworkUpgrades) {
@@ -117,7 +117,7 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 	GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
 }
 
-// GetRulesExtra returns the Avalanche-specific rules for the given Ethereum rules.
+// GetRulesExtra returns the Lux-specific rules for the given Ethereum rules.
 func GetRulesExtra(rules Rules) *extras.Rules {
 	// Create a ChainConfig from the Rules to get the extra data
 	chainID := rules.ChainID
@@ -130,9 +130,9 @@ func GetRulesExtra(rules Rules) *extras.Rules {
 	tempConfig := &ChainConfig{ChainID: chainID}
 	extra := GetExtra(tempConfig)
 	
-	// Create rules based on the Avalanche upgrades
+	// Create rules based on the Lux upgrades
 	return &extras.Rules{
-		AvalancheRules: extra.GetAvalancheRules(0), // Using 0 as we don't have timestamp in Rules
+		LuxRules: extra.GetLuxRules(0), // Using 0 as we don't have timestamp in Rules
 		Precompiles:    rules.ActivePrecompiles,
 		Predicaters:    rules.Predicaters,
 		AccepterPrecompiles: rules.AccepterPrecompiles,

@@ -101,7 +101,7 @@ func (bc *testBlockChain) CurrentBlock() *types.Header {
 	// The base fee at 5714 ETH translates into the 21000 base gas higher than
 	// mainnet ether existence, use that as a cap for the tests.
 	var (
-		blockNumber = big.NewInt(1) // Note: London fork is not based on number in Avalanche
+		blockNumber = big.NewInt(1) // Note: London fork is not based on number in Lux
 		blockTime   = *bc.config.CancunTime + 1
 		gasLimit    = uint64(30_000_000)
 	)

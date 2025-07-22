@@ -71,7 +71,7 @@ func VerifyExtraPrefix(
 // rules.
 //
 // TODO: Should this be merged with VerifyExtraPrefix?
-func VerifyExtra(rules extras.AvalancheRules, extra []byte) error {
+func VerifyExtra(rules extras.LuxRules, extra []byte) error {
 	extraLen := len(extra)
 	switch {
 	case rules.IsDurango:

@@ -337,9 +337,9 @@ func (vm *VM) Initialize(
 		g.Config = params.EVMDefaultChainConfig
 	}
 
-	// Set the Avalanche Context on the ChainConfig
+	// Set the Lux Context on the ChainConfig
 	configExtra := params.GetExtra(g.Config)
-	configExtra.AvalancheContext = extras.AvalancheContext{
+	configExtra.LuxContext = extras.LuxContext{
 		SnowCtx: chainCtx,
 	}
 
@@ -395,7 +395,7 @@ func (vm *VM) Initialize(
 	vm.ethConfig.Genesis = g
 	// NetworkID here is different tha Lux's NetworkID.
 	// Lux's NetworkID represents the Lux network is running on
-	// like Fuji, Mainnet, Local, etc.
+	// like Testnet, Mainnet, Local, etc.
 	// The NetworkId here is kept same as ChainID to be compatible with
 	// Ethereum tooling.
 	vm.ethConfig.NetworkId = g.Config.ChainID.Uint64()
@@ -1260,8 +1260,8 @@ func getMandatoryNetworkUpgrades(networkID uint32) (params.MandatoryNetworkUpgra
 	switch networkID {
 	case nodeConstants.MainnetID:
 		return params.MainnetNetworkUpgrades, true
-	case nodeConstants.FujiID:
-		return params.FujiNetworkUpgrades, true
+	case nodeConstants.TestnetID:
+		return params.TestnetNetworkUpgrades, true
 	case nodeConstants.UnitTestID:
 		return params.UnitTestNetworkUpgrades, false
 	default:
