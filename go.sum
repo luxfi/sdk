@@ -320,6 +320,8 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/geth v0.15.43 h1:Vgpk7iiIingXJIy0nSu85XbQYdh/BdxfbIXcKbHwjbQ=
 github.com/luxfi/geth v0.15.43/go.mod h1:A1degr56Dg0lPTK8hDLQDZ6GKZ6NZq5G8Q1ko0mqOwQ=
+github.com/luxfi/geth v0.15.44 h1:TFoBotNJ2UPZqPvBjBHIJjmiB9b6GwGNWTyjGRRXxvY=
+github.com/luxfi/geth v0.15.44/go.mod h1:A1degr56Dg0lPTK8hDLQDZ6GKZ6NZq5G8Q1ko0mqOwQ=
 github.com/luxfi/netrunner v1.7.12 h1:DusNxGpg9amhXq1KaVFAyGCPrZ/1YH0+hAbX3uWCZY4=
 github.com/luxfi/netrunner v1.7.12/go.mod h1:hms50FSf3Hj5+HsdovaIGniTpIOX0JRy6FTTDFmTJ6E=
 github.com/luxfi/node v1.13.20 h1:X/vWMr1Bzeajt+7bWDPRcz9YlR+CS3A+xzVbfxEVC04=

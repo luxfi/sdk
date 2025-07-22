@@ -19,7 +19,7 @@ require (
 	github.com/holiman/billy v0.0.0-20240216141850-2abb0c79d3c4
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/geth v0.15.43
+	github.com/luxfi/geth v0.15.44
 	github.com/luxfi/netrunner v1.7.12
 	github.com/luxfi/node v1.13.20
 	github.com/mattn/go-colorable v0.1.14
