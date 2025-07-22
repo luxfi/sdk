@@ -64,7 +64,7 @@ import (
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/choices"
 	linear "github.com/luxfi/node/consensus/linear"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/node/consensus/engine/linear/block"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
@@ -75,7 +75,7 @@ import (
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	commonEng "github.com/luxfi/node/consensus/engine"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
 	luxJSON "github.com/luxfi/node/utils/json"
 )
 

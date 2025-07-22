@@ -29,7 +29,7 @@ import (
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/choices"
 	"github.com/luxfi/node/consensus/linear"
-	commonEng "github.com/luxfi/node/consensus/engine"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/consensus/validators"
 	luxConstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/bls"

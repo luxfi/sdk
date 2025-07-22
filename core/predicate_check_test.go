@@ -6,7 +6,7 @@ package core
 import (
 	"errors"
 	"testing"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/node/consensus/engine/linear/block"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
