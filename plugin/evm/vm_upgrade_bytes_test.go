@@ -11,12 +11,12 @@ import (
 	"math/big"
 	"testing"
 	"time"
-	"github.com/luxfi/node/consensus"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/vms/components/chain"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
@@ -30,11 +30,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var DefaultEtnaTime = uint64(upgrade.GetConfig(testNetworkID).EtnaTime.Unix())
+var DefaultEtnaTime = uint64(interfaces.GetConfig(testNetworkID).EtnaTime.Unix())
 
 func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	// Make a TxAllowListConfig upgrade at genesis and convert it to JSON to apply as upgradeBytes.
-	enableAllowListTimestamp := upgrade.InitiallyActiveTime // enable at initial time
+	enableAllowListTimestamp := interfaces.InitiallyActiveTime // enable at initial time
 	upgradeConfig := &extras.UpgradeConfig{
 		PrecompileUpgrades: []extras.PrecompileUpgrade{
 			{
@@ -42,7 +42,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 			},
 		},
 	}
-	upgradeBytesJSON, err := json.Marshal(upgradeConfig)
+	upgradeBytesJSON, err := interfaces.Marshal(upgradeConfig)
 	if err != nil {
 		t.Fatalf("could not marshal upgradeConfig to json: %s", err)
 	}
@@ -85,7 +85,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 			Config: txallowlist.NewDisableConfig(utils.TimeToNewUint64(disableAllowListTimestamp)),
 		},
 	)
-	upgradeBytesJSON, err = json.Marshal(upgradeConfig)
+	upgradeBytesJSON, err = interfaces.Marshal(upgradeConfig)
 	if err != nil {
 		t.Fatalf("could not marshal upgradeConfig to json: %s", err)
 	}
@@ -93,10 +93,10 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	// restart the vm
 
 	// Reset metrics to allow re-initialization
-	vm.ctx.Metrics = metrics.NewPrefixGatherer()
+	vm.ctx.Metrics = interfaces.NewPrefixGatherer()
 
 	if err := vm.Initialize(
-		context.Background(), vm.ctx, dbManager, []byte(genesisJSONEVM), upgradeBytesJSON, []byte{}, issuer, []*commonEng.Fx{}, appSender,
+		context.Background(), vm.ctx, dbManager, []byte(genesisJSONEVM), upgradeBytesJSON, []byte{}, issuer, []*interfaces.Fx{}, appSender,
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -133,14 +133,14 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 
 	// Verify that the constructed block only has the whitelisted tx
 	block := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	txs := block.Transactions()
-	if txs.Len() != 1 {
-		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())
+	txs := interfaces.Transactions()
+	if interfaces.Len() != 1 {
+		t.Fatalf("Expected number of txs to be %d, but found %d", 1, interfaces.Len())
 	}
 	assert.Equal(t, signedTx0.Hash(), txs[0].Hash())
 
 	// verify the issued block is after the network upgrade
-	assert.GreaterOrEqual(t, int64(block.Time()), disableAllowListTimestamp.Unix())
+	assert.GreaterOrEqual(t, int64(interfaces.Time()), disableAllowListTimestamp.Unix())
 
 	<-newTxPoolHeadChan // wait for new head in tx pool
 
@@ -155,19 +155,19 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 
 	// Verify that the constructed block only has the previously rejected tx
 	block = blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	txs = block.Transactions()
-	if txs.Len() != 1 {
-		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())
+	txs = interfaces.Transactions()
+	if interfaces.Len() != 1 {
+		t.Fatalf("Expected number of txs to be %d, but found %d", 1, interfaces.Len())
 	}
 	assert.Equal(t, signedTx1.Hash(), txs[0].Hash())
 }
 
 func TestNetworkUpgradesOverriden(t *testing.T) {
 	var genesis core.Genesis
-	if err := json.Unmarshal([]byte(genesisJSONPreEVM), &genesis); err != nil {
+	if err := interfaces.Unmarshal([]byte(genesisJSONPreEVM), &genesis); err != nil {
 		t.Fatalf("could not unmarshal genesis bytes: %s", err)
 	}
-	genesisBytes, err := json.Marshal(&genesis)
+	genesisBytes, err := interfaces.Marshal(&genesis)
 	if err != nil {
 		t.Fatalf("could not unmarshal genesis bytes: %s", err)
 	}
@@ -183,7 +183,7 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	ctx, dbManager, genesisBytes, issuer, _ := setupGenesis(t, string(genesisBytes))
 	appSender := &enginetest.Sender{T: t}
 	appSender.CantSendAppGossip = true
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	appSender.SendAppGossipF = func(context.Context, interfaces.SendConfig, []byte) error { return nil }
 	err = vm.Initialize(
 		context.Background(),
 		ctx,
@@ -192,7 +192,7 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 		[]byte(upgradeBytesJSON),
 		nil,
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	)
 	require.NoError(t, err, "error initializing GenesisVM")
@@ -210,12 +210,12 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	require.False(t, vm.chainConfigExtra().IsEVM(0))
 	require.True(t, vm.chainConfigExtra().IsEVM(2))
 	require.False(t, vm.chainConfigExtra().IsDurango(0))
-	require.False(t, vm.chainConfigExtra().IsDurango(uint64(upgrade.InitiallyActiveTime.Unix())))
+	require.False(t, vm.chainConfigExtra().IsDurango(uint64(interfaces.InitiallyActiveTime.Unix())))
 	require.True(t, vm.chainConfigExtra().IsDurango(1607144402))
 }
 
 func mustMarshal(t *testing.T, v interface{}) string {
-	b, err := json.Marshal(v)
+	b, err := interfaces.Marshal(v)
 	require.NoError(t, err)
 	return string(b)
 }
@@ -223,7 +223,7 @@ func mustMarshal(t *testing.T, v interface{}) string {
 func TestVMStateUpgrade(t *testing.T) {
 	// modify genesis to add a key to the state
 	genesis := &core.Genesis{}
-	err := json.Unmarshal([]byte(genesisJSONEVM), genesis)
+	err := interfaces.Unmarshal([]byte(genesisJSONEVM), genesis)
 	require.NoError(t, err)
 	genesisAccount, ok := genesis.Alloc[testEthAddrs[0]]
 	require.True(t, ok)
@@ -240,7 +240,7 @@ func TestVMStateUpgrade(t *testing.T) {
 	upgradedCode, err := hexutil.Decode(upgradedCodeStr)
 	// This modification will be applied to an existing account
 	genesisAccountUpgrade := &extras.StateUpgradeAccount{
-		BalanceChange: (*math.HexOrDecimal256)(big.NewInt(100)),
+		BalanceChange: (*interfaces.HexOrDecimal256)(big.NewInt(100)),
 		Storage:       map[common.Hash]common.Hash{storageKey: {}},
 		Code:          upgradedCode,
 	}
@@ -249,12 +249,12 @@ func TestVMStateUpgrade(t *testing.T) {
 	newAccount := common.Address{42}
 	require.NoError(t, err)
 	newAccountUpgrade := &extras.StateUpgradeAccount{
-		BalanceChange: (*math.HexOrDecimal256)(big.NewInt(100)),
+		BalanceChange: (*interfaces.HexOrDecimal256)(big.NewInt(100)),
 		Storage:       map[common.Hash]common.Hash{storageKey: common.HexToHash("0x6666")},
 		Code:          upgradedCode,
 	}
 
-	upgradeTimestamp := upgrade.InitiallyActiveTime.Add(10 * time.Hour)
+	upgradeTimestamp := interfaces.InitiallyActiveTime.Add(10 * time.Hour)
 	upgradeBytesJSON := fmt.Sprintf(
 		`{
 			"stateUpgrades": [
@@ -349,7 +349,7 @@ func TestVMEupgradeActivatesCancun(t *testing.T) {
 						EtnaTimestamp: utils.NewUint64(DefaultEtnaTime + 2),
 					},
 				}
-				b, err := json.Marshal(upgrade)
+				b, err := interfaces.Marshal(upgrade)
 				require.NoError(t, err)
 				return string(b)
 			}(),
@@ -367,7 +367,7 @@ func TestVMEupgradeActivatesCancun(t *testing.T) {
 						EtnaTimestamp: utils.NewUint64(DefaultEtnaTime + 2),
 					},
 				}
-				b, err := json.Marshal(upgrade)
+				b, err := interfaces.Marshal(upgrade)
 				require.NoError(t, err)
 				return string(b)
 			}(),

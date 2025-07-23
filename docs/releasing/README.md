@@ -44,7 +44,7 @@ export VERSION=v0.7.3
     💁 If you are unsure about the RPC chain VM protocol version, set the version to `0`, for example `"v0.7.3": 0`, and then run:
 
     ```bash
-    go test -run ^TestCompatibility$ github.com/luxfi/evm/plugin/evm
+    go test -run ^TestCompatibility$ github.com/luxfi/geth/plugin/evm
     ```
 
     This will fail with an error similar to:
@@ -72,7 +72,7 @@ export VERSION=v0.7.3
 1. Create a pull request (PR) from your branch targeting master, for example using [`gh`](https://cli.github.com/):
 
     ```bash
-    gh pr create --repo github.com/luxfi/evm --base master --title "chore: release $VERSION_RC"
+    gh pr create --repo github.com/luxfi/geth --base master --title "chore: release $VERSION_RC"
     ```
 
 1. Wait for the PR checks to pass with
@@ -327,7 +327,7 @@ Following the previous example in the [Release candidate section](#release-candi
     ```
 
 1. Create a new release on Github, either using:
-    - the [Github web interface](https://github.com/luxfi/evm/releases/new)
+    - the [Github web interface](https://github.com/luxfi/geth/releases/new)
         1. In the "Choose a tag" box, select the tag previously created `$VERSION` (`v0.7.3`)
         1. Pick the previous tag, for example as `v0.7.2`.
         1. Set the "Release title" to `$VERSION` (`v0.7.3`)
@@ -370,10 +370,10 @@ Following the previous example in the [Release candidate section](#release-candi
         gh release create "$VERSION" --notes-start-tag "$PREVIOUS_VERSION" --notes-from-tag "$VERSION" --title "$VERSION" --notes "$NOTES" --verify-tag
         ```
 
-1. Monitor the [release Github workflow](https://github.com/luxfi/evm/actions/workflows/release.yml) to ensure the GoReleaser step succeeds and check the binaries are then published to [the releases page](https://github.com/luxfi/evm/releases). In case this fails, you can trigger the workflow manually:
-    1. Go to [github.com/luxfi/evm/actions/workflows/release.yml](https://github.com/luxfi/evm/actions/workflows/release.yml)
+1. Monitor the [release Github workflow](https://github.com/luxfi/geth/actions/workflows/release.yml) to ensure the GoReleaser step succeeds and check the binaries are then published to [the releases page](https://github.com/luxfi/geth/releases). In case this fails, you can trigger the workflow manually:
+    1. Go to [github.com/luxfi/geth/actions/workflows/release.yml](https://github.com/luxfi/geth/actions/workflows/release.yml)
     1. Click on the "Run workflow" button
     1. Enter the branch name, usually with goreleaser related fixes
     1. Enter the tag name `$VERSION` (i.e. `v0.7.3`)
-1. Monitor the [Publish Docker image workflow](https://github.com/luxfi/evm/actions/workflows/publish_docker.yml) succeeds. Note this workflow is triggered when pushing the tag, unlike Goreleaser which triggers when publishing the release.
+1. Monitor the [Publish Docker image workflow](https://github.com/luxfi/geth/actions/workflows/publish_docker.yml) succeeds. Note this workflow is triggered when pushing the tag, unlike Goreleaser which triggers when publishing the release.
 1. Finally, [create a release for precompile-evm](https://github.com/luxfi/precompile-evm/blob/main/docs/releasing/README.md)

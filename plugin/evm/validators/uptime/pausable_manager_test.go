@@ -7,25 +7,25 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/uptime"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/evm/interfaces"
+	uptimeimpl "github.com/luxfi/evm/plugin/evm/validators/uptime"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
+	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestPausableManager(t *testing.T) {
-	vID := ids.GenerateTestID()
-	nodeID0 := ids.GenerateTestNodeID()
+	vID := interfaces.GenerateTestID()
+	nodeID0 := interfaces.GenerateTestNodeID()
 	startTime := time.Now()
 
 	tests := []struct {
 		name     string
-		testFunc func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State)
+		testFunc func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State)
 	}{
 		{
 			name: "Case 1: Connect, pause, start tracking",
-			testFunc: func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State) {
+			testFunc: func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State) {
 				require := require.New(t)
 
 				// Connect before tracking
@@ -58,7 +58,7 @@ func TestPausableManager(t *testing.T) {
 		},
 		{
 			name: "Case 2: Start tracking, connect, pause, re-connect, resume",
-			testFunc: func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State) {
+			testFunc: func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State) {
 				require := require.New(t)
 
 				// Start tracking
@@ -109,7 +109,7 @@ func TestPausableManager(t *testing.T) {
 		},
 		{
 			name: "Case 3: Pause, start tracking, connect, re-connect, resume",
-			testFunc: func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State) {
+			testFunc: func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State) {
 				require := require.New(t)
 
 				// Pause before tracking
@@ -153,7 +153,7 @@ func TestPausableManager(t *testing.T) {
 		},
 		{
 			name: "Case 4: Start tracking, connect, pause, stop tracking, resume tracking",
-			testFunc: func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State) {
+			testFunc: func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State) {
 				require := require.New(t)
 
 				// Start tracking and connect
@@ -174,7 +174,7 @@ func TestPausableManager(t *testing.T) {
 				currentTime = addTime(clk, 3*time.Second)
 				require.NoError(up.StopTracking([]ids.NodeID{nodeID0}))
 				checkUptime(t, up, nodeID0, expectedUptime, currentTime)
-				up = NewPausableManager(uptime.NewManager(s, clk))
+				up = NewPausableManager(uptimeimpl.NewManager(s, clk))
 
 				// Uptime should not have increased since the node was paused
 				// and we have not started tracking again
@@ -217,7 +217,7 @@ func TestPausableManager(t *testing.T) {
 		},
 		{
 			name: "Case 5: Node paused after we stop tracking",
-			testFunc: func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State) {
+			testFunc: func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State) {
 				require := require.New(t)
 
 				// Start tracking and connect
@@ -251,7 +251,7 @@ func TestPausableManager(t *testing.T) {
 		},
 		{
 			name: "Case 6: Paused node got resumed after we stop tracking",
-			testFunc: func(t *testing.T, up interfaces.PausableManager, clk *mockable.Clock, s uptime.State) {
+			testFunc: func(t *testing.T, up interfaces.PausableManager, clk interfaces.MockableTimer, s uptimeimpl.State) {
 				require := require.New(t)
 
 				// Start tracking and connect
@@ -300,16 +300,16 @@ func TestPausableManager(t *testing.T) {
 	}
 }
 
-func setupTestEnv(nodeID ids.NodeID, startTime time.Time) (interfaces.PausableManager, *mockable.Clock, uptime.State) {
-	clk := mockable.Clock{}
+func setupTestEnv(nodeID interfaces.NodeID, startTime time.Time) (interfaces.PausableManager, interfaces.MockableTimer, uptimeimpl.State) {
+	clk := utils.NewMockableClock()
 	clk.Set(startTime)
-	s := uptime.NewTestState()
+	s := uptimeimpl.NewTestState()
 	s.AddNode(nodeID, startTime)
-	up := NewPausableManager(uptime.NewManager(s, &clk))
-	return up, &clk, s
+	up := NewPausableManager(uptimeimpl.NewManager(s, clk))
+	return up, clk, s
 }
 
-func addTime(clk *mockable.Clock, duration time.Duration) time.Time {
+func addTime(clk interfaces.MockableTimer, duration time.Duration) time.Time {
 	clk.Set(clk.Time().Add(duration))
 	return clk.Time()
 }

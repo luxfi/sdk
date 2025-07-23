@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/peer"
 	"github.com/luxfi/evm/warp/aggregator"
 	"github.com/luxfi/evm/warp/validators"
@@ -22,14 +22,14 @@ var errNoValidators = errors.New("cannot aggregate signatures from subnet with n
 // API introduces linear specific functionality to the evm
 type API struct {
 	networkID                     uint32
-	sourceSubnetID, sourceChainID ids.ID
+	sourceSubnetID, sourceChainID interfaces.ID
 	backend                       Backend
-	state                         validators.State
+	state                         interfaces.State
 	client                        peer.NetworkClient
 	requirePrimaryNetworkSigners  func() bool
 }
 
-func NewAPI(networkID uint32, sourceSubnetID ids.ID, sourceChainID ids.ID, state validators.State, backend Backend, client peer.NetworkClient, requirePrimaryNetworkSigners func() bool) *API {
+func NewAPI(networkID uint32, sourceSubnetID interfaces.ID, sourceChainID interfaces.ID, state interfaces.State, backend Backend, client peer.NetworkClient, requirePrimaryNetworkSigners func() bool) *API {
 	return &API{
 		networkID:                    networkID,
 		sourceSubnetID:               sourceSubnetID,
@@ -42,7 +42,7 @@ func NewAPI(networkID uint32, sourceSubnetID ids.ID, sourceChainID ids.ID, state
 }
 
 // GetMessage returns the Warp message associated with a messageID.
-func (a *API) GetMessage(ctx context.Context, messageID ids.ID) (hexutil.Bytes, error) {
+func (a *API) GetMessage(ctx context.Context, messageID interfaces.ID) (hexutil.Bytes, error) {
 	message, err := a.backend.GetMessage(messageID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get message %s with error %w", messageID, err)
@@ -51,7 +51,7 @@ func (a *API) GetMessage(ctx context.Context, messageID ids.ID) (hexutil.Bytes, 
 }
 
 // GetMessageSignature returns the BLS signature associated with a messageID.
-func (a *API) GetMessageSignature(ctx context.Context, messageID ids.ID) (hexutil.Bytes, error) {
+func (a *API) GetMessageSignature(ctx context.Context, messageID interfaces.ID) (hexutil.Bytes, error) {
 	unsignedMessage, err := a.backend.GetMessage(messageID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get message %s with error %w", messageID, err)
@@ -64,7 +64,7 @@ func (a *API) GetMessageSignature(ctx context.Context, messageID ids.ID) (hexuti
 }
 
 // GetBlockSignature returns the BLS signature associated with a blockID.
-func (a *API) GetBlockSignature(ctx context.Context, blockID ids.ID) (hexutil.Bytes, error) {
+func (a *API) GetBlockSignature(ctx context.Context, blockID interfaces.ID) (hexutil.Bytes, error) {
 	signature, err := a.backend.GetBlockSignature(ctx, blockID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signature for block %s with error %w", blockID, err)
@@ -73,7 +73,7 @@ func (a *API) GetBlockSignature(ctx context.Context, blockID ids.ID) (hexutil.By
 }
 
 // GetMessageAggregateSignature fetches the aggregate signature for the requested [messageID]
-func (a *API) GetMessageAggregateSignature(ctx context.Context, messageID ids.ID, quorumNum uint64, subnetIDStr string) (signedMessageBytes hexutil.Bytes, err error) {
+func (a *API) GetMessageAggregateSignature(ctx context.Context, messageID interfaces.ID, quorumNum uint64, subnetIDStr string) (signedMessageBytes hexutil.Bytes, err error) {
 	unsignedMessage, err := a.backend.GetMessage(messageID)
 	if err != nil {
 		return nil, err
@@ -82,12 +82,12 @@ func (a *API) GetMessageAggregateSignature(ctx context.Context, messageID ids.ID
 }
 
 // GetBlockAggregateSignature fetches the aggregate signature for the requested [blockID]
-func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, quorumNum uint64, subnetIDStr string) (signedMessageBytes hexutil.Bytes, err error) {
-	blockHashPayload, err := payload.NewHash(blockID)
+func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID interfaces.ID, quorumNum uint64, subnetIDStr string) (signedMessageBytes hexutil.Bytes, err error) {
+	blockHashPayload, err := interfaces.NewHash(blockID)
 	if err != nil {
 		return nil, err
 	}
-	unsignedMessage, err := warp.NewUnsignedMessage(a.networkID, a.sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := interfaces.NewUnsignedMessage(a.networkID, a.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, qu
 	return a.aggregateSignatures(ctx, unsignedMessage, quorumNum, subnetIDStr)
 }
 
-func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.UnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
+func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *interfaces.UnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
 	subnetID := a.sourceSubnetID
 	if len(subnetIDStr) > 0 {
 		sid, err := ids.FromString(subnetIDStr)
@@ -109,8 +109,8 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 		return nil, err
 	}
 
-	state := validators.NewState(&a.state, a.sourceSubnetID, a.sourceChainID, a.requirePrimaryNetworkSigners())
-	validatorSet, err := warp.GetCanonicalValidatorSetFromSubnetID(ctx, state, pChainHeight, subnetID)
+	state := interfaces.NewState(&a.state, a.sourceSubnetID, a.sourceChainID, a.requirePrimaryNetworkSigners())
+	validatorSet, err := interfaces.GetCanonicalValidatorSetFromSubnetID(ctx, state, pChainHeight, subnetID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validator set: %w", err)
 	}

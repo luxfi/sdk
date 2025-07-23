@@ -17,11 +17,8 @@
 package simulated
 
 import (
-	"math/big"
-
 	"github.com/luxfi/geth/eth/ethconfig"
-	"github.com/luxfi/evm/node"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/node"
 )
 
 // WithBlockGasLimit configures the simulated backend to target a specific gas limit
@@ -29,7 +26,6 @@ import (
 func WithBlockGasLimit(gaslimit uint64) func(nodeConf *node.Config, ethConf *ethconfig.Config) {
 	return func(nodeConf *node.Config, ethConf *ethconfig.Config) {
 		ethConf.Genesis.GasLimit = gaslimit
-		params.GetExtra(ethConf.Genesis.Config).FeeConfig.GasLimit = new(big.Int).SetUint64(gaslimit)
 	}
 }
 

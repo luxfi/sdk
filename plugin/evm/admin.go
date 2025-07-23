@@ -6,21 +6,21 @@ package evm
 import (
 	"fmt"
 	"net/http"
-	"github.com/luxfi/node/api"
-	"github.com/luxfi/node/utils/profiler"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/log"
 )
 
 // Admin is the API service for admin API calls
 type Admin struct {
 	vm       *VM
-	profiler profiler.Profiler
+	profiler interfaces.Profiler
 }
 
 func NewAdminService(vm *VM, performanceDir string) *Admin {
 	return &Admin{
 		vm:       vm,
-		profiler: profiler.New(performanceDir),
+		profiler: interfaces.New(performanceDir),
 	}
 }
 
@@ -31,7 +31,7 @@ func (p *Admin) StartCPUProfiler(_ *http.Request, _ *struct{}, _ *api.EmptyReply
 	p.vm.vmLock.Lock()
 	defer p.vm.vmLock.Unlock()
 
-	return p.profiler.StartCPUProfiler()
+	return p.interfaces.StartCPUProfiler()
 }
 
 // StopCPUProfiler stops the cpu profile
@@ -41,7 +41,7 @@ func (p *Admin) StopCPUProfiler(r *http.Request, _ *struct{}, _ *api.EmptyReply)
 	p.vm.vmLock.Lock()
 	defer p.vm.vmLock.Unlock()
 
-	return p.profiler.StopCPUProfiler()
+	return p.interfaces.StopCPUProfiler()
 }
 
 // MemoryProfile runs a memory profile writing to the specified file
@@ -51,7 +51,7 @@ func (p *Admin) MemoryProfile(_ *http.Request, _ *struct{}, _ *api.EmptyReply) e
 	p.vm.vmLock.Lock()
 	defer p.vm.vmLock.Unlock()
 
-	return p.profiler.MemoryProfile()
+	return p.interfaces.MemoryProfile()
 }
 
 // LockProfile runs a mutex profile writing to the specified file
@@ -61,7 +61,7 @@ func (p *Admin) LockProfile(_ *http.Request, _ *struct{}, _ *api.EmptyReply) err
 	p.vm.vmLock.Lock()
 	defer p.vm.vmLock.Unlock()
 
-	return p.profiler.LockProfile()
+	return p.interfaces.LockProfile()
 }
 
 func (p *Admin) SetLogLevel(_ *http.Request, args *client.SetLogLevelArgs, reply *api.EmptyReply) error {

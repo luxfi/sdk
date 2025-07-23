@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
@@ -84,7 +84,7 @@ $`,
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := test.config.Description()
+			got := test.interfaces.Description()
 			assert.Regexp(t, test.wantRegex, got, "config description mismatch")
 		})
 	}
@@ -161,7 +161,7 @@ func TestChainConfigVerify(t *testing.T) {
 					FortunaTimestamp:   pointer(uint64(4)),
 				},
 				LuxContext: LuxContext{ConsensusCtx: &consensus.Context{
-					NetworkUpgrades: upgrade.Config{
+					NetworkUpgrades: interfaces.Config{
 						DurangoTime: time.Unix(2, 0),
 						EtnaTime:    time.Unix(3, 0),
 						FortunaTime: time.Unix(4, 0),
@@ -173,7 +173,7 @@ func TestChainConfigVerify(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := test.config.Verify()
+			err := test.interfaces.Verify()
 			if test.errRegex == "" {
 				assert.NoError(t, err)
 			} else {

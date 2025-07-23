@@ -7,7 +7,7 @@ package warptest
 import (
 	"time"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
@@ -16,6 +16,6 @@ var _ interfaces.ValidatorReader = &NoOpValidatorReader{}
 
 type NoOpValidatorReader struct{}
 
-func (NoOpValidatorReader) GetValidatorAndUptime(ids.ID) (stateinterfaces.Validator, time.Duration, time.Time, error) {
+func (NoOpValidatorReader) GetValidatorAndUptime(interfaces.ID) (stateinterfaces.Validator, time.Duration, time.Time, error) {
 	return stateinterfaces.Validator{}, 0, time.Time{}, nil
 }

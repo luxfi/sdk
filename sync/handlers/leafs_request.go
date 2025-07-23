@@ -8,12 +8,12 @@ import (
 	"context"
 	"sync"
 	"time"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/luxfi/evm/sync/syncutils"
@@ -43,12 +43,12 @@ const (
 type LeafsRequestHandler struct {
 	trieDB           *triedb.Database
 	snapshotProvider SnapshotProvider
-	codec            codec.Manager
+	codec            interfaces.Codec
 	stats            stats.LeafsRequestHandlerStats
 	pool             sync.Pool
 }
 
-func NewLeafsRequestHandler(trieDB *triedb.Database, snapshotProvider SnapshotProvider, codec codec.Manager, syncerStats stats.LeafsRequestHandlerStats) *LeafsRequestHandler {
+func NewLeafsRequestHandler(trieDB *triedb.Database, snapshotProvider SnapshotProvider, codec interfaces.Codec, syncerStats stats.LeafsRequestHandlerStats) *LeafsRequestHandler {
 	return &LeafsRequestHandler{
 		trieDB:           trieDB,
 		snapshotProvider: snapshotProvider,
@@ -70,7 +70,7 @@ func NewLeafsRequestHandler(trieDB *triedb.Database, snapshotProvider SnapshotPr
 // Never returns errors
 // Returns nothing if the requested trie root is not found
 // Assumes ctx is active
-func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
+func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
 	startTime := time.Now()
 	lrh.stats.IncLeafsRequest()
 
@@ -151,7 +151,7 @@ func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID ids.N
 		return nil, nil
 	}
 
-	responseBytes, err := lrh.codec.Marshal(message.Version, leafsResponse)
+	responseBytes, err := lrh.interfaces.Marshal(message.Version, leafsResponse)
 	if err != nil {
 		log.Debug("failed to marshal LeafsResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "request", leafsRequest, "err", err)
 		return nil, nil

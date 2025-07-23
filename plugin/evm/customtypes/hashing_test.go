@@ -34,7 +34,7 @@ import (
 	mrand "math/rand"
 	"testing"
 	
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/interfaces/trie"
 	"github.com/luxfi/geth/common"

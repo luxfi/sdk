@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethclient"
 	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"

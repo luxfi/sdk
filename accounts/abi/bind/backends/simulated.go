@@ -35,10 +35,10 @@ import (
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/geth/eth/filters"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/interfaces"
@@ -70,7 +70,7 @@ var (
 )
 
 // SimulatedBackend is a simulated blockchain.
-// Deprecated: use package github.com/luxfi/geth/ethclient/simulated instead.
+// Deprecated: use package github.com/luxfi/evm/ethclient/simulated instead.
 type SimulatedBackend struct {
 	*simulated.Backend
 	simulated.Client
@@ -87,7 +87,7 @@ func (b *SimulatedBackend) Fork(ctx context.Context, parentHash common.Hash) err
 // A simulated backend always uses chainID 1337.
 //
 // Deprecated: please use simulated.Backend from package
-// github.com/luxfi/geth/ethclient/simulated instead.
+// github.com/luxfi/evm/ethclient/simulated instead.
 func NewSimulatedBackend(alloc types.GenesisAlloc, gasLimit uint64) *SimulatedBackend {
 	b := simulated.NewBackend(alloc, simulated.WithBlockGasLimit(gasLimit))
 	return &SimulatedBackend{

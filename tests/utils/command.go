@@ -10,8 +10,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"github.com/luxfi/node/api/health"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -54,7 +54,7 @@ func RegisterPingTest() {
 	require := require.New(ginkgo.GinkgoT())
 
 	ginkgo.It("ping the network", ginkgo.Label("ping"), func() {
-		client := health.NewClient(DefaultLocalNodeURI)
+		client := interfaces.NewClient(DefaultLocalNodeURI)
 		healthy, err := client.Readiness(context.Background(), nil)
 		require.NoError(err)
 		require.True(healthy.Healthy)
@@ -78,8 +78,8 @@ func RegisterNodeRun() {
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		// Assumes that startCmd will launch a node with HTTP Port at [utils.DefaultLocalNodeURI]
-		healthClient := health.NewClient(DefaultLocalNodeURI)
-		healthy, err := health.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
+		healthClient := interfaces.NewClient(DefaultLocalNodeURI)
+		healthy, err := interfaces.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
 		gomega.Expect(err).Should(gomega.BeNil())
 		gomega.Expect(healthy).Should(gomega.BeTrue())
 		log.Info("Lux node is healthy")

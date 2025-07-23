@@ -6,7 +6,7 @@ package utils
 import (
 	"bytes"
 	"testing"
-	"github.com/luxfi/node/utils"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

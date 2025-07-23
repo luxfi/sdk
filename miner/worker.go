@@ -35,14 +35,14 @@ import (
 	"math/big"
 	"sync"
 	"time"
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/commontype"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
@@ -53,8 +53,8 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/holiman/uint256"
-	ethparams "github.com/luxfi/geth/params"
-	eparams "github.com/ethereum/go-ethereum/params"
+	ethparams "github.com/luxfi/evm/params"
+	eparams "github.com/luxfi/evm/params"
 )
 
 const (
@@ -127,11 +127,11 @@ type worker struct {
 	mux        *event.TypeMux // TODO replace
 	mu         sync.RWMutex   // The lock used to protect the coinbase and extra fields
 	coinbase   common.Address
-	clock      *mockable.Clock // Allows us mock the clock for testing
+	clock      *interfaces.MockableTimer // Allows us mock the clock for testing
 	beaconRoot *common.Hash    // TODO: set to empty hash, retained for upstream compatibility and future use
 }
 
-func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, clock *mockable.Clock) *worker {
+func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, clock *interfaces.MockableTimer) *worker {
 	worker := &worker{
 		config:      config,
 		chainConfig: chainConfig,

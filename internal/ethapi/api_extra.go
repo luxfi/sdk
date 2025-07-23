@@ -7,21 +7,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
 
+	"github.com/luxfi/geth/core"
+	"github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rpc"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/params/extras"
-	"github.com/luxfi/evm/rpc"
 )
 
-func (s *BlockChainAPI) GetChainConfig(ctx context.Context) *params.ChainConfigWithUpgradesJSON {
-	return s.b.ChainConfig().ToWithUpgradesJSON()
+// GetChainConfig returns the chain config.
+func (api *BlockChainAPI) GetChainConfig(ctx context.Context) *params.ChainConfig {
+	return api.b.ChainConfig()
 }
 
 type DetailedExecutionResult struct {
@@ -95,80 +92,6 @@ func (s *BlockChainAPI) GetBadBlocks(ctx context.Context) ([]*BadBlockArgs, erro
 		})
 	}
 	return results, nil
-}
-
-type FeeConfigResult struct {
-	FeeConfig     commontype.FeeConfig `json:"feeConfig"`
-	LastChangedAt *big.Int             `json:"lastChangedAt,omitempty"`
-}
-
-func (s *BlockChainAPI) FeeConfig(ctx context.Context, blockNrOrHash *rpc.BlockNumberOrHash) (*FeeConfigResult, error) {
-	var (
-		header *types.Header
-		err    error
-	)
-	if blockNrOrHash == nil {
-		header = s.b.CurrentHeader()
-	} else {
-		header, err = s.b.HeaderByNumberOrHash(ctx, *blockNrOrHash)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	feeConfig, lastChangedAt, err := s.b.GetFeeConfigAt(header)
-	if err != nil {
-		return nil, err
-	}
-	return &FeeConfigResult{FeeConfig: feeConfig, LastChangedAt: lastChangedAt}, nil
-}
-
-// GetActivePrecompilesAt returns the active precompile configs at the given block timestamp.
-// DEPRECATED: Use GetActiveRulesAt instead.
-func (s *BlockChainAPI) GetActivePrecompilesAt(ctx context.Context, blockTimestamp *uint64) extras.Precompiles {
-	var timestamp uint64
-	if blockTimestamp == nil {
-		timestamp = s.b.CurrentHeader().Time
-	} else {
-		timestamp = *blockTimestamp
-	}
-
-	return params.GetExtra(s.b.ChainConfig()).EnabledStatefulPrecompiles(timestamp)
-}
-
-type ActivePrecompilesResult struct {
-	Timestamp uint64 `json:"timestamp"`
-}
-
-type ActiveRulesResult struct {
-	EthRules          params.Rules                       `json:"ethRules"`
-	LuxRules    extras.LuxRules              `json:"luxRules"`
-	ActivePrecompiles map[string]ActivePrecompilesResult `json:"precompiles"`
-}
-
-// GetActiveRulesAt returns the active rules at the given block timestamp.
-func (s *BlockChainAPI) GetActiveRulesAt(ctx context.Context, blockTimestamp *uint64) ActiveRulesResult {
-	var timestamp uint64
-	if blockTimestamp == nil {
-		timestamp = s.b.CurrentHeader().Time
-	} else {
-		timestamp = *blockTimestamp
-	}
-	rules := s.b.ChainConfig().Rules(common.Big0, timestamp)
-	res := ActiveRulesResult{
-		EthRules:       rules,
-		LuxRules: params.GetRulesExtra(rules).LuxRules,
-	}
-	res.ActivePrecompiles = make(map[string]ActivePrecompilesResult)
-	for _, precompileConfig := range params.GetRulesExtra(rules).Precompiles {
-		if precompileConfig.Timestamp() == nil {
-			continue
-		}
-		res.ActivePrecompiles[precompileConfig.Key()] = ActivePrecompilesResult{
-			Timestamp: *precompileConfig.Timestamp(),
-		}
-	}
-	return res
 }
 
 // stateQueryBlockNumberAllowed returns a nil error if:

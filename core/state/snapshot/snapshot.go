@@ -33,11 +33,10 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
-	ethsnapshot "github.com/luxfi/geth/core/state/snapshot"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"
 )
@@ -123,7 +122,7 @@ var (
 )
 
 // Snapshot represents the functionality supported by a snapshot storage layer.
-type Snapshot = ethsnapshot.Snapshot
+// type Snapshot = ethsnapshot.Snapshot (removed self-import)
 
 // snapshot is the internal version of the snapshot data layer that supports some
 // additional methods compared to the public API.

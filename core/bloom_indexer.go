@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/common"
 )

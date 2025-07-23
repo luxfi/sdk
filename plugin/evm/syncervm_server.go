@@ -6,8 +6,8 @@ package evm
 import (
 	"context"
 	"fmt"
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/consensus/engine/linear/block"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/geth/log"
@@ -27,14 +27,14 @@ type stateSyncServer struct {
 }
 
 type StateSyncServer interface {
-	GetLastStateSummary(context.Context) (block.StateSummary, error)
-	GetStateSummary(context.Context, uint64) (block.StateSummary, error)
+	GetLastStateSummary(context.Context) (interfaces.StateSummary, error)
+	GetStateSummary(context.Context, uint64) (interfaces.StateSummary, error)
 }
 
 func NewStateSyncServer(config *stateSyncServerConfig) StateSyncServer {
 	return &stateSyncServer{
-		chain:            config.Chain,
-		syncableInterval: config.SyncableInterval,
+		chain:            interfaces.Chain,
+		syncableInterval: interfaces.SyncableInterval,
 	}
 }
 
@@ -60,7 +60,7 @@ func (server *stateSyncServer) stateSummaryAtHeight(height uint64) (message.Sync
 // State summary is calculated by the block nearest to last accepted
 // that is divisible by [syncableInterval]
 // If no summary is available, [database.ErrNotFound] must be returned.
-func (server *stateSyncServer) GetLastStateSummary(context.Context) (block.StateSummary, error) {
+func (server *stateSyncServer) GetLastStateSummary(context.Context) (interfaces.StateSummary, error) {
 	lastHeight := server.chain.LastAcceptedBlock().NumberU64()
 	lastSyncSummaryNumber := lastHeight - lastHeight%server.syncableInterval
 
@@ -76,7 +76,7 @@ func (server *stateSyncServer) GetLastStateSummary(context.Context) (block.State
 // GetStateSummary implements StateSyncableVM and returns a summary corresponding
 // to the provided [height] if the node can serve state sync data for that key.
 // If not, [database.ErrNotFound] must be returned.
-func (server *stateSyncServer) GetStateSummary(_ context.Context, height uint64) (block.StateSummary, error) {
+func (server *stateSyncServer) GetStateSummary(_ context.Context, height uint64) (interfaces.StateSummary, error) {
 	summaryBlock := server.chain.GetBlockByNumber(height)
 	if summaryBlock == nil ||
 		summaryBlock.NumberU64() > server.chain.LastAcceptedBlock().NumberU64() ||

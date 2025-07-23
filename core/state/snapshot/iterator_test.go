@@ -33,7 +33,7 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/geth/common"
 )
 

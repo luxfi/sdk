@@ -28,9 +28,6 @@ package pathdb
 
 import (
 	"github.com/luxfi/geth/metrics"
-
-	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/luxfi/geth/triedb/pathdb"
 )
 
 // ====== If resolving merge conflicts ======

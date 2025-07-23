@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 )
 
 var _ = (*headerMarshaling)(nil)

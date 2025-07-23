@@ -7,14 +7,14 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
 )
 
 const (
@@ -230,9 +230,9 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 	if remainingGas, err = contract.DeductGas(suppliedGas, SendWarpMessageGasCost); err != nil {
 		return nil, 0, err
 	}
-	// This gas cost includes buffer room because it is based off of the total size of the input instead of the produced payload.
+	// This gas cost includes buffer room because it is based off of the total size of the input instead of the produced interfaces.
 	// This ensures that we charge gas before we unpack the variable sized input.
-	payloadGas, overflow := math.SafeMul(SendWarpMessageGasCostPerByte, uint64(len(input)))
+	payloadGas, overflow := interfaces.SafeMul(SendWarpMessageGasCostPerByte, uint64(len(input)))
 	if overflow {
 		return nil, 0, vm.ErrOutOfGas
 	}
@@ -253,14 +253,14 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 		sourceAddress = caller
 	)
 
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		sourceAddress.Bytes(),
 		payloadData,
 	)
 	if err != nil {
 		return nil, remainingGas, err
 	}
-	unsignedWarpMessage, err := warp.NewUnsignedMessage(
+	unsignedWarpMessage, err := interfaces.NewUnsignedMessage(
 		accessibleState.GetConsensusContext().NetworkID,
 		sourceChainID,
 		addressedPayload.Bytes(),
@@ -299,14 +299,14 @@ func PackSendWarpMessageEvent(sourceAddress common.Address, unsignedMessageID co
 	return WarpABI.PackEvent("SendWarpMessage", sourceAddress, unsignedMessageID, unsignedMessageBytes)
 }
 
-// UnpackSendWarpEventDataToMessage attempts to unpack event [data] as warp.UnsignedMessage.
-func UnpackSendWarpEventDataToMessage(data []byte) (*warp.UnsignedMessage, error) {
+// UnpackSendWarpEventDataToMessage attempts to unpack event [data] as interfaces.UnsignedMessage.
+func UnpackSendWarpEventDataToMessage(data []byte) (*interfaces.UnsignedMessage, error) {
 	event := SendWarpMessageEventData{}
 	err := WarpABI.UnpackIntoInterface(&event, "SendWarpMessage", data)
 	if err != nil {
 		return nil, err
 	}
-	return warp.ParseUnsignedMessage(event.Message)
+	return interfaces.ParseUnsignedMessage(event.Message)
 }
 
 // createWarpPrecompile returns a StatefulPrecompiledContract with getters and setters for the precompile.

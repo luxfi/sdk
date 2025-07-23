@@ -13,20 +13,20 @@ import (
 	"time"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/prefixdb"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/choices"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/engine/linear/block"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
@@ -44,7 +44,7 @@ func TestSkipStateSync(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 300, // must be greater than [syncableInterval] to skip sync
-		syncMode:           block.StateSyncSkipped,
+		syncMode:           interfaces.StateSyncSkipped,
 	}
 	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
 
@@ -56,7 +56,7 @@ func TestStateSyncFromScratch(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           interfaces.StateSyncStatic,
 	}
 	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
 
@@ -69,7 +69,7 @@ func TestStateSyncFromScratchExceedParent(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   numToGen,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           interfaces.StateSyncStatic,
 	}
 	vmSetup := createSyncServerAndClientVMs(t, test, int(numToGen))
 
@@ -84,7 +84,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           interfaces.StateSyncStatic,
 		responseIntercept: func(syncerVM *VM, nodeID ids.NodeID, requestID uint32, response []byte) {
 			lock.Lock()
 			defer lock.Unlock()
@@ -92,7 +92,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 			reqCount++
 			// Fail all requests after number 50 to interrupt the sync
 			if reqCount > 50 {
-				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID, commonEng.ErrTimeout); err != nil {
+				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID, interfaces.ErrTimeout); err != nil {
 					panic(err)
 				}
 				cancel := syncerVM.StateSyncClient.(*stateSyncerClient).cancel
@@ -112,13 +112,13 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	// Perform sync resulting in early termination.
 	testSyncerVM(t, vmSetup, test)
 
-	test.syncMode = block.StateSyncStatic
+	test.syncMode = interfaces.StateSyncStatic
 	test.responseIntercept = nil
 	test.expectedErr = nil
 
 	syncDisabledVM := &VM{}
 	appSender := &enginetest.Sender{T: t}
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	appSender.SendAppGossipF = func(context.Context, interfaces.SendConfig, []byte) error { return nil }
 	appSender.SendAppRequestF = func(ctx context.Context, nodeSet set.Set[ids.NodeID], requestID uint32, request []byte) error {
 		nodeID, hasItem := nodeSet.Pop()
 		if !hasItem {
@@ -128,7 +128,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		return nil
 	}
 	// Reset metrics to allow re-initialization
-	vmSetup.syncerVM.ctx.Metrics = metrics.NewPrefixGatherer()
+	vmSetup.syncerVM.ctx.Metrics = interfaces.NewPrefixGatherer()
 	stateSyncDisabledConfigJSON := `{"state-sync-enabled":false}`
 	if err := syncDisabledVM.Initialize(
 		context.Background(),
@@ -138,7 +138,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		nil,
 		[]byte(stateSyncDisabledConfigJSON),
 		vmSetup.syncerVM.toEngine,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -194,7 +194,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		test.stateSyncMinBlocks,
 	)
 	// Reset metrics to allow re-initialization
-	vmSetup.syncerVM.ctx.Metrics = metrics.NewPrefixGatherer()
+	vmSetup.syncerVM.ctx.Metrics = interfaces.NewPrefixGatherer()
 	if err := syncReEnabledVM.Initialize(
 		context.Background(),
 		vmSetup.syncerVM.ctx,
@@ -203,7 +203,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		nil,
 		[]byte(configJSON),
 		vmSetup.syncerVM.toEngine,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -244,7 +244,7 @@ func TestVMShutdownWhileSyncing(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           interfaces.StateSyncStatic,
 		responseIntercept: func(syncerVM *VM, nodeID ids.NodeID, requestID uint32, response []byte) {
 			lock.Lock()
 			defer lock.Unlock()
@@ -367,7 +367,7 @@ type syncVMSetup struct {
 
 	syncerVM             *VM
 	syncerDB             luxdatabase.Database
-	syncerEngineChan     <-chan commonEng.Message
+	syncerEngineChan     <-chan interfaces.Message
 	shutdownOnceSyncerVM *shutdownOnceVM
 }
 
@@ -387,7 +387,7 @@ type syncTest struct {
 	responseIntercept  func(vm *VM, nodeID ids.NodeID, requestID uint32, response []byte)
 	stateSyncMinBlocks uint64
 	syncableInterval   uint64
-	syncMode           block.StateSyncMode
+	syncMode           interfaces.StateSyncMode
 	expectedErr        error
 }
 
@@ -412,19 +412,19 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	syncMode, err := parsedSummary.Accept(context.Background())
 	require.NoError(err, "error accepting state summary")
 	require.Equal(test.syncMode, syncMode)
-	if syncMode == block.StateSyncSkipped {
+	if syncMode == interfaces.StateSyncSkipped {
 		return
 	}
 
 	msg := <-syncerEngineChan
-	require.Equal(commonEng.StateSyncDone, msg)
+	require.Equal(interfaces.StateSyncDone, msg)
 
 	// If the test is expected to error, assert the correct error is returned and finish the test.
 	err = syncerVM.StateSyncClient.Error()
 	if test.expectedErr != nil {
 		require.ErrorIs(err, test.expectedErr)
 		// Note we re-open the database here to avoid a closed error when the test is for a shutdown VM.
-		chaindb := database.WrapDatabase(prefixdb.NewNested(ethDBPrefix, syncerVM.versiondb))
+		chaindb := database.WrapDatabase(interfaces.NewNested(ethDBPrefix, syncerVM.versiondb))
 		assertSyncPerformedHeights(t, chaindb, map[uint64]struct{}{})
 		return
 	}
@@ -476,12 +476,12 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	},
 		func(block *types.Block) {
 			if syncerVM.ethConfig.TransactionHistory != 0 {
-				tail := block.NumberU64() - syncerVM.ethConfig.TransactionHistory + 1
+				tail := interfaces.NumberU64() - syncerVM.ethConfig.TransactionHistory + 1
 				// tail should be the minimum last synced block, since we skipped it to the last block
 				if tail < lastSyncedBlock.NumberU64() {
 					tail = lastSyncedBlock.NumberU64()
 				}
-				core.CheckTxIndices(t, &tail, block.NumberU64(), syncerVM.chaindb, true)
+				core.CheckTxIndices(t, &tail, interfaces.NumberU64(), syncerVM.chaindb, true)
 			}
 		},
 	)
@@ -509,12 +509,12 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	},
 		func(block *types.Block) {
 			if syncerVM.ethConfig.TransactionHistory != 0 {
-				tail := block.NumberU64() - syncerVM.ethConfig.TransactionHistory + 1
+				tail := interfaces.NumberU64() - syncerVM.ethConfig.TransactionHistory + 1
 				// tail should be the minimum last synced block, since we skipped it to the last block
 				if tail < lastSyncedBlock.NumberU64() {
 					tail = lastSyncedBlock.NumberU64()
 				}
-				core.CheckTxIndices(t, &tail, block.NumberU64(), syncerVM.chaindb, true)
+				core.CheckTxIndices(t, &tail, interfaces.NumberU64(), syncerVM.chaindb, true)
 			}
 		},
 	)

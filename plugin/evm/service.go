@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/plugin/evm/client"
 )
 
@@ -21,9 +21,9 @@ func (api *ValidatorsAPI) GetCurrentValidators(_ *http.Request, req *client.GetC
 	api.vm.vmLock.RLock()
 	defer api.vm.vmLock.RUnlock()
 
-	var vIDs set.Set[ids.ID]
+	var vIDs interfaces.Set[interfaces.ID]
 	if len(req.NodeIDs) > 0 {
-		vIDs = set.NewSet[ids.ID](len(req.NodeIDs))
+		vIDs = utils.NewSet[interfaces.ID](len(req.NodeIDs))
 		for _, nodeID := range req.NodeIDs {
 			vID, err := api.vm.validatorsManager.GetValidationID(nodeID)
 			if err != nil {

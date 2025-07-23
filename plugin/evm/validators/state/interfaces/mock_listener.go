@@ -12,7 +12,7 @@ package interfaces
 import (
 	reflect "reflect"
 
-	ids "github.com/luxfi/node/ids"
+	ids "github.com/luxfi/evm/interfaces"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,7 +41,7 @@ func (m *MockStateCallbackListener) EXPECT() *MockStateCallbackListenerMockRecor
 }
 
 // OnValidatorAdded mocks base method.
-func (m *MockStateCallbackListener) OnValidatorAdded(vID ids.ID, nodeID ids.NodeID, startTime uint64, isActive bool) {
+func (m *MockStateCallbackListener) OnValidatorAdded(vID interfaces.ID, nodeID interfaces.NodeID, startTime uint64, isActive bool) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "OnValidatorAdded", vID, nodeID, startTime, isActive)
 }
@@ -53,7 +53,7 @@ func (mr *MockStateCallbackListenerMockRecorder) OnValidatorAdded(vID, nodeID, s
 }
 
 // OnValidatorRemoved mocks base method.
-func (m *MockStateCallbackListener) OnValidatorRemoved(vID ids.ID, nodeID ids.NodeID) {
+func (m *MockStateCallbackListener) OnValidatorRemoved(vID interfaces.ID, nodeID interfaces.NodeID) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "OnValidatorRemoved", vID, nodeID)
 }
@@ -65,7 +65,7 @@ func (mr *MockStateCallbackListenerMockRecorder) OnValidatorRemoved(vID, nodeID 
 }
 
 // OnValidatorStatusUpdated mocks base method.
-func (m *MockStateCallbackListener) OnValidatorStatusUpdated(vID ids.ID, nodeID ids.NodeID, isActive bool) {
+func (m *MockStateCallbackListener) OnValidatorStatusUpdated(vID interfaces.ID, nodeID interfaces.NodeID, isActive bool) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "OnValidatorStatusUpdated", vID, nodeID, isActive)
 }

@@ -5,8 +5,8 @@ package evm
 
 import (
 	"context"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/plugin/evm/message"
@@ -32,7 +32,7 @@ func newNetworkHandler(
 	diskDB ethdb.KeyValueReader,
 	evmTrieDB *triedb.Database,
 	warpBackend warp.Backend,
-	networkCodec codec.Manager,
+	networkCodec interfaces.Codec,
 ) message.RequestHandler {
 	syncStats := syncStats.NewHandlerStats(metrics.Enabled)
 	return &networkHandler{
@@ -43,22 +43,22 @@ func newNetworkHandler(
 	}
 }
 
-func (n networkHandler) HandleStateTrieLeafsRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
+func (n networkHandler) HandleStateTrieLeafsRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
 	return n.stateTrieLeafsRequestHandler.OnLeafsRequest(ctx, nodeID, requestID, leafsRequest)
 }
 
-func (n networkHandler) HandleBlockRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, blockRequest message.BlockRequest) ([]byte, error) {
+func (n networkHandler) HandleBlockRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, blockRequest message.BlockRequest) ([]byte, error) {
 	return n.blockRequestHandler.OnBlockRequest(ctx, nodeID, requestID, blockRequest)
 }
 
-func (n networkHandler) HandleCodeRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, codeRequest message.CodeRequest) ([]byte, error) {
+func (n networkHandler) HandleCodeRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, codeRequest message.CodeRequest) ([]byte, error) {
 	return n.codeRequestHandler.OnCodeRequest(ctx, nodeID, requestID, codeRequest)
 }
 
-func (n networkHandler) HandleMessageSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, messageSignatureRequest message.MessageSignatureRequest) ([]byte, error) {
+func (n networkHandler) HandleMessageSignatureRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, messageSignatureRequest message.MessageSignatureRequest) ([]byte, error) {
 	return n.signatureRequestHandler.OnMessageSignatureRequest(ctx, nodeID, requestID, messageSignatureRequest)
 }
 
-func (n networkHandler) HandleBlockSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, blockSignatureRequest message.BlockSignatureRequest) ([]byte, error) {
+func (n networkHandler) HandleBlockSignatureRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, blockSignatureRequest message.BlockSignatureRequest) ([]byte, error) {
 	return n.signatureRequestHandler.OnBlockSignatureRequest(ctx, nodeID, requestID, blockSignatureRequest)
 }

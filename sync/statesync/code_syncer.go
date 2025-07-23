@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/message"
@@ -46,7 +46,7 @@ type codeSyncer struct {
 
 	CodeSyncerConfig
 
-	outstandingCodeHashes set.Set[ids.ID]  // Set of code hashes that we need to fetch from the network.
+	outstandingCodeHashes interfaces.Set[interfaces.ID]  // Set of code hashes that we need to fetch from the network.
 	codeHashes            chan common.Hash // Channel of incoming code hash requests
 
 	// Used to set terminal error or pass nil to [errChan] if successful.
@@ -63,7 +63,7 @@ func newCodeSyncer(config CodeSyncerConfig) *codeSyncer {
 	return &codeSyncer{
 		CodeSyncerConfig:      config,
 		codeHashes:            make(chan common.Hash, config.MaxOutstandingCodeHashes),
-		outstandingCodeHashes: set.NewSet[ids.ID](0),
+		outstandingCodeHashes: utils.NewSet[interfaces.ID](0),
 		errChan:               make(chan error, 1),
 	}
 }
@@ -187,7 +187,7 @@ func (c *codeSyncer) fulfillCodeRequest(ctx context.Context, codeHashes []common
 	batch := c.DB.NewBatch()
 	for i, codeHash := range codeHashes {
 		customrawdb.DeleteCodeToFetch(batch, codeHash)
-		c.outstandingCodeHashes.Remove(ids.ID(codeHash))
+		c.outstandingCodeHashes.Remove(interfaces.ID(codeHash))
 		rawdb.WriteCode(batch, codeHash, codeByteSlices[i])
 	}
 	c.lock.Unlock() // Release the lock before writing the batch
@@ -208,9 +208,9 @@ func (c *codeSyncer) addCode(codeHashes []common.Hash) error {
 	for _, codeHash := range codeHashes {
 		// Add the code hash to the queue if it's not already on the queue and we do not already have it
 		// in the database.
-		if !c.outstandingCodeHashes.Contains(ids.ID(codeHash)) && !rawdb.HasCode(c.DB, codeHash) {
+		if !c.outstandingCodeHashes.Contains(interfaces.ID(codeHash)) && !rawdb.HasCode(c.DB, codeHash) {
 			selectedCodeHashes = append(selectedCodeHashes, codeHash)
-			c.outstandingCodeHashes.Add(ids.ID(codeHash))
+			c.outstandingCodeHashes.Add(interfaces.ID(codeHash))
 			customrawdb.AddCodeToFetch(batch, codeHash)
 		}
 	}

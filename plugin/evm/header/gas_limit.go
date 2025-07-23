@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/node/utils/math"
-	"github.com/luxfi/geth/core/types"
-	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/core/types"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
 )
@@ -22,7 +22,7 @@ var (
 type CalculateGasLimitFunc func(parentGasUsed, parentGasLimit, gasFloor, gasCeil uint64) uint64
 
 // GasLimit takes the previous header and the timestamp of its child block and
-// calculates the gas limit for the child block.
+// calculates the gas limit for the child interfaces.
 func GasLimit(
 	config *extras.ChainConfig,
 	feeConfig commontype.FeeConfig,
@@ -30,7 +30,7 @@ func GasLimit(
 	timestamp uint64,
 ) (uint64, error) {
 	switch {
-	case config.IsEVM(timestamp):
+	case interfaces.IsEVM(timestamp):
 		return feeConfig.GasLimit.Uint64(), nil
 	default:
 		// since all chains have activated EVM,
@@ -72,7 +72,7 @@ func VerifyGasLimit(
 	header *types.Header,
 ) error {
 	switch {
-	case config.IsEVM(header.Time):
+	case interfaces.IsEVM(header.Time):
 		expectedGasLimit := feeConfig.GasLimit.Uint64()
 		if header.GasLimit != expectedGasLimit {
 			return fmt.Errorf("%w: expected to be %d in EVM, but found %d",
@@ -92,7 +92,7 @@ func VerifyGasLimit(
 		}
 
 		// Verify that the gas limit remains within allowed bounds
-		diff := math.AbsDiff(parent.GasLimit, header.GasLimit)
+		diff := interfaces.AbsDiff(parent.GasLimit, header.GasLimit)
 		limit := parent.GasLimit / ethparams.GasLimitBoundDivisor
 		if diff >= limit {
 			return fmt.Errorf("%w: have %d, want %d += %d",
@@ -107,7 +107,7 @@ func VerifyGasLimit(
 }
 
 // GasCapacity takes the previous header and the timestamp of its child block
-// and calculates the available gas that can be consumed in the child block.
+// and calculates the available gas that can be consumed in the child interfaces.
 func GasCapacity(
 	config *extras.ChainConfig,
 	feeConfig commontype.FeeConfig,

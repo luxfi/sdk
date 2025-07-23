@@ -11,23 +11,23 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 	ethcommon "github.com/luxfi/geth/common"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var (
-	defaultPeerVersion = &version.Application{
+	defaultPeerVersion = &interfaces.Application{
 		Major: 1,
 		Minor: 0,
 		Patch: 0,
@@ -44,12 +44,12 @@ var (
 
 	_ common.AppSender = testAppSender{}
 
-	_ p2p.Handler = &testSDKHandler{}
+	_ interfaces.Handler = &testSDKHandler{}
 )
 
 func TestNetworkDoesNotConnectToItself(t *testing.T) {
 	selfNodeID := ids.GenerateTestNodeID()
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	n := NewNetwork(p2pNetwork, nil, nil, selfNodeID, 1)
 	assert.NoError(t, n.Connected(context.Background(), selfNodeID, defaultPeerVersion))
@@ -86,7 +86,7 @@ func TestRequestAnyRequestsRoutingAndResponse(t *testing.T) {
 	}
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net = NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 16)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
@@ -138,7 +138,7 @@ func TestAppRequestOnCtxCancellation(t *testing.T) {
 		},
 	}
 
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net := NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
@@ -191,7 +191,7 @@ func TestRequestRequestsRoutingAndResponse(t *testing.T) {
 	}
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net = NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 16)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
@@ -272,7 +272,7 @@ func TestAppRequestOnShutdown(t *testing.T) {
 	}
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net = NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	client := NewNetworkClient(net)
@@ -321,7 +321,7 @@ func TestAppRequestAnyOnCtxCancellation(t *testing.T) {
 		},
 	}
 
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net := NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
@@ -329,7 +329,7 @@ func TestAppRequestAnyOnCtxCancellation(t *testing.T) {
 		net.Connected(
 			context.Background(),
 			ids.GenerateTestNodeID(),
-			version.CurrentApp,
+			interfaces.CurrentApp,
 		),
 	)
 
@@ -399,7 +399,7 @@ func TestRequestMinVersion(t *testing.T) {
 	}
 
 	// passing nil as codec works because the net.AppRequest is never called
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net = NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	client := NewNetworkClient(net)
@@ -410,8 +410,8 @@ func TestRequestMinVersion(t *testing.T) {
 		net.Connected(
 			context.Background(),
 			nodeID,
-			&version.Application{
-				Name:  version.Client,
+			&interfaces.Application{
+				Name:  interfaces.Client,
 				Major: 1,
 				Minor: 7,
 				Patch: 1,
@@ -422,8 +422,8 @@ func TestRequestMinVersion(t *testing.T) {
 	// ensure version does not match
 	responseBytes, _, err := client.SendAppRequestAny(
 		context.Background(),
-		&version.Application{
-			Name:  version.Client,
+		&interfaces.Application{
+			Name:  interfaces.Client,
 			Major: 2,
 			Minor: 0,
 			Patch: 0,
@@ -465,7 +465,7 @@ func TestOnRequestHonoursDeadline(t *testing.T) {
 		processingDuration: 500 * time.Millisecond,
 	}
 
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	net = NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	net.SetRequestHandler(requestHandler)
@@ -493,7 +493,7 @@ func TestHandleInvalidMessages(t *testing.T) {
 			return nil
 		},
 	}
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, sender, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, sender, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	clientNetwork := NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	clientNetwork.SetRequestHandler(&testRequestHandler{})
@@ -529,11 +529,11 @@ func TestHandleInvalidMessages(t *testing.T) {
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), garbageResponse))
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), emptyResponse))
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), nilResponse))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, gossipMsg))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, requestMessage))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, garbageResponse))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, emptyResponse))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, nilResponse))
+	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, gossipMsg))
+	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, requestMessage))
+	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, garbageResponse))
+	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, emptyResponse))
+	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, nilResponse))
 }
 
 func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
@@ -542,7 +542,7 @@ func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
 	requestID := peertest.TestPeerRequestID
 	sender := testAppSender{}
 
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, nil, prometheus.NewRegistry(), "")
 	require.NoError(t, err)
 	clientNetwork := NewNetwork(p2pNetwork, sender, codecManager, ids.EmptyNodeID, 1)
 	clientNetwork.SetRequestHandler(&testRequestHandler{err: errors.New("fail")}) // Return an error from the request handler
@@ -582,11 +582,11 @@ func TestNetworkRouting(t *testing.T) {
 	protocol := 0
 	requestID := peertest.TestSDKRequestID
 	handler := &testSDKHandler{}
-	p2pNetwork, err := p2p.NewNetwork(logging.NoLog{}, sender, prometheus.NewRegistry(), "")
+	p2pNetwork, err := interfaces.NewNetwork(logging.NoLog{}, sender, prometheus.NewRegistry(), "")
 	require.NoError(err)
 	require.NoError(p2pNetwork.AddHandler(uint64(protocol), handler))
 
-	networkCodec := codec.NewManager(0)
+	networkCodec := interfaces.NewManager(0)
 	network := NewNetwork(p2pNetwork, nil, networkCodec, ids.EmptyNodeID, 1)
 
 	nodeID := ids.GenerateTestNodeID()
@@ -596,15 +596,15 @@ func TestNetworkRouting(t *testing.T) {
 	require.True(handler.appRequested)
 
 	err = network.AppResponse(context.Background(), ids.GenerateTestNodeID(), requestID, foobar)
-	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
+	require.ErrorIs(err, interfaces.ErrUnrequestedResponse)
 
 	err = network.AppRequestFailed(context.Background(), nodeID, requestID, common.ErrTimeout)
-	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
+	require.ErrorIs(err, interfaces.ErrUnrequestedResponse)
 }
 
-func buildCodec(t *testing.T, types ...interface{}) codec.Manager {
-	codecManager := codec.NewDefaultManager()
-	c := linearcodec.NewDefault()
+func buildCodec(t *testing.T, types ...interface{}) interfaces.Manager {
+	codecManager := interfaces.NewDefaultManager()
+	c := linearinterfaces.NewDefault()
 	for _, typ := range types {
 		assert.NoError(t, c.RegisterType(typ))
 	}
@@ -614,8 +614,8 @@ func buildCodec(t *testing.T, types ...interface{}) codec.Manager {
 
 // marshalStruct is a helper method used to marshal an object as `interface{}`
 // so that the codec is able to include the TypeID in the resulting bytes
-func marshalStruct(codec codec.Manager, obj interface{}) ([]byte, error) {
-	return codec.Marshal(message.Version, &obj)
+func marshalStruct(codec interfaces.Manager, obj interface{}) ([]byte, error) {
+	return interfaces.Marshal(message.Version, &obj)
 }
 
 type testAppSender struct {
@@ -681,15 +681,15 @@ type TestRequestHandler interface {
 
 type HelloGreetingRequestHandler struct {
 	message.RequestHandler
-	codec codec.Manager
+	codec interfaces.Manager
 }
 
 func (h *HelloGreetingRequestHandler) HandleHelloRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, request *HelloRequest) ([]byte, error) {
-	return h.codec.Marshal(message.Version, HelloResponse{Response: "Hi"})
+	return h.interfaces.Marshal(message.Version, HelloResponse{Response: "Hi"})
 }
 
 func (h *HelloGreetingRequestHandler) HandleGreetingRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, request *GreetingRequest) ([]byte, error) {
-	return h.codec.Marshal(message.Version, GreetingResponse{Greet: "Hey there"})
+	return h.interfaces.Marshal(message.Version, GreetingResponse{Greet: "Hey there"})
 }
 
 type TestMessage struct {
@@ -713,16 +713,16 @@ func (tx *HelloGossip) GossipID() ids.ID {
 }
 
 type helloGossipMarshaller struct {
-	codec codec.Manager
+	codec interfaces.Manager
 }
 
 func (g helloGossipMarshaller) MarshalGossip(tx *HelloGossip) ([]byte, error) {
-	return g.codec.Marshal(0, tx)
+	return g.interfaces.Marshal(0, tx)
 }
 
 func (g helloGossipMarshaller) UnmarshalGossip(bytes []byte) (*HelloGossip, error) {
 	h := &HelloGossip{}
-	_, err := g.codec.Unmarshal(bytes, h)
+	_, err := g.interfaces.Unmarshal(bytes, h)
 	return h, err
 }
 

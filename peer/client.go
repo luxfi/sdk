@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var (
@@ -24,15 +24,15 @@ type NetworkClient interface {
 	// node version greater than or equal to minVersion.
 	// Returns response bytes, the ID of the chosen peer, and ErrRequestFailed if
 	// the request should be retried.
-	SendAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte) ([]byte, ids.NodeID, error)
+	SendAppRequestAny(ctx context.Context, minVersion *interfaces.Application, request []byte) ([]byte, interfaces.NodeID, error)
 
 	// SendAppRequest synchronously sends request to the selected nodeID
 	// Returns response bytes, and ErrRequestFailed if the request should be retried.
-	SendAppRequest(ctx context.Context, nodeID ids.NodeID, request []byte) ([]byte, error)
+	SendAppRequest(ctx context.Context, nodeID interfaces.NodeID, request []byte) ([]byte, error)
 
 	// TrackBandwidth should be called for each valid request with the bandwidth
 	// (length of response divided by request time), and with 0 if the response is invalid.
-	TrackBandwidth(nodeID ids.NodeID, bandwidth float64)
+	TrackBandwidth(nodeID interfaces.NodeID, bandwidth float64)
 }
 
 // client implements NetworkClient interface
@@ -53,7 +53,7 @@ func NewNetworkClient(network Network) NetworkClient {
 // node version greater than or equal to minVersion.
 // Returns response bytes, the ID of the chosen peer, and ErrRequestFailed if
 // the request should be retried.
-func (c *client) SendAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte) ([]byte, ids.NodeID, error) {
+func (c *client) SendAppRequestAny(ctx context.Context, minVersion *interfaces.Application, request []byte) ([]byte, interfaces.NodeID, error) {
 	waitingHandler := newWaitingResponseHandler()
 	nodeID, err := c.network.SendAppRequestAny(ctx, minVersion, request, waitingHandler)
 	if err != nil {
@@ -65,7 +65,7 @@ func (c *client) SendAppRequestAny(ctx context.Context, minVersion *version.Appl
 
 // SendAppRequest synchronously sends request to the specified nodeID
 // Returns response bytes and ErrRequestFailed if the request should be retried.
-func (c *client) SendAppRequest(ctx context.Context, nodeID ids.NodeID, request []byte) ([]byte, error) {
+func (c *client) SendAppRequest(ctx context.Context, nodeID interfaces.NodeID, request []byte) ([]byte, error) {
 	waitingHandler := newWaitingResponseHandler()
 	if err := c.network.SendAppRequest(ctx, nodeID, request, waitingHandler); err != nil {
 		return nil, err
@@ -73,6 +73,6 @@ func (c *client) SendAppRequest(ctx context.Context, nodeID ids.NodeID, request 
 	return waitingHandler.WaitForResult(ctx)
 }
 
-func (c *client) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
+func (c *client) TrackBandwidth(nodeID interfaces.NodeID, bandwidth float64) {
 	c.network.TrackBandwidth(nodeID, bandwidth)
 }

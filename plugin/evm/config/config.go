@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/database/pebbledb"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/spf13/cast"
@@ -59,7 +59,7 @@ const (
 	// - state sync time: ~6 hrs.
 	defaultStateSyncMinBlocks   = 300_000
 	defaultStateSyncRequestSize = 1024 // the number of key/values to ask peers for per request
-	defaultDBType               = pebbledb.Name
+	defaultDBType               = interfaces.Name
 	defaultValidatorAPIEnabled  = true
 
 	estimatedBlockAcceptPeriod        = 2 * time.Second
@@ -203,7 +203,7 @@ type Config struct {
 	InspectDatabase bool `json:"inspect-database"` // Inspects the database on startup if enabled.
 
 	// SkipUpgradeCheck disables checking that upgrades must take place before the last
-	// accepted block. Skipping this check is useful when a node operator does not update
+	// accepted interfaces. Skipping this check is useful when a node operator does not update
 	// their node before the network upgrade and their node accepts blocks that have
 	// identical state with the pre-upgrade ruleset.
 	SkipUpgradeCheck bool `json:"skip-upgrade-check"`
@@ -319,7 +319,7 @@ func (c *Config) SetDefaults(txPoolConfig TxPoolConfig) {
 
 func (d *Duration) UnmarshalJSON(data []byte) (err error) {
 	var v interface{}
-	if err := json.Unmarshal(data, &v); err != nil {
+	if err := interfaces.Unmarshal(data, &v); err != nil {
 		return err
 	}
 	d.Duration, err = cast.ToDurationE(v)
@@ -333,10 +333,10 @@ func (d Duration) String() string {
 
 // String implements the stringer interface.
 func (d Duration) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.Duration.String())
+	return interfaces.Marshal(d.Duration.String())
 }
 
-// Validate returns an error if this is an invalid config.
+// Validate returns an error if this is an invalid interfaces.
 func (c *Config) Validate() error {
 	if c.PopulateMissingTries != nil && (c.OfflinePruning || c.Pruning) {
 		return fmt.Errorf("cannot enable populate missing tries while offline pruning (enabled: %t)/pruning (enabled: %t) are enabled", c.OfflinePruning, c.Pruning)

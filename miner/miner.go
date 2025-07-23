@@ -28,11 +28,11 @@
 package miner
 
 import (
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
@@ -55,7 +55,7 @@ type Miner struct {
 	worker *worker
 }
 
-func New(eth Backend, config *Config, chainConfig *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine, clock *mockable.Clock) *Miner {
+func New(eth Backend, config *Config, chainConfig *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine, clock *interfaces.MockableTimer) *Miner {
 	return &Miner{
 		worker: newWorker(config, chainConfig, engine, eth, mux, clock),
 	}

@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	ethlog "github.com/luxfi/geth/log"
+	ethlog "github.com/luxfi/evm/log"
 	"github.com/luxfi/evm/log"
 	"log/slog"
 )

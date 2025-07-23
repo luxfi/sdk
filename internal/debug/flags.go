@@ -35,12 +35,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/geth/log"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
-	"log/slog"
+	"golang.org/x/exp/slog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 

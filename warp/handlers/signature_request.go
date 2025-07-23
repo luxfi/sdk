@@ -6,23 +6,23 @@ package handlers
 import (
 	"context"
 	"time"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/crypto/bls"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/warp"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/log"
 )
 
 // SignatureRequestHandler serves warp signature requests. It is a peer.RequestHandler for message.MessageSignatureRequest.
 // TODO: After Etna, this handler can be removed and SignatureRequestHandlerP2P is sufficient.
 type SignatureRequestHandler struct {
-	backend warp.Backend
-	codec   codec.Manager
+	backend interfaces.Backend
+	codec   interfaces.Codec
 	stats   *handlerStats
 }
 
-func NewSignatureRequestHandler(backend warp.Backend, codec codec.Manager) *SignatureRequestHandler {
+func NewSignatureRequestHandler(backend interfaces.Backend, codec interfaces.Codec) *SignatureRequestHandler {
 	return &SignatureRequestHandler{
 		backend: backend,
 		codec:   codec,
@@ -35,7 +35,7 @@ func NewSignatureRequestHandler(backend warp.Backend, codec codec.Manager) *Sign
 // Expects returned errors to be treated as FATAL
 // Returns empty response if signature is not found
 // Assumes ctx is active
-func (s *SignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, signatureRequest message.MessageSignatureRequest) ([]byte, error) {
+func (s *SignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, signatureRequest message.MessageSignatureRequest) ([]byte, error) {
 	startTime := time.Now()
 	s.stats.IncMessageSignatureRequest()
 
@@ -44,7 +44,7 @@ func (s *SignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context,
 		s.stats.UpdateMessageSignatureRequestTime(time.Since(startTime))
 	}()
 
-	var signature [bls.SignatureLen]byte
+	var signature [interfaces.SignatureLen]byte
 	unsignedMessage, err := s.backend.GetMessage(signatureRequest.MessageID)
 	if err != nil {
 		log.Debug("Unknown warp message requested", "messageID", signatureRequest.MessageID)
@@ -61,7 +61,7 @@ func (s *SignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context,
 	}
 
 	response := message.SignatureResponse{Signature: signature}
-	responseBytes, err := s.codec.Marshal(message.Version, &response)
+	responseBytes, err := s.interfaces.Marshal(message.Version, &response)
 	if err != nil {
 		log.Error("could not marshal SignatureResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "err", err)
 		return nil, nil
@@ -70,7 +70,7 @@ func (s *SignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context,
 	return responseBytes, nil
 }
 
-func (s *SignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, request message.BlockSignatureRequest) ([]byte, error) {
+func (s *SignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, request message.BlockSignatureRequest) ([]byte, error) {
 	startTime := time.Now()
 	s.stats.IncBlockSignatureRequest()
 
@@ -79,7 +79,7 @@ func (s *SignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, n
 		s.stats.UpdateBlockSignatureRequestTime(time.Since(startTime))
 	}()
 
-	var signature [bls.SignatureLen]byte
+	var signature [interfaces.SignatureLen]byte
 	sig, err := s.backend.GetBlockSignature(ctx, request.BlockID)
 	if err != nil {
 		log.Debug("Unknown warp signature requested", "blockID", request.BlockID)
@@ -90,7 +90,7 @@ func (s *SignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, n
 	}
 
 	response := message.SignatureResponse{Signature: signature}
-	responseBytes, err := s.codec.Marshal(message.Version, &response)
+	responseBytes, err := s.interfaces.Marshal(message.Version, &response)
 	if err != nil {
 		log.Error("could not marshal SignatureResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "err", err)
 		return nil, nil
@@ -101,10 +101,10 @@ func (s *SignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, n
 
 type NoopSignatureRequestHandler struct{}
 
-func (s *NoopSignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, signatureRequest message.MessageSignatureRequest) ([]byte, error) {
+func (s *NoopSignatureRequestHandler) OnMessageSignatureRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, signatureRequest message.MessageSignatureRequest) ([]byte, error) {
 	return nil, nil
 }
 
-func (s *NoopSignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, signatureRequest message.BlockSignatureRequest) ([]byte, error) {
+func (s *NoopSignatureRequestHandler) OnBlockSignatureRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, signatureRequest message.BlockSignatureRequest) ([]byte, error) {
 	return nil, nil
 }

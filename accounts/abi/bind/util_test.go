@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/accounts/abi/bind/backends"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
 )

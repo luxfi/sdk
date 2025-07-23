@@ -9,18 +9,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	luxuptime "github.com/luxfi/node/consensus/uptime"
-	luxvalidators "github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	luxuptime "github.com/luxfi/evm/interfaces"
+	luxvalidators "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/log"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 )
 
 type manager struct {
-	chainCtx *consensus.Context
+	chainCtx *interfaces.ChainContext
 	stateinterfaces.State
 	uptimeinterfaces.PausableManager
 }
@@ -37,11 +37,11 @@ type manager struct {
 // that manages the validator state and the uptime manager.
 // Manager is not thread safe and should be used with the VM locked.
 func NewManager(
-	ctx *consensus.Context,
-	db database.Database,
-	clock *mockable.Clock,
+	ctx *interfaces.ChainContext,
+	db interfaces.Database,
+	clock *interfaces.MockableTimer,
 ) (*manager, error) {
-	validatorState, err := validators.NewState(db)
+	validatorState, err := interfaces.NewState(db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize validator state: %w", err)
 	}
@@ -135,7 +135,7 @@ func (m *manager) sync(ctx context.Context) error {
 }
 
 // loadValidators loads the [validators] into the validator state [validatorState]
-func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*luxvalidators.GetCurrentValidatorOutput) error {
+func loadValidators(validatorState stateinterfaces.State, newValidators map[interfaces.ID]*luxinterfaces.GetCurrentValidatorOutput) error {
 	currentValidationIDs := validatorState.GetValidationIDs()
 	// first check if we need to delete any existing validators
 	for vID := range currentValidationIDs {

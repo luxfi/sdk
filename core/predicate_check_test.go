@@ -6,9 +6,9 @@ package core
 import (
 	"errors"
 	"testing"
-	"github.com/luxfi/node/consensus/engine/linear/block"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
@@ -19,8 +19,8 @@ import (
 type predicateCheckTest struct {
 	accessList       types.AccessList
 	gas              uint64
-	predicateContext *precompileconfig.PredicateContext
-	createPredicates func(t testing.TB) map[common.Address]precompileconfig.Predicater
+	predicateContext *precompileinterfaces.PredicateContext
+	createPredicates func(t testing.TB) map[common.Address]precompileinterfaces.Predicater
 	expectedRes      map[common.Address][]byte
 	expectedErr      error
 }
@@ -31,8 +31,8 @@ func TestCheckPredicate(t *testing.T) {
 	addr2 := common.HexToAddress("0xbb")
 	addr3 := common.HexToAddress("0xcc")
 	addr4 := common.HexToAddress("0xdd")
-	predicateContext := &precompileconfig.PredicateContext{
-		ProposerVMBlockCtx: &block.Context{
+	predicateContext := &precompileinterfaces.PredicateContext{
+		ProposerVMBlockCtx: &interfaces.Context{
 			PChainHeight: 10,
 		},
 	}
@@ -66,9 +66,9 @@ func TestCheckPredicate(t *testing.T) {
 		"predicate, no access list, no context passes": {
 			gas:              53000,
 			predicateContext: nil,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
-				return map[common.Address]precompileconfig.Predicater{
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -77,12 +77,12 @@ func TestCheckPredicate(t *testing.T) {
 		},
 		"predicate, no access list, no block context passes": {
 			gas: 53000,
-			predicateContext: &precompileconfig.PredicateContext{
+			predicateContext: &precompileinterfaces.PredicateContext{
 				ProposerVMBlockCtx: nil,
 			},
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
-				return map[common.Address]precompileconfig.Predicater{
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -92,11 +92,11 @@ func TestCheckPredicate(t *testing.T) {
 		"predicate named by access list, without context errors": {
 			gas:              53000,
 			predicateContext: nil,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 				arg := common.Hash{1}
 				predicater.EXPECT().PredicateGas(arg[:]).Return(uint64(0), nil).Times(1)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -112,14 +112,14 @@ func TestCheckPredicate(t *testing.T) {
 		},
 		"predicate named by access list, without block context errors": {
 			gas: 53000,
-			predicateContext: &precompileconfig.PredicateContext{
+			predicateContext: &precompileinterfaces.PredicateContext{
 				ProposerVMBlockCtx: nil,
 			},
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 				arg := common.Hash{1}
 				predicater.EXPECT().PredicateGas(arg[:]).Return(uint64(0), nil).Times(1)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -136,12 +136,12 @@ func TestCheckPredicate(t *testing.T) {
 		"predicate named by access list returns non-empty": {
 			gas:              53000,
 			predicateContext: predicateContext,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 				arg := common.Hash{1}
 				predicater.EXPECT().PredicateGas(arg[:]).Return(uint64(0), nil).Times(2)
 				predicater.EXPECT().VerifyPredicate(gomock.Any(), arg[:]).Return(nil)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -161,11 +161,11 @@ func TestCheckPredicate(t *testing.T) {
 		"predicate returns gas err": {
 			gas:              53000,
 			predicateContext: predicateContext,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 				arg := common.Hash{1}
 				predicater.EXPECT().PredicateGas(arg[:]).Return(uint64(0), testErr)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -182,12 +182,12 @@ func TestCheckPredicate(t *testing.T) {
 		"two predicates one named by access list returns non-empty": {
 			gas:              53000,
 			predicateContext: predicateContext,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 				arg := common.Hash{1}
 				predicater.EXPECT().PredicateGas(arg[:]).Return(uint64(0), nil).Times(2)
 				predicater.EXPECT().VerifyPredicate(gomock.Any(), arg[:]).Return(nil)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 					addr2: predicater,
 				}
@@ -208,17 +208,17 @@ func TestCheckPredicate(t *testing.T) {
 		"two predicates both named by access list returns non-empty": {
 			gas:              53000,
 			predicateContext: predicateContext,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
 				ctrl := gomock.NewController(t)
-				predicate1 := precompileconfig.NewMockPredicater(ctrl)
+				predicate1 := precompileinterfaces.NewMockPredicater(ctrl)
 				arg1 := common.Hash{1}
 				predicate1.EXPECT().PredicateGas(arg1[:]).Return(uint64(0), nil).Times(2)
 				predicate1.EXPECT().VerifyPredicate(gomock.Any(), arg1[:]).Return(nil)
-				predicate2 := precompileconfig.NewMockPredicater(ctrl)
+				predicate2 := precompileinterfaces.NewMockPredicater(ctrl)
 				arg2 := common.Hash{2}
 				predicate2.EXPECT().PredicateGas(arg2[:]).Return(uint64(0), nil).Times(2)
 				predicate2.EXPECT().VerifyPredicate(gomock.Any(), arg2[:]).Return(testErr)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicate1,
 					addr2: predicate2,
 				}
@@ -246,9 +246,9 @@ func TestCheckPredicate(t *testing.T) {
 		"two predicates neither named by access list": {
 			gas:              61600,
 			predicateContext: predicateContext,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
-				return map[common.Address]precompileconfig.Predicater{
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 					addr2: predicater,
 				}
@@ -273,11 +273,11 @@ func TestCheckPredicate(t *testing.T) {
 		"insufficient gas": {
 			gas:              53000,
 			predicateContext: predicateContext,
-			createPredicates: func(t testing.TB) map[common.Address]precompileconfig.Predicater {
-				predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			createPredicates: func(t testing.TB) map[common.Address]precompileinterfaces.Predicater {
+				predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 				arg := common.Hash{1}
 				predicater.EXPECT().PredicateGas(arg[:]).Return(uint64(1), nil)
-				return map[common.Address]precompileconfig.Predicater{
+				return map[common.Address]precompileinterfaces.Predicater{
 					addr1: predicater,
 				}
 			},
@@ -327,8 +327,8 @@ func TestCheckPredicatesOutput(t *testing.T) {
 	addr2 := common.HexToAddress("0xbb")
 	validHash := common.Hash{1}
 	invalidHash := common.Hash{2}
-	predicateContext := &precompileconfig.PredicateContext{
-		ProposerVMBlockCtx: &block.Context{
+	predicateContext := &precompileinterfaces.PredicateContext{
+		ProposerVMBlockCtx: &interfaces.Context{
 			PChainHeight: 10,
 		},
 	}
@@ -423,7 +423,7 @@ func TestCheckPredicatesOutput(t *testing.T) {
 			require := require.New(t)
 			// Create the rules from TestChainConfig and update the predicates based on the test params
 			rules := params.TestChainConfig.LuxRules(common.Big0, 0)
-			predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
+			predicater := precompileinterfaces.NewMockPredicater(gomock.NewController(t))
 			predicater.EXPECT().PredicateGas(gomock.Any()).Return(uint64(0), nil).Times(len(test.testTuple))
 
 			var txAccessList types.AccessList

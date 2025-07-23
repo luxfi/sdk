@@ -10,19 +10,19 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 )
 
 func TestEthTxGossip(t *testing.T) {
@@ -42,7 +42,7 @@ func TestEthTxGossip(t *testing.T) {
 	require.NoError(vm.Initialize(
 		ctx,
 		consensusCtx,
-		memdb.New(),
+		interfaces.New(),
 		[]byte(genesisJSONLatest),
 		nil,
 		nil,
@@ -61,9 +61,9 @@ func TestEthTxGossip(t *testing.T) {
 		SentAppRequest: make(chan []byte, 1),
 	}
 
-	network, err := p2p.NewNetwork(logging.NoLog{}, peerSender, prometheus.NewRegistry(), "")
+	network, err := interfaces.NewNetwork(logging.NoLog{}, peerSender, prometheus.NewRegistry(), "")
 	require.NoError(err)
-	client := network.NewClient(p2p.TxGossipHandlerID)
+	client := network.NewClient(interfaces.TxGossipHandlerID)
 
 	// we only accept gossip requests from validators
 	requestingNodeID := ids.GenerateTestNodeID()
@@ -71,8 +71,8 @@ func TestEthTxGossip(t *testing.T) {
 	validatorState.GetCurrentHeightF = func(context.Context) (uint64, error) {
 		return 0, nil
 	}
-	validatorState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
-		return map[ids.NodeID]*validators.GetValidatorOutput{
+	validatorState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
+		return map[ids.NodeID]*interfaces.GetValidatorOutput{
 			requestingNodeID: {
 				NodeID: requestingNodeID,
 				Weight: 1,
@@ -81,7 +81,7 @@ func TestEthTxGossip(t *testing.T) {
 	}
 
 	// Ask the VM for any new transactions. We should get nothing at first.
-	emptyBloomFilter, err := gossip.NewBloomFilter(prometheus.NewRegistry(), "", txGossipBloomMinTargetElements, txGossipBloomTargetFalsePositiveRate, txGossipBloomResetFalsePositiveRate)
+	emptyBloomFilter, err := interfaces.NewBloomFilter(prometheus.NewRegistry(), "", txGossipBloomMinTargetElements, txGossipBloomTargetFalsePositiveRate, txGossipBloomResetFalsePositiveRate)
 	require.NoError(err)
 	emptyBloomFilterBytes, _ := emptyBloomFilter.Marshal()
 	request := &sdk.PullGossipRequest{
@@ -152,13 +152,13 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 	}
 
 	vm := &VM{
-		ethTxPullGossiper: gossip.NoOpGossiper{},
+		ethTxPullGossiper: interfaces.NoOpGossiper{},
 	}
 
 	require.NoError(vm.Initialize(
 		ctx,
 		consensusCtx,
-		memdb.New(),
+		interfaces.New(),
 		[]byte(genesisJSONLatest),
 		nil,
 		nil,
@@ -187,7 +187,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 
 	// we should get a message that has the protocol prefix and the gossip
 	// message
-	require.Equal(byte(p2p.TxGossipHandlerID), sent[0])
+	require.Equal(byte(interfaces.TxGossipHandlerID), sent[0])
 	require.NoError(proto.Unmarshal(sent[1:], got))
 
 	marshaller := GossipEthTxMarshaller{}
@@ -205,13 +205,13 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 
 	sender := &enginetest.Sender{}
 	vm := &VM{
-		ethTxPullGossiper: gossip.NoOpGossiper{},
+		ethTxPullGossiper: interfaces.NoOpGossiper{},
 	}
 
 	require.NoError(vm.Initialize(
 		ctx,
 		consensusCtx,
-		memdb.New(),
+		interfaces.New(),
 		[]byte(genesisJSONLatest),
 		nil,
 		nil,
@@ -245,7 +245,7 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 	inboundGossipBytes, err := proto.Marshal(inboundGossip)
 	require.NoError(err)
 
-	inboundGossipMsg := append(binary.AppendUvarint(nil, p2p.TxGossipHandlerID), inboundGossipBytes...)
+	inboundGossipMsg := append(binary.AppendUvarint(nil, interfaces.TxGossipHandlerID), inboundGossipBytes...)
 	require.NoError(vm.AppGossip(ctx, ids.EmptyNodeID, inboundGossipMsg))
 
 	require.True(vm.txPool.Has(signedTx.Hash()))

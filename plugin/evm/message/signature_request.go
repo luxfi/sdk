@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/crypto/bls"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var (
@@ -18,32 +18,32 @@ var (
 
 // MessageSignatureRequest is used to request a warp message's signature.
 type MessageSignatureRequest struct {
-	MessageID ids.ID `serialize:"true"`
+	MessageID interfaces.ID `serialize:"true"`
 }
 
 func (s MessageSignatureRequest) String() string {
 	return fmt.Sprintf("MessageSignatureRequest(MessageID=%s)", s.MessageID.String())
 }
 
-func (s MessageSignatureRequest) Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
+func (s MessageSignatureRequest) Handle(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
 	return handler.HandleMessageSignatureRequest(ctx, nodeID, requestID, s)
 }
 
 // BlockSignatureRequest is used to request a warp message's signature.
 type BlockSignatureRequest struct {
-	BlockID ids.ID `serialize:"true"`
+	BlockID interfaces.ID `serialize:"true"`
 }
 
 func (s BlockSignatureRequest) String() string {
 	return fmt.Sprintf("BlockSignatureRequest(BlockID=%s)", s.BlockID.String())
 }
 
-func (s BlockSignatureRequest) Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
+func (s BlockSignatureRequest) Handle(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
 	return handler.HandleBlockSignatureRequest(ctx, nodeID, requestID, s)
 }
 
 // SignatureResponse is the response to a BlockSignatureRequest or MessageSignatureRequest.
 // The response contains a BLS signature of the requested message, signed by the responding node's BLS private key.
 type SignatureResponse struct {
-	Signature [bls.SignatureLen]byte `serialize:"true"`
+	Signature [interfaces.SignatureLen]byte `serialize:"true"`
 }

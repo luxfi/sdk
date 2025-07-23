@@ -6,9 +6,9 @@ package validators
 import (
 	"context"
 	"testing"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -27,19 +27,19 @@ func TestGetValidatorSetPrimaryNetwork(t *testing.T) {
 	consensusCtx.ValidatorState = mockState
 	state := NewState(consensusCtx.ValidatorState, consensusCtx.SubnetID, consensusCtx.ChainID, false)
 	// Expect that requesting my validator set returns my validator set
-	mockState.EXPECT().GetValidatorSet(gomock.Any(), gomock.Any(), mySubnetID).Return(make(map[ids.NodeID]*validators.GetValidatorOutput), nil)
+	mockState.EXPECT().GetValidatorSet(gomock.Any(), gomock.Any(), mySubnetID).Return(make(map[ids.NodeID]*interfaces.GetValidatorOutput), nil)
 	output, err := state.GetValidatorSet(context.Background(), 10, mySubnetID)
 	require.NoError(err)
 	require.Len(output, 0)
 
 	// Expect that requesting the Primary Network validator set overrides and returns my validator set
-	mockState.EXPECT().GetValidatorSet(gomock.Any(), gomock.Any(), mySubnetID).Return(make(map[ids.NodeID]*validators.GetValidatorOutput), nil)
+	mockState.EXPECT().GetValidatorSet(gomock.Any(), gomock.Any(), mySubnetID).Return(make(map[ids.NodeID]*interfaces.GetValidatorOutput), nil)
 	output, err = state.GetValidatorSet(context.Background(), 10, constants.PrimaryNetworkID)
 	require.NoError(err)
 	require.Len(output, 0)
 
 	// Expect that requesting other validator set returns that validator set
-	mockState.EXPECT().GetValidatorSet(gomock.Any(), gomock.Any(), otherSubnetID).Return(make(map[ids.NodeID]*validators.GetValidatorOutput), nil)
+	mockState.EXPECT().GetValidatorSet(gomock.Any(), gomock.Any(), otherSubnetID).Return(make(map[ids.NodeID]*interfaces.GetValidatorOutput), nil)
 	output, err = state.GetValidatorSet(context.Background(), 10, otherSubnetID)
 	require.NoError(err)
 	require.Len(output, 0)

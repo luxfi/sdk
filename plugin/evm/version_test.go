@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +20,7 @@ func TestCompatibility(t *testing.T) {
 	require.NoError(t, err, "reading compatibility file")
 
 	var parsedCompat rpcChainCompatibility
-	err = json.Unmarshal(compat, &parsedCompat)
+	err = interfaces.Unmarshal(compat, &parsedCompat)
 	require.NoError(t, err, "json decoding compatibility file")
 
 	rpcChainVMVersion, valueInJSON := parsedCompat.RPCChainVMProtocolVersion[Version]
@@ -28,8 +28,8 @@ func TestCompatibility(t *testing.T) {
 		t.Fatalf("%s has evm version %s missing from rpcChainVMProtocolVersion object",
 			filepath.Base(compatibilityFile), Version)
 	}
-	if rpcChainVMVersion != version.RPCChainVMProtocol {
+	if rpcChainVMVersion != interfaces.RPCChainVMProtocol {
 		t.Fatalf("%s has evm version %s stated as compatible with RPC chain VM protocol version %d but Lux protocol version is %d",
-			filepath.Base(compatibilityFile), Version, rpcChainVMVersion, version.RPCChainVMProtocol)
+			filepath.Base(compatibilityFile), Version, rpcChainVMVersion, interfaces.RPCChainVMProtocol)
 	}
 }

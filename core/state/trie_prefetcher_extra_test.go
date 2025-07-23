@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/interfaces/metrics"
 	"github.com/luxfi/geth/triedb"
@@ -139,7 +139,7 @@ func BenchmarkPrefetcherDatabase(b *testing.B) {
 				snaps := snapshot.NewTestTree(levelDB, fakeHash(block), root)
 				db := NewDatabaseWithConfig(levelDB, tdbConfig)
 				getMetric := func(metric string) int64 {
-					meter := metrics.GetOrRegisterMeter(triePrefetchMetricsPrefix+namespace+"/storage/"+metric, nil)
+					meter := interfaces.GetOrRegisterMeter(triePrefetchMetricsPrefix+namespace+"/storage/"+metric, nil)
 					return meter.Snapshot().Count()
 				}
 				startLoads := getMetric("load")

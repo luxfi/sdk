@@ -32,7 +32,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/geth/common"

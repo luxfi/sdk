@@ -6,27 +6,27 @@ package message
 import (
 	"context"
 	"fmt"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/node/consensus/engine/linear/block"
+	"github.com/luxfi/evm/interfaces"
 )
 
-var _ block.StateSummary = &SyncSummary{}
+var _ interfaces.StateSummary = &SyncSummary{}
 
 // SyncSummary provides the information necessary to sync a node starting
-// at the given block.
+// at the given interfaces.
 type SyncSummary struct {
 	BlockNumber uint64      `serialize:"true"`
 	BlockHash   common.Hash `serialize:"true"`
 	BlockRoot   common.Hash `serialize:"true"`
 
-	summaryID  ids.ID
+	summaryID  interfaces.ID
 	bytes      []byte
-	acceptImpl func(SyncSummary) (block.StateSyncMode, error)
+	acceptImpl func(SyncSummary) (interfaces.StateSyncMode, error)
 }
 
-func NewSyncSummaryFromBytes(summaryBytes []byte, acceptImpl func(SyncSummary) (block.StateSyncMode, error)) (SyncSummary, error) {
+func NewSyncSummaryFromBytes(summaryBytes []byte, acceptImpl func(SyncSummary) (interfaces.StateSyncMode, error)) (SyncSummary, error) {
 	summary := SyncSummary{}
 	if codecVersion, err := Codec.Unmarshal(summaryBytes, &summary); err != nil {
 		return SyncSummary{}, err
@@ -73,7 +73,7 @@ func (s SyncSummary) Height() uint64 {
 	return s.BlockNumber
 }
 
-func (s SyncSummary) ID() ids.ID {
+func (s SyncSummary) ID() interfaces.ID {
 	return s.summaryID
 }
 
@@ -81,9 +81,9 @@ func (s SyncSummary) String() string {
 	return fmt.Sprintf("SyncSummary(BlockHash=%s, BlockNumber=%d, BlockRoot=%s)", s.BlockHash, s.BlockNumber, s.BlockRoot)
 }
 
-func (s SyncSummary) Accept(context.Context) (block.StateSyncMode, error) {
+func (s SyncSummary) Accept(context.Context) (interfaces.StateSyncMode, error) {
 	if s.acceptImpl == nil {
-		return block.StateSyncSkipped, fmt.Errorf("accept implementation not specified for summary: %s", s)
+		return interfaces.StateSyncSkipped, fmt.Errorf("accept implementation not specified for summary: %s", s)
 	}
 	return s.acceptImpl(s)
 }

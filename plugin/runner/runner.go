@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/utils/ulimit"
-	"github.com/luxfi/node/vms/rpcchainvm"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 
 	"github.com/luxfi/evm/plugin/evm"
 )
@@ -25,9 +25,9 @@ func Run(versionStr string) {
 		fmt.Println(versionStr)
 		os.Exit(0)
 	}
-	if err := ulimit.Set(ulimit.DefaultFDLimit, logging.NoLog{}); err != nil {
+	if err := interfaces.Set(interfaces.DefaultFDLimit, logging.NoLog{}); err != nil {
 		fmt.Printf("failed to set fd limit correctly due to: %s", err)
 		os.Exit(1)
 	}
-	rpcchainvm.Serve(context.Background(), &evm.VM{})
+	interfaces.Serve(context.Background(), &evm.VM{})
 }

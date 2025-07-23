@@ -47,7 +47,7 @@ import (
 
 	"github.com/luxfi/geth/log"
 	"github.com/hashicorp/go-bexpr"
-	"log/slog"
+	"golang.org/x/exp/slog"
 )
 
 // Handler is the global debugging handler.

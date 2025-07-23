@@ -101,7 +101,7 @@ Lux Warp Messages are encoded as a signed Lux [Warp Message](https://github.com/
 
 Since the predicate is encoded into the [Transaction Access List](https://eips.ethereum.org/EIPS/eip-2930), it is packed into 32 byte hashes intended to declare storage slots that should be pre-warmed into the cache prior to transaction execution.
 
-Therefore, we use the [Predicate Utils](https://github.com/luxfi/evm/blob/master/predicate/Predicate.md) package to encode the actual byte slice of size N into the access list.
+Therefore, we use the [Predicate Utils](https://github.com/luxfi/geth/blob/master/predicate/Predicate.md) package to encode the actual byte slice of size N into the access list.
 
 ### Performance Optimization: Primary Network to Lux L1
 

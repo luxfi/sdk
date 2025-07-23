@@ -6,8 +6,8 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
@@ -52,7 +52,7 @@ func CheckPredicates(rules params.Rules, predicateContext *precompileconfig.Pred
 		// Since [address] is only added to [predicateArguments] when there's a valid predicate in the ruleset
 		// there's no need to check if the predicate exists here.
 		predicaterContract := rules.Predicaters[address]
-		bitset := set.NewBits()
+		bitset := utils.NewBits()
 		for i, predicate := range predicates {
 			if err := predicaterContract.VerifyPredicate(predicateContext, predicate); err != nil {
 				bitset.Add(i)

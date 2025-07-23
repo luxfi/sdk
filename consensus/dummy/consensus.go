@@ -8,17 +8,17 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/params/extras"
-	"github.com/luxfi/evm/utils"
 )
 
 var (
@@ -38,14 +38,14 @@ type Mode struct {
 
 type (
 	DummyEngine struct {
-		clock         *mockable.Clock
+		clock         interfaces.MockableTimer
 		consensusMode Mode
 	}
 )
 
 func NewDummyEngine(
 	mode Mode,
-	clock *mockable.Clock,
+	clock interfaces.MockableTimer,
 ) *DummyEngine {
 	return &DummyEngine{
 		clock:         clock,
@@ -55,18 +55,18 @@ func NewDummyEngine(
 
 func NewETHFaker() *DummyEngine {
 	return &DummyEngine{
-		clock:         &mockable.Clock{},
+		clock:         utils.NewMockableClock(),
 		consensusMode: Mode{ModeSkipBlockFee: true},
 	}
 }
 
 func NewFaker() *DummyEngine {
 	return &DummyEngine{
-		clock: &mockable.Clock{},
+		clock: utils.NewMockableClock(),
 	}
 }
 
-func NewFakerWithClock(clock *mockable.Clock) *DummyEngine {
+func NewFakerWithClock(clock interfaces.MockableTimer) *DummyEngine {
 	return &DummyEngine{
 		clock: clock,
 	}
@@ -74,12 +74,12 @@ func NewFakerWithClock(clock *mockable.Clock) *DummyEngine {
 
 func NewFakerWithMode(mode Mode) *DummyEngine {
 	return &DummyEngine{
-		clock:         &mockable.Clock{},
+		clock:         utils.NewMockableClock(),
 		consensusMode: mode,
 	}
 }
 
-func NewFakerWithModeAndClock(mode Mode, clock *mockable.Clock) *DummyEngine {
+func NewFakerWithModeAndClock(mode Mode, clock interfaces.MockableTimer) *DummyEngine {
 	return &DummyEngine{
 		clock:         clock,
 		consensusMode: mode,
@@ -88,14 +88,14 @@ func NewFakerWithModeAndClock(mode Mode, clock *mockable.Clock) *DummyEngine {
 
 func NewCoinbaseFaker() *DummyEngine {
 	return &DummyEngine{
-		clock:         &mockable.Clock{},
+		clock:         utils.NewMockableClock(),
 		consensusMode: Mode{ModeSkipCoinbase: true},
 	}
 }
 
 func NewFullFaker() *DummyEngine {
 	return &DummyEngine{
-		clock:         &mockable.Clock{},
+		clock:         utils.NewMockableClock(),
 		consensusMode: Mode{ModeSkipHeader: true},
 	}
 }
@@ -325,7 +325,7 @@ func (eng *DummyEngine) verifyBlockFee(
 	return nil
 }
 
-func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
+func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state vm.StateDB, receipts []*types.Receipt) error {
 	config := params.GetExtra(chain.Config())
 	timestamp := block.Time()
 	// we use the parent to determine the fee config
@@ -360,7 +360,7 @@ func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types
 	return nil
 }
 
-func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, state *state.StateDB, txs []*types.Transaction,
+func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header, state vm.StateDB, txs []*types.Transaction,
 	uncles []*types.Header, receipts []*types.Receipt,
 ) (*types.Block, error) {
 	// we use the parent to determine the fee config

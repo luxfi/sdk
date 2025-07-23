@@ -30,23 +30,37 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
-	ethsnapshot "github.com/luxfi/geth/core/state/snapshot"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
 )
 
 // Iterator is an iterator to step over all the accounts or the specific
 // storage in a snapshot which may or may not be composed of multiple layers.
-type Iterator = ethsnapshot.Iterator
+type Iterator interface {
+	// Next steps the iterator forward one element, returning false if exhausted.
+	Next() bool
+	// Error returns any failure that occurred during iteration.
+	Error() error
+	// Release releases any held resources.
+	Release()
+}
 
 // AccountIterator is an iterator to step over all the accounts in a snapshot,
 // which may or may not be composed of multiple layers.
-type AccountIterator = ethsnapshot.AccountIterator
+type AccountIterator interface {
+	Iterator
+	// Account returns the current account
+	Account() (common.Hash, Account)
+}
 
 // StorageIterator is an iterator to step over the specific storage in a snapshot,
 // which may or may not be composed of multiple layers.
-type StorageIterator = ethsnapshot.StorageIterator
+type StorageIterator interface {
+	Iterator
+	// Slot returns the current storage slot
+	Slot() (common.Hash, []byte)
+}
 
 // diffAccountIterator is an account iterator that steps over the accounts (both
 // live and deleted) contained within a single diff layer. Higher order iterators

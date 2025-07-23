@@ -6,9 +6,9 @@ package handlers
 import (
 	"context"
 	"time"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
@@ -20,11 +20,11 @@ import (
 // serving requested contract code bytes
 type CodeRequestHandler struct {
 	codeReader ethdb.KeyValueReader
-	codec      codec.Manager
+	codec      interfaces.Codec
 	stats      stats.CodeRequestHandlerStats
 }
 
-func NewCodeRequestHandler(codeReader ethdb.KeyValueReader, codec codec.Manager, stats stats.CodeRequestHandlerStats) *CodeRequestHandler {
+func NewCodeRequestHandler(codeReader ethdb.KeyValueReader, codec interfaces.Codec, stats stats.CodeRequestHandlerStats) *CodeRequestHandler {
 	handler := &CodeRequestHandler{
 		codeReader: codeReader,
 		codec:      codec,
@@ -38,7 +38,7 @@ func NewCodeRequestHandler(codeReader ethdb.KeyValueReader, codec codec.Manager,
 // Returns nothing if code hash is not found
 // Expects returned errors to be treated as FATAL
 // Assumes ctx is active
-func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID ids.NodeID, requestID uint32, codeRequest message.CodeRequest) ([]byte, error) {
+func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID interfaces.NodeID, requestID uint32, codeRequest message.CodeRequest) ([]byte, error) {
 	startTime := time.Now()
 	n.stats.IncCodeRequest()
 
@@ -71,7 +71,7 @@ func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID ids.NodeID,
 	}
 
 	codeResponse := message.CodeResponse{Data: codeBytes}
-	responseBytes, err := n.codec.Marshal(message.Version, codeResponse)
+	responseBytes, err := n.interfaces.Marshal(message.Version, codeResponse)
 	if err != nil {
 		log.Error("could not marshal CodeResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "request", codeRequest, "err", err)
 		return nil, nil

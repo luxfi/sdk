@@ -5,7 +5,7 @@ package predicate
 
 import (
 	"math/big"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 )

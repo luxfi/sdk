@@ -7,7 +7,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethclient"
 	ethcrypto "github.com/luxfi/geth/crypto"
 )

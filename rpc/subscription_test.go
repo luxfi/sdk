@@ -39,7 +39,7 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 
 	// Side effect: registration of libevm extras.
 	_ "github.com/luxfi/evm/plugin/evm/customtypes"

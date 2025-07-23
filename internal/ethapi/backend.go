@@ -31,18 +31,18 @@ import (
 	"context"
 	"math/big"
 	"time"
+
 	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/consensus"
+	"github.com/luxfi/geth/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/geth/core/state"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rpc"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
 )
 
@@ -61,6 +61,7 @@ type Backend interface {
 	RPCEVMTimeout() time.Duration // global timeout for eth_call over rpc: DoS protection
 	RPCTxFeeCap() float64         // global tx fee cap for all transaction related APIs
 
+	PriceOptionsConfig() PriceOptionConfig
 	UnprotectedAllowed(tx *types.Transaction) bool // allows only for EIP155 transactions.
 
 	// Blockchain API
@@ -79,7 +80,6 @@ type Backend interface {
 	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
 	SubscribeChainHeadEvent(ch chan<- core.ChainHeadEvent) event.Subscription
 	SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription
-	GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error)
 	BadBlocks() ([]*types.Block, []*core.BadBlockReason)
 	IsArchive() bool
 	HistoricalProofQueryWindow() uint64

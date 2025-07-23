@@ -6,7 +6,7 @@ package database
 import (
 	"errors"
 
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/ethdb"
 )
 
@@ -17,9 +17,9 @@ var (
 )
 
 // ethDbWrapper implements ethdb.Database
-type ethDbWrapper struct{ database.Database }
+type ethDbWrapper struct{ interfaces.Database }
 
-func WrapDatabase(db database.Database) ethdb.KeyValueStore { return ethDbWrapper{db} }
+func WrapDatabase(db interfaces.Database) ethdb.KeyValueStore { return ethDbWrapper{db} }
 
 // Stat implements ethdb.Database
 func (db ethDbWrapper) Stat() (string, error) { return "", database.ErrNotFound }

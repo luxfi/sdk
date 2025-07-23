@@ -30,8 +30,8 @@ package consensus
 import (
 	"math/big"
 	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 )
@@ -99,14 +99,14 @@ type Engine interface {
 	//
 	// Note: The block header and state database might be updated to reflect any
 	// consensus rules that happen at finalization (e.g. block rewards).
-	Finalize(chain ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error
+	Finalize(chain ChainHeaderReader, block *types.Block, parent *types.Header, state vm.StateDB, receipts []*types.Receipt) error
 
 	// FinalizeAndAssemble runs any post-transaction state modifications (e.g. block
 	// rewards) and assembles the final block.
 	//
 	// Note: The block header and state database might be updated to reflect any
 	// consensus rules that happen at finalization (e.g. block rewards).
-	FinalizeAndAssemble(chain ChainHeaderReader, header *types.Header, parent *types.Header, state *state.StateDB, txs []*types.Transaction,
+	FinalizeAndAssemble(chain ChainHeaderReader, header *types.Header, parent *types.Header, state vm.StateDB, txs []*types.Transaction,
 		uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error)
 
 	// CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty

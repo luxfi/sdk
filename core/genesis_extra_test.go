@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"

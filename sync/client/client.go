@@ -10,17 +10,17 @@ import (
 	"fmt"
 	"sync/atomic"
 	"time"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/sync/client/stats"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/peer"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/geth/trie"
@@ -33,7 +33,7 @@ const (
 )
 
 var (
-	StateSyncVersion = &version.Application{
+	StateSyncVersion = &interfaces.Application{
 		Major: 1,
 		Minor: 7,
 		Patch: 13,
@@ -68,12 +68,12 @@ type Client interface {
 // Validates response in context of the request
 // Ensures the returned interface matches the expected response type of the request
 // Returns the number of elements in the response (specific to the response type, used in metrics)
-type parseResponseFn func(codec codec.Manager, request message.Request, response []byte) (interface{}, int, error)
+type parseResponseFn func(codec interfaces.Codec, request message.Request, response []byte) (interface{}, int, error)
 
 type client struct {
 	networkClient    peer.NetworkClient
-	codec            codec.Manager
-	stateSyncNodes   []ids.NodeID
+	codec            interfaces.Codec
+	stateSyncNodes   []interfaces.NodeID
 	stateSyncNodeIdx uint32
 	stats            stats.ClientSyncerStats
 	blockParser      EthBlockParser
@@ -81,9 +81,9 @@ type client struct {
 
 type ClientConfig struct {
 	NetworkClient    peer.NetworkClient
-	Codec            codec.Manager
+	Codec            interfaces.Codec
 	Stats            stats.ClientSyncerStats
-	StateSyncNodeIDs []ids.NodeID
+	StateSyncNodeIDs []interfaces.NodeID
 	BlockParser      EthBlockParser
 }
 
@@ -93,11 +93,11 @@ type EthBlockParser interface {
 
 func NewClient(config *ClientConfig) *client {
 	return &client{
-		networkClient:  config.NetworkClient,
-		codec:          config.Codec,
-		stats:          config.Stats,
-		stateSyncNodes: config.StateSyncNodeIDs,
-		blockParser:    config.BlockParser,
+		networkClient:  interfaces.NetworkClient,
+		codec:          interfaces.Codec,
+		stats:          interfaces.Stats,
+		stateSyncNodes: interfaces.StateSyncNodeIDs,
+		blockParser:    interfaces.BlockParser,
 	}
 }
 
@@ -124,9 +124,9 @@ func (c *client) GetLeafs(ctx context.Context, req message.LeafsRequest) (messag
 // - first and last key in the response is not within the requested start and end range
 // - response keys are not in increasing order
 // - proof validation failed
-func parseLeafsResponse(codec codec.Manager, reqIntf message.Request, data []byte) (interface{}, int, error) {
+func parseLeafsResponse(codec interfaces.Codec, reqIntf message.Request, data []byte) (interface{}, int, error) {
 	var leafsResponse message.LeafsResponse
-	if _, err := codec.Unmarshal(data, &leafsResponse); err != nil {
+	if _, err := interfaces.Unmarshal(data, &leafsResponse); err != nil {
 		return nil, 0, err
 	}
 
@@ -199,9 +199,9 @@ func (c *client) GetBlocks(ctx context.Context, hash common.Hash, height uint64,
 // assumes req is of type message.BlockRequest
 // returns types.Blocks as interface{}
 // returns a non-nil error if the request should be retried
-func (c *client) parseBlocks(codec codec.Manager, req message.Request, data []byte) (interface{}, int, error) {
+func (c *client) parseBlocks(codec interfaces.Codec, req message.Request, data []byte) (interface{}, int, error) {
 	var response message.BlockResponse
-	if _, err := codec.Unmarshal(data, &response); err != nil {
+	if _, err := interfaces.Unmarshal(data, &response); err != nil {
 		return nil, 0, fmt.Errorf("%s: %w", errUnmarshalResponse, err)
 	}
 	if len(response.Blocks) == 0 {
@@ -223,12 +223,12 @@ func (c *client) parseBlocks(codec codec.Manager, req message.Request, data []by
 			return nil, 0, fmt.Errorf("%s: %w", errUnmarshalResponse, err)
 		}
 
-		if block.Hash() != hash {
-			return nil, 0, fmt.Errorf("%w for block: (got %v) (expected %v)", errHashMismatch, block.Hash(), hash)
+		if interfaces.Hash() != hash {
+			return nil, 0, fmt.Errorf("%w for block: (got %v) (expected %v)", errHashMismatch, interfaces.Hash(), hash)
 		}
 
 		blocks[i] = block
-		hash = block.ParentHash()
+		hash = interfaces.ParentHash()
 	}
 
 	// return decoded blocks
@@ -249,9 +249,9 @@ func (c *client) GetCode(ctx context.Context, hashes []common.Hash) ([][]byte, e
 // parseCode validates given object as a code object
 // assumes req is of type message.CodeRequest
 // returns a non-nil error if the request should be retried
-func parseCode(codec codec.Manager, req message.Request, data []byte) (interface{}, int, error) {
+func parseCode(codec interfaces.Codec, req message.Request, data []byte) (interface{}, int, error) {
 	var response message.CodeResponse
-	if _, err := codec.Unmarshal(data, &response); err != nil {
+	if _, err := interfaces.Unmarshal(data, &response); err != nil {
 		return nil, 0, err
 	}
 
@@ -312,7 +312,7 @@ func (c *client) get(ctx context.Context, request message.Request, parseFn parse
 
 		var (
 			response []byte
-			nodeID   ids.NodeID
+			nodeID   interfaces.NodeID
 			start    time.Time = time.Now()
 		)
 		if len(c.stateSyncNodes) == 0 {
@@ -329,7 +329,7 @@ func (c *client) get(ctx context.Context, request message.Request, parseFn parse
 
 		if err != nil {
 			ctx := make([]interface{}, 0, 8)
-			if nodeID != ids.EmptyNodeID {
+			if nodeID != interfaces.EmptyIDNodeID {
 				ctx = append(ctx, "nodeID", nodeID)
 			}
 			ctx = append(ctx, "attempt", attempt, "request", request, "err", err)

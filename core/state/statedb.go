@@ -41,7 +41,8 @@ type StateDB struct {
 
 // New creates a new state from a given trie.
 func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) {
-	ethStateDB, err := ethstate.New(root, db, snaps)
+	// Note: geth's New function doesn't take snapshot.Tree anymore
+	ethStateDB, err := ethstate.New(root, db)
 	if err != nil {
 		return nil, err
 	}

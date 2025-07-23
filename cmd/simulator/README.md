@@ -7,7 +7,7 @@ When building developing your own blockchain using `evm`, you may want to analyz
 To build the load simulator, navigate to the base of the simulator directory:
 
 ```bash
-cd $GOPATH/src/github.com/luxfi/evm/cmd/simulator
+cd $GOPATH/src/github.com/luxfi/geth/cmd/simulator
 ```
 
 Build the simulator:

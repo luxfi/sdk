@@ -16,36 +16,29 @@ import (
 	"testing"
 	"time"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/luxfi/node/chains/atomic"
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/memdb"
-	"github.com/luxfi/node/database/prefixdb"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/linear"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/validators"
-	luxConstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/crypto/bls"
-	"github.com/luxfi/node/utils/formatting"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/vms/components/chain"
+	
 	"github.com/luxfi/evm/accounts/abi"
 	accountKeystore "github.com/luxfi/geth/accounts/keystore"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/eth"
+	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/trie"
+	
+	"github.com/luxfi/node/chains/atomic"
+	"github.com/luxfi/node/utils/formatting"
+	
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/geth/eth"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/precompile/allowlist"
@@ -53,16 +46,12 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
-	luxdconstants "github.com/luxfi/node/utils/constants"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 )
 
 var (
-	testNetworkID   uint32 = luxdconstants.UnitTestID
+	testNetworkID   uint32 = interfaces.UnitTestID
 	testCChainID           = ids.ID{'c', 'c', 'h', 'a', 'i', 'n', 't', 'e', 's', 't'}
 	testXChainID           = ids.ID{'t', 'e', 's', 't', 'x'}
 	testMinGasPrice int64  = 225_000_000_000
@@ -84,7 +73,7 @@ var (
 		g := new(core.Genesis)
 		g.Difficulty = big.NewInt(0)
 		g.GasLimit = 8000000
-		g.Timestamp = uint64(upgrade.InitiallyActiveTime.Unix())
+		g.Timestamp = uint64(interfaces.InitiallyActiveTime.Unix())
 
 		// Use chainId: 43111, so that it does not overlap with any Lux ChainIDs, which may have their
 		// config overridden in vm.Initialize.
@@ -93,9 +82,9 @@ var (
 		g.Config = &cpy
 
 		allocStr := `{"0x71562b71999873DB5b286dF957af199Ec94617F7": {"balance":"0x4192927743b88000"}, "0x703c4b2bD70c169f5717101CaeE543299Fc946C7": {"balance":"0x4192927743b88000"}}`
-		json.Unmarshal([]byte(allocStr), &g.Alloc)
+		interfaces.Unmarshal([]byte(allocStr), &g.Alloc)
 
-		b, err := json.Marshal(g)
+		b, err := interfaces.Marshal(g)
 		if err != nil {
 			panic(err)
 		}
@@ -125,7 +114,7 @@ func buildGenesisTest(t *testing.T, genesisJSON string) []byte {
 	ss := CreateStaticService()
 
 	genesis := &core.Genesis{}
-	if err := json.Unmarshal([]byte(genesisJSON), genesis); err != nil {
+	if err := interfaces.Unmarshal([]byte(genesisJSON), genesis); err != nil {
 		t.Fatalf("Problem unmarshaling genesis JSON: %s", err)
 	}
 	args := &BuildGenesisArgs{GenesisData: genesis}
@@ -153,7 +142,7 @@ func NewContext() *consensus.Context {
 	_ = aliaser.Alias(testCChainID, testCChainID.String())
 	_ = aliaser.Alias(testXChainID, "X")
 	_ = aliaser.Alias(testXChainID, testXChainID.String())
-	ctx.ValidatorState = &validators.TestState{
+	ctx.ValidatorState = &interfaces.TestState{
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
 				luxConstants.PlatformChainID: luxConstants.PrimaryNetworkID,
@@ -166,12 +155,12 @@ func NewContext() *consensus.Context {
 			return subnetID, nil
 		},
 	}
-	blsSecretKey, err := bls.NewSecretKey()
+	blsSecretKey, err := interfaces.NewSecretKey()
 	if err != nil {
 		panic(err)
 	}
-	ctx.WarpSigner = luxWarp.NewSigner(blsSecretKey, ctx.NetworkID, ctx.ChainID)
-	ctx.PublicKey = bls.PublicFromSecretKey(blsSecretKey)
+	ctx.WarpSigner = interfaces.NewSigner(blsSecretKey, ctx.NetworkID, ctx.ChainID)
+	ctx.PublicKey = interfaces.PublicFromSecretKey(blsSecretKey)
 	return ctx
 }
 
@@ -182,7 +171,7 @@ func setupGenesis(
 ) (*consensus.Context,
 	database.Database,
 	[]byte,
-	chan commonEng.Message,
+	chan interfaces.Message,
 	*atomic.Memory,
 ) {
 	if len(genesisJSON) == 0 {
@@ -190,14 +179,14 @@ func setupGenesis(
 	}
 	ctx := utils.TestConsensusContext()
 
-	baseDB := memdb.New()
+	baseDB := interfaces.New()
 
 	// initialize the atomic memory
-	atomicMemory := atomic.NewMemory(prefixdb.New([]byte{0}, baseDB))
+	atomicMemory := atomic.NewMemory(interfaces.New([]byte{0}, baseDB))
 	ctx.SharedMemory = atomicMemory.NewSharedMemory(ctx.ChainID)
 
-	issuer := make(chan commonEng.Message, 1)
-	prefixedDB := prefixdb.New([]byte{1}, baseDB)
+	issuer := make(chan interfaces.Message, 1)
+	prefixedDB := interfaces.New([]byte{1}, baseDB)
 	return ctx, prefixedDB, []byte(genesisJSON), issuer, atomicMemory
 }
 
@@ -211,7 +200,7 @@ func GenesisVM(t *testing.T,
 	configJSON string,
 	upgradeJSON string,
 ) (
-	chan commonEng.Message,
+	chan interfaces.Message,
 	*VM,
 	database.Database,
 	*enginetest.Sender,
@@ -220,7 +209,7 @@ func GenesisVM(t *testing.T,
 	ctx, dbManager, genesisBytes, issuer, _ := setupGenesis(t, genesisJSON)
 	appSender := &enginetest.Sender{T: t}
 	appSender.CantSendAppGossip = true
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	appSender.SendAppGossipF = func(context.Context, interfaces.SendConfig, []byte) error { return nil }
 	err := vm.Initialize(
 		context.Background(),
 		ctx,
@@ -229,7 +218,7 @@ func GenesisVM(t *testing.T,
 		[]byte(upgradeJSON),
 		[]byte(configJSON),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	)
 	require.NoError(t, err, "error initializing GenesisVM")
@@ -247,8 +236,8 @@ func TestVMConfig(t *testing.T) {
 	enabledEthAPIs := []string{"debug"}
 	configJSON := fmt.Sprintf(`{"rpc-tx-fee-cap": %g,"eth-apis": %s}`, txFeeCap, fmt.Sprintf("[%q]", enabledEthAPIs[0]))
 	_, vm, _, _ := GenesisVM(t, false, "", configJSON, "")
-	require.Equal(t, vm.config.RPCTxFeeCap, txFeeCap, "Tx Fee Cap should be set")
-	require.Equal(t, vm.config.EthAPIs(), enabledEthAPIs, "EnabledEthAPIs should be set")
+	require.Equal(t, vm.interfaces.RPCTxFeeCap, txFeeCap, "Tx Fee Cap should be set")
+	require.Equal(t, vm.interfaces.EthAPIs(), enabledEthAPIs, "EnabledEthAPIs should be set")
 	require.NoError(t, vm.Shutdown(context.Background()))
 }
 
@@ -258,7 +247,7 @@ func TestVMConfigDefaults(t *testing.T) {
 	configJSON := fmt.Sprintf(`{"rpc-tx-fee-cap": %g,"eth-apis": %s}`, txFeeCap, fmt.Sprintf("[%q]", enabledEthAPIs[0]))
 	_, vm, _, _ := GenesisVM(t, false, "", configJSON, "")
 
-	var vmConfig config.Config
+	var vmConfig interfaces.Config
 	vmConfig.SetDefaults(defaultTxPoolConfig)
 	vmConfig.RPCTxFeeCap = txFeeCap
 	vmConfig.EnabledEthAPIs = enabledEthAPIs
@@ -270,7 +259,7 @@ func TestVMNilConfig(t *testing.T) {
 	_, vm, _, _ := GenesisVM(t, false, "", "", "")
 
 	// VM Config should match defaults if no config is passed in
-	var vmConfig config.Config
+	var vmConfig interfaces.Config
 	vmConfig.SetDefaults(defaultTxPoolConfig)
 	require.Equal(t, vmConfig, vm.config, "VM Config should match default config")
 	require.NoError(t, vm.Shutdown(context.Background()))
@@ -281,8 +270,8 @@ func TestVMContinuousProfiler(t *testing.T) {
 	profilerFrequency := 500 * time.Millisecond
 	configJSON := fmt.Sprintf(`{"continuous-profiler-dir": %q,"continuous-profiler-frequency": "500ms"}`, profilerDir)
 	_, vm, _, _ := GenesisVM(t, false, "", configJSON, "")
-	require.Equal(t, vm.config.ContinuousProfilerDir, profilerDir, "profiler dir should be set")
-	require.Equal(t, vm.config.ContinuousProfilerFrequency.Duration, profilerFrequency, "profiler frequency should be set")
+	require.Equal(t, vm.interfaces.ContinuousProfilerDir, profilerDir, "profiler dir should be set")
+	require.Equal(t, vm.interfaces.ContinuousProfilerFrequency.Duration, profilerFrequency, "profiler frequency should be set")
 
 	// Sleep for twice the frequency of the profiler to give it time
 	// to generate the first profile.
@@ -338,7 +327,7 @@ func TestVMUpgrades(t *testing.T) {
 	}
 }
 
-func issueAndAccept(t *testing.T, issuer <-chan commonEng.Message, vm *VM) chain.Block {
+func issueAndAccept(t *testing.T, issuer <-chan interfaces.Message, vm *VM) chain.Block {
 	t.Helper()
 	<-issuer
 
@@ -458,7 +447,7 @@ func TestBuildEthTxBlock(t *testing.T) {
 		[]byte(""),
 		[]byte(`{"pruning-enabled":true}`),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		nil,
 	); err != nil {
 		t.Fatal(err)
@@ -2050,7 +2039,7 @@ func TestBuildAllowListActivationBlock(t *testing.T) {
 		t.Fatalf("Expected new block to match")
 	}
 
-	// Verify that the allow list config activation was handled correctly in the first block.
+	// Verify that the allow list config activation was handled correctly in the first interfaces.
 	blkState, err := vm.blockChain.StateAt(blk.(*chain.BlockWrapper).Block.(*Block).ethBlock.Root())
 	if err != nil {
 		t.Fatal(err)
@@ -2095,7 +2084,7 @@ func TestTxAllowListSuccessfulTx(t *testing.T) {
 			},
 		},
 	}
-	upgradeBytesJSON, err := json.Marshal(upgradeConfig)
+	upgradeBytesJSON, err := interfaces.Marshal(upgradeConfig)
 	require.NoError(t, err)
 	issuer, vm, _, _ := GenesisVM(t, true, string(genesisJSON), "", string(upgradeBytesJSON))
 
@@ -2163,10 +2152,10 @@ func TestTxAllowListSuccessfulTx(t *testing.T) {
 	// Verify that the constructed block only has the whitelisted tx
 	block := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
 
-	txs := block.Transactions()
+	txs := interfaces.Transactions()
 
-	if txs.Len() != 1 {
-		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())
+	if interfaces.Len() != 1 {
+		t.Fatalf("Expected number of txs to be %d, but found %d", 1, interfaces.Len())
 	}
 
 	require.Equal(t, signedTx0.Hash(), txs[0].Hash())
@@ -2187,7 +2176,7 @@ func TestTxAllowListSuccessfulTx(t *testing.T) {
 	require.Equal(t, newHead.Head.Hash(), common.Hash(blk.ID()))
 	block = blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
 
-	blkState, err := vm.blockChain.StateAt(block.Root())
+	blkState, err := vm.blockChain.StateAt(interfaces.Root())
 	require.NoError(t, err)
 
 	// Check that address 0 is admin and address 1 is manager
@@ -2212,7 +2201,7 @@ func TestTxAllowListSuccessfulTx(t *testing.T) {
 
 	// Verify that the constructed block only has the whitelisted tx
 	block = blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	txs = block.Transactions()
+	txs = interfaces.Transactions()
 
 	require.Len(t, txs, 1)
 	require.Equal(t, signedTx3.Hash(), txs[0].Hash())
@@ -2242,7 +2231,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 		[]byte(""),
 		[]byte(""),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		nil,
 	)
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
@@ -2260,7 +2249,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 			},
 		},
 	}
-	upgradeBytesJSON, err := json.Marshal(upgradeConfig)
+	upgradeBytesJSON, err := interfaces.Marshal(upgradeConfig)
 	require.NoError(t, err)
 
 	vm = &VM{}
@@ -2273,7 +2262,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 		upgradeBytesJSON,
 		[]byte(""),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		nil,
 	)
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
@@ -2287,7 +2276,7 @@ func TestTxAllowListDisablePrecompile(t *testing.T) {
 	if err := genesis.UnmarshalJSON([]byte(genesisJSONEVM)); err != nil {
 		t.Fatal(err)
 	}
-	enableAllowListTimestamp := upgrade.InitiallyActiveTime // enable at initially active time
+	enableAllowListTimestamp := interfaces.InitiallyActiveTime // enable at initially active time
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		txallowlist.ConfigKey: txallowlist.NewConfig(utils.TimeToNewUint64(enableAllowListTimestamp), testEthAddrs[0:1], nil, nil),
 	}
@@ -2366,14 +2355,14 @@ func TestTxAllowListDisablePrecompile(t *testing.T) {
 
 	// Verify that the constructed block only has the whitelisted tx
 	block := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	txs := block.Transactions()
-	if txs.Len() != 1 {
-		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())
+	txs := interfaces.Transactions()
+	if interfaces.Len() != 1 {
+		t.Fatalf("Expected number of txs to be %d, but found %d", 1, interfaces.Len())
 	}
 	require.Equal(t, signedTx0.Hash(), txs[0].Hash())
 
 	// verify the issued block is after the network upgrade
-	require.GreaterOrEqual(t, int64(block.Time()), disableAllowListTimestamp.Unix())
+	require.GreaterOrEqual(t, int64(interfaces.Time()), disableAllowListTimestamp.Unix())
 
 	<-newTxPoolHeadChan // wait for new head in tx pool
 
@@ -2388,9 +2377,9 @@ func TestTxAllowListDisablePrecompile(t *testing.T) {
 
 	// Verify that the constructed block only has the previously rejected tx
 	block = blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	txs = block.Transactions()
-	if txs.Len() != 1 {
-		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())
+	txs = interfaces.Transactions()
+	if interfaces.Len() != 1 {
+		t.Fatalf("Expected number of txs to be %d, but found %d", 1, interfaces.Len())
 	}
 	require.Equal(t, signedTx1.Hash(), txs[0].Hash())
 }
@@ -2493,7 +2482,7 @@ func TestFeeManagerChangeFee(t *testing.T) {
 
 	block := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
 
-	feeConfig, lastChangedAt, err = vm.blockChain.GetFeeConfigAt(block.Header())
+	feeConfig, lastChangedAt, err = vm.blockChain.GetFeeConfigAt(interfaces.Header())
 	require.NoError(t, err)
 	require.EqualValues(t, testHighFeeConfig, feeConfig)
 	require.EqualValues(t, vm.blockChain.CurrentBlock().Number, lastChangedAt)
@@ -2592,10 +2581,10 @@ func TestAllowFeeRecipientEnabled(t *testing.T) {
 	}
 
 	etherBase := common.HexToAddress("0x0123456789")
-	c := config.Config{}
+	c := interfaces.Config{}
 	c.SetDefaults(defaultTxPoolConfig)
 	c.FeeRecipient = etherBase.String()
-	configJSON, err := json.Marshal(c)
+	configJSON, err := interfaces.Marshal(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2652,10 +2641,10 @@ func TestRewardManagerPrecompileSetRewardAddress(t *testing.T) {
 	require.NoError(t, err)
 
 	etherBase := common.HexToAddress("0x0123456789") // give custom ether base
-	c := config.Config{}
+	c := interfaces.Config{}
 	c.SetDefaults(defaultTxPoolConfig)
 	c.FeeRecipient = etherBase.String()
-	configJSON, err := json.Marshal(c)
+	configJSON, err := interfaces.Marshal(c)
 	require.NoError(t, err)
 
 	// arbitrary choice ahead of enableAllowListTimestamp
@@ -2750,7 +2739,7 @@ func TestRewardManagerPrecompileSetRewardAddress(t *testing.T) {
 	ethBlock = blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
 	// Reward manager deactivated at this block, so we expect the parent state
 	// to determine the coinbase for this block before full deactivation in the
-	// next block.
+	// next interfaces.
 	require.Equal(t, testAddr, ethBlock.Coinbase())
 	require.GreaterOrEqual(t, int64(ethBlock.Time()), disableTime.Unix())
 
@@ -2793,10 +2782,10 @@ func TestRewardManagerPrecompileAllowFeeRecipients(t *testing.T) {
 	genesisJSON, err := genesis.MarshalJSON()
 	require.NoError(t, err)
 	etherBase := common.HexToAddress("0x0123456789") // give custom ether base
-	c := config.Config{}
+	c := interfaces.Config{}
 	c.SetDefaults(defaultTxPoolConfig)
 	c.FeeRecipient = etherBase.String()
-	configJSON, err := json.Marshal(c)
+	configJSON, err := interfaces.Marshal(c)
 	require.NoError(t, err)
 	// configure a network upgrade to remove the reward manager
 	// arbitrary choice ahead of enableAllowListTimestamp
@@ -2916,7 +2905,7 @@ func TestRewardManagerPrecompileAllowFeeRecipients(t *testing.T) {
 func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// The most recent network upgrade in EVM is EVM itself, which cannot be disabled for this test since it results in
 	// disabling dynamic fees and causes a panic since some code assumes that this is enabled.
-	// TODO update this test when there is a future network upgrade that can be skipped in the config.
+	// TODO update this test when there is a future network upgrade that can be skipped in the interfaces.
 	t.Skip("no skippable upgrades")
 
 	issuer, vm, dbManager, appSender := GenesisVM(t, true, genesisJSONPreEVM, `{"pruning-enabled":true}`, "")
@@ -2954,24 +2943,24 @@ func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// use the block's timestamp instead of 0 since rewind to genesis
 	// is hardcoded to be allowed in core/genesis.go.
 	genesisWithUpgrade := &core.Genesis{}
-	require.NoError(t, json.Unmarshal([]byte(genesisJSONPreEVM), genesisWithUpgrade))
+	require.NoError(t, interfaces.Unmarshal([]byte(genesisJSONPreEVM), genesisWithUpgrade))
 	params.GetExtra(genesisWithUpgrade.Config).EVMTimestamp = utils.TimeToNewUint64(blk.Timestamp())
-	genesisWithUpgradeBytes, err := json.Marshal(genesisWithUpgrade)
+	genesisWithUpgradeBytes, err := interfaces.Marshal(genesisWithUpgrade)
 	require.NoError(t, err)
 
 	// Reset metrics to allow re-initialization
-	vm.ctx.Metrics = metrics.NewPrefixGatherer()
+	vm.ctx.Metrics = interfaces.NewPrefixGatherer()
 
 	// this will not be allowed
-	err = reinitVM.Initialize(context.Background(), vm.ctx, dbManager, genesisWithUpgradeBytes, []byte{}, []byte{}, issuer, []*commonEng.Fx{}, appSender)
+	err = reinitVM.Initialize(context.Background(), vm.ctx, dbManager, genesisWithUpgradeBytes, []byte{}, []byte{}, issuer, []*interfaces.Fx{}, appSender)
 	require.ErrorContains(t, err, "mismatching EVM fork block timestamp in database")
 
 	// Reset metrics to allow re-initialization
-	vm.ctx.Metrics = metrics.NewPrefixGatherer()
+	vm.ctx.Metrics = interfaces.NewPrefixGatherer()
 
 	// try again with skip-upgrade-check
 	config := []byte(`{"skip-upgrade-check": true}`)
-	err = reinitVM.Initialize(context.Background(), vm.ctx, dbManager, genesisWithUpgradeBytes, []byte{}, config, issuer, []*commonEng.Fx{}, appSender)
+	err = reinitVM.Initialize(context.Background(), vm.ctx, dbManager, genesisWithUpgradeBytes, []byte{}, config, issuer, []*interfaces.Fx{}, appSender)
 	require.NoError(t, err)
 	require.NoError(t, reinitVM.Shutdown(context.Background()))
 }
@@ -3086,16 +3075,16 @@ func TestParentBeaconRootBlock(t *testing.T) {
 func TestStandaloneDB(t *testing.T) {
 	vm := &VM{}
 	ctx := utils.TestConsensusContext()
-	baseDB := memdb.New()
-	atomicMemory := atomic.NewMemory(prefixdb.New([]byte{0}, baseDB))
+	baseDB := interfaces.New()
+	atomicMemory := atomic.NewMemory(interfaces.New([]byte{0}, baseDB))
 	ctx.SharedMemory = atomicMemory.NewSharedMemory(ctx.ChainID)
-	issuer := make(chan commonEng.Message, 1)
-	sharedDB := prefixdb.New([]byte{1}, baseDB)
+	issuer := make(chan interfaces.Message, 1)
+	sharedDB := interfaces.New([]byte{1}, baseDB)
 	// alter network ID to use standalone database
 	ctx.NetworkID = 123456
 	appSender := &enginetest.Sender{T: t}
 	appSender.CantSendAppGossip = true
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	appSender.SendAppGossipF = func(context.Context, interfaces.SendConfig, []byte) error { return nil }
 	configJSON := `{"database-type": "memdb"}`
 
 	isDBEmpty := func(db database.Database) bool {
@@ -3114,7 +3103,7 @@ func TestStandaloneDB(t *testing.T) {
 		nil,
 		[]byte(configJSON),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	)
 	defer vm.Shutdown(context.Background())
@@ -3247,7 +3236,7 @@ func TestFeeManagerRegressionMempoolMinFeeAfterRestart(t *testing.T) {
 
 	// check that the fee config is updated
 	block := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
-	feeConfig, lastChangedAt, err = restartedVM.blockChain.GetFeeConfigAt(block.Header())
+	feeConfig, lastChangedAt, err = restartedVM.blockChain.GetFeeConfigAt(interfaces.Header())
 	require.NoError(t, err)
 	require.EqualValues(t, restartedVM.blockChain.CurrentBlock().Number, lastChangedAt)
 	require.EqualValues(t, testLowFeeConfig, feeConfig)
@@ -3280,11 +3269,11 @@ func TestFeeManagerRegressionMempoolMinFeeAfterRestart(t *testing.T) {
 	require.Equal(t, newHead.Head.Hash(), common.Hash(blk.ID()))
 }
 
-func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, issuer chan commonEng.Message, appSender commonEng.AppSender, finishBootstrapping bool) (*VM, error) {
+func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, issuer chan interfaces.Message, appSender interfaces.AppSender, finishBootstrapping bool) (*VM, error) {
 	vm.Shutdown(context.Background())
 	restartedVM := &VM{}
-	vm.ctx.Metrics = metrics.NewPrefixGatherer()
-	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, issuer, []*commonEng.Fx{}, appSender)
+	vm.ctx.Metrics = interfaces.NewPrefixGatherer()
+	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, issuer, []*interfaces.Fx{}, appSender)
 	if err != nil {
 		return nil, err
 	}

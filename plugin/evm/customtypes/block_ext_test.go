@@ -15,7 +15,7 @@ import (
 	// TODO(arr4n) These tests were originally part of the `evm/core/types`
 	// package so assume the presence of identifiers. A dot-import reduces PR
 	// noise during the refactoring.
-	. "github.com/luxfi/geth/core/types"
+	. "github.com/luxfi/evm/core/types"
 )
 
 func TestCopyHeader(t *testing.T) {
