@@ -37,11 +37,11 @@ import (
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/crypto/kzg4844"
 	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/geth/params"
-	vmerr "github.com/luxfi/geth/vmerrs"
+	ethparams "github.com/luxfi/evm/params"
+	vmerr "github.com/luxfi/evm/vmerrs"
 )
 
 var (

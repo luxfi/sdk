@@ -6,15 +6,15 @@ package handlers
 import (
 	"context"
 	"testing"
-	"github.com/luxfi/node/database/memdb"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/linear"
-	"github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/engine/linear/block"
-	"github.com/luxfi/node/utils/crypto/bls"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/warp"
@@ -24,22 +24,22 @@ import (
 func TestMessageSignatureHandler(t *testing.T) {
 	testutils.WithMetrics(t)
 
-	database := memdb.New()
+	database := interfaces.New()
 	consensusCtx := utils.TestConsensusContext()
 	blsSecretKey, err := localsigner.New()
 	require.NoError(t, err)
-	warpSigner := luxWarp.NewSigner(blsSecretKey, consensusCtx.NetworkID, consensusCtx.ChainID)
+	warpSigner := interfaces.NewSigner(blsSecretKey, consensusCtx.NetworkID, consensusCtx.ChainID)
 
-	addressedPayload, err := payload.NewAddressedCall([]byte{1, 2, 3}, []byte{1, 2, 3})
+	addressedPayload, err := interfaces.NewAddressedCall([]byte{1, 2, 3}, []byte{1, 2, 3})
 	require.NoError(t, err)
-	offchainMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, addressedPayload.Bytes())
+	offchainMessage, err := interfaces.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, addressedPayload.Bytes())
 	require.NoError(t, err)
 
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](100)
-	backend, err := warp.NewBackend(consensusCtx.NetworkID, consensusCtx.ChainID, warpSigner, warptest.EmptyBlockClient, warptest.NoOpValidatorReader{}, database, messageSignatureCache, [][]byte{offchainMessage.Bytes()})
+	backend, err := interfaces.NewBackend(consensusCtx.NetworkID, consensusCtx.ChainID, warpSigner, warptest.EmptyBlockClient, warptest.NoOpValidatorReader{}, database, messageSignatureCache, [][]byte{offchainMessage.Bytes()})
 	require.NoError(t, err)
 
-	msg, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, []byte("test"))
+	msg, err := interfaces.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, []byte("test"))
 	require.NoError(t, err)
 	messageID := msg.ID()
 	require.NoError(t, backend.AddMessage(msg))
@@ -50,7 +50,7 @@ func TestMessageSignatureHandler(t *testing.T) {
 
 	unknownMessageID := ids.GenerateTestID()
 
-	emptySignature := [bls.SignatureLen]byte{}
+	emptySignature := [interfaces.SignatureLen]byte{}
 
 	tests := map[string]struct {
 		setup       func() (request message.MessageSignatureRequest, expectedResponse []byte)
@@ -130,16 +130,16 @@ func TestMessageSignatureHandler(t *testing.T) {
 func TestBlockSignatureHandler(t *testing.T) {
 	testutils.WithMetrics(t)
 
-	database := memdb.New()
+	database := interfaces.New()
 	consensusCtx := utils.TestConsensusContext()
 	blsSecretKey, err := localsigner.New()
 	require.NoError(t, err)
 
-	warpSigner := luxWarp.NewSigner(blsSecretKey, consensusCtx.NetworkID, consensusCtx.ChainID)
+	warpSigner := interfaces.NewSigner(blsSecretKey, consensusCtx.NetworkID, consensusCtx.ChainID)
 	blkID := ids.GenerateTestID()
 	blockClient := warptest.MakeBlockClient(blkID)
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](100)
-	backend, err := warp.NewBackend(
+	backend, err := interfaces.NewBackend(
 		consensusCtx.NetworkID,
 		consensusCtx.ChainID,
 		warpSigner,
@@ -155,7 +155,7 @@ func TestBlockSignatureHandler(t *testing.T) {
 	require.NoError(t, err)
 	unknownMessageID := ids.GenerateTestID()
 
-	emptySignature := [bls.SignatureLen]byte{}
+	emptySignature := [interfaces.SignatureLen]byte{}
 
 	tests := map[string]struct {
 		setup       func() (request message.BlockSignatureRequest, expectedResponse []byte)

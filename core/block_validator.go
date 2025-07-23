@@ -31,9 +31,9 @@ import (
 	"fmt"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/trie"
 )
 

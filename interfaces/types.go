@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 )
 
 // CallMsg contains parameters for contract calls.
@@ -55,7 +55,7 @@ type FilterQuery struct {
 // should be preferred over full blocks whenever possible.
 //
 // The returned error is NotFound if the requested item does not exist.
-type ChainReader interface {
+type EVMChainReader interface {
 	BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error)
 	BlockByNumber(ctx context.Context, number *big.Int) (*types.Block, error)
 	HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error)

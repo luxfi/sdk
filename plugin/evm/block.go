@@ -12,25 +12,25 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/linear"
-	"github.com/luxfi/node/consensus/engine/linear/block"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var (
 	_ chain.Block           = (*Block)(nil)
-	_ block.WithVerifyContext = (*Block)(nil)
+	_ interfaces.WithVerifyContext = (*Block)(nil)
 )
 
 // Block implements the chain.Block interface
 type Block struct {
-	id       ids.ID
+	id       interfaces.ID
 	ethBlock *types.Block
 	vm       *VM
 }
@@ -38,14 +38,14 @@ type Block struct {
 // newBlock returns a new Block wrapping the ethBlock type and implementing the chain.Block interface
 func (vm *VM) newBlock(ethBlock *types.Block) *Block {
 	return &Block{
-		id:       ids.ID(ethBlock.Hash()),
+		id:       interfaces.ID(ethBlock.Hash()),
 		ethBlock: ethBlock,
 		vm:       vm,
 	}
 }
 
 // ID implements the chain.Block interface
-func (b *Block) ID() ids.ID { return b.id }
+func (b *Block) ID() interfaces.ID { return b.id }
 
 // Accept implements the chain.Block interface
 func (b *Block) Accept(context.Context) error {
@@ -53,7 +53,7 @@ func (b *Block) Accept(context.Context) error {
 
 	// Although returning an error from Accept is considered fatal, it is good
 	// practice to cleanup the batch we were modifying in the case of an error.
-	defer vm.versiondb.Abort()
+	defer vm.interfaces.Abort()
 
 	blkID := b.ID()
 	log.Debug("accepting block",
@@ -80,7 +80,7 @@ func (b *Block) Accept(context.Context) error {
 		return fmt.Errorf("failed to put %s as the last accepted block: %w", blkID, err)
 	}
 
-	return b.vm.versiondb.Commit()
+	return b.vm.interfaces.Commit()
 }
 
 // handlePrecompileAccept calls Accept on any logs generated with an active precompile address that implements
@@ -98,7 +98,7 @@ func (b *Block) handlePrecompileAccept(rules extras.Rules) error {
 	if len(receipts) == 0 && b.ethBlock.ReceiptHash() != types.EmptyRootHash {
 		return fmt.Errorf("failed to fetch receipts for accepted block with non-empty root hash (%s) (Block: %s, Height: %d)", b.ethBlock.ReceiptHash(), b.ethBlock.Hash(), b.ethBlock.NumberU64())
 	}
-	acceptCtx := &precompileconfig.AcceptContext{
+	acceptCtx := &precompileinterfaces.AcceptContext{
 		ConsensusCtx: b.vm.ctx,
 		Warp:    b.vm.warpBackend,
 	}
@@ -129,8 +129,8 @@ func (b *Block) Reject(context.Context) error {
 }
 
 // Parent implements the chain.Block interface
-func (b *Block) Parent() ids.ID {
-	return ids.ID(b.ethBlock.ParentHash())
+func (b *Block) Parent() interfaces.ID {
+	return interfaces.ID(b.ethBlock.ParentHash())
 }
 
 // Height implements the chain.Block interface
@@ -156,13 +156,13 @@ func (b *Block) syntacticVerify() error {
 
 // Verify implements the chain.Block interface
 func (b *Block) Verify(context.Context) error {
-	return b.verify(&precompileconfig.PredicateContext{
+	return b.verify(&precompileinterfaces.PredicateContext{
 		ConsensusCtx:            b.vm.ctx,
 		ProposerVMBlockCtx: nil,
 	}, true)
 }
 
-// ShouldVerifyWithContext implements the block.WithVerifyContext interface
+// ShouldVerifyWithContext implements the interfaces.WithVerifyContext interface
 func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 	predicates := b.vm.chainConfig.LuxRules(b.ethBlock.Number(), b.ethBlock.Timestamp()).Predicaters
 	// Short circuit early if there are no predicates to verify
@@ -185,9 +185,9 @@ func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 	return false, nil
 }
 
-// VerifyWithContext implements the block.WithVerifyContext interface
-func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) error {
-	return b.verify(&precompileconfig.PredicateContext{
+// VerifyWithContext implements the interfaces.WithVerifyContext interface
+func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *interfaces.Context) error {
+	return b.verify(&precompileinterfaces.PredicateContext{
 		ConsensusCtx:            b.vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}, true)
@@ -196,7 +196,7 @@ func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block
 // Verify the block is valid.
 // Enforces that the predicates are valid within [predicateContext].
 // Writes the block details to disk and the state to the trie manager iff writes=true.
-func (b *Block) verify(predicateContext *precompileconfig.PredicateContext, writes bool) error {
+func (b *Block) verify(predicateContext *precompileinterfaces.PredicateContext, writes bool) error {
 	if predicateContext.ProposerVMBlockCtx != nil {
 		log.Debug("Verifying block with context", "block", b.ID(), "height", b.Height())
 	} else {
@@ -229,7 +229,7 @@ func (b *Block) verify(predicateContext *precompileconfig.PredicateContext, writ
 }
 
 // verifyPredicates verifies the predicates in the block are valid according to predicateContext.
-func (b *Block) verifyPredicates(predicateContext *precompileconfig.PredicateContext) error {
+func (b *Block) verifyPredicates(predicateContext *precompileinterfaces.PredicateContext) error {
 	rules := b.vm.chainConfig.LuxRules(b.ethBlock.Number(), b.ethBlock.Timestamp())
 
 	switch {

@@ -27,7 +27,7 @@
 package blobpool
 
 import (
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/log"
 )
 
 // Config are the configuration parameters of the blob transaction pool.

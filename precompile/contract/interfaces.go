@@ -6,10 +6,10 @@ package contract
 
 import (
 	"math/big"
-	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
-	ethtypes "github.com/luxfi/geth/core/types"
+	ethtypes "github.com/luxfi/evm/core/types"
 	"github.com/holiman/uint256"
 )
 
@@ -52,7 +52,7 @@ type StateDB interface {
 type AccessibleState interface {
 	GetStateDB() StateDB
 	GetBlockContext() BlockContext
-	GetConsensusContext() *consensus.Context
+	GetConsensusContext() *interfaces.ChainContext
 	GetChainConfig() precompileconfig.ChainConfig
 }
 

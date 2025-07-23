@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/peer"
 
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var _ peer.NetworkClient = &mockNetwork{}
@@ -19,28 +19,28 @@ var _ peer.NetworkClient = &mockNetwork{}
 type mockNetwork struct {
 	// captured request data
 	numCalls         uint
-	requestedVersion *version.Application
+	requestedVersion *interfaces.Application
 	request          []byte
 
 	// response mocking for RequestAny and Request calls
 	response       [][]byte
 	callback       func() // callback is called prior to processing each mock call
 	requestErr     []error
-	nodesRequested []ids.NodeID
+	nodesRequested []interfaces.NodeID
 }
 
-func (t *mockNetwork) SendAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte) ([]byte, ids.NodeID, error) {
+func (t *mockNetwork) SendAppRequestAny(ctx context.Context, minVersion *interfaces.Application, request []byte) ([]byte, interfaces.NodeID, error) {
 	if len(t.response) == 0 {
-		return nil, ids.EmptyNodeID, errors.New("no mocked response to return in mockNetwork")
+		return nil, interfaces.EmptyIDNodeID, errors.New("no mocked response to return in mockNetwork")
 	}
 
 	t.requestedVersion = minVersion
 
 	response, err := t.processMock(request)
-	return response, ids.EmptyNodeID, err
+	return response, interfaces.EmptyIDNodeID, err
 }
 
-func (t *mockNetwork) SendAppRequest(ctx context.Context, nodeID ids.NodeID, request []byte) ([]byte, error) {
+func (t *mockNetwork) SendAppRequest(ctx context.Context, nodeID interfaces.NodeID, request []byte) ([]byte, error) {
 	if len(t.response) == 0 {
 		return nil, errors.New("no mocked response to return in mockNetwork")
 	}
@@ -93,4 +93,4 @@ func (t *mockNetwork) mockResponses(callback func(), responses ...[]byte) {
 	t.numCalls = 0
 }
 
-func (t *mockNetwork) TrackBandwidth(ids.NodeID, float64) {}
+func (t *mockNetwork) TrackBandwidth(interfaces.NodeID, float64) {}

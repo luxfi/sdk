@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 	"time"
-	utils_math "github.com/luxfi/node/utils/math"
-	"github.com/luxfi/node/utils/timer"
+	utils_math "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"
@@ -26,7 +26,7 @@ type trieSyncStats struct {
 	lock sync.Mutex
 
 	lastUpdated time.Time
-	leafsRate   utils_math.Averager
+	leafsRate   utils_interfaces.Averager
 
 	triesRemaining   int
 	triesSynced      int
@@ -36,9 +36,9 @@ type trieSyncStats struct {
 	remainingLeafs map[*trieSegment]uint64
 
 	// metrics
-	totalLeafs     metrics.Counter
-	triesSegmented metrics.Counter
-	leafsRateGauge metrics.Gauge
+	totalLeafs     interfaces.Counter
+	triesSegmented interfaces.Counter
+	leafsRateGauge interfaces.Gauge
 }
 
 func newTrieSyncStats() *trieSyncStats {
@@ -48,9 +48,9 @@ func newTrieSyncStats() *trieSyncStats {
 		lastUpdated:    now,
 
 		// metrics
-		totalLeafs:     metrics.GetOrRegisterCounter("state_sync_total_leafs", nil),
-		leafsRateGauge: metrics.GetOrRegisterGauge("state_sync_leafs_per_second", nil),
-		triesSegmented: metrics.GetOrRegisterCounter("state_sync_tries_segmented", nil),
+		totalLeafs:     interfaces.GetOrRegisterCounter("state_sync_total_leafs", nil),
+		leafsRateGauge: interfaces.GetOrRegisterGauge("state_sync_leafs_per_second", nil),
+		triesSegmented: interfaces.GetOrRegisterCounter("state_sync_tries_segmented", nil),
 	}
 }
 
@@ -117,7 +117,7 @@ func (t *trieSyncStats) trieDone(root common.Hash) {
 func (t *trieSyncStats) updateETA(sinceUpdate time.Duration, now time.Time) time.Duration {
 	leafsRate := float64(t.leafsSinceUpdate) / sinceUpdate.Seconds()
 	if t.leafsRate == nil {
-		t.leafsRate = utils_math.NewAverager(leafsRate, leafRateHalfLife, now)
+		t.leafsRate = utils_interfaces.NewAverager(leafsRate, leafRateHalfLife, now)
 	} else {
 		t.leafsRate.Observe(leafsRate, now)
 	}
@@ -131,7 +131,7 @@ func (t *trieSyncStats) updateETA(sinceUpdate time.Duration, now time.Time) time
 		return leafsTime
 	}
 
-	triesTime := timer.EstimateETA(t.triesStartTime, uint64(t.triesSynced), uint64(t.triesSynced+t.triesRemaining))
+	triesTime := interfaces.EstimateETA(t.triesStartTime, uint64(t.triesSynced), uint64(t.triesSynced+t.triesRemaining))
 	eta := max(leafsTime, triesTime)
 	log.Info(
 		"state sync: syncing storage tries",

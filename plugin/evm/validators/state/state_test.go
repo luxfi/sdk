@@ -10,17 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/memdb"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/wrappers"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
 func TestState(t *testing.T) {
 	require := require.New(t)
-	db := memdb.New()
+	db := interfaces.New()
 	state, err := NewState(db)
 	require.NoError(err)
 
@@ -115,7 +115,7 @@ func TestState(t *testing.T) {
 
 func TestWriteValidator(t *testing.T) {
 	require := require.New(t)
-	db := memdb.New()
+	db := interfaces.New()
 	state, err := NewState(db)
 	require.NoError(err)
 	// write empty uptimes
@@ -245,7 +245,7 @@ func TestParseValidator(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
 			},
 			expected:    nil,
-			expectedErr: codec.ErrUnknownVersion,
+			expectedErr: interfaces.ErrUnknownVersion,
 		},
 		{
 			name: "short byte len",
@@ -258,7 +258,7 @@ func TestParseValidator(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
 			},
 			expected:    nil,
-			expectedErr: wrappers.ErrInsufficientLength,
+			expectedErr: interfaces.ErrInsufficientLength,
 		},
 	}
 	for _, tt := range tests {
@@ -277,7 +277,7 @@ func TestParseValidator(t *testing.T) {
 
 func TestStateListener(t *testing.T) {
 	require := require.New(t)
-	db := memdb.New()
+	db := interfaces.New()
 	state, err := NewState(db)
 	require.NoError(err)
 	ctrl := gomock.NewController(t)

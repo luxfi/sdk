@@ -31,9 +31,9 @@ import (
 	"fmt"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/evm/trie/trienode"
 	"slices"
 )
 

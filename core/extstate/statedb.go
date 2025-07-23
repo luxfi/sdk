@@ -5,9 +5,9 @@ package extstate
 
 import (
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
 )

@@ -6,25 +6,25 @@ package predicate
 import (
 	"fmt"
 	"strings"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/utils/wrappers"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 )
 
 const (
 	Version        = uint16(0)
-	MaxResultsSize = units.MiB
+	MaxResultsSize = interfaces.MiB
 )
 
-var Codec codec.Manager
+var Codec interfaces.Codec
 
 func init() {
-	Codec = codec.NewManager(MaxResultsSize)
+	Codec = interfaces.NewManager(MaxResultsSize)
 
-	c := linearcodec.NewDefault()
-	errs := wrappers.Errs{}
+	c := linearinterfaces.NewDefault()
+	errs := interfaces.Errs{}
 	errs.Add(
 		c.RegisterType(Results{}),
 		Codec.RegisterCodec(Version, c),

@@ -4,29 +4,29 @@
 package message
 
 import (
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/utils/wrappers"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 )
 
 const (
 	Version        = uint16(0)
-	maxMessageSize = 2*units.MiB - 64*units.KiB // Subtract 64 KiB from p2p network cap to leave room for encoding overhead from Lux
+	maxMessageSize = 2*interfaces.MiB - 64*interfaces.KiB // Subtract 64 KiB from p2p network cap to leave room for encoding overhead from Lux
 )
 
 var (
-	Codec codec.Manager
+	Codec interfaces.Codec
 )
 
 func init() {
-	Codec = codec.NewManager(maxMessageSize)
-	c := linearcodec.NewDefault()
+	Codec = interfaces.NewManager(maxMessageSize)
+	c := linearinterfaces.NewDefault()
 
 	// Skip registration to keep registeredTypes unchanged after legacy gossip deprecation
 	c.SkipRegistrations(1)
 
-	errs := wrappers.Errs{}
+	errs := interfaces.Errs{}
 	errs.Add(
 		// Types for state sync frontier consensus
 		c.RegisterType(SyncSummary{}),

@@ -7,11 +7,11 @@ import (
 	"context"
 	"math/big"
 	"testing"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
@@ -91,7 +91,7 @@ func executeBlockRequestTest(t testing.TB, test blockRequestTest, blocks []*type
 			t.Fatal("could not parse block", err)
 		}
 		assert.GreaterOrEqual(t, test.startBlockIndex, 0)
-		assert.Equal(t, blocks[test.startBlockIndex].Hash(), block.Hash())
+		assert.Equal(t, blocks[test.startBlockIndex].Hash(), interfaces.Hash())
 		test.startBlockIndex--
 	}
 	mockHandlerStats.Reset()
@@ -167,9 +167,9 @@ func TestBlockRequestHandlerLargeBlocks(t *testing.T) {
 		var data []byte
 		switch {
 		case i <= 32:
-			data = make([]byte, units.MiB)
+			data = make([]byte, interfaces.MiB)
 		default:
-			data = make([]byte, units.MiB/16)
+			data = make([]byte, interfaces.MiB/16)
 		}
 		tx, err := types.SignTx(types.NewTransaction(b.TxNonce(addr1), addr1, big.NewInt(10000), 4_215_304, nil, data), signer, key1)
 		if err != nil {
@@ -272,6 +272,6 @@ func TestBlockRequestHandlerCtxExpires(t *testing.T) {
 		if err := rlp.DecodeBytes(blockBytes, block); err != nil {
 			t.Fatal("could not parse block", err)
 		}
-		assert.Equal(t, blocks[len(blocks)-i-1].Hash(), block.Hash())
+		assert.Equal(t, blocks[len(blocks)-i-1].Hash(), interfaces.Hash())
 	}
 }

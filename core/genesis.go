@@ -32,10 +32,10 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/luxfi/geth/core/rawdb"
+	ethtypes "github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
@@ -48,7 +48,7 @@ import (
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
 	"github.com/holiman/uint256"
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 )
 
 //go:generate go run github.com/fjl/gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -189,7 +189,7 @@ func SetupGenesisBlock(
 	// Notes on the following line:
 	// - this is needed in geth to handle the case where existing nodes do not
 	//   have the Berlin or London forks initialized by block number on disk.
-	//   See https://github.com/luxfi/geth/pull/667/files
+	//   See https://github.com/luxfi/evm/pull/667/files
 	// - this is not needed in evm but it does not impact it either
 	params.SetEthUpgrades(storedcfg, params.GetExtra(storedcfg).NetworkUpgrades)
 	// Check config compatibility and write the config. Compatibility errors

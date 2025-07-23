@@ -7,10 +7,10 @@ package contract
 import (
 	big "math/big"
 	reflect "reflect"
-	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/evm/interfaces"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
 	common "github.com/luxfi/geth/common"
-	types "github.com/luxfi/geth/core/types"
+	types "github.com/luxfi/evm/core/types"
 	"github.com/holiman/uint256"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -134,10 +134,10 @@ func (mr *MockAccessibleStateMockRecorder) GetChainConfig() *gomock.Call {
 }
 
 // GetConsensusContext mocks base method.
-func (m *MockAccessibleState) GetConsensusContext() *consensus.Context {
+func (m *MockAccessibleState) GetConsensusContext() *interfaces.ChainContext {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetConsensusContext")
-	ret0, _ := ret[0].(*consensus.Context)
+	ret0, _ := ret[0].(*interfaces.ChainContext)
 	return ret0
 }
 

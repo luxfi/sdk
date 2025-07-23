@@ -35,7 +35,7 @@ import (
 	"strings"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/internal/flags"
-	"github.com/luxfi/geth/cmd/utils"
+	"github.com/luxfi/evm/cmd/utils"
 	"github.com/luxfi/geth/common/compiler"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"

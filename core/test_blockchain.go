@@ -10,9 +10,9 @@ import (
 	"time"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 )
 

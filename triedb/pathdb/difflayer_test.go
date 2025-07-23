@@ -33,7 +33,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/interfaces/trie/testutil"
-	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/evm/trie/trienode"
 )
 
 func emptyLayer() *diskLayer {

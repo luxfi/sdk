@@ -29,9 +29,9 @@ package ethapi
 import (
 	"fmt"
 
+	"github.com/luxfi/geth/accounts/abi"
+	"github.com/luxfi/evm/vmerrs"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/accounts/abi"
 )
 
 // revertError is an API error that encompasses an EVM revert with JSON error
@@ -54,11 +54,11 @@ func (e *revertError) ErrorData() interface{} {
 
 // newRevertError creates a revertError instance with the provided revert data.
 func newRevertError(revert []byte) *revertError {
-	err := vm.ErrExecutionReverted
+	err := vmerrs.ErrExecutionReverted
 
 	reason, errUnpack := abi.UnpackRevert(revert)
 	if errUnpack == nil {
-		err = fmt.Errorf("%w: %v", vm.ErrExecutionReverted, reason)
+		err = fmt.Errorf("%w: %v", vmerrs.ErrExecutionReverted, reason)
 	}
 	return &revertError{
 		error:  err,

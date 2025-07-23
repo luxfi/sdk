@@ -8,24 +8,24 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/engine/linear/block"
-	"github.com/luxfi/node/consensus/validators"
-	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/crypto/bls"
-	"github.com/luxfi/node/utils/set"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	agoUtils "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/testutils"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/node/consensus/validators/validatorstest"
-	"github.com/luxfi/node/utils/crypto/bls/signer/localsigner"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,16 +40,16 @@ var (
 	sourceSubnetID = ids.GenerateTestID()
 
 	// valid unsigned warp message used throughout testing
-	unsignedMsg *luxWarp.UnsignedMessage
+	unsignedMsg *interfaces.UnsignedMessage
 	// valid addressed payload
-	addressedPayload      *payload.AddressedCall
+	addressedPayload      *interfaces.AddressedCall
 	addressedPayloadBytes []byte
 	// blsSignatures of [unsignedMsg] from each of [testVdrs]
-	blsSignatures []*bls.Signature
+	blsSignatures []*interfaces.Signature
 
 	numTestVdrs = 10_000
 	testVdrs    []*testValidator
-	vdrs        map[ids.NodeID]*validators.GetValidatorOutput
+	vdrs        map[ids.NodeID]*interfaces.GetValidatorOutput
 
 	predicateTests = make(map[string]testutils.PredicateTest)
 )
@@ -61,7 +61,7 @@ func init() {
 	}
 	agoUtils.Sort(testVdrs)
 
-	vdrs = map[ids.NodeID]*validators.GetValidatorOutput{
+	vdrs = map[ids.NodeID]*interfaces.GetValidatorOutput{
 		testVdrs[0].nodeID: {
 			NodeID:    testVdrs[0].nodeID,
 			PublicKey: testVdrs[0].vdr.PublicKey,
@@ -81,7 +81,7 @@ func init() {
 
 	var err error
 	addr := ids.GenerateTestShortID()
-	addressedPayload, err = payload.NewAddressedCall(
+	addressedPayload, err = interfaces.NewAddressedCall(
 		addr[:],
 		[]byte{1, 2, 3},
 	)
@@ -89,7 +89,7 @@ func init() {
 		panic(err)
 	}
 	addressedPayloadBytes = addressedPayload.Bytes()
-	unsignedMsg, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMsg, err = interfaces.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -107,10 +107,10 @@ func init() {
 
 type testValidator struct {
 	nodeID ids.NodeID
-	sk     *bls.SecretKey
-	vdr    *luxWarp.Validator
-	sk     bls.Signer
-	vdr    *luxWarp.Validator
+	sk     *interfaces.SecretKey
+	vdr    *interfaces.Validator
+	sk     interfaces.Signer
+	vdr    *interfaces.Validator
 }
 
 func (v *testValidator) Compare(o *testValidator) int {
@@ -128,7 +128,7 @@ func newTestValidator() *testValidator {
 	return &testValidator{
 		nodeID: nodeID,
 		sk:     sk,
-		vdr: &luxWarp.Validator{
+		vdr: &interfaces.Validator{
 			PublicKey:      pk,
 			PublicKeyBytes: pk.Serialize(),
 			Weight:         3,
@@ -139,17 +139,17 @@ func newTestValidator() *testValidator {
 
 type signatureTest struct {
 	name      string
-	stateF    func(*gomock.Controller) validators.State
+	stateF    func(*gomock.Controller) interfaces.State
 	quorumNum uint64
 	quorumDen uint64
-	msgF      func(*require.Assertions) *luxWarp.Message
+	msgF      func(*require.Assertions) *interfaces.Message
 	err       error
 }
 
 // createWarpMessage constructs a signed warp message using the global variable [unsignedMsg]
 // and the first [numKeys] signatures from [blsSignatures]
-func createWarpMessage(numKeys int) *luxWarp.Message {
-	aggregateSignature, err := bls.AggregateSignatures(blsSignatures[0:numKeys])
+func createWarpMessage(numKeys int) *interfaces.Message {
+	aggregateSignature, err := interfaces.AggregateSignatures(blsSignatures[0:numKeys])
 	if err != nil {
 		panic(err)
 	}
@@ -157,11 +157,11 @@ func createWarpMessage(numKeys int) *luxWarp.Message {
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &luxWarp.BitSetSignature{
+	warpSignature := &interfaces.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
-	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
-	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
+	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
+	warpMsg, err := interfaces.NewMessage(unsignedMsg, warpSignature)
 	if err != nil {
 		panic(err)
 	}
@@ -187,11 +187,11 @@ type validatorRange struct {
 
 // createConsensusCtx creates a consensus.Context instance with a validator state specified by the given validatorRanges
 func createConsensusCtx(validatorRanges []validatorRange) *consensus.Context {
-	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
+	getValidatorsOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput)
 
 	for _, validatorRange := range validatorRanges {
 		for i := validatorRange.start; i < validatorRange.end; i++ {
-			validatorOutput := &validators.GetValidatorOutput{
+			validatorOutput := &interfaces.GetValidatorOutput{
 				NodeID: testVdrs[i].nodeID,
 				Weight: validatorRange.weight,
 			}
@@ -207,7 +207,7 @@ func createConsensusCtx(validatorRanges []validatorRange) *consensus.Context {
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			return sourceSubnetID, nil
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
 			return getValidatorsOutput, nil
 		},
 	}
@@ -219,9 +219,9 @@ func createConsensusCtx(validatorRanges []validatorRange) *consensus.Context {
 func createValidPredicateTest(consensusCtx *consensus.Context, numKeys uint64, predicateBytes []byte) testutils.PredicateTest {
 	return testutils.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileconfig.PredicateContext{
+		PredicateContext: &precompileinterfaces.PredicateContext{
 			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &block.Context{
+			ProposerVMBlockCtx: &interfaces.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -242,18 +242,18 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	require := require.New(t)
 	numKeys := 10
 	cChainID := ids.GenerateTestID()
-	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
+	addressedCall, err := interfaces.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(err)
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(networkID, cChainID, addressedCall.Bytes())
+	unsignedMsg, err := interfaces.NewUnsignedMessage(networkID, cChainID, addressedCall.Bytes())
 	require.NoError(err)
 
-	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
-	blsSignatures := make([]*bls.Signature, 0, numKeys)
+	getValidatorsOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput)
+	blsSignatures := make([]*interfaces.Signature, 0, numKeys)
 	for i := 0; i < numKeys; i++ {
 		sig, err := testVdrs[i].sk.Sign(unsignedMsg.Bytes())
 		require.NoError(err)
 
-		validatorOutput := &validators.GetValidatorOutput{
+		validatorOutput := &interfaces.GetValidatorOutput{
 			NodeID:    testVdrs[i].nodeID,
 			Weight:    20,
 			PublicKey: testVdrs[i].vdr.PublicKey,
@@ -261,17 +261,17 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 		getValidatorsOutput[testVdrs[i].nodeID] = validatorOutput
 		blsSignatures = append(blsSignatures, sig)
 	}
-	aggregateSignature, err := bls.AggregateSignatures(blsSignatures)
+	aggregateSignature, err := interfaces.AggregateSignatures(blsSignatures)
 	require.NoError(err)
 	bitSet := set.NewBits()
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &luxWarp.BitSetSignature{
+	warpSignature := &interfaces.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
-	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
-	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
+	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
+	warpMsg, err := interfaces.NewMessage(unsignedMsg, warpSignature)
 	require.NoError(err)
 
 	predicateBytes := predicate.PackPredicate(warpMsg.Bytes())
@@ -286,7 +286,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 			require.Equal(chainID, cChainID)
 			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
 			expectedSubnetID := consensusCtx.SubnetID
 			if requirePrimaryNetworkSigners {
 				expectedSubnetID = constants.PrimaryNetworkID
@@ -298,9 +298,9 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 
 	test := testutils.PredicateTest{
 		Config: NewConfig(utils.NewUint64(0), 0, requirePrimaryNetworkSigners),
-		PredicateContext: &precompileconfig.PredicateContext{
+		PredicateContext: &precompileinterfaces.PredicateContext{
 			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &block.Context{
+			ProposerVMBlockCtx: &interfaces.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -328,9 +328,9 @@ func TestInvalidPredicatePacking(t *testing.T) {
 
 	test := testutils.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileconfig.PredicateContext{
+		PredicateContext: &precompileinterfaces.PredicateContext{
 			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &block.Context{
+			ProposerVMBlockCtx: &interfaces.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -359,9 +359,9 @@ func TestInvalidWarpMessage(t *testing.T) {
 
 	test := testutils.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileconfig.PredicateContext{
+		PredicateContext: &precompileinterfaces.PredicateContext{
 			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &block.Context{
+			ProposerVMBlockCtx: &interfaces.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -383,29 +383,29 @@ func TestInvalidAddressedPayload(t *testing.T) {
 			publicKey: true,
 		},
 	})
-	aggregateSignature, err := bls.AggregateSignatures(blsSignatures[0:numKeys])
+	aggregateSignature, err := interfaces.AggregateSignatures(blsSignatures[0:numKeys])
 	require.NoError(t, err)
 	bitSet := set.NewBits()
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &luxWarp.BitSetSignature{
+	warpSignature := &interfaces.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
-	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
+	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
 	// Create an unsigned message with an invalid addressed payload
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3})
+	unsignedMsg, err := interfaces.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3})
 	require.NoError(t, err)
-	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
+	warpMsg, err := interfaces.NewMessage(unsignedMsg, warpSignature)
 	require.NoError(t, err)
 	warpMsgBytes := warpMsg.Bytes()
 	predicateBytes := predicate.PackPredicate(warpMsgBytes)
 
 	test := testutils.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileconfig.PredicateContext{
+		PredicateContext: &precompileinterfaces.PredicateContext{
 			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &block.Context{
+			ProposerVMBlockCtx: &interfaces.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -418,20 +418,20 @@ func TestInvalidAddressedPayload(t *testing.T) {
 }
 
 func TestInvalidBitSet(t *testing.T) {
-	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
+	addressedCall, err := interfaces.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(t, err)
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(
+	unsignedMsg, err := interfaces.NewUnsignedMessage(
 		networkID,
 		sourceChainID,
 		addressedCall.Bytes(),
 	)
 	require.NoError(t, err)
 
-	msg, err := luxWarp.NewMessage(
+	msg, err := interfaces.NewMessage(
 		unsignedMsg,
-		&luxWarp.BitSetSignature{
+		&interfaces.BitSetSignature{
 			Signers:   make([]byte, 1),
-			Signature: [bls.SignatureLen]byte{},
+			Signature: [interfaces.SignatureLen]byte{},
 		},
 	)
 	require.NoError(t, err)
@@ -448,9 +448,9 @@ func TestInvalidBitSet(t *testing.T) {
 	predicateBytes := predicate.PackPredicate(msg.Bytes())
 	test := testutils.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileconfig.PredicateContext{
+		PredicateContext: &precompileinterfaces.PredicateContext{
 			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &block.Context{
+			ProposerVMBlockCtx: &interfaces.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -493,9 +493,9 @@ func TestWarpSignatureWeightsDefaultQuorumNumerator(t *testing.T) {
 
 		tests[fmt.Sprintf("default quorum %d signature(s)", numSigners)] = testutils.PredicateTest{
 			Config: NewDefaultConfig(utils.NewUint64(0)),
-			PredicateContext: &precompileconfig.PredicateContext{
+			PredicateContext: &precompileinterfaces.PredicateContext{
 				ConsensusCtx: consensusCtx,
-				ProposerVMBlockCtx: &block.Context{
+				ProposerVMBlockCtx: &interfaces.Context{
 					PChainHeight: 1,
 				},
 			},
@@ -551,9 +551,9 @@ func TestWarpMultiplePredicates(t *testing.T) {
 
 			tests[fmt.Sprintf("multiple predicates %v", validMessageIndices)] = testutils.PredicateTest{
 				Config: NewDefaultConfig(utils.NewUint64(0)),
-				PredicateContext: &precompileconfig.PredicateContext{
+				PredicateContext: &precompileinterfaces.PredicateContext{
 					ConsensusCtx: consensusCtx,
-					ProposerVMBlockCtx: &block.Context{
+					ProposerVMBlockCtx: &interfaces.Context{
 						PChainHeight: 1,
 					},
 				},
@@ -595,9 +595,9 @@ func TestWarpSignatureWeightsNonDefaultQuorumNumerator(t *testing.T) {
 		name := fmt.Sprintf("non-default quorum %d signature(s)", numSigners)
 		tests[name] = testutils.PredicateTest{
 			Config: NewConfig(utils.NewUint64(0), uint64(nonDefaultQuorumNumerator), false),
-			PredicateContext: &precompileconfig.PredicateContext{
+			PredicateContext: &precompileinterfaces.PredicateContext{
 				ConsensusCtx: consensusCtx,
-				ProposerVMBlockCtx: &block.Context{
+				ProposerVMBlockCtx: &interfaces.Context{
 					PChainHeight: 1,
 				},
 			},
@@ -674,9 +674,9 @@ func initWarpPredicateTests() {
 		testName := fmt.Sprintf("%d validators w/ %d signers/repeated PublicKeys", totalNodes, numSigners)
 
 		predicateBytes := createPredicate(numSigners)
-		getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput, totalNodes)
+		getValidatorsOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput, totalNodes)
 		for i := 0; i < totalNodes; i++ {
-			getValidatorsOutput[testVdrs[i].nodeID] = &validators.GetValidatorOutput{
+			getValidatorsOutput[testVdrs[i].nodeID] = &interfaces.GetValidatorOutput{
 				NodeID:    testVdrs[i].nodeID,
 				Weight:    20,
 				PublicKey: testVdrs[i%numSigners].vdr.PublicKey,
@@ -689,7 +689,7 @@ func initWarpPredicateTests() {
 			GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 				return sourceSubnetID, nil
 			},
-			GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+			GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
 				return getValidatorsOutput, nil
 			},
 		}

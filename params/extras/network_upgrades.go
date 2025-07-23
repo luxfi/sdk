@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
 	gethparams "github.com/luxfi/geth/params"
 )
@@ -51,7 +51,7 @@ type NetworkUpgrades struct {
 	EtnaTimestamp *uint64 `json:"etnaTimestamp,omitempty"`
 	// Fortuna has no effect on EVM by itself, but is included for completeness.
 	FortunaTimestamp *uint64 `json:"fortunaTimestamp,omitempty"`
-	// Granite is a placeholder for the next upgrade.
+	// Granite is a placeholder for the next interfaces.
 	GraniteTimestamp *uint64 `json:"graniteTimestamp,omitempty"`
 }
 
@@ -91,7 +91,7 @@ func (n *NetworkUpgrades) forkOrder() []fork {
 
 // SetDefaults sets the default values for the network upgrades.
 // This overrides deactivating the network upgrade by providing a timestamp of nil value.
-func (n *NetworkUpgrades) SetDefaults(agoUpgrades upgrade.Config) {
+func (n *NetworkUpgrades) SetDefaults(agoUpgrades interfaces.Config) {
 	defaults := getDefaultNetworkUpgrades(agoUpgrades)
 	// If the network upgrade is not set, set it to the default value.
 	// If the network upgrade is set to 0, we also treat it as nil and set it default.
@@ -113,7 +113,7 @@ func (n *NetworkUpgrades) SetDefaults(agoUpgrades upgrade.Config) {
 }
 
 // verifyNetworkUpgrades checks that the network upgrades are well formed.
-func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) error {
+func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades interfaces.Config) error {
 	defaults := getDefaultNetworkUpgrades(agoUpgrades)
 	if err := verifyWithDefault(n.EVMTimestamp, defaults.EVMTimestamp); err != nil {
 		return fmt.Errorf("EVM fork block timestamp is invalid: %w", err)
@@ -211,7 +211,7 @@ func (n *NetworkUpgrades) GetLuxRules(time uint64) LuxRules {
 
 // getDefaultNetworkUpgrades returns the network upgrades for the specified luxd upgrades.
 // Nil values are used to indicate optional upgrades.
-func getDefaultNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
+func getDefaultNetworkUpgrades(agoUpgrade interfaces.Config) NetworkUpgrades {
 	return NetworkUpgrades{
 		EVMTimestamp: utils.NewUint64(0),
 		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.DurangoTime),

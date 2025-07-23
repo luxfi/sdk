@@ -31,7 +31,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 )
@@ -89,7 +89,7 @@ type SendTxArgs struct {
 
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	// "input" is the newer name and should be preferred by clients.
-	// Issue detail: https://github.com/luxfi/geth/issues/15628
+	// Issue detail: https://github.com/luxfi/evm/issues/15628
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input,omitempty"`
 

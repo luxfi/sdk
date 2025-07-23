@@ -34,12 +34,12 @@ import (
 	"sync/atomic"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/event"
-	gethevent "github.com/ethereum/go-ethereum/event"
+	gethevent "github.com/luxfi/geth/event"
 	"github.com/luxfi/geth/log"
 )
 

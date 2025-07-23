@@ -32,8 +32,9 @@ import (
 	"math/big"
 	"reflect"
 	"testing"
+
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
@@ -265,6 +266,8 @@ func newBackendMock() *backendMock {
 	config := &params.ChainConfig{
 		ChainID:             big.NewInt(42),
 		HomesteadBlock:      big.NewInt(0),
+		DAOForkBlock:        nil,
+		DAOForkSupport:      true,
 		EIP150Block:         big.NewInt(0),
 		EIP155Block:         big.NewInt(0),
 		EIP158Block:         big.NewInt(0),
@@ -273,8 +276,10 @@ func newBackendMock() *backendMock {
 		PetersburgBlock:     big.NewInt(0),
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
-		LondonBlock:         big.NewInt(1100),
 		CancunTime:          &cancunTime,
+		NetworkUpgrades: params.NetworkUpgrades{
+			ApricotPhase3BlockTimestamp: utils.NewUint64(100),
+		},
 	}
 	return &backendMock{
 		current: &types.Header{
@@ -292,11 +297,9 @@ func newBackendMock() *backendMock {
 
 func (b *backendMock) setFork(fork string) error {
 	if fork == "legacy" {
-		b.current.Number = big.NewInt(900)
-		b.current.Time = 555
+		b.current.Time = uint64(90) // Before ApricotPhase3BlockTimestamp
 	} else if fork == "london" {
-		b.current.Number = big.NewInt(1100)
-		b.current.Time = 555
+		b.current.Time = uint64(110) // After ApricotPhase3BlockTimestamp
 	} else if fork == "cancun" {
 		b.current.Number = big.NewInt(1100)
 		b.current.Time = 700

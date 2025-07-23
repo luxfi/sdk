@@ -4,17 +4,17 @@
 package evm
 
 import (
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/vms"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var (
 	// ID this VM should be referenced by
 	IDStr = "subnetevm"
-	ID    = ids.ID{'s', 'u', 'b', 'n', 'e', 't', 'e', 'v', 'm'}
+	ID    = interfaces.ID{'s', 'u', 'b', 'n', 'e', 't', 'e', 'v', 'm'}
 
-	_ vms.Factory = &Factory{}
+	_ interfaces.Factory = &Factory{}
 )
 
 type Factory struct{}

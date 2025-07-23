@@ -2,7 +2,7 @@
 title: EVM API
 ---
 
-[EVM](https://github.com/luxfi/evm) APIs are identical to
+[EVM](https://github.com/luxfi/geth) APIs are identical to
 [Geth](https://build.lux.network/docs/api-reference/c-chain/api) C-Chain APIs, except Lux Specific APIs
 starting with `lux`. EVM also supports standard Ethereum APIs as well. For more
 information about Geth APIs see [GitHub](https://github.com/luxfi/geth).

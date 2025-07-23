@@ -31,7 +31,7 @@ import (
 	crand "crypto/rand"
 	"math/rand"
 	"testing"
-	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"

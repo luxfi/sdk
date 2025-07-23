@@ -4,7 +4,7 @@
 package customrawdb
 
 import (
-	"github.com/luxfi/node/utils/wrappers"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 )
 

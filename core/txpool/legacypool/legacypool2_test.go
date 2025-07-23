@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/geth/event"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 )
 

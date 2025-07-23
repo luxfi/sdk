@@ -16,14 +16,14 @@ import (
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/plugin/evm/config"
 	"github.com/luxfi/evm/plugin/evm/database"
-	"github.com/luxfi/node/api/metrics"
-	luxdatabase "github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/pebbledb"
-	"github.com/luxfi/node/database/leveldb"
-	"github.com/luxfi/node/database/prefixdb"
-	"github.com/luxfi/node/database/versiondb"
-	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/evm/interfaces"
+	luxdatabase "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 )
 
 const (
@@ -49,12 +49,12 @@ type DatabaseConfig struct {
 // initializeDBs initializes the databases used by the VM.
 // If [useStandaloneDB] is true, the chain will use a standalone database for its state.
 // Otherwise, the chain will use the provided [avaDB] for its state.
-func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
+func (vm *VM) initializeDBs(avaDB luxinterfaces.Database) error {
 	db := avaDB
 	// skip standalone database initialization if we are running in unit tests
 	if vm.ctx.NetworkID != constants.UnitTestID {
 		// first initialize the accepted block database to check if we need to use a standalone database
-		acceptedDB := prefixdb.New(acceptedPrefix, avaDB)
+		acceptedDB := interfaces.NewPrefixDB(acceptedPrefix, avaDB)
 		useStandAloneDB, err := vm.useStandaloneDatabase(acceptedDB)
 		if err != nil {
 			return err
@@ -76,20 +76,20 @@ func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 	}
 	// Use NewNested rather than New so that the structure of the database
 	// remains the same regardless of the provided baseDB type.
-	vm.chaindb = rawdb.NewDatabase(database.WrapDatabase(prefixdb.NewNested(ethDBPrefix, db)))
-	vm.versiondb = versiondb.New(db)
-	vm.acceptedBlockDB = prefixdb.New(acceptedPrefix, vm.versiondb)
-	vm.metadataDB = prefixdb.New(metadataPrefix, vm.versiondb)
+	vm.chaindb = rawdb.NewDatabase(database.WrapDatabase(interfaces.NewPrefixDBNested(ethDBPrefix, db)))
+	vm.versiondb = interfaces.NewVersionDB(db)
+	vm.acceptedBlockDB = interfaces.NewPrefixDB(acceptedPrefix, vm.versiondb)
+	vm.metadataDB = interfaces.NewPrefixDB(metadataPrefix, vm.versiondb)
 	vm.db = db
 	// Note warpDB and validatorsDB are not part of versiondb because it is not necessary
 	// that they are committed to the database atomically with
-	// the last accepted block.
+	// the last accepted interfaces.
 	// [warpDB] is used to store warp message signatures
 	// set to a prefixDB with the prefix [warpPrefix]
-	vm.warpDB = prefixdb.New(warpPrefix, db)
+	vm.warpDB = interfaces.NewPrefixDB(warpPrefix, db)
 	// [validatorsDB] is used to store the current validator set and uptimes
 	// set to a prefixDB with the prefix [validatorsDBPrefix]
-	vm.validatorsDB = prefixdb.New(validatorsDBPrefix, db)
+	vm.validatorsDB = interfaces.NewPrefixDB(validatorsDBPrefix, db)
 	return nil
 }
 
@@ -117,9 +117,9 @@ func (vm *VM) inspectDatabases() error {
 
 // useStandaloneDatabase returns true if the chain can and should use a standalone database
 // other than given by [db] in Initialize()
-func (vm *VM) useStandaloneDatabase(acceptedDB luxdatabase.Database) (bool, error) {
+func (vm *VM) useStandaloneDatabase(acceptedDB luxinterfaces.Database) (bool, error) {
 	// no config provided, use default
-	standaloneDBFlag := vm.config.UseStandaloneDatabase
+	standaloneDBFlag := vm.interfaces.UseStandaloneDatabase
 	if standaloneDBFlag != nil {
 		return standaloneDBFlag.Bool(), nil
 	}
@@ -135,19 +135,19 @@ func (vm *VM) useStandaloneDatabase(acceptedDB luxdatabase.Database) (bool, erro
 
 // getDatabaseConfig returns the database configuration for the chain
 // to be used by separate, standalone database.
-func getDatabaseConfig(config config.Config, chainDataDir string) (DatabaseConfig, error) {
+func getDatabaseConfig(config interfaces.Config, chainDataDir string) (DatabaseConfig, error) {
 	var (
 		configBytes []byte
 		err         error
 	)
-	if len(config.DatabaseConfigContent) != 0 {
-		dbConfigContent := config.DatabaseConfigContent
+	if len(interfaces.DatabaseConfigContent) != 0 {
+		dbConfigContent := interfaces.DatabaseConfigContent
 		configBytes, err = base64.StdEncoding.DecodeString(dbConfigContent)
 		if err != nil {
 			return DatabaseConfig{}, fmt.Errorf("unable to decode base64 content: %w", err)
 		}
-	} else if len(config.DatabaseConfigFile) != 0 {
-		configPath := config.DatabaseConfigFile
+	} else if len(interfaces.DatabaseConfigFile) != 0 {
+		configPath := interfaces.DatabaseConfigFile
 		configBytes, err = os.ReadFile(configPath)
 		if err != nil {
 			return DatabaseConfig{}, err
@@ -155,19 +155,19 @@ func getDatabaseConfig(config config.Config, chainDataDir string) (DatabaseConfi
 	}
 
 	dbPath := filepath.Join(chainDataDir, "db")
-	if len(config.DatabasePath) != 0 {
-		dbPath = config.DatabasePath
+	if len(interfaces.DatabasePath) != 0 {
+		dbPath = interfaces.DatabasePath
 	}
 
 	return DatabaseConfig{
-		Name:     config.DatabaseType,
-		ReadOnly: config.DatabaseReadOnly,
+		Name:     interfaces.DatabaseType,
+		ReadOnly: interfaces.DatabaseReadOnly,
 		Path:     dbPath,
 		Config:   configBytes,
 	}, nil
 }
 
-func inspectDB(db luxdatabase.Database, label string) error {
+func inspectDB(db luxinterfaces.Database, label string) error {
 	it := db.NewIterator()
 	defer it.Release()
 
@@ -197,35 +197,35 @@ func inspectDB(db luxdatabase.Database, label string) error {
 	return nil
 }
 
-func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger logging.Logger) (luxdatabase.Database, error) {
+func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer interfaces.MultiGatherer, logger logging.Logger) (luxinterfaces.Database, error) {
 	dbPath := filepath.Join(dbConfig.Path, dbConfig.Name)
 
 	dbConfigBytes := dbConfig.Config
 	// If the database is pebble, we need to set the config
 	// to use no sync. Sync mode in pebble has an issue with OSs like MacOS.
-	if dbConfig.Name == pebbledb.Name {
-		cfg := pebbledb.DefaultConfig
+	if dbConfig.Name == interfaces.Name {
+		cfg := interfaces.DefaultConfig
 		// Default to "no sync" for pebble db
 		cfg.Sync = false
 		if len(dbConfigBytes) > 0 {
-			if err := json.Unmarshal(dbConfigBytes, &cfg); err != nil {
+			if err := interfaces.Unmarshal(dbConfigBytes, &cfg); err != nil {
 				return nil, err
 			}
 		}
 		var err error
 		// Marshal the config back to bytes to ensure that new defaults are applied
-		dbConfigBytes, err = json.Marshal(cfg)
+		dbConfigBytes, err = interfaces.Marshal(cfg)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	var db luxdatabase.Database
+	var db luxinterfaces.Database
 	switch dbConfig.Name {
-	case pebbledb.Name:
-		db, err = pebbledb.New(dbPath, dbConfigBytes, logger, gatherer)
-	case leveldb.Name:
-		db, err = leveldb.New(dbPath, dbConfigBytes, logger, gatherer)
+	case interfaces.Name:
+		db, err = interfaces.New(dbPath, dbConfigBytes, logger, gatherer)
+	case interfaces.Name:
+		db, err = interfaces.New(dbPath, dbConfigBytes, logger, gatherer)
 	default:
 		return nil, fmt.Errorf("unknown database type: %s", dbConfig.Name)
 	}

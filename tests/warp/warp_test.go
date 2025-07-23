@@ -17,17 +17,13 @@ import (
 	"time"
 	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/platformvm"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/load"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
@@ -56,7 +52,7 @@ var (
 
 	repoRootPath = tests.GetRepoRootPath("tests/warp")
 
-	genesisPath = filepath.Join(repoRootPath, "tests/precompile/genesis/warp.json")
+	genesisPath = filepath.Join(repoRootPath, "tests/precompile/genesis/interfaces.json")
 
 	subnetA, subnetB, cChainSubnetDetails *Subnet
 
@@ -128,11 +124,11 @@ var _ = ginkgo.BeforeSuite(func() {
 	require.NoError(err)
 	err = manager.SetupNetwork(
 		ctx,
-		config.LuxExecPath,
+		interfaces.LuxExecPath,
 		[]*rpcpb.BlockchainSpec{
 			{
 				VmName:      evm.IDStr,
-				Genesis:     "./tests/precompile/genesis/warp.json",
+				Genesis:     "./tests/precompile/genesis/interfaces.json",
 				ChainConfig: warpChainConfigPath,
 				SubnetSpec: &rpcpb.SubnetSpec{
 					SubnetConfig: "",
@@ -141,7 +137,7 @@ var _ = ginkgo.BeforeSuite(func() {
 			},
 			{
 				VmName:      evm.IDStr,
-				Genesis:     "./tests/precompile/genesis/warp.json",
+				Genesis:     "./tests/precompile/genesis/interfaces.json",
 				ChainConfig: warpChainConfigPath,
 				SubnetSpec: &rpcpb.SubnetSpec{
 					SubnetConfig: "",
@@ -217,12 +213,12 @@ type warpTest struct {
 
 	// Fields set throughout test execution
 	blockID                     ids.ID
-	blockPayload                *payload.Hash
-	blockPayloadUnsignedMessage *luxWarp.UnsignedMessage
-	blockPayloadSignedMessage   *luxWarp.Message
+	blockPayload                *interfaces.Hash
+	blockPayloadUnsignedMessage *interfaces.UnsignedMessage
+	blockPayloadSignedMessage   *interfaces.Message
 
-	addressedCallUnsignedMessage *luxWarp.UnsignedMessage
-	addressedCallSignedMessage   *luxWarp.Message
+	addressedCallUnsignedMessage *interfaces.UnsignedMessage
+	addressedCallSignedMessage   *interfaces.Message
 }
 
 func newWarpTest(ctx context.Context, sendingSubnet *Subnet, receivingSubnet *Subnet) *warpTest {
@@ -316,12 +312,12 @@ func (w *warpTest) sendMessageFromSendingSubnet() {
 	startingNonce, err := client.NonceAt(ctx, w.sendingSubnetFundedAddress, nil)
 	require.NoError(err)
 
-	packedInput, err := warp.PackSendWarpMessage(testPayload)
+	packedInput, err := interfaces.PackSendWarpMessage(testPayload)
 	require.NoError(err)
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:   w.sendingSubnetChainID,
 		Nonce:     startingNonce,
-		To:        &warp.Module.Address,
+		To:        &interfaces.Module.Address,
 		Gas:       200_000,
 		GasFeeCap: big.NewInt(225 * params.GWei),
 		GasTipCap: big.NewInt(params.GWei),
@@ -342,40 +338,40 @@ func (w *warpTest) sendMessageFromSendingSubnet() {
 
 	log.Info("Constructing warp block hash unsigned message", "blockHash", blockHash)
 	w.blockID = ids.ID(blockHash) // Set blockID to construct a warp message containing a block hash payload later
-	w.blockPayload, err = payload.NewHash(w.blockID)
+	w.blockPayload, err = interfaces.NewHash(w.blockID)
 	require.NoError(err)
-	w.blockPayloadUnsignedMessage, err = luxWarp.NewUnsignedMessage(w.networkID, w.sendingSubnet.BlockchainID, w.blockPayload.Bytes())
+	w.blockPayloadUnsignedMessage, err = interfaces.NewUnsignedMessage(w.networkID, w.sendingSubnet.BlockchainID, w.blockPayload.Bytes())
 	require.NoError(err)
 
 	log.Info("Fetching relevant warp logs from the newly produced block")
 	logs, err := client.FilterLogs(ctx, ethereum.FilterQuery{
 		BlockHash: &blockHash,
-		Addresses: []common.Address{warp.Module.Address},
+		Addresses: []common.Address{interfaces.Module.Address},
 	})
 	require.NoError(err)
 	require.Len(logs, 1)
 
 	// Check for relevant warp log from subscription and ensure that it matches
-	// the log extracted from the last block.
+	// the log extracted from the last interfaces.
 	txLog := logs[0]
 	log.Info("Parsing logData as unsigned warp message")
-	unsignedMsg, err := warp.UnpackSendWarpEventDataToMessage(txLog.Data)
+	unsignedMsg, err := interfaces.UnpackSendWarpEventDataToMessage(txLog.Data)
 	require.NoError(err)
 
 	// Set local variables for the duration of the test
 	w.addressedCallUnsignedMessage = unsignedMsg
 	log.Info("Parsed unsignedWarpMsg", "unsignedWarpMessageID", w.addressedCallUnsignedMessage.ID(), "unsignedWarpMessage", w.addressedCallUnsignedMessage)
 
-	// Loop over each client on chain A to ensure they all have time to accept the block.
+	// Loop over each client on chain A to ensure they all have time to accept the interfaces.
 	// Note: if we did not confirm this here, the next stage could be racy since it assumes every node
-	// has accepted the block.
+	// has accepted the interfaces.
 	for i, client := range w.sendingSubnetClients {
 		// Loop until each node has advanced to >= the height of the block that emitted the warp log
 		for {
 			block, err := client.BlockByNumber(ctx, nil)
 			require.NoError(err)
-			if block.NumberU64() >= blockNumber {
-				log.Info("client accepted the block containing SendWarpMessage", "client", i, "height", block.NumberU64())
+			if interfaces.NumberU64() >= blockNumber {
+				log.Info("client accepted the block containing SendWarpMessage", "client", i, "height", interfaces.NumberU64())
 				break
 			}
 		}
@@ -404,7 +400,7 @@ func (w *warpTest) aggregateSignaturesViaAPI() {
 	// If the source subnet is the Primary Network, then we only need to aggregate signatures from the receiving
 	// subnet's validator set instead of the entire Primary Network.
 	// If the destination turns out to be the Primary Network as well, then this is a no-op.
-	var validators map[ids.NodeID]*validators.GetValidatorOutput
+	var validators map[ids.NodeID]*interfaces.GetValidatorOutput
 	if w.sendingSubnet.SubnetID == constants.PrimaryNetworkID {
 		validators, err = pChainClient.GetValidatorsAt(ctx, w.receivingSubnet.SubnetID, api.Height(pChainHeight))
 	} else {
@@ -414,9 +410,9 @@ func (w *warpTest) aggregateSignaturesViaAPI() {
 	require.NotZero(len(validators))
 
 	totalWeight := uint64(0)
-	warpValidators := make([]*luxWarp.Validator, 0, len(validators))
+	warpValidators := make([]*interfaces.Validator, 0, len(validators))
 	for nodeID, validator := range validators {
-		warpValidators = append(warpValidators, &luxWarp.Validator{
+		warpValidators = append(warpValidators, &interfaces.Validator{
 			PublicKey: validator.PublicKey,
 			Weight:    validator.Weight,
 			NodeIDs:   []ids.NodeID{nodeID},
@@ -456,12 +452,12 @@ func (w *warpTest) aggregateSignatures() {
 	if w.sendingSubnet.SubnetID == constants.PrimaryNetworkID {
 		subnetIDStr = w.receivingSubnet.SubnetID.String()
 	}
-	signedWarpMessageBytes, err := client.GetMessageAggregateSignature(ctx, w.addressedCallSignedMessage.ID(), warp.WarpQuorumDenominator, subnetIDStr)
+	signedWarpMessageBytes, err := client.GetMessageAggregateSignature(ctx, w.addressedCallSignedMessage.ID(), interfaces.WarpQuorumDenominator, subnetIDStr)
 	require.NoError(err)
 	require.Equal(w.addressedCallSignedMessage.Bytes(), signedWarpMessageBytes)
 
 	log.Info("Fetching block payload aggregate signature via p2p API")
-	signedWarpBlockBytes, err := client.GetBlockAggregateSignature(ctx, w.blockID, warp.WarpQuorumDenominator, subnetIDStr)
+	signedWarpBlockBytes, err := client.GetBlockAggregateSignature(ctx, w.blockID, interfaces.WarpQuorumDenominator, subnetIDStr)
 	require.NoError(err)
 	require.Equal(w.blockPayloadSignedMessage.Bytes(), signedWarpBlockBytes)
 }
@@ -481,19 +477,19 @@ func (w *warpTest) deliverAddressedCallToReceivingSubnet() {
 	nonce, err := client.NonceAt(ctx, w.receivingSubnetFundedAddress, nil)
 	require.NoError(err)
 
-	packedInput, err := warp.PackGetVerifiedWarpMessage(0)
+	packedInput, err := interfaces.PackGetVerifiedWarpMessage(0)
 	require.NoError(err)
 	tx := predicate.NewPredicateTx(
 		w.receivingSubnetChainID,
 		nonce,
-		&warp.Module.Address,
+		&interfaces.Module.Address,
 		5_000_000,
 		big.NewInt(225*params.GWei),
 		big.NewInt(params.GWei),
 		common.Big0,
 		packedInput,
 		types.AccessList{},
-		warp.ContractAddress,
+		interfaces.ContractAddress,
 		w.addressedCallSignedMessage.Bytes(),
 	)
 	signedTx, err := types.SignTx(tx, w.receivingSubnetSigner, w.receivingSubnetFundedKey)
@@ -512,7 +508,7 @@ func (w *warpTest) deliverAddressedCallToReceivingSubnet() {
 	log.Info("Fetching relevant warp logs and receipts from new block")
 	logs, err := client.FilterLogs(ctx, ethereum.FilterQuery{
 		BlockHash: &blockHash,
-		Addresses: []common.Address{warp.Module.Address},
+		Addresses: []common.Address{interfaces.Module.Address},
 	})
 	require.NoError(err)
 	require.Len(logs, 0)
@@ -536,19 +532,19 @@ func (w *warpTest) deliverBlockHashPayload() {
 	nonce, err := client.NonceAt(ctx, w.receivingSubnetFundedAddress, nil)
 	require.NoError(err)
 
-	packedInput, err := warp.PackGetVerifiedWarpBlockHash(0)
+	packedInput, err := interfaces.PackGetVerifiedWarpBlockHash(0)
 	require.NoError(err)
 	tx := predicate.NewPredicateTx(
 		w.receivingSubnetChainID,
 		nonce,
-		&warp.Module.Address,
+		&interfaces.Module.Address,
 		5_000_000,
 		big.NewInt(225*params.GWei),
 		big.NewInt(params.GWei),
 		common.Big0,
 		packedInput,
 		types.AccessList{},
-		warp.ContractAddress,
+		interfaces.ContractAddress,
 		w.blockPayloadSignedMessage.Bytes(),
 	)
 	signedTx, err := types.SignTx(tx, w.receivingSubnetSigner, w.receivingSubnetFundedKey)
@@ -567,7 +563,7 @@ func (w *warpTest) deliverBlockHashPayload() {
 	log.Info("Fetching relevant warp logs and receipts from new block")
 	logs, err := client.FilterLogs(ctx, ethereum.FilterQuery{
 		BlockHash: &blockHash,
-		Addresses: []common.Address{warp.Module.Address},
+		Addresses: []common.Address{interfaces.Module.Address},
 	})
 	require.NoError(err)
 	require.Len(logs, 0)
@@ -601,7 +597,7 @@ func (w *warpTest) executeHardHatTest() {
 
 	cmdPath := filepath.Join(repoRootPath, "contracts")
 	// test path is relative to the cmd path
-	testPath := "./test/warp.ts"
+	testPath := "./test/interfaces.ts"
 	utils.RunHardhatTestsCustomURI(ctx, rpcURI, cmdPath, testPath)
 }
 
@@ -620,7 +616,7 @@ func (w *warpTest) warpLoad() {
 	chainAKeys, chainAPrivateKeys := generateKeys(w.sendingSubnetFundedKey, numWorkers)
 	chainBKeys, chainBPrivateKeys := generateKeys(w.receivingSubnetFundedKey, numWorkers)
 
-	loadMetrics := metrics.NewDefaultMetrics()
+	loadMetrics := interfaces.NewDefaultMetrics()
 
 	log.Info("Distributing funds on sending subnet", "numKeys", len(chainAKeys))
 	chainAKeys, err := load.DistributeFunds(ctx, sendingClient, chainAKeys, len(chainAKeys), new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether)), loadMetrics)
@@ -631,11 +627,11 @@ func (w *warpTest) warpLoad() {
 	require.NoError(err)
 
 	log.Info("Creating workers for each subnet...")
-	chainAWorkers := make([]txs.Worker[*types.Transaction], 0, len(chainAKeys))
+	chainAWorkers := make([]interfaces.Worker[*types.Transaction], 0, len(chainAKeys))
 	for i := range chainAKeys {
 		chainAWorkers = append(chainAWorkers, load.NewTxReceiptWorker(ctx, w.sendingSubnetClients[i]))
 	}
-	chainBWorkers := make([]txs.Worker[*types.Transaction], 0, len(chainBKeys))
+	chainBWorkers := make([]interfaces.Worker[*types.Transaction], 0, len(chainBKeys))
 	for i := range chainBKeys {
 		chainBWorkers = append(chainBWorkers, load.NewTxReceiptWorker(ctx, w.receivingSubnetClients[i]))
 	}
@@ -643,7 +639,7 @@ func (w *warpTest) warpLoad() {
 	log.Info("Subscribing to warp send events on sending subnet")
 	logs := make(chan types.Log, numWorkers*int(txsPerWorker))
 	sub, err := sendingClient.SubscribeFilterLogs(ctx, ethereum.FilterQuery{
-		Addresses: []common.Address{warp.Module.Address},
+		Addresses: []common.Address{interfaces.Module.Address},
 	}, logs)
 	require.NoError(err)
 	defer func() {
@@ -653,15 +649,15 @@ func (w *warpTest) warpLoad() {
 	}()
 
 	log.Info("Generating tx sequence to send warp messages...")
-	warpSendSequences, err := txs.GenerateTxSequences(ctx, func(key *ecdsa.PrivateKey, nonce uint64) (*types.Transaction, error) {
-		data, err := warp.PackSendWarpMessage([]byte(fmt.Sprintf("Jets %d-%d Dolphins", key.X.Int64(), nonce)))
+	warpSendSequences, err := interfaces.GenerateTxSequences(ctx, func(key *ecdsa.PrivateKey, nonce uint64) (*types.Transaction, error) {
+		data, err := interfaces.PackSendWarpMessage([]byte(fmt.Sprintf("Jets %d-%d Dolphins", key.X.Int64(), nonce)))
 		if err != nil {
 			return nil, err
 		}
 		tx := types.NewTx(&types.DynamicFeeTx{
 			ChainID:   w.sendingSubnetChainID,
 			Nonce:     nonce,
-			To:        &warp.Module.Address,
+			To:        &interfaces.Module.Address,
 			Gas:       200_000,
 			GasFeeCap: big.NewInt(225 * params.GWei),
 			GasTipCap: big.NewInt(params.GWei),
@@ -685,36 +681,36 @@ func (w *warpTest) warpLoad() {
 	}
 
 	log.Info("Executing warp delivery sequences...")
-	warpDeliverSequences, err := txs.GenerateTxSequences(ctx, func(key *ecdsa.PrivateKey, nonce uint64) (*types.Transaction, error) {
+	warpDeliverSequences, err := interfaces.GenerateTxSequences(ctx, func(key *ecdsa.PrivateKey, nonce uint64) (*types.Transaction, error) {
 		// Wait for the next warp send log
 		warpLog := <-logs
 
-		unsignedMessage, err := warp.UnpackSendWarpEventDataToMessage(warpLog.Data)
+		unsignedMessage, err := interfaces.UnpackSendWarpEventDataToMessage(warpLog.Data)
 		if err != nil {
 			return nil, err
 		}
 		log.Info("Fetching addressed call aggregate signature via p2p API")
 
-		signedWarpMessageBytes, err := warpClient.GetMessageAggregateSignature(ctx, unsignedMessage.ID(), warp.WarpDefaultQuorumNumerator, subnetIDStr)
+		signedWarpMessageBytes, err := warpClient.GetMessageAggregateSignature(ctx, unsignedMessage.ID(), interfaces.WarpDefaultQuorumNumerator, subnetIDStr)
 		if err != nil {
 			return nil, err
 		}
 
-		packedInput, err := warp.PackGetVerifiedWarpMessage(0)
+		packedInput, err := interfaces.PackGetVerifiedWarpMessage(0)
 		if err != nil {
 			return nil, err
 		}
 		tx := predicate.NewPredicateTx(
 			w.receivingSubnetChainID,
 			nonce,
-			&warp.Module.Address,
+			&interfaces.Module.Address,
 			5_000_000,
 			big.NewInt(225*params.GWei),
 			big.NewInt(params.GWei),
 			common.Big0,
 			packedInput,
 			types.AccessList{},
-			warp.ContractAddress,
+			interfaces.ContractAddress,
 			signedWarpMessageBytes,
 		)
 		return types.SignTx(tx, w.receivingSubnetSigner, key)

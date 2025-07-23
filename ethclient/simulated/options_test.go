@@ -22,10 +22,11 @@ import (
 	"strings"
 	"testing"
 
-	ethereum "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth/core"
 	"github.com/luxfi/geth/core/types"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/plugin/evm/upgrade/acp176"
 )
 
 // Tests that the simulator starts with the initial gas limit in the genesis block,
@@ -49,8 +50,8 @@ func TestWithBlockGasLimitOption(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to retrieve head block: %v", err)
 	}
-	if head.GasLimit() != 12_345_678 {
-		t.Errorf("head gas limit mismatch: have %v, want %v", head.GasLimit(), 12_345_678)
+	if head.GasLimit() != acp176.MinMaxCapacity {
+		t.Errorf("head gas limit mismatch: have %v, want %v", head.GasLimit(), acp176.MinMaxCapacity)
 	}
 }
 
@@ -59,11 +60,11 @@ func TestWithCallGasLimitOption(t *testing.T) {
 	// Construct a simulator, targeting a different gas limit
 	sim := NewBackend(types.GenesisAlloc{
 		testAddr: {Balance: big.NewInt(10000000000000000)},
-	}, WithCallGasLimit(ethparams.TxGas-1))
+	}, WithCallGasLimit(params.TxGas-1))
 	defer sim.Close()
 
 	client := sim.Client()
-	_, err := client.CallContract(context.Background(), ethereum.CallMsg{
+	_, err := client.CallContract(context.Background(), interfaces.CallMsg{
 		From: testAddr,
 		To:   &testAddr,
 		Gas:  21000,

@@ -6,14 +6,14 @@ package validators
 import (
 	"testing"
 
-	"github.com/luxfi/node/database/memdb"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/state"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	avagovalidators "github.com/luxfi/node/consensus/validators"
+	avagovalidators "github.com/luxfi/evm/interfaces"
 )
 
 func TestLoadNewValidators(t *testing.T) {
@@ -29,21 +29,21 @@ func TestLoadNewValidators(t *testing.T) {
 	}
 	tests := []struct {
 		name                      string
-		initialValidators         map[ids.ID]*avagovalidators.GetCurrentValidatorOutput
-		newValidators             map[ids.ID]*avagovalidators.GetCurrentValidatorOutput
+		initialValidators         map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput
+		newValidators             map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput
 		registerMockListenerCalls func(*interfaces.MockStateCallbackListener)
 		expectedLoadErr           error
 	}{
 		{
 			name:                      "before empty/after empty",
-			initialValidators:         map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{},
-			newValidators:             map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{},
+			initialValidators:         map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{},
+			newValidators:             map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{},
 			registerMockListenerCalls: func(*interfaces.MockStateCallbackListener) {},
 		},
 		{
 			name:              "before empty/after one",
-			initialValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{},
-			newValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{},
+			newValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
@@ -56,14 +56,14 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "before one/after empty",
-			initialValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
 					StartTime: 0,
 				},
 			},
-			newValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{},
+			newValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
 				// initial validator will trigger first
 				mock.EXPECT().OnValidatorAdded(testValidationIDs[0], testNodeIDs[0], uint64(0), true).Times(1)
@@ -73,14 +73,14 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "no change",
-			initialValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
 					StartTime: 0,
 				},
 			},
-			newValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
@@ -93,7 +93,7 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "status and weight change and new one",
-			initialValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
@@ -101,7 +101,7 @@ func TestLoadNewValidators(t *testing.T) {
 					Weight:    1,
 				},
 			},
-			newValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  false,
@@ -125,14 +125,14 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "renew validation ID",
-			initialValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
 					StartTime: 0,
 				},
 			},
-			newValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[1]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
@@ -150,14 +150,14 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "renew node ID",
-			initialValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					IsActive:  true,
 					StartTime: 0,
 				},
 			},
-			newValidators: map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[1],
 					IsActive:  true,
@@ -176,7 +176,7 @@ func TestLoadNewValidators(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(tt *testing.T) {
 			require := require.New(tt)
-			db := memdb.New()
+			db := interfaces.New()
 			validatorState, err := state.NewState(db)
 			require.NoError(err)
 

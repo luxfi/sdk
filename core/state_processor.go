@@ -31,13 +31,13 @@ import (
 	"math/big"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 )
 

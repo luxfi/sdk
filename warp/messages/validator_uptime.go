@@ -6,20 +6,20 @@ package messages
 import (
 	"fmt"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 )
 
 // ValidatorUptime is signed when the ValidationID is known and the validator
 // has been up for TotalUptime seconds.
 type ValidatorUptime struct {
-	ValidationID ids.ID `serialize:"true"`
+	ValidationID interfaces.ID `serialize:"true"`
 	TotalUptime  uint64 `serialize:"true"` // in seconds
 
 	bytes []byte
 }
 
 // NewValidatorUptime creates a new *ValidatorUptime and initializes it.
-func NewValidatorUptime(validationID ids.ID, totalUptime uint64) (*ValidatorUptime, error) {
+func NewValidatorUptime(validationID interfaces.ID, totalUptime uint64) (*ValidatorUptime, error) {
 	bhp := &ValidatorUptime{
 		ValidationID: validationID,
 		TotalUptime:  totalUptime,

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
 )

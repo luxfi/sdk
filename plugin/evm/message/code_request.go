@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 )
 
@@ -27,7 +27,7 @@ func (c CodeRequest) String() string {
 	return fmt.Sprintf("CodeRequest(Hashes=%s)", strings.Join(hashStrs, ", "))
 }
 
-func (c CodeRequest) Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
+func (c CodeRequest) Handle(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
 	return handler.HandleCodeRequest(ctx, nodeID, requestID, c)
 }
 

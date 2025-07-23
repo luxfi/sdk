@@ -4,20 +4,20 @@
 package interfaces
 
 import (
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/uptime"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 )
 
 type StateReader interface {
 	// GetValidator returns the validator data for the given validation ID
-	GetValidator(vID ids.ID) (Validator, error)
+	GetValidator(vID interfaces.ID) (Validator, error)
 	// GetValidationIDs returns the validation IDs in the state
-	GetValidationIDs() set.Set[ids.ID]
+	GetValidationIDs() interfaces.Set[interfaces.ID]
 	// GetNodeIDs returns the validator node IDs in the state
-	GetNodeIDs() set.Set[ids.NodeID]
+	GetNodeIDs() interfaces.Set[interfaces.NodeID]
 	// GetValidationID returns the validation ID for the given node ID
-	GetValidationID(nodeID ids.NodeID) (ids.ID, error)
+	GetValidationID(nodeID interfaces.NodeID) (interfaces.ID, error)
 }
 
 type State interface {
@@ -28,7 +28,7 @@ type State interface {
 	// UpdateValidator updates the validator in the state
 	UpdateValidator(vdr Validator) error
 	// DeleteValidator deletes the validator from the state
-	DeleteValidator(vID ids.ID) error
+	DeleteValidator(vID interfaces.ID) error
 	// WriteState writes the validator state to the disk
 	WriteState() error
 	// RegisterListener registers a listener to the state
@@ -38,16 +38,16 @@ type State interface {
 // StateCallbackListener is a listener for the validator state
 type StateCallbackListener interface {
 	// OnValidatorAdded is called when a new validator is added
-	OnValidatorAdded(vID ids.ID, nodeID ids.NodeID, startTime uint64, isActive bool)
+	OnValidatorAdded(vID interfaces.ID, nodeID interfaces.NodeID, startTime uint64, isActive bool)
 	// OnValidatorRemoved is called when a validator is removed
-	OnValidatorRemoved(vID ids.ID, nodeID ids.NodeID)
+	OnValidatorRemoved(vID interfaces.ID, nodeID interfaces.NodeID)
 	// OnValidatorStatusUpdated is called when a validator status is updated
-	OnValidatorStatusUpdated(vID ids.ID, nodeID ids.NodeID, isActive bool)
+	OnValidatorStatusUpdated(vID interfaces.ID, nodeID interfaces.NodeID, isActive bool)
 }
 
 type Validator struct {
-	ValidationID   ids.ID     `json:"validationID"`
-	NodeID         ids.NodeID `json:"nodeID"`
+	ValidationID   interfaces.ID     `json:"validationID"`
+	NodeID         interfaces.NodeID `json:"nodeID"`
 	Weight         uint64     `json:"weight"`
 	StartTimestamp uint64     `json:"startTimestamp"`
 	IsActive       bool       `json:"isActive"`

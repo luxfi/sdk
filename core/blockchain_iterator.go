@@ -32,7 +32,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 )
 
 type blockAndState struct {

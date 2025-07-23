@@ -4,7 +4,7 @@
 
 - Removed static API handler: `subnetevm.decodeGenesis`, `subnetevm.buildGenesis`
 
-## [v0.7.4](https://github.com/luxfi/evm/releases/tag/v0.7.4)
+## [v0.7.4](https://github.com/luxfi/geth/releases/tag/v0.7.4)
 
 - Major refactor to use [`libevm`](https://github.com/luxfi/libevm) for EVM execution, database access, types & chain configuration. This improves maintainability and enables keeping up with upstream changes more easily.
 - Wrapped database with `corruptabledb` to prevent corruption of the database.
@@ -12,7 +12,7 @@
 - Updated golang version to 1.23.9
 - Fixed a bug in mempool where the min fee was not updated after restart
 
-## [v0.7.3](https://github.com/luxfi/evm/releases/tag/v0.7.3)
+## [v0.7.3](https://github.com/luxfi/geth/releases/tag/v0.7.3)
 
 This version is backwards compatible to v0.7.0. It is optional, but encouraged.
 
@@ -47,11 +47,11 @@ The plugin version is unchanged at 39 and is compatible with Lux version v1.13.0
 - simulator: fix wrong flag name `staking-enabled` -> `--sybil-protection-enabled=false` (#1476)
 - typo fixes (#1491, #1506)
 
-**Full Changelog**: <https://github.com/luxfi/evm/compare/v0.7.2...v0.7.3>
+**Full Changelog**: <https://github.com/luxfi/geth/compare/v0.7.2...v0.7.3>
 
-## [v0.7.2](https://github.com/luxfi/evm/releases/tag/v0.7.2)
+## [v0.7.2](https://github.com/luxfi/geth/releases/tag/v0.7.2)
 
-This version is backwards compatible to [v0.7.0](https://github.com/luxfi/evm/releases/tag/v0.7.0). It is optional, **but strongly encouraged as it's fixing an important bug in uptime tracking.**
+This version is backwards compatible to [v0.7.0](https://github.com/luxfi/geth/releases/tag/v0.7.0). It is optional, **but strongly encouraged as it's fixing an important bug in uptime tracking.**
 
 ### Lux Compatibility
 
@@ -63,7 +63,7 @@ The plugin version is unchanged at 39 and is compatible with Lux version v1.12.2
 * Bump golang version to v1.23.6
 * Bump golangci-lint to v1.63 and add linters
 
-## [v0.7.1](https://github.com/luxfi/evm/releases/tag/v0.7.1)
+## [v0.7.1](https://github.com/luxfi/geth/releases/tag/v0.7.1)
 
 This release focuses on code quality improvements and post-Etna cleanups.
 
@@ -80,7 +80,7 @@ The plugin version is **updated** to 39 and is compatible with Lux version v1.12
 * Removed deprecated legacy gossip handler and metrics
 * Removed unnecessary locks in mempool
 
-## [v0.7.0](https://github.com/luxfi/evm/releases/tag/v0.7.0)
+## [v0.7.0](https://github.com/luxfi/geth/releases/tag/v0.7.0)
 
 ### Updates
 
@@ -90,11 +90,11 @@ The plugin version is **updated** to 39 and is compatible with Lux version v1.12
 
 * Fixed database close on shutdown
 
-## [v0.6.11](https://github.com/luxfi/evm/releases/tag/v0.6.11)
+## [v0.6.11](https://github.com/luxfi/geth/releases/tag/v0.6.11)
 
 This release focuses on Standalone DB and database configs.
 
-This version is backwards compatible to [v0.6.0](https://github.com/luxfi/evm/releases/tag/v0.6.0). It is optional, but encouraged.
+This version is backwards compatible to [v0.6.0](https://github.com/luxfi/geth/releases/tag/v0.6.0). It is optional, but encouraged.
 
 The plugin version is unchanged at 37 and is compatible with Lux versions v1.11.12.
 

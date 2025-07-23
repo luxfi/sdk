@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/log"
 	"github.com/stretchr/testify/require"
 )
 

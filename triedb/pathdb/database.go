@@ -32,11 +32,11 @@ import (
 	"sync"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/evm/trie/trienode"
 	"github.com/luxfi/geth/triedb/database"
 	"github.com/luxfi/evm/params"
 )
@@ -62,7 +62,7 @@ func NewStateSetWithOrigin(accounts map[common.Address][]byte, storages map[comm
 	s := &StateSetWithOrigin{}
 	// Note: We can't directly set the fields because they might be unexported
 	// This is a compatibility shim - the actual implementation would need to use
-	// the proper constructor from ethereum/go-ethereum/triedb/pathdb
+	// the proper constructor from luxfi/geth/triedb/pathdb
 	return s
 }
 

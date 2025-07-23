@@ -7,12 +7,12 @@ import (
 	"math"
 	"math/big"
 	"testing"
-	"github.com/luxfi/node/ids"
-	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
+	agoUtils "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/testutils"
@@ -20,8 +20,8 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/luxfi/geth/common"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/stretchr/testify/require"
 )
@@ -93,12 +93,12 @@ func TestSendWarpMessage(t *testing.T) {
 
 	sendWarpMessageInput, err := PackSendWarpMessage(sendWarpMessagePayload)
 	require.NoError(t, err)
-	sendWarpMessageAddressedPayload, err := payload.NewAddressedCall(
+	sendWarpMessageAddressedPayload, err := interfaces.NewAddressedCall(
 		callerAddr.Bytes(),
 		sendWarpMessagePayload,
 	)
 	require.NoError(t, err)
-	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
+	unsignedWarpMessage, err := interfaces.NewUnsignedMessage(
 		defaultConsensusCtx.NetworkID,
 		blockchainID,
 		sendWarpMessageAddressedPayload.Bytes(),
@@ -161,7 +161,7 @@ func TestSendWarpMessage(t *testing.T) {
 				logData := logsData[0]
 				unsignedWarpMsg, err := UnpackSendWarpEventDataToMessage(logData)
 				require.NoError(t, err)
-				addressedPayload, err := payload.ParseAddressedCall(unsignedWarpMsg.Payload)
+				addressedPayload, err := interfaces.ParseAddressedCall(unsignedWarpMsg.Payload)
 				require.NoError(t, err)
 
 				require.Equal(t, common.BytesToAddress(addressedPayload.SourceAddress), callerAddr)
@@ -180,14 +180,14 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 	sourceAddress := common.HexToAddress("0x456789")
 	sourceChainID := ids.GenerateTestID()
 	packagedPayloadBytes := []byte("mcsorley")
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		sourceAddress.Bytes(),
 		packagedPayloadBytes,
 	)
 	require.NoError(t, err)
-	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
+	unsignedWarpMsg, err := interfaces.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
 	require.NoError(t, err)
-	warpMessage, err := luxWarp.NewMessage(unsignedWarpMsg, &luxWarp.BitSetSignature{}) // Create message with empty signature for testing
+	warpMessage, err := interfaces.NewMessage(unsignedWarpMsg, &interfaces.BitSetSignature{}) // Create message with empty signature for testing
 	require.NoError(t, err)
 	warpMessagePredicateBytes := predicate.PackPredicate(warpMessage.Bytes())
 	getVerifiedWarpMsg, err := PackGetVerifiedWarpMessage(0)
@@ -409,9 +409,9 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 			Caller:  callerAddr,
 			InputFn: func(t testing.TB) []byte { return getVerifiedWarpMsg },
 			BeforeHook: func(t testing.TB, state contract.StateDB) {
-				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid addressed payload
+				unsignedMessage, err := interfaces.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid addressed payload
 				require.NoError(t, err)
-				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
+				warpMessage, err := interfaces.NewMessage(unsignedMessage, &interfaces.BitSetSignature{})
 				require.NoError(t, err)
 
 				state.SetPredicateStorageSlots(ContractAddress, [][]byte{predicate.PackPredicate(warpMessage.Bytes())})
@@ -426,7 +426,7 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 		"get message index invalid uint32": {
 			Caller: callerAddr,
 			InputFn: func(t testing.TB) []byte {
-				return append(WarpABI.Methods["getVerifiedWarpMessage"].ID, new(big.Int).SetInt64(math.MaxInt64).Bytes()...)
+				return append(WarpABI.Methods["getVerifiedWarpMessage"].ID, new(big.Int).SetInt64(interfaces.MaxInt64).Bytes()...)
 			},
 			SuppliedGas: GetVerifiedWarpMessageBaseCost,
 			ReadOnly:    false,
@@ -435,7 +435,7 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 		"get message index invalid int32": {
 			Caller: callerAddr,
 			InputFn: func(t testing.TB) []byte {
-				res, err := PackGetVerifiedWarpMessage(math.MaxInt32 + 1)
+				res, err := PackGetVerifiedWarpMessage(interfaces.MaxInt32 + 1)
 				require.NoError(t, err)
 				return res
 			},
@@ -464,11 +464,11 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
 	sourceChainID := ids.GenerateTestID()
 	blockHash := ids.GenerateTestID()
-	blockHashPayload, err := payload.NewHash(blockHash)
+	blockHashPayload, err := interfaces.NewHash(blockHash)
 	require.NoError(t, err)
-	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedWarpMsg, err := interfaces.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(t, err)
-	warpMessage, err := luxWarp.NewMessage(unsignedWarpMsg, &luxWarp.BitSetSignature{}) // Create message with empty signature for testing
+	warpMessage, err := interfaces.NewMessage(unsignedWarpMsg, &interfaces.BitSetSignature{}) // Create message with empty signature for testing
 	require.NoError(t, err)
 	warpMessagePredicateBytes := predicate.PackPredicate(warpMessage.Bytes())
 	getVerifiedWarpBlockHash, err := PackGetVerifiedWarpBlockHash(0)
@@ -687,9 +687,9 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 			Caller:  callerAddr,
 			InputFn: func(t testing.TB) []byte { return getVerifiedWarpBlockHash },
 			BeforeHook: func(t testing.TB, state contract.StateDB) {
-				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid block hash payload
+				unsignedMessage, err := interfaces.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid block hash payload
 				require.NoError(t, err)
-				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
+				warpMessage, err := interfaces.NewMessage(unsignedMessage, &interfaces.BitSetSignature{})
 				require.NoError(t, err)
 
 				state.SetPredicateStorageSlots(ContractAddress, [][]byte{predicate.PackPredicate(warpMessage.Bytes())})
@@ -704,7 +704,7 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 		"get message index invalid uint32": {
 			Caller: callerAddr,
 			InputFn: func(t testing.TB) []byte {
-				return append(WarpABI.Methods["getVerifiedWarpBlockHash"].ID, new(big.Int).SetInt64(math.MaxInt64).Bytes()...)
+				return append(WarpABI.Methods["getVerifiedWarpBlockHash"].ID, new(big.Int).SetInt64(interfaces.MaxInt64).Bytes()...)
 			},
 			SuppliedGas: GetVerifiedWarpMessageBaseCost,
 			ReadOnly:    false,
@@ -713,7 +713,7 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 		"get message index invalid int32": {
 			Caller: callerAddr,
 			InputFn: func(t testing.TB) []byte {
-				res, err := PackGetVerifiedWarpBlockHash(math.MaxInt32 + 1)
+				res, err := PackGetVerifiedWarpBlockHash(interfaces.MaxInt32 + 1)
 				require.NoError(t, err)
 				return res
 			},
@@ -743,13 +743,13 @@ func TestPackEvents(t *testing.T) {
 	payloadData := []byte("mcsorley")
 	networkID := uint32(54321)
 
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		sourceAddress.Bytes(),
 		payloadData,
 	)
 	require.NoError(t, err)
 
-	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
+	unsignedWarpMessage, err := interfaces.NewUnsignedMessage(
 		networkID,
 		sourceChainID,
 		addressedPayload.Bytes(),

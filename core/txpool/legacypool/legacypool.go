@@ -38,11 +38,11 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/prque"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
-	eparams "github.com/ethereum/go-ethereum/params"
+	eparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"

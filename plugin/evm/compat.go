@@ -1,0 +1,23 @@
+// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package evm
+
+import (
+	"github.com/luxfi/evm/adapter"
+	"github.com/luxfi/evm/interfaces"
+	
+	// Temporary imports for compatibility
+	nodedb "github.com/luxfi/evm/interfaces"
+	nodeconsensus "github.com/luxfi/evm/interfaces"
+)
+
+// ConvertDatabase converts a node database to an interface database
+func ConvertDatabase(db nodedb.Database) interfaces.Database {
+	return adapter.NewDatabaseAdapter(db)
+}
+
+// ConvertConsensus converts node consensus to interface consensus
+func ConvertConsensus(ctx *nodeinterfaces.ChainContext) interfaces.NodeConsensus {
+	return adapter.NewConsensusAdapter(ctx)
+}

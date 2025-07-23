@@ -201,7 +201,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
     default:
-        // Treat any disabled (nil) collector from github.com/luxfi/geth/metrics as
+        // Treat any disabled (nil) collector from github.com/luxfi/evm/metrics as
         // a noop and skip it rather than returning an error. These collectors
         // have types prefixed with "metrics.Nil" (e.g. metrics.NilHealthcheck)
         // and are instantiated when metrics.Enabled == false. They carry no

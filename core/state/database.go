@@ -38,18 +38,18 @@ type (
 )
 
 func NewDatabase(db ethdb.Database) ethstate.Database {
-	// ethstate.NewDatabase expects an ethdb.Database, not a triedb.Database
-	// So we pass the raw db directly
-	return ethstate.NewDatabase(db)
+	// Create a triedb and pass to ethstate.NewDatabase
+	tdb := triedb.NewDatabase(db, nil)
+	return ethstate.NewDatabase(tdb, nil)
 }
 
 func NewDatabaseWithConfig(db ethdb.Database, config *triedb.Config) ethstate.Database {
-	// For now, just use the raw db
-	// In the future, we might need to handle the config differently
-	return ethstate.NewDatabase(db)
+	// Create a triedb with the config and pass to ethstate.NewDatabase
+	tdb := triedb.NewDatabase(db, config)
+	return ethstate.NewDatabase(tdb, nil)
 }
 
-func NewDatabaseWithNodeDB(db ethdb.Database, triedb *triedb.Database) ethstate.Database {
-	// Use the underlying db from triedb
-	return ethstate.NewDatabase(db)
+func NewDatabaseWithNodeDB(db ethdb.Database, tdb *triedb.Database) ethstate.Database {
+	// Use the provided triedb directly
+	return ethstate.NewDatabase(tdb, nil)
 }

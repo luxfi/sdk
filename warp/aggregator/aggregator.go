@@ -3,14 +3,16 @@
 
 package aggregator
 
+import "github.com/luxfi/evm/interfaces"
+
 import (
 	"context"
 	"fmt"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/node/utils/crypto/bls"
-	"github.com/luxfi/node/utils/set"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/evm/log"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/interfaces"
 )
 
 type AggregateSignatureResult struct {
@@ -19,11 +21,11 @@ type AggregateSignatureResult struct {
 	// Total weight of all validators in the subnet.
 	TotalWeight uint64
 	// The message with the aggregate signature.
-	Message *luxWarp.Message
+	Message *interfaces.Message
 }
 
 type signatureFetchResult struct {
-	sig    *bls.Signature
+	sig    *interfaces.Signature
 	index  int
 	weight uint64
 }
@@ -31,13 +33,13 @@ type signatureFetchResult struct {
 // Aggregator requests signatures from validators and
 // aggregates them into a single signature.
 type Aggregator struct {
-	validators  []*luxWarp.Validator
+	validators  []*interfaces.Validator
 	totalWeight uint64
 	client      SignatureGetter
 }
 
 // New returns a signature aggregator that will attempt to aggregate signatures from [validators].
-func New(client SignatureGetter, validators []*luxWarp.Validator, totalWeight uint64) *Aggregator {
+func New(client SignatureGetter, validators []*interfaces.Validator, totalWeight uint64) *Aggregator {
 	return &Aggregator{
 		client:      client,
 		validators:  validators,
@@ -47,7 +49,7 @@ func New(client SignatureGetter, validators []*luxWarp.Validator, totalWeight ui
 
 // Returns an aggregate signature over [unsignedMessage].
 // The returned signature's weight exceeds the threshold given by [quorumNum].
-func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage, quorumNum uint64) (*AggregateSignatureResult, error) {
+func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *interfaces.UnsignedMessage, quorumNum uint64) (*AggregateSignatureResult, error) {
 	// Create a child context to cancel signature fetching if we reach signature threshold.
 	signatureFetchCtx, signatureFetchCancel := context.WithCancel(ctx)
 	defer signatureFetchCancel()
@@ -86,7 +88,7 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 				"index", i,
 			)
 
-			if !bls.Verify(validator.PublicKey, signature, unsignedMessage.Bytes()) {
+			if !interfaces.Verify(validator.PublicKey, signature, unsignedMessage.Bytes()) {
 				log.Debug("Failed to verify warp signature",
 					"nodeID", nodeID,
 					"index", i,
@@ -105,8 +107,8 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 	}
 
 	var (
-		signatures                = make([]*bls.Signature, 0, len(a.validators))
-		signersBitset             = set.NewBits()
+		signatures                = make([]*interfaces.Signature, 0, len(a.validators))
+		signersBitset             = utils.NewBits()
 		signaturesWeight          = uint64(0)
 		signaturesPassedThreshold = false
 	)
@@ -127,7 +129,7 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 		)
 
 		// If the signature weight meets the requested threshold, cancel signature fetching
-		if err := luxWarp.VerifyWeight(signaturesWeight, a.totalWeight, quorumNum, params.WarpQuorumDenominator); err == nil {
+		if err := interfaces.VerifyWeight(signaturesWeight, a.totalWeight, quorumNum, params.WarpQuorumDenominator); err == nil {
 			log.Debug("Verify weight passed, exiting aggregation early",
 				"quorumNum", quorumNum,
 				"totalWeight", a.totalWeight,
@@ -142,21 +144,21 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 
 	// If I failed to fetch sufficient signature stake, return an error
 	if !signaturesPassedThreshold {
-		return nil, luxWarp.ErrInsufficientWeight
+		return nil, interfaces.ErrInsufficientWeight
 	}
 
 	// Otherwise, return the aggregate signature
-	aggregateSignature, err := bls.AggregateSignatures(signatures)
+	aggregateSignature, err := interfaces.AggregateSignatures(signatures)
 	if err != nil {
 		return nil, fmt.Errorf("failed to aggregate BLS signatures: %w", err)
 	}
 
-	warpSignature := &luxWarp.BitSetSignature{
+	warpSignature := &interfaces.BitSetSignature{
 		Signers: signersBitset.Bytes(),
 	}
-	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
+	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
 
-	msg, err := luxWarp.NewMessage(unsignedMessage, warpSignature)
+	msg, err := interfaces.NewMessage(unsignedMessage, warpSignature)
 	if err != nil {
 		return nil, fmt.Errorf("failed to construct warp message: %w", err)
 	}

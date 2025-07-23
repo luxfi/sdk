@@ -35,15 +35,15 @@ import (
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/geth/eth/tracers"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
-	// "github.com/luxfi/geth/core/asm" // TODO: asm package not available
+	// "github.com/luxfi/evm/core/asm" // TODO: asm package not available
 	// force-load js tracers to trigger registration
 	_ "github.com/luxfi/geth/eth/tracers/js"
 )
@@ -608,7 +608,7 @@ func TestEip2929Cases(t *testing.T) {
 
 // TestColdAccountAccessCost test that the cold account access cost is reported
 // correctly
-// see: https://github.com/luxfi/geth/issues/22649
+// see: https://github.com/luxfi/evm/issues/22649
 func TestColdAccountAccessCost(t *testing.T) {
 	for i, tc := range []struct {
 		code []byte

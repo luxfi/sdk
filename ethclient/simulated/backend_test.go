@@ -24,13 +24,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/accounts/abi/bind"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rpc"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/accounts/abi/bind"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
 	"github.com/stretchr/testify/require"
 )
 
@@ -267,7 +266,7 @@ func TestCommitReturnValue(t *testing.T) {
 	// Create a block in the original chain (containing a transaction to force different block hashes)
 	head, _ := client.HeaderByNumber(ctx, nil) // Should be child's, good enough
 	gasPrice := new(big.Int).Add(head.BaseFee, big.NewInt(1))
-	_tx := types.NewTransaction(0, testAddr, big.NewInt(1000), ethparams.TxGas, gasPrice, nil)
+	_tx := types.NewTransaction(0, testAddr, big.NewInt(1000), params.TxGas, gasPrice, nil)
 	tx, _ := types.SignTx(_tx, types.LatestSignerForChainID(chainid), testKey)
 	if err := client.SendTransaction(ctx, tx); err != nil {
 		t.Fatalf("sending transaction: %v", err)

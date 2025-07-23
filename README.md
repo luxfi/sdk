@@ -1,7 +1,7 @@
 # Lux EVM
 
-[![Build + Test + Release](https://github.com/luxfi/evm/actions/workflows/lint-tests-release.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/lint-tests-release.yml)
-[![CodeQL](https://github.com/luxfi/evm/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/codeql-analysis.yml)
+[![Build + Test + Release](https://github.com/luxfi/geth/actions/workflows/lint-tests-release.yml/badge.svg)](https://github.com/luxfi/geth/actions/workflows/lint-tests-release.yml)
+[![CodeQL](https://github.com/luxfi/geth/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/luxfi/geth/actions/workflows/codeql-analysis.yml)
 
 [Lux](https://docs.lux.network/overview/getting-started/lux-platform) is a network composed of multiple blockchains.
 Each blockchain is an instance of a Virtual Machine (VM), much like an object in an object-oriented language is an instance of a class.

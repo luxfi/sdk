@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/uptime"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
@@ -31,31 +31,31 @@ const (
 type validatorData struct {
 	UpDuration    time.Duration `serialize:"true"`
 	LastUpdated   uint64        `serialize:"true"`
-	NodeID        ids.NodeID    `serialize:"true"`
+	NodeID        interfaces.NodeID    `serialize:"true"`
 	Weight        uint64        `serialize:"true"`
 	StartTime     uint64        `serialize:"true"`
 	IsActive      bool          `serialize:"true"`
 	IsL1Validator bool          `serialize:"true"`
 
-	validationID ids.ID // database key
+	validationID interfaces.ID // database key
 }
 
 type state struct {
-	data  map[ids.ID]*validatorData // vID -> validatorData
-	index map[ids.NodeID]ids.ID     // nodeID -> vID
+	data  map[interfaces.ID]*validatorData // vID -> validatorData
+	index map[interfaces.NodeID]interfaces.ID     // nodeID -> vID
 	// updatedData tracks the updates since WriteValidator was last called
-	updatedData map[ids.ID]dbUpdateStatus // vID -> updated status
-	db          database.Database
+	updatedData map[interfaces.ID]dbUpdateStatus // vID -> updated status
+	db          interfaces.Database
 
 	listeners []interfaces.StateCallbackListener
 }
 
 // NewState creates a new State, it also loads the data from the disk
-func NewState(db database.Database) (interfaces.State, error) {
+func NewState(db interfaces.Database) (interfaces.State, error) {
 	s := &state{
-		index:       make(map[ids.NodeID]ids.ID),
-		data:        make(map[ids.ID]*validatorData),
-		updatedData: make(map[ids.ID]dbUpdateStatus),
+		index:       make(map[interfaces.NodeID]interfaces.ID),
+		data:        make(map[interfaces.ID]*validatorData),
+		updatedData: make(map[interfaces.ID]dbUpdateStatus),
 		db:          db,
 	}
 	if err := s.loadFromDisk(); err != nil {
@@ -66,7 +66,7 @@ func NewState(db database.Database) (interfaces.State, error) {
 
 // GetUptime returns the uptime of the validator with the given nodeID
 func (s *state) GetUptime(
-	nodeID ids.NodeID,
+	nodeID interfaces.NodeID,
 ) (time.Duration, time.Time, error) {
 	data, err := s.getData(nodeID)
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *state) GetUptime(
 
 // SetUptime sets the uptime of the validator with the given nodeID
 func (s *state) SetUptime(
-	nodeID ids.NodeID,
+	nodeID interfaces.NodeID,
 	upDuration time.Duration,
 	lastUpdated time.Time,
 ) error {
@@ -93,7 +93,7 @@ func (s *state) SetUptime(
 }
 
 // GetStartTime returns the start time of the validator with the given nodeID
-func (s *state) GetStartTime(nodeID ids.NodeID) (time.Time, error) {
+func (s *state) GetStartTime(nodeID interfaces.NodeID) (time.Time, error) {
 	data, err := s.getData(nodeID)
 	if err != nil {
 		return time.Time{}, err
@@ -160,7 +160,7 @@ func (s *state) UpdateValidator(vdr interfaces.Validator) error {
 
 // DeleteValidator marks the validator as deleted
 // marked validator will be deleted from disk when WriteState is called
-func (s *state) DeleteValidator(vID ids.ID) error {
+func (s *state) DeleteValidator(vID interfaces.ID) error {
 	data, exists := s.data[vID]
 	if !exists {
 		return database.ErrNotFound
@@ -208,7 +208,7 @@ func (s *state) WriteState() error {
 }
 
 // SetStatus sets the active status of the validator with the given vID
-func (s *state) SetStatus(vID ids.ID, isActive bool) error {
+func (s *state) SetStatus(vID interfaces.ID, isActive bool) error {
 	data, exists := s.data[vID]
 	if !exists {
 		return database.ErrNotFound
@@ -223,8 +223,8 @@ func (s *state) SetStatus(vID ids.ID, isActive bool) error {
 }
 
 // GetValidationIDs returns the validation IDs in the state
-func (s *state) GetValidationIDs() set.Set[ids.ID] {
-	ids := set.NewSet[ids.ID](len(s.data))
+func (s *state) GetValidationIDs() interfaces.Set[interfaces.ID] {
+	ids := utils.NewSet[interfaces.ID](len(s.data))
 	for vID := range s.data {
 		ids.Add(vID)
 	}
@@ -232,8 +232,8 @@ func (s *state) GetValidationIDs() set.Set[ids.ID] {
 }
 
 // GetNodeIDs returns the node IDs of validators in the state
-func (s *state) GetNodeIDs() set.Set[ids.NodeID] {
-	ids := set.NewSet[ids.NodeID](len(s.index))
+func (s *state) GetNodeIDs() interfaces.Set[interfaces.NodeID] {
+	ids := utils.NewSet[interfaces.NodeID](len(s.index))
 	for nodeID := range s.index {
 		ids.Add(nodeID)
 	}
@@ -241,16 +241,16 @@ func (s *state) GetNodeIDs() set.Set[ids.NodeID] {
 }
 
 // GetValidationID returns the validation ID for the given nodeID
-func (s *state) GetValidationID(nodeID ids.NodeID) (ids.ID, error) {
+func (s *state) GetValidationID(nodeID interfaces.NodeID) (interfaces.ID, error) {
 	vID, exists := s.index[nodeID]
 	if !exists {
-		return ids.ID{}, database.ErrNotFound
+		return interfaces.ID{}, database.ErrNotFound
 	}
 	return vID, nil
 }
 
 // GetValidator returns the validator data for the given validationID
-func (s *state) GetValidator(vID ids.ID) (interfaces.Validator, error) {
+func (s *state) GetValidator(vID interfaces.ID) (interfaces.Validator, error) {
 	data, ok := s.data[vID]
 	if !ok {
 		return interfaces.Validator{}, database.ErrNotFound
@@ -311,7 +311,7 @@ func (s *state) loadFromDisk() error {
 
 // addData adds the data to the state
 // returns an error if the data already exists
-func (s *state) addData(vID ids.ID, data *validatorData) error {
+func (s *state) addData(vID interfaces.ID, data *validatorData) error {
 	if _, exists := s.data[vID]; exists {
 		return fmt.Errorf("%w, vID: %s", ErrAlreadyExists, vID)
 	}
@@ -326,7 +326,7 @@ func (s *state) addData(vID ids.ID, data *validatorData) error {
 
 // getData returns the data for the validator with the given nodeID
 // returns database.ErrNotFound if the data does not exist
-func (s *state) getData(nodeID ids.NodeID) (*validatorData, error) {
+func (s *state) getData(nodeID interfaces.NodeID) (*validatorData, error) {
 	vID, exists := s.index[nodeID]
 	if !exists {
 		return nil, database.ErrNotFound

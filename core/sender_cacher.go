@@ -28,7 +28,7 @@ package core
 
 import (
 	"sync"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 )
 
 // txSenderCacherRequest is a request for recovering transaction senders with a

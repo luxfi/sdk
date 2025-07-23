@@ -34,7 +34,7 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/holiman/uint256"

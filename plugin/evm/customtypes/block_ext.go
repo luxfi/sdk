@@ -6,7 +6,7 @@ package customtypes
 import (
 	"math/big"
 
-	ethtypes "github.com/luxfi/geth/core/types"
+	ethtypes "github.com/luxfi/evm/core/types"
 )
 
 func BlockGasCost(b *ethtypes.Block) *big.Int {

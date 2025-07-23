@@ -7,13 +7,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/node/consensus/engine/enginetest"
-	avagovalidators "github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/consensus/validators/validatorstest"
+	avagovalidators "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/utils"
@@ -43,8 +43,8 @@ func TestValidatorState(t *testing.T) {
 		ids.GenerateTestID(),
 	}
 	ctx.ValidatorState = &validatorstest.State{
-		GetCurrentValidatorSetF: func(ctx context.Context, subnetID ids.ID) (map[ids.ID]*avagovalidators.GetCurrentValidatorOutput, uint64, error) {
-			return map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+		GetCurrentValidatorSetF: func(ctx context.Context, subnetID ids.ID) (map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput, uint64, error) {
+			return map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					PublicKey: nil,
@@ -63,7 +63,7 @@ func TestValidatorState(t *testing.T) {
 			}, 0, nil
 		},
 	}
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	appSender.SendAppGossipF = func(context.Context, interfaces.SendConfig, []byte) error { return nil }
 	err = vm.Initialize(
 		context.Background(),
 		ctx,
@@ -72,7 +72,7 @@ func TestValidatorState(t *testing.T) {
 		[]byte(""),
 		[]byte(""),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	)
 	require.NoError(err, "error initializing GenesisVM")
@@ -105,7 +105,7 @@ func TestValidatorState(t *testing.T) {
 		[]byte(""),
 		[]byte(""),
 		issuer,
-		[]*commonEng.Fx{},
+		[]*interfaces.Fx{},
 		appSender,
 	)
 	require.NoError(err, "error initializing GenesisVM")
@@ -118,8 +118,8 @@ func TestValidatorState(t *testing.T) {
 	newValidationID := ids.GenerateTestID()
 	newNodeID := ids.GenerateTestNodeID()
 	testState := &validatorstest.State{
-		GetCurrentValidatorSetF: func(ctx context.Context, subnetID ids.ID) (map[ids.ID]*avagovalidators.GetCurrentValidatorOutput, uint64, error) {
-			return map[ids.ID]*avagovalidators.GetCurrentValidatorOutput{
+		GetCurrentValidatorSetF: func(ctx context.Context, subnetID ids.ID) (map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput, uint64, error) {
+			return map[ids.ID]*avagointerfaces.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
 					PublicKey: nil,
@@ -157,5 +157,5 @@ func TestValidatorState(t *testing.T) {
 		newValidator, err := vm.validatorsManager.GetValidator(newValidationID)
 		assert.NoError(c, err)
 		assert.Equal(c, newNodeID, newValidator.NodeID)
-	}, validators.SyncFrequency*2, 5*time.Second)
+	}, interfaces.SyncFrequency*2, 5*time.Second)
 }

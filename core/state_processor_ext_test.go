@@ -9,10 +9,10 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/geth/crypto"
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"

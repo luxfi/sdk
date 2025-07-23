@@ -6,9 +6,9 @@ package evm
 import (
 	"math/big"
 	"testing"
-	"github.com/luxfi/node/database/memdb"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/trie"
@@ -64,7 +64,7 @@ func TestHandlePrecompileAccept(t *testing.T) {
 
 	// Set up the mock with the expected calls to Accept
 	txIndex := 0
-	mockAccepter := precompileconfig.NewMockAccepter(ctrl)
+	mockAccepter := precompileinterfaces.NewMockAccepter(ctrl)
 	gomock.InOrder(
 		mockAccepter.EXPECT().Accept(
 			gomock.Not(gomock.Nil()),                // acceptCtx
@@ -89,7 +89,7 @@ func TestHandlePrecompileAccept(t *testing.T) {
 	// Call handlePrecompileAccept
 	blk := vm.newBlock(ethBlock)
 	rules := extras.Rules{
-		AccepterPrecompiles: map[common.Address]precompileconfig.Accepter{
+		AccepterPrecompiles: map[common.Address]precompileinterfaces.Accepter{
 			precompileAddr: mockAccepter,
 		},
 	}

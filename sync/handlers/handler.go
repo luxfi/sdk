@@ -5,7 +5,7 @@ package handlers
 
 import (
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/common"
 )
 

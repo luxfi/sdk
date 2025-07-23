@@ -10,19 +10,19 @@ import (
 	"testing"
 	"time"
 	_ "embed"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/engine/linear/block"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/crypto/bls"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/components/chain"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/eth/tracers"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
@@ -61,7 +61,7 @@ func TestSendWarpMessage(t *testing.T) {
 	genesis := &core.Genesis{}
 	require.NoError(genesis.UnmarshalJSON([]byte(genesisJSONDurango)))
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
-		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(upgrade.InitiallyActiveTime)),
+		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(interfaces.InitiallyActiveTime)),
 	}
 	genesisJSON, err := genesis.MarshalJSON()
 	require.NoError(err)
@@ -79,12 +79,12 @@ func TestSendWarpMessage(t *testing.T) {
 
 	warpSendMessageInput, err := warpcontract.PackSendWarpMessage(payloadData)
 	require.NoError(err)
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		testEthAddrs[0].Bytes(),
 		payloadData,
 	)
 	require.NoError(err)
-	expectedUnsignedMessage, err := luxWarp.NewUnsignedMessage(
+	expectedUnsignedMessage, err := interfaces.NewUnsignedMessage(
 		vm.ctx.NetworkID,
 		vm.ctx.ChainID,
 		addressedPayload.Bytes(),
@@ -132,10 +132,10 @@ func TestSendWarpMessage(t *testing.T) {
 	require.NoError(blk.Accept(context.Background()))
 	vm.blockChain.DrainAcceptorQueue()
 
-	// Verify the message signature after accepting the block.
+	// Verify the message signature after accepting the interfaces.
 	rawSignatureBytes, err := vm.warpBackend.GetMessageSignature(context.TODO(), unsignedMessage)
 	require.NoError(err)
-	blsSignature, err := bls.SignatureFromBytes(rawSignatureBytes[:])
+	blsSignature, err := interfaces.SignatureFromBytes(rawSignatureBytes[:])
 	require.NoError(err)
 
 	select {
@@ -147,21 +147,21 @@ func TestSendWarpMessage(t *testing.T) {
 	}
 
 	// Verify the produced message signature is valid
-	require.True(bls.Verify(vm.ctx.PublicKey, blsSignature, unsignedMessage.Bytes()))
+	require.True(interfaces.Verify(vm.ctx.PublicKey, blsSignature, unsignedMessage.Bytes()))
 
 	// Verify the blockID will now be signed by the backend and produces a valid signature.
 	rawSignatureBytes, err = vm.warpBackend.GetBlockSignature(context.TODO(), blk.ID())
 	require.NoError(err)
-	blsSignature, err = bls.SignatureFromBytes(rawSignatureBytes[:])
+	blsSignature, err = interfaces.SignatureFromBytes(rawSignatureBytes[:])
 	require.NoError(err)
 
-	blockHashPayload, err := payload.NewHash(blk.ID())
+	blockHashPayload, err := interfaces.NewHash(blk.ID())
 	require.NoError(err)
-	unsignedMessage, err = luxWarp.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, blockHashPayload.Bytes())
+	unsignedMessage, err = interfaces.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, blockHashPayload.Bytes())
 	require.NoError(err)
 
 	// Verify the produced message signature is valid
-	require.True(bls.Verify(vm.ctx.PublicKey, blsSignature, unsignedMessage.Bytes()))
+	require.True(interfaces.Verify(vm.ctx.PublicKey, blsSignature, unsignedMessage.Bytes()))
 }
 
 func TestValidateWarpMessage(t *testing.T) {
@@ -169,12 +169,12 @@ func TestValidateWarpMessage(t *testing.T) {
 	sourceChainID := ids.GenerateTestID()
 	sourceAddress := common.HexToAddress("0x376c47978271565f56DEB45495afa69E59c16Ab2")
 	payloadData := []byte{1, 2, 3}
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		sourceAddress.Bytes(),
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMessage, err := interfaces.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -195,12 +195,12 @@ func TestValidateInvalidWarpMessage(t *testing.T) {
 	sourceChainID := ids.GenerateTestID()
 	sourceAddress := common.HexToAddress("0x376c47978271565f56DEB45495afa69E59c16Ab2")
 	payloadData := []byte{1, 2, 3}
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		sourceAddress.Bytes(),
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMessage, err := interfaces.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -217,9 +217,9 @@ func TestValidateWarpBlockHash(t *testing.T) {
 	require := require.New(t)
 	sourceChainID := ids.GenerateTestID()
 	blockHash := ids.GenerateTestID()
-	blockHashPayload, err := payload.NewHash(blockHash)
+	blockHashPayload, err := interfaces.NewHash(blockHash)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := interfaces.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -238,9 +238,9 @@ func TestValidateInvalidWarpBlockHash(t *testing.T) {
 	require := require.New(t)
 	sourceChainID := ids.GenerateTestID()
 	blockHash := ids.GenerateTestID()
-	blockHashPayload, err := payload.NewHash(blockHash)
+	blockHashPayload, err := interfaces.NewHash(blockHash)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := interfaces.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -253,12 +253,12 @@ func TestValidateInvalidWarpBlockHash(t *testing.T) {
 	testWarpVMTransaction(t, unsignedMessage, false, exampleWarpPayload)
 }
 
-func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessage, validSignature bool, txPayload []byte) {
+func testWarpVMTransaction(t *testing.T, unsignedMessage *interfaces.UnsignedMessage, validSignature bool, txPayload []byte) {
 	require := require.New(t)
 	genesis := &core.Genesis{}
 	require.NoError(genesis.UnmarshalJSON([]byte(genesisJSONDurango)))
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
-		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(upgrade.InitiallyActiveTime)),
+		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(interfaces.InitiallyActiveTime)),
 	}
 	genesisJSON, err := genesis.MarshalJSON()
 	require.NoError(err)
@@ -286,7 +286,7 @@ func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessag
 	blsSignature2, err := blsSecretKey2.Sign(unsignedMessage.Bytes())
 	require.NoError(err)
 
-	blsAggregatedSignature, err := bls.AggregateSignatures([]*bls.Signature{blsSignature1, blsSignature2})
+	blsAggregatedSignature, err := interfaces.AggregateSignatures([]*interfaces.Signature{blsSignature1, blsSignature2})
 	require.NoError(err)
 
 	minimumValidPChainHeight := uint64(10)
@@ -297,11 +297,11 @@ func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessag
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			return ids.Empty, nil
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
 			if height < minimumValidPChainHeight {
 				return nil, getValidatorSetTestErr
 			}
-			return map[ids.NodeID]*validators.GetValidatorOutput{
+			return map[ids.NodeID]*interfaces.GetValidatorOutput{
 				nodeID1: {
 					NodeID:    nodeID1,
 					PublicKey: blsPublicKey1,
@@ -320,14 +320,14 @@ func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessag
 	signersBitSet.Add(0)
 	signersBitSet.Add(1)
 
-	warpSignature := &luxWarp.BitSetSignature{
+	warpSignature := &interfaces.BitSetSignature{
 		Signers: signersBitSet.Bytes(),
 	}
 
-	blsAggregatedSignatureBytes := bls.SignatureToBytes(blsAggregatedSignature)
+	blsAggregatedSignatureBytes := interfaces.SignatureToBytes(blsAggregatedSignature)
 	copy(warpSignature.Signature[:], blsAggregatedSignatureBytes)
 
-	signedMessage, err := luxWarp.NewMessage(
+	signedMessage, err := interfaces.NewMessage(
 		unsignedMessage,
 		warpSignature,
 	)
@@ -365,7 +365,7 @@ func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessag
 	}
 
 	// If [validSignature] set the signature to be considered valid at the verified height.
-	blockCtx := &block.Context{
+	blockCtx := &interfaces.Context{
 		PChainHeight: minimumValidPChainHeight - 1,
 	}
 	if validSignature {
@@ -377,7 +377,7 @@ func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessag
 	warpBlock, err := vm.BuildBlockWithContext(context.Background(), blockCtx)
 	require.NoError(err)
 
-	warpBlockVerifyWithCtx, ok := warpBlock.(block.WithVerifyContext)
+	warpBlockVerifyWithCtx, ok := warpBlock.(interfaces.WithVerifyContext)
 	require.True(ok)
 	shouldVerifyWithCtx, err := warpBlockVerifyWithCtx.ShouldVerifyWithContext(context.Background())
 	require.NoError(err)
@@ -398,15 +398,15 @@ func testWarpVMTransaction(t *testing.T, unsignedMessage *luxWarp.UnsignedMessag
 	txTraceResults, err := tracerAPI.TraceBlockByHash(context.Background(), ethBlock.Hash(), nil)
 	require.NoError(err)
 	require.Len(txTraceResults, 2)
-	blockTxTraceResultBytes, err := json.Marshal(txTraceResults[1].Result)
+	blockTxTraceResultBytes, err := interfaces.Marshal(txTraceResults[1].Result)
 	require.NoError(err)
 	unmarshalResults := make(map[string]interface{})
-	require.NoError(json.Unmarshal(blockTxTraceResultBytes, &unmarshalResults))
+	require.NoError(interfaces.Unmarshal(blockTxTraceResultBytes, &unmarshalResults))
 	require.Equal("", unmarshalResults["returnValue"])
 
 	txTraceResult, err := tracerAPI.TraceTransaction(context.Background(), tx.Hash(), nil)
 	require.NoError(err)
-	txTraceResultBytes, err := json.Marshal(txTraceResult)
+	txTraceResultBytes, err := interfaces.Marshal(txTraceResult)
 	require.NoError(err)
 	require.JSONEq(string(txTraceResultBytes), string(blockTxTraceResultBytes))
 }
@@ -418,13 +418,13 @@ func TestReceiveWarpMessage(t *testing.T) {
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		// Note that warp is enabled without RequirePrimaryNetworkSigners
 		// by default in the genesis configuration.
-		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(upgrade.InitiallyActiveTime)),
+		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(interfaces.InitiallyActiveTime)),
 	}
 	genesisJSON, err := genesis.MarshalJSON()
 	require.NoError(err)
 
 	// disable warp so we can re-enable it with RequirePrimaryNetworkSigners
-	disableTime := upgrade.InitiallyActiveTime.Add(10 * time.Second)
+	disableTime := interfaces.InitiallyActiveTime.Add(10 * time.Second)
 	disableConfig := warpcontract.NewDisableConfig(utils.TimeToNewUint64(disableTime))
 
 	// re-enable warp with RequirePrimaryNetworkSigners
@@ -441,7 +441,7 @@ func TestReceiveWarpMessage(t *testing.T) {
 			{Config: reEnableConfig},
 		},
 	}
-	upgradeBytes, err := json.Marshal(upgradeConfig)
+	upgradeBytes, err := interfaces.Marshal(upgradeConfig)
 	require.NoError(err)
 
 	issuer, vm, _, _ := GenesisVM(t, true, string(genesisJSON), "", string(upgradeBytes))
@@ -465,21 +465,21 @@ func TestReceiveWarpMessage(t *testing.T) {
 			sourceChainID: vm.ctx.ChainID,
 			msgFrom:       fromSubnet,
 			useSigners:    signersSubnet,
-			blockTime:     upgrade.InitiallyActiveTime,
+			blockTime:     interfaces.InitiallyActiveTime,
 		},
 		{
 			name:          "P-Chain message should be signed by subnet without RequirePrimaryNetworkSigners",
 			sourceChainID: constants.PlatformChainID,
 			msgFrom:       fromPrimary,
 			useSigners:    signersSubnet,
-			blockTime:     upgrade.InitiallyActiveTime.Add(blockGap),
+			blockTime:     interfaces.InitiallyActiveTime.Add(blockGap),
 		},
 		{
 			name:          "C-Chain message should be signed by subnet without RequirePrimaryNetworkSigners",
 			sourceChainID: vm.ctx.CChainID,
 			msgFrom:       fromPrimary,
 			useSigners:    signersSubnet,
-			blockTime:     upgrade.InitiallyActiveTime.Add(2 * blockGap),
+			blockTime:     interfaces.InitiallyActiveTime.Add(2 * blockGap),
 		},
 		// Note here we disable warp and re-enable it with RequirePrimaryNetworkSigners
 		// by using reEnableTime.
@@ -515,19 +515,19 @@ func TestReceiveWarpMessage(t *testing.T) {
 }
 
 func testReceiveWarpMessage(
-	t *testing.T, issuer chan commonEng.Message, vm *VM,
+	t *testing.T, issuer chan interfaces.Message, vm *VM,
 	sourceChainID ids.ID,
 	msgFrom warpMsgFrom, useSigners useWarpMsgSigners,
 	blockTime time.Time,
 ) {
 	require := require.New(t)
 	payloadData := avagoUtils.RandomBytes(100)
-	addressedPayload, err := payload.NewAddressedCall(
+	addressedPayload, err := interfaces.NewAddressedCall(
 		testEthAddrs[0].Bytes(),
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(
+	unsignedMessage, err := interfaces.NewUnsignedMessage(
 		vm.ctx.NetworkID,
 		sourceChainID,
 		addressedPayload.Bytes(),
@@ -537,8 +537,8 @@ func testReceiveWarpMessage(
 	type signer struct {
 		networkID ids.ID
 		nodeID    ids.NodeID
-		secret    bls.Signer
-		signature *bls.Signature
+		secret    interfaces.Signer
+		signature *interfaces.Signature
 		weight    uint64
 	}
 	newSigner := func(networkID ids.ID, weight uint64) signer {
@@ -569,11 +569,11 @@ func testReceiveWarpMessage(
 		signers = primarySigners
 	}
 
-	blsSignatures := make([]*bls.Signature, len(signers))
+	blsSignatures := make([]*interfaces.Signature, len(signers))
 	for i := range signers {
 		blsSignatures[i] = signers[i].signature
 	}
-	blsAggregatedSignature, err := bls.AggregateSignatures(blsSignatures)
+	blsAggregatedSignature, err := interfaces.AggregateSignatures(blsSignatures)
 	require.NoError(err)
 
 	minimumValidPChainHeight := uint64(10)
@@ -586,7 +586,7 @@ func testReceiveWarpMessage(
 			}
 			return vm.ctx.SubnetID, nil
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
 			if height < minimumValidPChainHeight {
 				return nil, getValidatorSetTestErr
 			}
@@ -595,9 +595,9 @@ func testReceiveWarpMessage(
 				signers = primarySigners
 			}
 
-			vdrOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
+			vdrOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput)
 			for _, s := range signers {
-				vdrOutput[s.nodeID] = &validators.GetValidatorOutput{
+				vdrOutput[s.nodeID] = &interfaces.GetValidatorOutput{
 					NodeID:    s.nodeID,
 					PublicKey: s.secret.PublicKey(),
 					Weight:    s.weight,
@@ -612,14 +612,14 @@ func testReceiveWarpMessage(
 		signersBitSet.Add(i)
 	}
 
-	warpSignature := &luxWarp.BitSetSignature{
+	warpSignature := &interfaces.BitSetSignature{
 		Signers: signersBitSet.Bytes(),
 	}
 
-	blsAggregatedSignatureBytes := bls.SignatureToBytes(blsAggregatedSignature)
+	blsAggregatedSignatureBytes := interfaces.SignatureToBytes(blsAggregatedSignature)
 	copy(warpSignature.Signature[:], blsAggregatedSignatureBytes)
 
-	signedMessage, err := luxWarp.NewMessage(
+	signedMessage, err := interfaces.NewMessage(
 		unsignedMessage,
 		warpSignature,
 	)
@@ -651,7 +651,7 @@ func testReceiveWarpMessage(
 	}
 
 	// Build, verify, and accept block with valid proposer context.
-	validProposerCtx := &block.Context{
+	validProposerCtx := &interfaces.Context{
 		PChainHeight: minimumValidPChainHeight,
 	}
 	vm.clock.Set(blockTime)
@@ -675,7 +675,7 @@ func testReceiveWarpMessage(
 	bitset := set.BitsFromBytes(txResultsBytes)
 	require.Zero(bitset.Len()) // Empty bitset indicates success
 
-	block2VerifyWithCtx, ok := block2.(block.WithVerifyContext)
+	block2VerifyWithCtx, ok := block2.(interfaces.WithVerifyContext)
 	require.True(ok)
 	shouldVerifyWithCtx, err := block2VerifyWithCtx.ShouldVerifyWithContext(context.Background())
 	require.NoError(err)
@@ -684,13 +684,13 @@ func testReceiveWarpMessage(
 	require.NoError(vm.SetPreference(context.Background(), block2.ID()))
 
 	// Verify the block with another valid context with identical predicate results
-	require.NoError(block2VerifyWithCtx.VerifyWithContext(context.Background(), &block.Context{
+	require.NoError(block2VerifyWithCtx.VerifyWithContext(context.Background(), &interfaces.Context{
 		PChainHeight: minimumValidPChainHeight + 1,
 	}))
 
 	// Verify the block in a different context causing the warp message to fail verification changing
 	// the expected header predicate results.
-	require.ErrorIs(block2VerifyWithCtx.VerifyWithContext(context.Background(), &block.Context{
+	require.ErrorIs(block2VerifyWithCtx.VerifyWithContext(context.Background(), &interfaces.Context{
 		PChainHeight: minimumValidPChainHeight - 1,
 	}), errInvalidHeaderPredicateResults)
 
@@ -717,15 +717,15 @@ func testReceiveWarpMessage(
 	txTraceResults, err := tracerAPI.TraceBlockByHash(context.Background(), ethBlock.Hash(), nil)
 	require.NoError(err)
 	require.Len(txTraceResults, 1)
-	blockTxTraceResultBytes, err := json.Marshal(txTraceResults[0].Result)
+	blockTxTraceResultBytes, err := interfaces.Marshal(txTraceResults[0].Result)
 	require.NoError(err)
 	unmarshalResults := make(map[string]interface{})
-	require.NoError(json.Unmarshal(blockTxTraceResultBytes, &unmarshalResults))
+	require.NoError(interfaces.Unmarshal(blockTxTraceResultBytes, &unmarshalResults))
 	require.Equal(common.Bytes2Hex(expectedOutput), unmarshalResults["returnValue"])
 
 	txTraceResult, err := tracerAPI.TraceTransaction(context.Background(), getVerifiedWarpMessageTx.Hash(), nil)
 	require.NoError(err)
-	txTraceResultBytes, err := json.Marshal(txTraceResult)
+	txTraceResultBytes, err := interfaces.Marshal(txTraceResult)
 	require.NoError(err)
 	require.JSONEq(string(txTraceResultBytes), string(blockTxTraceResultBytes))
 }
@@ -739,7 +739,7 @@ func TestMessageSignatureRequestsToVM(t *testing.T) {
 	}()
 
 	// Generate a new warp unsigned message and add to warp backend
-	warpMessage, err := luxWarp.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, []byte{1, 2, 3})
+	warpMessage, err := interfaces.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, []byte{1, 2, 3})
 	require.NoError(t, err)
 
 	// Add the known message and get its signature to confirm.
@@ -747,12 +747,12 @@ func TestMessageSignatureRequestsToVM(t *testing.T) {
 	require.NoError(t, err)
 	signature, err := vm.warpBackend.GetMessageSignature(context.TODO(), warpMessage)
 	require.NoError(t, err)
-	var knownSignature [bls.SignatureLen]byte
+	var knownSignature [interfaces.SignatureLen]byte
 	copy(knownSignature[:], signature)
 
 	tests := map[string]struct {
 		messageID        ids.ID
-		expectedResponse [bls.SignatureLen]byte
+		expectedResponse [interfaces.SignatureLen]byte
 	}{
 		"known": {
 			messageID:        warpMessage.ID(),
@@ -760,7 +760,7 @@ func TestMessageSignatureRequestsToVM(t *testing.T) {
 		},
 		"unknown": {
 			messageID:        ids.GenerateTestID(),
-			expectedResponse: [bls.SignatureLen]byte{},
+			expectedResponse: [interfaces.SignatureLen]byte{},
 		},
 	}
 
@@ -804,12 +804,12 @@ func TestBlockSignatureRequestsToVM(t *testing.T) {
 
 	signature, err := vm.warpBackend.GetBlockSignature(context.TODO(), lastAcceptedID)
 	require.NoError(t, err)
-	var knownSignature [bls.SignatureLen]byte
+	var knownSignature [interfaces.SignatureLen]byte
 	copy(knownSignature[:], signature)
 
 	tests := map[string]struct {
 		blockID          ids.ID
-		expectedResponse [bls.SignatureLen]byte
+		expectedResponse [interfaces.SignatureLen]byte
 	}{
 		"known": {
 			blockID:          lastAcceptedID,
@@ -817,7 +817,7 @@ func TestBlockSignatureRequestsToVM(t *testing.T) {
 		},
 		"unknown": {
 			blockID:          ids.GenerateTestID(),
-			expectedResponse: [bls.SignatureLen]byte{},
+			expectedResponse: [interfaces.SignatureLen]byte{},
 		},
 	}
 
@@ -851,16 +851,16 @@ func TestBlockSignatureRequestsToVM(t *testing.T) {
 func TestClearWarpDB(t *testing.T) {
 	ctx, db, genesisBytes, issuer, _ := setupGenesis(t, genesisJSONLatest)
 	vm := &VM{}
-	err := vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, issuer, []*commonEng.Fx{}, &enginetest.Sender{})
+	err := vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, issuer, []*interfaces.Fx{}, &enginetest.Sender{})
 	require.NoError(t, err)
 
 	// use multiple messages to test that all messages get cleared
 	payloads := [][]byte{[]byte("test1"), []byte("test2"), []byte("test3"), []byte("test4"), []byte("test5")}
-	messages := []*luxWarp.UnsignedMessage{}
+	messages := []*interfaces.UnsignedMessage{}
 
 	// add all messages
 	for _, payload := range payloads {
-		unsignedMsg, err := luxWarp.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, payload)
+		unsignedMsg, err := interfaces.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, payload)
 		require.NoError(t, err)
 		err = vm.warpBackend.AddMessage(unsignedMsg)
 		require.NoError(t, err)
@@ -874,9 +874,9 @@ func TestClearWarpDB(t *testing.T) {
 
 	// Restart VM with the same database default should not prune the warp db
 	vm = &VM{}
-	// we need new context since the previous one has registered metrics.
+	// we need new context since the previous one has registered interfaces.
 	ctx, _, _, _, _ = setupGenesis(t, genesisJSONLatest)
-	err = vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, issuer, []*commonEng.Fx{}, &enginetest.Sender{})
+	err = vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, issuer, []*interfaces.Fx{}, &enginetest.Sender{})
 	require.NoError(t, err)
 
 	// check messages are still present
@@ -892,7 +892,7 @@ func TestClearWarpDB(t *testing.T) {
 	vm = &VM{}
 	config := `{"prune-warp-db-enabled": true}`
 	ctx, _, _, _, _ = setupGenesis(t, genesisJSONLatest)
-	err = vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte(config), issuer, []*commonEng.Fx{}, &enginetest.Sender{})
+	err = vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte(config), issuer, []*interfaces.Fx{}, &enginetest.Sender{})
 	require.NoError(t, err)
 
 	it := vm.warpDB.NewIterator()
@@ -902,6 +902,6 @@ func TestClearWarpDB(t *testing.T) {
 	// ensure all messages have been deleted
 	for _, message := range messages {
 		_, err := vm.warpBackend.GetMessageSignature(context.TODO(), message)
-		require.ErrorIs(t, err, &commonEng.AppError{Code: warp.ParseErrCode})
+		require.ErrorIs(t, err, &interfaces.AppError{Code: interfaces.ParseErrCode})
 	}
 }

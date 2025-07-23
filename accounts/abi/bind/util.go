@@ -31,8 +31,8 @@ import (
 	"errors"
 	"time"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	ethereum "github.com/luxfi/geth/interfaces"
+	"github.com/luxfi/evm/core/types"
+	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/log"
 )
 

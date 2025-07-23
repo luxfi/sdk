@@ -34,7 +34,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/common"
 	"github.com/holiman/uint256"
 	"slices"
