@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/evm/interfaces"
-	luxuptime "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/consensus/uptime"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
@@ -17,12 +17,12 @@ type ValidatorReader interface {
 	// GetValidatorAndUptime returns the calculated uptime of the validator specified by validationID
 	// and the last updated time.
 	// GetValidatorAndUptime holds the VM lock while performing the operation and can be called concurrently.
-	GetValidatorAndUptime(validationID interfaces.ID) (stateinterfaces.Validator, time.Duration, time.Time, error)
+	GetValidatorAndUptime(validationID ids.ID) (stateinterfaces.Validator, time.Duration, time.Time, error)
 }
 
 type Manager interface {
 	stateinterfaces.StateReader
-	luxuptime.Manager
+	uptime.Manager
 	// Initialize initializes the validator manager
 	// by syncing the validator state with the current validator set
 	// and starting the uptime tracking.

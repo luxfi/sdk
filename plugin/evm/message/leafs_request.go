@@ -6,7 +6,7 @@ package message
 import (
 	"context"
 	"fmt"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/common"
 )
 
@@ -31,7 +31,7 @@ func (l LeafsRequest) String() string {
 	)
 }
 
-func (l LeafsRequest) Handle(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
+func (l LeafsRequest) Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error) {
 	return handler.HandleStateTrieLeafsRequest(ctx, nodeID, requestID, l)
 }
 

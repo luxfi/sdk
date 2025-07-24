@@ -35,7 +35,7 @@ import (
 
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers"
-	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 )
@@ -151,14 +151,15 @@ func newFlatCallTracer(ctx *tracers.Context, cfg json.RawMessage) (tracers.Trace
 		return nil, errors.New("internal error: embedded tracer has wrong type")
 	}
 
-	return &flatCallTracer{tracer: t, ctx: ctx, config: config}, nil
+	ft := &flatCallTracer{tracer: t, ctx: ctx, config: config}
+	return ft, nil
 }
 
 // CaptureStart implements the EVMLogger interface to initialize the tracing operation.
 func (t *flatCallTracer) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) {
 	t.tracer.CaptureStart(env, from, to, create, input, gas, value)
 	// Update list of precompiles based on current block
-	rules := env.ChainConfig().Rules(env.Context.BlockNumber, env.Context.Time)
+	rules := env.ChainConfig().Rules(env.Context.BlockNumber, false, env.Context.Time)
 	t.activePrecompiles = vm.ActivePrecompiles(rules)
 }
 
@@ -276,7 +277,7 @@ func flatFromNested(input *callFrame, traceAddress []int, convertErrs bool, ctx 
 
 	// Revert output contains useful information (revert reason).
 	// Otherwise discard result.
-	if input.Error != "" && input.Error != vmerrs.ErrExecutionReverted.Error() {
+	if input.Error != "" && input.Error != vm.ErrExecutionReverted.Error() {
 		frame.Result = nil
 	}
 

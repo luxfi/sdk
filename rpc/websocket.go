@@ -37,7 +37,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/evm/log"
+	"github.com/luxfi/geth/log"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gorilla/websocket"
 )
@@ -83,7 +83,7 @@ func (s *Server) WebsocketHandlerWithDuration(allowedOrigins []string, apiMaxDur
 // websocket upgrade process. When a '*' is specified as an allowed origins all
 // connections are accepted.
 func wsHandshakeValidator(allowedOrigins []string) func(*http.Request) bool {
-	origins := maputils.NewSet[string]()
+	origins := mapset.NewSet[string]()
 	allowAllOrigins := false
 
 	for _, origin := range allowedOrigins {
@@ -136,7 +136,7 @@ func (e wsHandshakeError) Error() string {
 	return s
 }
 
-func originIsAllowed(allowedOrigins mapinterfaces.Set[string], browserOrigin string) bool {
+func originIsAllowed(allowedOrigins mapset.Set[string], browserOrigin string) bool {
 	it := allowedOrigins.Iterator()
 	for origin := range it.C {
 		if ruleAllowsOrigin(origin, browserOrigin) {

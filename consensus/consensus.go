@@ -1,118 +1,36 @@
 // (c) 2019-2020, Lux Industries, Inc.
-//
-// This file is a derived work, based on the go-ethereum library whose original
-// notices appear below.
-//
-// It is distributed under a license compatible with the licensing terms of the
-// original code from which it is derived.
-//
-// Much love to the original authors for their work.
-// **********
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// All rights reserved.
+// See the file LICENSE for licensing terms.
 
-// Package consensus implements different Ethereum consensus engines.
-package consensus
+package snow
 
 import (
-	"math/big"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/ids"
 )
 
-// ChainHeaderReader defines a small collection of methods needed to access the local
-// blockchain during header verification.
-type ChainHeaderReader interface {
-	// Config retrieves the blockchain's chain configuration.
-	Config() *params.ChainConfig
-
-	// CurrentHeader retrieves the current header from the local chain.
-	CurrentHeader() *types.Header
-
-	// GetHeader retrieves a block header from the database by hash and number.
-	GetHeader(hash common.Hash, number uint64) *types.Header
-
-	// GetHeaderByNumber retrieves a block header from the database by number.
-	GetHeaderByNumber(number uint64) *types.Header
-
-	// GetHeaderByHash retrieves a block header from the database by its hash.
-	GetHeaderByHash(hash common.Hash) *types.Header
-
-	// GetFeeConfigAt retrieves the fee config and last changed block number at block header.
-	GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error)
-
-	// GetCoinbaseAt retrieves the configured coinbase address at [parent].
-	// If fee recipients are allowed, returns true in the second return value and a predefined address in the first value.
-	GetCoinbaseAt(parent *types.Header) (common.Address, bool, error)
+// Block is the interface for linear blocks
+type Block interface {
+	ID() ids.ID
+	ParentID() ids.ID
+	Height() uint64
+	Verify() error
+	Accept() error
+	Reject() error
+	Status() Status
 }
 
-// ChainReader defines a small collection of methods needed to access the local
-// blockchain during header and/or uncle verification.
-type ChainReader interface {
-	ChainHeaderReader
+// Status represents the status of a block
+type Status uint8
 
-	// GetBlock retrieves a block from the database by hash and number.
-	GetBlock(hash common.Hash, number uint64) *types.Block
-}
+const (
+	Unknown Status = iota
+	Processing
+	Rejected
+	Accepted
+)
 
-// Engine is an algorithm agnostic consensus common.
-type Engine interface {
-	// Author retrieves the Ethereum address of the account that minted the given
-	// block, which may be different from the header's coinbase if a consensus
-	// engine is based on signatures.
-	Author(header *types.Header) (common.Address, error)
-
-	// VerifyHeader checks whether a header conforms to the consensus rules of a
-	// given common.
-	//
-	// NOTE: VerifyHeader does not validate the correctness of fields that rely
-	// on the contents of the block (as opposed to the current and/or parent
-	// header).
-	VerifyHeader(chain ChainHeaderReader, header *types.Header) error
-
-	// VerifyUncles verifies that the given block's uncles conform to the consensus
-	// rules of a given common.
-	VerifyUncles(chain ChainReader, block *types.Block) error
-
-	// Prepare initializes the consensus fields of a block header according to the
-	// rules of a particular common. The changes are executed inline.
-	Prepare(chain ChainHeaderReader, header *types.Header) error
-
-	// Finalize runs any post-transaction state modifications (e.g. block rewards)
-	// but does not assemble the block.
-	//
-	// Note: The block header and state database might be updated to reflect any
-	// consensus rules that happen at finalization (e.g. block rewards).
-	Finalize(chain ChainHeaderReader, block *types.Block, parent *types.Header, state vm.StateDB, receipts []*types.Receipt) error
-
-	// FinalizeAndAssemble runs any post-transaction state modifications (e.g. block
-	// rewards) and assembles the final block.
-	//
-	// Note: The block header and state database might be updated to reflect any
-	// consensus rules that happen at finalization (e.g. block rewards).
-	FinalizeAndAssemble(chain ChainHeaderReader, header *types.Header, parent *types.Header, state vm.StateDB, txs []*types.Transaction,
-		uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error)
-
-	// CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty
-	// that a new block should have.
-	CalcDifficulty(chain ChainHeaderReader, time uint64, parent *types.Header) *big.Int
-
-	// Close terminates any background threads maintained by the consensus common.
-	Close() error
+// Consensus interface for linear consensus
+type Consensus interface {
+	Add(Block) error
+	Finalized() bool
 }

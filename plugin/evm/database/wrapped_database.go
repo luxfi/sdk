@@ -8,6 +8,7 @@ import (
 
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/node/database"
 )
 
 var (
@@ -63,25 +64,37 @@ func (db ethDbWrapper) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
 		copy(newStart[len(prefix):], start)
 		start = newStart
 	}
-	return db.Database.NewIteratorWithStartAndPrefix(start, prefix)
+	return db.Database.NewIterator(prefix, start)
 }
 
 // NewIteratorWithStart implements ethdb.Database
 func (db ethDbWrapper) NewIteratorWithStart(start []byte) ethdb.Iterator {
-	return db.Database.NewIteratorWithStart(start)
+	return db.Database.NewIterator(nil, start)
 }
 
 // wrappedBatch implements ethdb.wrappedBatch
-type wrappedBatch struct{ database.Batch }
+type wrappedBatch struct{ interfaces.Batch }
 
 // ValueSize implements ethdb.Batch
-func (batch wrappedBatch) ValueSize() int { return batch.Batch.Size() }
+func (batch wrappedBatch) ValueSize() int { return batch.Batch.ValueSize() }
 
 // Replay implements ethdb.Batch
-func (batch wrappedBatch) Replay(w ethdb.KeyValueWriter) error { return batch.Batch.Replay(w) }
+func (batch wrappedBatch) Replay(w ethdb.KeyValueWriter) error { 
+	// Wrap the ethdb.KeyValueWriter as a database.KeyValueWriterDeleter
+	return batch.Batch.Replay(&keyValueWriterDeleter{w})
+}
 
 // DeleteRange implements ethdb.Batch
 func (batch wrappedBatch) DeleteRange(start []byte, end []byte) error {
 	// Not supported in lux database
 	return nil
+}
+
+// keyValueWriterDeleter wraps an ethdb.KeyValueWriter to implement database.KeyValueWriterDeleter
+type keyValueWriterDeleter struct {
+	ethdb.KeyValueWriter
+}
+
+func (k *keyValueWriterDeleter) Delete(key []byte) error {
+	return k.KeyValueWriter.Delete(key)
 }

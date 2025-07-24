@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/spf13/cast"
@@ -59,7 +58,7 @@ const (
 	// - state sync time: ~6 hrs.
 	defaultStateSyncMinBlocks   = 300_000
 	defaultStateSyncRequestSize = 1024 // the number of key/values to ask peers for per request
-	defaultDBType               = interfaces.Name
+	defaultDBType               = "leveldb"
 	defaultValidatorAPIEnabled  = true
 
 	estimatedBlockAcceptPeriod        = 2 * time.Second
@@ -319,7 +318,7 @@ func (c *Config) SetDefaults(txPoolConfig TxPoolConfig) {
 
 func (d *Duration) UnmarshalJSON(data []byte) (err error) {
 	var v interface{}
-	if err := interfaces.Unmarshal(data, &v); err != nil {
+	if err := json.Unmarshal(data, &v); err != nil {
 		return err
 	}
 	d.Duration, err = cast.ToDurationE(v)
@@ -333,7 +332,7 @@ func (d Duration) String() string {
 
 // String implements the stringer interface.
 func (d Duration) MarshalJSON() ([]byte, error) {
-	return interfaces.Marshal(d.Duration.String())
+	return json.Marshal(d.Duration.String())
 }
 
 // Validate returns an error if this is an invalid interfaces.

@@ -33,12 +33,13 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/params"
+	gethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/vmerrs"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	gethmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/crypto/blake2b"
 	// "github.com/luxfi/geth/crypto/bls12381" // TODO: Add this to geth
@@ -190,8 +191,8 @@ var PrecompiledContractsCancun = map[common.Address]contract.StatefulPrecompiled
 // 	common.BytesToAddress([]byte{17}): newWrappedPrecompiledContract(&bls12381MapG1{}),
 // 	common.BytesToAddress([]byte{18}): newWrappedPrecompiledContract(&bls12381MapG2{}),
 // }
-// 
-// var (
+
+var (
 	PrecompiledAddressesCancun           []common.Address
 	PrecompiledAddressesBanff            []common.Address
 	PrecompiledAddressesApricotPhase6    []common.Address
@@ -259,7 +260,7 @@ func init() {
 }
 
 // ActivePrecompiles returns the precompiles enabled with the current configuration.
-func ActivePrecompiles(rules params.Rules) []common.Address {
+func ActivePrecompiles(rules gethparams.Rules) []common.Address {
 	switch {
 	case rules.IsCancun:
 		return PrecompiledAddressesCancun
@@ -295,7 +296,7 @@ func RunPrecompiledContract(p PrecompiledContract, input []byte, suppliedGas uin
 type ecrecover struct{}
 
 func (c *ecrecover) RequiredGas(input []byte) uint64 {
-	return params.EcrecoverGas
+	return gethparams.EcrecoverGas
 }
 
 func (c *ecrecover) Run(input []byte) ([]byte, error) {
@@ -337,7 +338,7 @@ type sha256hash struct{}
 // This method does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *sha256hash) RequiredGas(input []byte) uint64 {
-	return uint64(len(input)+31)/32*params.Sha256PerWordGas + params.Sha256BaseGas
+	return uint64(len(input)+31)/32*gethparams.Sha256PerWordGas + gethparams.Sha256BaseGas
 }
 func (c *sha256hash) Run(input []byte) ([]byte, error) {
 	h := sha256.Sum256(input)
@@ -352,7 +353,7 @@ type ripemd160hash struct{}
 // This method does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *ripemd160hash) RequiredGas(input []byte) uint64 {
-	return uint64(len(input)+31)/32*params.Ripemd160PerWordGas + params.Ripemd160BaseGas
+	return uint64(len(input)+31)/32*gethparams.Ripemd160PerWordGas + gethparams.Ripemd160BaseGas
 }
 func (c *ripemd160hash) Run(input []byte) ([]byte, error) {
 	ripemd := ripemd160.New()
@@ -368,7 +369,7 @@ type dataCopy struct{}
 // This method does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *dataCopy) RequiredGas(input []byte) uint64 {
-	return uint64(len(input)+31)/32*params.IdentityPerWordGas + params.IdentityBaseGas
+	return uint64(len(input)+31)/32*gethparams.IdentityPerWordGas + gethparams.IdentityBaseGas
 }
 func (c *dataCopy) Run(in []byte) ([]byte, error) {
 	return common.CopyBytes(in), nil
@@ -460,7 +461,12 @@ func (c *bigModExp) RequiredGas(input []byte) uint64 {
 	}
 	adjExpLen.Add(adjExpLen, big.NewInt(int64(msb)))
 	// Calculate the gas cost of the operation
-	gas := new(big.Int).Set(math.BigMax(modLen, baseLen))
+	gas := new(big.Int)
+	if modLen.Cmp(baseLen) > 0 {
+		gas.Set(modLen)
+	} else {
+		gas.Set(baseLen)
+	}
 	if c.eip2565 {
 		// EIP-2565 has three changes
 		// 1. Different multComplexity (inlined here)
@@ -573,7 +579,7 @@ type bn256AddIstanbul struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256AddIstanbul) RequiredGas(input []byte) uint64 {
-	return params.Bn256AddGasIstanbul
+	return gethparams.Bn256AddGasIstanbul
 }
 
 func (c *bn256AddIstanbul) Run(input []byte) ([]byte, error) {
@@ -586,7 +592,7 @@ type bn256AddByzantium struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256AddByzantium) RequiredGas(input []byte) uint64 {
-	return params.Bn256AddGasByzantium
+	return gethparams.Bn256AddGasByzantium
 }
 
 func (c *bn256AddByzantium) Run(input []byte) ([]byte, error) {
@@ -611,7 +617,7 @@ type bn256ScalarMulIstanbul struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256ScalarMulIstanbul) RequiredGas(input []byte) uint64 {
-	return params.Bn256ScalarMulGasIstanbul
+	return gethparams.Bn256ScalarMulGasIstanbul
 }
 
 func (c *bn256ScalarMulIstanbul) Run(input []byte) ([]byte, error) {
@@ -624,7 +630,7 @@ type bn256ScalarMulByzantium struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256ScalarMulByzantium) RequiredGas(input []byte) uint64 {
-	return params.Bn256ScalarMulGasByzantium
+	return gethparams.Bn256ScalarMulGasByzantium
 }
 
 func (c *bn256ScalarMulByzantium) Run(input []byte) ([]byte, error) {
@@ -679,7 +685,7 @@ type bn256PairingIstanbul struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256PairingIstanbul) RequiredGas(input []byte) uint64 {
-	return params.Bn256PairingBaseGasIstanbul + uint64(len(input)/192)*params.Bn256PairingPerPointGasIstanbul
+	return gethparams.Bn256PairingBaseGasIstanbul + uint64(len(input)/192)*gethparams.Bn256PairingPerPointGasIstanbul
 }
 
 func (c *bn256PairingIstanbul) Run(input []byte) ([]byte, error) {
@@ -692,7 +698,7 @@ type bn256PairingByzantium struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256PairingByzantium) RequiredGas(input []byte) uint64 {
-	return params.Bn256PairingBaseGasByzantium + uint64(len(input)/192)*params.Bn256PairingPerPointGasByzantium
+	return gethparams.Bn256PairingBaseGasByzantium + uint64(len(input)/192)*gethparams.Bn256PairingPerPointGasByzantium
 }
 
 func (c *bn256PairingByzantium) Run(input []byte) ([]byte, error) {
@@ -772,7 +778,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381G1Add) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381G1AddGas
+// 	return gethparams.Bls12381G1AddGas
 // }
 // 
 // func (c *bls12381G1Add) Run(input []byte) ([]byte, error) {
@@ -810,7 +816,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381G1Mul) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381G1MulGas
+// 	return gethparams.Bls12381G1MulGas
 // }
 // 
 // func (c *bls12381G1Mul) Run(input []byte) ([]byte, error) {
@@ -854,13 +860,13 @@ var (
 // 	}
 // 	// Lookup discount value for G1 point, scalar value pair length
 // 	var discount uint64
-// 	if dLen := len(params.Bls12381MultiExpDiscountTable); k < dLen {
-// 		discount = params.Bls12381MultiExpDiscountTable[k-1]
+// 	if dLen := len(gethparams.Bls12381MultiExpDiscountTable); k < dLen {
+// 		discount = gethparams.Bls12381MultiExpDiscountTable[k-1]
 // 	} else {
-// 		discount = params.Bls12381MultiExpDiscountTable[dLen-1]
+// 		discount = gethparams.Bls12381MultiExpDiscountTable[dLen-1]
 // 	}
 // 	// Calculate gas and return the result
-// 	return (uint64(k) * params.Bls12381G1MulGas * discount) / 1000
+// 	return (uint64(k) * gethparams.Bls12381G1MulGas * discount) / 1000
 // }
 // 
 // func (c *bls12381G1MultiExp) Run(input []byte) ([]byte, error) {
@@ -903,7 +909,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381G2Add) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381G2AddGas
+// 	return gethparams.Bls12381G2AddGas
 // }
 // 
 // func (c *bls12381G2Add) Run(input []byte) ([]byte, error) {
@@ -941,7 +947,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381G2Mul) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381G2MulGas
+// 	return gethparams.Bls12381G2MulGas
 // }
 // 
 // func (c *bls12381G2Mul) Run(input []byte) ([]byte, error) {
@@ -985,13 +991,13 @@ var (
 // 	}
 // 	// Lookup discount value for G2 point, scalar value pair length
 // 	var discount uint64
-// 	if dLen := len(params.Bls12381MultiExpDiscountTable); k < dLen {
-// 		discount = params.Bls12381MultiExpDiscountTable[k-1]
+// 	if dLen := len(gethparams.Bls12381MultiExpDiscountTable); k < dLen {
+// 		discount = gethparams.Bls12381MultiExpDiscountTable[k-1]
 // 	} else {
-// 		discount = params.Bls12381MultiExpDiscountTable[dLen-1]
+// 		discount = gethparams.Bls12381MultiExpDiscountTable[dLen-1]
 // 	}
 // 	// Calculate gas and return the result
-// 	return (uint64(k) * params.Bls12381G2MulGas * discount) / 1000
+// 	return (uint64(k) * gethparams.Bls12381G2MulGas * discount) / 1000
 // }
 // 
 // func (c *bls12381G2MultiExp) Run(input []byte) ([]byte, error) {
@@ -1034,7 +1040,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381Pairing) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381PairingBaseGas + uint64(len(input)/384)*params.Bls12381PairingPerPairGas
+// 	return gethparams.Bls12381PairingBaseGas + uint64(len(input)/384)*gethparams.Bls12381PairingPerPairGas
 // }
 // 
 // func (c *bls12381Pairing) Run(input []byte) ([]byte, error) {
@@ -1113,7 +1119,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381MapG1) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381MapG1Gas
+// 	return gethparams.Bls12381MapG1Gas
 // }
 // 
 // func (c *bls12381MapG1) Run(input []byte) ([]byte, error) {
@@ -1148,7 +1154,7 @@ var (
 // 
 // // RequiredGas returns the gas required to execute the pre-compiled contract.
 // func (c *bls12381MapG2) RequiredGas(input []byte) uint64 {
-// 	return params.Bls12381MapG2Gas
+// 	return gethparams.Bls12381MapG2Gas
 // }
 // 
 // func (c *bls12381MapG2) Run(input []byte) ([]byte, error) {
@@ -1185,19 +1191,19 @@ var (
 // 	return g.EncodePoint(r), nil
 // }
 // 
-// // kzgPointEvaluation implements the EIP-4844 point evaluation precompile.
-// type kzgPointEvaluation struct{}
-// 
-// // RequiredGas estimates the gas required for running the point evaluation precompile.
-// func (b *kzgPointEvaluation) RequiredGas(input []byte) uint64 {
-// 	return params.BlobTxPointEvaluationPrecompileGas
-// }
-// 
-// const (
-// 	blobVerifyInputLength           = 192  // Max input length for the point evaluation precompile.
-// 	blobCommitmentVersionKZG  uint8 = 0x01 // Version byte for the point evaluation precompile.
-// 	blobPrecompileReturnValue       = "000000000000000000000000000000000000000000000000000000000000100073eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001"
-// )
+// kzgPointEvaluation implements the EIP-4844 point evaluation precompile.
+type kzgPointEvaluation struct{}
+
+// RequiredGas estimates the gas required for running the point evaluation precompile.
+func (b *kzgPointEvaluation) RequiredGas(input []byte) uint64 {
+	return 50000 // Default gas cost for kzg point evaluation
+}
+
+const (
+	blobVerifyInputLength           = 192  // Max input length for the point evaluation precompile.
+	blobCommitmentVersionKZG  uint8 = 0x01 // Version byte for the point evaluation precompile.
+	blobPrecompileReturnValue       = "000000000000000000000000000000000000000000000000000000000000100073eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001"
+)
 
 var (
 	errBlobVerifyInvalidInputLength = errors.New("invalid input length")

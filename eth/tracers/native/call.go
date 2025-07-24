@@ -35,7 +35,8 @@ import (
 	"github.com/luxfi/geth/accounts/abi"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers"
-	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/evm/eth/tracers/internal"
+	"github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/log"
@@ -91,7 +92,7 @@ func (f *callFrame) processOutput(output []byte, err error) {
 	if f.Type == vm.CREATE || f.Type == vm.CREATE2 {
 		f.To = nil
 	}
-	if !errors.Is(err, vmerrs.ErrExecutionReverted) || len(output) == 0 {
+	if !errors.Is(err, vm.ErrExecutionReverted) || len(output) == 0 {
 		return
 	}
 	f.Output = output
@@ -137,7 +138,8 @@ func newCallTracer(ctx *tracers.Context, cfg json.RawMessage) (tracers.Tracer, e
 	}
 	// First callframe contains tx context info
 	// and is populated on start and end.
-	return &callTracer{callstack: make([]callFrame, 1), config: config}, nil
+	t := &callTracer{callstack: make([]callFrame, 1), config: config}
+	return t, nil
 }
 
 // CaptureStart implements the EVMLogger interface to initialize the tracing operation.
@@ -195,7 +197,7 @@ func (t *callTracer) CaptureState(pc uint64, op vm.OpCode, gas, cost uint64, sco
 			topics[i] = common.Hash(topic.Bytes32())
 		}
 
-		data, err := tracers.GetMemoryCopyPadded(scope.Memory, int64(mStart.Uint64()), int64(mSize.Uint64()))
+		data, err := internal.GetMemoryCopyPadded(scope.Memory.Data(), int64(mStart.Uint64()), int64(mSize.Uint64()))
 		if err != nil {
 			// mSize was unrealistically large
 			log.Warn("failed to copy CREATE2 input", "err", err, "tracer", "callTracer", "offset", mStart, "size", mSize)

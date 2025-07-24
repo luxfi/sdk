@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/evm/snow"
+	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/node/utils/crypto/secp256k1"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/prometheus/client_golang/prometheus"

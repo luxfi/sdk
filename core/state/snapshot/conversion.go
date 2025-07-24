@@ -324,10 +324,12 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 				fullData []byte
 			)
 			if leafCallback == nil {
-				fullData, err = types.FullAccountRLP(it.(AccountIterator).Account())
+				accHash, data := it.(AccountIterator).Account()
+				fullData, err = types.FullAccountRLP(data)
 				if err != nil {
 					return stop(err)
 				}
+				leaf = trieKV{accHash, fullData}
 			} else {
 				// Wait until the semaphore allows us to continue, aborting if
 				// a sub-task failed
@@ -336,7 +338,8 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 					return stop(err)
 				}
 				// Fetch the next account and process it concurrently
-				account, err := FullAccount(it.(AccountIterator).Account())
+				accHash, data := it.(AccountIterator).Account()
+				account, err := FullAccount(data)
 				if err != nil {
 					return stop(err)
 				}
@@ -351,15 +354,16 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 						return
 					}
 					results <- nil
-				}(it.Hash())
+				}(accHash)
 				fullData, err = rlp.EncodeToBytes(account)
 				if err != nil {
 					return stop(err)
 				}
+				leaf = trieKV{accHash, fullData}
 			}
-			leaf = trieKV{it.Hash(), fullData}
 		} else {
-			leaf = trieKV{it.Hash(), common.CopyBytes(it.(StorageIterator).Slot())}
+			slotHash, slotData := it.(StorageIterator).Slot()
+			leaf = trieKV{slotHash, common.CopyBytes(slotData)}
 		}
 		in <- leaf
 
@@ -367,9 +371,9 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 		processed++
 		if time.Since(logged) > 3*time.Second && stats != nil {
 			if account == (common.Hash{}) {
-				stats.progressAccounts(it.Hash(), processed)
+				stats.progressAccounts(leaf.key, processed)
 			} else {
-				stats.progressContract(account, it.Hash(), processed)
+				stats.progressContract(account, leaf.key, processed)
 			}
 			logged, processed = time.Now(), 0
 		}
@@ -386,14 +390,13 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 }
 
 func stackTrieGenerate(db ethdb.KeyValueWriter, scheme string, owner common.Hash, in chan trieKV, out chan common.Hash) {
-	// Use StackTrieOptions.WithWriter instead of the removed OnTrieNode API.
-	opts := trie.NewStackTrieOptions()
+	var onTrieNode trie.OnTrieNode
 	if db != nil {
-		opts = opts.WithWriter(func(path []byte, hash common.Hash, blob []byte) {
+		onTrieNode = func(path []byte, hash common.Hash, blob []byte) {
 			rawdb.WriteTrieNode(db, owner, path, hash, blob, scheme)
-		})
+		}
 	}
-	t := trie.NewStackTrie(opts)
+	t := trie.NewStackTrie(onTrieNode)
 	for leaf := range in {
 		t.Update(leaf.key[:], leaf.value)
 	}

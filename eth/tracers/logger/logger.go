@@ -28,7 +28,6 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/vmerrs"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
@@ -246,7 +245,7 @@ func (l *StructLogger) GetResult() (json.RawMessage, error) {
 	returnData := common.CopyBytes(l.output)
 	// Return data when successful and revert reason when reverted, otherwise empty.
 	returnVal := fmt.Sprintf("%x", returnData)
-	if failed && l.err != vmerrs.ErrExecutionReverted {
+	if failed && l.err != vm.ErrExecutionReverted {
 		returnVal = ""
 	}
 	return json.Marshal(&ExecutionResult{

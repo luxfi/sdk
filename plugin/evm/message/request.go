@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
 )
 
 // Request represents a Network request type
@@ -18,10 +18,10 @@ type Request interface {
 
 	// Handle allows `Request` to call respective methods on handler to handle
 	// this particular request type
-	Handle(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, handler RequestHandler) ([]byte, error)
+	Handle(ctx context.Context, nodeID ids.NodeID, requestID uint32, handler RequestHandler) ([]byte, error)
 }
 
 // RequestToBytes marshals the given request object into bytes
-func RequestToBytes(codec interfaces.Codec, request Request) ([]byte, error) {
-	return interfaces.Marshal(Version, &request)
+func RequestToBytes(codec codec.Manager, request Request) ([]byte, error) {
+	return codec.Marshal(Version, &request)
 }

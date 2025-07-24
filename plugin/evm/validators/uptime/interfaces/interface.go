@@ -4,13 +4,13 @@
 package interfaces
 
 import (
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/consensus/uptime"
 	validatorsstateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
 type PausableManager interface {
 	uptime.Manager
 	validatorsstateinterfaces.StateCallbackListener
-	IsPaused(nodeID interfaces.NodeID) bool
+	IsPaused(nodeID ids.NodeID) bool
 }

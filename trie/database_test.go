@@ -64,7 +64,7 @@ func (r *testReader) Node(owner common.Hash, path []byte, hash common.Hash) ([]b
 	return rawdb.ReadTrieNode(r.db, owner, path, hash, r.scheme), nil
 }
 
-// testDb implements database.Database interface, using for testing purpose.
+// testDb implements database.NodeDatabase interface, using for testing purpose.
 type testDb struct {
 	disk    ethdb.Database
 	root    common.Hash

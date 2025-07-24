@@ -19,8 +19,8 @@ import (
 	"github.com/luxfi/node/chains/atomic"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/evm/snow"
-	"github.com/luxfi/evm/snow/consensus/snowman"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/consensus/consensus/linear"
 	"github.com/luxfi/node/utils/crypto/secp256k1"
 	"github.com/luxfi/node/utils/hashing"
 	"github.com/luxfi/node/utils/set"
@@ -137,13 +137,13 @@ type Backend struct {
 }
 
 type BlockFetcher interface {
-	LastAcceptedBlockInternal() snowman.Block
-	GetBlockInternal(context.Context, ids.ID) (snowman.Block, error)
+	LastAcceptedBlockInternal() linear.Block
+	GetBlockInternal(context.Context, ids.ID) (linear.Block, error)
 }
 
 type AtomicBlockContext interface {
 	AtomicTxs() []*Tx
-	snowman.Block
+	linear.Block
 }
 
 type StateDB interface {

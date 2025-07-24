@@ -34,7 +34,7 @@ import (
 
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth"
 	"github.com/luxfi/geth/rpc"
 	"github.com/luxfi/geth/signer/core/apitypes"
 	"github.com/luxfi/geth/common"
@@ -159,7 +159,7 @@ func (api *ExternalSigner) Derive(path accounts.DerivationPath, pin bool) (accou
 	return accounts.Account{}, errors.New("operation not supported on external signers")
 }
 
-func (api *ExternalSigner) SelfDerive(bases []accounts.DerivationPath, chain interfaces.ChainStateReader) {
+func (api *ExternalSigner) SelfDerive(bases []accounts.DerivationPath, chain ethereum.ChainStateReader) {
 	log.Error("operation SelfDerive not supported on external signers")
 }
 

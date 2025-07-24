@@ -36,7 +36,7 @@ type Config struct {
     OPStackConfig  *OPStackConfig  `json:",omitempty"`
     
     // Consensus configuration
-    ConsensusEngine string // "snowman", "sequencer", "op-stack", "hybrid"
+    ConsensusEngine string // "linear", "sequencer", "op-stack", "hybrid"
     
     // State configuration
     StateDBPath    string
@@ -175,7 +175,7 @@ evm/
 │   └── vm/
 ├── consensus/              # Consensus abstraction
 │   ├── interface.go
-│   ├── snowman.go         # Avalanche consensus
+│   ├── linear.go         # Avalanche consensus
 │   ├── sequencer.go       # Centralized sequencer
 │   ├── opstack.go         # OP Stack consensus
 │   └── hybrid.go          # Multi-consensus
@@ -201,7 +201,7 @@ evm/
 {
   "mode": "c-chain",
   "chainId": 43114,
-  "consensusEngine": "snowman",
+  "consensusEngine": "linear",
   "cChainConfig": {
     "allowFeeRecipients": true,
     "feeConfig": {
@@ -218,7 +218,7 @@ evm/
 {
   "mode": "subnet-l2",
   "chainId": 281123,
-  "consensusEngine": "snowman",
+  "consensusEngine": "linear",
   "subnetConfig": {
     "subnetID": "2PYmKXzSJCPcgKUhKgxPAHKfxeFbPFBH2Y7JqfmV3mJYLHaAZS",
     "validatorOnly": false
