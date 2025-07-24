@@ -50,8 +50,8 @@ type Iterator interface {
 // which may or may not be composed of multiple layers.
 type AccountIterator interface {
 	Iterator
-	// Account returns the current account
-	Account() (common.Hash, Account)
+	// Account returns the current account hash and RLP encoded account
+	Account() (common.Hash, []byte)
 }
 
 // StorageIterator is an iterator to step over the specific storage in a snapshot,
@@ -134,13 +134,13 @@ func (it *diffAccountIterator) Hash() common.Hash {
 // if elements have been deleted.
 //
 // Note the returned account is not a copy, please don't modify it.
-func (it *diffAccountIterator) Account() []byte {
+func (it *diffAccountIterator) Account() (common.Hash, []byte) {
 	it.layer.lock.RLock()
 	blob, ok := it.layer.accountData[it.curHash]
 	if !ok {
 		if _, ok := it.layer.destructSet[it.curHash]; ok {
 			it.layer.lock.RUnlock()
-			return nil
+			return it.curHash, nil
 		}
 		panic(fmt.Sprintf("iterator referenced non-existent account: %x", it.curHash))
 	}
@@ -148,7 +148,7 @@ func (it *diffAccountIterator) Account() []byte {
 	if it.layer.Stale() {
 		it.fail, it.keys = ErrSnapshotStale, nil
 	}
-	return blob
+	return it.curHash, blob
 }
 
 // Release is a noop for diff account iterators as there are no held resources.
@@ -208,8 +208,8 @@ func (it *diskAccountIterator) Hash() common.Hash {
 }
 
 // Account returns the RLP encoded slim account the iterator is currently at.
-func (it *diskAccountIterator) Account() []byte {
-	return it.it.Value()
+func (it *diskAccountIterator) Account() (common.Hash, []byte) {
+	return it.Hash(), it.it.Value()
 }
 
 // Release releases the database snapshot held during iteration.
@@ -301,7 +301,7 @@ func (it *diffStorageIterator) Hash() common.Hash {
 // if elements have been deleted.
 //
 // Note the returned slot is not a copy, please don't modify it.
-func (it *diffStorageIterator) Slot() []byte {
+func (it *diffStorageIterator) Slot() (common.Hash, []byte) {
 	it.layer.lock.RLock()
 	storage, ok := it.layer.storageData[it.account]
 	if !ok {
@@ -316,7 +316,7 @@ func (it *diffStorageIterator) Slot() []byte {
 	if it.layer.Stale() {
 		it.fail, it.keys = ErrSnapshotStale, nil
 	}
-	return blob
+	return it.curHash, blob
 }
 
 // Release is a noop for diff account iterators as there are no held resources.
@@ -387,8 +387,8 @@ func (it *diskStorageIterator) Hash() common.Hash {
 }
 
 // Slot returns the raw storage slot content the iterator is currently at.
-func (it *diskStorageIterator) Slot() []byte {
-	return it.it.Value()
+func (it *diskStorageIterator) Slot() (common.Hash, []byte) {
+	return it.Hash(), it.it.Value()
 }
 
 // Release releases the database snapshot held during iteration.

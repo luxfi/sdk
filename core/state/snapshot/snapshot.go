@@ -34,6 +34,7 @@ import (
 	"sync"
 	"time"
 	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
@@ -122,7 +123,22 @@ var (
 )
 
 // Snapshot represents the functionality supported by a snapshot storage layer.
-// type Snapshot = ethsnapshot.Snapshot (removed self-import)
+type Snapshot interface {
+	// Root returns the root hash for which this snapshot was made.
+	Root() common.Hash
+
+	// Account directly retrieves the account associated with a particular hash in
+	// the snapshot slim data format.
+	Account(hash common.Hash) (*types.SlimAccount, error)
+
+	// AccountRLP directly retrieves the account RLP associated with a particular
+	// hash in the snapshot slim data format.
+	AccountRLP(hash common.Hash) ([]byte, error)
+
+	// Storage directly retrieves the storage data associated with a particular hash,
+	// within a particular account.
+	Storage(accountHash, storageHash common.Hash) ([]byte, error)
+}
 
 // snapshot is the internal version of the snapshot data layer that supports some
 // additional methods compared to the public API.

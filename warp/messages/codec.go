@@ -6,22 +6,21 @@ package messages
 import (
 	"errors"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
 )
 
 const (
 	CodecVersion = 0
 
-	MaxMessageSize = 24 * interfaces.KiB
+	MaxMessageSize = 24 * 1024 // 24 KiB
 )
 
-var Codec interfaces.Codec
+var Codec codec.Manager
 
 func init() {
-	Codec = interfaces.NewManager(MaxMessageSize)
-	lc := linearinterfaces.NewDefault()
+	Codec = codec.NewManager(MaxMessageSize)
+	lc := linearcodec.NewDefault()
 
 	err := errors.Join(
 		lc.RegisterType(&ValidatorUptime{}),

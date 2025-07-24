@@ -6,29 +6,26 @@ package state
 import (
 	"math"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
 )
 
 const (
 	codecVersion = uint16(0)
 )
 
-var vdrCodec interfaces.Codec
+var vdrCodec codec.Manager
 
 func init() {
-	vdrCodec = interfaces.NewManager(interfaces.MaxInt32)
-	c := linearinterfaces.NewDefault()
+	vdrCodec = codec.NewManager(math.MaxInt32)
+	c := linearcodec.NewDefault()
 
-	errs := interfaces.Errs{}
-	errs.Add(
-		c.RegisterType(validatorData{}),
-
-		vdrCodec.RegisterCodec(codecVersion, c),
-	)
-
-	if errs.Errored() {
-		panic(errs.Err)
+	err := c.RegisterType(validatorData{})
+	if err != nil {
+		panic(err)
+	}
+	err = vdrCodec.RegisterCodec(codecVersion, c)
+	if err != nil {
+		panic(err)
 	}
 }

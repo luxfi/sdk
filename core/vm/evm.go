@@ -30,11 +30,12 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/luxfi/evm/snow"
+	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core/headerutil"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
@@ -132,6 +133,8 @@ type BlockContext struct {
 	PredicateResults *predicate.Results
 	// Extra is the extra field from the block header.
 	Extra []byte
+	// ConsensusContext is the context for consensus-related operations
+	ConsensusContext *interfaces.ChainContext
 
 	// Block information
 	Coinbase    common.Address // Provides information for COINBASE
@@ -663,6 +666,9 @@ func (evm *EVM) ChainConfig() *params.ChainConfig { return evm.chainConfig }
 
 // GetChainConfig implements AccessibleState
 func (evm *EVM) GetChainConfig() precompileconfig.ChainConfig { return evm.chainConfig }
+
+// GetConsensusContext implements AccessibleState
+func (evm *EVM) GetConsensusContext() *interfaces.ChainContext { return evm.Context.ConsensusContext }
 
 func (evm *EVM) NativeAssetCall(caller common.Address, input []byte, suppliedGas uint64, gasCost uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	if suppliedGas < gasCost {

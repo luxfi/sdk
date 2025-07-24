@@ -141,9 +141,9 @@ func Estimate(ctx context.Context, call *core.Message, opts *Options, gasCap uin
 	lo = result.UsedGas - 1
 
 	// There's a fairly high chance for the transaction to execute successfully
-	// with gasLimit set to the first execution's usedGas + gasRefund. Explicitly
+	// with gasLimit set to the first execution's usedGas. Explicitly
 	// check that gas amount and use as a limit for the binary search.
-	optimisticGasLimit := (result.UsedGas + result.RefundedGas + params.CallStipend) * 64 / 63
+	optimisticGasLimit := (result.UsedGas + params.CallStipend) * 64 / 63
 	if optimisticGasLimit < hi {
 		failed, _, err = execute(ctx, call, opts, optimisticGasLimit)
 		if err != nil {
@@ -222,8 +222,9 @@ func run(ctx context.Context, call *core.Message, opts *Options) (*core.Executio
 		evmContext = core.NewEVMBlockContext(opts.Header, opts.Chain, nil)
 
 		dirtyState = opts.State.Copy()
-		evm        = vm.NewEVM(evmContext, msgContext, dirtyState, opts.Config, vm.Config{NoBaseFee: true})
+		evm        = vm.NewEVM(evmContext, dirtyState, opts.Config, vm.Config{NoBaseFee: true})
 	)
+	evm.TxContext = msgContext
 	// Monitor the outer context and interrupt the EVM upon cancellation. To avoid
 	// a dangling goroutine until the outer estimation finishes, create an internal
 	// context for the lifetime of this method call.

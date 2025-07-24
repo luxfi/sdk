@@ -35,7 +35,7 @@ import (
 	"sync"
 	"unicode"
 
-	"github.com/luxfi/evm/log"
+	"github.com/luxfi/geth/log"
 )
 
 var (

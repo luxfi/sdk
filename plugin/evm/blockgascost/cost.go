@@ -7,7 +7,7 @@ package blockgascost
 import (
 	"math"
 
-	safemath "github.com/luxfi/evm/interfaces"
+	safemath "github.com/luxfi/node/utils/math"
 	"github.com/luxfi/evm/commontype"
 )
 
@@ -22,20 +22,20 @@ func BlockGasCost(
 	step uint64,
 	timeElapsed uint64,
 ) uint64 {
-	deviation := safeinterfaces.AbsDiff(feeConfig.TargetBlockRate, timeElapsed)
-	change, err := safeinterfaces.Mul(step, deviation)
+	deviation := safemath.AbsDiff(feeConfig.TargetBlockRate, timeElapsed)
+	change, err := safemath.Mul(step, deviation)
 	if err != nil {
-		change = interfaces.MaxUint64
+		change = math.MaxUint64
 	}
 
 	var (
 		minBlockGasCost uint64 = feeConfig.MinBlockGasCost.Uint64()
 		maxBlockGasCost uint64 = feeConfig.MaxBlockGasCost.Uint64()
-		op                     = safeinterfaces.Add[uint64]
+		op                     = safemath.Add[uint64]
 		defaultCost     uint64 = feeConfig.MaxBlockGasCost.Uint64()
 	)
 	if timeElapsed > feeConfig.TargetBlockRate {
-		op = safeinterfaces.Sub
+		op = safemath.Sub
 		defaultCost = minBlockGasCost
 	}
 

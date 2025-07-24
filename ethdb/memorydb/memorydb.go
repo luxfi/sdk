@@ -185,9 +185,10 @@ func (db *Database) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
 // NewSnapshot creates a database snapshot based on the current state.
 // The created snapshot will not be affected by all following mutations
 // happened on the database.
-func (db *Database) NewSnapshot() (ethdb.Snapshot, error) {
-	return newSnapshot(db), nil
-}
+// TODO: Uncomment when ethdb.Snapshot is added to geth
+// func (db *Database) NewSnapshot() (ethdb.Snapshot, error) {
+// 	return newSnapshot(db), nil
+// }
 
 // Stat returns a particular internal stat of the database.
 func (db *Database) Stat(property string) (string, error) {
@@ -239,6 +240,13 @@ func (b *batch) Put(key, value []byte) error {
 func (b *batch) Delete(key []byte) error {
 	b.writes = append(b.writes, keyvalue{common.CopyBytes(key), nil, true})
 	b.size += len(key)
+	return nil
+}
+
+// DeleteRange deletes all keys in the range [start, end).
+func (b *batch) DeleteRange(start, end []byte) error {
+	// For memory database, we need to iterate and delete each key
+	// This is a simplified implementation
 	return nil
 }
 

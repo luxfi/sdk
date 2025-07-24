@@ -5,11 +5,11 @@
 package precompileconfig
 
 import (
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/vms/platformvm/warp"
 )
 
 // StatefulPrecompileConfig defines the interface for a stateful precompile to
@@ -35,7 +35,7 @@ type Config interface {
 type PredicateContext struct {
 	ConsensusCtx *interfaces.ChainContext
 	// ProposerVMBlockCtx defines the ProposerVM context the predicate is verified within
-	ProposerVMBlockCtx *interfaces.Context
+	ProposerVMBlockCtx *consensus.Context
 }
 
 // Predicater is an optional interface for StatefulPrecompileContracts to implement.
@@ -51,7 +51,7 @@ type Predicater interface {
 }
 
 type WarpMessageWriter interface {
-	AddMessage(unsignedMessage *interfaces.UnsignedMessage) error
+	AddMessage(unsignedMessage *warp.UnsignedMessage) error
 }
 
 // AcceptContext defines the context passed in to a precompileconfig's Accepter

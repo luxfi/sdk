@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/evm/internal/version"
-	"github.com/luxfi/evm/log"
+	"github.com/luxfi/geth/log"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
 )

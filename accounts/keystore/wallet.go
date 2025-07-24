@@ -31,7 +31,7 @@ import (
 
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth"
 	"github.com/luxfi/geth/crypto"
 )
 
@@ -87,7 +87,7 @@ func (w *keystoreWallet) Derive(path accounts.DerivationPath, pin bool) (account
 
 // SelfDerive implements accounts.Wallet, but is a noop for plain wallets since
 // there is no notion of hierarchical account derivation for plain keystore accounts.
-func (w *keystoreWallet) SelfDerive(bases []accounts.DerivationPath, chain interfaces.ChainStateReader) {
+func (w *keystoreWallet) SelfDerive(bases []accounts.DerivationPath, chain ethereum.ChainStateReader) {
 }
 
 // signHash attempts to sign the given hash with

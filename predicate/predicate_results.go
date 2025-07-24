@@ -7,9 +7,8 @@ import (
 	"fmt"
 	"strings"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/geth/common"
 )
 
@@ -18,19 +17,19 @@ const (
 	MaxResultsSize = interfaces.MiB
 )
 
-var Codec interfaces.Codec
+var Codec codec.Manager
 
 func init() {
-	Codec = interfaces.NewManager(MaxResultsSize)
+	Codec = codec.NewManager(MaxResultsSize)
 
-	c := linearinterfaces.NewDefault()
-	errs := interfaces.Errs{}
-	errs.Add(
-		c.RegisterType(Results{}),
-		Codec.RegisterCodec(Version, c),
-	)
-	if errs.Errored() {
-		panic(errs.Err)
+	c := linearcodec.NewDefault()
+	err := c.RegisterType(Results{})
+	if err != nil {
+		panic(err)
+	}
+	err = Codec.RegisterCodec(Version, c)
+	if err != nil {
+		panic(err)
 	}
 }
 

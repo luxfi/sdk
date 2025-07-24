@@ -2,13 +2,13 @@
 // All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package snowman
+package linear
 
 import (
 	"github.com/luxfi/node/ids"
 )
 
-// Block is the interface for snowman blocks
+// Block is the interface for linear blocks
 type Block interface {
 	ID() ids.ID
 	ParentID() ids.ID
@@ -29,7 +29,7 @@ const (
 	Accepted
 )
 
-// Consensus interface for snowman consensus
+// Consensus interface for linear consensus
 type Consensus interface {
 	Add(Block) error
 	Finalized() bool

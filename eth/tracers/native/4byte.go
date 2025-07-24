@@ -33,7 +33,9 @@ import (
 	"sync/atomic"
 
 	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/eth/tracers"
+	"github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/common"
 )
 
@@ -65,7 +67,7 @@ type fourByteTracer struct {
 
 // newFourByteTracer returns a native go tracer which collects
 // 4 byte-identifiers of a tx, and implements vm.EVMLogger.
-func newFourByteTracer(ctx *tracers.Context, _ json.RawMessage) (tracers.Tracer, error) {
+func newFourByteTracer(ctx *tracers.Context, cfg json.RawMessage) (tracers.Tracer, error) {
 	t := &fourByteTracer{
 		ids: make(map[string]int),
 	}
@@ -91,7 +93,7 @@ func (t *fourByteTracer) store(id []byte, size int) {
 // CaptureStart implements the EVMLogger interface to initialize the tracing operation.
 func (t *fourByteTracer) CaptureStart(env *vm.EVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) {
 	// Update list of precompiles based on current block
-	rules := env.ChainConfig().Rules(env.Context.BlockNumber, env.Context.Time)
+	rules := env.ChainConfig().Rules(env.Context.BlockNumber, false, env.Context.Time)
 	t.activePrecompiles = vm.ActivePrecompiles(rules)
 
 	// Save the outer calldata also

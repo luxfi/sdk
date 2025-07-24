@@ -38,12 +38,12 @@ import (
 // for concurrent usage.
 type trieReader struct {
 	owner  common.Hash
-	reader database.Reader
+	reader database.NodeReader
 	banned map[string]struct{} // Marker to prevent node from being accessed, for tests
 }
 
 // newTrieReader initializes the trie reader with the given node reader.
-func newTrieReader(stateRoot, owner common.Hash, db database.Database) (*trieReader, error) {
+func newTrieReader(stateRoot, owner common.Hash, db database.NodeDatabase) (*trieReader, error) {
 	if stateRoot == (common.Hash{}) || stateRoot == types.EmptyRootHash {
 		if stateRoot == (common.Hash{}) {
 			log.Error("Zero state root hash!")
@@ -85,11 +85,11 @@ func (r *trieReader) node(path []byte, hash common.Hash) ([]byte, error) {
 
 // MerkleLoader implements triestate.TrieLoader for constructing tries.
 type MerkleLoader struct {
-	db database.Database
+	db database.NodeDatabase
 }
 
 // NewMerkleLoader creates the merkle trie loader.
-func NewMerkleLoader(db database.Database) *MerkleLoader {
+func NewMerkleLoader(db database.NodeDatabase) *MerkleLoader {
 	return &MerkleLoader{db: db}
 }
 

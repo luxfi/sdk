@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/utils/wrappers"
 	safemath "github.com/luxfi/geth/common/math"
 )
 
