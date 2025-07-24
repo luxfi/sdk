@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/chains/atomic"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/consensus"
-	avalancheutils "github.com/luxfi/node/utils"
+	luxutils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/secp256k1"
 	"github.com/luxfi/node/utils/math"
@@ -125,7 +125,7 @@ func (utx *UnsignedExportTx) Verify(
 	if !lux.IsSortedTransferableOutputs(utx.ExportedOutputs, Codec) {
 		return ErrOutputsNotSorted
 	}
-	if rules.IsApricotPhase1 && !avalancheutils.IsSortedAndUnique(utx.Ins) {
+	if rules.IsApricotPhase1 && !luxutils.IsSortedAndUnique(utx.Ins) {
 		return ErrInputsNotSortedUnique
 	}
 

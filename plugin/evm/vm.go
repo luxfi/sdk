@@ -76,7 +76,7 @@ import (
 	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/database/prefixdb"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/lip118"
 	"github.com/luxfi/node/network/p2p/gossip"
 	evmValidators "github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/node/utils"
@@ -546,7 +546,7 @@ func (vm *VM) Initialize(
 	go vm.ctx.Log.RecoverAndPanic(vm.startContinuousProfiler)
 
 	// Add p2p warp message warpHandler
-	warpHandler := acp118.NewCachedHandler(meteredCache, vm.warpBackend, vm.ctx.WarpSigner)
+	warpHandler := lip118.NewCachedHandler(meteredCache, vm.warpBackend, vm.ctx.WarpSigner)
 	vm.Network.AddHandler(p2p.SignatureRequestHandlerID, warpHandler)
 
 	vm.setAppRequestHandlers()

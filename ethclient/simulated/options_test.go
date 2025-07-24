@@ -26,7 +26,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/plugin/evm/upgrade/acp176"
+	"github.com/luxfi/evm/plugin/evm/upgrade/lip176"
 )
 
 // Tests that the simulator starts with the initial gas limit in the genesis block,
@@ -50,8 +50,8 @@ func TestWithBlockGasLimitOption(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to retrieve head block: %v", err)
 	}
-	if head.GasLimit() != acp176.MinMaxCapacity {
-		t.Errorf("head gas limit mismatch: have %v, want %v", head.GasLimit(), acp176.MinMaxCapacity)
+	if head.GasLimit() != lip176.MinMaxCapacity {
+		t.Errorf("head gas limit mismatch: have %v, want %v", head.GasLimit(), lip176.MinMaxCapacity)
 	}
 }
 

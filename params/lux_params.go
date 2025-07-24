@@ -3,7 +3,7 @@
 
 package params
 
-// Avalanche-specific gas costs for precompiled contracts
+// Lux-specific gas costs for precompiled contracts
 const (
 	// AssetBalanceApricot is the gas cost for querying native asset balance
 	AssetBalanceApricot uint64 = 2474

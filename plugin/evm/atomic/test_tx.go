@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/node/utils"
 
-	avalancheatomic "github.com/luxfi/node/chains/atomic"
+	luxatomic "github.com/luxfi/node/chains/atomic"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/node/utils/set"
@@ -39,7 +39,7 @@ func init() {
 type TestUnsignedTx struct {
 	GasUsedV                    uint64                    `serialize:"true"`
 	AcceptRequestsBlockchainIDV ids.ID                    `serialize:"true"`
-	AcceptRequestsV             *avalancheatomic.Requests `serialize:"true"`
+	AcceptRequestsV             *luxatomic.Requests `serialize:"true"`
 	VerifyV                     error
 	IDV                         ids.ID `serialize:"true" json:"id"`
 	BurnedV                     uint64 `serialize:"true"`
@@ -59,7 +59,7 @@ func (t *TestUnsignedTx) GasUsed(fixedFee bool) (uint64, error) { return t.GasUs
 func (t *TestUnsignedTx) Verify(ctx *consensus.Context, rules params.Rules) error { return t.VerifyV }
 
 // AtomicOps implements the UnsignedAtomicTx interface
-func (t *TestUnsignedTx) AtomicOps() (ids.ID, *avalancheatomic.Requests, error) {
+func (t *TestUnsignedTx) AtomicOps() (ids.ID, *luxatomic.Requests, error) {
 	return t.AcceptRequestsBlockchainIDV, t.AcceptRequestsV, nil
 }
 
@@ -100,7 +100,7 @@ func GenerateTestImportTxWithGas(gasUsed uint64, burned uint64) *Tx {
 			GasUsedV:                    gasUsed,
 			BurnedV:                     burned,
 			AcceptRequestsBlockchainIDV: TestBlockchainID,
-			AcceptRequestsV: &avalancheatomic.Requests{
+			AcceptRequestsV: &luxatomic.Requests{
 				RemoveRequests: [][]byte{
 					utils.RandomBytes(32),
 					utils.RandomBytes(32),
@@ -115,7 +115,7 @@ func GenerateTestImportTx() *Tx {
 		UnsignedAtomicTx: &TestUnsignedTx{
 			IDV:                         ids.GenerateTestID(),
 			AcceptRequestsBlockchainIDV: TestBlockchainID,
-			AcceptRequestsV: &avalancheatomic.Requests{
+			AcceptRequestsV: &luxatomic.Requests{
 				RemoveRequests: [][]byte{
 					utils.RandomBytes(32),
 					utils.RandomBytes(32),
@@ -130,8 +130,8 @@ func GenerateTestExportTx() *Tx {
 		UnsignedAtomicTx: &TestUnsignedTx{
 			IDV:                         ids.GenerateTestID(),
 			AcceptRequestsBlockchainIDV: TestBlockchainID,
-			AcceptRequestsV: &avalancheatomic.Requests{
-				PutRequests: []*avalancheatomic.Element{
+			AcceptRequestsV: &luxatomic.Requests{
+				PutRequests: []*luxatomic.Element{
 					{
 						Key:   utils.RandomBytes(16),
 						Value: utils.RandomBytes(24),
