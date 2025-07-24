@@ -13,19 +13,19 @@ import (
 
 // Context is the context for the chain
 type Context struct {
-	NetworkID     uint32
-	SubnetID      ids.ID
-	ChainID       ids.ID
-	NodeID        ids.NodeID
-	PublicKey     *bls.PublicKey
-	XChainID      ids.ID
-	CChainID      ids.ID
-	AVAXAssetID   ids.ID
-	Log           logging.Logger
-	Metrics       metrics.MultiGatherer
-	ChainDataDir  string
-	AliasManager  AliasManager
-	Validators    ValidatorManager
+	NetworkID    uint32
+	SubnetID     ids.ID
+	ChainID      ids.ID
+	NodeID       ids.NodeID
+	PublicKey    *bls.PublicKey
+	XChainID     ids.ID
+	CChainID     ids.ID
+	LUXAssetID   ids.ID
+	Log          logging.Logger
+	Metrics      metrics.MultiGatherer
+	ChainDataDir string
+	AliasManager AliasManager
+	Validators   ValidatorManager
 }
 
 // AliasManager interface

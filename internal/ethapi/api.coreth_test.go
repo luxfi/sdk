@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/plugin/evm/upgrade/acp176"
+	"github.com/luxfi/evm/plugin/evm/upgrade/lip176"
 	"github.com/luxfi/evm/plugin/evm/upgrade/etna"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
@@ -56,7 +56,7 @@ func TestSuggestPriceOptions(t *testing.T) {
 	}
 	minBaseFee := etna.MinBaseFee
 	bigMinBaseFee := big.NewInt(int64(minBaseFee))
-	fortunaMinBaseFee := acp176.MinGasPrice
+	fortunaMinBaseFee := lip176.MinGasPrice
 	bigFortunaMinBaseFee := big.NewInt(int64(fortunaMinBaseFee))
 	slowFeeNumerator := testCfg.SlowFeePercentage
 	fastFeeNumerator := testCfg.FastFeePercentage
