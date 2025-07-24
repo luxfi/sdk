@@ -277,9 +277,9 @@ func (evm *EVM) Cancelled() bool {
 	return evm.abort.Load()
 }
 
-// GetSnowContext returns the evm's snow.Context.
-func (evm *EVM) GetSnowContext() *snow.Context {
-	return evm.chainConfig.SnowCtx
+// GetConsensusContext returns the evm's consensus.Context.
+func (evm *EVM) GetConsensusContext() *consensus.Context {
+	return evm.chainConfig.ConsensusCtx
 }
 
 // GetStateDB returns the evm's StateDB

@@ -2,11 +2,18 @@
 // All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package snow
+package consensus
 
-import (
+)
+	"math/big"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/node/ids"
 )
+
 
 // Block is the interface for linear blocks
 type Block interface {
@@ -33,4 +40,28 @@ const (
 type Consensus interface {
 	Add(Block) error
 	Finalized() bool
+}
+
+// Use interfaces from the interfaces package
+type ChainHeaderReader = interfaces.ChainHeaderReader
+type ChainReader = interfaces.ChainReader
+type Engine = interfaces.Engine
+
+// PoW is a consensus engine based on proof-of-work (deprecated).
+type PoW interface {
+	Engine
+
+	// Hashrate returns the current mining hashrate of a PoW consensus engine.
+	Hashrate() float64
+}
+
+// PoS is a consensus engine based on proof-of-stake (delegated to Lux).
+type PoS interface {
+	Engine
+}
+
+// FeeConfig defines the interface for chain fee configuration
+type FeeConfig interface {
+	GetBaseFee(timestamp uint64) *big.Int
+	GetMaxGasLimit() *big.Int
 }

@@ -58,7 +58,7 @@ func newMempoolMetrics() *mempoolMetrics {
 type Mempool struct {
 	lock sync.RWMutex
 
-	ctx *snow.Context
+	ctx *consensus.Context
 	// maxSize is the maximum number of transactions allowed to be kept in mempool
 	maxSize int
 	// currentTxs is the set of transactions about to be added to a block.
@@ -85,7 +85,7 @@ type Mempool struct {
 }
 
 // NewMempool returns a Mempool with [maxSize]
-func NewMempool(ctx *snow.Context, registerer prometheus.Registerer, maxSize int, verify func(tx *Tx) error) (*Mempool, error) {
+func NewMempool(ctx *consensus.Context, registerer prometheus.Registerer, maxSize int, verify func(tx *Tx) error) (*Mempool, error) {
 	bloom, err := gossip.NewBloomFilter(registerer, "atomic_mempool_bloom_filter",
 		config.TxGossipBloomMinTargetElements,
 		config.TxGossipBloomTargetFalsePositiveRate,

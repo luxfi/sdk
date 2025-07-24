@@ -2,7 +2,7 @@
 // All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package snow
+package consensus
 
 import (
 	"github.com/luxfi/node/api/metrics"
