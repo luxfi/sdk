@@ -56,7 +56,7 @@ var _ UnsignedAtomicTx = &TestUnsignedTx{}
 func (t *TestUnsignedTx) GasUsed(fixedFee bool) (uint64, error) { return t.GasUsedV, nil }
 
 // Verify implements the UnsignedAtomicTx interface
-func (t *TestUnsignedTx) Verify(ctx *snow.Context, rules params.Rules) error { return t.VerifyV }
+func (t *TestUnsignedTx) Verify(ctx *consensus.Context, rules params.Rules) error { return t.VerifyV }
 
 // AtomicOps implements the UnsignedAtomicTx interface
 func (t *TestUnsignedTx) AtomicOps() (ids.ID, *avalancheatomic.Requests, error) {
@@ -87,7 +87,7 @@ func (t *TestUnsignedTx) SemanticVerify(backend *Backend, stx *Tx, parent Atomic
 }
 
 // EVMStateTransfer implements the UnsignedAtomicTx interface
-func (t *TestUnsignedTx) EVMStateTransfer(ctx *snow.Context, state StateDB) error {
+func (t *TestUnsignedTx) EVMStateTransfer(ctx *consensus.Context, state StateDB) error {
 	return t.EVMStateTransferV
 }
 

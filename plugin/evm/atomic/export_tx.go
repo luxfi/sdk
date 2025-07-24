@@ -74,7 +74,7 @@ func (utx *UnsignedExportTx) InputUTXOs() set.Set[ids.ID] {
 
 // Verify this transaction is well-formed
 func (utx *UnsignedExportTx) Verify(
-	ctx *snow.Context,
+	ctx *consensus.Context,
 	rules params.Rules,
 ) error {
 	switch {
@@ -286,7 +286,7 @@ func (utx *UnsignedExportTx) AtomicOps() (ids.ID, *atomic.Requests, error) {
 
 // NewExportTx returns a new ExportTx
 func NewExportTx(
-	ctx *snow.Context,
+	ctx *consensus.Context,
 	rules params.Rules,
 	state StateDB,
 	assetID ids.ID, // AssetID of the tokens to export
@@ -379,7 +379,7 @@ func NewExportTx(
 }
 
 // EVMStateTransfer executes the state update from the atomic export transaction
-func (utx *UnsignedExportTx) EVMStateTransfer(ctx *snow.Context, state StateDB) error {
+func (utx *UnsignedExportTx) EVMStateTransfer(ctx *consensus.Context, state StateDB) error {
 	addrs := map[[20]byte]uint64{}
 	for _, from := range utx.Ins {
 		if from.AssetID == ctx.LUXAssetID {
@@ -419,7 +419,7 @@ func (utx *UnsignedExportTx) EVMStateTransfer(ctx *snow.Context, state StateDB) 
 // corresponds to a single key, so that the signers can be passed in to
 // [tx.Sign] which supports multiple keys on a single input.
 func GetSpendableFunds(
-	ctx *snow.Context,
+	ctx *consensus.Context,
 	state StateDB,
 	keys []*secp256k1.PrivateKey,
 	assetID ids.ID,
@@ -476,7 +476,7 @@ func GetSpendableFunds(
 // corresponds to a single key, so that the signers can be passed in to
 // [tx.Sign] which supports multiple keys on a single input.
 func GetSpendableLUXWithFee(
-	ctx *snow.Context,
+	ctx *consensus.Context,
 	state StateDB,
 	keys []*secp256k1.PrivateKey,
 	amount uint64,

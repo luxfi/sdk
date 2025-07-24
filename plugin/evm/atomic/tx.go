@@ -128,7 +128,7 @@ type UnsignedTx interface {
 }
 
 type Backend struct {
-	Ctx          *snow.Context
+	Ctx          *consensus.Context
 	Fx           fx.Fx
 	Rules        params.Rules
 	Bootstrapped bool
@@ -167,7 +167,7 @@ type UnsignedAtomicTx interface {
 	// InputUTXOs returns the UTXOs this tx consumes
 	InputUTXOs() set.Set[ids.ID]
 	// Verify attempts to verify that the transaction is well formed
-	Verify(ctx *snow.Context, rules params.Rules) error
+	Verify(ctx *consensus.Context, rules params.Rules) error
 	// Attempts to verify this transaction with the provided state.
 	// SemanticVerify this transaction is valid.
 	SemanticVerify(backend *Backend, stx *Tx, parent AtomicBlockContext, baseFee *big.Int) error
@@ -176,7 +176,7 @@ type UnsignedAtomicTx interface {
 	// The set of atomic requests must be returned in a consistent order.
 	AtomicOps() (ids.ID, *atomic.Requests, error)
 
-	EVMStateTransfer(ctx *snow.Context, state StateDB) error
+	EVMStateTransfer(ctx *consensus.Context, state StateDB) error
 }
 
 // Tx is a signed transaction
