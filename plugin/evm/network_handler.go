@@ -13,6 +13,7 @@ import (
 	syncHandlers "github.com/luxfi/evm/sync/handlers"
 	syncStats "github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/warp"
 	warpHandlers "github.com/luxfi/evm/warp/handlers"
 )

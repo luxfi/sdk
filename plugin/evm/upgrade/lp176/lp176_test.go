@@ -1,7 +1,7 @@
 // (c) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package lip176
+package lp176
 
 import (
 	"math"

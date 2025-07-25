@@ -36,7 +36,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/params"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
-	"github.com/luxfi/evm/plugin/evm/upgrade/lip176"
+	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
 	"github.com/luxfi/geth/rpc"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/lru"
@@ -63,8 +63,8 @@ const (
 
 var (
 	DefaultMaxPrice           = big.NewInt(150 * params.GWei)
-	DefaultMinPrice           = big.NewInt(lip176.MinGasPrice)
-	DefaultMinGasUsed         = big.NewInt(lip176.MinTargetPerSecond)
+	DefaultMinPrice           = big.NewInt(lp176.MinGasPrice)
+	DefaultMinGasUsed         = big.NewInt(lp176.MinTargetPerSecond)
 	DefaultMaxLookbackSeconds = uint64(80)
 )
 

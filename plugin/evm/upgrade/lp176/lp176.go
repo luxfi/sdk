@@ -1,9 +1,9 @@
 // (c) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// LIP176 implements the fee logic specified here:
+// LP176 implements the fee logic specified here:
 // https://github.com/lux-foundation/LIPs/blob/main/LIPs/176-dynamic-evm-gas-limit-and-price-discovery-updates/README.md
-package lip176
+package lp176
 
 import (
 	"encoding/binary"

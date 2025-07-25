@@ -4,12 +4,6 @@ go 1.24.5
 
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
-// Temporary: Keep this until all imports are migrated to interfaces
-replace github.com/luxfi/node => ../node
-
-// Replace go-ethereum with our fork
-replace github.com/luxfi/geth => ../geth
-
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
 	github.com/cespare/cp v0.1.0
@@ -18,6 +12,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/dop251/goja v0.0.0-20230806174421-c933cf95e127
+	github.com/ethereum/go-ethereum v1.16.1
 	github.com/ethereum/go-verkle v0.2.2
 	github.com/fjl/gencodec v0.1.1
 	github.com/fsnotify/fsnotify v1.6.0
@@ -26,14 +21,15 @@ require (
 	github.com/gorilla/rpc v1.2.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/go-bexpr v0.1.14
-	github.com/hashicorp/golang-lru v0.5.4
+	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d
+	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/holiman/billy v0.0.0-20240216141850-2abb0c79d3c4
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/kylelemons/godebug v1.1.0
-	github.com/luxfi/geth v0.0.0-00010101000000-000000000000
-	github.com/luxfi/netrunner v1.6.0
-	github.com/luxfi/node v0.0.0-00010101000000-000000000000
+	github.com/luxfi/geth v1.16.2
+	github.com/luxfi/netrunner v1.7.12
+	github.com/luxfi/node v1.13.20
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/olekukonko/tablewriter v0.0.5
@@ -81,10 +77,9 @@ require (
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.0 // indirect
-	github.com/ethereum/go-ethereum v1.16.1 // indirect
 	github.com/ferranbt/fastssz v0.1.4 // indirect
 	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
-	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
+	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08 // indirect
 	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -100,7 +95,6 @@ require (
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huin/goupnp v1.3.0 // indirect
@@ -168,3 +162,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/luxfi/node => ../node
