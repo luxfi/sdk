@@ -177,6 +177,9 @@ type ChainContext struct {
 
 	// Chain configuration
 	ChainDataDir string
+
+	// Network upgrades configuration
+	NetworkUpgrades Config
 }
 
 // SubnetID represents a subnet identifier

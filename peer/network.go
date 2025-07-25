@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
+	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/peer/stats"
 	"github.com/luxfi/evm/plugin/evm/message"
 )

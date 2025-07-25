@@ -16,6 +16,7 @@ import (
    "github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/localsigner"
+	"github.com/luxfi/evm/interfaces"
 )
 
 var (
@@ -57,6 +58,16 @@ func TestConsensusContext() *consensus.Context {
 	_ = aliaser.Alias(testXChainID, testXChainID.String())
 
 	return ctx
+}
+
+// TestChainContext returns a test interfaces.ChainContext
+func TestChainContext() *interfaces.ChainContext {
+	return &interfaces.ChainContext{
+		NetworkID: constants.UnitTestID,
+		SubnetID:  interfaces.SubnetID{},
+		ChainID:   interfaces.ChainID{5, 4, 3, 2, 1},
+		NodeID:    interfaces.GenerateTestNodeID(),
+	}
 }
 
 // TestValidatorState is a test implementation of validator state

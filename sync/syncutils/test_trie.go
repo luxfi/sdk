@@ -16,8 +16,9 @@ import (
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/internal/testutils"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,8 +63,7 @@ func FillTrie(t *testing.T, start, numKeys int, keySize int, trieDB *triedb.Data
 	}
 
 	// Commit the root to [trieDB]
-	nextRoot, nodes, err := testTrie.Commit(false)
-	assert.NoError(t, err)
+	nextRoot, nodes := testTrie.Commit(false)
 	err = trieDB.Update(nextRoot, root, 0, trienode.NewWithNodeSet(nodes), nil)
 	assert.NoError(t, err)
 	err = trieDB.Commit(nextRoot, false)
@@ -124,8 +124,9 @@ func CorruptTrie(t *testing.T, diskdb ethdb.Batcher, tr *trie.Trie, n int) {
 	count := 0
 	for nodeIt.Next(true) {
 		count++
-		if count%n == 0 && nodeIt.Hash() != (common.Hash{}) {
-			if err := batch.Delete(nodeIt.Hash().Bytes()); err != nil {
+		hash := nodeIt.Hash()
+		if count%n == 0 && hash != (common.Hash{}) {
+			if err := batch.Delete(hash.Bytes()); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -179,10 +180,7 @@ func FillAccounts(
 		accounts[key] = &acc
 	}
 
-	newRoot, nodes, err := tr.Commit(false)
-	if err != nil {
-		t.Fatalf("error committing trie: %v", err)
-	}
+	newRoot, nodes := tr.Commit(false)
 	if err := trieDB.Update(newRoot, root, 0, trienode.NewWithNodeSet(nodes), nil); err != nil {
 		t.Fatalf("error updating trieDB: %v", err)
 	}
