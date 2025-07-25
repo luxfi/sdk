@@ -9,26 +9,28 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	luxuptime "github.com/luxfi/evm/interfaces"
-	luxvalidators "github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/consensus"
+	luxvalidators "github.com/luxfi/node/consensus/validators"
+	luxuptime "github.com/luxfi/node/consensus/uptime"
+	"github.com/luxfi/node/utils/timer/mockable"
+
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/luxfi/evm/log"
+	"github.com/luxfi/geth/log"
 )
 
 const (
 	SyncFrequency = 1 * time.Minute
 )
 
+// manager handles validator state and uptime tracking.
 type manager struct {
-	chainCtx *interfaces.ChainContext
+	chainCtx *consensus.Context
 	stateinterfaces.State
 	uptimeinterfaces.PausableManager
 }
@@ -36,12 +38,15 @@ type manager struct {
 // NewManager returns a new validator manager
 // that manages the validator state and the uptime manager.
 // Manager is not thread safe and should be used with the VM locked.
+// NewManager returns a new validator manager
+// that manages the validator state and the uptime manager.
+// Manager is not thread safe and should be used with the VM locked.
 func NewManager(
-	ctx *interfaces.ChainContext,
-	db interfaces.Database,
-	clock *interfaces.MockableTimer,
+	ctx *consensus.Context,
+	db database.Database,
+	clock *mockable.Clock,
 ) (*manager, error) {
-	validatorState, err := interfaces.NewState(db)
+	validatorState, err := validators.NewState(db)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize validator state: %w", err)
 	}
@@ -135,7 +140,8 @@ func (m *manager) sync(ctx context.Context) error {
 }
 
 // loadValidators loads the [validators] into the validator state [validatorState]
-func loadValidators(validatorState stateinterfaces.State, newValidators map[interfaces.ID]*luxinterfaces.GetCurrentValidatorOutput) error {
+// loadValidators loads the [newValidators] into the validator state [validatorState].
+func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*luxvalidators.GetCurrentValidatorOutput) error {
 	currentValidationIDs := validatorState.GetValidationIDs()
 	// first check if we need to delete any existing validators
 	for vID := range currentValidationIDs {
