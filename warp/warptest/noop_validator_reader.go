@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
+	validatorinterfaces "github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
-var _ interfaces.ValidatorReader = &NoOpValidatorReader{}
+var _ validatorinterfaces.ValidatorReader = &NoOpValidatorReader{}
 
 type NoOpValidatorReader struct{}
 

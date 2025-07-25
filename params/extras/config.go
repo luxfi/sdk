@@ -10,6 +10,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	gethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
@@ -36,7 +37,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		LuxContext:   LuxContext{ConsensusCtx: utils.TestConsensusContext()},
+		LuxContext:   LuxContext{ConsensusCtx: testChainContext()},
 		FeeConfig:          DefaultFeeConfig,
 		NetworkUpgrades:    getDefaultNetworkUpgrades(interfaces.GetConfig(constants.UnitTestID)), // This can be changed to correct network (local, test) via VM.
 		GenesisPrecompiles: Precompiles{},
@@ -97,6 +98,15 @@ var (
 		}
 	})
 )
+
+func testChainContext() *interfaces.ChainContext {
+	return &interfaces.ChainContext{
+		NetworkID: constants.UnitTestID,
+		SubnetID:  interfaces.SubnetID{},
+		ChainID:   interfaces.ChainID{5, 4, 3, 2, 1},
+		NodeID:    interfaces.GenerateTestNodeID(),
+	}
+}
 
 func copyAndSet(c *ChainConfig, set func(*ChainConfig)) *ChainConfig {
 	newConfig := *c

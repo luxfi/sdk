@@ -19,7 +19,6 @@ func (sk *SecretKey) Inner() *bls.SecretKey {
 	return sk.sk
 }
 
-// New generates a new random BLS secret key
 // New generates a new random BLS secret key.
 func New() (*SecretKey, error) {
 	sk, err := localsigner.New()

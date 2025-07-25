@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/ids"
-	plugininterfaces "github.com/luxfi/evm/plugin/evm/validators/interfaces"
+	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
@@ -18,15 +18,15 @@ type RLocker interface {
 }
 
 type lockedReader struct {
-	manager plugininterfaces.Manager
+	manager interfaces.Manager
 	lock    RLocker
 }
 
 // NewLockedValidatorReader returns a ValidatorReader that locks during operations.
 func NewLockedValidatorReader(
-	manager plugininterfaces.Manager,
+	manager interfaces.Manager,
 	lock RLocker,
-) plugininterfaces.ValidatorReader {
+) interfaces.ValidatorReader {
 	return &lockedReader{
 		lock:    lock,
 		manager: manager,

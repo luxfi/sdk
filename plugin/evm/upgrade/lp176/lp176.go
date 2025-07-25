@@ -212,7 +212,7 @@ func scaleExcess(
 // mulWithUpperBound multiplies two numbers and returns the result. If the
 // result overflows, it returns [math.MaxUint64].
 func mulWithUpperBound(a, b gas.Gas) gas.Gas {
-	product, err := safemath.Mul(a, b)
+	product, err := safemath.Mul64(a, b)
 	if err != nil {
 		return math.MaxUint64
 	}
