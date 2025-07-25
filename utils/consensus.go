@@ -11,9 +11,9 @@ import (
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/consensus"
+   "github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/api/metrics"
-	"github.com/luxfi/node/consensus/validators"
+   "github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/localsigner"
 )

@@ -8,29 +8,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/big"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"sync"
-	"time"
-	nodeMetrics "github.com/luxfi/node/api/metrics"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/lp118"
-	"github.com/luxfi/node/network/p2p/gossip"
-	nodeConstants "github.com/luxfi/node/utils/constants"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/luxfi/evm/commontype"
+	dummyconsensus "github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/core/txpool/legacypool"
-	"github.com/luxfi/geth/core/types"
-	dummyconsensus "github.com/luxfi/evm/consensus/dummy"
 	evmvm "github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/evm/interfaces"
 	evmPrometheus "github.com/luxfi/evm/metrics/prometheus"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/node"
@@ -42,52 +27,67 @@ import (
 	"github.com/luxfi/evm/rpc"
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/client/stats"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/warp"
 	warpValidators "github.com/luxfi/evm/warp/validators"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/geth/trie"
+	nodeMetrics "github.com/luxfi/node/api/metrics"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/network/p2p/gossip"
+	"github.com/luxfi/node/network/p2p/lp118"
+	nodeConstants "github.com/luxfi/node/utils/constants"
+	"github.com/prometheus/client_golang/prometheus"
+	"math/big"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
 	// Force-load tracer engine to trigger registration
 	//
 	// We must import this package (not referenced elsewhere) so that the native "callTracer"
 	// is added to a map of client-accessible tracers. In geth, this is done
 	// inside of cmd/geth.
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	_ "github.com/luxfi/geth/eth/tracers/js"
 	_ "github.com/luxfi/geth/eth/tracers/native"
-	"github.com/luxfi/evm/precompile/precompileconfig"
 	// Force-load precompiles to trigger registration
+	luxRPC "github.com/gorilla/rpc/v2"
+	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/luxfi/evm/plugin/evm/validators"
+	validatorsInterfaces "github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	_ "github.com/luxfi/evm/precompile/registry"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
-	luxRPC "github.com/gorilla/rpc/v2"
 	ethparams "github.com/luxfi/geth/params"
-	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/node/cache"
 	"github.com/luxfi/node/cache/metercacher"
 	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/choices"
+	commonEng "github.com/luxfi/node/consensus/engine/common"
+	"github.com/luxfi/node/consensus/engine/linear/block"
+	linear "github.com/luxfi/node/consensus/linear"
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/database/prefixdb"
 	"github.com/luxfi/node/database/versiondb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/choices"
-	linear "github.com/luxfi/node/consensus/linear"
-	"github.com/luxfi/node/consensus/engine/linear/block"
+	luxUtils "github.com/luxfi/node/utils"
+	luxJSON "github.com/luxfi/node/utils/json"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	vmchain "github.com/luxfi/node/vms/components/chain"
-	luxUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	luxJSON "github.com/luxfi/node/utils/json"
-	"github.com/luxfi/evm/plugin/evm/validators"
-	validatorsInterfaces "github.com/luxfi/evm/plugin/evm/validators/interfaces"
 )
 
 var (
@@ -150,8 +150,8 @@ var (
 	errInvalidBlock                  = errors.New("invalid block")
 	errInvalidNonce                  = errors.New("invalid nonce")
 	errUnclesUnsupported             = errors.New("uncles unsupported")
-	errNilBaseFeeEVM           = errors.New("nil base fee is invalid after evm")
-	errNilBlockGasCostEVM      = errors.New("nil blockGasCost is invalid after evm")
+	errNilBaseFeeEVM                 = errors.New("nil base fee is invalid after evm")
+	errNilBlockGasCostEVM            = errors.New("nil blockGasCost is invalid after evm")
 	errInvalidHeaderPredicateResults = errors.New("invalid header predicate results")
 	errInitializingLogger            = errors.New("failed to initialize logger")
 )
@@ -415,7 +415,7 @@ func (vm *VM) Initialize(
 		return fmt.Errorf("failed to verify genesis: %w", err)
 	}
 
-	// Create directory for offline pruning  
+	// Create directory for offline pruning
 	if len(vm.config.OfflinePruningDataDirectory) != 0 {
 		if err := os.MkdirAll(vm.config.OfflinePruningDataDirectory, perms.ReadWriteExecute); err != nil {
 			log.Error("failed to create offline pruning data directory", "error", err)
@@ -527,7 +527,7 @@ func (vm *VM) initializeMetrics() error {
 	vm.sdkMetrics = prometheus.NewRegistry()
 	// Skip multiGatherer for now - register metrics directly
 	if metrics.Enabled {
-		// Register SDK metrics 
+		// Register SDK metrics
 		if err := vm.ctx.Metrics.Register(sdkMetricsPrefix, vm.sdkMetrics); err != nil {
 			return err
 		}
@@ -538,31 +538,31 @@ func (vm *VM) initializeMetrics() error {
 func (vm *VM) initializeChain(lastAcceptedHash common.Hash) error {
 	// Create a dummy consensus engine
 	engine := dummyconsensus.NewFullFaker()
-	
+
 	// Create cache config
 	cacheConfig := &core.CacheConfig{
-		TrieCleanLimit: vm.config.TrieCleanCache,
-		TrieDirtyLimit: vm.config.TrieDirtyCache,
-		SnapshotLimit:  vm.config.SnapshotCache,
-		Preimages:      vm.config.Preimages,
+		TrieCleanLimit:     vm.config.TrieCleanCache,
+		TrieDirtyLimit:     vm.config.TrieDirtyCache,
+		SnapshotLimit:      vm.config.SnapshotCache,
+		Preimages:          vm.config.Preimages,
 		AcceptorQueueLimit: vm.config.AcceptorQueueLimit,
 	}
-	
+
 	// Create VM config
 	vmConfig := evmvm.Config{}
-	
+
 	// Create the blockchain
-	// Create genesis 
+	// Create genesis
 	genesis := &core.Genesis{
 		Config: vm.chainConfig,
 	}
-	
+
 	var err error
 	vm.blockChain, err = core.NewBlockChain(vm.chaindb, cacheConfig, genesis, engine, vmConfig, lastAcceptedHash, false)
 	if err != nil {
 		return err
 	}
-	
+
 	// Create the transaction pool using legacy pool implementation
 	// First import at top: "github.com/luxfi/evm/core/txpool/legacypool"
 	txPoolConfig := legacypool.DefaultConfig
@@ -575,21 +575,21 @@ func (vm *VM) initializeChain(lastAcceptedHash common.Hash) error {
 	txPoolConfig.Lifetime = vm.config.TxPoolLifetime.Duration
 	txPoolConfig.Locals = []common.Address{}
 	txPoolConfig.Journal = "" // Disable journaling
-	
+
 	// Create a new transaction pool
 	pool := legacypool.New(txPoolConfig, vm.blockChain)
 	vm.txPool, err = txpool.New(txPoolConfig.PriceLimit, vm.blockChain, []txpool.SubPool{pool})
 	if err != nil {
 		return err
 	}
-	
+
 	// Create the miner
 	minerConfig := &miner.Config{
 		Etherbase: common.Address{},
 	}
 	eventMux := new(event.TypeMux)
 	vm.miner = miner.New(vm, minerConfig, vm.chainConfig, eventMux, engine, &vm.clock)
-	
+
 	lastAccepted := vm.blockChain.LastAcceptedBlock()
 	feeConfig, _, err := vm.blockChain.GetFeeConfigAt(lastAccepted.Header())
 	if err != nil {
@@ -599,7 +599,7 @@ func (vm *VM) initializeChain(lastAcceptedHash common.Hash) error {
 	if vm.txPool != nil && feeConfig.MinBaseFee != nil {
 		// TODO: Find equivalent method in core.TxPool
 	}
-	
+
 	return vm.initChainState(lastAccepted)
 }
 
@@ -888,7 +888,7 @@ func (vm *VM) Shutdown(context.Context) error {
 	}
 	if vm.miner != nil {
 		// Stop miner if it has a Stop method
-	// TODO: Check miner interface
+		// TODO: Check miner interface
 	}
 	log.Info("Ethereum backend stop completed")
 	if vm.usingStandaloneDB {
@@ -915,7 +915,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 		log.Debug("Building block without context")
 	}
 	predicateCtx := &precompileconfig.PredicateContext{
-		ConsensusCtx:            vm.ctx,
+		ConsensusCtx:       vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}
 
