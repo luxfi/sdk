@@ -46,6 +46,12 @@ type binaryIterator struct {
 	fail            error
 }
 
+// hashIterator is an interface for iterators that can return their current hash
+type hashIterator interface {
+	Iterator
+	Hash() common.Hash
+}
+
 // initBinaryAccountIterator creates a simplistic iterator to step over all the
 // accounts in a slow, but easily verifiable way. Note this function is used for
 // initialization, use `newBinaryAccountIterator` as the API.
@@ -132,16 +138,26 @@ func (it *binaryIterator) Next() bool {
 	}
 first:
 	if it.aDone {
-		it.k = it.b.Hash()
+		if hb, ok := it.b.(hashIterator); ok {
+			it.k = hb.Hash()
+		}
 		it.bDone = !it.b.Next()
 		return true
 	}
 	if it.bDone {
-		it.k = it.a.Hash()
+		if ha, ok := it.a.(hashIterator); ok {
+			it.k = ha.Hash()
+		}
 		it.aDone = !it.a.Next()
 		return true
 	}
-	nextA, nextB := it.a.Hash(), it.b.Hash()
+	var nextA, nextB common.Hash
+	if ha, ok := it.a.(hashIterator); ok {
+		nextA = ha.Hash()
+	}
+	if hb, ok := it.b.(hashIterator); ok {
+		nextB = hb.Hash()
+	}
 	if diff := bytes.Compare(nextA[:], nextB[:]); diff < 0 {
 		it.aDone = !it.a.Next()
 		it.k = nextA

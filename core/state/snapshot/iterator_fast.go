@@ -35,6 +35,12 @@ import (
 	"slices"
 )
 
+// hashIterator is an interface for iterators that can return their current hash
+type hashIterator interface {
+	Iterator
+	Hash() common.Hash
+}
+
 // weightedIterator is a iterator with an assigned weight. It is used to prioritise
 // which account or storage slot is the correct one if multiple iterators find the
 // same one (modified in multiple consecutive blocks).
@@ -45,8 +51,13 @@ type weightedIterator struct {
 
 func (it *weightedIterator) Cmp(other *weightedIterator) int {
 	// Order the iterators primarily by the account hashes
-	hashI := it.it.Hash()
-	hashJ := other.it.Hash()
+	var hashI, hashJ common.Hash
+	if hi, ok := it.it.(hashIterator); ok {
+		hashI = hi.Hash()
+	}
+	if hj, ok := other.it.(hashIterator); ok {
+		hashJ = hj.Hash()
+	}
 
 	switch bytes.Compare(hashI[:], hashJ[:]) {
 	case -1:
@@ -144,7 +155,10 @@ func (fi *fastIterator) init() {
 				break
 			}
 			// The iterator is still alive, check for collisions with previous ones
-			hash := it.it.Hash()
+			var hash common.Hash
+			if hi, ok := it.it.(hashIterator); ok {
+				hash = hi.Hash()
+			}
 			if other, exist := positioned[hash]; !exist {
 				positioned[hash] = i
 				break
@@ -184,9 +198,9 @@ func (fi *fastIterator) Next() bool {
 		// do the sorting already
 		fi.initiated = true
 		if fi.account {
-			fi.curAccount = fi.iterators[0].it.(AccountIterator).Account()
+			_, fi.curAccount = fi.iterators[0].it.(AccountIterator).Account()
 		} else {
-			fi.curSlot = fi.iterators[0].it.(StorageIterator).Slot()
+			_, fi.curSlot = fi.iterators[0].it.(StorageIterator).Slot()
 		}
 		if innerErr := fi.iterators[0].it.Error(); innerErr != nil {
 			fi.fail = innerErr
@@ -210,9 +224,9 @@ func (fi *fastIterator) Next() bool {
 			return false // exhausted
 		}
 		if fi.account {
-			fi.curAccount = fi.iterators[0].it.(AccountIterator).Account()
+			_, fi.curAccount = fi.iterators[0].it.(AccountIterator).Account()
 		} else {
-			fi.curSlot = fi.iterators[0].it.(StorageIterator).Slot()
+			_, fi.curSlot = fi.iterators[0].it.(StorageIterator).Slot()
 		}
 		if innerErr := fi.iterators[0].it.Error(); innerErr != nil {
 			fi.fail = innerErr
@@ -248,8 +262,14 @@ func (fi *fastIterator) next(idx int) bool {
 	// We next-ed the iterator at 'idx', now we may have to re-sort that element
 	var (
 		cur, next         = fi.iterators[idx], fi.iterators[idx+1]
-		curHash, nextHash = cur.it.Hash(), next.it.Hash()
+		curHash, nextHash common.Hash
 	)
+	if hc, ok := cur.it.(hashIterator); ok {
+		curHash = hc.Hash()
+	}
+	if hn, ok := next.it.(hashIterator); ok {
+		nextHash = hn.Hash()
+	}
 	if diff := bytes.Compare(curHash[:], nextHash[:]); diff < 0 {
 		// It is still in correct place
 		return true
@@ -272,7 +292,10 @@ func (fi *fastIterator) next(idx int) bool {
 			// Can always place an elem last
 			return true
 		}
-		nextHash := fi.iterators[n+1].it.Hash()
+		var nextHash common.Hash
+		if hn, ok := fi.iterators[n+1].it.(hashIterator); ok {
+			nextHash = hn.Hash()
+		}
 		if diff := bytes.Compare(curHash[:], nextHash[:]); diff < 0 {
 			return true
 		} else if diff > 0 {
@@ -306,7 +329,10 @@ func (fi *fastIterator) Error() error {
 
 // Hash returns the current key
 func (fi *fastIterator) Hash() common.Hash {
-	return fi.iterators[0].it.Hash()
+	if h0, ok := fi.iterators[0].it.(hashIterator); ok {
+		return h0.Hash()
+	}
+	return common.Hash{}
 }
 
 // Account returns the current account blob.
@@ -333,7 +359,11 @@ func (fi *fastIterator) Release() {
 // Debug is a convenience helper during testing
 func (fi *fastIterator) Debug() {
 	for _, it := range fi.iterators {
-		fmt.Printf("[p=%v v=%v] ", it.priority, it.it.Hash()[0])
+		var h common.Hash
+		if hi, ok := it.it.(hashIterator); ok {
+			h = hi.Hash()
+		}
+		fmt.Printf("[p=%v v=%v] ", it.priority, h[0])
 	}
 	fmt.Println()
 }

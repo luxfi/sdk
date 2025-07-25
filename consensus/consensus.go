@@ -7,9 +7,6 @@ package consensus
 import (
    "math/big"
 
-   "github.com/luxfi/geth/common"
-   "github.com/luxfi/evm/commontype"
-   "github.com/luxfi/evm/core/types"
    "github.com/luxfi/evm/interfaces"
    "github.com/luxfi/node/ids"
 )

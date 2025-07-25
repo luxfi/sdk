@@ -56,13 +56,13 @@ func BlockGasCost(
 	timeElapsed uint64,
 ) uint64 {
 	deviation := safemath.AbsDiff(TargetBlockRate, timeElapsed)
-	change, err := safemath.Mul(step, deviation)
+	change, err := safemath.Mul64(step, deviation)
 	if err != nil {
 		change = math.MaxUint64
 	}
 
 	var (
-		op                 = safemath.Add[uint64]
+		op                 = safemath.Add64[uint64]
 		defaultCost uint64 = MaxBlockGasCost
 	)
 	if timeElapsed > TargetBlockRate {

@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
