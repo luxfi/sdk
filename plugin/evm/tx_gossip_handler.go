@@ -7,11 +7,11 @@ import (
 	"context"
 	"time"
 
+	commoneng "github.com/luxfi/node/consensus/engine/common"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/utils/logging"
-	"github.com/luxfi/node/ids"
-	commoneng "github.com/luxfi/node/consensus/engine/core"
 )
 
 // newTxGossipHandler creates a new transaction gossip handler
@@ -33,7 +33,7 @@ func newTxGossipHandler(
 		metrics,
 		maxSize,
 	)
-	
+
 	// Wrap with throttling
 	return &throttledHandler{
 		Handler:          handler,

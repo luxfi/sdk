@@ -8,24 +8,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/node/consensus/choices"
-	chain "github.com/luxfi/node/consensus/linear"
 	"github.com/luxfi/node/consensus/engine/linear/block"
+	chain "github.com/luxfi/node/consensus/linear"
+	"github.com/luxfi/node/ids"
+	"time"
 )
 
 var (
-	_ chain.Block           = (*Block)(nil)
+	_ chain.Block             = (*Block)(nil)
 	_ block.WithVerifyContext = (*Block)(nil)
 )
 
@@ -101,7 +101,7 @@ func (b *Block) handlePrecompileAccept(rules params.Rules, sharedMemoryWriter pr
 	}
 	acceptCtx := &precompileconfig.AcceptContext{
 		ConsensusCtx: b.vm.ctx,
-		Warp:    b.vm.warpBackend,
+		Warp:         b.vm.warpBackend,
 	}
 	for _, receipt := range receipts {
 		for logIdx, log := range receipt.Logs {
@@ -158,7 +158,7 @@ func (b *Block) syntacticVerify() error {
 // Verify implements the chain.Block interface
 func (b *Block) Verify(context.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:            b.vm.ctx,
+		ConsensusCtx:       b.vm.ctx,
 		ProposerVMBlockCtx: nil,
 	}, true)
 }
@@ -189,7 +189,7 @@ func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 // VerifyWithContext implements the block.WithVerifyContext interface
 func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:            b.vm.ctx,
+		ConsensusCtx:       b.vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}, true)
 }
