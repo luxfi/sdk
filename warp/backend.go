@@ -7,15 +7,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/log"
+	"github.com/luxfi/node/cache"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/network/p2p/lp118"
+	"github.com/luxfi/node/consensus/linear"
+	"github.com/luxfi/node/consensus/validators"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/geth/log"
 )
 
 var (
@@ -27,51 +27,51 @@ var (
 )
 
 type BlockClient interface {
-	GetAcceptedBlock(ctx context.Context, blockID interfaces.ID) (interfaces.Block, error)
+	GetAcceptedBlock(ctx context.Context, blockID ids.ID) (linear.Block, error)
 }
 
 // Backend tracks signature-eligible warp messages and provides an interface to fetch them.
 // The backend is also used to query for warp message signatures by the signature request handler.
 type Backend interface {
 	// AddMessage signs [unsignedMessage] and adds it to the warp backend database
-	AddMessage(unsignedMessage *interfaces.UnsignedMessage) error
+	AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error
 
 	// GetMessageSignature validates the message and returns the signature of the requested message.
-	GetMessageSignature(ctx context.Context, message *interfaces.UnsignedMessage) ([]byte, error)
+	GetMessageSignature(ctx context.Context, message *luxWarp.UnsignedMessage) ([]byte, error)
 
-	// GetBlockSignature returns the signature of a hash payload containing blockID if it's the ID of an accepted interfaces.
-	GetBlockSignature(ctx context.Context, blockID interfaces.ID) ([]byte, error)
+	// GetBlockSignature returns the signature of a hash payload containing blockID if it's the ID of an accepted block.
+	GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error)
 
 	// GetMessage retrieves the [unsignedMessage] from the warp backend database if available
-	GetMessage(messageHash interfaces.ID) (*interfaces.UnsignedMessage, error)
+	GetMessage(messageHash ids.ID) (*luxWarp.UnsignedMessage, error)
 
-	interfaces.Verifier
+	lp118.Verifier
 }
 
 // backend implements Backend, keeps track of warp messages, and generates message signatures.
 type backend struct {
 	networkID                 uint32
-	sourceChainID             interfaces.ID
-	db                        interfaces.Database
-	warpSigner                interfaces.Signer
+	sourceChainID             ids.ID
+	db                        database.Database
+	warpSigner                luxWarp.Signer
 	blockClient               BlockClient
-	messageSignatureCache     interfaces.Cacher[interfaces.ID, []byte]
-	blockSignatureCache       interfaces.Cacher[interfaces.ID, []byte]
-	messageCache              interfaces.Cacher[interfaces.ID, *interfaces.UnsignedMessage]
-	offchainAddressedCallMsgs map[interfaces.ID]*interfaces.UnsignedMessage
+	messageSignatureCache     cache.Cacher[ids.ID, []byte]
+	blockSignatureCache       cache.Cacher[ids.ID, []byte]
+	messageCache              cache.Cacher[ids.ID, *luxWarp.UnsignedMessage]
+	offchainAddressedCallMsgs map[ids.ID]*luxWarp.UnsignedMessage
 	stats                     *verifierStats
-	validatorReader           interfaces.State
+	validatorReader           validators.State
 }
 
 // NewBackend creates a new Backend, and initializes the signature cache and message tracking database.
 func NewBackend(
 	networkID uint32,
-	sourceChainID interfaces.ID,
-	warpSigner interfaces.Signer,
+	sourceChainID ids.ID,
+	warpSigner luxWarp.Signer,
 	blockClient BlockClient,
-	validatorReader interfaces.State,
-	db interfaces.Database,
-	signatureCache interfaces.Cacher[interfaces.ID, []byte],
+	validatorReader validators.State,
+	db database.Database,
+	signatureCache cache.Cacher[ids.ID, []byte],
 	offchainMessages [][]byte,
 ) (Backend, error) {
 	b := &backend{
@@ -82,8 +82,8 @@ func NewBackend(
 		blockClient:               blockClient,
 		messageSignatureCache:     signatureCache,
 		blockSignatureCache:       signatureCache,
-		messageCache:              &interfaces.Empty[interfaces.ID, *interfaces.UnsignedMessage]{},
-		offchainAddressedCallMsgs: make(map[interfaces.ID]*interfaces.UnsignedMessage),
+		messageCache:              &cache.Empty[ids.ID, *luxWarp.UnsignedMessage]{},
+		offchainAddressedCallMsgs: make(map[ids.ID]*luxWarp.UnsignedMessage),
 		stats:                     newVerifierStats(),
 		validatorReader:           validatorReader,
 	}
@@ -92,20 +92,20 @@ func NewBackend(
 
 func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 	for i, offchainMsg := range offchainMessages {
-		unsignedMsg, err := interfaces.ParseUnsignedMessage(offchainMsg)
+		unsignedMsg, err := luxWarp.ParseUnsignedMessage(offchainMsg)
 		if err != nil {
 			return fmt.Errorf("%w at index %d: %w", errParsingOffChainMessage, i, err)
 		}
 
 		if unsignedMsg.NetworkID != b.networkID {
-			return fmt.Errorf("%w at index %d", interfaces.ErrWrongNetworkID, i)
+			return fmt.Errorf("%w at index %d", luxWarp.ErrWrongNetworkID, i)
 		}
 
 		if unsignedMsg.SourceChainID != b.sourceChainID {
-			return fmt.Errorf("%w at index %d", interfaces.ErrWrongSourceChainID, i)
+			return fmt.Errorf("%w at index %d", luxWarp.ErrWrongSourceChainID, i)
 		}
 
-		_, err = interfaces.ParseAddressedCall(unsignedMsg.Payload)
+		_, err = payload.ParseAddressedCall(unsignedMsg.Payload)
 		if err != nil {
 			return fmt.Errorf("%w at index %d as AddressedCall: %w", errParsingOffChainMessage, i, err)
 		}
@@ -122,7 +122,7 @@ func (b *backend) Clear() error {
 	return database.Clear(b.db, batchSize)
 }
 
-func (b *backend) AddMessage(unsignedMessage *interfaces.UnsignedMessage) error {
+func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 	messageID := unsignedMessage.ID()
 	log.Debug("Adding warp message to backend", "messageID", messageID)
 
@@ -141,7 +141,7 @@ func (b *backend) AddMessage(unsignedMessage *interfaces.UnsignedMessage) error 
 	return nil
 }
 
-func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *interfaces.UnsignedMessage) ([]byte, error) {
+func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
 	messageID := unsignedMessage.ID()
 
 	log.Debug("Getting warp message from backend", "messageID", messageID)
@@ -155,15 +155,15 @@ func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *inte
 	return b.signMessage(unsignedMessage)
 }
 
-func (b *backend) GetBlockSignature(ctx context.Context, blockID interfaces.ID) ([]byte, error) {
+func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error) {
 	log.Debug("Getting block from backend", "blockID", blockID)
 
-	blockHashPayload, err := interfaces.NewHash(blockID)
+	blockHashPayload, err := payload.NewHash(blockID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}
 
-	unsignedMessage, err := interfaces.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new unsigned warp message: %w", err)
 	}
@@ -184,7 +184,7 @@ func (b *backend) GetBlockSignature(ctx context.Context, blockID interfaces.ID) 
 	return sig, nil
 }
 
-func (b *backend) GetMessage(messageID interfaces.ID) (*interfaces.UnsignedMessage, error) {
+func (b *backend) GetMessage(messageID ids.ID) (*luxWarp.UnsignedMessage, error) {
 	if message, ok := b.messageCache.Get(messageID); ok {
 		return message, nil
 	}
@@ -197,7 +197,7 @@ func (b *backend) GetMessage(messageID interfaces.ID) (*interfaces.UnsignedMessa
 		return nil, err
 	}
 
-	unsignedMessage, err := interfaces.ParseUnsignedMessage(unsignedMessageBytes)
+	unsignedMessage, err := luxWarp.ParseUnsignedMessage(unsignedMessageBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse unsigned message %s: %w", messageID.String(), err)
 	}
@@ -206,7 +206,7 @@ func (b *backend) GetMessage(messageID interfaces.ID) (*interfaces.UnsignedMessa
 	return unsignedMessage, nil
 }
 
-func (b *backend) signMessage(unsignedMessage *interfaces.UnsignedMessage) ([]byte, error) {
+func (b *backend) signMessage(unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
 	sig, err := b.warpSigner.Sign(unsignedMessage)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign warp message: %w", err)

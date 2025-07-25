@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	"github.com/luxfi/evm/core/txpool"
+	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/geth/eth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
@@ -231,14 +232,14 @@ func (c *Config) SetDefaults() {
 	c.RPCTxFeeCap = defaultRpcTxFeeCap
 	c.MetricsExpensiveEnabled = defaultMetricsExpensiveEnabled
 
-	c.TxPoolJournal = txpool.DefaultConfig.Journal
-	c.TxPoolRejournal = Duration{txpool.DefaultConfig.Rejournal}
-	c.TxPoolPriceLimit = txpool.DefaultConfig.PriceLimit
-	c.TxPoolPriceBump = txpool.DefaultConfig.PriceBump
-	c.TxPoolAccountSlots = txpool.DefaultConfig.AccountSlots
-	c.TxPoolGlobalSlots = txpool.DefaultConfig.GlobalSlots
-	c.TxPoolAccountQueue = txpool.DefaultConfig.AccountQueue
-	c.TxPoolGlobalQueue = txpool.DefaultConfig.GlobalQueue
+	c.TxPoolJournal = legacypool.DefaultConfig.Journal
+	c.TxPoolRejournal = Duration{legacypool.DefaultConfig.Rejournal}
+	c.TxPoolPriceLimit = legacypool.DefaultConfig.PriceLimit
+	c.TxPoolPriceBump = legacypool.DefaultConfig.PriceBump
+	c.TxPoolAccountSlots = legacypool.DefaultConfig.AccountSlots
+	c.TxPoolGlobalSlots = legacypool.DefaultConfig.GlobalSlots
+	c.TxPoolAccountQueue = legacypool.DefaultConfig.AccountQueue
+	c.TxPoolGlobalQueue = legacypool.DefaultConfig.GlobalQueue
 
 	c.APIMaxDuration.Duration = defaultApiMaxDuration
 	c.WSCPURefillRate.Duration = defaultWsCpuRefillRate

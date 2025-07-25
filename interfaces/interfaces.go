@@ -3,4 +3,12 @@
 
 package interfaces
 
-// Additional interfaces can be defined here if needed
+import (
+	"github.com/luxfi/node/ids"
+)
+
+// Manager handles validator management
+type Manager interface {
+	Connected(nodeID ids.NodeID)
+	Disconnect(nodeID ids.NodeID) error
+}

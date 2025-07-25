@@ -36,7 +36,7 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
 	bloomfilter "github.com/holiman/bloomfilter/v2"
 	"slices"

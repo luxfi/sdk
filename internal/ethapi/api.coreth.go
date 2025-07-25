@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/evm/plugin/evm/upgrade/lip176"
+	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
 	"github.com/luxfi/evm/plugin/evm/upgrade/etna"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
@@ -67,7 +67,7 @@ func (s *EthereumAPI) SuggestPriceOptions(ctx context.Context) (*PriceOptions, e
 	chainConfig := s.b.ChainConfig()
 	minBaseFee := new(big.Int)
 	if chainConfig.IsFortuna(time) {
-		minBaseFee.SetUint64(lip176.MinGasPrice)
+		minBaseFee.SetUint64(lp176.MinGasPrice)
 	} else {
 		minBaseFee.SetUint64(etna.MinBaseFee)
 	}

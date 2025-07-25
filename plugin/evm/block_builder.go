@@ -13,6 +13,7 @@ import (
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/geth/log"
+	"github.com/holiman/uint256"
 )
 
 const (
@@ -96,9 +97,14 @@ func (b *blockBuilder) handleGenerateBlock() {
 // needToBuild returns true if there are outstanding transactions to be issued
 // into a interfaces.
 func (b *blockBuilder) needToBuild() bool {
-	size := b.txPool.PendingSize(txpool.PendingFilter{
+	pending := b.txPool.Pending(txpool.PendingFilter{
 		MinTip: uint256.MustFromBig(b.txPool.GasTip()),
 	})
+	// Count total pending transactions
+	size := 0
+	for _, txs := range pending {
+		size += len(txs)
+	}
 	return size > 0
 }
 
@@ -142,7 +148,7 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 	// txSubmitChan is invoked when new transactions are issued as well as on re-orgs which
 	// may orphan transactions that were previously in a preferred interfaces.
 	txSubmitChan := make(chan core.NewTxsEvent)
-	b.txPool.SubscribeTransactions(txSubmitChan, true)
+	b.txPool.SubscribeNewTxsEvent(txSubmitChan)
 
 	b.shutdownWg.Add(1)
 	go b.ctx.Log.RecoverAndPanic(func() {
