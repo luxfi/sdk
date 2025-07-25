@@ -166,3 +166,5 @@ require (
 )
 
 replace github.com/luxfi/node => ../node
+
+replace github.com/luxfi/bft => ../bft
