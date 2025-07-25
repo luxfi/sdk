@@ -178,14 +178,14 @@ func (c *ChainConfig) Description() string {
 	banner += c.NetworkUpgrades.Description()
 	banner += "\n"
 
-	upgradeConfigBytes, err := interfaces.Marshal(c.UpgradeConfig)
+	upgradeConfigBytes, err := json.Marshal(c.UpgradeConfig)
 	if err != nil {
 		upgradeConfigBytes = []byte("cannot marshal UpgradeConfig")
 	}
 	banner += fmt.Sprintf("Upgrade Config: %s", string(upgradeConfigBytes))
 	banner += "\n"
 
-	feeBytes, err := interfaces.Marshal(c.FeeConfig)
+	feeBytes, err := json.Marshal(c.FeeConfig)
 	if err != nil {
 		feeBytes = []byte("cannot marshal FeeConfig")
 	}
@@ -230,7 +230,7 @@ func (c *ChainConfig) UnmarshalJSON(data []byte) error {
 	// Alias ChainConfigExtra to avoid recursion
 	type _ChainConfigExtra ChainConfig
 	tmp := _ChainConfigExtra{}
-	if err := interfaces.Unmarshal(data, &tmp); err != nil {
+	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 
@@ -238,7 +238,7 @@ func (c *ChainConfig) UnmarshalJSON(data []byte) error {
 	*c = ChainConfig(tmp)
 
 	// Unmarshal inlined PrecompileUpgrade
-	return interfaces.Unmarshal(data, &c.GenesisPrecompiles)
+	return json.Unmarshal(data, &c.GenesisPrecompiles)
 }
 
 // MarshalJSON returns the JSON encoding of c.
@@ -246,27 +246,27 @@ func (c *ChainConfig) UnmarshalJSON(data []byte) error {
 func (c *ChainConfig) MarshalJSON() ([]byte, error) {
 	// Alias ChainConfigExtra to avoid recursion
 	type _ChainConfigExtra ChainConfig
-	tmp, err := interfaces.Marshal(_ChainConfigExtra(*c))
+	tmp, err := json.Marshal(_ChainConfigExtra(*c))
 	if err != nil {
 		return nil, err
 	}
 
 	// To include PrecompileUpgrades, we unmarshal the json representing c
 	// then directly add the corresponding keys to the interfaces.
-	raw := make(map[string]interfaces.RawMessage)
-	if err := interfaces.Unmarshal(tmp, &raw); err != nil {
+	raw := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(tmp, &raw); err != nil {
 		return nil, err
 	}
 
 	for key, value := range c.GenesisPrecompiles {
-		conf, err := interfaces.Marshal(value)
+		conf, err := json.Marshal(value)
 		if err != nil {
 			return nil, err
 		}
 		raw[key] = conf
 	}
 
-	return interfaces.Marshal(raw)
+	return json.Marshal(raw)
 }
 
 type fork struct {
@@ -310,7 +310,7 @@ func checkForks(forks []fork, blockFork bool) error {
 
 			// Fork (whether defined by block or timestamp) must follow the fork definition sequence
 			case (lastFork.block != nil && cur.block != nil) || (lastFork.timestamp != nil && cur.timestamp != nil):
-				if lastFork.block != nil && lastFork.interfaces.Cmp(cur.block) > 0 {
+				if lastFork.block != nil && lastFork.block.Cmp(cur.block) > 0 {
 					return fmt.Errorf("unsupported fork ordering: %v enabled at block %v, but %v enabled at block %v",
 						lastFork.name, lastFork.block, cur.name, cur.block)
 				} else if lastFork.timestamp != nil && *lastFork.timestamp > *cur.timestamp {
@@ -359,7 +359,7 @@ func (c *ChainConfig) Verify() error {
 // IsPrecompileEnabled returns whether precompile with `address` is enabled at `timestamp`.
 func (c *ChainConfig) IsPrecompileEnabled(address common.Address, timestamp uint64) bool {
 	config := c.GetActivePrecompileConfig(address, timestamp)
-	return config != nil && !interfaces.IsDisabled()
+	return config != nil && !config.IsDisabled()
 }
 
 // GetFeeConfig returns the original FeeConfig contained in the genesis ChainConfig.

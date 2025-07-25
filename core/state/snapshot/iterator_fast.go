@@ -35,11 +35,6 @@ import (
 	"slices"
 )
 
-// hashIterator is an interface for iterators that can return their current hash
-type hashIterator interface {
-	Iterator
-	Hash() common.Hash
-}
 
 // weightedIterator is a iterator with an assigned weight. It is used to prioritise
 // which account or storage slot is the correct one if multiple iterators find the
@@ -337,14 +332,14 @@ func (fi *fastIterator) Hash() common.Hash {
 
 // Account returns the current account blob.
 // Note the returned account is not a copy, please don't modify it.
-func (fi *fastIterator) Account() []byte {
-	return fi.curAccount
+func (fi *fastIterator) Account() (common.Hash, []byte) {
+	return fi.Hash(), fi.curAccount
 }
 
 // Slot returns the current storage slot.
 // Note the returned slot is not a copy, please don't modify it.
-func (fi *fastIterator) Slot() []byte {
-	return fi.curSlot
+func (fi *fastIterator) Slot() (common.Hash, []byte) {
+	return fi.Hash(), fi.curSlot
 }
 
 // Release iterates over all the remaining live layer iterators and releases each

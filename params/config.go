@@ -106,7 +106,7 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		LuxContext:          LuxContext{utils.TestConsensusContext()},
+		LuxContext:          LuxContext{utils.TestChainContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -126,7 +126,7 @@ var (
 	}
 
 	TestEVMConfig = &ChainConfig{
-		LuxContext:          LuxContext{utils.TestConsensusContext()},
+		LuxContext:          LuxContext{utils.TestChainContext()},
 		ChainID:             big.NewInt(1),
 		FeeConfig:           DefaultFeeConfig,
 		AllowFeeRecipients:  false,
@@ -145,7 +145,7 @@ var (
 	}
 
 	TestPreEVMConfig = &ChainConfig{
-		LuxContext:               LuxContext{utils.TestConsensusContext()},
+		LuxContext:               LuxContext{utils.TestChainContext()},
 		ChainID:                  big.NewInt(1),
 		FeeConfig:                DefaultFeeConfig,
 		AllowFeeRecipients:       false,
@@ -233,7 +233,7 @@ func (c *ChainConfig) UnmarshalJSON(data []byte) error {
 	// Alias ChainConfig to avoid recursion
 	type _ChainConfig ChainConfig
 	tmp := _ChainConfig{}
-	if err := interfaces.Unmarshal(data, &tmp); err != nil {
+	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 
@@ -241,7 +241,7 @@ func (c *ChainConfig) UnmarshalJSON(data []byte) error {
 	*c = ChainConfig(tmp)
 
 	// Unmarshal inlined PrecompileUpgrade
-	return interfaces.Unmarshal(data, &c.GenesisPrecompiles)
+	return json.Unmarshal(data, &c.GenesisPrecompiles)
 }
 
 // MarshalJSON returns the JSON encoding of c.
@@ -249,27 +249,27 @@ func (c *ChainConfig) UnmarshalJSON(data []byte) error {
 func (c ChainConfig) MarshalJSON() ([]byte, error) {
 	// Alias ChainConfig to avoid recursion
 	type _ChainConfig ChainConfig
-	tmp, err := interfaces.Marshal(_ChainConfig(c))
+	tmp, err := json.Marshal(_ChainConfig(c))
 	if err != nil {
 		return nil, err
 	}
 
 	// To include PrecompileUpgrades, we unmarshal the json representing c
 	// then directly add the corresponding keys to the interfaces.
-	raw := make(map[string]interfaces.RawMessage)
-	if err := interfaces.Unmarshal(tmp, &raw); err != nil {
+	raw := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(tmp, &raw); err != nil {
 		return nil, err
 	}
 
 	for key, value := range c.GenesisPrecompiles {
-		conf, err := interfaces.Marshal(value)
+		conf, err := json.Marshal(value)
 		if err != nil {
 			return nil, err
 		}
 		raw[key] = conf
 	}
 
-	return interfaces.Marshal(raw)
+	return json.Marshal(raw)
 }
 
 // ToEthChainConfig converts Lux ChainConfig to ethereum ChainConfig
@@ -321,28 +321,28 @@ func (c *ChainConfig) Description() string {
 	banner += "\n"
 
 	// Add EVM custom fields
-	optionalNetworkUpgradeBytes, err := interfaces.Marshal(c.OptionalNetworkUpgrades)
+	optionalNetworkUpgradeBytes, err := json.Marshal(c.OptionalNetworkUpgrades)
 	if err != nil {
 		optionalNetworkUpgradeBytes = []byte("cannot marshal OptionalNetworkUpgrades")
 	}
 	banner += fmt.Sprintf("Optional Network Upgrades: %s", string(optionalNetworkUpgradeBytes))
 	banner += "\n"
 
-	precompileUpgradeBytes, err := interfaces.Marshal(c.GenesisPrecompiles)
+	precompileUpgradeBytes, err := json.Marshal(c.GenesisPrecompiles)
 	if err != nil {
 		precompileUpgradeBytes = []byte("cannot marshal PrecompileUpgrade")
 	}
 	banner += fmt.Sprintf("Precompile Upgrades: %s", string(precompileUpgradeBytes))
 	banner += "\n"
 
-	upgradeConfigBytes, err := interfaces.Marshal(c.UpgradeConfig)
+	upgradeConfigBytes, err := json.Marshal(c.UpgradeConfig)
 	if err != nil {
 		upgradeConfigBytes = []byte("cannot marshal UpgradeConfig")
 	}
 	banner += fmt.Sprintf("Upgrade Config: %s", string(upgradeConfigBytes))
 	banner += "\n"
 
-	feeBytes, err := interfaces.Marshal(c.FeeConfig)
+	feeBytes, err := json.Marshal(c.FeeConfig)
 	if err != nil {
 		feeBytes = []byte("cannot marshal FeeConfig")
 	}
@@ -869,13 +869,13 @@ type Rules struct {
 	// for this rule set.
 	// Note: none of these addresses should conflict with the address space used by
 	// any existing precompiles.
-	ActivePrecompiles map[common.Address]precompileinterfaces.Config
+	ActivePrecompiles map[common.Address]precompileconfig.Config
 	// Predicaters maps addresses to stateful precompile Predicaters
 	// that are enabled for this rule set.
-	Predicaters map[common.Address]precompileinterfaces.Predicater
+	Predicaters map[common.Address]precompileconfig.Predicater
 	// AccepterPrecompiles map addresses to stateful precompile accepter functions
 	// that are enabled for this rule set.
-	AccepterPrecompiles map[common.Address]precompileinterfaces.Accepter
+	AccepterPrecompiles map[common.Address]precompileconfig.Accepter
 }
 
 // IsPrecompileEnabled returns true if the precompile at [addr] is enabled for this rule set.
@@ -913,19 +913,19 @@ func (c *ChainConfig) LuxRules(blockNum *big.Int, timestamp uint64) Rules {
 	rules.IsDUpgrade = c.IsDUpgrade(timestamp)
 
 	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].
-	rules.ActivePrecompiles = make(map[common.Address]precompileinterfaces.Config)
-	rules.Predicaters = make(map[common.Address]precompileinterfaces.Predicater)
-	rules.AccepterPrecompiles = make(map[common.Address]precompileinterfaces.Accepter)
+	rules.ActivePrecompiles = make(map[common.Address]precompileconfig.Config)
+	rules.Predicaters = make(map[common.Address]precompileconfig.Predicater)
+	rules.AccepterPrecompiles = make(map[common.Address]precompileconfig.Accepter)
 	
 	extra := GetExtra(c)
 	if extra != nil {
 		for _, module := range modules.RegisteredModules() {
 			if config := extra.GetActivePrecompileConfig(module.Address, timestamp); config != nil && !interfaces.IsDisabled() {
 				rules.ActivePrecompiles[module.Address] = config
-				if predicater, ok := interfaces.(precompileinterfaces.Predicater); ok {
+				if predicater, ok := interfaces.(precompileconfig.Predicater); ok {
 					rules.Predicaters[module.Address] = predicater
 				}
-				if precompileAccepter, ok := interfaces.(precompileinterfaces.Accepter); ok {
+				if precompileAccepter, ok := interfaces.(precompileconfig.Accepter); ok {
 					rules.AccepterPrecompiles[module.Address] = precompileAccepter
 				}
 			}
@@ -959,7 +959,7 @@ type ChainConfigWithUpgradesJSON struct {
 // ChainConfig struct.
 func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 	// embed the ChainConfig struct into the response
-	chainConfigJSON, err := interfaces.Marshal(cu.ChainConfig)
+	chainConfigJSON, err := json.Marshal(cu.ChainConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -971,7 +971,7 @@ func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 		UpgradeConfig UpgradeConfig `json:"upgrades"`
 	}
 
-	upgradeJSON, err := interfaces.Marshal(upgrades{cu.UpgradeConfig})
+	upgradeJSON, err := json.Marshal(upgrades{cu.UpgradeConfig})
 	if err != nil {
 		return nil, err
 	}
@@ -989,7 +989,7 @@ func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 
 func (cu *ChainConfigWithUpgradesJSON) UnmarshalJSON(input []byte) error {
 	var cc ChainConfig
-	if err := interfaces.Unmarshal(input, &cc); err != nil {
+	if err := json.Unmarshal(input, &cc); err != nil {
 		return err
 	}
 
@@ -998,7 +998,7 @@ func (cu *ChainConfigWithUpgradesJSON) UnmarshalJSON(input []byte) error {
 	}
 
 	var u upgrades
-	if err := interfaces.Unmarshal(input, &u); err != nil {
+	if err := json.Unmarshal(input, &u); err != nil {
 		return err
 	}
 	cu.ChainConfig = cc
