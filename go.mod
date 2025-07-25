@@ -2,6 +2,14 @@ module github.com/luxfi/evm
 
 go 1.24.5
 
+exclude google.golang.org/genproto v0.0.0-20210402141018-6c239bbf2bb1
+
+exclude google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
+
+exclude google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
+
+exclude google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
+
 replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v1.1.0
 
 replace github.com/luxfi/geth => ../geth
@@ -152,7 +160,6 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.37.0 // indirect
 	go.opentelemetry.io/otel/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.37.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.7.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
@@ -174,3 +181,6 @@ require (
 replace github.com/luxfi/node => ../node
 
 replace github.com/luxfi/bft => ../bft
+
+// Pin genproto to avoid ambiguous import between separate google.golang.org/genproto modules
+replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20250721164621-a45f3dfb1074
