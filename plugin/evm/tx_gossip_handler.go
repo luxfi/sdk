@@ -7,7 +7,7 @@ import (
 	"context"
 	"time"
 
-	commoneng "github.com/luxfi/node/consensus/engine/common"
+	commoneng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
