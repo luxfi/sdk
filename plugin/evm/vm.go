@@ -71,7 +71,7 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/choices"
-	commonEng "github.com/luxfi/node/consensus/engine/common"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/consensus/engine/linear/block"
 	linear "github.com/luxfi/node/consensus/linear"
 	"github.com/luxfi/node/database"

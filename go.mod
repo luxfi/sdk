@@ -59,6 +59,7 @@ require (
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
+	github.com/StephenButtolph/canoto v0.17.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.20.0 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.3 // indirect
@@ -162,11 +163,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/luxfi/node => ../node
-// local node modules for genesis build
 )
 
 replace github.com/luxfi/node => ../node
