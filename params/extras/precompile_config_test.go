@@ -1,7 +1,7 @@
 // (c) 2022 Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package extras
+package extras_test
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
@@ -21,12 +22,12 @@ import (
 
 func TestVerifyWithChainConfig(t *testing.T) {
 	admins := []common.Address{{1}}
-	copy := *TestChainConfig
+	copy := *extras.TestChainConfig
 	config := &copy
-	config.GenesisPrecompiles = Precompiles{
+	config.GenesisPrecompiles = extras.Precompiles{
 		txallowlist.ConfigKey: txallowlist.NewConfig(utils.NewUint64(2), nil, nil, nil),
 	}
-	config.PrecompileUpgrades = []PrecompileUpgrade{
+	config.PrecompileUpgrades = []extras.PrecompileUpgrade{
 		{
 			// disable TxAllowList at timestamp 4
 			txallowlist.NewDisableConfig(utils.NewUint64(4)),
@@ -45,7 +46,7 @@ func TestVerifyWithChainConfig(t *testing.T) {
 	badConfig := *config
 	badConfig.PrecompileUpgrades = append(
 		badConfig.PrecompileUpgrades,
-		PrecompileUpgrade{
+		extras.PrecompileUpgrade{
 			Config: txallowlist.NewDisableConfig(utils.NewUint64(5)),
 		},
 	)
@@ -56,7 +57,7 @@ func TestVerifyWithChainConfig(t *testing.T) {
 	badConfig = *config
 	badConfig.PrecompileUpgrades = append(
 		badConfig.PrecompileUpgrades,
-		PrecompileUpgrade{
+		extras.PrecompileUpgrade{
 			Config: txallowlist.NewConfig(utils.NewUint64(5), admins, nil, nil),
 		},
 	)
@@ -66,14 +67,14 @@ func TestVerifyWithChainConfig(t *testing.T) {
 
 func TestVerifyWithChainConfigAtNilTimestamp(t *testing.T) {
 	admins := []common.Address{{0}}
-	copy := *TestChainConfig
+	copy := *extras.TestChainConfig
 	config := &copy
-	config.PrecompileUpgrades = []PrecompileUpgrade{
+	config.PrecompileUpgrades = []extras.PrecompileUpgrade{
 		// this does NOT enable the precompile, so it should be upgradeable.
 		{Config: txallowlist.NewConfig(nil, nil, nil, nil)},
 	}
 	require.False(t, config.IsPrecompileEnabled(txallowlist.ContractAddress, 0)) // check the precompile is not enabled.
-	config.PrecompileUpgrades = []PrecompileUpgrade{
+	config.PrecompileUpgrades = []extras.PrecompileUpgrade{
 		{
 			// enable TxAllowList at timestamp 5
 			Config: txallowlist.NewConfig(utils.NewUint64(5), admins, nil, nil),
@@ -88,12 +89,12 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 	admins := []common.Address{{1}}
 	tests := []struct {
 		name          string
-		upgrades      []PrecompileUpgrade
+		upgrades      []extras.PrecompileUpgrade
 		expectedError string
 	}{
 		{
 			name: "enable and disable tx allow list",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: txallowlist.NewConfig(utils.NewUint64(1), admins, nil, nil),
 				},
@@ -105,7 +106,7 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 		},
 		{
 			name: "invalid allow list config in tx allowlist",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: txallowlist.NewConfig(utils.NewUint64(1), admins, nil, nil),
 				},
@@ -120,11 +121,11 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 		},
 		{
 			name: "invalid initial fee manager config",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: feemanager.NewConfig(utils.NewUint64(3), admins, nil, nil,
 						func() *commontype.FeeConfig {
-							feeConfig := DefaultFeeConfig
+							feeConfig := extras.DefaultFeeConfig
 							feeConfig.GasLimit = big.NewInt(-1)
 							return &feeConfig
 						}()),
@@ -134,11 +135,11 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 		},
 		{
 			name: "invalid initial fee manager config gas limit 0",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: feemanager.NewConfig(utils.NewUint64(3), admins, nil, nil,
 						func() *commontype.FeeConfig {
-							feeConfig := DefaultFeeConfig
+							feeConfig := extras.DefaultFeeConfig
 							feeConfig.GasLimit = common.Big0
 							return &feeConfig
 						}()),
@@ -148,7 +149,7 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 		},
 		{
 			name: "different upgrades are allowed to configure same timestamp for different precompiles",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: txallowlist.NewConfig(utils.NewUint64(1), admins, nil, nil),
 				},
@@ -160,7 +161,7 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 		},
 		{
 			name: "different upgrades must be monotonically increasing",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: txallowlist.NewConfig(utils.NewUint64(2), admins, nil, nil),
 				},
@@ -172,7 +173,7 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 		},
 		{
 			name: "upgrades with same keys are not allowed to configure same timestamp for same precompiles",
-			upgrades: []PrecompileUpgrade{
+			upgrades: []extras.PrecompileUpgrade{
 				{
 					Config: txallowlist.NewConfig(utils.NewUint64(1), admins, nil, nil),
 				},
@@ -186,7 +187,7 @@ func TestVerifyPrecompileUpgrades(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			copy := *TestChainConfig
+			copy := *extras.TestChainConfig
 			config := &copy
 			config.PrecompileUpgrades = tt.upgrades
 
@@ -204,22 +205,22 @@ func TestVerifyPrecompiles(t *testing.T) {
 	admins := []common.Address{{1}}
 	tests := []struct {
 		name          string
-		precompiles   Precompiles
+		precompiles   extras.Precompiles
 		expectedError string
 	}{
 		{
 			name: "invalid allow list config in tx allowlist",
-			precompiles: Precompiles{
+			precompiles: extras.Precompiles{
 				txallowlist.ConfigKey: txallowlist.NewConfig(utils.NewUint64(3), admins, admins, admins),
 			},
 			expectedError: "cannot set address",
 		},
 		{
 			name: "invalid initial fee manager config",
-			precompiles: Precompiles{
+			precompiles: extras.Precompiles{
 				feemanager.ConfigKey: feemanager.NewConfig(utils.NewUint64(3), admins, nil, nil,
 					func() *commontype.FeeConfig {
-						feeConfig := DefaultFeeConfig
+						feeConfig := extras.DefaultFeeConfig
 						feeConfig.GasLimit = big.NewInt(-1)
 						return &feeConfig
 					}()),
@@ -230,7 +231,7 @@ func TestVerifyPrecompiles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
-			copy := *TestChainConfig
+			copy := *extras.TestChainConfig
 			config := &copy
 			config.GenesisPrecompiles = tt.precompiles
 
@@ -246,10 +247,10 @@ func TestVerifyPrecompiles(t *testing.T) {
 
 func TestVerifyRequiresSortedTimestamps(t *testing.T) {
 	admins := []common.Address{{1}}
-	config := &ChainConfig{
-		FeeConfig: DefaultFeeConfig,
+	config := &extras.ChainConfig{
+		FeeConfig: extras.DefaultFeeConfig,
 	}
-	config.PrecompileUpgrades = []PrecompileUpgrade{
+	config.PrecompileUpgrades = []extras.PrecompileUpgrade{
 		{
 			Config: txallowlist.NewConfig(utils.NewUint64(2), admins, nil, nil),
 		},
@@ -265,8 +266,8 @@ func TestVerifyRequiresSortedTimestamps(t *testing.T) {
 
 func TestGetPrecompileConfig(t *testing.T) {
 	require := require.New(t)
-	config := &ChainConfig{}
-	config.GenesisPrecompiles = Precompiles{
+	config := &extras.ChainConfig{}
+	config.GenesisPrecompiles = extras.Precompiles{
 		deployerallowlist.ConfigKey: deployerallowlist.NewConfig(utils.NewUint64(10), nil, nil, nil),
 	}
 
@@ -310,7 +311,7 @@ func TestPrecompileUpgradeUnmarshalJSON(t *testing.T) {
 			}
 	`)
 
-	var upgradeConfig UpgradeConfig
+	var upgradeConfig extras.UpgradeConfig
 	err := json.Unmarshal(upgradeBytes, &upgradeConfig)
 	require.NoError(err)
 
@@ -336,7 +337,7 @@ func TestPrecompileUpgradeUnmarshalJSON(t *testing.T) {
 	// Marshal and unmarshal again and check that the result is the same
 	upgradeBytes2, err := json.Marshal(upgradeConfig)
 	require.NoError(err)
-	var upgradeConfig2 UpgradeConfig
+	var upgradeConfig2 extras.UpgradeConfig
 	err = json.Unmarshal(upgradeBytes2, &upgradeConfig2)
 	require.NoError(err)
 	require.Equal(upgradeConfig, upgradeConfig2)
