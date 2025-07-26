@@ -18,7 +18,9 @@ The EVM runs in a separate process from the main Lux process and communicates wi
 ### Lux Compatibility
 
 ```text
-[v1.13.3] First Official Release - Full EVM compatibility
+[v0.7.7] First Official Release - Based on subnet-evm v0.7.7
+[v0.8.0] Lux EVM v2 Initial Development
+[v0.8.1] Lux EVM v2 Development Release (current)
 ```
 
 ### Building the EVM
