@@ -24,7 +24,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package params
+package params_test
 
 import (
 	"encoding/json"
@@ -33,35 +33,39 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
 	"github.com/ethereum/go-ethereum/common"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCheckCompatible(t *testing.T) {
 	type test struct {
-		stored, new   *ChainConfig
+		stored, new   *params.ChainConfig
 		headBlock     uint64
 		headTimestamp uint64
 		wantErr       *ethparams.ConfigCompatError
 	}
 	tests := []test{
-		{stored: TestChainConfig, new: TestChainConfig, headBlock: 0, headTimestamp: 0, wantErr: nil},
-		{stored: TestChainConfig, new: TestChainConfig, headBlock: 0, headTimestamp: uint64(time.Now().Unix()), wantErr: nil},
-		{stored: TestChainConfig, new: TestChainConfig, headBlock: 100, wantErr: nil},
+		{stored: params.TestChainConfig, new: params.TestChainConfig, headBlock: 0, headTimestamp: 0, wantErr: nil},
+		{stored: params.TestChainConfig, new: params.TestChainConfig, headBlock: 0, headTimestamp: uint64(time.Now().Unix()), wantErr: nil},
+		{stored: params.TestChainConfig, new: params.TestChainConfig, headBlock: 100, wantErr: nil},
 		{
-			stored:        &ChainConfig{EIP150Block: big.NewInt(10)},
-			new:           &ChainConfig{EIP150Block: big.NewInt(20)},
+			stored:        &params.ChainConfig{EIP150Block: big.NewInt(10)},
+			new:           &params.ChainConfig{EIP150Block: big.NewInt(20)},
 			headBlock:     9,
 			headTimestamp: 90,
 			wantErr:       nil,
 		},
 		{
-			stored:        TestChainConfig,
-			new:           &ChainConfig{HomesteadBlock: nil},
+			stored:        params.TestChainConfig,
+			new:           &params.ChainConfig{HomesteadBlock: nil},
 			headBlock:     3,
 			headTimestamp: 30,
 			wantErr: &ethparams.ConfigCompatError{
@@ -72,8 +76,8 @@ func TestCheckCompatible(t *testing.T) {
 			},
 		},
 		{
-			stored:        TestChainConfig,
-			new:           &ChainConfig{HomesteadBlock: big.NewInt(1)},
+			stored:        params.TestChainConfig,
+			new:           &params.ChainConfig{HomesteadBlock: big.NewInt(1)},
 			headBlock:     3,
 			headTimestamp: 30,
 			wantErr: &ethparams.ConfigCompatError{
@@ -84,8 +88,8 @@ func TestCheckCompatible(t *testing.T) {
 			},
 		},
 		{
-			stored:        &ChainConfig{HomesteadBlock: big.NewInt(30), EIP150Block: big.NewInt(10)},
-			new:           &ChainConfig{HomesteadBlock: big.NewInt(25), EIP150Block: big.NewInt(20)},
+			stored:        &params.ChainConfig{HomesteadBlock: big.NewInt(30), EIP150Block: big.NewInt(10)},
+			new:           &params.ChainConfig{HomesteadBlock: big.NewInt(25), EIP150Block: big.NewInt(20)},
 			headBlock:     25,
 			headTimestamp: 250,
 			wantErr: &ethparams.ConfigCompatError{
@@ -96,15 +100,15 @@ func TestCheckCompatible(t *testing.T) {
 			},
 		},
 		{
-			stored:        &ChainConfig{ConstantinopleBlock: big.NewInt(30)},
-			new:           &ChainConfig{ConstantinopleBlock: big.NewInt(30), PetersburgBlock: big.NewInt(30)},
+			stored:        &params.ChainConfig{ConstantinopleBlock: big.NewInt(30)},
+			new:           &params.ChainConfig{ConstantinopleBlock: big.NewInt(30), PetersburgBlock: big.NewInt(30)},
 			headBlock:     40,
 			headTimestamp: 400,
 			wantErr:       nil,
 		},
 		{
-			stored:        &ChainConfig{ConstantinopleBlock: big.NewInt(30)},
-			new:           &ChainConfig{ConstantinopleBlock: big.NewInt(30), PetersburgBlock: big.NewInt(31)},
+			stored:        &params.ChainConfig{ConstantinopleBlock: big.NewInt(30)},
+			new:           &params.ChainConfig{ConstantinopleBlock: big.NewInt(30), PetersburgBlock: big.NewInt(31)},
 			headBlock:     40,
 			headTimestamp: 400,
 			wantErr: &ethparams.ConfigCompatError{
@@ -115,26 +119,26 @@ func TestCheckCompatible(t *testing.T) {
 			},
 		},
 		{
-			stored:        TestChainConfig,
-			new:           TestPreEVMChainConfig,
+			stored:        params.TestChainConfig,
+			new:           params.TestPreEVMChainConfig,
 			headBlock:     0,
 			headTimestamp: 0,
 			wantErr: &ethparams.ConfigCompatError{
 				What:         "EVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
-				NewTime:      GetExtra(TestPreEVMChainConfig).NetworkUpgrades.EVMTimestamp,
+				NewTime:      params.GetExtra(params.TestPreEVMChainConfig).NetworkUpgrades.EVMTimestamp,
 				RewindToTime: 0,
 			},
 		},
 		{
-			stored:        TestChainConfig,
-			new:           TestPreEVMChainConfig,
+			stored:        params.TestChainConfig,
+			new:           params.TestPreEVMChainConfig,
 			headBlock:     10,
 			headTimestamp: 100,
 			wantErr: &ethparams.ConfigCompatError{
 				What:         "EVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
-				NewTime:      GetExtra(TestPreEVMChainConfig).NetworkUpgrades.EVMTimestamp,
+				NewTime:      params.GetExtra(params.TestPreEVMChainConfig).NetworkUpgrades.EVMTimestamp,
 				RewindToTime: 0,
 			},
 		},
@@ -149,8 +153,8 @@ func TestCheckCompatible(t *testing.T) {
 }
 
 func TestConfigRules(t *testing.T) {
-	c := WithExtra(
-		&ChainConfig{},
+	c := params.WithExtra(
+		&params.ChainConfig{},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
 				EVMTimestamp: utils.NewUint64(500),
@@ -159,15 +163,15 @@ func TestConfigRules(t *testing.T) {
 	)
 
 	var stamp uint64
-	if r := c.GenesisRules(big.NewInt(0), stamp); r.IsEVM {
+	if r := c.GenesisRules(big.NewInt(0), stamp); params.GetRulesExtra(r).IsEVM {
 		t.Errorf("expected %v to not be evm", stamp)
 	}
 	stamp = 500
-	if r := c.GenesisRules(big.NewInt(0), stamp); !r.IsEVM {
+	if r := c.GenesisRules(big.NewInt(0), stamp); !params.GetRulesExtra(r).IsEVM {
 		t.Errorf("expected %v to be evm", stamp)
 	}
 	stamp = math.MaxInt64
-	if r := c.GenesisRules(big.NewInt(0), stamp); !r.IsEVM {
+	if r := c.GenesisRules(big.NewInt(0), stamp); !params.GetRulesExtra(r).IsEVM {
 		t.Errorf("expected %v to be evm", stamp)
 	}
 }
@@ -213,34 +217,34 @@ func TestConfigUnmarshalJSON(t *testing.T) {
 		}
 	}
 	`)
-	c := ChainConfig{}
+	c := params.ChainConfig{}
 	err := json.Unmarshal(config, &c)
 	require.NoError(err)
 
 	require.Equal(c.ChainID, big.NewInt(43214))
-	require.Equal(GetExtra(&c).AllowFeeRecipients, true)
+	require.Equal(params.GetExtra(&c).AllowFeeRecipients, true)
 
-	rewardManagerConfig, ok := GetExtra(&c).GenesisPrecompiles[rewardmanager.ConfigKey]
+	rewardManagerConfig, ok := params.GetExtra(&c).GenesisPrecompiles[rewardmanager.ConfigKey]
 	require.True(ok)
 	require.Equal(rewardManagerConfig.Key(), rewardmanager.ConfigKey)
 	require.True(rewardManagerConfig.Equal(testRewardManagerConfig))
 
-	nativeMinterConfig := GetExtra(&c).GenesisPrecompiles[nativeminter.ConfigKey]
+	nativeMinterConfig := params.GetExtra(&c).GenesisPrecompiles[nativeminter.ConfigKey]
 	require.Equal(nativeMinterConfig.Key(), nativeminter.ConfigKey)
 	require.True(nativeMinterConfig.Equal(testContractNativeMinterConfig))
 
 	// Marshal and unmarshal again and check that the result is the same
 	marshaled, err := json.Marshal(&c)
 	require.NoError(err)
-	c2 := ChainConfig{}
+	c2 := params.ChainConfig{}
 	err = json.Unmarshal(marshaled, &c2)
 	require.NoError(err)
 	require.Equal(c, c2)
 }
 
 func TestActivePrecompiles(t *testing.T) {
-	config := *WithExtra(
-		&ChainConfig{},
+	config := *params.WithExtra(
+		&params.ChainConfig{},
 		&extras.ChainConfig{
 			UpgradeConfig: extras.UpgradeConfig{
 				PrecompileUpgrades: []extras.PrecompileUpgrade{
@@ -256,16 +260,18 @@ func TestActivePrecompiles(t *testing.T) {
 	)
 
 	rules0 := config.GenesisRules(common.Big0, 0)
-	require.True(t, rules0.IsPrecompileEnabled(nativeminter.Module.Address))
+	extras0 := params.GetRulesExtra(rules0)
+	require.True(t, extras0.IsPrecompileEnabled(nativeminter.Module.Address))
 
 	rules1 := config.GenesisRules(common.Big0, 1)
-	require.False(t, rules1.IsPrecompileEnabled(nativeminter.Module.Address))
+	extras1 := params.GetRulesExtra(rules1)
+	require.False(t, extras1.IsPrecompileEnabled(nativeminter.Module.Address))
 }
 
 func TestChainConfigMarshalWithUpgrades(t *testing.T) {
-	config := ChainConfigWithUpgradesJSON{
-		ChainConfig: *WithExtra(
-			&ChainConfig{
+	config := params.ChainConfigWithUpgradesJSON{
+		ChainConfig: *params.WithExtra(
+			&params.ChainConfig{
 				ChainID:             big.NewInt(1),
 				HomesteadBlock:      big.NewInt(0),
 				EIP150Block:         big.NewInt(0),
@@ -278,7 +284,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 				MuirGlacierBlock:    big.NewInt(0),
 			},
 			&extras.ChainConfig{
-				FeeConfig:          DefaultFeeConfig,
+				FeeConfig:          params.DefaultFeeConfig,
 				AllowFeeRecipients: false,
 				NetworkUpgrades: extras.NetworkUpgrades{
 					EVMTimestamp: utils.NewUint64(0),
@@ -287,7 +293,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 				GenesisPrecompiles: extras.Precompiles{},
 			},
 		),
-		UpgradeConfig: extras.UpgradeConfig{
+		UpgradeConfig: params.UpgradeConfig{
 			PrecompileUpgrades: []extras.PrecompileUpgrade{
 				{
 					Config: txallowlist.NewConfig(utils.NewUint64(100), nil, nil, nil),
@@ -332,7 +338,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 	}`
 	require.JSONEq(t, expectedJSON, string(result))
 
-	var unmarshalled ChainConfigWithUpgradesJSON
+	var unmarshalled params.ChainConfigWithUpgradesJSON
 	err = json.Unmarshal(result, &unmarshalled)
 	require.NoError(t, err)
 	require.Equal(t, config, unmarshalled)

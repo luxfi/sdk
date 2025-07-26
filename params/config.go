@@ -162,6 +162,9 @@ var (
 	}
 
 	TestRules = TestChainConfig.GenesisRules(new(big.Int), 0)
+	
+	// TestPreEVMChainConfig is a chain config with EVM disabled
+	TestPreEVMChainConfig = TestPreEVMConfig
 )
 
 // UpgradeConfig includes the following configs that may be specified in upgradeBytes:

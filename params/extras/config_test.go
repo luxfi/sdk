@@ -1,15 +1,14 @@
 // (c) 2025 Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package extras
+package extras_test
 
 import (
 	"math/big"
 	"testing"
-	"time"
 
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
@@ -23,12 +22,12 @@ func TestChainConfigDescription(t *testing.T) {
 	t.Parallel()
 
 	tests := map[string]struct {
-		config    *ChainConfig
+		config    *extras.ChainConfig
 		wantRegex string
 	}{
 		"nil": {},
 		"empty": {
-			config: &ChainConfig{},
+			config: &extras.ChainConfig{},
 			wantRegex: `Lux Upgrades \(timestamp based\)\:
  - EVM Timestamp: ( )+@nil( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
@@ -38,8 +37,8 @@ Allow Fee Recipients: false
 $`,
 		},
 		"set": {
-			config: &ChainConfig{
-				NetworkUpgrades: NetworkUpgrades{
+			config: &extras.ChainConfig{
+				NetworkUpgrades: extras.NetworkUpgrades{
 					EVMTimestamp: pointer(uint64(1)),
 					DurangoTimestamp:   pointer(uint64(2)),
 					EtnaTimestamp:      pointer(uint64(3)),
@@ -56,14 +55,14 @@ $`,
 					BlockGasCostStep:         big.NewInt(12),
 				},
 				AllowFeeRecipients: true,
-				UpgradeConfig: UpgradeConfig{
-					NetworkUpgradeOverrides: &NetworkUpgrades{
+				UpgradeConfig: extras.UpgradeConfig{
+					NetworkUpgradeOverrides: &extras.NetworkUpgrades{
 						EVMTimestamp: pointer(uint64(13)),
 					},
-					StateUpgrades: []StateUpgrade{
+					StateUpgrades: []extras.StateUpgrade{
 						{
 							BlockTimestamp: pointer(uint64(14)),
-							StateUpgradeAccounts: map[common.Address]StateUpgradeAccount{
+							StateUpgradeAccounts: map[common.Address]extras.StateUpgradeAccount{
 								common.Address{15}: {
 									Code: []byte{16},
 								},
@@ -84,7 +83,7 @@ $`,
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := test.interfaces.Description()
+			got := test.config.Description()
 			assert.Regexp(t, test.wantRegex, got, "config description mismatch")
 		})
 	}
@@ -105,11 +104,11 @@ func TestChainConfigVerify(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		config   ChainConfig
+		config   extras.ChainConfig
 		errRegex string
 	}{
 		"invalid_feeconfig": {
-			config: ChainConfig{
+			config: extras.ChainConfig{
 				FeeConfig: commontype.FeeConfig{
 					GasLimit: nil,
 				},
@@ -118,10 +117,10 @@ func TestChainConfigVerify(t *testing.T) {
 		},
 		"invalid_precompile_upgrades": {
 			// Also see precompile_config_test.go TestVerifyWithChainConfig* tests
-			config: ChainConfig{
+			config: extras.ChainConfig{
 				FeeConfig: validFeeConfig,
-				UpgradeConfig: UpgradeConfig{
-					PrecompileUpgrades: []PrecompileUpgrade{
+				UpgradeConfig: extras.UpgradeConfig{
+					PrecompileUpgrades: []extras.PrecompileUpgrade{
 						// same precompile cannot be configured twice for the same timestamp
 						{Config: txallowlist.NewDisableConfig(pointer(uint64(1)))},
 						{Config: txallowlist.NewDisableConfig(pointer(uint64(1)))},
@@ -131,10 +130,10 @@ func TestChainConfigVerify(t *testing.T) {
 			errRegex: "^invalid precompile upgrades: ",
 		},
 		"invalid_state_upgrades": {
-			config: ChainConfig{
+			config: extras.ChainConfig{
 				FeeConfig: validFeeConfig,
-				UpgradeConfig: UpgradeConfig{
-					StateUpgrades: []StateUpgrade{
+				UpgradeConfig: extras.UpgradeConfig{
+					StateUpgrades: []extras.StateUpgrade{
 						{BlockTimestamp: nil},
 					},
 				},
@@ -142,30 +141,28 @@ func TestChainConfigVerify(t *testing.T) {
 			errRegex: "^invalid state upgrades: ",
 		},
 		"invalid_network_upgrades": {
-			config: ChainConfig{
+			config: extras.ChainConfig{
 				FeeConfig: validFeeConfig,
-				NetworkUpgrades: NetworkUpgrades{
+				NetworkUpgrades: extras.NetworkUpgrades{
 					EVMTimestamp: nil,
 				},
-				LuxContext: LuxContext{ConsensusCtx: &consensus.Context{}},
+				LuxContext: extras.LuxContext{ConsensusCtx: &interfaces.ChainContext{}},
 			},
 			errRegex: "^invalid network upgrades: ",
 		},
 		"valid": {
-			config: ChainConfig{
+			config: extras.ChainConfig{
 				FeeConfig: validFeeConfig,
-				NetworkUpgrades: NetworkUpgrades{
+				NetworkUpgrades: extras.NetworkUpgrades{
 					EVMTimestamp: pointer(uint64(1)),
 					DurangoTimestamp:   pointer(uint64(2)),
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),
 				},
-				LuxContext: LuxContext{ConsensusCtx: &consensus.Context{
-					NetworkUpgrades: interfaces.Config{
-						DurangoTime: time.Unix(2, 0),
-						EtnaTime:    time.Unix(3, 0),
-						FortunaTime: time.Unix(4, 0),
-					},
+				LuxContext: extras.LuxContext{ConsensusCtx: &interfaces.ChainContext{
+					NetworkID: 1,
+					ChainID: interfaces.ChainID{},
+					NodeID: interfaces.NodeID{},
 				}},
 			},
 		},
@@ -173,7 +170,7 @@ func TestChainConfigVerify(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := test.interfaces.Verify()
+			err := test.config.Verify()
 			if test.errRegex == "" {
 				assert.NoError(t, err)
 			} else {
