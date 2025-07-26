@@ -8,12 +8,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
 	"github.com/luxfi/evm/plugin/evm/upgrade/etna"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/require"
 )
 

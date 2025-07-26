@@ -31,13 +31,13 @@ import (
 	"io"
 	"sync"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxfi/evm/trie/trienode"
-	"github.com/luxfi/geth/triedb/database"
+	"github.com/ethereum/go-ethereum/triedb/database"
 	"github.com/luxfi/evm/params"
 )
 

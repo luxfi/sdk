@@ -27,7 +27,7 @@
 package vm
 
 import (
-	"github.com/luxfi/geth/params"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 func minSwapStack(n int) int {

@@ -3,7 +3,7 @@
 
 package utils
 
-import "github.com/luxfi/geth/common"
+import "github.com/ethereum/go-ethereum/common"
 
 // IncrOne increments bytes value by one
 func IncrOne(bytes []byte) {

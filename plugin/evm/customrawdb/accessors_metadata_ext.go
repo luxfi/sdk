@@ -1,4 +1,4 @@
-// (c) 2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package customrawdb
@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	ethrawdb "github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxfi/evm/params"
 )
 
@@ -118,15 +119,34 @@ func ReadAcceptorTip(db ethdb.KeyValueReader) (common.Hash, error) {
 
 // ReadChainConfig retrieves the consensus settings based on the given genesis hash.
 func ReadChainConfig(db ethdb.KeyValueReader, hash common.Hash) *params.ChainConfig {
-	// For now, return nil since params.ChainConfig has different structure than ethereum's
-	// This needs proper implementation to convert between the two types
+	// TODO: Fix ChainConfig type mismatch between ethereum and luxfi
+	ethConfig := ethrawdb.ReadChainConfig(db, hash)
+	if ethConfig == nil {
+		return nil
+	}
+
+	// For now, return nil until we properly convert between types
+	// config := ethrawdb.ReadChainConfig(db, hash)
+	//
+	// upgrade, _ := db.Get(upgradeConfigKey(hash))
+	// if len(upgrade) == 0 {
+	//	return config
+	// }
+	//
+	// extra := params.GetExtra(config)
+	// if err := json.Unmarshal(upgrade, &extra.UpgradeConfig); err != nil {
+	//	log.Error("Invalid upgrade config JSON", "err", err)
+	//	return nil
+	// }
+	//
+	// return config
 	return nil
 }
 
 // WriteChainConfig writes the chain config settings to the database.
 func WriteChainConfig(db ethdb.KeyValueWriter, hash common.Hash, config *params.ChainConfig) {
-	// For now, skip writing since params.ChainConfig has different structure than ethereum's
-	// This needs proper implementation to convert between the two types
+	// TODO: Fix ChainConfig type mismatch between ethereum and luxfi
+	// ethrawdb.WriteChainConfig(db, hash, config)
 	if config == nil {
 		return
 	}

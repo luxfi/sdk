@@ -104,8 +104,8 @@ import (
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/event"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

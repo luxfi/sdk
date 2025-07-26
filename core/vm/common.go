@@ -29,8 +29,7 @@ package vm
 import (
 	"math"
 	
-	"github.com/luxfi/geth/common"
-	gethmath "github.com/luxfi/geth/common/math"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 )
 

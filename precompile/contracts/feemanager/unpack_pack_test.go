@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/stretchr/testify/require"
 )
 

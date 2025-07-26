@@ -32,9 +32,9 @@ import (
 	"encoding/binary"
 
 	"github.com/luxfi/node/utils/wrappers"
-	"github.com/luxfi/geth/metrics"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 // The fields below define the low level database schema prefixing.

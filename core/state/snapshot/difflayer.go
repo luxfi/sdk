@@ -35,9 +35,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/rlp"
 	bloomfilter "github.com/holiman/bloomfilter/v2"
 	"slices"
 )

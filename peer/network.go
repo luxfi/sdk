@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 	"golang.org/x/sync/semaphore"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
@@ -19,7 +19,6 @@ import (
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/peer/stats"
 	"github.com/luxfi/evm/plugin/evm/message"
 )
@@ -477,15 +476,16 @@ func (n *network) Gossip(gossip []byte) error {
 // AppGossip is called by node -> VM when there is an incoming AppGossip from a peer
 // error returned by this function is expected to be treated as fatal by the engine
 // returns error if request could not be parsed as message.Request or when the requestHandler returns an error
-func (n *network) AppGossip(_ context.Context, nodeID ids.NodeID, gossipBytes []byte) error {
-	var gossipMsg message.GossipMessage
-	if _, err := n.codec.Unmarshal(gossipBytes, &gossipMsg); err != nil {
-		log.Trace("could not parse app gossip", "nodeID", nodeID, "gossipLen", len(gossipBytes), "err", err)
-		return nil
+func (n *network) AppGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte) error {
+	// For now, directly pass the gossip bytes to the handler
+	// In the future, we may want to parse the message first
+	if n.gossipHandler != nil {
+		log.Trace("processing AppGossip from node", "nodeID", nodeID, "gossipLen", len(gossipBytes))
+		return n.gossipHandler.HandleGossip(ctx, nodeID, gossipBytes)
 	}
-
-	log.Trace("processing AppGossip from node", "nodeID", nodeID, "msg", gossipMsg)
-	return gossipMsg.Handle(n.gossipHandler, nodeID)
+	
+	log.Trace("no gossip handler registered, dropping message", "nodeID", nodeID)
+	return nil
 }
 
 // Connected adds the given nodeID to the peer list so that it can receive messages

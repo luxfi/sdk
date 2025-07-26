@@ -9,13 +9,13 @@ import (
 	"fmt"
 	
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/contract"
+	precompileinterfaces "github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 	warpValidators "github.com/luxfi/evm/warp/validators"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 const (

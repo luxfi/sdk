@@ -24,7 +24,7 @@ func GetConfig(networkID uint32) Config {
 			DurangoTime: time.Date(2024, time.March, 6, 16, 0, 0, 0, time.UTC),
 			EtnaTime:    time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC), // Placeholder
 		}
-	case constants.FujiID:
+	case constants.TestnetID:
 		return Config{
 			DurangoTime: time.Date(2024, time.February, 13, 16, 0, 0, 0, time.UTC),
 			EtnaTime:    time.Date(2024, time.December, 1, 0, 0, 0, 0, time.UTC), // Placeholder

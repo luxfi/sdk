@@ -35,30 +35,30 @@ import (
 	"time"
 
 	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/geth/consensus"
-	"github.com/luxfi/geth/core"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/state/pruner"
-	"github.com/luxfi/geth/core/txpool"
-	"github.com/luxfi/geth/core/txpool/legacypool"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/ethconfig"
-	"github.com/luxfi/geth/eth/filters"
-	"github.com/luxfi/geth/eth/gasprice"
-	"github.com/luxfi/geth/eth/tracers"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/state/pruner"
+	"github.com/luxfi/evm/core/txpool"
+	"github.com/luxfi/evm/core/txpool/legacypool"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/eth/ethconfig"
+	"github.com/luxfi/evm/eth/filters"
+	"github.com/luxfi/evm/eth/gasprice"
+	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/internal/shutdowncheck"
-	"github.com/luxfi/geth/miner"
-	"github.com/luxfi/geth/node"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/miner"
+	"github.com/ethereum/go-ethereum/node"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // Config contains the configuration options of the ETH protocol.
@@ -283,7 +283,7 @@ func New(
 	// Start the RPC service
 	eth.netRPCService = ethapi.NewNetAPI(eth.NetVersion())
 
-	eth.stackRPCs = stack.APIs()
+	// eth.stackRPCs = stack.APIs() // TODO: APIs() method not available on node.Node
 
 	// Successful startup; push a marker and check previous unclean shutdowns.
 	eth.shutdownTracker.MarkStartup()

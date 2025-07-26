@@ -5,41 +5,18 @@ package runner
 
 import (
 	"flag"
-
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
+	"os"
 )
 
-func evmFlagSet() *flag.FlagSet {
-	fs := flag.NewFlagSet("evm", flag.ContinueOnError)
-
-	fs.Bool(versionKey, false, "If true, print version and quit")
-
-	return fs
-}
-
-// getViper returns the viper environment for the plugin binary
-func getViper() (*viper.Viper, error) {
-	v := viper.New()
-
-	fs := evmFlagSet()
-	pflag.CommandLine.AddGoFlagSet(fs)
-	pflag.Parse()
-	if err := v.BindPFlags(pflag.CommandLine); err != nil {
-		return nil, err
-	}
-
-	return v, nil
-}
+const versionKey = "version"
 
 func PrintVersion() (bool, error) {
-	v, err := getViper()
-	if err != nil {
+	fs := flag.NewFlagSet("", flag.ContinueOnError)
+	versionFlag := fs.Bool(versionKey, false, "print version")
+	
+	if err := fs.Parse(os.Args[1:]); err != nil {
 		return false, err
 	}
 
-	if v.GetBool(versionKey) {
-		return true, nil
-	}
-	return false, nil
+	return *versionFlag, nil
 }

@@ -6,7 +6,7 @@ package syncutils
 import (
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 var (
@@ -27,7 +27,8 @@ func (it *AccountIterator) Next() bool {
 		return false
 	}
 	for it.AccountIterator.Next() {
-		it.val, it.err = types.FullAccountRLP(it.Account())
+		_, data := it.Account()
+		it.val, it.err = types.FullAccountRLP(data)
 		return it.err == nil
 	}
 	it.val = nil
@@ -38,7 +39,8 @@ func (it *AccountIterator) Key() []byte {
 	if it.err != nil {
 		return nil
 	}
-	return it.Hash().Bytes()
+	hash, _ := it.Account()
+	return hash.Bytes()
 }
 
 func (it *AccountIterator) Value() []byte {
@@ -61,9 +63,11 @@ type StorageIterator struct {
 }
 
 func (it *StorageIterator) Key() []byte {
-	return it.Hash().Bytes()
+	hash, _ := it.Slot()
+	return hash.Bytes()
 }
 
 func (it *StorageIterator) Value() []byte {
-	return it.Slot()
+	_, slot := it.Slot()
+	return slot
 }

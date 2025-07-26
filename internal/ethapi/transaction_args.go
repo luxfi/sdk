@@ -32,18 +32,18 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 
-	"github.com/luxfi/geth/consensus/misc/eip4844"
-	"github.com/luxfi/geth/core"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/crypto/kzg4844"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto/kzg4844"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/holiman/uint256"
 )
 
@@ -65,7 +65,7 @@ type TransactionArgs struct {
 
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	// "input" is the newer name and should be preferred by clients.
-	// Issue detail: https://github.com/luxfi/geth/issues/15628
+	// Issue detail: https://github.com/ethereum/go-ethereum/issues/15628
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
 
@@ -214,7 +214,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	}
 	// If the tx has completely specified a fee mechanism, no default is needed.
 	// This allows users who are not yet synced past London to get defaults for
-	// other tx values. See https://github.com/luxfi/geth/pull/23274
+	// other tx values. See https://github.com/ethereum/go-ethereum/pull/23274
 	// for more information.
 	eip1559ParamsSet := args.MaxFeePerGas != nil && args.MaxPriorityFeePerGas != nil
 	// Sanity check the EIP-1559 fee parameters if present.
@@ -342,12 +342,12 @@ func (args *TransactionArgs) setBlobTxSidecar(ctx context.Context, b Backend) er
 		commitments := make([]kzg4844.Commitment, n)
 		proofs := make([]kzg4844.Proof, n)
 		for i, b := range args.Blobs {
-			c, err := kzg4844.BlobToCommitment(b)
+			c, err := kzg4844.BlobToCommitment(&b)
 			if err != nil {
 				return fmt.Errorf("blobs[%d]: error computing commitment: %v", i, err)
 			}
 			commitments[i] = c
-			p, err := kzg4844.ComputeBlobProof(b, c)
+			p, err := kzg4844.ComputeBlobProof(&b, c)
 			if err != nil {
 				return fmt.Errorf("blobs[%d]: error computing proof: %v", i, err)
 			}
@@ -357,7 +357,7 @@ func (args *TransactionArgs) setBlobTxSidecar(ctx context.Context, b Backend) er
 		args.Proofs = proofs
 	} else {
 		for i, b := range args.Blobs {
-			if err := kzg4844.VerifyBlobProof(b, args.Commitments[i], args.Proofs[i]); err != nil {
+			if err := kzg4844.VerifyBlobProof(&b, args.Commitments[i], args.Proofs[i]); err != nil {
 				return fmt.Errorf("failed to verify blob proof: %v", err)
 			}
 		}
@@ -435,7 +435,7 @@ func (args *TransactionArgs) ToMessage(globalGasCap uint64, baseFee *big.Int) (*
 			// Backfill the legacy gasPrice for EVM execution, unless we're all zeroes
 			gasPrice = new(big.Int)
 			if gasFeeCap.BitLen() > 0 || gasTipCap.BitLen() > 0 {
-				gasPrice = math.BigMin(new(big.Int).Add(gasTipCap, baseFee), gasFeeCap)
+				gasPrice = BigMin(new(big.Int).Add(gasTipCap, baseFee), gasFeeCap)
 			}
 		}
 	}

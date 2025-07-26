@@ -29,10 +29,10 @@ package blobpool
 import (
 	"errors"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/holiman/billy"
 )
 

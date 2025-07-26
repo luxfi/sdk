@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package core
 
-import "github.com/luxfi/geth/metrics"
+import "github.com/ethereum/go-ethereum/metrics"
 
 // getOrOverrideAsRegisteredCounter searches for a metric already registered
 // with `name`. If a metric is found and it is a [metrics.Counter], it is returned. If a
@@ -12,15 +12,21 @@ import "github.com/luxfi/geth/metrics"
 //
 // This is necessary for a metric defined in libevm with the same name but a
 // different type to what we expect.
-func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) metrics.Counter {
+func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) *metrics.Counter {
 	if r == nil {
 		r = metrics.DefaultRegistry
 	}
 
-	if c, ok := r.GetOrRegister(name, func() interface{} { return metrics.NewCounter() }).(metrics.Counter); ok {
-		return c
+	// Try to get existing metric
+	if existing := r.Get(name); existing != nil {
+		// If it's already a counter, return it
+		if c, ok := existing.(*metrics.Counter); ok {
+			return c
+		}
+		// Otherwise unregister it
+		r.Unregister(name)
 	}
-	// `name` must have already been registered to be any other type
-	r.Unregister(name)
+	
+	// Register new counter
 	return metrics.NewRegisteredCounter(name, r)
 }

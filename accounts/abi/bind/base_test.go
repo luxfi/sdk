@@ -37,10 +37,10 @@ import (
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/stretchr/testify/assert"
 )
 

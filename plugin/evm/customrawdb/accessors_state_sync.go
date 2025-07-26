@@ -1,16 +1,16 @@
-// (c) 2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package customrawdb
 
 import (
 	"encoding/binary"
-	
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
-	ethrawdb "github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+
+	"github.com/luxfi/node/utils/wrappers"
+	"github.com/ethereum/go-ethereum/common"
+	ethrawdb "github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // ReadSyncRoot reads the root corresponding to the main trie of an in-progress

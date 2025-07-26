@@ -30,8 +30,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxfi/evm/trie/trienode"
 )
 

@@ -30,9 +30,9 @@ import (
 	"math/big"
 	"testing"
 	
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/event"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/event"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"

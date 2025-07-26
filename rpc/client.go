@@ -37,7 +37,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var (

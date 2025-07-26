@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -8,6 +8,7 @@ import (
 
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/node/utils/wrappers"
 )
 
 const (
@@ -20,12 +21,14 @@ func init() {
 	vdrCodec = codec.NewManager(math.MaxInt32)
 	c := linearcodec.NewDefault()
 
-	err := c.RegisterType(validatorData{})
-	if err != nil {
-		panic(err)
-	}
-	err = vdrCodec.RegisterCodec(codecVersion, c)
-	if err != nil {
-		panic(err)
+	errs := wrappers.Errs{}
+	errs.Add(
+		c.RegisterType(validatorData{}),
+
+		vdrCodec.RegisterCodec(codecVersion, c),
+	)
+
+	if errs.Errored() {
+		panic(errs.Err)
 	}
 }

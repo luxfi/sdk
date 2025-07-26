@@ -30,10 +30,10 @@ import (
 	"context"
 	"errors"
 	"time"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/types"
 	ethereum "github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // WaitMined waits for tx to be mined on the blockchain.

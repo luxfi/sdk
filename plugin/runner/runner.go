@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/utils/ulimit"
+	"github.com/luxfi/node/vms/rpcchainvm"
+	
 	"github.com/luxfi/evm/plugin/evm"
 )
 
@@ -25,9 +25,14 @@ func Run(versionStr string) {
 		fmt.Println(versionStr)
 		os.Exit(0)
 	}
-	if err := interfaces.Set(interfaces.DefaultFDLimit, logging.NoLog{}); err != nil {
+	
+	// Set file descriptor limit
+	if err := ulimit.Set(ulimit.DefaultFDLimit, logging.NoLog{}); err != nil {
 		fmt.Printf("failed to set fd limit correctly due to: %s", err)
 		os.Exit(1)
 	}
-	interfaces.Serve(context.Background(), &evm.VM{})
+	
+	// Create VM instance and serve it via RPC
+	vm := &evm.SimpleVM{}
+	rpcchainvm.Serve(context.Background(), vm)
 }

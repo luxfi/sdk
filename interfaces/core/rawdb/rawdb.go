@@ -1,6 +1,6 @@
 package rawdb
 
-import "github.com/luxfi/geth/ethdb"
+import "github.com/ethereum/go-ethereum/ethdb"
 
 // Re-export rawdb types
 type Database = ethdb.Database

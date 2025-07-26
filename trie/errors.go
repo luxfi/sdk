@@ -30,7 +30,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // ErrCommitted is returned when a already committed trie is requested for usage.

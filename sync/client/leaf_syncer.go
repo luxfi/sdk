@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 	"golang.org/x/sync/errgroup"
 )
 

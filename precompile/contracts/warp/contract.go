@@ -7,12 +7,12 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"github.com/luxfi/evm/interfaces"
+	
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
 )

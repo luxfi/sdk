@@ -31,12 +31,12 @@ import (
 	"sync"
 	"time"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/triedb"
+	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // diskLayer is a low level persistent snapshot built on top of a key-value store.

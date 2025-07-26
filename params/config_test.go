@@ -37,7 +37,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -159,15 +159,15 @@ func TestConfigRules(t *testing.T) {
 	)
 
 	var stamp uint64
-	if r := c.LuxRules(big.NewInt(0), stamp); r.IsEVM {
+	if r := c.GenesisRules(big.NewInt(0), stamp); r.IsEVM {
 		t.Errorf("expected %v to not be evm", stamp)
 	}
 	stamp = 500
-	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsEVM {
+	if r := c.GenesisRules(big.NewInt(0), stamp); !r.IsEVM {
 		t.Errorf("expected %v to be evm", stamp)
 	}
 	stamp = math.MaxInt64
-	if r := c.LuxRules(big.NewInt(0), stamp); !r.IsEVM {
+	if r := c.GenesisRules(big.NewInt(0), stamp); !r.IsEVM {
 		t.Errorf("expected %v to be evm", stamp)
 	}
 }
@@ -255,10 +255,10 @@ func TestActivePrecompiles(t *testing.T) {
 		},
 	)
 
-	rules0 := config.LuxRules(common.Big0, 0)
+	rules0 := config.GenesisRules(common.Big0, 0)
 	require.True(t, rules0.IsPrecompileEnabled(nativeminter.Module.Address))
 
-	rules1 := config.LuxRules(common.Big0, 1)
+	rules1 := config.GenesisRules(common.Big0, 1)
 	require.False(t, rules1.IsPrecompileEnabled(nativeminter.Module.Address))
 }
 

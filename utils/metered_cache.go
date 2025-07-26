@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/luxfi/geth/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 // MeteredCache wraps *fastcache.Cache and periodically pulls stats from it.

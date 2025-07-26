@@ -36,12 +36,12 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
 	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/plugin/evm/header"
 )
@@ -110,10 +110,8 @@ func (b *BlockGen) SetParentBeaconRoot(root common.Hash) {
 	b.header.ParentBeaconRoot = &root
 	var (
 		blockContext = NewEVMBlockContext(b.header, b.cm, &b.header.Coinbase)
-		// Convert to ethereum ChainConfig for VM
-		ethConfig    = convertToEthChainConfig(b.cm.config)
 		txContext    = vm.TxContext{} // Empty TxContext for beacon root processing
-		vmenv        = vm.NewEVM(blockContext, txContext, b.statedb, ethConfig, vm.Config{})
+		vmenv        = vm.NewEVM(blockContext, txContext, b.statedb, b.cm.config, vm.Config{})
 	)
 	ProcessBeaconBlockRoot(root, vmenv, b.statedb)
 }
@@ -207,7 +205,7 @@ func (b *BlockGen) Gas() uint64 {
 
 // Signer returns a valid signer instance for the current block.
 func (b *BlockGen) Signer() types.Signer {
-	return types.MakeSigner(b.cm.config.ToEthChainConfig(), b.header.Number, b.header.Time)
+	return types.MakeSigner(b.cm.config, b.header.Number, b.header.Time)
 }
 
 // AddUncheckedReceipt forcefully adds a receipts to the block without a
@@ -347,7 +345,7 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 		if block.ExcessBlobGas() != nil {
 			blobGasPrice = eip4844.CalcBlobFee(*block.ExcessBlobGas())
 		}
-		if err := receipts.DeriveFields(config.ToEthChainConfig(), block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
+		if err := receipts.DeriveFields(config, block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
 			panic(err)
 		}
 

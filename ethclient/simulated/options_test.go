@@ -22,10 +22,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/geth/core"
-	"github.com/luxfi/geth/core/types"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/params"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
 )
 

@@ -21,10 +21,10 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/eth/tracers"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/eth/tracers"
 )
 
 // traceWriter is an vm.EVMLogger which also holds an inner logger/tracer.

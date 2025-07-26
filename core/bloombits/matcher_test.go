@@ -33,7 +33,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const testSectionSize = 4096

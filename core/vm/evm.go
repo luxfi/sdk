@@ -30,10 +30,9 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/params"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/core/headerutil"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/precompile/contract"
@@ -41,9 +40,9 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/holiman/uint256"
 )
 
@@ -76,16 +75,17 @@ type (
 
 func (evm *EVM) precompile(addr common.Address) (contract.StatefulPrecompiledContract, bool) {
 	var precompiles map[common.Address]contract.StatefulPrecompiledContract
+	rulesExtra := params.GetRulesExtra(evm.chainRules)
 	switch {
 	case evm.chainRules.IsCancun:
 		precompiles = PrecompiledContractsCancun
-	case evm.chainRules.IsBanff:
+	case rulesExtra.IsBanff:
 		precompiles = PrecompiledContractsBanff
-	case evm.chainRules.IsApricotPhase6:
+	case rulesExtra.IsApricotPhase6:
 		precompiles = PrecompiledContractsApricotPhase6
-	case evm.chainRules.IsApricotPhasePre6:
+	case rulesExtra.IsApricotPhasePre6:
 		precompiles = PrecompiledContractsApricotPhasePre6
-	case evm.chainRules.IsApricotPhase2:
+	case rulesExtra.IsApricotPhase2:
 		precompiles = PrecompiledContractsApricotPhase2
 	case evm.chainRules.IsIstanbul:
 		precompiles = PrecompiledContractsIstanbul
@@ -102,7 +102,7 @@ func (evm *EVM) precompile(addr common.Address) (contract.StatefulPrecompiledCon
 	}
 
 	// Otherwise, check the chain rules for the additionally configured precompiles.
-	if _, ok = evm.chainRules.ActivePrecompiles[addr]; ok {
+	if _, ok = rulesExtra.Precompiles[addr]; ok {
 		module, ok := modules.GetPrecompileModuleByAddress(addr)
 		return module.Contract, ok
 	}
@@ -227,7 +227,7 @@ func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig
 		StateDB:     statedb,
 		Config:      config,
 		chainConfig: chainConfig,
-		chainRules:  chainConfig.Rules(blockCtx.BlockNumber, blockCtx.Time),
+		chainRules:  chainConfig.Rules(blockCtx.BlockNumber, params.IsMergeTODO, blockCtx.Time),
 	}
 	evm.interpreter = NewEVMInterpreter(evm)
 
@@ -277,14 +277,14 @@ func (evm *EVM) Cancelled() bool {
 	return evm.abort.Load()
 }
 
-// GetConsensusContext returns the evm's consensus.Context.
-func (evm *EVM) GetConsensusContext() *consensus.Context {
-	return evm.chainConfig.ConsensusCtx
+// GetConsensusContext returns the evm's consensus context.
+func (evm *EVM) GetConsensusContext() *interfaces.ChainContext {
+	return evm.Context.ConsensusContext
 }
 
 // GetStateDB returns the evm's StateDB
 func (evm *EVM) GetStateDB() contract.StateDB {
-	return evm.StateDB
+	return NewStateDBAdapter(evm.StateDB)
 }
 
 // GetBlockContext returns the evm's BlockContext
@@ -571,7 +571,8 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	evm.StateDB.SetNonce(caller.Address(), nonce+1)
 	// We add this to the access list _before_ taking a snapshot. Even if the creation fails,
 	// the access-list change should not be rolled back
-	if evm.chainRules.IsApricotPhase2 {
+	rulesExtra := params.GetRulesExtra(evm.chainRules)
+	if rulesExtra.IsApricotPhase2 {
 		evm.StateDB.AddAddressToAccessList(address)
 	}
 	// Ensure there's no existing contract already at the designated address
@@ -608,7 +609,7 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 	}
 
 	// Reject code starting with 0xEF if EIP-3541 is enabled.
-	if err == nil && len(ret) >= 1 && ret[0] == 0xEF && evm.chainRules.IsApricotPhase3 {
+	if err == nil && len(ret) >= 1 && ret[0] == 0xEF && rulesExtra.IsApricotPhase3 {
 		err = vmerrs.ErrInvalidCode
 	}
 
@@ -667,8 +668,6 @@ func (evm *EVM) ChainConfig() *params.ChainConfig { return evm.chainConfig }
 // GetChainConfig implements AccessibleState
 func (evm *EVM) GetChainConfig() precompileconfig.ChainConfig { return evm.chainConfig }
 
-// GetConsensusContext implements AccessibleState
-func (evm *EVM) GetConsensusContext() *interfaces.ChainContext { return evm.Context.ConsensusContext }
 
 func (evm *EVM) NativeAssetCall(caller common.Address, input []byte, suppliedGas uint64, gasCost uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	if suppliedGas < gasCost {

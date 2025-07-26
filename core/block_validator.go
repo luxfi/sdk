@@ -33,8 +33,7 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
-	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and
@@ -96,8 +95,8 @@ func (v *BlockValidator) ValidateBody(block *types.Block) error {
 
 	// Check blob gas usage.
 	if header.BlobGasUsed != nil {
-		if want := *header.BlobGasUsed / ethparams.BlobTxBlobGasPerBlob; uint64(blobs) != want { // div because the header is surely good vs the body might be bloated
-			return fmt.Errorf("blob gas used mismatch (header %v, calculated %v)", *header.BlobGasUsed, blobs*ethparams.BlobTxBlobGasPerBlob)
+		if want := *header.BlobGasUsed / params.BlobTxBlobGasPerBlob; uint64(blobs) != want { // div because the header is surely good vs the body might be bloated
+			return fmt.Errorf("blob gas used mismatch (header %v, calculated %v)", *header.BlobGasUsed, blobs*params.BlobTxBlobGasPerBlob)
 		}
 	} else {
 		if blobs > 0 {
@@ -147,10 +146,10 @@ func (v *BlockValidator) ValidateState(block *types.Block, statedb *state.StateD
 // the gas allowance.
 func CalcGasLimit(parentGasUsed, parentGasLimit, gasFloor, gasCeil uint64) uint64 {
 	// contrib = (parentGasUsed * 3 / 2) / 1024
-	contrib := (parentGasUsed + parentGasUsed/2) / ethparams.GasLimitBoundDivisor
+	contrib := (parentGasUsed + parentGasUsed/2) / params.GasLimitBoundDivisor
 
 	// decay = parentGasLimit / 1024 -1
-	decay := parentGasLimit/ethparams.GasLimitBoundDivisor - 1
+	decay := parentGasLimit/params.GasLimitBoundDivisor - 1
 
 	/*
 		strategy: gasLimit of block-to-mine is set based on parent's
@@ -160,8 +159,8 @@ func CalcGasLimit(parentGasUsed, parentGasLimit, gasFloor, gasCeil uint64) uint6
 		from parentGasLimit * (2/3) parentGasUsed is.
 	*/
 	limit := parentGasLimit - decay + contrib
-	if limit < ethparams.MinGasLimit {
-		limit = ethparams.MinGasLimit
+	if limit < params.MinGasLimit {
+		limit = params.MinGasLimit
 	}
 	// If we're outside our allowed gas range, we try to hone towards them
 	if limit < gasFloor {

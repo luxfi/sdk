@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // NewPredicateTx returns a transaction with the predicateAddress/predicateBytes tuple

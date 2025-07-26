@@ -7,13 +7,12 @@ import (
 	"math"
 	"math/rand"
 	"time"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/node/ids"
 	mathutils "github.com/luxfi/node/utils/math"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/metrics"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 const (
@@ -31,7 +30,7 @@ const (
 
 // information we track on a given peer
 type peerInfo struct {
-	version   uint32 // Application version
+	version   *version.Application // Application version
 	bandwidth mathutils.Averager
 }
 
@@ -74,7 +73,7 @@ func (p *peerTracker) shouldTrackNewPeer() bool {
 		// already tracking all the peers
 		return false
 	}
-	newPeerProbability := interfaces.Exp(-float64(numResponsivePeers) * newPeerConnectFactor)
+	newPeerProbability := math.Exp(-float64(numResponsivePeers) * newPeerConnectFactor)
 	return rand.Float64() < newPeerProbability
 }
 
@@ -97,7 +96,7 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 	if p.shouldTrackNewPeer() {
 		for nodeID := range p.peers {
 			// if minVersion is specified and peer's version is less, skip
-			if minVersion != nil && p.peers[nodeID].interfaces.Compare(minVersion) < 0 {
+			if minVersion != nil && p.peers[nodeID].version.Compare(minVersion) < 0 {
 				continue
 			}
 			// skip peers already tracked
@@ -112,7 +111,7 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 		nodeID   ids.NodeID
 		ok       bool
 		random   bool
-		averager utils_interfaces.Averager
+		averager mathutils.Averager
 	)
 	if rand.Float64() < randomPeerProbability {
 		random = true
@@ -143,7 +142,7 @@ func (p *peerTracker) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
 
 	now := time.Now()
 	if peer.bandwidth == nil {
-		peer.bandwidth = utils_interfaces.NewAverager(bandwidth, bandwidthHalflife, now)
+		peer.bandwidth = mathutils.NewAverager(bandwidth, bandwidthHalflife, now)
 	} else {
 		peer.bandwidth.Observe(bandwidth, now)
 	}

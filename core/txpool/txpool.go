@@ -35,12 +35,12 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/event"
-	gethevent "github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/event"
+	gethevent "github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var (
@@ -160,10 +160,10 @@ func (p *TxPool) reserver(id int, subpool SubPool) AddressReserver {
 				return ErrAlreadyReserved
 			}
 			p.reservations[addr] = subpool
-		if metrics.Enabled {
-			m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
-			metrics.GetOrRegisterGauge(m, nil).Inc(1)
-		}
+			if metrics.Enabled() {
+				m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
+				metrics.GetOrRegisterGauge(m, nil).Inc(1)
+			}
 			return nil
 		}
 		// Ensure subpools only attempt to unreserve their own owned addresses,
@@ -177,7 +177,7 @@ func (p *TxPool) reserver(id int, subpool SubPool) AddressReserver {
 			return errors.New("address not owned")
 		}
 		delete(p.reservations, addr)
-		if metrics.Enabled {
+		if metrics.Enabled() {
 			m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
 			metrics.GetOrRegisterGauge(m, nil).Dec(1)
 		}

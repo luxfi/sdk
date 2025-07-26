@@ -39,10 +39,10 @@ import (
 	"github.com/luxfi/evm/params"
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/tests"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -145,7 +145,7 @@ func Transaction(ctx *cli.Context) error {
 			r.Address = sender
 		}
 		// Check intrinsic gas
-		rules := chainConfig.LuxRules(new(big.Int), 0)
+		rules := chainConfig.GenesisRules(new(big.Int), 0)
 		if gas, err := core.IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, rules); err != nil {
 			r.Error = err
 			results = append(results, r)

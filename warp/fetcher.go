@@ -8,9 +8,6 @@ import (
 	"fmt"
 
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/warp/aggregator"
 )
 
@@ -26,7 +23,7 @@ func NewAPIFetcher(clients map[interfaces.NodeID]Client) *apiFetcher {
 	}
 }
 
-func (f *apiFetcher) GetSignature(ctx context.Context, nodeID interfaces.NodeID, unsignedWarpMessage *interfaces.UnsignedMessage) (*interfaces.Signature, error) {
+func (f *apiFetcher) GetSignature(ctx context.Context, nodeID interfaces.NodeID, unsignedWarpMessage *interfaces.WarpUnsignedMessage) (*interfaces.WarpSignature, error) {
 	client, ok := f.clients[nodeID]
 	if !ok {
 		return nil, fmt.Errorf("no warp client for nodeID: %s", nodeID)
@@ -40,7 +37,7 @@ func (f *apiFetcher) GetSignature(ctx context.Context, nodeID interfaces.NodeID,
 	case *interfaces.AddressedCall:
 		signatureBytes, err = client.GetMessageSignature(ctx, unsignedWarpMessage.ID())
 	case *interfaces.Hash:
-		signatureBytes, err = client.GetBlockSignature(ctx, p.Hash)
+		signatureBytes, err = client.GetBlockSignature(ctx, *p)
 	}
 	if err != nil {
 		return nil, err

@@ -32,11 +32,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/trie/trienode"
-	"github.com/luxfi/geth/triedb/database"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/trie/trienode"
+	"github.com/ethereum/go-ethereum/triedb/database"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // Trie is a Merkle Patricia Trie. Use New to create a trie that sits on

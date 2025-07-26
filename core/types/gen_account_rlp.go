@@ -5,7 +5,7 @@ package types
 import (
 	"io"
 
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 func (obj *StateAccount) EncodeRLP(_w io.Writer) error {

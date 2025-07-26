@@ -6,7 +6,7 @@ package contract
 import (
 	"fmt"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (

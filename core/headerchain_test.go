@@ -37,7 +37,7 @@ import (
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 func verifyUnbrokenCanonchain(bc *BlockChain) error {

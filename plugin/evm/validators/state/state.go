@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/consensus/uptime"
 	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/consensus/uptime"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
-var _ uptime.State = &state{}
+var _ uptime.State = (*state)(nil)
 
 type dbUpdateStatus bool
 
@@ -224,20 +224,20 @@ func (s *state) SetStatus(vID ids.ID, isActive bool) error {
 
 // GetValidationIDs returns the validation IDs in the state
 func (s *state) GetValidationIDs() set.Set[ids.ID] {
-	idSet := set.NewSet[ids.ID](len(s.data))
+	ids := set.NewSet[ids.ID](len(s.data))
 	for vID := range s.data {
-		idSet.Add(vID)
+		ids.Add(vID)
 	}
-	return idSet
+	return ids
 }
 
 // GetNodeIDs returns the node IDs of validators in the state
 func (s *state) GetNodeIDs() set.Set[ids.NodeID] {
-	idSet := set.NewSet[ids.NodeID](len(s.index))
+	ids := set.NewSet[ids.NodeID](len(s.index))
 	for nodeID := range s.index {
-		idSet.Add(nodeID)
+		ids.Add(nodeID)
 	}
-	return idSet
+	return ids
 }
 
 // GetValidationID returns the validation ID for the given nodeID

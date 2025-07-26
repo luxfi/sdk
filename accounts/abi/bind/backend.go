@@ -30,7 +30,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/types"
 	ethereum "github.com/luxfi/evm/interfaces"
 )

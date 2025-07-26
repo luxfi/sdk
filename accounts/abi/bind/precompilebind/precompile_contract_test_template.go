@@ -19,7 +19,7 @@ import (
 	{{- end}}
 	"github.com/luxfi/evm/precompile/testutils"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
 

@@ -3,10 +3,16 @@ package interfaces
 
 import (
 	"math/big"
+	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
+
+// MockableTimer is an interface for a timer that can be mocked
+type MockableTimer interface {
+	Time() time.Time
+}
 
 // ChainHeaderReader defines methods needed to access the local blockchain during header verification.
 type ChainHeaderReader interface {

@@ -27,11 +27,12 @@
 package vm
 
 import (
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // Config are the configuration options for the Interpreter
@@ -66,16 +67,17 @@ type EVMInterpreter struct {
 func NewEVMInterpreter(evm *EVM) *EVMInterpreter {
 	// If jump table was not initialised we set the default one.
 	var table *JumpTable
+	rulesExtra := params.GetRulesExtra(evm.chainRules)
 	switch {
 	case evm.chainRules.IsCancun:
 		table = &cancunInstructionSet
-	case evm.chainRules.IsDurango:
+	case rulesExtra.IsDurango:
 		table = &durangoInstructionSet
-	case evm.chainRules.IsApricotPhase3:
+	case rulesExtra.IsApricotPhase3:
 		table = &apricotPhase3InstructionSet
-	case evm.chainRules.IsApricotPhase2:
+	case rulesExtra.IsApricotPhase2:
 		table = &apricotPhase2InstructionSet
-	case evm.chainRules.IsApricotPhase1:
+	case rulesExtra.IsApricotPhase1:
 		table = &apricotPhase1InstructionSet
 	case evm.chainRules.IsIstanbul:
 		table = &istanbulInstructionSet

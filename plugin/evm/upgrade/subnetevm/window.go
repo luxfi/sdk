@@ -1,4 +1,4 @@
-// (c) 2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // subnetevm defines the dynamic fee window used after subnetevm upgrade.
@@ -11,7 +11,7 @@ import (
 	"math"
 
 	"github.com/luxfi/node/utils/wrappers"
-	safemath "github.com/luxfi/geth/common/math"
+	safemath "github.com/ethereum/go-ethereum/common/math"
 )
 
 const (

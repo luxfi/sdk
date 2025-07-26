@@ -8,12 +8,11 @@ import (
 	"context"
 	"time"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/node/utils/units"
 )
 
 const (
@@ -107,7 +106,7 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID interfa
 	response := message.BlockResponse{
 		Blocks: blocks,
 	}
-	responseBytes, err := b.interfaces.Marshal(message.Version, response)
+	responseBytes, err := b.codec.Marshal(response)
 	if err != nil {
 		log.Error("failed to marshal BlockResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "hash", blockRequest.Hash, "parents", blockRequest.Parents, "blocksLen", len(response.Blocks), "err", err)
 		return nil, nil

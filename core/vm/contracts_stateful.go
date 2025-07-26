@@ -5,7 +5,7 @@ package vm
 
 import (
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // wrappedPrecompiledContract implements StatefulPrecompiledContract by wrapping stateless native precompiled contracts

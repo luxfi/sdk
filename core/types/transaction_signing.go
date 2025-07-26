@@ -32,9 +32,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/params"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 var ErrInvalidChainId = errors.New("invalid chain id for signer")
@@ -49,7 +49,7 @@ type sigCache struct {
 // MakeSigner returns a Signer based on the given chain config and block number or time.
 func MakeSigner(config *params.ChainConfig, blockNumber *big.Int, blockTime uint64) Signer {
 	switch {
-	case config.IsCancun(blockNumber, blockTime):
+	case config.IsCancun(blockTime):
 		return NewCancunSigner(config.ChainID)
 	case config.IsLondon(blockNumber):
 		return NewLondonSigner(config.ChainID)

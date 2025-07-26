@@ -31,7 +31,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/trie/trienode"
 )
 

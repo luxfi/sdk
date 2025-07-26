@@ -4,8 +4,8 @@
 package statesync
 
 import (
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 

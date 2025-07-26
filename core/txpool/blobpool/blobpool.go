@@ -39,14 +39,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/metrics"
-	ethparams "github.com/luxfi/evm/params"
-	eparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
@@ -60,7 +58,7 @@ import (
 const (
 	// blobSize is the protocol constrained byte size of a single blob in a
 	// transaction. There can be multiple of these embedded into a single tx.
-	blobSize = ethparams.BlobTxFieldElementsPerBlob * ethparams.BlobTxBytesPerFieldElement
+	blobSize = params.BlobTxFieldElementsPerBlob * params.BlobTxBytesPerFieldElement
 
 	// maxBlobsPerTransaction is the maximum number of blobs a single transaction
 	// is allowed to contain. Whilst the spec states it's unlimited, the block
@@ -338,7 +336,7 @@ func New(config Config, chain BlockChain) *BlobPool {
 	// Create the transaction pool with its initial settings
 	return &BlobPool{
 		config: config,
-		signer: types.LatestSigner(&eparams.ChainConfig{ChainID: chain.Config().ChainID}),
+		signer: types.LatestSigner(&params.ChainConfig{ChainID: chain.Config().ChainID}),
 		chain:  chain,
 		lookup: make(map[common.Hash]uint64),
 		index:  make(map[common.Address][]*blobTxMeta),
@@ -412,14 +410,9 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 	for addr := range p.index {
 		p.recheck(addr, nil)
 	}
-	feeConfig, _, err := p.chain.GetFeeConfigAt(p.head)
-	if err != nil {
-		p.Close()
-		return err
-	}
+	// feeConfig removed - not used in EstimateNextBaseFee anymore
 	baseFee, err := header.EstimateNextBaseFee(
-		params.GetExtra(p.chain.Config()),
-		feeConfig,
+		p.chain.Config(),
 		p.head,
 		uint64(time.Now().Unix()),
 	)
@@ -430,7 +423,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 	var (
 		// basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), p.head))
 		basefee = uint256.MustFromBig(baseFee)
-		blobfee = uint256.NewInt(ethparams.BlobTxMinBlobGasprice)
+		blobfee = uint256.NewInt(params.BlobTxMinBlobGasprice)
 	)
 	if p.head.ExcessBlobGas != nil {
 		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(*p.head.ExcessBlobGas))
@@ -848,14 +841,9 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 	if p.chain.Config().IsCancun(p.head.Time) {
 		p.limbo.finalize(p.chain.CurrentFinalBlock())
 	}
-	feeConfig, _, err := p.chain.GetFeeConfigAt(p.head)
-	if err != nil {
-		log.Error("Failed to get fee config to reset blobpool fees", "err", err)
-		return
-	}
+	// feeConfig removed - not used in EstimateNextBaseFee anymore
 	baseFeeBig, err := header.EstimateNextBaseFee(
-		params.GetExtra(p.chain.Config()),
-		feeConfig,
+		p.chain.Config(),
 		p.head,
 		uint64(time.Now().Unix()),
 	)
@@ -867,7 +855,7 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 	var (
 		// basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), newHead))
 		basefee = uint256.MustFromBig(baseFeeBig)
-		blobfee = uint256.MustFromBig(big.NewInt(ethparams.BlobTxMinBlobGasprice))
+		blobfee = uint256.MustFromBig(big.NewInt(params.BlobTxMinBlobGasprice))
 	)
 	if newHead.ExcessBlobGas != nil {
 		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(*newHead.ExcessBlobGas))

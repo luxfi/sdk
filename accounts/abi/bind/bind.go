@@ -39,7 +39,7 @@ import (
 	"text/template"
 	"unicode"
 	"github.com/luxfi/evm/accounts/abi"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // Lang is a target programming language selector to generate bindings for.

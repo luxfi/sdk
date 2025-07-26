@@ -36,10 +36,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/event"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/event"
 	"golang.org/x/exp/slices"
 )
 

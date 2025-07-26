@@ -35,7 +35,7 @@ package blocktest
 import (
 	"hash"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"golang.org/x/crypto/sha3"
 )
 

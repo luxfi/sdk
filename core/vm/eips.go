@@ -30,9 +30,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/luxfi/geth/params"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 )
 

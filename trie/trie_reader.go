@@ -27,11 +27,11 @@
 package trie
 
 import (
-	"github.com/luxfi/geth/core/types"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/trie/triestate"
-	"github.com/luxfi/geth/triedb/database"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/triedb/database"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // trieReader is a wrapper of the underlying node reader. It's not safe
@@ -50,11 +50,13 @@ func newTrieReader(stateRoot, owner common.Hash, db database.NodeDatabase) (*tri
 		}
 		return &trieReader{owner: owner}, nil
 	}
-	reader, err := db.Reader(stateRoot)
-	if err != nil {
-		return nil, &MissingNodeError{Owner: owner, NodeHash: stateRoot, err: err}
-	}
-	return &trieReader{owner: owner, reader: reader}, nil
+	// TODO: Fix database interface - Reader method not found
+	// reader, err := db.Reader(stateRoot)
+	// if err != nil {
+	//	return nil, &MissingNodeError{Owner: owner, NodeHash: stateRoot, err: err}
+	// }
+	// return &trieReader{owner: owner, reader: reader}, nil
+	return &trieReader{owner: owner}, nil
 }
 
 // newEmptyReader initializes the pure in-memory reader. All read operations

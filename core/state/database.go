@@ -27,9 +27,9 @@
 package state
 
 import (
-	"github.com/luxfi/geth/ethdb"
-	ethstate "github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/triedb"
+	"github.com/ethereum/go-ethereum/ethdb"
+	ethstate "github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/triedb"
 )
 
 type (

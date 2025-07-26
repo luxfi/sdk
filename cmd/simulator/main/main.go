@@ -10,7 +10,7 @@ import (
 	"os"
 	"github.com/luxfi/evm/cmd/simulator/config"
 	"github.com/luxfi/evm/cmd/simulator/load"
-	"github.com/luxfi/evm/log"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/spf13/pflag"
 )
 

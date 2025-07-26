@@ -14,16 +14,16 @@ import (
 	"github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/peer"
 	"github.com/luxfi/evm/plugin/evm/message"
-	"github.com/luxfi/geth/trie"
+	"github.com/ethereum/go-ethereum/trie"
 )
 
 const (
