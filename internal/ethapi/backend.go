@@ -32,18 +32,18 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/geth/consensus"
-	"github.com/luxfi/geth/core"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 // Backend interface provides the common API services (that are provided by
@@ -117,31 +117,31 @@ func GetAPIs(apiBackend Backend) []rpc.API {
 		{
 			Namespace: "eth",
 			Service:   NewEthereumAPI(apiBackend),
-			Name:      "internal-eth",
+			// Name:      "internal-eth",
 		}, {
 			Namespace: "eth",
 			Service:   NewBlockChainAPI(apiBackend),
-			Name:      "internal-blockchain",
+			// Name:      "internal-blockchain",
 		}, {
 			Namespace: "eth",
 			Service:   NewTransactionAPI(apiBackend, nonceLock),
-			Name:      "internal-transaction",
+			// Name:      "internal-transaction",
 		}, {
 			Namespace: "txpool",
 			Service:   NewTxPoolAPI(apiBackend),
-			Name:      "internal-tx-pool",
+			// Name:      "internal-tx-pool",
 		}, {
 			Namespace: "debug",
 			Service:   NewDebugAPI(apiBackend),
-			Name:      "internal-debug",
+			// Name:      "internal-debug",
 		}, {
 			Namespace: "eth",
 			Service:   NewEthereumAccountAPI(apiBackend.AccountManager()),
-			Name:      "internal-account",
+			// Name:      "internal-account",
 		}, {
 			Namespace: "personal",
 			Service:   NewPersonalAccountAPI(apiBackend, nonceLock),
-			Name:      "internal-personal",
+			// Name:      "internal-personal",
 		},
 	}
 }

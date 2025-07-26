@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -6,16 +6,33 @@ package message
 import (
 	"context"
 	"fmt"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/node/consensus/engine/linear/block"
+
 	"github.com/luxfi/node/ids"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
-var _ block.StateSummary = &SyncSummary{}
+// StateSummary interface from linear package
+type StateSummary interface {
+	ID() ids.ID
+	Height() uint64
+	Bytes() []byte
+	Accept(ctx context.Context) (StateSyncMode, error)
+}
+
+// StateSyncMode defines the sync mode
+type StateSyncMode uint8
+
+const (
+	StateSyncSkipped StateSyncMode = iota
+	StateSyncStatic
+	StateSyncDynamic
+)
+
+var _ StateSummary = (*SyncSummary)(nil)
 
 // SyncSummary provides the information necessary to sync a node starting
-// at the given interfaces.
+// at the given block.
 type SyncSummary struct {
 	BlockNumber uint64      `serialize:"true"`
 	BlockHash   common.Hash `serialize:"true"`
@@ -23,10 +40,10 @@ type SyncSummary struct {
 
 	summaryID  ids.ID
 	bytes      []byte
-	acceptImpl func(SyncSummary) (block.StateSyncMode, error)
+	acceptImpl func(SyncSummary) (StateSyncMode, error)
 }
 
-func NewSyncSummaryFromBytes(summaryBytes []byte, acceptImpl func(SyncSummary) (block.StateSyncMode, error)) (SyncSummary, error) {
+func NewSyncSummaryFromBytes(summaryBytes []byte, acceptImpl func(SyncSummary) (StateSyncMode, error)) (SyncSummary, error) {
 	summary := SyncSummary{}
 	if codecVersion, err := Codec.Unmarshal(summaryBytes, &summary); err != nil {
 		return SyncSummary{}, err
@@ -81,9 +98,9 @@ func (s SyncSummary) String() string {
 	return fmt.Sprintf("SyncSummary(BlockHash=%s, BlockNumber=%d, BlockRoot=%s)", s.BlockHash, s.BlockNumber, s.BlockRoot)
 }
 
-func (s SyncSummary) Accept(context.Context) (block.StateSyncMode, error) {
+func (s SyncSummary) Accept(context.Context) (StateSyncMode, error) {
 	if s.acceptImpl == nil {
-		return block.StateSyncSkipped, fmt.Errorf("accept implementation not specified for summary: %s", s)
+		return StateSyncSkipped, fmt.Errorf("accept implementation not specified for summary: %s", s)
 	}
 	return s.acceptImpl(s)
 }

@@ -27,9 +27,9 @@
 package types
 
 import (
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var (

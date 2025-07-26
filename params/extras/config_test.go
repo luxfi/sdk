@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/stretchr/testify/assert"

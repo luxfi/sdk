@@ -7,8 +7,8 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // CallMsg contains parameters for contract calls.

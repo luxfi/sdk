@@ -33,18 +33,17 @@ import (
 	"fmt"
 	"math/big"
 
-	gethparams "github.com/luxfi/geth/params"
+	gethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
-	gethmath "github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/crypto/blake2b"
-	// "github.com/luxfi/geth/crypto/bls12381" // TODO: Add this to geth
-	"github.com/luxfi/geth/crypto/bn256"
-	"github.com/luxfi/geth/crypto/kzg4844"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/blake2b"
+	// "github.com/ethereum/go-ethereum/crypto/bls12381" // TODO: Add this to geth
+	"github.com/ethereum/go-ethereum/crypto/bn256"
+	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -260,13 +259,14 @@ func init() {
 }
 
 // ActivePrecompiles returns the precompiles enabled with the current configuration.
-func ActivePrecompiles(rules gethparams.Rules) []common.Address {
+func ActivePrecompiles(rules params.Rules) []common.Address {
+	rulesExtra := params.GetRulesExtra(rules)
 	switch {
 	case rules.IsCancun:
 		return PrecompiledAddressesCancun
-	case rules.IsBanff:
+	case rulesExtra.IsBanff:
 		return PrecompiledAddressesBanff
-	case rules.IsApricotPhase2:
+	case rulesExtra.IsApricotPhase2:
 		return PrecompiledAddressesApricotPhase2
 	case rules.IsIstanbul:
 		return PrecompiledAddressesIstanbul
@@ -480,11 +480,11 @@ func (c *bigModExp) RequiredGas(input []byte) uint64 {
 		gas = gas.Div(gas, big8)
 		gas.Mul(gas, gas)
 
-		gas.Mul(gas, math.BigMax(adjExpLen, big1))
+		gas.Mul(gas, BigMax(adjExpLen, big1))
 		// 2. Different divisor (`GQUADDIVISOR`) (3)
 		gas.Div(gas, big3)
 		if gas.BitLen() > 64 {
-			return math.MaxUint64
+			return MaxUint64
 		}
 		// 3. Minimum price of 200 gas
 		if gas.Uint64() < 200 {
@@ -493,11 +493,11 @@ func (c *bigModExp) RequiredGas(input []byte) uint64 {
 		return gas.Uint64()
 	}
 	gas = modexpMultComplexity(gas)
-	gas.Mul(gas, math.BigMax(adjExpLen, big1))
+	gas.Mul(gas, BigMax(adjExpLen, big1))
 	gas.Div(gas, big20)
 
 	if gas.BitLen() > 64 {
-		return math.MaxUint64
+		return MaxUint64
 	}
 	return gas.Uint64()
 }

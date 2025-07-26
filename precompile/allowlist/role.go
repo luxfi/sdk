@@ -7,7 +7,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // 1. NoRole - this is equivalent to common.Hash{} and deletes the key from the DB when set

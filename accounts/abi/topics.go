@@ -33,9 +33,9 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 // packTopic packs rule into the corresponding hash value for a log's topic

@@ -34,9 +34,9 @@ import (
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 )
@@ -88,11 +88,9 @@ func (p *StateProcessor) Process(block *types.Block, parent *types.Header, state
 
 	var (
 		context = NewEVMBlockContext(header, p.bc, nil)
-		// Use the converted ethereum ChainConfig for EVM
-		ethConfig = convertToEthChainConfig(p.config)
 		txContext = vm.TxContext{} // Empty initial tx context
-		vmenv   = vm.NewEVM(context, txContext, statedb, ethConfig, cfg)
-		signer  = types.MakeSigner(p.config.ToEthChainConfig(), header.Number, header.Time)
+		vmenv   = vm.NewEVM(context, txContext, statedb, p.config, cfg)
+		signer  = types.MakeSigner(p.config, header.Number, header.Time)
 	)
 	if beaconRoot := block.BeaconRoot(); beaconRoot != nil {
 		ProcessBeaconBlockRoot(*beaconRoot, vmenv, statedb)
@@ -175,14 +173,13 @@ func applyTransaction(msg *Message, config *params.ChainConfig, gp *GasPool, sta
 // for the transaction, gas used and an error if the transaction failed,
 // indicating the block was invalid.
 func ApplyTransaction(config *params.ChainConfig, bc ChainContext, blockContext vm.BlockContext, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, error) {
-	msg, err := TransactionToMessage(tx, types.MakeSigner(config.ToEthChainConfig(), header.Number, header.Time), header.BaseFee)
+	msg, err := TransactionToMessage(tx, types.MakeSigner(config, header.Number, header.Time), header.BaseFee)
 	if err != nil {
 		return nil, err
 	}
 	// Create a new context to be used in the EVM environment
 	txContext := NewEVMTxContext(msg)
-	ethConfig := convertToEthChainConfig(config)
-	vmenv := vm.NewEVM(blockContext, txContext, statedb, ethConfig, cfg)
+	vmenv := vm.NewEVM(blockContext, txContext, statedb, config, cfg)
 	return applyTransaction(msg, config, gp, statedb, header.Number, header.Hash(), tx, usedGas, vmenv)
 }
 

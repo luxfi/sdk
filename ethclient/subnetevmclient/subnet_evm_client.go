@@ -36,8 +36,8 @@ import (
 	"github.com/luxfi/evm/core/types"
 	ethereum "github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // Client is a wrapper around rpc.Client that implements geth-specific functionality.

@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var ErrMissingPredicateContext = errors.New("missing predicate context")
@@ -30,13 +30,14 @@ func CheckPredicates(rules params.Rules, predicateContext *precompileconfig.Pred
 	}
 
 	predicateResults := make(map[common.Address][]byte)
+	rulesExtra := params.GetRulesExtra(rules)
 	// Short circuit early if there are no precompile predicates to verify
-	if len(rules.Predicaters) == 0 {
+	if len(rulesExtra.Predicaters) == 0 {
 		return predicateResults, nil
 	}
 
 	// Prepare the predicate storage slots from the transaction's access list
-	predicateArguments := predicate.PreparePredicateStorageSlots(&rules, tx.AccessList())
+	predicateArguments := predicate.PreparePredicateStorageSlots(rulesExtra, tx.AccessList())
 
 	// If there are no predicates to verify, return early and skip requiring the proposervm block
 	// context to be populated.
@@ -51,7 +52,7 @@ func CheckPredicates(rules params.Rules, predicateContext *precompileconfig.Pred
 	for address, predicates := range predicateArguments {
 		// Since [address] is only added to [predicateArguments] when there's a valid predicate in the ruleset
 		// there's no need to check if the predicate exists here.
-		predicaterContract := rules.Predicaters[address]
+		predicaterContract := rulesExtra.Predicaters[address]
 		bitset := utils.NewBits()
 		for i, predicate := range predicates {
 			if err := predicaterContract.VerifyPredicate(predicateContext, predicate); err != nil {

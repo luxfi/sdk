@@ -33,10 +33,11 @@ import (
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/core/headerutil"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/params"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/holiman/uint256"
 )
 
@@ -51,11 +52,16 @@ type ChainContext interface {
 
 	// GetHeader returns the header corresponding to the hash/number argument pair.
 	GetHeader(common.Hash, uint64) *types.Header
+	
+	// Config returns the chain configuration
+	Config() *params.ChainConfig
 }
 
 // NewEVMBlockContext creates a new context for use in the EVM.
 func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address) vm.BlockContext {
-	predicateBytes := customheader.PredicateBytesFromExtra(header.Extra)
+	config := chain.Config()
+	rules := config.Rules(header.Number, params.IsMergeTODO, header.Time)
+	predicateBytes := headerutil.PredicateBytesFromExtra(rules, header.Extra)
 	if len(predicateBytes) == 0 {
 		return newEVMBlockContext(header, chain, author, nil)
 	}
@@ -80,7 +86,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 func NewEVMBlockContextWithPredicateResults(header *types.Header, chain ChainContext, author *common.Address, predicateBytes []byte) vm.BlockContext {
 	// Create a new header with the predicate bytes set in the extra field
 	modifiedHeader := types.CopyHeader(header)
-	modifiedHeader.Extra = customheader.SetPredicateBytesInExtra(
+	modifiedHeader.Extra = headerutil.SetPredicateBytesInExtra(
 		bytes.Clone(header.Extra),
 		predicateBytes,
 	)

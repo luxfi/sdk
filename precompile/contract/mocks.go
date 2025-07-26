@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 	"github.com/luxfi/evm/interfaces"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
-	common "github.com/luxfi/geth/common"
-	types "github.com/luxfi/evm/core/types"
+	common "github.com/ethereum/go-ethereum/common"
+	types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/holiman/uint256"
 	gomock "go.uber.org/mock/gomock"
 )

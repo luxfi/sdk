@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/testutils"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"go.uber.org/mock/gomock"
 )
 

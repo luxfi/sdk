@@ -32,10 +32,10 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/luxfi/geth/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/luxfi/evm/trie/testutil"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 )

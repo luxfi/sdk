@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Context contains some contextual infos for a transaction execution that is not

@@ -5,7 +5,7 @@
 package headerutil
 
 import (
-	"github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/params"
 )
 
 // WindowSize is the size of the rolling window
@@ -24,4 +24,20 @@ func PredicateBytesFromExtra(rules params.Rules, extra []byte) []byte {
 		return nil
 	}
 	return extra[offset:]
+}
+
+// SetPredicateBytesInExtra sets the predicate bytes in the extra field.
+func SetPredicateBytesInExtra(extra []byte, predicateBytes []byte) []byte {
+	// Ensure extra is at least WindowSize long
+	if len(extra) < WindowSize {
+		newExtra := make([]byte, WindowSize)
+		copy(newExtra, extra)
+		extra = newExtra
+	}
+	
+	// Truncate extra to WindowSize and append predicate bytes
+	result := make([]byte, WindowSize+len(predicateBytes))
+	copy(result, extra[:WindowSize])
+	copy(result[WindowSize:], predicateBytes)
+	return result
 }

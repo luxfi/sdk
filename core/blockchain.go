@@ -41,26 +41,23 @@ import (
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
-	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
-	"github.com/luxfi/evm/plugin/evm/customlogs"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/internal/version"
-	"github.com/luxfi/geth/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/triedb/hashdb"
-	"github.com/luxfi/evm/triedb/pathdb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/lru"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/triedb/hashdb"
+	"github.com/ethereum/go-ethereum/triedb/pathdb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/lru"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // ====== If resolving merge conflicts ======
@@ -217,8 +214,8 @@ func (c *CacheConfig) triedbConfig() *triedb.Config {
 	if c.StateScheme == rawdb.PathScheme {
 		config.PathDB = &pathdb.Config{
 			StateHistory:   c.StateHistory,
-			CleanCacheSize: c.TrieCleanLimit * 1024 * 1024,
-			DirtyCacheSize: c.TrieDirtyLimit * 1024 * 1024,
+			// Note: ethereum's pathdb.Config doesn't have CleanCacheSize and DirtyCacheSize
+			// These would need to be set through a different mechanism
 		}
 	}
 	return config
@@ -470,7 +467,7 @@ func NewBlockChain(
 
 	// if txlookup limit is 0 (uindexing disabled), we don't need to repair the tx index tail.
 	if bc.cacheConfig.TransactionHistory != 0 {
-		latestStateSynced := customrawdb.GetLatestSyncPerformed(bc.db)
+		latestStateSynced := rawdb.GetLatestSyncPerformed(bc.db)
 		bc.repairTxIndexTail(latestStateSynced)
 	}
 
@@ -503,7 +500,7 @@ func (bc *BlockChain) batchBlockAcceptedIndices(batch ethdb.Batch, b *types.Bloc
 	if !bc.cacheConfig.SkipTxIndexing {
 		rawdb.WriteTxLookupEntriesByBlock(batch, b)
 	}
-	if err := customrawdb.WriteAcceptorTip(batch, b.Hash()); err != nil {
+	if err := rawdb.WriteAcceptorTip(batch, b.Hash()); err != nil {
 		return fmt.Errorf("%w: failed to write acceptor tip key", err)
 	}
 	return nil
@@ -606,7 +603,7 @@ func (bc *BlockChain) startAcceptor() {
 		bc.acceptorTipLock.Unlock()
 
 		// Update accepted feeds
-		flattenedLogs := customlogs.FlattenLogs(logs)
+		flattenedLogs := types.FlattenLogs(logs)
 		bc.chainAcceptedFeed.Send(ChainEvent{Block: next, Hash: next.Hash(), Logs: flattenedLogs})
 		if len(flattenedLogs) > 0 {
 			bc.logsAcceptedFeed.Send(flattenedLogs)
@@ -1319,8 +1316,7 @@ func (bc *BlockChain) InsertBlockManual(block *types.Block, writes bool) error {
 
 func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	start := time.Now()
-	// Use ToEthChainConfig to convert to ethereum ChainConfig
-	bc.senderCacher.Recover(types.MakeSigner(bc.chainConfig.ToEthChainConfig(), block.Number(), block.Time()), block.Transactions())
+	bc.senderCacher.Recover(types.MakeSigner(bc.chainConfig, block.Number(), block.Time()), block.Transactions())
 
 	substart := time.Now()
 	err := bc.engine.VerifyHeader(bc, block.Header())
@@ -1377,7 +1373,7 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 
 	// Enable prefetching to pull in trie node paths while processing transactions
 	// WithConcurrentWorkers is not available in ethereum v1.16.1
-	statedb.StartPrefetcher("chain")
+	statedb.StartPrefetcher("chain", nil)
 	defer statedb.StopPrefetcher()
 
 	// Process block using the parent state as reference point
@@ -1437,7 +1433,7 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 		"parentHash", block.ParentHash(),
 		"uncles", len(block.Uncles()), "txs", len(block.Transactions()), "gas", block.GasUsed(),
 		"elapsed", common.PrettyDuration(time.Since(start)),
-		"root", block.Root(), "baseFeePerGas", block.BaseFee(), "blockGasCost", customtypes.BlockGasCost(block),
+		"root", block.Root(), "baseFeePerGas", block.BaseFee(), "blockGasCost", block.BlockGasCost(),
 	)
 
 	processedBlockGasUsedCounter.Inc(int64(block.GasUsed()))
@@ -1457,7 +1453,7 @@ func (bc *BlockChain) collectUnflattenedLogs(b *types.Block, removed bool) [][]*
 	}
 	receipts := rawdb.ReadRawReceipts(bc.db, b.Hash(), b.NumberU64())
 	// Remove unused ethConfig variable
-	if err := receipts.DeriveFields(bc.chainConfig.ToEthChainConfig(), b.Hash(), b.NumberU64(), b.Time(), b.BaseFee(), blobGasPrice, b.Transactions()); err != nil {
+	if err := receipts.DeriveFields(bc.chainConfig, b.Hash(), b.NumberU64(), b.Time(), b.BaseFee(), blobGasPrice, b.Transactions()); err != nil {
 		log.Error("Failed to derive block receipts fields", "hash", b.Hash(), "number", b.NumberU64(), "err", err)
 	}
 
@@ -1481,7 +1477,7 @@ func (bc *BlockChain) collectUnflattenedLogs(b *types.Block, removed bool) [][]*
 // the processing of a block. These logs are later announced as deleted or reborn.
 func (bc *BlockChain) collectLogs(b *types.Block, removed bool) []*types.Log {
 	unflattenedLogs := bc.collectUnflattenedLogs(b, removed)
-	return customlogs.FlattenLogs(unflattenedLogs)
+	return types.FlattenLogs(unflattenedLogs)
 }
 
 // reorg takes two blocks, an old chain and a new chain and will reconstruct the
@@ -1734,7 +1730,7 @@ func (bc *BlockChain) reprocessBlock(parent *types.Block, current *types.Block) 
 
 	// Enable prefetching to pull in trie node paths while processing transactions
 	// WithConcurrentWorkers is not available in ethereum v1.16.1
-	statedb.StartPrefetcher("chain")
+	statedb.StartPrefetcher("chain", nil)
 	defer statedb.StopPrefetcher()
 
 	// Process previously stored block
@@ -1759,6 +1755,7 @@ func (bc *BlockChain) commitWithSnap(
 	// blockHashes must be passed through [state.StateDB]'s Commit since snapshots
 	// are based on the block hash.
 	snapshotOpt := snapshot.WithBlockHashes(current.Hash(), current.ParentHash())
+	_ = snapshotOpt // TODO: Use snapshot options when available
 	root, err := statedb.Commit(current.NumberU64(), bc.chainConfig.IsEIP158(current.Number()))
 	if err != nil {
 		return common.Hash{}, err
@@ -1808,7 +1805,7 @@ func (bc *BlockChain) initSnapshot(b *types.Header) {
 // state that reprocessing will start from.
 func (bc *BlockChain) reprocessState(current *types.Block, reexec uint64) error {
 	origin := current.NumberU64()
-	acceptorTip, err := customrawdb.ReadAcceptorTip(bc.db)
+	acceptorTip, err := rawdb.ReadAcceptorTip(bc.db)
 	if err != nil {
 		return fmt.Errorf("%w: unable to get Acceptor tip", err)
 	}
@@ -1939,9 +1936,9 @@ func (bc *BlockChain) reprocessState(current *types.Block, reexec uint64) error 
 
 func (bc *BlockChain) protectTrieIndex() error {
 	if !bc.cacheConfig.Pruning {
-		return customrawdb.WritePruningDisabled(bc.db)
+		return rawdb.WritePruningDisabled(bc.db)
 	}
-	pruningDisabled, err := customrawdb.HasPruningDisabled(bc.db)
+	pruningDisabled, err := rawdb.HasPruningDisabled(bc.db)
 	if err != nil {
 		return fmt.Errorf("failed to check if the chain has been run with pruning disabled: %w", err)
 	}
@@ -2026,7 +2023,7 @@ func (bc *BlockChain) populateMissingTries() error {
 	// Write marker to DB to indicate populate missing tries finished successfully.
 	// Note: writing the marker here means that we do allow consecutive runs of re-populating
 	// missing tries if it does not finish during the prior run.
-	if err := customrawdb.WritePopulateMissingTries(bc.db); err != nil {
+	if err := rawdb.WritePopulateMissingTries(bc.db); err != nil {
 		return fmt.Errorf("failed to write offline pruning success marker: %w", err)
 	}
 
@@ -2124,9 +2121,9 @@ func (bc *BlockChain) ResetToStateSyncedBlock(block *types.Block) error {
 	}
 	rawdb.WriteHeadBlockHash(batch, block.Hash())
 	rawdb.WriteHeadHeaderHash(batch, block.Hash())
-	customrawdb.WriteSnapshotBlockHash(batch, block.Hash())
+	rawdb.WriteSnapshotBlockHash(batch, block.Hash())
 	rawdb.WriteSnapshotRoot(batch, block.Root())
-	if err := customrawdb.WriteSyncPerformed(batch, block.NumberU64()); err != nil {
+	if err := rawdb.WriteSyncPerformed(batch, block.NumberU64()); err != nil {
 		return err
 	}
 

@@ -39,13 +39,13 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/eth/tracers"
-	"github.com/luxfi/geth/eth/tracers/logger"
+	"github.com/ethereum/go-ethereum/eth/tracers"
+	"github.com/ethereum/go-ethereum/eth/tracers/logger"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	// "github.com/luxfi/evm/core/asm" // TODO: asm package not available
 	// force-load js tracers to trigger registration
-	_ "github.com/luxfi/geth/eth/tracers/js"
+	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 )
 
 func TestDefaults(t *testing.T) {

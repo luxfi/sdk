@@ -6,9 +6,9 @@ package statesync
 import (
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // writeAccountSnapshot stores the account represented by [acc] to the snapshot at [accHash], using

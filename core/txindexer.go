@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // TxIndexProgress is the struct describing the progress for transaction indexing.

@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"time"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 type THash interface {

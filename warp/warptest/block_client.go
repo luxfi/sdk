@@ -7,7 +7,9 @@ package warptest
 import (
 	"context"
 	"slices"
+	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/interfaces"
 )
 
@@ -29,8 +31,9 @@ type TestBlock struct {
 }
 
 // ID returns the block ID
-func (b *TestBlock) ID() interfaces.ID {
-	return b.id
+func (b *TestBlock) ID() common.Hash {
+	// Convert interfaces.ID to common.Hash
+	return common.BytesToHash(b.id[:])
 }
 
 // Accept marks the block as accepted
@@ -51,8 +54,9 @@ func (b *TestBlock) Status() interfaces.Status {
 }
 
 // Parent returns the parent block ID
-func (b *TestBlock) Parent() interfaces.ID {
-	return b.parent
+func (b *TestBlock) Parent() common.Hash {
+	// Convert interfaces.ID to common.Hash
+	return common.BytesToHash(b.parent[:])
 }
 
 // Height returns the block height
@@ -61,8 +65,8 @@ func (b *TestBlock) Height() uint64 {
 }
 
 // Timestamp returns the block timestamp
-func (b *TestBlock) Timestamp() interfaces.Timestamp {
-	return interfaces.Timestamp{}
+func (b *TestBlock) Timestamp() time.Time {
+	return time.Now() // Return current time for test blocks
 }
 
 // Verify verifies the block

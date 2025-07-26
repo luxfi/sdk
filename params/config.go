@@ -32,13 +32,11 @@ import (
 	"fmt"
 	"math/big"
 	
-	"github.com/luxfi/geth/common"
-	ethparams "github.com/luxfi/geth/params"
+	"github.com/ethereum/go-ethereum/common"
+	ethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
-	"github.com/luxfi/evm/precompile/modules"
-	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -163,7 +161,7 @@ var (
 		UpgradeConfig:            UpgradeConfig{},
 	}
 
-	TestRules = TestChainConfig.LuxRules(new(big.Int), 0)
+	TestRules = TestChainConfig.GenesisRules(new(big.Int), 0)
 )
 
 // UpgradeConfig includes the following configs that may be specified in upgradeBytes:
@@ -412,14 +410,33 @@ func (c *ChainConfig) IsLondon(num *big.Int) bool {
 }
 
 // IsShanghai returns whether time represents a block with a timestamp after the Shanghai upgrade time.
-func (c *ChainConfig) IsShanghai(num *big.Int, time uint64) bool {
+func (c *ChainConfig) IsShanghai(time uint64) bool {
 	// For now, we'll consider Shanghai active if EVM is active
 	return c.IsEVM(time)
 }
 
+// IsMerge returns whether the given block is either equal to the merge
+// transition block or greater.
+func (c *ChainConfig) IsMerge(num *big.Int, time uint64) bool {
+	// The merge is always active in Lux
+	return true
+}
+
+// IsPrague returns whether time is either equal to the Prague fork time or greater.
+func (c *ChainConfig) IsPrague(time uint64) bool {
+	// Prague features are not yet active
+	return false
+}
+
+// IsVerkle returns whether time is either equal to the Verkle fork time or greater.
+func (c *ChainConfig) IsVerkle(time uint64) bool {
+	// Verkle is not yet active
+	return false
+}
+
 // Rules returns the Ethereum chainrules to use for the given block number and timestamp.
-func (c *ChainConfig) Rules(num *big.Int, timestamp uint64) Rules {
-	return c.rules(num, timestamp)
+func (c *ChainConfig) Rules(num *big.Int, isMerge bool, timestamp uint64) Rules {
+	return c.rules(num, isMerge, timestamp)
 }
 
 // IsEVM returns whether [time] represents a block
@@ -440,14 +457,6 @@ func (c *ChainConfig) IsCancun(time uint64) bool {
 	return c.MandatoryNetworkUpgrades.IsEtna(time)
 }
 
-func (r *Rules) PredicatersExist() bool {
-	return len(r.Predicaters) > 0
-}
-
-func (r *Rules) PredicaterExists(addr common.Address) bool {
-	_, PredicaterExists := r.Predicaters[addr]
-	return PredicaterExists
-}
 
 // verifyPrecompileUpgrades checks that the precompile upgrades are valid
 func (c *ChainConfig) verifyPrecompileUpgrades() error {
@@ -519,7 +528,7 @@ func (c *ChainConfig) IsPrecompileEnabled(address common.Address, timestamp uint
 		return false
 	}
 	config := extra.GetActivePrecompileConfig(address, timestamp)
-	return config != nil && !interfaces.IsDisabled()
+	return config != nil && !config.IsDisabled()
 }
 
 // CheckCompatible checks whether scheduled fork transitions have been imported
@@ -797,7 +806,7 @@ func newBlockCompatError(what string, storedblock, newblock *big.Int) *ConfigCom
 	switch {
 	case storedblock == nil:
 		rew = newblock
-	case newblock == nil || storedinterfaces.Cmp(newblock) < 0:
+	case newblock == nil || storedblock.Cmp(newblock) < 0:
 		rew = storedblock
 	default:
 		rew = newblock
@@ -855,41 +864,18 @@ func ptrToString(val *uint64) string {
 //
 // Rules is a one time interface meaning that it shouldn't be used in between transition
 // phases.
-type Rules struct {
-	ChainID                                                 *big.Int
-	IsHomestead, IsEIP150, IsEIP155, IsEIP158               bool
-	IsByzantium, IsConstantinople, IsPetersburg, IsIstanbul bool
-	IsCancun                                                bool
-
-	// Rules for Lux releases
-	IsEVM bool
-	IsDUpgrade  bool
-
-	// ActivePrecompiles maps addresses to stateful precompiled contracts that are enabled
-	// for this rule set.
-	// Note: none of these addresses should conflict with the address space used by
-	// any existing precompiles.
-	ActivePrecompiles map[common.Address]precompileconfig.Config
-	// Predicaters maps addresses to stateful precompile Predicaters
-	// that are enabled for this rule set.
-	Predicaters map[common.Address]precompileconfig.Predicater
-	// AccepterPrecompiles map addresses to stateful precompile accepter functions
-	// that are enabled for this rule set.
-	AccepterPrecompiles map[common.Address]precompileconfig.Accepter
-}
-
-// IsPrecompileEnabled returns true if the precompile at [addr] is enabled for this rule set.
-func (r *Rules) IsPrecompileEnabled(addr common.Address) bool {
-	_, ok := r.ActivePrecompiles[addr]
-	return ok
-}
+// 
+// We use ethereum's Rules type directly to maintain compatibility
+type Rules = ethparams.Rules
 
 // Rules ensures c's ChainID is not nil.
-func (c *ChainConfig) rules(num *big.Int, timestamp uint64) Rules {
+func (c *ChainConfig) rules(num *big.Int, isMerge bool, timestamp uint64) Rules {
 	chainID := c.ChainID
 	if chainID == nil {
 		chainID = new(big.Int)
 	}
+	// disallow setting Merge out of order
+	isMerge = isMerge && c.IsLondon(num)
 	return Rules{
 		ChainID:          new(big.Int).Set(chainID),
 		IsHomestead:      c.IsHomestead(num),
@@ -900,39 +886,24 @@ func (c *ChainConfig) rules(num *big.Int, timestamp uint64) Rules {
 		IsConstantinople: c.IsConstantinople(num),
 		IsPetersburg:     c.IsPetersburg(num),
 		IsIstanbul:       c.IsIstanbul(num),
-		IsCancun:         c.IsCancun(timestamp),
+		IsBerlin:         c.IsBerlin(num),
+		IsLondon:         c.IsLondon(num),
+		IsMerge:          isMerge,
+		IsShanghai:       isMerge && c.IsShanghai(timestamp),
+		IsCancun:         isMerge && c.IsCancun(timestamp),
+		IsPrague:         isMerge && c.IsPrague(timestamp),
+		IsVerkle:         c.IsVerkle(timestamp),
+		IsEIP2929:        c.IsBerlin(num) && !c.IsVerkle(timestamp),
+		IsEIP4762:        c.IsVerkle(timestamp),
 	}
 }
 
-// LuxRules returns the Lux modified rules to support Lux
+// GenesisRules returns the Lux modified rules to support Lux
 // network upgrades
-func (c *ChainConfig) LuxRules(blockNum *big.Int, timestamp uint64) Rules {
-	rules := c.rules(blockNum, timestamp)
-
-	rules.IsEVM = c.IsEVM(timestamp)
-	rules.IsDUpgrade = c.IsDUpgrade(timestamp)
-
-	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].
-	rules.ActivePrecompiles = make(map[common.Address]precompileconfig.Config)
-	rules.Predicaters = make(map[common.Address]precompileconfig.Predicater)
-	rules.AccepterPrecompiles = make(map[common.Address]precompileconfig.Accepter)
-	
-	extra := GetExtra(c)
-	if extra != nil {
-		for _, module := range modules.RegisteredModules() {
-			if config := extra.GetActivePrecompileConfig(module.Address, timestamp); config != nil && !interfaces.IsDisabled() {
-				rules.ActivePrecompiles[module.Address] = config
-				if predicater, ok := interfaces.(precompileconfig.Predicater); ok {
-					rules.Predicaters[module.Address] = predicater
-				}
-				if precompileAccepter, ok := interfaces.(precompileconfig.Accepter); ok {
-					rules.AccepterPrecompiles[module.Address] = precompileAccepter
-				}
-			}
-		}
-	}
-
-	return rules
+func (c *ChainConfig) GenesisRules(blockNum *big.Int, timestamp uint64) Rules {
+	// For now, we assume merge is always active in Lux
+	isMerge := true
+	return c.rules(blockNum, isMerge, timestamp)
 }
 
 // GetFeeConfig returns the original FeeConfig contained in the genesis ChainConfig.

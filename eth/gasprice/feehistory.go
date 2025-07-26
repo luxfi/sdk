@@ -33,10 +33,10 @@ import (
 	"math/big"
 	"slices"
 
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var (

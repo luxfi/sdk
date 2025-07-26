@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -10,17 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/database/memdb"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
 func TestState(t *testing.T) {
 	require := require.New(t)
-	db := interfaces.New()
+	db := memdb.New()
 	state, err := NewState(db)
 	require.NoError(err)
 
@@ -91,19 +91,23 @@ func TestState(t *testing.T) {
 	// set a different node ID should fail
 	newNodeID := ids.GenerateTestNodeID()
 	vdr.NodeID = newNodeID
-	require.ErrorIs(state.UpdateValidator(vdr), ErrImmutableField)
+	err = state.UpdateValidator(vdr)
+	require.ErrorIs(err, ErrImmutableField)
 
 	// set a different start time should fail
 	vdr.StartTimestamp = vdr.StartTimestamp + 100
-	require.ErrorIs(state.UpdateValidator(vdr), ErrImmutableField)
+	err = state.UpdateValidator(vdr)
+	require.ErrorIs(err, ErrImmutableField)
 
 	// set IsL1Validator should fail
 	vdr.IsL1Validator = false
-	require.ErrorIs(state.UpdateValidator(vdr), ErrImmutableField)
+	err = state.UpdateValidator(vdr)
+	require.ErrorIs(err, ErrImmutableField)
 
 	// set validation ID should result in not found
 	vdr.ValidationID = ids.GenerateTestID()
-	require.ErrorIs(state.UpdateValidator(vdr), database.ErrNotFound)
+	err = state.UpdateValidator(vdr)
+	require.ErrorIs(err, database.ErrNotFound)
 
 	// delete uptime
 	require.NoError(state.DeleteValidator(vID))
@@ -115,7 +119,7 @@ func TestState(t *testing.T) {
 
 func TestWriteValidator(t *testing.T) {
 	require := require.New(t)
-	db := interfaces.New()
+	db := memdb.New()
 	state, err := NewState(db)
 	require.NoError(err)
 	// write empty uptimes
@@ -245,7 +249,7 @@ func TestParseValidator(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
 			},
 			expected:    nil,
-			expectedErr: interfaces.ErrUnknownVersion,
+			expectedErr: codec.ErrUnknownVersion,
 		},
 		{
 			name: "short byte len",
@@ -258,7 +262,7 @@ func TestParseValidator(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
 			},
 			expected:    nil,
-			expectedErr: interfaces.ErrInsufficientLength,
+			expectedErr: wrappers.ErrInsufficientLength,
 		},
 	}
 	for _, tt := range tests {
@@ -277,7 +281,7 @@ func TestParseValidator(t *testing.T) {
 
 func TestStateListener(t *testing.T) {
 	require := require.New(t)
-	db := interfaces.New()
+	db := memdb.New()
 	state, err := NewState(db)
 	require.NoError(err)
 	ctrl := gomock.NewController(t)

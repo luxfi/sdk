@@ -7,7 +7,9 @@ import (
 	"math/big"
 	"sync"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -132,9 +134,11 @@ func GetRulesExtra(rules Rules) *extras.Rules {
 	
 	// Create rules based on the Lux upgrades
 	return &extras.Rules{
-		LuxRules: extra.GetLuxRules(0), // Using 0 as we don't have timestamp in Rules
-		Precompiles:    rules.ActivePrecompiles,
-		Predicaters:    rules.Predicaters,
-		AccepterPrecompiles: rules.AccepterPrecompiles,
+		GenesisRules: extra.GetGenesisRules(0), // Using 0 as we don't have timestamp in Rules
+		// Note: Precompiles, Predicaters, and AccepterPrecompiles are populated separately
+		// by the caller since ethereum's Rules doesn't have these fields
+		Precompiles: make(map[common.Address]precompileconfig.Config),
+		Predicaters: make(map[common.Address]precompileconfig.Predicater),
+		AccepterPrecompiles: make(map[common.Address]precompileconfig.Accepter),
 	}
 }

@@ -4,12 +4,13 @@
 package extstate
 
 import (
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	ethparams "github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/predicate"
 )
 
 type VmStateDB interface {
@@ -61,7 +62,8 @@ func (s *StateDB) SetCode(addr common.Address, code []byte) {
 }
 
 // AddLog wrapper to match precompile interface
-func (s *StateDB) AddLog(log *types.Log) {
+// This takes ethereum types.Log but our interface expects luxfi/evm types.Log
+func (s *StateDB) AddLog(log *ethtypes.Log) {
 	// The underlying StateDB has a different AddLog signature
 	// We need to call it with the components of the log
 	if log != nil {
@@ -70,15 +72,11 @@ func (s *StateDB) AddLog(log *types.Log) {
 }
 
 func (s *StateDB) Prepare(rules params.Rules, sender, coinbase common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {
-	// FIXME: GetRulesExtra doesn't exist in current params package
-	// rulesExtra := params.GetRulesExtra(rules)
-	// s.predicateStorageSlots = predicate.PreparePredicateStorageSlots(rulesExtra, list)
-	// For now, just pass an empty Rules struct
-	// TODO: Map our Rules to ethereum Rules properly
-	ethRules := ethparams.Rules{
-		ChainID: rules.ChainID,
-	}
-	s.vmStateDB.Prepare(ethRules, sender, coinbase, dst, precompiles, list)
+	rulesExtra := params.GetRulesExtra(rules)
+	s.predicateStorageSlots = predicate.PreparePredicateStorageSlots(rulesExtra, list)
+	
+	// Call Prepare on the underlying StateDB with luxfi/evm types
+	s.vmStateDB.Prepare(rules, sender, coinbase, dst, precompiles, list)
 }
 
 // GetLogData returns the underlying topics and data from each log included in the [StateDB].

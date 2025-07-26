@@ -36,10 +36,10 @@ import (
 	"time"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // ChainIndexerBackend defines the methods needed to process chain segments in

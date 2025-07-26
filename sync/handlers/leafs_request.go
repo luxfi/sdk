@@ -9,19 +9,18 @@ import (
 	"sync"
 	"time"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/luxfi/evm/sync/syncutils"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/triedb"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 const (
@@ -151,7 +150,7 @@ func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID inter
 		return nil, nil
 	}
 
-	responseBytes, err := lrh.interfaces.Marshal(message.Version, leafsResponse)
+	responseBytes, err := lrh.codec.Marshal(leafsResponse)
 	if err != nil {
 		log.Debug("failed to marshal LeafsResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "request", leafsRequest, "err", err)
 		return nil, nil

@@ -35,13 +35,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/event"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 var (

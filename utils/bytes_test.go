@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"testing"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

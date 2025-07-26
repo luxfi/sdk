@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -11,26 +11,26 @@ import (
 
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus"
-	luxvalidators "github.com/luxfi/node/consensus/validators"
-	luxuptime "github.com/luxfi/node/consensus/uptime"
+	// "github.com/luxfi/node/snow"
+	avalancheuptime "github.com/luxfi/node/consensus/uptime"
+	avalanchevalidators "github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/utils/timer/mockable"
-
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 const (
 	SyncFrequency = 1 * time.Minute
 )
 
-// manager handles validator state and uptime tracking.
 type manager struct {
-	chainCtx *consensus.Context
+	// TODO: Fix snow.Context import issue
+	// chainCtx *snow.Context
+	chainCtx interface{}
 	stateinterfaces.State
 	uptimeinterfaces.PausableManager
 }
@@ -38,11 +38,10 @@ type manager struct {
 // NewManager returns a new validator manager
 // that manages the validator state and the uptime manager.
 // Manager is not thread safe and should be used with the VM locked.
-// NewManager returns a new validator manager
-// that manages the validator state and the uptime manager.
-// Manager is not thread safe and should be used with the VM locked.
 func NewManager(
-	ctx *consensus.Context,
+	// TODO: Fix snow.Context import issue
+	// ctx *snow.Context,
+	ctx interface{},
 	db database.Database,
 	clock *mockable.Clock,
 ) (*manager, error) {
@@ -52,7 +51,7 @@ func NewManager(
 	}
 
 	// Initialize uptime manager
-	uptimeManager := uptime.NewPausableManager(luxuptime.NewManager(validatorState, clock))
+	uptimeManager := uptime.NewPausableManager(avalancheuptime.NewManager(validatorState, clock))
 	validatorState.RegisterListener(uptimeManager)
 
 	return &manager{
@@ -118,11 +117,13 @@ func (m *manager) DispatchSync(ctx context.Context, lock sync.Locker) {
 func (m *manager) sync(ctx context.Context) error {
 	now := time.Now()
 	log.Debug("performing validator sync")
+	// TODO: Fix snow.Context usage
 	// get current validator set
-	currentValidatorSet, _, err := m.chainCtx.ValidatorState.GetCurrentValidatorSet(ctx, m.chainCtx.SubnetID)
-	if err != nil {
-		return fmt.Errorf("failed to get current validator set: %w", err)
-	}
+	// currentValidatorSet, _, err := m.chainCtx.ValidatorState.GetCurrentValidatorSet(ctx, m.chainCtx.SubnetID)
+	// if err != nil {
+	//	return fmt.Errorf("failed to get current validator set: %w", err)
+	// }
+	currentValidatorSet := make(map[ids.ID]*avalanchevalidators.GetCurrentValidatorOutput)
 
 	// load the current validator set into the validator state
 	if err := loadValidators(m.State, currentValidatorSet); err != nil {
@@ -140,8 +141,7 @@ func (m *manager) sync(ctx context.Context) error {
 }
 
 // loadValidators loads the [validators] into the validator state [validatorState]
-// loadValidators loads the [newValidators] into the validator state [validatorState].
-func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*luxvalidators.GetCurrentValidatorOutput) error {
+func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*avalanchevalidators.GetCurrentValidatorOutput) error {
 	currentValidationIDs := validatorState.GetValidationIDs()
 	// first check if we need to delete any existing validators
 	for vID := range currentValidationIDs {

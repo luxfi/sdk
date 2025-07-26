@@ -33,9 +33,9 @@ import (
 	"math/big"
 
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Filter can be used to retrieve and filter logs.

@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var _ contract.Configurator = &configurator{}

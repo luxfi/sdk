@@ -59,16 +59,17 @@ const (
 )
 
 // Timer provides timing functionality
-type MockableTimer interface {
-	// Time returns the current time
-	Time() time.Time
-	
-	// Set sets the current time (for testing)
-	Set(time.Time)
-	
-	// Advance advances the time by duration (for testing)
-	Advance(time.Duration)
-}
+// Commented out - defined in consensus.go
+// type MockableTimer interface {
+// 	// Time returns the current time
+// 	Time() time.Time
+// 	
+// 	// Set sets the current time (for testing)
+// 	Set(time.Time)
+// 	
+// 	// Advance advances the time by duration (for testing)
+// 	Advance(time.Duration)
+// }
 
 // Wrappers provides error wrapping utilities
 type Wrappers interface {

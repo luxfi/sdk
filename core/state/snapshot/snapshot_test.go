@@ -34,8 +34,8 @@ import (
 	"time"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // randomHash generates a random blob of data and returns it as a hash.

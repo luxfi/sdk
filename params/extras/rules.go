@@ -4,13 +4,13 @@
 package extras
 
 import (
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 )
 
 type Rules struct {
 	// Rules for Lux releases
-	LuxRules
+	GenesisRules
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.

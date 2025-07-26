@@ -9,8 +9,8 @@ import (
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 )
 
 var _ precompileconfig.Config = &Config{}

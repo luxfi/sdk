@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
-	gethparams "github.com/luxfi/geth/params"
+	gethparams "github.com/ethereum/go-ethereum/params"
 )
 
 var errCannotBeNil = fmt.Errorf("timestamp cannot be nil")
@@ -191,21 +191,38 @@ func (n *NetworkUpgrades) Description() string {
 	return banner
 }
 
-type LuxRules struct {
+type GenesisRules struct {
 	IsEVM bool
 	IsDurango   bool
 	IsEtna      bool
 	IsFortuna   bool
 	IsGranite   bool
+	
+	// Avalanche-specific rules for compatibility
+	IsApricotPhase1, IsApricotPhase2, IsApricotPhase3, IsApricotPhase4       bool
+	IsApricotPhase5, IsApricotPhase6, IsApricotPhasePre6, IsApricotPhasePost6 bool
+	IsBanff, IsCortina bool
 }
 
-func (n *NetworkUpgrades) GetLuxRules(time uint64) LuxRules {
-	return LuxRules{
+func (n *NetworkUpgrades) GetGenesisRules(time uint64) GenesisRules {
+	return GenesisRules{
 		IsEVM: n.IsEVM(time),
 		IsDurango:   n.IsDurango(time),
 		IsEtna:      n.IsEtna(time),
 		IsFortuna:   n.IsFortuna(time),
 		IsGranite:   n.IsGranite(time),
+		// For compatibility with Avalanche precompiles, we set these as always enabled
+		// This matches the behavior in params/config.go
+		IsApricotPhase1:     true,
+		IsApricotPhase2:     true,
+		IsApricotPhase3:     true,
+		IsApricotPhase4:     true,
+		IsApricotPhase5:     true,
+		IsApricotPhase6:     true,
+		IsApricotPhasePre6:  false,
+		IsApricotPhasePost6: true,
+		IsBanff:             true,
+		IsCortina:           true,
 	}
 }
 

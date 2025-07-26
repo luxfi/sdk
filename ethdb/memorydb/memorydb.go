@@ -28,13 +28,14 @@
 package memorydb
 
 import (
+	"bytes"
 	"errors"
 	"sort"
 	"strings"
 	"sync"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethdb"
 )
 
 var (
@@ -198,6 +199,28 @@ func (db *Database) Stat(property string) (string, error) {
 // Compact is not supported on a memory database, but there's no need either as
 // a memory database doesn't waste space anyway.
 func (db *Database) Compact(start []byte, limit []byte) error {
+	return nil
+}
+
+// DeleteRange deletes all keys in the range [start, end).
+func (db *Database) DeleteRange(start, end []byte) error {
+	db.lock.Lock()
+	defer db.lock.Unlock()
+
+	if db.db == nil {
+		return errMemorydbClosed
+	}
+
+	for key := range db.db {
+		keyBytes := []byte(key)
+		if start != nil && bytes.Compare(keyBytes, start) < 0 {
+			continue
+		}
+		if end != nil && bytes.Compare(keyBytes, end) >= 0 {
+			continue
+		}
+		delete(db.db, key)
+	}
 	return nil
 }
 

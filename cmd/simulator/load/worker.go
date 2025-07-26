@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethclient"
-	ethereum "github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/ethclient"
+	ethereum "github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 type ethereumTxWorker struct {

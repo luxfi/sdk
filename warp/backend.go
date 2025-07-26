@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/node/consensus/validators"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var (

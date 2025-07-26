@@ -12,10 +12,10 @@ import (
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethclient"
+	"github.com/luxfi/evm/ethclient"
 	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // DistributeFunds ensures that each address in keys has at least [minFundsPerAddr] by sending funds
@@ -70,7 +70,9 @@ func DistributeFunds(ctx context.Context, client ethclient.Client, keys []*key.K
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch chainID: %w", err)
 	}
-	gasFeeCap, err := client.EstimateBaseFee(ctx)
+	// TODO: Fix - EstimateBaseFee is not a standard ethclient method
+	// For now, use SuggestGasPrice which includes base fee
+	gasFeeCap, err := client.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch estimated base fee: %w", err)
 	}

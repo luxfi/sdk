@@ -1,22 +1,16 @@
 // (c) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// AP1 defines constants used after the Apricot Phase 1 upgrade.
 package ap1
 
-import "github.com/luxfi/evm/utils"
-
-const (
-	// MinGasPrice is the minimum gas price of a transaction after the Apricot
-	// Phase 1 upgrade.
-	//
-	// This value was replaced with the Apricot Phase 3 dynamic fee mechanism.
-	MinGasPrice = 225 * utils.GWei
-
-	// GasLimit is the target amount of gas that can be included in a single
-	// block after the Apricot Phase 1 upgrade.
-	//
-	// This value encodes the default parameterization of the initial gas
-	// targeting mechanism.
-	GasLimit = 8_000_000
+import (
+	"math/big"
+	"time"
 )
+
+// ApricotPhase1MinBaseFee is the minimum base fee that can be used for blocks
+// accepted in ApricotPhase1
+var ApricotPhase1MinBaseFee = big.NewInt(225_000_000_000)
+
+// ApricotPhase1BlockTimestamp is the timestamp of the first block that is subject to the Apricot Phase 1 rules
+var ApricotPhase1BlockTimestamp = big.NewInt(time.Date(2021, time.March, 31, 14, 0, 0, 0, time.UTC).Unix())

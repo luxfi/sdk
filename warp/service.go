@@ -7,14 +7,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/peer"
 	"github.com/luxfi/evm/warp/aggregator"
 	"github.com/luxfi/evm/warp/validators"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/node/ids"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var errNoValidators = errors.New("cannot aggregate signatures from subnet with no validators")
@@ -43,7 +43,11 @@ func NewAPI(networkID uint32, sourceSubnetID interfaces.ID, sourceChainID interf
 
 // GetMessage returns the Warp message associated with a messageID.
 func (a *API) GetMessage(ctx context.Context, messageID interfaces.ID) (hexutil.Bytes, error) {
-	message, err := a.backend.GetMessage(messageID)
+	// Convert interfaces.ID to ids.ID
+	var id ids.ID
+	copy(id[:], messageID[:])
+	
+	message, err := a.backend.GetMessage(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get message %s with error %w", messageID, err)
 	}
@@ -52,7 +56,11 @@ func (a *API) GetMessage(ctx context.Context, messageID interfaces.ID) (hexutil.
 
 // GetMessageSignature returns the BLS signature associated with a messageID.
 func (a *API) GetMessageSignature(ctx context.Context, messageID interfaces.ID) (hexutil.Bytes, error) {
-	unsignedMessage, err := a.backend.GetMessage(messageID)
+	// Convert interfaces.ID to ids.ID
+	var id ids.ID
+	copy(id[:], messageID[:])
+	
+	unsignedMessage, err := a.backend.GetMessage(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get message %s with error %w", messageID, err)
 	}
@@ -95,7 +103,7 @@ func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID interfaces
 	return a.aggregateSignatures(ctx, unsignedMessage, quorumNum, subnetIDStr)
 }
 
-func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *interfaces.UnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
+func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *interfaces.WarpUnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
 	subnetID := a.sourceSubnetID
 	if len(subnetIDStr) > 0 {
 		sid, err := ids.FromString(subnetIDStr)

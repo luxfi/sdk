@@ -27,7 +27,7 @@
 package state
 
 import (
-	ethstate "github.com/luxfi/geth/core/state"
+	ethstate "github.com/ethereum/go-ethereum/core/state"
 )
 
 type (

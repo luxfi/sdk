@@ -6,7 +6,7 @@ package stateupgrade
 import (
 	"math/big"
 	
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/holiman/uint256"
 )

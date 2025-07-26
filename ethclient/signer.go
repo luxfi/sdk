@@ -30,8 +30,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/core/types"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC

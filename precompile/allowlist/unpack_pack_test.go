@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 )
 

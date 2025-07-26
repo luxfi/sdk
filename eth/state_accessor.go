@@ -32,16 +32,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/geth/core"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/tracers"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/evm/trie"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // noopReleaser is returned in case there is no operation expected

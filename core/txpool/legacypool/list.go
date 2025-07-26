@@ -35,7 +35,7 @@ import (
 	"sync/atomic"
 	"time"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 	"slices"
 )

@@ -37,7 +37,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
 

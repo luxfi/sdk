@@ -32,21 +32,18 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-	ethtypes "github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
-	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/holiman/uint256"
 	ethparams "github.com/luxfi/evm/params"
 )
@@ -177,12 +174,12 @@ func SetupGenesisBlock(
 	if err := newcfg.CheckConfigForkOrder(); err != nil {
 		return newcfg, common.Hash{}, err
 	}
-	storedcfg := customrawdb.ReadChainConfig(db, stored)
+	storedcfg := rawdb.ReadChainConfig(db, stored)
 	// If there is no previously stored chain config, write the chain config to disk.
 	if storedcfg == nil {
 		// Note: this can happen since we did not previously write the genesis block and chain config in the same batch.
 		log.Warn("Found genesis block without chain config")
-		customrawdb.WriteChainConfig(db, stored, newcfg)
+		rawdb.WriteChainConfig(db, stored, newcfg)
 		return newcfg, stored, nil
 	}
 
@@ -219,7 +216,7 @@ func SetupGenesisBlock(
 	}
 	// Required to write the chain config to disk to ensure both the chain config and upgrade bytes are persisted to disk.
 	// Note: this intentionally removes an extra check from upstream.
-	customrawdb.WriteChainConfig(db, stored, newcfg)
+	rawdb.WriteChainConfig(db, stored, newcfg)
 	return newcfg, stored, nil
 }
 
@@ -339,16 +336,18 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 	}
 
-	statedb.Commit(0, false)
+	root, err = statedb.Commit(0, false)
+	if err != nil {
+		panic(fmt.Sprintf("failed to commit state: %v", err))
+	}
 	// Commit newly generated states into disk if it's not empty.
 	if root != types.EmptyRootHash {
 		if err := triedb.Commit(root, true); err != nil {
 			panic(fmt.Sprintf("unable to commit genesis block: %v", err))
 		}
 	}
-	// Create ethereum Body type for NewBlock
-	ethBody := &ethtypes.Body{}
-	return types.NewBlock(head, ethBody, nil, trie.NewStackTrie(nil))
+	// Create block with empty transactions, uncles, and receipts
+	return types.NewBlock(head, nil, nil, nil, trie.NewStackTrie(nil))
 }
 
 // Commit writes the block and state of a genesis specification to the database.
@@ -371,7 +370,7 @@ func (g *Genesis) Commit(db ethdb.Database, triedb *triedb.Database) (*types.Blo
 	rawdb.WriteCanonicalHash(batch, block.Hash(), block.NumberU64())
 	rawdb.WriteHeadBlockHash(batch, block.Hash())
 	rawdb.WriteHeadHeaderHash(batch, block.Hash())
-	customrawdb.WriteChainConfig(batch, block.Hash(), config)
+	rawdb.WriteChainConfig(batch, block.Hash(), config)
 	if err := batch.Write(); err != nil {
 		return nil, fmt.Errorf("failed to write genesis block: %w", err)
 	}
@@ -410,7 +409,7 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 	g := Genesis{
 		Config:  params.TestChainConfig,
 		Alloc:   GenesisAlloc{addr: {Balance: balance}},
-		BaseFee: big.NewInt(legacy.BaseFee),
+		BaseFee: big.NewInt(params.TestInitialBaseFee),
 	}
 	return g.MustCommit(db, triedb.NewDatabase(db, triedb.HashDefaults))
 }

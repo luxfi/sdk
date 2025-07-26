@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 )
 
@@ -63,7 +63,7 @@ func (b *nativeAssetBalance) Run(accessibleState contract.AccessibleState, calle
 		return nil, remainingGas, vmerrs.ErrExecutionReverted
 	}
 
-	res, overflow := uint256.FromBig(accessibleState.GetStateDB().GetBalanceMultiCoin(address, assetID))
+	res, overflow := uint256.FromBig(accessibleState.GetStateDB().(StateDB).GetBalanceMultiCoin(address, assetID))
 	if overflow {
 		return nil, remainingGas, vmerrs.ErrExecutionReverted
 	}
@@ -103,7 +103,11 @@ func UnpackNativeAssetCallInput(input []byte) (common.Address, common.Hash, *big
 // Run implements StatefulPrecompiledContract
 func (c *nativeAssetCall) Run(accessibleState contract.AccessibleState, caller common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	// input: encodePacked(address 20 bytes, assetID 32 bytes, assetAmount 32 bytes, callData variable length bytes)
-	return accessibleState.NativeAssetCall(caller, input, suppliedGas, c.gasCost, readOnly)
+	// Cast to EVM to access NativeAssetCall method
+	if evm, ok := accessibleState.(*EVM); ok {
+		return evm.NativeAssetCall(caller, input, suppliedGas, c.gasCost, readOnly)
+	}
+	return nil, suppliedGas, vmerrs.ErrExecutionReverted
 }
 
 type deprecatedContract struct{}

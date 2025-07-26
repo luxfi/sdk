@@ -32,23 +32,23 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/geth/consensus"
-	"github.com/luxfi/geth/core"
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/txpool"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/gasprice"
-	"github.com/luxfi/geth/eth/tracers"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/txpool"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/eth/gasprice"
+	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/params"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 var ErrUnfinalizedData = errors.New("cannot query unfinalized data")
@@ -367,10 +367,8 @@ func (b *EthAPIBackend) GetPoolTransactions() (types.Transactions, error) {
 	pending := b.eth.txPool.Pending(txpool.PendingFilter{})
 	var txs types.Transactions
 	for _, batch := range pending {
-		for _, lazy := range batch {
-			if tx := lazy.Resolve(); tx != nil {
-				txs = append(txs, tx)
-			}
+		for _, tx := range batch {
+			txs = append(txs, tx)
 		}
 	}
 	return txs, nil
@@ -420,7 +418,7 @@ func (b *EthAPIBackend) TxPoolContentFrom(addr common.Address) ([]*types.Transac
 }
 
 func (b *EthAPIBackend) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Subscription {
-	return b.eth.txPool.SubscribeTransactions(ch, true)
+	return b.eth.txPool.SubscribeNewTxsEvent(ch)
 }
 
 func (b *EthAPIBackend) EstimateBaseFee(ctx context.Context) (*big.Int, error) {

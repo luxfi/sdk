@@ -23,7 +23,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/luxfi/geth/version"
+	"github.com/ethereum/go-ethereum/version"
 )
 
 const ourPath = "github.com/luxfi/evm" // Path to our module

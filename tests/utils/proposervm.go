@@ -7,12 +7,12 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethclient"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	ethparams "github.com/luxfi/evm/params"
 )
 

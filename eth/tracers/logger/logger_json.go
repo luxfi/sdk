@@ -21,9 +21,9 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 )
 
 type JSONLogger struct {

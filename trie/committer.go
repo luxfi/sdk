@@ -29,8 +29,8 @@ package trie
 import (
 	"fmt"
 
-	"github.com/luxfi/geth/trie/trienode"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/trie/trienode"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // committer is the tool used for the trie Commit operation. The committer will

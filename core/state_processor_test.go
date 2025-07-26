@@ -37,10 +37,10 @@ import (
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/geth/trie"
+	"github.com/ethereum/go-ethereum/trie"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/crypto/sha3"
 )
 

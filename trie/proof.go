@@ -31,9 +31,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes

@@ -6,12 +6,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/version"
 	"github.com/luxfi/evm/plugin/evm"
 	"github.com/luxfi/evm/plugin/runner"
 )
 
 func main() {
-	versionString := fmt.Sprintf("EVM/%s [Lux=%s, rpcchainvm=%d]", evm.Version, interfaces.Current, interfaces.RPCChainVMProtocol)
+	versionString := fmt.Sprintf("Subnet-EVM/%s [Lux=%s, rpcchainvm=%d]", evm.Version, version.Current, version.RPCChainVMProtocol)
 	runner.Run(versionString)
 }

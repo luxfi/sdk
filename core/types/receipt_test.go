@@ -34,9 +34,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/holiman/uint256"
 	"github.com/kylelemons/godebug/diff"
 )

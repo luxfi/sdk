@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/geth/common"
-	ethtypes "github.com/luxfi/evm/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/holiman/uint256"
 )
 

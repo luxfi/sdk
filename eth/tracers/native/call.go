@@ -32,14 +32,14 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"github.com/luxfi/geth/accounts/abi"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/tracers"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/eth/tracers/internal"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/params"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 //go:generate go run github.com/fjl/gencodec -type callFrame -field-override callFrameMarshaling -out gen_callframe_json.go
@@ -53,7 +53,7 @@ type callLog struct {
 	Topics  []common.Hash  `json:"topics"`
 	Data    hexutil.Bytes  `json:"data"`
 	// Position of the log relative to subcalls within the same trace
-	// See https://github.com/luxfi/geth/pull/28389 for details
+	// See https://github.com/ethereum/go-ethereum/pull/28389 for details
 	Position hexutil.Uint `json:"position"`
 }
 

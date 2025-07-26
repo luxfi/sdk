@@ -5,7 +5,7 @@ package stats
 
 import (
 	"time"
-	"github.com/luxfi/geth/metrics"
+	"github.com/ethereum/go-ethereum/metrics"
 )
 
 // RequestHandlerStats provides the interface for metrics for app requests.

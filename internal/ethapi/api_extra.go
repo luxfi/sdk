@@ -8,12 +8,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/core"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // GetChainConfig returns the chain config.

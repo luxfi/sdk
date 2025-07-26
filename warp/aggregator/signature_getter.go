@@ -9,10 +9,8 @@ import (
 	"time"
 
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/node/ids"
 )
 
 const (
@@ -26,7 +24,7 @@ var _ SignatureGetter = (*NetworkSignatureGetter)(nil)
 // SignatureGetter defines the minimum network interface to perform signature aggregation
 type SignatureGetter interface {
 	// GetSignature attempts to fetch a BLS Signature from [nodeID] for [unsignedWarpMessage]
-	GetSignature(ctx context.Context, nodeID interfaces.NodeID, unsignedWarpMessage *interfaces.UnsignedMessage) (*interfaces.Signature, error)
+	GetSignature(ctx context.Context, nodeID interfaces.NodeID, unsignedWarpMessage *interfaces.WarpUnsignedMessage) (*interfaces.WarpSignature, error)
 }
 
 type NetworkClient interface {
@@ -49,7 +47,7 @@ func NewSignatureGetter(client NetworkClient) *NetworkSignatureGetter {
 //
 // Note: this function will continue attempting to fetch the signature from [nodeID] until it receives an invalid value or [ctx] is cancelled.
 // The caller is responsible to cancel [ctx] if it no longer needs to fetch this signature.
-func (s *NetworkSignatureGetter) GetSignature(ctx context.Context, nodeID interfaces.NodeID, unsignedWarpMessage *interfaces.UnsignedMessage) (*interfaces.Signature, error) {
+func (s *NetworkSignatureGetter) GetSignature(ctx context.Context, nodeID interfaces.NodeID, unsignedWarpMessage *interfaces.WarpUnsignedMessage) (*interfaces.WarpSignature, error) {
 	var signatureReqBytes []byte
 	parsedPayload, err := interfaces.Parse(unsignedWarpMessage.Payload)
 	if err != nil {
@@ -57,16 +55,20 @@ func (s *NetworkSignatureGetter) GetSignature(ctx context.Context, nodeID interf
 	}
 	switch p := parsedPayload.(type) {
 	case *interfaces.AddressedCall:
+		// TODO: Fix - WarpUnsignedMessage doesn't have ID() method
 		signatureReq := message.MessageSignatureRequest{
-			MessageID: unsignedWarpMessage.ID(),
+			// MessageID: unsignedWarpMessage.ID(),
 		}
 		signatureReqBytes, err = message.RequestToBytes(message.Codec, signatureReq)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal signature request: %w", err)
 		}
 	case *interfaces.Hash:
+		// Convert common.Hash to ids.ID
+		var blockID ids.ID
+		copy(blockID[:], (*p)[:])
 		signatureReq := message.BlockSignatureRequest{
-			BlockID: p.Hash,
+			BlockID: blockID,
 		}
 		signatureReqBytes, err = message.RequestToBytes(message.Codec, signatureReq)
 		if err != nil {
@@ -76,17 +78,17 @@ func (s *NetworkSignatureGetter) GetSignature(ctx context.Context, nodeID interf
 
 	delay := initialRetryFetchSignatureDelay
 	timer := time.NewTimer(delay)
-	defer interfaces.Stop()
+	defer timer.Stop()
 	for {
 		signatureRes, err := s.Client.SendAppRequest(ctx, nodeID, signatureReqBytes)
 		// If the client fails to retrieve a response perform an exponential backoff.
 		// Note: it is up to the caller to ensure that [ctx] is eventually cancelled
 		if err != nil {
 			// Wait until the retry delay has elapsed before retrying.
-			if !interfaces.Stop() {
-				<-interfaces.C
+			if !timer.Stop() {
+				<-timer.C
 			}
-			interfaces.Reset(delay)
+			timer.Reset(delay)
 
 			select {
 			case <-ctx.Done():

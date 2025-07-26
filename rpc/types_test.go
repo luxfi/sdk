@@ -31,8 +31,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

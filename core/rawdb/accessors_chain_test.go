@@ -25,10 +25,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/params"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

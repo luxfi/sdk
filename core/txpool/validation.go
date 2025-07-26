@@ -34,20 +34,18 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/crypto/kzg4844"
-	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/evm/params"
-	vmerr "github.com/luxfi/evm/vmerrs"
+	"github.com/ethereum/go-ethereum/crypto/kzg4844"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/evm/vmerrs"
 )
 
 var (
 	// blobTxMinBlobGasPrice is the big.Int version of the configured protocol
 	// parameter to avoid constucting a new big integer for every transaction.
-	blobTxMinBlobGasPrice = big.NewInt(ethparams.BlobTxMinBlobGasprice)
+	blobTxMinBlobGasPrice = big.NewInt(params.BlobTxMinBlobGasprice)
 )
 
 // ValidationOptions define certain differences between transaction validation
@@ -87,8 +85,8 @@ func ValidateTransaction(tx *types.Transaction, head *types.Header, signer types
 		return fmt.Errorf("%w: type %d rejected, pool not yet in Cancun", core.ErrTxTypeNotSupported, tx.Type())
 	}
 	// Check whether the init code size has been exceeded
-	if opts.Config.IsShanghai(head.Number, head.Time) && tx.To() == nil && len(tx.Data()) > ethparams.MaxInitCodeSize {
-		return fmt.Errorf("%w: code size %v, limit %v", vmerr.ErrMaxInitCodeSizeExceeded, len(tx.Data()), ethparams.MaxInitCodeSize)
+	if opts.Config.IsShanghai(head.Time) && tx.To() == nil && len(tx.Data()) > params.MaxInitCodeSize {
+		return fmt.Errorf("%w: code size %v, limit %v", vmerrs.ErrMaxInitCodeSizeExceeded, len(tx.Data()), params.MaxInitCodeSize)
 	}
 	// Transactions can't be negative. This may never happen using RLP decoded
 	// transactions but may occur for transactions created using the RPC.
@@ -122,7 +120,7 @@ func ValidateTransaction(tx *types.Transaction, head *types.Header, signer types
 	}
 	// Ensure the transaction has more gas than the bare minimum needed to cover
 	// the transaction metadata
-	intrGas, err := core.IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, opts.Config.Rules(head.Number, head.Time))
+	intrGas, err := core.IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, opts.Config.Rules(head.Number, params.IsMergeTODO, head.Time))
 	if err != nil {
 		return err
 	}
@@ -279,7 +277,7 @@ func ValidateTransactionWithState(tx *types.Transaction, signer types.Signer, op
 	if params.GetRulesExtra(opts.Rules).IsPrecompileEnabled(txallowlist.ContractAddress) {
 		txAllowListRole := txallowlist.GetTxAllowListStatus(opts.State, from)
 		if !txAllowListRole.IsEnabled() {
-			return fmt.Errorf("%w: %s", vmerrors.ErrSenderAddressNotAllowListed, from)
+			return fmt.Errorf("%w: %s", vmerrs.ErrSenderAddressNotAllowListed, from)
 		}
 	}
 

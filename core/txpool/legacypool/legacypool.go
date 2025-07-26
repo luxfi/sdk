@@ -36,12 +36,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/prque"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/prque"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/metrics"
+	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
 	eparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
@@ -699,6 +699,7 @@ func (pool *LegacyPool) validateTx(tx *types.Transaction, local bool) error {
 		State: pool.currentState,
 		Rules: pool.chainconfig.Rules(
 			pool.currentHead.Load().Number,
+			params.IsMergeTODO,
 			pool.currentHead.Load().Time,
 		),
 		MinimumFee: pool.minimumFee,
@@ -1846,12 +1847,11 @@ func (pool *LegacyPool) updateBaseFee() {
 // assumes lock is already held
 // should only be called when the chain is in Lux EVM.
 func (pool *LegacyPool) updateBaseFeeAt(head *types.Header) error {
-	feeConfig, _, err := pool.chain.GetFeeConfigAt(head)
+	_, _, err := pool.chain.GetFeeConfigAt(head)
 	if err != nil {
 		return err
 	}
-	chainConfig := params.GetExtra(pool.chainconfig)
-	baseFeeEstimate, err := header.EstimateNextBaseFee(chainConfig, feeConfig, head, uint64(time.Now().Unix()))
+	baseFeeEstimate, err := header.EstimateNextBaseFee(pool.chainconfig, head, uint64(time.Now().Unix()))
 	if err != nil {
 		return err
 	}

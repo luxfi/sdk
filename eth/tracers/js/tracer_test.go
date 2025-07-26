@@ -34,11 +34,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/tracers"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/eth/tracers"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/holiman/uint256"
 )
 

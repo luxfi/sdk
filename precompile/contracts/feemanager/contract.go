@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/luxfi/evm/core/vm"
 )
 

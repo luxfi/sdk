@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 	"github.com/luxfi/evm/accounts/abi"
-	"github.com/luxfi/geth/crypto"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/luxfi/evm/vmerrs"
 )
 

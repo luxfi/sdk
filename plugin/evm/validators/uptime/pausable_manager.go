@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package uptime
@@ -6,11 +6,12 @@ package uptime
 import (
 	"errors"
 
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
+
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/consensus/uptime"
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 )
 
 var errPausedDisconnect = errors.New("paused node cannot be disconnected")
@@ -26,8 +27,8 @@ type pausableManager struct {
 // NewPausableManager takes an uptime.Manager and returns a PausableManager
 func NewPausableManager(manager uptime.Manager) interfaces.PausableManager {
 	return &pausableManager{
-		pausedVdrs:    set.NewSet[ids.NodeID](0),
-		connectedVdrs: set.NewSet[ids.NodeID](0),
+		pausedVdrs:    make(set.Set[ids.NodeID]),
+		connectedVdrs: make(set.Set[ids.NodeID]),
 		Manager:       manager,
 	}
 }
@@ -69,7 +70,7 @@ func (p *pausableManager) OnValidatorAdded(_ ids.ID, nodeID ids.NodeID, _ uint64
 	if !isActive {
 		err := p.pause(nodeID)
 		if err != nil {
-			log.Error("failed to handle added validator", "nodeID", nodeID, "error", err)
+			log.Error("failed to handle added validator %s: %s", nodeID, err)
 		}
 	}
 }
@@ -80,7 +81,7 @@ func (p *pausableManager) OnValidatorRemoved(_ ids.ID, nodeID ids.NodeID) {
 	if p.IsPaused(nodeID) {
 		err := p.resume(nodeID)
 		if err != nil {
-			log.Error("failed to handle validator removed", "nodeID", nodeID, "error", err)
+			log.Error("failed to handle validator removed %s: %s", nodeID, err)
 		}
 	}
 }
@@ -95,7 +96,7 @@ func (p *pausableManager) OnValidatorStatusUpdated(_ ids.ID, nodeID ids.NodeID, 
 		err = p.pause(nodeID)
 	}
 	if err != nil {
-		log.Error("failed to update status for node", "nodeID", nodeID, "error", err)
+		log.Error("failed to update status for node %s: %s", nodeID, err)
 	}
 }
 

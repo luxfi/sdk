@@ -32,17 +32,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/evm/trie"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // DebugAPI is the collection of Ethereum full node APIs for debugging the

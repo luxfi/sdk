@@ -27,11 +27,11 @@
 package trie
 
 import (
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/trie/trienode"
-	"github.com/luxfi/geth/triedb/database"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/evm/trie/trienode"
+	"github.com/ethereum/go-ethereum/triedb/database"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // SecureTrie is the old name of StateTrie.
@@ -221,7 +221,9 @@ func (t *StateTrie) GetKey(shaKey []byte) []byte {
 	if key, ok := t.getSecKeyCache()[string(shaKey)]; ok {
 		return key
 	}
-	return t.db.Preimage(common.BytesToHash(shaKey))
+	// TODO: Fix database interface - Preimage method not found
+	// return t.db.Preimage(common.BytesToHash(shaKey))
+	return nil
 }
 
 // Commit collects all dirty nodes in the trie and replaces them with the
@@ -238,7 +240,8 @@ func (t *StateTrie) Commit(collectLeaf bool) (common.Hash, *trienode.NodeSet, er
 		for hk, key := range t.secKeyCache {
 			preimages[common.BytesToHash([]byte(hk))] = key
 		}
-		t.db.InsertPreimage(preimages)
+		// TODO: Fix database interface - InsertPreimage method not found
+		// t.db.InsertPreimage(preimages)
 		t.secKeyCache = make(map[string][]byte)
 	}
 	// Commit the trie and return its modified nodeset.

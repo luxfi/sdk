@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,14 +31,14 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
 
-	// TODO(arr4n) These tests were originally part of the `evm/core/types`
+	// TODO(arr4n) These tests were originally part of the `subnet-evm/core/types`
 	// package so assume the presence of identifiers. A dot-import reduces PR
 	// noise during the refactoring.
-	. "github.com/luxfi/evm/core/types"
+	. "github.com/ethereum/go-ethereum/core/types"
 )
 
 type devnull struct{ len int }

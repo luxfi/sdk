@@ -31,7 +31,7 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 )

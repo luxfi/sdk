@@ -27,7 +27,7 @@
 package eth
 
 import (
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // EthereumAPI provides an API to access Ethereum full node-related information.

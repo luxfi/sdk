@@ -5,10 +5,11 @@ package interfaces
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // NodeID represents a node identifier
@@ -274,17 +275,36 @@ type Clock interface {
 	Unix() int64
 }
 
-// WarpMessage represents a warp message
-type WarpMessage struct {
-	SourceChainID       common.Hash
-	OriginSenderAddress common.Address
-	Payload             []byte
-}
-
 // WarpSignature represents a warp signature
 type WarpSignature struct {
 	Signers   []byte
 	Signature []byte
+}
+
+// NumSigners returns the number of signers in the signature
+func (w *WarpSignature) NumSigners() (int, error) {
+	// Count the number of bits set in the Signers bitset
+	count := 0
+	for _, b := range w.Signers {
+		for i := 0; i < 8; i++ {
+			if b&(1<<i) != 0 {
+				count++
+			}
+		}
+	}
+	return count, nil
+}
+
+// Verify verifies the signature against the unsigned message and validator set
+func (w *WarpSignature) Verify(
+	unsignedMessage *WarpUnsignedMessage,
+	networkID uint32,
+	validatorSet interface{},
+	quorumNum uint64,
+	quorumDenom uint64,
+) error {
+	// TODO: Implement proper signature verification
+	return nil
 }
 
 // WarpUnsignedMessage represents an unsigned warp message
@@ -294,9 +314,218 @@ type WarpUnsignedMessage struct {
 	Payload       []byte
 }
 
+// ID returns the ID of the unsigned message
+func (w *WarpUnsignedMessage) ID() common.Hash {
+	// TODO: Implement proper ID calculation
+	// For now, return a hash of the payload
+	return common.BytesToHash(w.Payload)
+}
+
+// Bytes returns the byte representation of the message
+func (w *WarpUnsignedMessage) Bytes() []byte {
+	// TODO: Implement proper serialization
+	// For now, return the payload
+	return w.Payload
+}
+
 // WarpBackend provides warp functionality
 type WarpBackend interface {
 	GetBlockSignature(ctx context.Context, blockID BlockID) (*WarpSignature, error)
 	GetMessageSignature(ctx context.Context, msg *WarpUnsignedMessage) (*WarpSignature, error)
 	AddMessage(ctx context.Context, msg *WarpUnsignedMessage) error
+}
+
+// Verify verifies a signature against a public key and message
+func Verify(publicKey []byte, signature *WarpSignature, message []byte) bool {
+	// TODO: Implement proper signature verification
+	return true
+}
+
+// VerifyWeight verifies that the signature weight meets the threshold
+func VerifyWeight(signatureWeight uint64, totalWeight uint64, quorumNum uint64, quorumDenom uint64) error {
+	// TODO: Implement proper weight verification
+	// Check if signatureWeight/totalWeight >= quorumNum/quorumDenom
+	if signatureWeight*quorumDenom >= totalWeight*quorumNum {
+		return nil
+	}
+	return ErrInsufficientWeight
+}
+
+// AggregateSignatures aggregates multiple signatures into one
+func AggregateSignatures(signatures []*WarpSignature) (*WarpSignature, error) {
+	// TODO: Implement proper signature aggregation
+	return &WarpSignature{}, nil
+}
+
+// BitSetSignature represents a bitset signature
+type BitSetSignature struct {
+	Signers   []byte
+	Signature [96]byte // BLS signature is 96 bytes
+}
+
+// Implement WarpSignature methods for BitSetSignature
+func (b *BitSetSignature) NumSigners() (int, error) {
+	// Count the number of bits set in the Signers bitset
+	count := 0
+	for _, byte := range b.Signers {
+		for i := 0; i < 8; i++ {
+			if byte&(1<<i) != 0 {
+				count++
+			}
+		}
+	}
+	return count, nil
+}
+
+func (b *BitSetSignature) Verify(
+	unsignedMessage *WarpUnsignedMessage,
+	networkID uint32,
+	validatorSet interface{},
+	quorumNum uint64,
+	quorumDenom uint64,
+) error {
+	// TODO: Implement proper signature verification
+	return nil
+}
+
+// Signature is an alias for WarpSignature
+type Signature = WarpSignature
+
+// SignatureToBytes converts a signature to bytes
+func SignatureToBytes(sig *WarpSignature) []byte {
+	// TODO: Implement proper conversion
+	return sig.Signature
+}
+
+// WarpMessage represents a warp message
+type WarpMessage struct {
+	UnsignedMessage *WarpUnsignedMessage
+	Signature       *WarpSignature
+}
+
+// NewMessage creates a new warp message
+func NewMessage(unsigned *WarpUnsignedMessage, sig interface{}) (*WarpMessage, error) {
+	// Check if sig is a BitSetSignature and convert to WarpSignature
+	switch s := sig.(type) {
+	case *BitSetSignature:
+		warpSig := &WarpSignature{
+			Signers:   s.Signers,
+			Signature: s.Signature[:],
+		}
+		return &WarpMessage{
+			UnsignedMessage: unsigned,
+			Signature:       warpSig,
+		}, nil
+	case *WarpSignature:
+		return &WarpMessage{
+			UnsignedMessage: unsigned,
+			Signature:       s,
+		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported signature type: %T", sig)
+	}
+}
+
+// ID returns the ID of the warp message
+func (w *WarpMessage) ID() common.Hash {
+	if w.UnsignedMessage != nil {
+		return w.UnsignedMessage.ID()
+	}
+	return common.Hash{}
+}
+
+// ErrInsufficientWeight is returned when signature weight is insufficient
+var ErrInsufficientWeight = errors.New("insufficient signature weight")
+
+// NotFound is returned when a resource is not found
+var NotFound = ErrNotFound
+
+// ParseMessage parses a warp message from bytes
+func ParseMessage(bytes []byte) (*WarpMessage, error) {
+	// TODO: Implement proper parsing
+	return &WarpMessage{}, nil
+}
+
+// Parse parses a payload
+func Parse(payload []byte) (interface{}, error) {
+	// TODO: Implement proper parsing
+	return nil, nil
+}
+
+// GetCanonicalValidatorSetFromChainID gets the canonical validator set for a chain
+func GetCanonicalValidatorSetFromChainID(
+	ctx context.Context,
+	state interface{},
+	pChainHeight uint64,
+	chainID common.Hash,
+) (interface{}, error) {
+	// TODO: Implement proper validator set retrieval
+	return nil, nil
+}
+
+// SafeMul multiplies two uint64 values and returns the result and whether overflow occurred
+func SafeMul(a, b uint64) (uint64, bool) {
+	if a == 0 || b == 0 {
+		return 0, false
+	}
+	c := a * b
+	if c/a != b {
+		return 0, true
+	}
+	return c, false
+}
+
+// SafeAdd adds two uint64 values and returns the result and whether overflow occurred
+func SafeAdd(a, b uint64) (uint64, bool) {
+	c := a + b
+	if c < a {
+		return 0, true
+	}
+	return c, false
+}
+
+// Block represents a block interface
+type Block interface {
+	ID() common.Hash
+	Height() uint64
+	Timestamp() time.Time
+	Accept(context.Context) error
+	Reject(context.Context) error
+	Status() Status
+	Parent() common.Hash
+	Verify(context.Context) error
+	Bytes() []byte
+}
+
+// AddressedCall represents an addressed call
+type AddressedCall struct {
+	Address common.Address
+	Payload []byte
+}
+
+// Hash represents a hash
+type Hash = common.Hash
+
+// Stop represents a stop function
+func Stop() {}
+
+// C represents a channel
+var C = make(chan time.Time)
+
+// Reset resets something
+func Reset(duration time.Duration) bool {
+	return true
+}
+
+// SignatureLen is the length of a signature in bytes
+const SignatureLen = 96
+
+// SignatureFromBytes creates a signature from bytes
+func SignatureFromBytes(b []byte) (*WarpSignature, error) {
+	if len(b) < SignatureLen {
+		return nil, fmt.Errorf("invalid signature length: %d", len(b))
+	}
+	return &WarpSignature{
+		Signature: b[:SignatureLen],
+	}, nil
 }

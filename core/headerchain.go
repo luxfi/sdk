@@ -35,10 +35,10 @@ import (
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/lru"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/lru"
 )
 
 const (

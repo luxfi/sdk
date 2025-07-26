@@ -40,9 +40,9 @@ import (
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/event"
+	"github.com/ethereum/go-ethereum/triedb"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/event"
 )
 
 // CurrentHeader retrieves the current head header of the canonical chain. The

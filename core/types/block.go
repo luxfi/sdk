@@ -34,9 +34,9 @@ import (
 	"reflect"
 	"sync/atomic"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 // A BlockNonce is a 64-bit hash which proves (combined with the
@@ -67,7 +67,7 @@ func (n *BlockNonce) UnmarshalText(input []byte) error {
 }
 
 //go:generate go run github.com/fjl/gencodec -type Header -field-override headerMarshaling -out gen_header_json.go
-//go:generate go run github.com/luxfi/geth/rlp/rlpgen -type Header -out gen_header_rlp.go
+//go:generate go run github.com/ethereum/go-ethereum/rlp/rlpgen -type Header -out gen_header_rlp.go
 
 // Header represents a block header in the Ethereum blockchain.
 type Header struct {

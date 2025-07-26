@@ -7,13 +7,12 @@ import (
 	"context"
 	"time"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // CodeRequestHandler is a peer.RequestHandler for message.CodeRequest
@@ -71,7 +70,7 @@ func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID interfaces.
 	}
 
 	codeResponse := message.CodeResponse{Data: codeBytes}
-	responseBytes, err := n.interfaces.Marshal(message.Version, codeResponse)
+	responseBytes, err := n.codec.Marshal(codeResponse)
 	if err != nil {
 		log.Error("could not marshal CodeResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "request", codeRequest, "err", err)
 		return nil, nil

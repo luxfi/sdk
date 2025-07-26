@@ -36,7 +36,7 @@ import (
 	"time"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Runs multiple tests with randomized parameters.

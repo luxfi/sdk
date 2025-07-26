@@ -42,7 +42,7 @@ import (
 	"os"
 	"strconv"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/geth/rlp"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 type allocItem struct {

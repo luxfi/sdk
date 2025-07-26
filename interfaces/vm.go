@@ -3,8 +3,8 @@ package interfaces
 import (
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // EVM is the interface for the Ethereum Virtual Machine

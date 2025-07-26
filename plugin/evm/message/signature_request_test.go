@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -8,8 +8,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,7 +52,7 @@ func TestMarshalBlockSignatureRequest(t *testing.T) {
 // TestMarshalSignatureResponse asserts that the structure or serialization logic hasn't changed, primarily to
 // ensure compatibility with the network.
 func TestMarshalSignatureResponse(t *testing.T) {
-	var signature [interfaces.SignatureLen]byte
+	var signature [bls.SignatureLen]byte
 	sig, err := hex.DecodeString("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef")
 	require.NoError(t, err, "failed to decode string to hex")
 

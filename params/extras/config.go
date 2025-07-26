@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	gethparams "github.com/luxfi/geth/params"
+	"github.com/ethereum/go-ethereum/common"
+	gethparams "github.com/ethereum/go-ethereum/params"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/interfaces"

@@ -1,10 +1,11 @@
-// (c) 2019-2021, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
 
 import (
 	"context"
+
 	"github.com/luxfi/node/ids"
 )
 
@@ -34,22 +35,6 @@ type ResponseHandler interface {
 	OnFailure() error
 }
 
-// CrossChainRequestHandler interface handles incoming cross chain requests
-type CrossChainRequestHandler interface {
-	HandleCrossChainRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, request []byte) ([]byte, error)
-}
-
-// GossipHandler interface handles incoming gossip messages
-type GossipHandler interface {
-	HandleGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte)
-}
-
-// GossipMessage is a marker interface for gossip messages
-type GossipMessage interface {
-	// Handle is called to process this gossip message
-	Handle(handler GossipHandler, nodeID ids.NodeID) error
-}
-
 type NoopRequestHandler struct{}
 
 func (NoopRequestHandler) HandleStateTrieLeafsRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, leafsRequest LeafsRequest) ([]byte, error) {
@@ -70,4 +55,33 @@ func (NoopRequestHandler) HandleMessageSignatureRequest(ctx context.Context, nod
 
 func (NoopRequestHandler) HandleBlockSignatureRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, signatureRequest BlockSignatureRequest) ([]byte, error) {
 	return nil, nil
+}
+
+// CrossChainRequestHandler interface handles incoming cross-chain requests
+type CrossChainRequestHandler interface {
+	HandleCrossChainRequest(ctx context.Context, chainID ids.ID, requestID uint32, request []byte) ([]byte, error)
+}
+
+// GossipHandler interface handles incoming gossip messages
+type GossipHandler interface {
+	HandleGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte) error
+}
+
+// GossipMessage represents a gossip message
+type GossipMessage struct {
+	Payload []byte
+}
+
+// NoopCrossChainRequestHandler is a no-op implementation
+type NoopCrossChainRequestHandler struct{}
+
+func (NoopCrossChainRequestHandler) HandleCrossChainRequest(ctx context.Context, chainID ids.ID, requestID uint32, request []byte) ([]byte, error) {
+	return nil, nil
+}
+
+// NoopGossipHandler is a no-op implementation  
+type NoopGossipHandler struct{}
+
+func (NoopGossipHandler) HandleGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte) error {
+	return nil
 }

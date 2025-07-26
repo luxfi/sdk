@@ -6,8 +6,6 @@ package utils
 import (
 	"sync"
 	"time"
-
-	"github.com/luxfi/evm/interfaces"
 )
 
 // MockableClock implements interfaces.MockableTimer
@@ -17,7 +15,7 @@ type MockableClock struct {
 }
 
 // NewMockableClock creates a new mockable clock
-func NewMockableClock() interfaces.MockableTimer {
+func NewMockableClock() *MockableClock {
 	return &MockableClock{
 		time: time.Now(),
 	}

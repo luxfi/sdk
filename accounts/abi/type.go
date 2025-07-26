@@ -36,7 +36,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/luxfi/geth/common"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Type enumerator

@@ -17,8 +17,8 @@
 package simulated
 
 import (
-	"github.com/luxfi/geth/eth/ethconfig"
-	"github.com/luxfi/geth/node"
+	"github.com/ethereum/go-ethereum/eth/ethconfig"
+	"github.com/ethereum/go-ethereum/node"
 )
 
 // WithBlockGasLimit configures the simulated backend to target a specific gas limit

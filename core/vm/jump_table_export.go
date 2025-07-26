@@ -17,25 +17,26 @@
 package vm
 
 import (
-	"github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/params"
 )
 
 // LookupInstructionSet returns the instruction set for the fork configured by
 // the rules.
 func LookupInstructionSet(rules params.Rules) (JumpTable, error) {
+	rulesExtra := params.GetRulesExtra(rules)
 	switch {
 	case rules.IsCancun:
 		return newCancunInstructionSet(), nil
-	case rules.IsDurango:
+	case rulesExtra.IsDurango:
 		return newDurangoInstructionSet(), nil
-	case rules.IsApricotPhase3, rules.IsApricotPhase4,
-		rules.IsApricotPhase5, rules.IsApricotPhasePre6,
-		rules.IsApricotPhase6, rules.IsApricotPhasePost6,
-		rules.IsBanff, rules.IsCortina:
+	case rulesExtra.IsApricotPhase3, rulesExtra.IsApricotPhase4,
+		rulesExtra.IsApricotPhase5, rulesExtra.IsApricotPhasePre6,
+		rulesExtra.IsApricotPhase6, rulesExtra.IsApricotPhasePost6,
+		rulesExtra.IsBanff, rulesExtra.IsCortina:
 		return newApricotPhase3InstructionSet(), nil
-	case rules.IsApricotPhase2:
+	case rulesExtra.IsApricotPhase2:
 		return newApricotPhase2InstructionSet(), nil
-	case rules.IsApricotPhase1:
+	case rulesExtra.IsApricotPhase1:
 		return newApricotPhase1InstructionSet(), nil
 	case rules.IsIstanbul:
 		return newIstanbulInstructionSet(), nil

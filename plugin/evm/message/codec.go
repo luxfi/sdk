@@ -1,4 +1,4 @@
-// (c) 2019-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -7,11 +7,12 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/node/utils/wrappers"
 )
 
 const (
 	Version        = uint16(0)
-	maxMessageSize = 2*units.MiB - 64*units.KiB // Subtract 64 KiB from p2p network cap to leave room for encoding overhead from Lux
+	maxMessageSize = 2*units.MiB - 64*units.KiB // Subtract 64 KiB from p2p network cap to leave room for encoding overhead from AvalancheGo
 )
 
 var (
@@ -25,8 +26,8 @@ func init() {
 	// Skip registration to keep registeredTypes unchanged after legacy gossip deprecation
 	c.SkipRegistrations(1)
 
-	errs := []error{}
-	errs = append(errs,
+	errs := wrappers.Errs{}
+	errs.Add(
 		// Types for state sync frontier consensus
 		c.RegisterType(SyncSummary{}),
 
@@ -42,12 +43,11 @@ func init() {
 		c.RegisterType(MessageSignatureRequest{}),
 		c.RegisterType(BlockSignatureRequest{}),
 		c.RegisterType(SignatureResponse{}),
-	)
-	errs = append(errs, Codec.RegisterCodec(Version, c))
 
-	for _, err := range errs {
-		if err != nil {
-			panic(err)
-		}
+		Codec.RegisterCodec(Version, c),
+	)
+
+	if errs.Errored() {
+		panic(errs.Err)
 	}
 }

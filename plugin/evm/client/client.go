@@ -5,117 +5,59 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"math/big"
 
-	"log/slog"
-
-	"github.com/luxfi/evm/plugin/evm/config"
-	"github.com/luxfi/node/api"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/utils/rpc"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
-// Interface compliance
-var _ Client = (*client)(nil)
-
-type CurrentValidator struct {
-	ValidationID     ids.ID     `json:"validationID"`
-	NodeID           ids.NodeID `json:"nodeID"`
-	Weight           uint64     `json:"weight"`
-	StartTimestamp   uint64     `json:"startTimestamp"`
-	IsActive         bool       `json:"isActive"`
-	IsL1Validator    bool       `json:"isL1Validator"`
-	IsConnected      bool       `json:"isConnected"`
-	UptimePercentage float32    `json:"uptimePercentage"`
-	UptimeSeconds    uint64     `json:"uptimeSeconds"`
+// Client is an Ethereum client for interacting with EVM chains
+type Client struct {
+	rpc *rpc.Client
 }
 
-// Client interface for interacting with EVM [chain]
-type Client interface {
-	StartCPUProfiler(ctx context.Context, options ...rpc.Option) error
-	StopCPUProfiler(ctx context.Context, options ...rpc.Option) error
-	MemoryProfile(ctx context.Context, options ...rpc.Option) error
-	LockProfile(ctx context.Context, options ...rpc.Option) error
-	SetLogLevel(ctx context.Context, level slog.Level, options ...rpc.Option) error
-	GetVMConfig(ctx context.Context, options ...rpc.Option) (*config.Config, error)
-	GetCurrentValidators(ctx context.Context, nodeIDs []ids.NodeID, options ...rpc.Option) ([]CurrentValidator, error)
-}
-
-// Client implementation for interacting with EVM [chain]
-type client struct {
-	adminRequester      rpc.EndpointRequester
-	validatorsRequester rpc.EndpointRequester
-}
-
-// NewClient returns a Client for interacting with EVM [chain]
-func NewClient(uri, chain string) Client {
-	requestUri := fmt.Sprintf("%s/ext/bc/%s", uri, chain)
-	return NewClientWithURL(requestUri)
-}
-
-// NewClientWithURL returns a Client for interacting with EVM [chain]
-func NewClientWithURL(url string) Client {
-	return &client{
-		adminRequester: rpc.NewEndpointRequester(
-			url + "/admin",
-		),
-		validatorsRequester: rpc.NewEndpointRequester(
-			url + "/validators",
-		),
+// NewClient creates a new EVM client
+func NewClient(endpoint string) (*Client, error) {
+	rc, err := rpc.Dial(endpoint)
+	if err != nil {
+		return nil, err
 	}
+	return &Client{rpc: rc}, nil
 }
 
-func (c *client) StartCPUProfiler(ctx context.Context, options ...rpc.Option) error {
-	return c.adminRequester.SendRequest(ctx, "admin.startCPUProfiler", struct{}{}, &api.EmptyReply{}, options...)
+// Close closes the client connection
+func (c *Client) Close() {
+	c.rpc.Close()
 }
 
-func (c *client) StopCPUProfiler(ctx context.Context, options ...rpc.Option) error {
-	return c.adminRequester.SendRequest(ctx, "admin.stopCPUProfiler", struct{}{}, &api.EmptyReply{}, options...)
+// ChainID retrieves the chain ID
+func (c *Client) ChainID(ctx context.Context) (*big.Int, error) {
+	var result hexutil.Big
+	err := c.rpc.CallContext(ctx, &result, "eth_chainId")
+	if err != nil {
+		return nil, err
+	}
+	return (*big.Int)(&result), nil
 }
 
-func (c *client) MemoryProfile(ctx context.Context, options ...rpc.Option) error {
-	return c.adminRequester.SendRequest(ctx, "admin.memoryProfile", struct{}{}, &api.EmptyReply{}, options...)
+// BlockNumber returns the current block number
+func (c *Client) BlockNumber(ctx context.Context) (uint64, error) {
+	var result hexutil.Uint64
+	err := c.rpc.CallContext(ctx, &result, "eth_blockNumber")
+	return uint64(result), err
 }
 
-func (c *client) LockProfile(ctx context.Context, options ...rpc.Option) error {
-	return c.adminRequester.SendRequest(ctx, "admin.lockProfile", struct{}{}, &api.EmptyReply{}, options...)
+// BalanceAt returns the balance of an account at a specific block
+func (c *Client) BalanceAt(ctx context.Context, account common.Address, blockNumber *big.Int) (*big.Int, error) {
+	var result hexutil.Big
+	err := c.rpc.CallContext(ctx, &result, "eth_getBalance", account, toBlockNumArg(blockNumber))
+	return (*big.Int)(&result), err
 }
 
-type SetLogLevelArgs struct {
-	Level string `json:"level"`
-}
-
-// SetLogLevel dynamically sets the log level for the C Chain
-func (c *client) SetLogLevel(ctx context.Context, level slog.Level, options ...rpc.Option) error {
-	return c.adminRequester.SendRequest(ctx, "admin.setLogLevel", &SetLogLevelArgs{
-		Level: level.String(),
-	}, &api.EmptyReply{}, options...)
-}
-
-type ConfigReply struct {
-	Config *config.Config `json:"config"`
-}
-
-// GetVMConfig returns the current config of the VM
-func (c *client) GetVMConfig(ctx context.Context, options ...rpc.Option) (*config.Config, error) {
-	res := &ConfigReply{}
-	err := c.adminRequester.SendRequest(ctx, "admin.getVMConfig", struct{}{}, res, options...)
-	return res.Config, err
-}
-
-type GetCurrentValidatorsRequest struct {
-	NodeIDs []ids.NodeID `json:"nodeIDs"`
-}
-
-type GetCurrentValidatorsResponse struct {
-	Validators []CurrentValidator `json:"validators"`
-}
-
-// GetCurrentValidators returns the current validators
-func (c *client) GetCurrentValidators(ctx context.Context, nodeIDs []ids.NodeID, options ...rpc.Option) ([]CurrentValidator, error) {
-	res := &GetCurrentValidatorsResponse{}
-	err := c.validatorsRequester.SendRequest(ctx, "validators.getCurrentValidators", &GetCurrentValidatorsRequest{
-		NodeIDs: nodeIDs,
-	}, res, options...)
-	return res.Validators, err
+func toBlockNumArg(number *big.Int) string {
+	if number == nil {
+		return "latest"
+	}
+	return hexutil.EncodeBig(number)
 }
