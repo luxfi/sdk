@@ -3,7 +3,7 @@
 
 package params
 
-import "github.com/ethereum/go-ethereum/common"
+import "github.com/luxfi/geth/common"
 
 // -----------------------------------------------------------------------------
 // ALWAYS-ON UPGRADE FLAGS

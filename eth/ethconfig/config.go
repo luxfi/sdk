@@ -36,7 +36,7 @@ import (
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // DefaultFullGPOConfig contains default gasprice oracle settings for full node.

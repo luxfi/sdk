@@ -30,7 +30,7 @@ build:
 	@echo "Building Lux EVM..."
 	@mkdir -p build
 	@mkdir -p $(TMPDIR) $(GOCACHE)
-	TMPDIR=$(TMPDIR) GOCACHE=$(GOCACHE) CGO_CFLAGS="$(CGO_CFLAGS)" go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) ./plugin
+	TMPDIR=$(TMPDIR) GOCACHE=$(GOCACHE) CGO_CFLAGS="$(CGO_CFLAGS)" go build -ldflags "$(LDFLAGS)" -o build/$(BINARY_NAME) ./cmd/evm
 
 # Build and install as plugin
 .PHONY: install

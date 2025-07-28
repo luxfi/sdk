@@ -29,10 +29,10 @@ package vm
 import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
 )
 
 // Config are the configuration options for the Interpreter

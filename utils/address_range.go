@@ -6,7 +6,7 @@ package utils
 import (
 	"bytes"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // AddressRange represents a continuous range of addresses

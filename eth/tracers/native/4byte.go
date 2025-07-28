@@ -33,10 +33,10 @@ import (
 	"sync/atomic"
 
 	"github.com/luxfi/evm/core/vm"
-	"github.com/ethereum/go-ethereum/core/tracing"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func init() {

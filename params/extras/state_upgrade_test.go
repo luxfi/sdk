@@ -10,8 +10,8 @@ import (
 	
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
 	"github.com/stretchr/testify/require"
 )
 

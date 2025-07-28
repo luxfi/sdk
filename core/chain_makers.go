@@ -36,12 +36,12 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/params"
 	ethparams "github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/plugin/evm/header"
 )
@@ -380,12 +380,12 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 	if err != nil {
 		panic(err)
 	}
-	config := params.GetExtra(cm.config)
-	gasLimit, err := header.GasLimit(config, feeConfig, parent.Header(), time)
+	gasLimit, err := header.GasLimit(cm.config, feeConfig, parent.Header(), time)
 	if err != nil {
 		panic(err)
 	}
-	baseFee, err := header.BaseFee(config, feeConfig, parent.Header(), time)
+	extrasConfig := params.GetExtra(cm.config)
+	baseFee, err := header.BaseFee(extrasConfig, feeConfig, parent.Header(), time)
 	if err != nil {
 		panic(err)
 	}

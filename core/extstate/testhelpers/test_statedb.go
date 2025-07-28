@@ -5,7 +5,7 @@ package testhelpers
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/extstate"

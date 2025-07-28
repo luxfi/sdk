@@ -8,14 +8,14 @@ import (
 	"errors"
 	"fmt"
 	
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/iface"
 	"github.com/luxfi/evm/precompile/contract"
 	precompileinterfaces "github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 	warpValidators "github.com/luxfi/evm/warp/validators"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -144,11 +144,11 @@ func (c *Config) Accept(acceptCtx *precompileinterfaces.AcceptContext, blockHash
 // If the payload of the warp message fails parsing, return a non-nil error invalidating the transaction.
 func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	totalGas := GasCostPerSignatureVerification
-	bytesGasCost, overflow := interfaces.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
+	bytesGasCost, overflow := iface.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
 	if overflow {
 		return 0, fmt.Errorf("overflow calculating gas cost for warp message bytes of size %d", len(predicateBytes))
 	}
-	totalGas, overflow = interfaces.SafeAdd(totalGas, bytesGasCost)
+	totalGas, overflow = iface.SafeAdd(totalGas, bytesGasCost)
 	if overflow {
 		return 0, fmt.Errorf("overflow adding bytes gas cost of size %d", len(predicateBytes))
 	}
@@ -157,11 +157,11 @@ func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidPredicateBytes, err)
 	}
-	warpMessage, err := interfaces.ParseMessage(unpackedPredicateBytes)
+	warpMessage, err := iface.ParseMessage(unpackedPredicateBytes)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidWarpMsg, err)
 	}
-	_, err = interfaces.Parse(warpMessage.Payload)
+	_, err = iface.Parse(warpMessage.Payload)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidWarpMsgPayload, err)
 	}
@@ -170,11 +170,11 @@ func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errCannotGetNumSigners, err)
 	}
-	signerGas, overflow := interfaces.SafeMul(uint64(numSigners), GasCostPerWarpSigner)
+	signerGas, overflow := iface.SafeMul(uint64(numSigners), GasCostPerWarpSigner)
 	if overflow {
 		return 0, errOverflowSignersGasCost
 	}
-	totalGas, overflow = interfaces.SafeAdd(totalGas, signerGas)
+	totalGas, overflow = iface.SafeAdd(totalGas, signerGas)
 	if overflow {
 		return 0, fmt.Errorf("overflow adding signer gas (PrevTotal: %d, VerificationGas: %d)", totalGas, signerGas)
 	}
@@ -190,7 +190,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileinterfaces.Predicat
 	}
 
 	// Note: PredicateGas should be called before VerifyPredicate, so we should never reach an error case here.
-	warpMsg, err := interfaces.ParseMessage(unpackedPredicateBytes)
+	warpMsg, err := iface.ParseMessage(unpackedPredicateBytes)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCannotParseWarpMsg, err)
 	}
@@ -202,7 +202,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileinterfaces.Predicat
 
 	log.Debug("verifying warp message", "warpMsg", warpMsg, "quorumNum", quorumNumerator, "quorumDenom", WarpQuorumDenominator)
 
-	// Wrap interfaces.State on the chain consensus context to special case the Primary Network
+	// Wrap iface.State on the chain consensus context to special case the Primary Network
 	state := warpValidators.NewState(
 		predicateContext.ConsensusCtx.ValidatorState,
 		predicateContext.ConsensusCtx.SubnetID,
@@ -210,7 +210,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileinterfaces.Predicat
 		c.RequirePrimaryNetworkSigners,
 	)
 
-	validatorSet, err := interfaces.GetCanonicalValidatorSetFromChainID(
+	validatorSet, err := iface.GetCanonicalValidatorSetFromChainID(
 		context.Background(),
 		state,
 		predicateContext.ProposerVMBlockCtx.PChainHeight,

@@ -34,7 +34,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func TestChainIterator(t *testing.T) {

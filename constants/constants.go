@@ -3,7 +3,7 @@
 
 package constants
 
-import "github.com/ethereum/go-ethereum/common"
+import "github.com/luxfi/geth/common"
 
 var (
 	BlackholeAddr = common.Address{

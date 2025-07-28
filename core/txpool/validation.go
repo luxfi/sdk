@@ -35,10 +35,10 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/crypto/kzg4844"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/vmerrs"
 )
 

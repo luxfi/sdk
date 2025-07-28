@@ -7,7 +7,6 @@ package evm
 import (
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms"
-	plugin "github.com/luxfi/evm/plugin/evm"
 )
 
 var _ vms.Factory = (*Factory)(nil)
@@ -17,5 +16,5 @@ type Factory struct{}
 
 // New creates a new VM instance
 func (f *Factory) New(log logging.Logger) (interface{}, error) {
-	return &plugin.VM{}, nil
+	return &VM{}, nil
 }

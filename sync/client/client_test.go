@@ -21,9 +21,9 @@ import (
 	clientstats "github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/sync/handlers"
 	handlerstats "github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/ethereum/go-ethereum/trie"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 )
 
 func TestGetCode(t *testing.T) {

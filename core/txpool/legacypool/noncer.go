@@ -29,7 +29,7 @@ package legacypool
 import (
 	"sync"
 	"github.com/luxfi/evm/core/state"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // noncer is a tiny virtual state database to manage the executable nonces of

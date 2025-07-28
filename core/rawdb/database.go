@@ -33,12 +33,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/ethdb/leveldb"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/ethdb/pebble"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/ethdb/leveldb"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/geth/ethdb/pebble"
+	"github.com/luxfi/geth/log"
 	"github.com/olekukonko/tablewriter"
 )
 

@@ -33,9 +33,9 @@ import (
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

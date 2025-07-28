@@ -21,8 +21,8 @@ import (
 	"time"
 	"github.com/luxfi/evm/core/bloombits"
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/common"
 )
 
 const (

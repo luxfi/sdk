@@ -8,7 +8,7 @@ import (
 	"sort"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var (

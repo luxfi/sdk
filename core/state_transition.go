@@ -34,10 +34,10 @@ import (
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	cmath "github.com/ethereum/go-ethereum/common/math"
+	"github.com/luxfi/geth/common"
+	cmath "github.com/luxfi/geth/common/math"
 	"github.com/holiman/uint256"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
+	"github.com/luxfi/geth/crypto/kzg4844"
 )
 
 // BigMin returns the smaller of x or y.

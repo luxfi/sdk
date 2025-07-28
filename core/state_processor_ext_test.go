@@ -7,11 +7,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/crypto"
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/params"

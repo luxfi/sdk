@@ -36,7 +36,7 @@ import (
 
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/rlp"
 )
 
 // AdminAPI is the collection of Ethereum full node related APIs for node

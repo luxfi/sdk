@@ -36,9 +36,9 @@ import (
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/evm/cmd/utils"
-	"github.com/ethereum/go-ethereum/common/compiler"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common/compiler"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
 	"github.com/urfave/cli/v2"
 )
 

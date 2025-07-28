@@ -2,7 +2,7 @@
 // See the file LICENSE for licensing terms.
 package core
 
-import "github.com/ethereum/go-ethereum/metrics"
+import "github.com/luxfi/geth/metrics"
 
 // getOrOverrideAsRegisteredCounter searches for a metric already registered
 // with `name`. If a metric is found and it is a [metrics.Counter], it is returned. If a

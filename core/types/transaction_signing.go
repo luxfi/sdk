@@ -33,8 +33,8 @@ import (
 	"math/big"
 
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 )
 
 var ErrInvalidChainId = errors.New("invalid chain id for signer")

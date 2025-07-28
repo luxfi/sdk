@@ -32,14 +32,14 @@ import (
 	"errors"
 	"io"
 	"math/big"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/external"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/accounts/external"
+	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/evm/core/types"
-	gethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	gethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
 )
 
 // ErrNoChainID is returned whenever the user failed to specify a chain id.

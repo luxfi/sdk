@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"reflect"
 	
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	gethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	gethparams "github.com/luxfi/geth/params"
 )
 
 // StateUpgrade describes the modifications to be made to the state during

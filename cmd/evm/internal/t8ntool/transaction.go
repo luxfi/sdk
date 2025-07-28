@@ -39,10 +39,10 @@ import (
 	"github.com/luxfi/evm/params"
 	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/tests"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 	"github.com/urfave/cli/v2"
 )
 

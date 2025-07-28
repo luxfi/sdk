@@ -36,8 +36,8 @@ import (
 	"github.com/luxfi/evm/core/headerutil"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 	"github.com/holiman/uint256"
 )
 

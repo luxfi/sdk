@@ -8,11 +8,11 @@ import (
 	"time"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 // CodeRequestHandler is a peer.RequestHandler for message.CodeRequest

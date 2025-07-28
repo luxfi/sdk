@@ -38,10 +38,10 @@ import (
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/lru"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/lru"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 	"golang.org/x/exp/slices"
 )
 

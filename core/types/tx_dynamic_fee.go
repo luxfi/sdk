@@ -30,8 +30,8 @@ import (
 	"bytes"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/rlp"
 )
 
 // DynamicFeeTx represents an EIP-1559 transaction.

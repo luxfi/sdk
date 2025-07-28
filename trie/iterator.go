@@ -31,8 +31,8 @@ import (
 	"container/heap"
 	"errors"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/common"
 )
 
 // NodeResolver is used for looking up trie nodes before reaching into the real

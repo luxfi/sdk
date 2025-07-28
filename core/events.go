@@ -28,7 +28,7 @@ package core
 
 import (
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.

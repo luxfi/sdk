@@ -30,7 +30,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/evm/trie/trienode"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // committer is the tool used for the trie Commit operation. The committer will

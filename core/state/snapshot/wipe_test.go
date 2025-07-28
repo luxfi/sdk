@@ -31,7 +31,7 @@ import (
 	"testing"
 	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // Tests that given a database with random data content, all parts of a snapshot

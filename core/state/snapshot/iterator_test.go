@@ -34,7 +34,7 @@ import (
 	"math/rand"
 	"testing"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // TestAccountIteratorBasics tests some simple single-layer(diff and disk) iteration

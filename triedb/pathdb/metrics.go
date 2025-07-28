@@ -27,7 +27,7 @@
 package pathdb
 
 import (
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 )
 
 // ====== If resolving merge conflicts ======
