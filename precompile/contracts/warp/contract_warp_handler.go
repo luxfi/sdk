@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/predicate"
-	"github.com/ethereum/go-ethereum/common"
-	ethmath "github.com/ethereum/go-ethereum/common/math"
+	"github.com/luxfi/geth/common"
+	ethmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/evm/core/vm"
 )
 

@@ -39,9 +39,9 @@ import (
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/trie"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 )
 
 // noopReleaser is returned in case there is no operation expected

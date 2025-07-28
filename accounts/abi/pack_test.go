@@ -37,7 +37,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // TestPack tests the general pack/unpack tests in packing_test.go

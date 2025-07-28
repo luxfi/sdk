@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/rpc"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )

@@ -36,9 +36,9 @@ import (
 
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/luxfi/geth/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
 
 	// Force-load precompiles to trigger registration
 	_ "github.com/luxfi/evm/precompile/registry"

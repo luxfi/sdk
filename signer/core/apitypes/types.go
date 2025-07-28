@@ -32,8 +32,8 @@ import (
 	"math/big"
 	"strings"
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
 )
 
 type ValidationInfo struct {

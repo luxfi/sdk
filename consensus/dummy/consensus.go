@@ -9,7 +9,7 @@ import (
 	"math/big"
 	"time"
 	
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/state"
@@ -125,7 +125,7 @@ func (eng *DummyEngine) verifyCoinbase(header *types.Header, parent *types.Heade
 	return nil
 }
 
-func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, parent *types.Header, chain consensus.ChainHeaderReader) error {
+func verifyHeaderGasFields(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header) error {
 	// We verify the current block by checking the parent fee config
 	// this is because the current block cannot set the fee config for itself
 	// Fee config might depend on the state when precompile is activated
@@ -135,18 +135,23 @@ func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, par
 	if err != nil {
 		return err
 	}
-	if err := customheader.VerifyGasUsed(config, feeConfig, parent, header); err != nil {
+	// Get extras config and params config from chain
+	luxConfig := chain.Config()
+	extrasConfig := params.GetExtra(luxConfig)
+	paramsConfig := luxConfig
+	
+	if err := customheader.VerifyGasUsed(paramsConfig, feeConfig, parent, header); err != nil {
 		return err
 	}
-	if err := customheader.VerifyGasLimit(config, feeConfig, parent, header); err != nil {
+	if err := customheader.VerifyGasLimit(paramsConfig, feeConfig, parent, header); err != nil {
 		return err
 	}
-	if err := customheader.VerifyExtraPrefix(config, parent, header); err != nil {
+	if err := customheader.VerifyExtraPrefix(extrasConfig, parent, header); err != nil {
 		return err
 	}
 
 	// Verify header.BaseFee matches the expected value.
-	expectedBaseFee, err := customheader.BaseFee(config, feeConfig, parent, header.Time)
+	expectedBaseFee, err := customheader.BaseFee(extrasConfig, feeConfig, parent, header.Time)
 	if err != nil {
 		return fmt.Errorf("failed to calculate base fee: %w", err)
 	}
@@ -156,7 +161,7 @@ func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, par
 
 	// Enforce BlockGasCost constraints
 	expectedBlockGasCost := customheader.BlockGasCost(
-		config,
+		extrasConfig,
 		feeConfig,
 		parent,
 		header.Time,
@@ -176,18 +181,23 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 	}
 
 	// Verify the extra data is well-formed.
-	// NOTE: chain.Config() returns ethereum's ChainConfig, but we need our own
-	// Create ethereum Rules using the chain config
-	rules := chain.Config().Rules(header.Number, params.IsMergeTODO, header.Time)
+	// Get our lux config from chain
+	luxConfig := chain.Config()
+	
+	rules := extras.GenesisRules{
+		IsApricotPhase3: luxConfig.IsApricotPhase3(header.Time),
+		IsApricotPhase5: luxConfig.IsApricotPhase5(header.Time),
+		IsApricotPhase6: luxConfig.IsApricotPhase6(header.Time),
+		IsApricotPhasePre6: luxConfig.IsApricotPhasePre6(header.Time),
+		IsApricotPhasePost6: luxConfig.IsApricotPhasePost6(header.Time),
+	}
 	
 	if err := customheader.VerifyExtra(rules, header.Extra); err != nil {
 		return err
 	}
 
-	// Get extra config for gas field verification
-	config := params.GetExtra(chain.Config())
 	// Ensure gas-related header fields are correct
-	if err := verifyHeaderGasFields(config, header, parent, chain); err != nil {
+	if err := verifyHeaderGasFields(chain, header, parent); err != nil {
 		return err
 	}
 	// Ensure that coinbase is valid
@@ -332,11 +342,9 @@ func (eng *DummyEngine) verifyBlockFee(
 }
 
 func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
-	// NOTE: chain.Config() returns ethereum's ChainConfig, but we need our own
-	luxConfig := &params.ChainConfig{
-		ChainID: chain.Config().ChainID,
-	}
-	config := params.GetExtra(luxConfig)
+	// Get extras config from chain config
+	// chain.Config() returns our params.ChainConfig, not ethereum's
+	config := params.GetExtra(chain.Config())
 	timestamp := block.Time()
 	// we use the parent to determine the fee config
 	// since the current block has not been finalized yet.
@@ -379,11 +387,9 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	if err != nil {
 		return nil, err
 	}
-	// NOTE: chain.Config() returns ethereum's ChainConfig, but we need our own
-	luxConfig := &params.ChainConfig{
-		ChainID: chain.Config().ChainID,
-	}
-	config := params.GetExtra(luxConfig)
+	// Get extras config from chain config
+	// chain.Config() returns our params.ChainConfig, not ethereum's
+	config := params.GetExtra(chain.Config())
 
 	// Calculate the required block gas cost for this block.
 	headerExtra := customtypes.GetHeaderExtra(header)

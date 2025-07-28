@@ -6,7 +6,7 @@ package modules
 import (
 	"bytes"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 type Module struct {

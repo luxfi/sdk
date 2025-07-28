@@ -7,9 +7,9 @@ import (
 	"encoding/binary"
 
 	"github.com/luxfi/node/utils/wrappers"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/log"
 )
 
 // ReadSyncRoot reads the root corresponding to the main trie of an in-progress

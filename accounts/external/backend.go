@@ -32,15 +32,15 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth"
+	"github.com/luxfi/geth/rpc"
+	"github.com/luxfi/geth/signer/core/apitypes"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 )
 
 type ExternalBackend struct {
@@ -159,7 +159,7 @@ func (api *ExternalSigner) Derive(path accounts.DerivationPath, pin bool) (accou
 	return accounts.Account{}, errors.New("operation not supported on external signers")
 }
 
-func (api *ExternalSigner) SelfDerive(bases []accounts.DerivationPath, chain ethereum.ChainStateReader) {
+func (api *ExternalSigner) SelfDerive(bases []accounts.DerivationPath, chain geth.ChainStateReader) {
 	log.Error("operation SelfDerive not supported on external signers")
 }
 

@@ -33,17 +33,17 @@ import (
 	"fmt"
 	"math/big"
 
-	gethparams "github.com/ethereum/go-ethereum/params"
+	gethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/blake2b"
-	// "github.com/ethereum/go-ethereum/crypto/bls12381" // TODO: Add this to geth
-	"github.com/ethereum/go-ethereum/crypto/bn256"
-	"github.com/ethereum/go-ethereum/crypto/kzg4844"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/crypto/blake2b"
+	// "github.com/luxfi/geth/crypto/bls12381" // TODO: Add this to geth
+	"github.com/luxfi/geth/crypto/bn256"
+	"github.com/luxfi/geth/crypto/kzg4844"
 	"golang.org/x/crypto/ripemd160"
 )
 

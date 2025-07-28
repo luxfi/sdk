@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/evm/core/bloombits"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // Filter can be used to retrieve and filter logs.

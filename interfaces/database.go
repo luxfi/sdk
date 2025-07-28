@@ -7,7 +7,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 )
 
 // Database errors

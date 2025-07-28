@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/luxfi/geth/common/hexutil"
 )
 
 var _ Client = (*client)(nil)

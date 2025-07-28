@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/utils"
 )
 

@@ -32,8 +32,8 @@ import (
 	"testing"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/require"
 )
 

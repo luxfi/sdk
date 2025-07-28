@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
-	ethcommon "github.com/ethereum/go-ethereum/common"
+	ethcommon "github.com/luxfi/geth/common"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/stretchr/testify/assert"

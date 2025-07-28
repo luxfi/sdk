@@ -37,9 +37,9 @@ import (
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/eth/tracers"
 	jsassets "github.com/luxfi/evm/eth/tracers/js/internal/tracers"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/crypto"
 )
 
 var assetTracers = make(map[string]string)

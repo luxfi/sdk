@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 const (

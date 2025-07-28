@@ -32,8 +32,8 @@ import (
 	"fmt"
 	"math/big"
 	
-	"github.com/ethereum/go-ethereum/common"
-	ethparams "github.com/ethereum/go-ethereum/params"
+	"github.com/luxfi/geth/common"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"

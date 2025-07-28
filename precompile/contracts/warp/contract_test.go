@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/vmerrs"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/core/extstate"

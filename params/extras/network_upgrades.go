@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
-	gethparams "github.com/ethereum/go-ethereum/params"
+	gethparams "github.com/luxfi/geth/params"
 )
 
 var errCannotBeNil = fmt.Errorf("timestamp cannot be nil")

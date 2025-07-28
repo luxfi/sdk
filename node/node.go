@@ -27,7 +27,7 @@
 package node
 
 import (
-	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/evm/rpc"
 )
 

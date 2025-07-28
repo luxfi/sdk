@@ -30,7 +30,7 @@ import (
 	"time"
 
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/ethereum/go-ethereum/common/bitutil"
+	"github.com/luxfi/geth/common/bitutil"
 )
 
 const (

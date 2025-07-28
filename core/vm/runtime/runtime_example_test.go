@@ -29,7 +29,7 @@ package runtime_test
 import (
 	"fmt"
 	"github.com/luxfi/evm/core/vm/runtime"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func ExampleExecute() {

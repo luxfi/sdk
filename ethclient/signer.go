@@ -31,7 +31,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // senderFromServer is a types.Signer that remembers the sender address returned by the RPC

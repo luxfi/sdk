@@ -33,9 +33,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/holiman/uint256"
 )

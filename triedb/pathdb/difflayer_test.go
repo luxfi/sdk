@@ -30,7 +30,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/interfaces/core/rawdb"
 	"github.com/luxfi/evm/interfaces/trie/testutil"
 	"github.com/luxfi/evm/trie/trienode"

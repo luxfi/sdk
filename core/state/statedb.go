@@ -30,12 +30,12 @@ package state
 import (
 	"math/big"
 	
-	ethstate "github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/state/snapshot"
-	"github.com/ethereum/go-ethereum/core/tracing"
-	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	ethparams "github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/common"
+	ethstate "github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/core/state/snapshot"
+	"github.com/luxfi/geth/core/tracing"
+	ethtypes "github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/common"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"

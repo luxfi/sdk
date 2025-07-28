@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"

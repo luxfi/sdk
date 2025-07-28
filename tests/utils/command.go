@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"

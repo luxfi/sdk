@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
 	"github.com/luxfi/evm/plugin/evm/upgrade/etna"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/luxfi/geth/common/hexutil"
 )
 
 const (

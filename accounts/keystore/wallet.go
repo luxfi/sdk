@@ -29,10 +29,10 @@ package keystore
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth"
+	"github.com/luxfi/geth/crypto"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original
@@ -87,7 +87,7 @@ func (w *keystoreWallet) Derive(path accounts.DerivationPath, pin bool) (account
 
 // SelfDerive implements accounts.Wallet, but is a noop for plain wallets since
 // there is no notion of hierarchical account derivation for plain keystore accounts.
-func (w *keystoreWallet) SelfDerive(bases []accounts.DerivationPath, chain ethereum.ChainStateReader) {
+func (w *keystoreWallet) SelfDerive(bases []accounts.DerivationPath, chain geth.ChainStateReader) {
 }
 
 // signHash attempts to sign the given hash with

@@ -43,13 +43,13 @@ import (
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/core/vm/runtime"
-	"github.com/ethereum/go-ethereum/eth/tracers/logger"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 	"github.com/urfave/cli/v2"
 )
 

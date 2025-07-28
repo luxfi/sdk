@@ -19,7 +19,7 @@ import (
 	{{- if .Contract.AllowList}}
 	"github.com/luxfi/evm/precompile/allowlist"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	{{- end}}
 	"go.uber.org/mock/gomock"
 )

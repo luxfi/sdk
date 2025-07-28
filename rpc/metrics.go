@@ -29,7 +29,7 @@ package rpc
 import (
 	"fmt"
 	"time"
-	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/luxfi/geth/metrics"
 )
 
 // ====== If resolving merge conflicts ======

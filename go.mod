@@ -16,6 +16,8 @@ replace github.com/luxfi/geth => ../geth
 
 replace github.com/tyler-smith/go-bip39 => github.com/luxfi/go-bip39 v1.1.0
 
+replace github.com/luxfi/warp => ../warp
+
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
 	github.com/cespare/cp v0.1.0
@@ -24,7 +26,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/docker/docker v28.3.2+incompatible
 	github.com/dop251/goja v0.0.0-20230806174421-c933cf95e127
-	github.com/ethereum/go-ethereum v1.16.1
 	github.com/ethereum/go-verkle v0.2.2
 	github.com/fjl/gencodec v0.1.1
 	github.com/fsnotify/fsnotify v1.7.0
@@ -114,6 +115,8 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/luxfi/geth v1.16.2 // indirect
+	github.com/luxfi/warp v0.1.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 var testFeeConfig = commontype.FeeConfig{

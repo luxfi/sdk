@@ -35,12 +35,12 @@ import (
 	"time"
 
 	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/state/pruner"
+	"github.com/luxfi/geth/core/state/pruner"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/evm/core/types"
@@ -52,13 +52,13 @@ import (
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/internal/shutdowncheck"
 	"github.com/luxfi/evm/miner"
-	"github.com/ethereum/go-ethereum/node"
+	"github.com/luxfi/geth/node"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 )
 
 // Config contains the configuration options of the ETH protocol.

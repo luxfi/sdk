@@ -11,12 +11,12 @@ import (
 	"sync"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/luxfi/geth/ethdb"
 	syncclient "github.com/luxfi/evm/sync/client"
-	"github.com/ethereum/go-ethereum/trie"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
