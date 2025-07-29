@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/linear"
+	"github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/version"
@@ -92,19 +92,19 @@ func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 }
 
 // GetBlock implements the block.ChainVM interface
-func (vm *VM) GetBlock(ctx context.Context, blkID ids.ID) (linear.Block, error) {
+func (vm *VM) GetBlock(ctx context.Context, blkID ids.ID) (chain.Block, error) {
 	// TODO: Implement block retrieval
 	return nil, database.ErrNotFound
 }
 
 // ParseBlock implements the block.ChainVM interface
-func (vm *VM) ParseBlock(ctx context.Context, blockBytes []byte) (linear.Block, error) {
+func (vm *VM) ParseBlock(ctx context.Context, blockBytes []byte) (chain.Block, error) {
 	// TODO: Implement block parsing
 	return nil, database.ErrNotFound
 }
 
 // BuildBlock implements the block.ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (linear.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (chain.Block, error) {
 	// TODO: Implement block building
 	return nil, database.ErrNotFound
 }
