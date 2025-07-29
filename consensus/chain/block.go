@@ -2,13 +2,13 @@
 // All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package linear
+package chain
 
 import (
 	"github.com/luxfi/node/ids"
 )
 
-// Block is the interface for linear blocks
+// Block is the interface for chain blocks
 type Block interface {
 	ID() ids.ID
 	ParentID() ids.ID
@@ -29,7 +29,7 @@ const (
 	Accepted
 )
 
-// Consensus interface for linear consensus
+// Consensus interface for chain consensus
 type Consensus interface {
 	Add(Block) error
 	Finalized() bool

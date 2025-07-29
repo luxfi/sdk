@@ -11,23 +11,27 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/utils"
+
 	ethcommon "github.com/luxfi/geth/common"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/message"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/version"
+
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/plugin/evm/message"
 )
 
 var (
-	defaultPeerVersion = &interfaces.Application{
+	defaultPeerVersion = &version.Application{
 		Major: 1,
 		Minor: 0,
 		Patch: 0,
@@ -410,7 +414,7 @@ func TestRequestMinVersion(t *testing.T) {
 		net.Connected(
 			context.Background(),
 			nodeID,
-			&interfaces.Application{
+			&version.Application{
 				Name:  interfaces.Client,
 				Major: 1,
 				Minor: 7,
@@ -422,7 +426,7 @@ func TestRequestMinVersion(t *testing.T) {
 	// ensure version does not match
 	responseBytes, _, err := client.SendAppRequestAny(
 		context.Background(),
-		&interfaces.Application{
+		&version.Application{
 			Name:  interfaces.Client,
 			Major: 2,
 			Minor: 0,
@@ -529,11 +533,11 @@ func TestHandleInvalidMessages(t *testing.T) {
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), garbageResponse))
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), emptyResponse))
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), nilResponse))
-	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, gossipMsg))
-	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, requestMessage))
-	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, garbageResponse))
-	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, emptyResponse))
-	assert.ErrorIs(t, interfaces.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, nilResponse))
+	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, gossipMsg))
+	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, requestMessage))
+	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, garbageResponse))
+	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, emptyResponse))
+	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, nilResponse))
 }
 
 func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
@@ -596,15 +600,15 @@ func TestNetworkRouting(t *testing.T) {
 	require.True(handler.appRequested)
 
 	err = network.AppResponse(context.Background(), ids.GenerateTestNodeID(), requestID, foobar)
-	require.ErrorIs(err, interfaces.ErrUnrequestedResponse)
+	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
 
 	err = network.AppRequestFailed(context.Background(), nodeID, requestID, common.ErrTimeout)
-	require.ErrorIs(err, interfaces.ErrUnrequestedResponse)
+	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
 }
 
-func buildCodec(t *testing.T, types ...interface{}) interfaces.Manager {
-	codecManager := interfaces.NewDefaultManager()
-	c := linearinterfaces.NewDefault()
+func buildCodec(t *testing.T, types ...interface{}) codec.Manager {
+	codecManager := codec.NewDefaultManager()
+	c := linearcodec.NewDefault()
 	for _, typ := range types {
 		assert.NoError(t, c.RegisterType(typ))
 	}
@@ -614,8 +618,8 @@ func buildCodec(t *testing.T, types ...interface{}) interfaces.Manager {
 
 // marshalStruct is a helper method used to marshal an object as `interface{}`
 // so that the codec is able to include the TypeID in the resulting bytes
-func marshalStruct(codec interfaces.Manager, obj interface{}) ([]byte, error) {
-	return interfaces.Marshal(message.Version, &obj)
+func marshalStruct(codecManager codec.Manager, obj interface{}) ([]byte, error) {
+	return codecManager.Marshal(message.Version, &obj)
 }
 
 type testAppSender struct {
