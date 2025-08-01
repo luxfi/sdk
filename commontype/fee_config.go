@@ -1,4 +1,4 @@
-// (c) 2019-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package commontype
@@ -6,7 +6,9 @@ package commontype
 import (
 	"fmt"
 	"math/big"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/utils"
 )
 
 // FeeConfig specifies the parameters for the dynamic fee algorithm, which determines the gas limit, base fee, and block gas cost of blocks
@@ -105,25 +107,14 @@ func (f *FeeConfig) Equal(other *FeeConfig) bool {
 		return false
 	}
 
-	return bigNumEqual(f.GasLimit, other.GasLimit) &&
+	return utils.BigNumEqual(f.GasLimit, other.GasLimit) &&
 		f.TargetBlockRate == other.TargetBlockRate &&
-		bigNumEqual(f.MinBaseFee, other.MinBaseFee) &&
-		bigNumEqual(f.TargetGas, other.TargetGas) &&
-		bigNumEqual(f.BaseFeeChangeDenominator, other.BaseFeeChangeDenominator) &&
-		bigNumEqual(f.MinBlockGasCost, other.MinBlockGasCost) &&
-		bigNumEqual(f.MaxBlockGasCost, other.MaxBlockGasCost) &&
-		bigNumEqual(f.BlockGasCostStep, other.BlockGasCostStep)
-}
-
-// bigNumEqual compares two big.Int values
-func bigNumEqual(a, b *big.Int) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-	return a.Cmp(b) == 0
+		utils.BigNumEqual(f.MinBaseFee, other.MinBaseFee) &&
+		utils.BigNumEqual(f.TargetGas, other.TargetGas) &&
+		utils.BigNumEqual(f.BaseFeeChangeDenominator, other.BaseFeeChangeDenominator) &&
+		utils.BigNumEqual(f.MinBlockGasCost, other.MinBlockGasCost) &&
+		utils.BigNumEqual(f.MaxBlockGasCost, other.MaxBlockGasCost) &&
+		utils.BigNumEqual(f.BlockGasCostStep, other.BlockGasCostStep)
 }
 
 // checkByteLens checks byte lengths against common.HashLen (32 bytes) and returns error

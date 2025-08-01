@@ -1,12 +1,11 @@
-// (c) 2024 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package extras_test
+package extras
 
 import (
 	"testing"
 
-	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,11 +50,7 @@ func TestIsTimestampForked(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			// Test through NetworkUpgrades public methods
-			n := &extras.NetworkUpgrades{
-				EVMTimestamp: test.fork,
-			}
-			res := n.IsEVM(test.block)
+			res := isTimestampForked(test.fork, test.block)
 			assert.Equal(t, test.isForked, res)
 		})
 	}
@@ -125,7 +120,7 @@ func TestIsForkTransition(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			res := extras.IsForkTransition(test.fork, test.parent, test.current)
+			res := IsForkTransition(test.fork, test.parent, test.current)
 			assert.Equal(t, test.transitioned, res)
 		})
 	}

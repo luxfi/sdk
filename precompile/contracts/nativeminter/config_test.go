@@ -1,24 +1,25 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package nativeminter
 
 import (
 	"testing"
-	"github.com/luxfi/evm/precompile/allowlist"
-	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/evm/precompile/testutils"
-	"github.com/luxfi/evm/utils"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/precompiletest"
+	"github.com/luxfi/evm/utils"
 	"go.uber.org/mock/gomock"
 )
 
 func TestVerify(t *testing.T) {
-	admins := []common.Address{allowlist.TestAdminAddr}
-	enableds := []common.Address{allowlist.TestEnabledAddr}
-	managers := []common.Address{allowlist.TestManagerAddr}
-	tests := map[string]testutils.ConfigVerifyTest{
+	admins := []common.Address{allowlisttest.TestAdminAddr}
+	enableds := []common.Address{allowlisttest.TestEnabledAddr}
+	managers := []common.Address{allowlisttest.TestManagerAddr}
+	tests := map[string]precompiletest.ConfigVerifyTest{
 		"valid config": {
 			Config: NewConfig(utils.NewUint64(3), admins, enableds, managers, nil),
 			ChainConfig: func() precompileconfig.ChainConfig {
@@ -28,15 +29,15 @@ func TestVerify(t *testing.T) {
 			}(),
 			ExpectedError: "",
 		},
-		"invalid allow list config in native minter allowlist": {
+		"invalid allow list config in native minter allowlisttest": {
 			Config:        NewConfig(utils.NewUint64(3), admins, admins, nil, nil),
 			ExpectedError: "cannot set address",
 		},
-		"duplicate admins in config in native minter allowlist": {
+		"duplicate admins in config in native minter allowlisttest": {
 			Config:        NewConfig(utils.NewUint64(3), append(admins, admins[0]), enableds, managers, nil),
 			ExpectedError: "duplicate address",
 		},
-		"duplicate enableds in config in native minter allowlist": {
+		"duplicate enableds in config in native minter allowlisttest": {
 			Config:        NewConfig(utils.NewUint64(3), admins, append(enableds, enableds[0]), managers, nil),
 			ExpectedError: "duplicate address",
 		},
@@ -57,14 +58,14 @@ func TestVerify(t *testing.T) {
 			ExpectedError: "initial mint cannot contain invalid amount",
 		},
 	}
-	allowlist.VerifyPrecompileWithAllowListTests(t, Module, tests)
+	allowlisttest.VerifyPrecompileWithAllowListTests(t, Module, tests)
 }
 
 func TestEqual(t *testing.T) {
-	admins := []common.Address{allowlist.TestAdminAddr}
-	enableds := []common.Address{allowlist.TestEnabledAddr}
-	managers := []common.Address{allowlist.TestManagerAddr}
-	tests := map[string]testutils.ConfigEqualTest{
+	admins := []common.Address{allowlisttest.TestAdminAddr}
+	enableds := []common.Address{allowlisttest.TestEnabledAddr}
+	managers := []common.Address{allowlisttest.TestManagerAddr}
+	tests := map[string]precompiletest.ConfigEqualTest{
 		"non-nil config and nil other": {
 			Config:   NewConfig(utils.NewUint64(3), admins, enableds, managers, nil),
 			Other:    nil,
@@ -114,5 +115,5 @@ func TestEqual(t *testing.T) {
 			Expected: true,
 		},
 	}
-	allowlist.EqualPrecompileWithAllowListTests(t, Module, tests)
+	allowlisttest.EqualPrecompileWithAllowListTests(t, Module, tests)
 }

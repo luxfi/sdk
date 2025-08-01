@@ -1,4 +1,4 @@
-// (c) 2019-2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package nativeminter
@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/require"
 )
 

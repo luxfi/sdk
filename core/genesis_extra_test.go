@@ -1,4 +1,4 @@
-// (c) 2025 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package core
@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params"
@@ -46,7 +46,7 @@ func TestGenesisEthUpgrades(t *testing.T) {
 				MinBaseFee: big.NewInt(1),
 			},
 			NetworkUpgrades: extras.NetworkUpgrades{
-				EVMTimestamp: utils.NewUint64(0),
+				SubnetEVMTimestamp: utils.NewUint64(0),
 			},
 		},
 	)
@@ -70,8 +70,7 @@ func TestGenesisEthUpgrades(t *testing.T) {
 	rawdb.WriteBlock(db, block)
 	// We should still be able to re-initialize
 	config = *preEthUpgrades
-	luxUpgrades := extras.NetworkUpgrades{}
-	params.SetEthUpgrades(&config, luxUpgrades) // New versions will set additional fields eg, LondonBlock
+	require.NoError(t, params.SetEthUpgrades(&config)) // New versions will set additional fields eg, LondonBlock
 	_, _, err = SetupGenesisBlock(db, tdb, &Genesis{Config: &config}, block.Hash(), false)
 	require.NoError(t, err)
 }

@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -27,7 +28,7 @@
 // Package bind generates Ethereum contract Go bindings.
 //
 // Detailed usage document and tutorial available on the go-ethereum Wiki page:
-// https://github.com/luxfi/evm/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
+// https://github.com/ethereum/go-ethereum/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
 package bind
 
 import (
@@ -38,8 +39,9 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
-	"github.com/luxfi/evm/accounts/abi"
+
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/accounts/abi"
 )
 
 // Lang is a target programming language selector to generate bindings for.

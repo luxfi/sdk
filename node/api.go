@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -27,10 +28,10 @@
 package node
 
 import (
-	"github.com/luxfi/evm/internal/debug"
-	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/internal/debug"
+	"github.com/luxfi/evm/rpc"
 )
 
 // apis returns the collection of built-in RPC APIs.
@@ -56,7 +57,7 @@ type web3API struct {
 
 // ClientVersion returns the node name
 func (s *web3API) ClientVersion() string {
-	return s.stack.config.EVMVersion
+	return s.stack.config.SubnetEVMVersion
 }
 
 // Sha3 applies the ethereum sha3 implementation on the input.

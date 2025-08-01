@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,10 +34,11 @@ import (
 
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/geth/trie/triestate"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -152,12 +154,9 @@ func (dl *diskLayer) Node(owner common.Hash, path []byte, hash common.Hash) ([]b
 		nHash common.Hash
 	)
 	if owner == (common.Hash{}) {
-		nBlob, _ = rawdb.ReadAccountTrieNode(dl.db.diskdb, path)
+		nBlob, nHash = rawdb.ReadAccountTrieNode(dl.db.diskdb, path)
 	} else {
-		nBlob, _ = rawdb.ReadStorageTrieNode(dl.db.diskdb, owner, path)
-	}
-	if len(nBlob) > 0 {
-		nHash = crypto.Keccak256Hash(nBlob)
+		nBlob, nHash = rawdb.ReadStorageTrieNode(dl.db.diskdb, owner, path)
 	}
 	if nHash != hash {
 		diskFalseMeter.Mark(1)
@@ -173,7 +172,7 @@ func (dl *diskLayer) Node(owner common.Hash, path []byte, hash common.Hash) ([]b
 
 // update implements the layer interface, returning a new diff layer on top
 // with the given state set.
-func (dl *diskLayer) update(root common.Hash, id uint64, block uint64, nodes map[common.Hash]map[string]*trienode.Node, states *Set) *diffLayer {
+func (dl *diskLayer) update(root common.Hash, id uint64, block uint64, nodes map[common.Hash]map[string]*trienode.Node, states *triestate.Set) *diffLayer {
 	return newDiffLayer(dl, root, id, block, nodes, states)
 }
 
@@ -250,7 +249,7 @@ func (dl *diskLayer) commit(bottom *diffLayer, force bool) (*diskLayer, error) {
 
 // nolint: unused
 // revert applies the given state history and return a reverted disk layer.
-func (dl *diskLayer) revert(h *history, loader TrieLoader) (*diskLayer, error) {
+func (dl *diskLayer) revert(h *history, loader triestate.TrieLoader) (*diskLayer, error) {
 	if h.meta.root != dl.rootHash() {
 		return nil, errUnexpectedHistory
 	}
@@ -266,12 +265,10 @@ func (dl *diskLayer) revert(h *history, loader TrieLoader) (*diskLayer, error) {
 	// Apply the reverse state changes upon the current state. This must
 	// be done before holding the lock in order to access state in "this"
 	// layer.
-	// FIXME: triestate.Apply doesn't exist in ethereum v1.16.1
-	// nodes, err := triestate.Apply(h.meta.parent, h.meta.root, h.accounts, h.storages, loader)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// var nodes *trienode.MergedNodeSet
+	nodes, err := triestate.Apply(h.meta.parent, h.meta.root, h.accounts, h.storages, loader)
+	if err != nil {
+		return nil, err
+	}
 	// Mark the diskLayer as stale before applying any mutations on top.
 	dl.lock.Lock()
 	defer dl.lock.Unlock()
@@ -284,15 +281,13 @@ func (dl *diskLayer) revert(h *history, loader TrieLoader) (*diskLayer, error) {
 	// needs to be reverted is not yet flushed and cached in node
 	// buffer, otherwise, manipulate persistent state directly.
 	if !dl.buffer.empty() {
-		// FIXME: Can't pass MergedNodeSet to revert which expects map type
-		err := errors.New("revert not implemented for MergedNodeSet")
+		err := dl.buffer.revert(dl.db.diskdb, nodes)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		batch := dl.db.diskdb.NewBatch()
-		// FIXME: Can't pass MergedNodeSet to writeNodes which expects map type
-		// writeNodes(batch, nodes, dl.cleans)
+		writeNodes(batch, nodes, dl.cleans)
 		rawdb.WritePersistentStateID(batch, dl.id-1)
 		if err := batch.Write(); err != nil {
 			log.Crit("Failed to write states", "err", err)

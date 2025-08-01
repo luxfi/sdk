@@ -17,13 +17,13 @@ PLATFORMS="${PLATFORMS:-}"
 PUBLISH="${PUBLISH:-}"
 
 # Directory above this script
-SUBNET_EVM_PATH=$(
+EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
 )
 
 # Load the constants
-source "$SUBNET_EVM_PATH"/scripts/constants.sh
+source "$EVM_PATH"/scripts/constants.sh
 
 # ALLOW_TAG_LATEST is used to tag the image as 'latest' if set to true.
 # It only works if the image is built from the master branch. This is to avoid
@@ -92,7 +92,7 @@ if ! docker pull "${LUXD_NODE_IMAGE}"; then
   LUXD_NODE_IMAGE="${LUXD_LOCAL_IMAGE_NAME}:${LUX_VERSION}"
   echo "Building ${LUXD_NODE_IMAGE} locally"
 
-  source "${SUBNET_EVM_PATH}"/scripts/lib_luxd_clone.sh
+  source "${EVM_PATH}"/scripts/lib_luxd_clone.sh
   clone_luxd "${LUX_VERSION}"
   SKIP_BUILD_RACE=1 \
     DOCKER_IMAGE="${LUXD_LOCAL_IMAGE_NAME}" \
@@ -100,11 +100,11 @@ if ! docker pull "${LUXD_NODE_IMAGE}"; then
     "${LUXD_CLONE_PATH}"/scripts/build_image.sh
 fi
 
-echo "Building Docker Image: $IMAGE_NAME:$BUILD_IMAGE_ID based of Lux@$LUX_VERSION"
+echo "Building Docker Image: $IMAGE_NAME:$BUILD_IMAGE_ID based of Luxd@$LUX_VERSION"
 ${DOCKER_CMD} -t "$IMAGE_NAME:$BUILD_IMAGE_ID" -t "$IMAGE_NAME:${DOCKERHUB_TAG}" \
-  "$SUBNET_EVM_PATH" -f "$SUBNET_EVM_PATH/Dockerfile" \
+  "$EVM_PATH" -f "$EVM_PATH/Dockerfile" \
   --build-arg LUXD_NODE_IMAGE="$LUXD_NODE_IMAGE" \
-  --build-arg SUBNET_EVM_COMMIT="$SUBNET_EVM_COMMIT" \
+  --build-arg EVM_COMMIT="$EVM_COMMIT" \
   --build-arg CURRENT_BRANCH="$CURRENT_BRANCH" \
   --build-arg VM_ID="$VM_ID"
 

@@ -1,3 +1,14 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+//
+// This file is a derived work, based on the go-ethereum library whose original
+// notices appear below.
+//
+// It is distributed under a license compatible with the licensing terms of the
+// original code from which it is derived.
+//
+// Much love to the original authors for their work.
+// **********
 // Copyright 2023 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -21,20 +32,21 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/geth/core"
+	"github.com/luxfi/luxd/utils/timer/mockable"
+	ethereum "github.com/luxfi/geth"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/eth"
-	"github.com/luxfi/geth/eth/ethconfig"
-	"github.com/luxfi/geth/ethclient"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/constants"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/eth"
+	"github.com/luxfi/evm/eth/ethconfig"
+	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/node"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/node"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 )
 
 var _ eth.PushGossiper = (*fakePushGossiper)(nil)
@@ -45,20 +57,20 @@ func (*fakePushGossiper) Add(*types.Transaction) {}
 
 // Client exposes the methods provided by the Ethereum RPC client.
 type Client interface {
-	interfaces.BlockNumberReader
-	interfaces.ChainReader
-	interfaces.ChainStateReader
-	interfaces.ContractCaller
-	interfaces.GasEstimator
-	interfaces.GasPricer
-	interfaces.GasPricer1559
-	interfaces.FeeHistoryReader
-	interfaces.LogFilterer
+	ethereum.BlockNumberReader
+	ethereum.ChainReader
+	ethereum.ChainStateReader
+	ethereum.ContractCaller
+	ethereum.GasEstimator
+	ethereum.GasPricer
+	ethereum.GasPricer1559
+	ethereum.FeeHistoryReader
+	ethereum.LogFilterer
 	interfaces.AcceptedStateReader
 	interfaces.AcceptedContractCaller
-	interfaces.TransactionReader
-	interfaces.TransactionSender
-	interfaces.ChainIDReader
+	ethereum.TransactionReader
+	ethereum.TransactionSender
+	ethereum.ChainIDReader
 }
 
 // simClient wraps ethclient. This exists to prevent extracting ethclient.Client
@@ -81,7 +93,7 @@ type Backend struct {
 //
 // A simulated backend always uses chainID 1337.
 func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config, ethConf *ethconfig.Config)) *Backend {
-	chainConfig := *params.TestChainConfig
+	chainConfig := params.Copy(params.TestChainConfig)
 	chainConfig.ChainID = big.NewInt(1337)
 
 	// Create the default configurations for the outer node shell and the Ethereum
@@ -90,8 +102,9 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 
 	ethConf := ethconfig.DefaultConfig
 	ethConf.Genesis = &core.Genesis{
-		Config: &chainConfig,
-		Alloc:  alloc,
+		Config:   &chainConfig,
+		GasLimit: params.GetExtra(&chainConfig).FeeConfig.GasLimit.Uint64(),
+		Alloc:    alloc,
 	}
 	ethConf.AllowUnfinalizedQueries = true
 	ethConf.Miner.Etherbase = constants.BlackholeAddr

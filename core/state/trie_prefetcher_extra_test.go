@@ -1,4 +1,4 @@
-// (c) 2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -12,12 +12,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/luxd/database"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/luxfi/geth/geth/stateconf"
+	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/triedb/hashdb"
@@ -139,7 +140,7 @@ func BenchmarkPrefetcherDatabase(b *testing.B) {
 				snaps := snapshot.NewTestTree(levelDB, fakeHash(block), root)
 				db := NewDatabaseWithConfig(levelDB, tdbConfig)
 				getMetric := func(metric string) int64 {
-					meter := interfaces.GetOrRegisterMeter(triePrefetchMetricsPrefix+namespace+"/storage/"+metric, nil)
+					meter := metrics.GetOrRegisterMeter(triePrefetchMetricsPrefix+namespace+"/storage/"+metric, nil)
 					return meter.Snapshot().Count()
 				}
 				startLoads := getMetric("load")
@@ -169,7 +170,7 @@ func addKVs(
 		return nil, common.Hash{}, fmt.Errorf("creating state with snapshot: %w", err)
 	}
 	if prefetchers > 0 {
-		statedb.StartPrefetcher(namespace, nil)
+		statedb.StartPrefetcher(namespace, WithConcurrentWorkers(prefetchers))
 		defer statedb.StopPrefetcher()
 	}
 	for _, address := range []common.Address{address1, address2} {
@@ -183,7 +184,8 @@ func addKVs(
 			statedb.SetState(address, common.BytesToHash(key), common.BytesToHash(value))
 		}
 	}
-	root, err = statedb.Commit(block+1, true)
+	snapshotOpt := snapshot.WithBlockHashes(fakeHash(block+1), fakeHash(block))
+	root, err = statedb.Commit(block+1, true, stateconf.WithSnapshotUpdateOpts(snapshotOpt))
 	if err != nil {
 		return nil, common.Hash{}, fmt.Errorf("committing with snap: %w", err)
 	}

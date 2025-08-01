@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,7 +33,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	ethparams "github.com/luxfi/evm/params"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/holiman/uint256"
 )
 

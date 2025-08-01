@@ -1,4 +1,4 @@
-// (c) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
@@ -25,16 +25,16 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package consensus implements different consensus engines.
+// Package consensus implements different Ethereum consensus engines.
 package consensus
 
 import (
 	"math/big"
 
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
 )
 
@@ -57,11 +57,10 @@ type ChainHeaderReader interface {
 	GetHeaderByHash(hash common.Hash) *types.Header
 
 	// GetFeeConfigAt retrieves the fee config and last changed block number at block header.
-	// This is only supported by Lux VMs.
 	GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error)
 
 	// GetCoinbaseAt retrieves the configured coinbase address at [parent].
-	// If fee recipients are allowed, returns true in the second return value.
+	// If fee recipients are allowed, returns true in the second return value and a predefined address in the first value.
 	GetCoinbaseAt(parent *types.Header) (common.Address, bool, error)
 }
 
@@ -118,12 +117,4 @@ type Engine interface {
 
 	// Close terminates any background threads maintained by the consensus engine.
 	Close() error
-}
-
-// PoW is a consensus engine based on proof-of-work.
-type PoW interface {
-	Engine
-
-	// Hashrate returns the current mining hashrate of a PoW consensus engine.
-	Hashrate() float64
 }

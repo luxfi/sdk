@@ -1,13 +1,14 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
 
 import (
 	"context"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/utils/constants"
+
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/luxd/snow/validators"
+	"github.com/luxfi/luxd/utils/constants"
 )
 
 var _ validators.State = (*State)(nil)

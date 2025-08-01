@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesyncclient
@@ -10,20 +10,24 @@ import (
 	"fmt"
 	"sync/atomic"
 	"time"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/ids"
+
 	"github.com/luxfi/evm/sync/client/stats"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/version"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/geth/ethdb"
-	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/peer"
-	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/evm/network"
+	"github.com/luxfi/evm/plugin/evm/message"
 )
 
 const (
@@ -33,7 +37,7 @@ const (
 )
 
 var (
-	StateSyncVersion = &interfaces.Application{
+	StateSyncVersion = &version.Application{
 		Major: 1,
 		Minor: 7,
 		Patch: 13,
@@ -47,7 +51,7 @@ var (
 	errInvalidCodeResponseLen = errors.New("number of code bytes in response does not match requested hashes")
 	errMaxCodeSizeExceeded    = errors.New("max code size exceeded")
 )
-var _ Client = &client{}
+var _ Client = (*client)(nil)
 
 // Client synchronously fetches data from the network to fulfill state sync requests.
 // Repeatedly requests failed requests until the context to the request is expired.
@@ -68,22 +72,22 @@ type Client interface {
 // Validates response in context of the request
 // Ensures the returned interface matches the expected response type of the request
 // Returns the number of elements in the response (specific to the response type, used in metrics)
-type parseResponseFn func(codec interfaces.Codec, request message.Request, response []byte) (interface{}, int, error)
+type parseResponseFn func(codec codec.Manager, request message.Request, response []byte) (interface{}, int, error)
 
 type client struct {
-	networkClient    peer.NetworkClient
-	codec            interfaces.Codec
-	stateSyncNodes   []interfaces.NodeID
+	networkClient    network.SyncedNetworkClient
+	codec            codec.Manager
+	stateSyncNodes   []ids.NodeID
 	stateSyncNodeIdx uint32
 	stats            stats.ClientSyncerStats
 	blockParser      EthBlockParser
 }
 
 type ClientConfig struct {
-	NetworkClient    peer.NetworkClient
-	Codec            interfaces.Codec
+	NetworkClient    network.SyncedNetworkClient
+	Codec            codec.Manager
 	Stats            stats.ClientSyncerStats
-	StateSyncNodeIDs []interfaces.NodeID
+	StateSyncNodeIDs []ids.NodeID
 	BlockParser      EthBlockParser
 }
 
@@ -93,11 +97,11 @@ type EthBlockParser interface {
 
 func NewClient(config *ClientConfig) *client {
 	return &client{
-		networkClient:  interfaces.NetworkClient,
-		codec:          interfaces.Codec,
-		stats:          interfaces.Stats,
-		stateSyncNodes: interfaces.StateSyncNodeIDs,
-		blockParser:    interfaces.BlockParser,
+		networkClient:  config.NetworkClient,
+		codec:          config.Codec,
+		stats:          config.Stats,
+		stateSyncNodes: config.StateSyncNodeIDs,
+		blockParser:    config.BlockParser,
 	}
 }
 
@@ -124,9 +128,9 @@ func (c *client) GetLeafs(ctx context.Context, req message.LeafsRequest) (messag
 // - first and last key in the response is not within the requested start and end range
 // - response keys are not in increasing order
 // - proof validation failed
-func parseLeafsResponse(codec interfaces.Codec, reqIntf message.Request, data []byte) (interface{}, int, error) {
+func parseLeafsResponse(codec codec.Manager, reqIntf message.Request, data []byte) (interface{}, int, error) {
 	var leafsResponse message.LeafsResponse
-	if _, err := interfaces.Unmarshal(data, &leafsResponse); err != nil {
+	if _, err := codec.Unmarshal(data, &leafsResponse); err != nil {
 		return nil, 0, err
 	}
 
@@ -199,9 +203,9 @@ func (c *client) GetBlocks(ctx context.Context, hash common.Hash, height uint64,
 // assumes req is of type message.BlockRequest
 // returns types.Blocks as interface{}
 // returns a non-nil error if the request should be retried
-func (c *client) parseBlocks(codec interfaces.Codec, req message.Request, data []byte) (interface{}, int, error) {
+func (c *client) parseBlocks(codec codec.Manager, req message.Request, data []byte) (interface{}, int, error) {
 	var response message.BlockResponse
-	if _, err := interfaces.Unmarshal(data, &response); err != nil {
+	if _, err := codec.Unmarshal(data, &response); err != nil {
 		return nil, 0, fmt.Errorf("%s: %w", errUnmarshalResponse, err)
 	}
 	if len(response.Blocks) == 0 {
@@ -223,12 +227,12 @@ func (c *client) parseBlocks(codec interfaces.Codec, req message.Request, data [
 			return nil, 0, fmt.Errorf("%s: %w", errUnmarshalResponse, err)
 		}
 
-		if interfaces.Hash() != hash {
-			return nil, 0, fmt.Errorf("%w for block: (got %v) (expected %v)", errHashMismatch, interfaces.Hash(), hash)
+		if block.Hash() != hash {
+			return nil, 0, fmt.Errorf("%w for block: (got %v) (expected %v)", errHashMismatch, block.Hash(), hash)
 		}
 
 		blocks[i] = block
-		hash = interfaces.ParentHash()
+		hash = block.ParentHash()
 	}
 
 	// return decoded blocks
@@ -249,9 +253,9 @@ func (c *client) GetCode(ctx context.Context, hashes []common.Hash) ([][]byte, e
 // parseCode validates given object as a code object
 // assumes req is of type message.CodeRequest
 // returns a non-nil error if the request should be retried
-func parseCode(codec interfaces.Codec, req message.Request, data []byte) (interface{}, int, error) {
+func parseCode(codec codec.Manager, req message.Request, data []byte) (interface{}, int, error) {
 	var response message.CodeResponse
-	if _, err := interfaces.Unmarshal(data, &response); err != nil {
+	if _, err := codec.Unmarshal(data, &response); err != nil {
 		return nil, 0, err
 	}
 
@@ -312,24 +316,24 @@ func (c *client) get(ctx context.Context, request message.Request, parseFn parse
 
 		var (
 			response []byte
-			nodeID   interfaces.NodeID
+			nodeID   ids.NodeID
 			start    time.Time = time.Now()
 		)
 		if len(c.stateSyncNodes) == 0 {
-			response, nodeID, err = c.networkClient.SendAppRequestAny(ctx, StateSyncVersion, requestBytes)
+			response, nodeID, err = c.networkClient.SendSyncedAppRequestAny(ctx, StateSyncVersion, requestBytes)
 		} else {
 			// get the next nodeID using the nodeIdx offset. If we're out of nodes, loop back to 0
 			// we do this every attempt to ensure we get a different node each time if possible.
 			nodeIdx := atomic.AddUint32(&c.stateSyncNodeIdx, 1)
 			nodeID = c.stateSyncNodes[nodeIdx%uint32(len(c.stateSyncNodes))]
 
-			response, err = c.networkClient.SendAppRequest(ctx, nodeID, requestBytes)
+			response, err = c.networkClient.SendSyncedAppRequest(ctx, nodeID, requestBytes)
 		}
 		metric.UpdateRequestLatency(time.Since(start))
 
 		if err != nil {
 			ctx := make([]interface{}, 0, 8)
-			if nodeID != interfaces.EmptyIDNodeID {
+			if nodeID != ids.EmptyNodeID {
 				ctx = append(ctx, "nodeID", nodeID)
 			}
 			ctx = append(ctx, "attempt", attempt, "request", request, "err", err)

@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,19 +30,30 @@ package core
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"math/big"
+	"path/filepath"
 	"reflect"
 	"testing"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/ethdb"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
-	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/evm/triedb/firewood"
+	"github.com/luxfi/evm/triedb/pathdb"
 	"github.com/luxfi/evm/utils"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
@@ -61,13 +73,16 @@ func TestGenesisBlockForTesting(t *testing.T) {
 }
 
 func TestSetupGenesis(t *testing.T) {
-	testSetupGenesis(t, rawdb.HashScheme)
-	testSetupGenesis(t, rawdb.PathScheme)
+	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme, customrawdb.FirewoodScheme} {
+		t.Run(scheme, func(t *testing.T) {
+			testSetupGenesis(t, scheme)
+		})
+	}
 }
 
 func testSetupGenesis(t *testing.T, scheme string) {
-	preSubnetConfig := params.Copy(params.TestPreEVMChainConfig)
-	params.GetExtra(&preSubnetConfig).EVMTimestamp = utils.NewUint64(100)
+	preSubnetConfig := params.Copy(params.TestPreSubnetEVMChainConfig)
+	params.GetExtra(&preSubnetConfig).SubnetEVMTimestamp = utils.NewUint64(100)
 	var (
 		customghash = common.HexToHash("0x4a12fe7bf8d40d152d7e9de22337b115186a4662aa3a97217b36146202bbfc66")
 		customg     = Genesis{
@@ -81,7 +96,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 	)
 
 	rollbackpreSubnetConfig := params.Copy(&preSubnetConfig)
-	params.GetExtra(&rollbackpreSubnetConfig).EVMTimestamp = utils.NewUint64(90)
+	params.GetExtra(&rollbackpreSubnetConfig).SubnetEVMTimestamp = utils.NewUint64(90)
 	oldcustomg.Config = &rollbackpreSubnetConfig
 
 	tests := []struct {
@@ -94,7 +109,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 		{
 			name: "genesis without ChainConfig",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				return setupGenesisBlock(db, triedb.NewDatabase(db, newDbConfig(scheme)), new(Genesis), common.Hash{})
+				return setupGenesisBlock(db, triedb.NewDatabase(db, newDbConfig(t, scheme)), new(Genesis), common.Hash{})
 			},
 			wantErr:    errGenesisNoConfig,
 			wantConfig: nil,
@@ -102,7 +117,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 		{
 			name: "no block in DB, genesis == nil",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				return setupGenesisBlock(db, triedb.NewDatabase(db, newDbConfig(scheme)), nil, common.Hash{})
+				return setupGenesisBlock(db, triedb.NewDatabase(db, newDbConfig(t, scheme)), nil, common.Hash{})
 			},
 			wantErr:    ErrNoGenesis,
 			wantConfig: nil,
@@ -110,7 +125,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 		{
 			name: "custom block in DB, genesis == nil",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				tdb := triedb.NewDatabase(db, newDbConfig(scheme))
+				tdb := triedb.NewDatabase(db, newDbConfig(t, scheme))
 				customg.Commit(db, tdb)
 				return setupGenesisBlock(db, tdb, nil, common.Hash{})
 			},
@@ -120,7 +135,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 		{
 			name: "compatible config in DB",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				tdb := triedb.NewDatabase(db, newDbConfig(scheme))
+				tdb := triedb.NewDatabase(db, newDbConfig(t, scheme))
 				oldcustomg.Commit(db, tdb)
 				return setupGenesisBlock(db, tdb, &customg, customghash)
 			},
@@ -130,15 +145,21 @@ func testSetupGenesis(t *testing.T, scheme string) {
 		{
 			name: "incompatible config for lux fork in DB",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				// Commit the 'old' genesis block with EVM transition at 90.
-				// Advance to block #4, past the EVM transition block of customg.
-				tdb := triedb.NewDatabase(db, newDbConfig(scheme))
+				// Commit the 'old' genesis block with SubnetEVM transition at 90.
+				// Advance to block #4, past the SubnetEVM transition block of customg.
+				tdb := triedb.NewDatabase(db, newDbConfig(t, rawdb.HashScheme))
 				genesis, err := oldcustomg.Commit(db, tdb)
 				if err != nil {
 					t.Fatal(err)
 				}
+				tdb.Close()
 
-				bc, _ := NewBlockChain(db, DefaultCacheConfigWithScheme(scheme), &oldcustomg, dummy.NewFullFaker(), vm.Config{}, genesis.Hash(), false)
+				cacheConfig := DefaultCacheConfigWithScheme(scheme)
+				cacheConfig.ChainDataDir = t.TempDir()
+				bc, err := NewBlockChain(db, cacheConfig, &oldcustomg, dummy.NewFullFaker(), vm.Config{}, genesis.Hash(), false)
+				if err != nil {
+					t.Fatal(err)
+				}
 				defer bc.Stop()
 
 				_, blocks, _, err := GenerateChainWithGenesis(&oldcustomg, dummy.NewFullFaker(), 4, 25, nil)
@@ -154,12 +175,12 @@ func testSetupGenesis(t *testing.T, scheme string) {
 				}
 
 				// This should return a compatibility error.
-				return setupGenesisBlock(db, tdb, &customg, bc.lastAccepted.Hash())
+				return setupGenesisBlock(db, bc.TrieDB(), &customg, bc.lastAccepted.Hash())
 			},
 			wantHash:   customghash,
 			wantConfig: customg.Config,
 			wantErr: &ethparams.ConfigCompatError{
-				What:         "EVM fork block timestamp",
+				What:         "SubnetEVM fork block timestamp",
 				StoredTime:   u64(90),
 				NewTime:      u64(100),
 				RewindToTime: 89,
@@ -168,7 +189,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s %s", test.name, scheme), func(t *testing.T) {
 			db := rawdb.NewMemoryDatabase()
 			config, hash, err := test.fn(db)
 			// Check the return values.
@@ -343,11 +364,21 @@ func TestGenesisWriteUpgradesRegression(t *testing.T) {
 	require.NoError(err)
 }
 
-func newDbConfig(scheme string) *triedb.Config {
-	if scheme == rawdb.HashScheme {
+func newDbConfig(t *testing.T, scheme string) *triedb.Config {
+	switch scheme {
+	case rawdb.HashScheme:
 		return triedb.HashDefaults
+	case rawdb.PathScheme:
+		return &triedb.Config{DBOverride: pathdb.Defaults.BackendConstructor}
+	case customrawdb.FirewoodScheme:
+		fwCfg := firewood.Defaults
+		// Create a unique temporary directory for each test
+		fwCfg.FilePath = filepath.Join(t.TempDir(), "firewood_state") // matches blockchain.go
+		return &triedb.Config{DBOverride: fwCfg.BackendConstructor}
+	default:
+		t.Fatalf("unknown scheme %s", scheme)
 	}
-	return &triedb.Config{DBOverride: pathdb.Defaults.BackendConstructor}
+	return nil
 }
 
 func TestVerkleGenesisCommit(t *testing.T) {

@@ -1,4 +1,5 @@
-// (c) 2020-2022, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,16 +33,24 @@ import (
 	"reflect"
 	"sync"
 	"time"
-	
+
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/geth/stateconf"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/geth/trie/triestate"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/geth/triedb/database"
 	"github.com/luxfi/evm/utils"
+
+	// Force geth metrics of the same name to be registered first.
+	_ "github.com/luxfi/geth/triedb/hashdb"
 )
 
 const (
@@ -50,9 +59,9 @@ const (
 
 // ====== If resolving merge conflicts ======
 //
-// All calls to metrics.NewRegistered*() for metrics also defined in libevm/triedb/hashdb
+// All calls to metrics.NewRegistered*() for metrics also defined in geth/triedb/hashdb
 // have been replaced with metrics.GetOrRegister*() to get metrics already registered in
-// libevm/triedb/hashdb or register them here otherwise. These replacements ensure the same
+// geth/triedb/hashdb or register them here otherwise. These replacements ensure the same
 // metrics are shared between the two packages.
 var (
 	memcacheCleanHitMeter   = metrics.GetOrRegisterMeter("hashdb/memcache/clean/hit", nil)
@@ -107,9 +116,8 @@ type Config struct {
 	ReferenceRootAtomicallyOnUpdate bool   // Whether to reference the root node on update
 }
 
-// BackendConstructor returns a new trie database backend
-func (c Config) BackendConstructor(diskdb ethdb.Database) *Database {
-	return New(diskdb, &c, nil)
+func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
+	return New(diskdb, &c, trie.MerkleResolver{})
 }
 
 // Defaults is the default setting for database if it's not specified.
@@ -643,7 +651,7 @@ func (db *Database) Initialized(genesisRoot common.Hash) bool {
 // account trie with multiple storage tries if necessary.
 // If ReferenceRootAtomicallyOnUpdate was enabled in the config, it will also add a reference from
 // the root to the metaroot while holding the db's lock.
-func (db *Database) Update(root common.Hash, parent common.Hash, block uint64, nodes *trienode.MergedNodeSet, states *trienode.NodeSet) error {
+func (db *Database) Update(root common.Hash, parent common.Hash, block uint64, nodes *trienode.MergedNodeSet, states *triestate.Set, _ ...stateconf.TrieDBUpdateOption) error {
 	// Ensure the parent state is present and signal a warning if not.
 	if parent != types.EmptyRootHash {
 		if blob, _ := db.node(parent); len(blob) == 0 {
@@ -736,7 +744,7 @@ func (db *Database) Scheme() string {
 
 // Reader retrieves a node reader belonging to the given state root.
 // An error will be returned if the requested state is not available.
-func (db *Database) Reader(root common.Hash) (*reader, error) {
+func (db *Database) Reader(root common.Hash) (database.Reader, error) {
 	if _, err := db.node(root); err != nil {
 		return nil, fmt.Errorf("state %#x is not available, %v", root, err)
 	}

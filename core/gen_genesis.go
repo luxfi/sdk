@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"math/big"
-	"github.com/luxfi/evm/params"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
+	params0 "github.com/luxfi/evm/params"
 )
 
 var _ = (*genesisSpecMarshaling)(nil)
@@ -18,7 +19,7 @@ var _ = (*genesisSpecMarshaling)(nil)
 // MarshalJSON marshals as JSON.
 func (g Genesis) MarshalJSON() ([]byte, error) {
 	type Genesis struct {
-		Config        *params.ChainConfig                       `json:"config"`
+		Config        *params0.ChainConfig                       `json:"config"`
 		Nonce         math.HexOrDecimal64                        `json:"nonce"`
 		Timestamp     math.HexOrDecimal64                        `json:"timestamp"`
 		ExtraData     hexutil.Bytes                              `json:"extraData"`
@@ -49,14 +50,7 @@ func (g Genesis) MarshalJSON() ([]byte, error) {
 	if g.Alloc != nil {
 		enc.Alloc = make(map[common.UnprefixedAddress]types.Account, len(g.Alloc))
 		for k, v := range g.Alloc {
-			// Convert GenesisAccount to Account (losing MCBalance field)
-			enc.Alloc[common.UnprefixedAddress(k)] = types.Account{
-				Code:       v.Code,
-				Storage:    v.Storage,
-				Balance:    v.Balance,
-				Nonce:      v.Nonce,
-				PrivateKey: v.PrivateKey,
-			}
+			enc.Alloc[common.UnprefixedAddress(k)] = v
 		}
 	}
 	enc.AirdropHash = g.AirdropHash
@@ -74,7 +68,7 @@ func (g Genesis) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON unmarshals from JSON.
 func (g *Genesis) UnmarshalJSON(input []byte) error {
 	type Genesis struct {
-		Config        *params.ChainConfig                       `json:"config"`
+		Config        *params0.ChainConfig                       `json:"config"`
 		Nonce         *math.HexOrDecimal64                       `json:"nonce"`
 		Timestamp     *math.HexOrDecimal64                       `json:"timestamp"`
 		ExtraData     *hexutil.Bytes                             `json:"extraData"`
@@ -128,15 +122,7 @@ func (g *Genesis) UnmarshalJSON(input []byte) error {
 	}
 	g.Alloc = make(types.GenesisAlloc, len(dec.Alloc))
 	for k, v := range dec.Alloc {
-		// Convert Account to GenesisAccount
-		g.Alloc[common.Address(k)] = types.GenesisAccount{
-			Code:       v.Code,
-			Storage:    v.Storage,
-			Balance:    v.Balance,
-			Nonce:      v.Nonce,
-			PrivateKey: v.PrivateKey,
-			MCBalance:  nil, // Set to nil as Account doesn't have MCBalance
-		}
+		g.Alloc[common.Address(k)] = v
 	}
 	if dec.AirdropHash != nil {
 		g.AirdropHash = *dec.AirdropHash

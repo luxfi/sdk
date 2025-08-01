@@ -1,19 +1,19 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
 
 import (
 	"fmt"
-	"math"
-	
-	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/geth/common"
-	ethmath "github.com/luxfi/geth/common/math"
-	"github.com/luxfi/evm/core/vm"
 )
 
 var (
@@ -42,7 +42,7 @@ func init() {
 
 type messageHandler interface {
 	packFailed() []byte
-	handleMessage(msg *interfaces.Message) ([]byte, error)
+	handleMessage(msg *warp.Message) ([]byte, error)
 }
 
 func handleWarpMessage(accessibleState contract.AccessibleState, input []byte, suppliedGas uint64, handler messageHandler) ([]byte, uint64, error) {
@@ -55,7 +55,7 @@ func handleWarpMessage(accessibleState contract.AccessibleState, input []byte, s
 	if err != nil {
 		return nil, remainingGas, fmt.Errorf("%w: %s", errInvalidIndexInput, err)
 	}
-	if warpIndexInput > interfaces.MaxInt32 {
+	if warpIndexInput > math.MaxInt32 {
 		return nil, remainingGas, fmt.Errorf("%w: larger than MaxInt32", errInvalidIndexInput)
 	}
 	warpIndex := int(warpIndexInput) // This conversion is safe even if int is 32 bits because we checked above.
@@ -69,7 +69,7 @@ func handleWarpMessage(accessibleState contract.AccessibleState, input []byte, s
 
 	// Note: we charge for the size of the message during both predicate verification and each time the message is read during
 	// EVM execution because each execution incurs an additional read cost.
-	msgBytesGas, overflow := ethinterfaces.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
+	msgBytesGas, overflow := math.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
 	if overflow {
 		return nil, 0, vm.ErrOutOfGas
 	}
@@ -82,7 +82,7 @@ func handleWarpMessage(accessibleState contract.AccessibleState, input []byte, s
 	if err != nil {
 		return nil, remainingGas, fmt.Errorf("%w: %s", errInvalidPredicateBytes, err)
 	}
-	warpMessage, err := interfaces.ParseMessage(unpackedPredicateBytes)
+	warpMessage, err := warp.ParseMessage(unpackedPredicateBytes)
 	if err != nil {
 		return nil, remainingGas, fmt.Errorf("%w: %s", errInvalidWarpMsg, err)
 	}
@@ -99,8 +99,8 @@ func (addressedPayloadHandler) packFailed() []byte {
 	return getVerifiedWarpMessageInvalidOutput
 }
 
-func (addressedPayloadHandler) handleMessage(warpMessage *interfaces.Message) ([]byte, error) {
-	addressedPayload, err := interfaces.ParseAddressedCall(warpMessage.UnsignedMessage.Payload)
+func (addressedPayloadHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
+	addressedPayload, err := payload.ParseAddressedCall(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidAddressedPayload, err)
 	}
@@ -120,8 +120,8 @@ func (blockHashHandler) packFailed() []byte {
 	return getVerifiedWarpBlockHashInvalidOutput
 }
 
-func (blockHashHandler) handleMessage(warpMessage *interfaces.Message) ([]byte, error) {
-	blockHashPayload, err := interfaces.ParseHash(warpMessage.UnsignedMessage.Payload)
+func (blockHashHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
+	blockHashPayload, err := payload.ParseHash(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidBlockHashPayload, err)
 	}

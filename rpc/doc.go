@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -108,7 +109,7 @@ Subscriptions are deleted when the user sends an unsubscribe request or when the
 connection which was used to create the subscription is closed. This can be initiated by
 the client and server. The server will close the connection for any write error.
 
-For more information about subscriptions, see https://github.com/luxfi/evm/wiki/RPC-PUB-SUB.
+For more information about subscriptions, see https://github.com/ethereum/go-ethereum/wiki/RPC-PUB-SUB.
 
 # Reverse Calls
 

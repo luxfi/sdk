@@ -1,4 +1,4 @@
-# Lux EVM Contracts
+# Subnet EVM Contracts
 
 CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_release_life_cycle#Alpha) AND ARE NOT AUDITED. USE AT YOUR OWN RISK!
 
@@ -6,9 +6,9 @@ CONTRACTS HERE ARE [ALPHA SOFTWARE](https://en.wikipedia.org/wiki/Software_relea
 
 Lux is an open-source platform for launching decentralized applications and enterprise blockchain deployments in one interoperable, highly scalable ecosystem. Lux gives you complete control on both the network and application layers&mdash;helping you build anything you can imagine.
 
-The Lux Network is composed of many subnets and chains. Chains in subnets run with customizable virtual machines. One of these virtual machines is Lux EVM. The Lux EVM's API is almost identical to an Ethereum node's API. Lux EVM brings its own features like minting native tokens via contracts, restrincting contract deployer etc. These features are presented with `Stateful Precompile Contracts`. These contracts are precompiled and deployed when they're activated.
+The Lux Network is composed of many subnets and chains. Chains in subnets run with customizable virtual machines. One of these virtual machines is Subnet EVM. The Subnet EVM's API is almost identical to an Ethereum node's API. Subnet EVM brings its own features like minting native tokens via contracts, restrincting contract deployer etc. These features are presented with `Stateful Precompile Contracts`. These contracts are precompiled and deployed when they're activated.
 
-The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Lux's Lux EVM. We'll be building smart contracts with development environment [Hardhat](https://hardhat.org).
+The goal of this guide is to lay out best practices regarding writing, testing and deployment of smart contracts to Lux's Subnet EVM. We'll be building smart contracts with development environment [Hardhat](https://hardhat.org).
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ It is also helpful to have a basic understanding of [Solidity](https://docs.soli
 Clone the repo and install the necessary packages via `yarn`.
 
 ```bash
-git clone https://github.com/luxfi/geth.git
+git clone https://github.com/luxfi/evm.git
 cd contracts
 npm install
 ```
@@ -34,7 +34,7 @@ npm install
 
 `AllowList.sol` is the base contract which provided AllowList precompile capabilities to inheriting contracts.
 
-`ERC20NativeMinter.sol` is based on [Open Zeppelin](https://openzeppelin.com) [ERC20](https://eips.ethereum.org/EIPS/eip-20) contract powered by native minting capabilities of Lux EVM. ERC20 is a popular smart contract interface. It uses `INativeMinter` interface to interact with `NativeMinter` precompile.
+`ERC20NativeMinter.sol` is based on [Open Zeppelin](https://openzeppelin.com) [ERC20](https://eips.ethereum.org/EIPS/eip-20) contract powered by native minting capabilities of Subnet EVM. ERC20 is a popular smart contract interface. It uses `INativeMinter` interface to interact with `NativeMinter` precompile.
 
 `ExampleDeployerList` shows how `ContractDeployerAllowList` precompile can be used in a smart contract. It uses `IAllowList` to interact with `ContractDeployerAllowList` precompile. When the precompile is activated only those allowed can deploy contracts.
 
@@ -42,13 +42,13 @@ npm install
 
 All of these `NativeMinter`, `FeeManager` and `AllowList` contracts should be enabled by a chain config in genesis or as an upgrade. See the example genesis under [Tests](#tests) section.
 
-For more information about precompiles see [evm precompiles](https://github.com/luxfi/geth#precompiles).
+For more information about precompiles see [evm precompiles](https://github.com/luxfi/evm#precompiles).
 
 ## Hardhat Config
 
 Hardhat uses `hardhat.config.js` as the configuration file. You can define tasks, networks, compilers and more in that file. For more information see [here](https://hardhat.org/config/).
 
-In EVM, we provide a pre-configured file [hardhat.config.ts](https://github.com/luxfi/geth/blob/master/contracts/hardhat.config.ts).
+In Subnet-EVM, we provide a pre-configured file [hardhat.config.ts](https://github.com/luxfi/evm/blob/master/contracts/hardhat.config.ts).
 
 The HardHat config file includes a single network configuration: `local`. `local` defaults to using the following values for the RPC URL and the Chain ID:
 
@@ -57,7 +57,7 @@ var local_rpc_uri = process.env.RPC_URI || "http://127.0.0.1:9650/ext/bc/C/rpc";
 var local_chain_id = process.env.CHAIN_ID || 99999;
 ```
 
-You can use this network configuration by providing the environment variables and specifying the `--network` flag, as EVM does in its testing suite:
+You can use this network configuration by providing the environment variables and specifying the `--network` flag, as Subnet-EVM does in its testing suite:
 
 ```bash
 RPC_URI=http://127.0.0.1:9650/ext/bc/28N1Tv5CZziQ3FKCaXmo8xtxoFtuoVA6NvZykAT5MtGjF4JkGs/rpc CHAIN_ID=77777 npx hardhat test --network local
@@ -101,60 +101,8 @@ You can define custom hardhat tasks in [tasks.ts](https://github.com/luxfi/lux-s
 
 ## Tests
 
-Tests are written for a local network which runs a EVM Blockchain.
+Tests are written for a local network which runs a Subnet-EVM Blockchain.
 
 E.g `RPC_URI=http://127.0.0.1:9650/ext/bc/28N1Tv5CZziQ3FKCaXmo8xtxoFtuoVA6NvZykAT5MtGjF4JkGs/rpc CHAIN_ID=77777 npx hardhat test --network local`.
 
-EVM must activate any precompiles used in the test in the genesis:
-
-```json
-{
-  "config": {
-    "chainId": 43214,
-    "homesteadBlock": 0,
-    "eip150Block": 0,
-    "eip155Block": 0,
-    "eip158Block": 0,
-    "byzantiumBlock": 0,
-    "constantinopleBlock": 0,
-    "petersburgBlock": 0,
-    "istanbulBlock": 0,
-    "muirGlacierBlock": 0,
-    "subnetEVMTimestamp": 0,
-    "feeConfig": {
-      "gasLimit": 8000000,
-      "minBaseFee": 25000000000,
-      "targetGas": 15000000,
-      "baseFeeChangeDenominator": 36,
-      "minBlockGasCost": 0,
-      "maxBlockGasCost": 1000000,
-      "targetBlockRate": 2,
-      "blockGasCostStep": 200000
-    },
-    "contractDeployerAllowListConfig": {
-      "blockTimestamp": 0,
-      "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"]
-    },
-    "contractNativeMinterConfig": {
-      "blockTimestamp": 0,
-      "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"]
-    },
-    "allowFeeRecipients": false
-  },
-  "alloc": {
-    "8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC": {
-      "balance": "0x295BE96E64066972000000"
-    }
-  },
-  "nonce": "0x0",
-  "timestamp": "0x0",
-  "extraData": "0x00",
-  "gasLimit": "0x7A1200",
-  "difficulty": "0x0",
-  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-  "coinbase": "0x0000000000000000000000000000000000000000",
-  "number": "0x0",
-  "gasUsed": "0x0",
-  "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
-}
-```
+Subnet-EVM must activate any precompiles used in the test in the genesis.

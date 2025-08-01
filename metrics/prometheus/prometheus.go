@@ -1,4 +1,4 @@
-// (c) 2021-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package prometheus
@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	
-	"github.com/luxfi/geth/metrics"
+
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/luxfi/geth/metrics"
+
 	dto "github.com/prometheus/client_model/go"
 )
 
@@ -62,17 +64,14 @@ var (
 func ptrTo[T any](x T) *T { return &x }
 
 func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err error) {
-    metric := registry.Get(name)
-    name = strings.ReplaceAll(name, "/", "_")
-
-    // If metrics collection is disabled a *metrics.NilXYZ collector is
-    // returned.  These should be ignored entirely.
-    if strings.Contains(fmt.Sprintf("%T", metric), "Nil") {
-        return nil, fmt.Errorf("%w: %q disabled (nil) metric", errMetricSkip, name)
-    }
+	metric := registry.Get(name)
+	name = strings.ReplaceAll(name, "/", "_")
 
 	switch m := metric.(type) {
-	case nil:
+	case metrics.NilCounter, metrics.NilCounterFloat64, metrics.NilEWMA,
+		metrics.NilGauge, metrics.NilGaugeFloat64, metrics.NilGaugeInfo,
+		metrics.NilHealthcheck, metrics.NilHistogram, metrics.NilMeter,
+		metrics.NilResettingTimer, metrics.NilSample, metrics.NilTimer:
 		return nil, fmt.Errorf("%w: %q metric is nil", errMetricSkip, name)
 	case metrics.Counter:
 		return &dto.MetricFamily{
@@ -176,7 +175,8 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 		}, nil
 	case metrics.ResettingTimer:
 		snapshot := m.Snapshot()
-		if snapshot.Count() == 0 {
+		count := snapshot.Count()
+		if count == 0 {
 			return nil, fmt.Errorf("%w: %q resetting timer metric count is zero", errMetricSkip, name)
 		}
 
@@ -195,22 +195,13 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			Type: dto.MetricType_SUMMARY.Enum(),
 			Metric: []*dto.Metric{{
 				Summary: &dto.Summary{
-					SampleCount: ptrTo(uint64(snapshot.Count())), //nolint:gosec
+					SampleCount: ptrTo(uint64(count)), //nolint:gosec
+					SampleSum:   ptrTo(float64(count) * snapshot.Mean()),
 					Quantile:    dtoQuantiles,
 				},
 			}},
 		}, nil
-    default:
-        // Treat any disabled (nil) collector from github.com/luxfi/evm/metrics as
-        // a noop and skip it rather than returning an error. These collectors
-        // have types prefixed with "metrics.Nil" (e.g. metrics.NilHealthcheck)
-        // and are instantiated when metrics.Enabled == false. They carry no
-        // runtime data and therefore should not be surfaced to Prometheus.
-
-        if strings.HasPrefix(fmt.Sprintf("%T", metric), "metrics.Nil") {
-            return nil, fmt.Errorf("%w: %q disabled (nil) metric", errMetricSkip, name)
-        }
-
-        return nil, fmt.Errorf("%w: metric %q type %T", errMetricTypeNotSupported, name, metric)
+	default:
+		return nil, fmt.Errorf("%w: metric %q type %T", errMetricTypeNotSupported, name, metric)
 	}
 }

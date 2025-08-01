@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,6 +31,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/accounts/external"
 	"github.com/luxfi/geth/accounts/keystore"
@@ -65,7 +67,7 @@ type Config struct {
 	// BatchResponseMaxSize is the maximum number of bytes returned from a batched rpc call.
 	BatchResponseMaxSize int `toml:",omitempty"`
 
-	EVMVersion string
+	SubnetEVMVersion string
 }
 
 // ExtRPCEnabled returns the indicator whether node enables the external

@@ -1,4 +1,4 @@
-// (c) 2024 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package extras
@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/luxd/snow"
+	"github.com/luxfi/luxd/upgrade"
+	"github.com/luxfi/luxd/utils/constants"
 	"github.com/luxfi/geth/common"
-	gethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/node/utils/constants"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -30,83 +31,73 @@ var (
 		BlockGasCostStep: big.NewInt(200_000),
 	}
 
-	EVMDefaultChainConfig = &ChainConfig{
+	SubnetEVMDefaultChainConfig = &ChainConfig{
 		FeeConfig:          DefaultFeeConfig,
-		NetworkUpgrades:    getDefaultNetworkUpgrades(interfaces.GetConfig(constants.MainnetID)),
+		NetworkUpgrades:    GetNetworkUpgrades(upgrade.GetConfig(constants.MainnetID)),
 		GenesisPrecompiles: Precompiles{},
 	}
 
 	TestChainConfig = &ChainConfig{
-		LuxContext:   LuxContext{ConsensusCtx: testChainContext()},
 		FeeConfig:          DefaultFeeConfig,
-		NetworkUpgrades:    getDefaultNetworkUpgrades(interfaces.GetConfig(constants.UnitTestID)), // This can be changed to correct network (local, test) via VM.
+		NetworkUpgrades:    GetNetworkUpgrades(upgrade.GetConfig(constants.UnitTestID)), // This can be changed to correct network (local, test) via VM.
 		GenesisPrecompiles: Precompiles{},
 	}
 
-	TestPreEVMChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
+	TestPreSubnetEVMChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
 		c.NetworkUpgrades = NetworkUpgrades{
-			EVMTimestamp: utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
-			DurangoTimestamp:   utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
-			EtnaTimestamp:      utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
-			FortunaTimestamp:   utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
+			SubnetEVMTimestamp: utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
+			DurangoTimestamp:   utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
+			EtnaTimestamp:      utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
+			FortunaTimestamp:   utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
 		}
 	})
 
-	TestEVMChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
+	TestSubnetEVMChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
 		c.NetworkUpgrades = NetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(0),
-			DurangoTimestamp:   utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
-			EtnaTimestamp:      utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
-			FortunaTimestamp:   utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
+			EtnaTimestamp:      utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
+			FortunaTimestamp:   utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
 		}
 	})
 
 	TestDurangoChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
 		c.NetworkUpgrades = NetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(0),
-			DurangoTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			EtnaTimestamp:      utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
-			FortunaTimestamp:   utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			EtnaTimestamp:      utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
+			FortunaTimestamp:   utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
 		}
 	})
 
 	TestEtnaChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
 		c.NetworkUpgrades = NetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(0),
-			DurangoTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			EtnaTimestamp:      utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			FortunaTimestamp:   utils.TimeToNewUint64(interfaces.UnscheduledActivationTime),
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			EtnaTimestamp:      utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			FortunaTimestamp:   utils.TimeToNewUint64(upgrade.UnscheduledActivationTime),
 		}
 	})
 
 	TestFortunaChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
 		c.NetworkUpgrades = NetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(0),
-			DurangoTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			EtnaTimestamp:      utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			FortunaTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			EtnaTimestamp:      utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			FortunaTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
 		}
 	})
 
 	TestGraniteChainConfig = copyAndSet(TestChainConfig, func(c *ChainConfig) {
 		c.NetworkUpgrades = NetworkUpgrades{
-			EVMTimestamp: utils.NewUint64(0),
-			DurangoTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			EtnaTimestamp:      utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			FortunaTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
-			GraniteTimestamp:   utils.TimeToNewUint64(interfaces.InitiallyActiveTime),
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			EtnaTimestamp:      utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			FortunaTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			GraniteTimestamp:   utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
 		}
 	})
 )
-
-func testChainContext() *interfaces.ChainContext {
-	return &interfaces.ChainContext{
-		NetworkID: constants.UnitTestID,
-		SubnetID:  interfaces.SubnetID{},
-		ChainID:   interfaces.ChainID{5, 4, 3, 2, 1},
-		NodeID:    interfaces.GenerateTestNodeID(),
-	}
-}
 
 func copyAndSet(c *ChainConfig, set func(*ChainConfig)) *ChainConfig {
 	newConfig := *c
@@ -121,7 +112,7 @@ type UpgradeConfig struct {
 	// Config for timestamps that enable network upgrades.
 	NetworkUpgradeOverrides *NetworkUpgrades `json:"networkUpgradeOverrides,omitempty"`
 
-	// Config for modifying state as a network interfaces.
+	// Config for modifying state as a network upgrade.
 	StateUpgrades []StateUpgrade `json:"stateUpgrades,omitempty"`
 
 	// Config for enabling and disabling precompiles as network upgrades.
@@ -130,7 +121,7 @@ type UpgradeConfig struct {
 
 // LuxContext provides Lux specific context directly into the EVM.
 type LuxContext struct {
-	ConsensusCtx *interfaces.ChainContext
+	SnowCtx *snow.Context
 }
 
 type ChainConfig struct {
@@ -144,23 +135,33 @@ type ChainConfig struct {
 	UpgradeConfig      `json:"-"`           // Config specified in upgradeBytes (lux network upgrades or enable/disabling precompiles). Not serialized.
 }
 
-func (c *ChainConfig) CheckConfigCompatible(newConfig *ChainConfig, headNumber *big.Int, headTimestamp uint64) *gethparams.ConfigCompatError {
+func (c *ChainConfig) CheckConfigCompatible(newConfig *ethparams.ChainConfig, headNumber *big.Int, headTimestamp uint64) *ethparams.ConfigCompatError {
 	if c == nil {
 		return nil
 	}
-	return c.checkConfigCompatible(newConfig, headNumber, headTimestamp)
+	newcfg, ok := newConfig.Hooks().(*ChainConfig)
+	if !ok {
+		// Proper registration of the extras on the geth side should prevent this from happening.
+		// Return an error to prevent the chain from starting, just in case.
+		return ethparams.NewTimestampCompatError(
+			fmt.Sprintf("ChainConfig.Hooks() is not of the expected type *extras.ChainConfig, got %T", newConfig.Hooks()),
+			utils.NewUint64(0),
+			nil,
+		)
+	}
+	return c.checkConfigCompatible(newcfg, headNumber, headTimestamp)
 }
 
-func (c *ChainConfig) checkConfigCompatible(newcfg *ChainConfig, headNumber *big.Int, headTimestamp uint64) *gethparams.ConfigCompatError {
+func (c *ChainConfig) checkConfigCompatible(newcfg *ChainConfig, headNumber *big.Int, headTimestamp uint64) *ethparams.ConfigCompatError {
 	if err := c.checkNetworkUpgradesCompatible(&newcfg.NetworkUpgrades, headTimestamp); err != nil {
 		return err
 	}
-	// Check that the precompiles on the new config are compatible with the existing precompile interfaces.
+	// Check that the precompiles on the new config are compatible with the existing precompile config.
 	if err := c.checkPrecompilesCompatible(newcfg.PrecompileUpgrades, headTimestamp); err != nil {
 		return err
 	}
 
-	// Check that the state upgrades on the new config are compatible with the existing state upgrade interfaces.
+	// Check that the state upgrades on the new config are compatible with the existing state upgrade config.
 	if err := c.checkStateUpgradesCompatible(newcfg.StateUpgrades, headTimestamp); err != nil {
 		return err
 	}
@@ -252,7 +253,7 @@ func (c *ChainConfig) MarshalJSON() ([]byte, error) {
 	}
 
 	// To include PrecompileUpgrades, we unmarshal the json representing c
-	// then directly add the corresponding keys to the interfaces.
+	// then directly add the corresponding keys to the json.
 	raw := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(tmp, &raw); err != nil {
 		return nil, err
@@ -287,7 +288,7 @@ func (c *ChainConfig) CheckConfigForkOrder() error {
 	// Lux upgrades are enabled in order.
 	// Note: we do not add the precompile configs here because they are optional
 	// and independent, i.e. the order in which they are enabled does not impact
-	// the correctness of the chain interfaces.
+	// the correctness of the chain config.
 	return checkForks(c.forkOrder(), false)
 }
 
@@ -333,7 +334,7 @@ func checkForks(forks []fork, blockFork bool) error {
 	return nil
 }
 
-// Verify verifies chain interfaces.
+// Verify verifies chain config.
 func (c *ChainConfig) Verify() error {
 	if err := c.FeeConfig.Verify(); err != nil {
 		return fmt.Errorf("invalid fee config: %w", err)
@@ -349,7 +350,7 @@ func (c *ChainConfig) Verify() error {
 	}
 
 	// Verify the network upgrades are internally consistent given the existing chainConfig.
-	if err := c.verifyNetworkUpgrades(c.ConsensusCtx.NetworkUpgrades); err != nil {
+	if err := c.verifyNetworkUpgrades(c.SnowCtx.NetworkUpgrades); err != nil {
 		return fmt.Errorf("invalid network upgrades: %w", err)
 	}
 

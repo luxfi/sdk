@@ -1,4 +1,4 @@
-// (c) 2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package messages
@@ -6,20 +6,20 @@ package messages
 import (
 	"fmt"
 
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/luxd/ids"
 )
 
 // ValidatorUptime is signed when the ValidationID is known and the validator
 // has been up for TotalUptime seconds.
 type ValidatorUptime struct {
-	ValidationID interfaces.ID `serialize:"true"`
+	ValidationID ids.ID `serialize:"true"`
 	TotalUptime  uint64 `serialize:"true"` // in seconds
 
 	bytes []byte
 }
 
 // NewValidatorUptime creates a new *ValidatorUptime and initializes it.
-func NewValidatorUptime(validationID interfaces.ID, totalUptime uint64) (*ValidatorUptime, error) {
+func NewValidatorUptime(validationID ids.ID, totalUptime uint64) (*ValidatorUptime, error) {
 	bhp := &ValidatorUptime{
 		ValidationID: validationID,
 		TotalUptime:  totalUptime,

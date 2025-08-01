@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,12 +33,12 @@ import (
 	"errors"
 	"io"
 	"math/big"
+
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/accounts/external"
 	"github.com/luxfi/geth/accounts/keystore"
-	"github.com/luxfi/evm/core/types"
-	gethtypes "github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
 )
@@ -182,34 +183,7 @@ func NewClefTransactor(clef *external.ExternalSigner, account accounts.Account) 
 			if address != account.Address {
 				return nil, ErrNotAuthorized
 			}
-			// Convert EVM transaction to geth transaction for signing
-			gethTx := gethtypes.NewTx(&gethtypes.LegacyTx{
-				Nonce:    transaction.Nonce(),
-				GasPrice: transaction.GasPrice(),
-				Gas:      transaction.Gas(),
-				To:       transaction.To(),
-				Value:    transaction.Value(),
-				Data:     transaction.Data(),
-			})
-			signedGethTx, err := clef.SignTx(account, gethTx, nil) // Clef enforces its own chain id
-			if err != nil {
-				return nil, err
-			}
-			// Get signature values from signed transaction
-			v, r, s := signedGethTx.RawSignatureValues()
-			
-			// Convert back to EVM transaction
-			return types.NewTx(&types.LegacyTx{
-				Nonce:    signedGethTx.Nonce(),
-				GasPrice: signedGethTx.GasPrice(),
-				Gas:      signedGethTx.Gas(),
-				To:       signedGethTx.To(),
-				Value:    signedGethTx.Value(),
-				Data:     signedGethTx.Data(),
-				V:        v,
-				R:        r,
-				S:        s,
-			}), nil
+			return clef.SignTx(account, transaction, nil) // Clef enforces its own chain id
 		},
 		Context: context.Background(),
 	}

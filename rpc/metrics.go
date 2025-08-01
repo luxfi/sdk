@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,14 +30,18 @@ package rpc
 import (
 	"fmt"
 	"time"
+
 	"github.com/luxfi/geth/metrics"
+
+	// Force geth metrics of the same name to be registered first.
+	_ "github.com/luxfi/geth/rpc"
 )
 
 // ====== If resolving merge conflicts ======
 //
-// All calls to metrics.NewRegistered*() for metrics also defined in libevm/rpc have
+// All calls to metrics.NewRegistered*() for metrics also defined in geth/rpc have
 // been replaced with metrics.GetOrRegister*() to get metrics already registered in
-// libevm/rpc or register them here otherwise. These replacements ensure the same
+// geth/rpc or register them here otherwise. These replacements ensure the same
 // metrics are shared between the two packages.
 var (
 	rpcRequestGauge        = metrics.GetOrRegisterGauge("rpc/requests", nil)

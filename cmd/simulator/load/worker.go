@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -7,11 +7,12 @@ import (
 	"context"
 	"fmt"
 	"time"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/ethclient"
-	ethereum "github.com/ethereum/go-ethereum"
+
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/ethclient"
 )
 
 type ethereumTxWorker struct {

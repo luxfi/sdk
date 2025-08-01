@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,12 +32,15 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+
 	"github.com/luxfi/evm/cmd/evm/internal/t8ntool"
+	"github.com/luxfi/evm/internal/debug"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/urfave/cli/v2"
+
 	// Force-load the tracer engines to trigger registration
-	_ "github.com/luxfi/evm/interfaces/eth/tracers/js"
-	_ "github.com/luxfi/evm/interfaces/eth/tracers/native"
+	_ "github.com/luxfi/geth/eth/tracers/js"
+	_ "github.com/luxfi/geth/eth/tracers/native"
 )
 
 var (

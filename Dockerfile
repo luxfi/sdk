@@ -1,6 +1,7 @@
 # ============= Setting up base Stage ================
-# Set required LUX_VERSION parameter in build image script
-ARG LUX_VERSION
+# LUXD_NODE_IMAGE needs to identify an existing node image and should include the tag
+# This value is not intended to be used but silences a warning
+ARG LUXD_NODE_IMAGE="invalid-image"
 
 # ============= Compilation Stage ================
 FROM --platform=$BUILDPLATFORM golang:1.23.9-bookworm AS builder
@@ -8,11 +9,10 @@ FROM --platform=$BUILDPLATFORM golang:1.23.9-bookworm AS builder
 WORKDIR /build
 
 # Copy lux dependencies first (intermediate docker image caching)
-# Copy node directory if present (for manual CI case, which uses local dependency)
-COPY go.mod go.sum node* ./
-
+# Copy luxd directory if present (for manual CI case, which uses local dependency)
+COPY go.mod go.sum luxd* ./
 # Download lux dependencies using go mod
-RUN go mod download && go mod tidy -compat=1.20
+RUN go mod download && go mod tidy
 
 # Copy the code into the container
 COPY . .
@@ -38,19 +38,21 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ] && [ "$BUILDPLATFORM" != "linux/arm
   echo "export CC=gcc" > ./build_env.sh \
   ; fi
 
-# Pass in SUBNET_EVM_COMMIT as an arg to allow the build script to set this externally
-ARG SUBNET_EVM_COMMIT
+# Pass in EVM_COMMIT as an arg to allow the build script to set this externally
+ARG EVM_COMMIT
 ARG CURRENT_BRANCH
 
 RUN . ./build_env.sh && \
   echo "{CC=$CC, TARGETPLATFORM=$TARGETPLATFORM, BUILDPLATFORM=$BUILDPLATFORM}" && \
   export GOARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) && \
   export CURRENT_BRANCH=$CURRENT_BRANCH && \
-  export SUBNET_EVM_COMMIT=$SUBNET_EVM_COMMIT && \
+  export EVM_COMMIT=$EVM_COMMIT && \
   ./scripts/build.sh build/evm
 
 # ============= Cleanup Stage ================
-FROM luxdefi/node:$LUX_VERSION AS builtImage
+FROM $LUXD_NODE_IMAGE AS execution
 
 # Copy the evm binary into the correct location in the container
-COPY --from=builder /build/srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy /node/build/plugins/srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy
+ARG VM_ID=srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy
+ENV LUXD_PLUGIN_DIR="/luxd/build/plugins"
+COPY --from=builder /build/build/evm $LUXD_PLUGIN_DIR/$VM_ID

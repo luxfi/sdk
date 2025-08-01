@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package core
@@ -6,13 +6,14 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/evm/core/types"
+
+	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
 )
 
 var ErrMissingPredicateContext = errors.New("missing predicate context")
@@ -29,10 +30,10 @@ func CheckPredicates(rules params.Rules, predicateContext *precompileconfig.Pred
 		return nil, fmt.Errorf("%w for predicate verification (%d) < intrinsic gas (%d)", ErrIntrinsicGas, tx.Gas(), intrinsicGas)
 	}
 
-	predicateResults := make(map[common.Address][]byte)
 	rulesExtra := params.GetRulesExtra(rules)
+	predicateResults := make(map[common.Address][]byte)
 	// Short circuit early if there are no precompile predicates to verify
-	if len(rulesExtra.Predicaters) == 0 {
+	if !rulesExtra.PredicatersExist() {
 		return predicateResults, nil
 	}
 
@@ -52,8 +53,9 @@ func CheckPredicates(rules params.Rules, predicateContext *precompileconfig.Pred
 	for address, predicates := range predicateArguments {
 		// Since [address] is only added to [predicateArguments] when there's a valid predicate in the ruleset
 		// there's no need to check if the predicate exists here.
-		predicaterContract := rulesExtra.Predicaters[address]
-		bitset := utils.NewBits()
+		rules := params.GetRulesExtra(rules)
+		predicaterContract := rules.Predicaters[address]
+		bitset := set.NewBits()
 		for i, predicate := range predicates {
 			if err := predicaterContract.VerifyPredicate(predicateContext, predicate); err != nil {
 				bitset.Add(i)

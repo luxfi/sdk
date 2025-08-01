@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -37,7 +38,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/metrics"
 	"golang.org/x/time/rate"
 )
 
@@ -620,7 +623,9 @@ func (h *handler) handleCall(cp *callProc, msg *jsonrpcMessage) *jsonrpcMessage 
 			successfulRequestGauge.Inc(1)
 		}
 		rpcServingTimer.UpdateSince(start)
-		updateServeTimeHistogram(msg.Method, answer.Error == nil, time.Since(start))
+		if metrics.EnabledExpensive {
+			updateServeTimeHistogram(msg.Method, answer.Error == nil, time.Since(start))
+		}
 	}
 
 	return answer

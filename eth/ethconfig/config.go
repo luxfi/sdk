@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,14 +30,13 @@ package ethconfig
 import (
 	"time"
 
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool/blobpool"
 	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/evm/eth/gasprice"
-	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
 )
 
 // DefaultFullGPOConfig contains default gasprice oracle settings for full node.
@@ -140,7 +140,7 @@ type Config struct {
 
 	// HistoricalProofQueryWindow is the number of blocks before the last accepted block to be accepted for state queries.
 	// For archive nodes, it defaults to 43200 and can be set to 0 to indicate to accept any block query.
-	// For non-archive nodes, it is forcibly set to the value of [core.TipBufferSize].
+	// For non-archive nodes, it is forcibly set to the value of StateHistory.
 	HistoricalProofQueryWindow uint64
 
 	// AllowUnprotectedTxs allow unprotected transactions to be locally issued.
@@ -179,7 +179,4 @@ type Config struct {
 	// This is useful for validators that don't need to index transactions.
 	// TransactionHistory can be still used to control unindexing old transactions.
 	SkipTxIndexing bool
-
-	// TODO: remove once we move SuggestPriceOptions to LUX/custom API
-	PriceOptionConfig ethapi.PriceOptionConfig
 }

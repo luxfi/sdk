@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,13 +33,14 @@ import (
 	"math/big"
 	mrand "math/rand"
 	"sync/atomic"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/params"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/lru"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/params"
 )
 
 const (
@@ -157,10 +159,7 @@ func (hc *HeaderChain) GetHeaderByHash(hash common.Hash) *types.Header {
 // In theory, if header is present in the database, all relative components
 // like td and hash->number should be present too.
 func (hc *HeaderChain) HasHeader(hash common.Hash, number uint64) bool {
-	if _, ok := hc.numberCache.Get(hash); ok {
-		return true
-	}
-	if _, ok := hc.headerCache.Get(hash); ok {
+	if hc.numberCache.Contains(hash) || hc.headerCache.Contains(hash) {
 		return true
 	}
 	return rawdb.HasHeader(hc.chainDb, hash, number)
@@ -204,7 +203,7 @@ func (hc *HeaderChain) SetGenesis(head *types.Header) {
 // Config retrieves the header chain's chain configuration.
 func (hc *HeaderChain) Config() *params.ChainConfig { return hc.config }
 
-// Engine retrieves the header chain's consensus common.
+// Engine retrieves the header chain's consensus engine.
 func (hc *HeaderChain) Engine() consensus.Engine { return hc.engine }
 
 // GetBlock implements consensus.ChainReader, and returns nil for every input as

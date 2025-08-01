@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -28,13 +29,16 @@ package blobpool
 
 import (
 	"github.com/luxfi/geth/metrics"
+
+	// Force geth metrics of the same name to be registered first.
+	_ "github.com/luxfi/geth/core/txpool/blobpool"
 )
 
 // ====== If resolving merge conflicts ======
 //
-// All calls to metrics.NewRegistered*() for metrics also defined in libevm/core/txpool/blobpool
+// All calls to metrics.NewRegistered*() for metrics also defined in geth/core/txpool/blobpool
 // have been replaced with metrics.GetOrRegister*() to get metrics already registered in
-// libevm/core/txpool/blobpool or register them here otherwise. These replacements ensure the
+// geth/core/txpool/blobpool or register them here otherwise. These replacements ensure the
 // same metrics are shared between the two packages.
 var (
 	// datacapGauge tracks the user's configured capacity for the blob pool. It

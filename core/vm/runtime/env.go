@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -27,9 +28,8 @@
 package runtime
 
 import (
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/vm"
-	ethparams "github.com/luxfi/evm/params"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {
@@ -50,7 +50,8 @@ func NewEnv(cfg *Config) *vm.EVM {
 		GasLimit:    cfg.GasLimit,
 		BaseFee:     cfg.BaseFee,
 		BlobBaseFee: cfg.BlobBaseFee,
+		Random:      cfg.Random,
 	}
 
-	return vm.NewEVM(blockContext, txContext, cfg.State, &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}, cfg.EVMConfig)
+	return vm.NewEVM(blockContext, txContext, cfg.State, cfg.ChainConfig, cfg.EVMConfig)
 }

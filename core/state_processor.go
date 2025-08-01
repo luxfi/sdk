@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,16 +30,16 @@ package core
 import (
 	"fmt"
 	"math/big"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/params"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/evm/params"
-	"github.com/holiman/uint256"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -88,8 +89,7 @@ func (p *StateProcessor) Process(block *types.Block, parent *types.Header, state
 
 	var (
 		context = NewEVMBlockContext(header, p.bc, nil)
-		txContext = vm.TxContext{} // Empty initial tx context
-		vmenv   = vm.NewEVM(context, txContext, statedb, p.config, cfg)
+		vmenv   = vm.NewEVM(context, vm.TxContext{}, statedb, p.config, cfg)
 		signer  = types.MakeSigner(p.config, header.Number, header.Time)
 	)
 	if beaconRoot := block.BeaconRoot(); beaconRoot != nil {
@@ -120,7 +120,6 @@ func (p *StateProcessor) Process(block *types.Block, parent *types.Header, state
 func applyTransaction(msg *Message, config *params.ChainConfig, gp *GasPool, statedb *state.StateDB, blockNumber *big.Int, blockHash common.Hash, tx *types.Transaction, usedGas *uint64, evm *vm.EVM) (*types.Receipt, error) {
 	// Create a new context to be used in the EVM environment.
 	txContext := NewEVMTxContext(msg)
-	// Update the evm with the new transaction context.
 	evm.Reset(txContext, statedb)
 
 	// Apply the transaction to the current state (included in the env).
@@ -188,23 +187,17 @@ func ApplyTransaction(config *params.ChainConfig, bc ChainContext, blockContext 
 func ProcessBeaconBlockRoot(beaconRoot common.Hash, vmenv *vm.EVM, statedb *state.StateDB) {
 	// If EIP-4788 is enabled, we need to invoke the beaconroot storage contract with
 	// the new root
-	// BeaconRootsStorageAddress is not available in our go-ethereum version
-	beaconRootsAddr := common.HexToAddress("0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02")
-	systemAddress := common.HexToAddress("0xfffffffffffffffffffffffffffffffffffffffe")
-	
 	msg := &Message{
-		From:      systemAddress,
+		From:      ethparams.SystemAddress,
 		GasLimit:  30_000_000,
 		GasPrice:  common.Big0,
 		GasFeeCap: common.Big0,
 		GasTipCap: common.Big0,
-		To:        &beaconRootsAddr,
+		To:        &ethparams.BeaconRootsStorageAddress,
 		Data:      beaconRoot[:],
 	}
-	// Update the evm with the new transaction context.
 	vmenv.Reset(NewEVMTxContext(msg), statedb)
-	statedb.AddAddressToAccessList(beaconRootsAddr)
-	// Call the beacon roots contract  
-	_, _, _ = vmenv.Call(vm.AccountRef(msg.From), *msg.To, msg.Data, 30_000_000, uint256.NewInt(0))
+	statedb.AddAddressToAccessList(ethparams.BeaconRootsStorageAddress)
+	_, _, _ = vmenv.Call(vm.AccountRef(msg.From), *msg.To, msg.Data, 30_000_000, common.U2560)
 	statedb.Finalise(true)
 }

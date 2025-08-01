@@ -1,4 +1,5 @@
-// (c) 2022, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,9 +31,10 @@ import (
 	"bytes"
 	"fmt"
 	"time"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
 )
 

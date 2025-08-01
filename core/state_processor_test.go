@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,17 +31,24 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"testing"
+
+	"github.com/luxfi/luxd/upgrade"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/crypto"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/holiman/uint256"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -360,7 +368,7 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 	header := &types.Header{
 		ParentHash: parent.Hash(),
 		Coinbase:   parent.Coinbase(),
-		Difficulty: common.CalcDifficulty(fakeChainReader, parent.Time()+10, &types.Header{
+		Difficulty: engine.CalcDifficulty(fakeChainReader, parent.Time()+10, &types.Header{
 			Number:     parent.Number(),
 			Time:       parent.Time(),
 			Difficulty: parent.Difficulty(),
@@ -373,7 +381,7 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 		BaseFee:   baseFee,
 	}
 
-	if params.GetExtra(config).IsEVM(header.Time) {
+	if params.GetExtra(config).IsSubnetEVM(header.Time) {
 		headerExtra := customtypes.GetHeaderExtra(header)
 		headerExtra.BlockGasCost = big.NewInt(0)
 	}

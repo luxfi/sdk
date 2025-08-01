@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,10 +30,12 @@ package snapshot
 import (
 	"bytes"
 	"testing"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/ethdb/memorydb"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // reverse reverses the contents of a byte slice. It's used to update random accs

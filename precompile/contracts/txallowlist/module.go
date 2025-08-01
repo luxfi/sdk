@@ -1,17 +1,18 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txallowlist
 
 import (
 	"fmt"
+
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/geth/common"
 )
 
-var _ contract.Configurator = &configurator{}
+var _ contract.Configurator = (*configurator)(nil)
 
 // ConfigKey is the key used in json config files to specify this precompile config.
 // must be unique across all precompiles.

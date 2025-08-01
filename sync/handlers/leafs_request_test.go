@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -8,38 +8,39 @@ import (
 	"context"
 	"math/rand"
 	"testing"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/core/types"
+
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/sync/statesync/statesynctest"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
-	rand.Seed(1)
+	rand.New(rand.NewSource(1))
 	mockHandlerStats := &stats.MockHandlerStats{}
 	memdb := rawdb.NewMemoryDatabase()
 	trieDB := triedb.NewDatabase(memdb, nil)
 
-	corruptedTrieRoot, _, _ := syncutils.GenerateTrie(t, trieDB, 100, common.HashLength)
+	corruptedTrieRoot, _, _ := statesynctest.GenerateTrie(t, trieDB, 100, common.HashLength)
 	tr, err := trie.New(trie.TrieID(corruptedTrieRoot), trieDB)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// Corrupt [corruptedTrieRoot]
-	syncutils.CorruptTrie(t, memdb, tr, 5)
+	statesynctest.CorruptTrie(t, memdb, tr, 5)
 
-	largeTrieRoot, largeTrieKeys, _ := syncutils.GenerateTrie(t, trieDB, 10_000, common.HashLength)
-	smallTrieRoot, _, _ := syncutils.GenerateTrie(t, trieDB, 500, common.HashLength)
-	accountTrieRoot, accounts := syncutils.FillAccounts(
+	largeTrieRoot, largeTrieKeys, _ := statesynctest.GenerateTrie(t, trieDB, 10_000, common.HashLength)
+	smallTrieRoot, _, _ := statesynctest.GenerateTrie(t, trieDB, 500, common.HashLength)
+	accountTrieRoot, accounts := statesynctest.FillAccounts(
 		t,
 		trieDB,
 		common.Hash{},

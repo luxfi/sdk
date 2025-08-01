@@ -1,5 +1,6 @@
-// (c) 2019-2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package precompilebind
 
 const tmplSourcePrecompileEventGo = `
@@ -11,6 +12,7 @@ package {{.Package}}
 
 import (
 	"math/big"
+
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/geth/common"
 )

@@ -1,3 +1,14 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+//
+// This file is a derived work, based on the go-ethereum library whose original
+// notices appear below.
+//
+// It is distributed under a license compatible with the licensing terms of the
+// original code from which it is derived.
+//
+// Much love to the original authors for their work.
+// **********
 // Copyright 2023 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -17,23 +28,67 @@
 package eip4844
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
 )
 
-// CalcExcessBlobGas calculates the excess blob gas after the change.
-func CalcExcessBlobGas(parentExcessBlobGas, parentBlobGasUsed uint64) uint64 {
-	excessBlobGas := parentExcessBlobGas + parentBlobGasUsed
-	if excessBlobGas < params.BlobTxTargetBlobGasPerBlock {
-		return 0
+var (
+	minBlobGasPrice            = big.NewInt(ethparams.BlobTxMinBlobGasprice)
+	blobGaspriceUpdateFraction = big.NewInt(ethparams.BlobTxBlobGaspriceUpdateFraction)
+)
+
+// VerifyEIP4844Header verifies the presence of the excessBlobGas field and that
+// if the current block contains no transactions, the excessBlobGas is updated
+// accordingly.
+func VerifyEIP4844Header(parent, header *types.Header) error {
+	// Verify the header is not malformed
+	if header.ExcessBlobGas == nil {
+		return errors.New("header is missing excessBlobGas")
 	}
-	return excessBlobGas - params.BlobTxTargetBlobGasPerBlock
+	if header.BlobGasUsed == nil {
+		return errors.New("header is missing blobGasUsed")
+	}
+	// Verify that the blob gas used remains within reasonable limits.
+	if *header.BlobGasUsed > ethparams.MaxBlobGasPerBlock {
+		return fmt.Errorf("blob gas used %d exceeds maximum allowance %d", *header.BlobGasUsed, ethparams.MaxBlobGasPerBlock)
+	}
+	if *header.BlobGasUsed%ethparams.BlobTxBlobGasPerBlob != 0 {
+		return fmt.Errorf("blob gas used %d not a multiple of blob gas per blob %d", header.BlobGasUsed, ethparams.BlobTxBlobGasPerBlob)
+	}
+	// Verify the excessBlobGas is correct based on the parent header
+	var (
+		parentExcessBlobGas uint64
+		parentBlobGasUsed   uint64
+	)
+	if parent.ExcessBlobGas != nil {
+		parentExcessBlobGas = *parent.ExcessBlobGas
+		parentBlobGasUsed = *parent.BlobGasUsed
+	}
+	expectedExcessBlobGas := CalcExcessBlobGas(parentExcessBlobGas, parentBlobGasUsed)
+	if *header.ExcessBlobGas != expectedExcessBlobGas {
+		return fmt.Errorf("invalid excessBlobGas: have %d, want %d, parent excessBlobGas %d, parent blobDataUsed %d",
+			*header.ExcessBlobGas, expectedExcessBlobGas, parentExcessBlobGas, parentBlobGasUsed)
+	}
+	return nil
 }
 
-// CalcBlobFee calculates the blob gas price from the excess blob gas.
+// CalcExcessBlobGas calculates the excess blob gas after applying the set of
+// blobs on top of the excess blob gas.
+func CalcExcessBlobGas(parentExcessBlobGas uint64, parentBlobGasUsed uint64) uint64 {
+	excessBlobGas := parentExcessBlobGas + parentBlobGasUsed
+	if excessBlobGas < ethparams.BlobTxTargetBlobGasPerBlock {
+		return 0
+	}
+	return excessBlobGas - ethparams.BlobTxTargetBlobGasPerBlock
+}
+
+// CalcBlobFee calculates the blobfee from the header's excess blob gas field.
 func CalcBlobFee(excessBlobGas uint64) *big.Int {
-	return fakeExponential(new(big.Int).SetUint64(params.BlobTxMinBlobGasprice), new(big.Int).SetUint64(excessBlobGas), big.NewInt(params.BlobTxBlobGaspriceUpdateFraction))
+	return fakeExponential(minBlobGasPrice, new(big.Int).SetUint64(excessBlobGas), blobGaspriceUpdateFraction)
 }
 
 // fakeExponential approximates factor * e ** (numerator / denominator) using

@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,11 +33,11 @@ import (
 
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/geth/trie/trienode"
 )
 
 // nodebuffer is a collection of modified trie nodes to aggregate the disk
@@ -165,14 +166,10 @@ func (b *nodebuffer) revert(db ethdb.KeyValueReader, nodes map[common.Hash]map[s
 				// In case of database rollback, don't panic if this "clean"
 				// node occurs which is not present in buffer.
 				var nhash common.Hash
-				var nodeData []byte
 				if owner == (common.Hash{}) {
-					nodeData, _ = rawdb.ReadAccountTrieNode(db, []byte(path))
+					_, nhash = rawdb.ReadAccountTrieNode(db, []byte(path))
 				} else {
-					nodeData, _ = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
-				}
-				if len(nodeData) > 0 {
-					nhash = crypto.Keccak256Hash(nodeData)
+					_, nhash = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
 				}
 				// Ignore the clean node in the case described above.
 				if nhash == n.Hash {

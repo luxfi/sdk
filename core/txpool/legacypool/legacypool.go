@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -38,11 +39,10 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/prque"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
-	eparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
@@ -53,8 +53,8 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/holiman/uint256"
 
-	// Force libevm metrics of the same name to be registered first.
-	_ "github.com/luxfi/evm/interfaces/core/txpool/legacypool"
+	// Force geth metrics of the same name to be registered first.
+	_ "github.com/luxfi/geth/core/txpool/legacypool"
 )
 
 const (
@@ -82,14 +82,14 @@ var (
 var (
 	evictionInterval      = time.Minute      // Time interval to check for evictable transactions
 	statsReportInterval   = 8 * time.Second  // Time interval to report transaction pool stats
-	baseFeeUpdateInterval = 10 * time.Second // Time interval at which to schedule a base fee update for the tx pool after EVM is enabled
+	baseFeeUpdateInterval = 10 * time.Second // Time interval at which to schedule a base fee update for the tx pool after SubnetEVM is enabled
 )
 
 // ====== If resolving merge conflicts ======
 //
-// All calls to metrics.NewRegistered*() for metrics also defined in libevm/core/txpool/legacypool
+// All calls to metrics.NewRegistered*() for metrics also defined in geth/core/txpool/legacypool
 // have been replaced with metrics.GetOrRegister*() to get metrics already registered in
-// libevm/core/txpool/legacypool or register them here otherwise. These replacements ensure the
+// geth/core/txpool/legacypool or register them here otherwise. These replacements ensure the
 // same metrics are shared between the two packages.
 var (
 	// Metrics for the pending pool
@@ -284,7 +284,7 @@ func New(config Config, chain BlockChain) *LegacyPool {
 		config:              config,
 		chain:               chain,
 		chainconfig:         chain.Config(),
-		signer:              types.LatestSigner(&eparams.ChainConfig{ChainID: chain.Config().ChainID}),
+		signer:              types.LatestSigner(chain.Config()),
 		pending:             make(map[common.Address]*list),
 		queue:               make(map[common.Address]*list),
 		beats:               make(map[common.Address]time.Time),
@@ -1776,7 +1776,7 @@ func (pool *LegacyPool) demoteUnexecutables() {
 			gapped := list.Cap(0)
 			for _, tx := range gapped {
 				hash := tx.Hash()
-				log.Error("Demoting invalidated transaction", "hash", hash)
+				log.Warn("Demoting invalidated transaction", "hash", hash)
 
 				// Internal shuffle shouldn't touch the lookup set.
 				pool.enqueueTx(hash, tx, false, false)
@@ -1794,14 +1794,14 @@ func (pool *LegacyPool) demoteUnexecutables() {
 }
 
 func (pool *LegacyPool) startPeriodicFeeUpdate() {
-	evmTimestamp := params.GetExtra(pool.chainconfig).EVMTimestamp
-	if evmTimestamp == nil {
+	subnetEVMTimestamp := params.GetExtra(pool.chainconfig).SubnetEVMTimestamp
+	if subnetEVMTimestamp == nil {
 		return
 	}
 
 	// Call updateBaseFee here to ensure that there is not a [baseFeeUpdateInterval] delay
 	// when starting up in ApricotPhase3 before the base fee is updated.
-	if time.Now().After(utils.Uint64ToTime(evmTimestamp)) {
+	if time.Now().After(utils.Uint64ToTime(subnetEVMTimestamp)) {
 		pool.updateBaseFee()
 	}
 
@@ -1813,9 +1813,9 @@ func (pool *LegacyPool) periodicBaseFeeUpdate() {
 	defer pool.wg.Done()
 
 	// Sleep until its time to start the periodic base fee update or the tx pool is shutting down
-	evmTime := utils.Uint64ToTime(params.GetExtra(pool.chainconfig).EVMTimestamp)
+	subnetEVMTime := utils.Uint64ToTime(params.GetExtra(pool.chainconfig).SubnetEVMTimestamp)
 	select {
-	case <-time.After(time.Until(evmTime)):
+	case <-time.After(time.Until(subnetEVMTime)):
 	case <-pool.generalShutdownChan:
 		return // Return early if shutting down
 	}
@@ -1833,7 +1833,7 @@ func (pool *LegacyPool) periodicBaseFeeUpdate() {
 }
 
 // updateBaseFee updates the base fee in the tx pool based on the current head block.
-// should only be called when the chain is in Lux EVM.
+// should only be called when the chain is in Subnet EVM.
 func (pool *LegacyPool) updateBaseFee() {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
@@ -1845,13 +1845,14 @@ func (pool *LegacyPool) updateBaseFee() {
 }
 
 // assumes lock is already held
-// should only be called when the chain is in Lux EVM.
+// should only be called when the chain is in Subnet EVM.
 func (pool *LegacyPool) updateBaseFeeAt(head *types.Header) error {
-	_, _, err := pool.chain.GetFeeConfigAt(head)
+	feeConfig, _, err := pool.chain.GetFeeConfigAt(head)
 	if err != nil {
 		return err
 	}
-	baseFeeEstimate, err := header.EstimateNextBaseFee(pool.chainconfig, head, uint64(time.Now().Unix()))
+	chainConfig := params.GetExtra(pool.chainconfig)
+	baseFeeEstimate, err := header.EstimateNextBaseFee(chainConfig, feeConfig, head, uint64(time.Now().Unix()))
 	if err != nil {
 		return err
 	}

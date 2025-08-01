@@ -2,7 +2,7 @@
 
 The `load/` and `warp/` paths contain end-to-end (e2e) tests that use
 the [tmpnet
-fixture](https://github.com/luxfi/node/blob/master/tests/fixture/tmpnet/README.md). By
+fixture](https://github.com/luxfi/luxd/blob/master/tests/fixture/tmpnet/README.md). By
 default both test suites use the tmpnet fixture to create a temporary
 network that exists for only the duration of their execution.
 
@@ -33,7 +33,7 @@ having to set them up.
 Logs and metrics can be optionally collected for tmpnet networks and
 viewed in grafana. The details of configuration and usage for
 evm mirror those of luxd and the same
-[documentation](https://github.com/luxfi/node/blob/master/tests/fixture/tmpnet/README.md#Monitoring)
+[documentation](https://github.com/luxfi/luxd/blob/master/tests/fixture/tmpnet/README.md#Monitoring)
 applies.
 
 ## Optional Dev Shell

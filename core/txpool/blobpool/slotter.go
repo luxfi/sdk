@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -42,6 +43,7 @@ func newSlotter() func() (uint32, bool) {
 	return func() (size uint32, done bool) {
 		slotsize += blobSize
 		finished := slotsize > maxBlobsPerTransaction*blobSize+txMaxSize
+
 		return slotsize, finished
 	}
 }

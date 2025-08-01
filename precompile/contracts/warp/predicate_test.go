@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -8,24 +8,24 @@ import (
 	"errors"
 	"fmt"
 	"testing"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	agoUtils "github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/params"
+
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/luxd/snow"
+	"github.com/luxfi/luxd/snow/engine/snowman/block"
+	"github.com/luxfi/luxd/snow/validators"
+	"github.com/luxfi/luxd/snow/validators/validatorstest"
+	agoUtils "github.com/luxfi/luxd/utils"
+	"github.com/luxfi/luxd/utils/constants"
+	"github.com/luxfi/luxd/utils/crypto/bls"
+	"github.com/luxfi/luxd/utils/crypto/bls/signer/localsigner"
+	"github.com/luxfi/luxd/utils/set"
+	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/evm/precompile/testutils"
+	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,23 +35,20 @@ var (
 	_ agoUtils.Sortable[*testValidator] = (*testValidator)(nil)
 
 	errTest        = errors.New("non-nil error")
-	networkID      = uint32(54321)
 	sourceChainID  = ids.GenerateTestID()
 	sourceSubnetID = ids.GenerateTestID()
 
 	// valid unsigned warp message used throughout testing
-	unsignedMsg *interfaces.UnsignedMessage
+	unsignedMsg *luxWarp.UnsignedMessage
 	// valid addressed payload
-	addressedPayload      *interfaces.AddressedCall
+	addressedPayload      *payload.AddressedCall
 	addressedPayloadBytes []byte
 	// blsSignatures of [unsignedMsg] from each of [testVdrs]
-	blsSignatures []*interfaces.Signature
+	blsSignatures []*bls.Signature
 
 	numTestVdrs = 10_000
 	testVdrs    []*testValidator
-	vdrs        map[ids.NodeID]*interfaces.GetValidatorOutput
-
-	predicateTests = make(map[string]testutils.PredicateTest)
+	vdrs        map[ids.NodeID]*validators.GetValidatorOutput
 )
 
 func init() {
@@ -61,7 +58,7 @@ func init() {
 	}
 	agoUtils.Sort(testVdrs)
 
-	vdrs = map[ids.NodeID]*interfaces.GetValidatorOutput{
+	vdrs = map[ids.NodeID]*validators.GetValidatorOutput{
 		testVdrs[0].nodeID: {
 			NodeID:    testVdrs[0].nodeID,
 			PublicKey: testVdrs[0].vdr.PublicKey,
@@ -81,7 +78,7 @@ func init() {
 
 	var err error
 	addr := ids.GenerateTestShortID()
-	addressedPayload, err = interfaces.NewAddressedCall(
+	addressedPayload, err = payload.NewAddressedCall(
 		addr[:],
 		[]byte{1, 2, 3},
 	)
@@ -89,7 +86,7 @@ func init() {
 		panic(err)
 	}
 	addressedPayloadBytes = addressedPayload.Bytes()
-	unsignedMsg, err = interfaces.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, addressedPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -101,16 +98,12 @@ func init() {
 		}
 		blsSignatures = append(blsSignatures, blsSignature)
 	}
-
-	initWarpPredicateTests()
 }
 
 type testValidator struct {
 	nodeID ids.NodeID
-	sk     *interfaces.SecretKey
-	vdr    *interfaces.Validator
-	sk     interfaces.Signer
-	vdr    *interfaces.Validator
+	sk     bls.Signer
+	vdr    *luxWarp.Validator
 }
 
 func (v *testValidator) Compare(o *testValidator) int {
@@ -128,7 +121,7 @@ func newTestValidator() *testValidator {
 	return &testValidator{
 		nodeID: nodeID,
 		sk:     sk,
-		vdr: &interfaces.Validator{
+		vdr: &luxWarp.Validator{
 			PublicKey:      pk,
 			PublicKeyBytes: pk.Serialize(),
 			Weight:         3,
@@ -137,19 +130,10 @@ func newTestValidator() *testValidator {
 	}
 }
 
-type signatureTest struct {
-	name      string
-	stateF    func(*gomock.Controller) interfaces.State
-	quorumNum uint64
-	quorumDen uint64
-	msgF      func(*require.Assertions) *interfaces.Message
-	err       error
-}
-
 // createWarpMessage constructs a signed warp message using the global variable [unsignedMsg]
 // and the first [numKeys] signatures from [blsSignatures]
-func createWarpMessage(numKeys int) *interfaces.Message {
-	aggregateSignature, err := interfaces.AggregateSignatures(blsSignatures[0:numKeys])
+func createWarpMessage(numKeys int) *luxWarp.Message {
+	aggregateSignature, err := bls.AggregateSignatures(blsSignatures[0:numKeys])
 	if err != nil {
 		panic(err)
 	}
@@ -157,11 +141,11 @@ func createWarpMessage(numKeys int) *interfaces.Message {
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &interfaces.BitSetSignature{
+	warpSignature := &luxWarp.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
-	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
-	warpMsg, err := interfaces.NewMessage(unsignedMsg, warpSignature)
+	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
+	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
 	if err != nil {
 		panic(err)
 	}
@@ -185,13 +169,13 @@ type validatorRange struct {
 	publicKey bool
 }
 
-// createConsensusCtx creates a consensus.Context instance with a validator state specified by the given validatorRanges
-func createConsensusCtx(validatorRanges []validatorRange) *consensus.Context {
-	getValidatorsOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput)
+// createSnowCtx creates a snow.Context instance with a validator state specified by the given validatorRanges
+func createSnowCtx(tb testing.TB, validatorRanges []validatorRange) *snow.Context {
+	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
 
 	for _, validatorRange := range validatorRanges {
 		for i := validatorRange.start; i < validatorRange.end; i++ {
-			validatorOutput := &interfaces.GetValidatorOutput{
+			validatorOutput := &validators.GetValidatorOutput{
 				NodeID: testVdrs[i].nodeID,
 				Weight: validatorRange.weight,
 			}
@@ -202,26 +186,25 @@ func createConsensusCtx(validatorRanges []validatorRange) *consensus.Context {
 		}
 	}
 
-	consensusCtx := utils.TestConsensusContext()
+	snowCtx := utilstest.NewTestSnowContext(tb)
 	state := &validatorstest.State{
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			return sourceSubnetID, nil
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
+		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			return getValidatorsOutput, nil
 		},
 	}
-	consensusCtx.ValidatorState = state
-	consensusCtx.NetworkID = networkID
-	return consensusCtx
+	snowCtx.ValidatorState = state
+	return snowCtx
 }
 
-func createValidPredicateTest(consensusCtx *consensus.Context, numKeys uint64, predicateBytes []byte) testutils.PredicateTest {
-	return testutils.PredicateTest{
+func createValidPredicateTest(snowCtx *snow.Context, numKeys uint64, predicateBytes []byte) precompiletest.PredicateTest {
+	return precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileinterfaces.PredicateContext{
-			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &interfaces.Context{
+		PredicateContext: &precompileconfig.PredicateContext{
+			SnowCtx: snowCtx,
+			ProposerVMBlockCtx: &block.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -242,18 +225,18 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	require := require.New(t)
 	numKeys := 10
 	cChainID := ids.GenerateTestID()
-	addressedCall, err := interfaces.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
+	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(err)
-	unsignedMsg, err := interfaces.NewUnsignedMessage(networkID, cChainID, addressedCall.Bytes())
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID, addressedCall.Bytes())
 	require.NoError(err)
 
-	getValidatorsOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput)
-	blsSignatures := make([]*interfaces.Signature, 0, numKeys)
+	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
+	blsSignatures := make([]*bls.Signature, 0, numKeys)
 	for i := 0; i < numKeys; i++ {
 		sig, err := testVdrs[i].sk.Sign(unsignedMsg.Bytes())
 		require.NoError(err)
 
-		validatorOutput := &interfaces.GetValidatorOutput{
+		validatorOutput := &validators.GetValidatorOutput{
 			NodeID:    testVdrs[i].nodeID,
 			Weight:    20,
 			PublicKey: testVdrs[i].vdr.PublicKey,
@@ -261,33 +244,32 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 		getValidatorsOutput[testVdrs[i].nodeID] = validatorOutput
 		blsSignatures = append(blsSignatures, sig)
 	}
-	aggregateSignature, err := interfaces.AggregateSignatures(blsSignatures)
+	aggregateSignature, err := bls.AggregateSignatures(blsSignatures)
 	require.NoError(err)
 	bitSet := set.NewBits()
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &interfaces.BitSetSignature{
+	warpSignature := &luxWarp.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
-	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
-	warpMsg, err := interfaces.NewMessage(unsignedMsg, warpSignature)
+	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
+	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
 	require.NoError(err)
 
 	predicateBytes := predicate.PackPredicate(warpMsg.Bytes())
 
-	consensusCtx := utils.TestConsensusContext()
-	consensusCtx.SubnetID = ids.GenerateTestID()
-	consensusCtx.ChainID = ids.GenerateTestID()
-	consensusCtx.CChainID = cChainID
-	consensusCtx.NetworkID = networkID
-	consensusCtx.ValidatorState = &validatorstest.State{
+	snowCtx := utilstest.NewTestSnowContext(t)
+	snowCtx.SubnetID = ids.GenerateTestID()
+	snowCtx.ChainID = ids.GenerateTestID()
+	snowCtx.CChainID = cChainID
+	snowCtx.ValidatorState = &validatorstest.State{
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			require.Equal(chainID, cChainID)
 			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
-			expectedSubnetID := consensusCtx.SubnetID
+		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+			expectedSubnetID := snowCtx.SubnetID
 			if requirePrimaryNetworkSigners {
 				expectedSubnetID = constants.PrimaryNetworkID
 			}
@@ -296,11 +278,11 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 		},
 	}
 
-	test := testutils.PredicateTest{
+	test := precompiletest.PredicateTest{
 		Config: NewConfig(utils.NewUint64(0), 0, requirePrimaryNetworkSigners),
-		PredicateContext: &precompileinterfaces.PredicateContext{
-			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &interfaces.Context{
+		PredicateContext: &precompileconfig.PredicateContext{
+			SnowCtx: snowCtx,
+			ProposerVMBlockCtx: &block.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -315,7 +297,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 
 func TestInvalidPredicatePacking(t *testing.T) {
 	numKeys := 1
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       numKeys,
@@ -326,11 +308,11 @@ func TestInvalidPredicatePacking(t *testing.T) {
 	predicateBytes := createPredicate(numKeys)
 	predicateBytes = append(predicateBytes, byte(0x01)) // Invalidate the predicate byte packing
 
-	test := testutils.PredicateTest{
+	test := precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileinterfaces.PredicateContext{
-			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &interfaces.Context{
+		PredicateContext: &precompileconfig.PredicateContext{
+			SnowCtx: snowCtx,
+			ProposerVMBlockCtx: &block.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -344,7 +326,7 @@ func TestInvalidPredicatePacking(t *testing.T) {
 
 func TestInvalidWarpMessage(t *testing.T) {
 	numKeys := 1
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       numKeys,
@@ -357,11 +339,11 @@ func TestInvalidWarpMessage(t *testing.T) {
 	warpMsgBytes = append(warpMsgBytes, byte(0x01)) // Invalidate warp message packing
 	predicateBytes := predicate.PackPredicate(warpMsgBytes)
 
-	test := testutils.PredicateTest{
+	test := precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileinterfaces.PredicateContext{
-			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &interfaces.Context{
+		PredicateContext: &precompileconfig.PredicateContext{
+			SnowCtx: snowCtx,
+			ProposerVMBlockCtx: &block.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -375,7 +357,7 @@ func TestInvalidWarpMessage(t *testing.T) {
 
 func TestInvalidAddressedPayload(t *testing.T) {
 	numKeys := 1
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       numKeys,
@@ -383,29 +365,29 @@ func TestInvalidAddressedPayload(t *testing.T) {
 			publicKey: true,
 		},
 	})
-	aggregateSignature, err := interfaces.AggregateSignatures(blsSignatures[0:numKeys])
+	aggregateSignature, err := bls.AggregateSignatures(blsSignatures[0:numKeys])
 	require.NoError(t, err)
 	bitSet := set.NewBits()
 	for i := 0; i < numKeys; i++ {
 		bitSet.Add(i)
 	}
-	warpSignature := &interfaces.BitSetSignature{
+	warpSignature := &luxWarp.BitSetSignature{
 		Signers: bitSet.Bytes(),
 	}
-	copy(warpSignature.Signature[:], interfaces.SignatureToBytes(aggregateSignature))
+	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
 	// Create an unsigned message with an invalid addressed payload
-	unsignedMsg, err := interfaces.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3})
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, []byte{1, 2, 3})
 	require.NoError(t, err)
-	warpMsg, err := interfaces.NewMessage(unsignedMsg, warpSignature)
+	warpMsg, err := luxWarp.NewMessage(unsignedMsg, warpSignature)
 	require.NoError(t, err)
 	warpMsgBytes := warpMsg.Bytes()
 	predicateBytes := predicate.PackPredicate(warpMsgBytes)
 
-	test := testutils.PredicateTest{
+	test := precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileinterfaces.PredicateContext{
-			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &interfaces.Context{
+		PredicateContext: &precompileconfig.PredicateContext{
+			SnowCtx: snowCtx,
+			ProposerVMBlockCtx: &block.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -418,26 +400,26 @@ func TestInvalidAddressedPayload(t *testing.T) {
 }
 
 func TestInvalidBitSet(t *testing.T) {
-	addressedCall, err := interfaces.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
+	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(t, err)
-	unsignedMsg, err := interfaces.NewUnsignedMessage(
-		networkID,
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(
+		constants.UnitTestID,
 		sourceChainID,
 		addressedCall.Bytes(),
 	)
 	require.NoError(t, err)
 
-	msg, err := interfaces.NewMessage(
+	msg, err := luxWarp.NewMessage(
 		unsignedMsg,
-		&interfaces.BitSetSignature{
+		&luxWarp.BitSetSignature{
 			Signers:   make([]byte, 1),
-			Signature: [interfaces.SignatureLen]byte{},
+			Signature: [bls.SignatureLen]byte{},
 		},
 	)
 	require.NoError(t, err)
 
 	numKeys := 1
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       numKeys,
@@ -446,11 +428,11 @@ func TestInvalidBitSet(t *testing.T) {
 		},
 	})
 	predicateBytes := predicate.PackPredicate(msg.Bytes())
-	test := testutils.PredicateTest{
+	test := precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
-		PredicateContext: &precompileinterfaces.PredicateContext{
-			ConsensusCtx: consensusCtx,
-			ProposerVMBlockCtx: &interfaces.Context{
+		PredicateContext: &precompileconfig.PredicateContext{
+			SnowCtx: snowCtx,
+			ProposerVMBlockCtx: &block.Context{
 				PChainHeight: 1,
 			},
 		},
@@ -463,7 +445,7 @@ func TestInvalidBitSet(t *testing.T) {
 }
 
 func TestWarpSignatureWeightsDefaultQuorumNumerator(t *testing.T) {
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       100,
@@ -472,7 +454,7 @@ func TestWarpSignatureWeightsDefaultQuorumNumerator(t *testing.T) {
 		},
 	})
 
-	tests := make(map[string]testutils.PredicateTest)
+	tests := make(map[string]precompiletest.PredicateTest)
 	for _, numSigners := range []int{
 		1,
 		int(WarpDefaultQuorumNumerator) - 1,
@@ -491,11 +473,11 @@ func TestWarpSignatureWeightsDefaultQuorumNumerator(t *testing.T) {
 			expectedErr = errFailedVerification
 		}
 
-		tests[fmt.Sprintf("default quorum %d signature(s)", numSigners)] = testutils.PredicateTest{
+		tests[fmt.Sprintf("default quorum %d signature(s)", numSigners)] = precompiletest.PredicateTest{
 			Config: NewDefaultConfig(utils.NewUint64(0)),
-			PredicateContext: &precompileinterfaces.PredicateContext{
-				ConsensusCtx: consensusCtx,
-				ProposerVMBlockCtx: &interfaces.Context{
+			PredicateContext: &precompileconfig.PredicateContext{
+				SnowCtx: snowCtx,
+				ProposerVMBlockCtx: &block.Context{
 					PChainHeight: 1,
 				},
 			},
@@ -505,12 +487,12 @@ func TestWarpSignatureWeightsDefaultQuorumNumerator(t *testing.T) {
 			ExpectedErr:    expectedErr,
 		}
 	}
-	testutils.RunPredicateTests(t, tests)
+	precompiletest.RunPredicateTests(t, tests)
 }
 
 // multiple messages all correct, multiple messages all incorrect, mixed bag
 func TestWarpMultiplePredicates(t *testing.T) {
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       100,
@@ -519,7 +501,7 @@ func TestWarpMultiplePredicates(t *testing.T) {
 		},
 	})
 
-	tests := make(map[string]testutils.PredicateTest)
+	tests := make(map[string]precompiletest.PredicateTest)
 	for _, validMessageIndices := range [][]bool{
 		{},
 		{true, false},
@@ -549,11 +531,11 @@ func TestWarpMultiplePredicates(t *testing.T) {
 				expectedErr = errFailedVerification
 			}
 
-			tests[fmt.Sprintf("multiple predicates %v", validMessageIndices)] = testutils.PredicateTest{
+			tests[fmt.Sprintf("multiple predicates %v", validMessageIndices)] = precompiletest.PredicateTest{
 				Config: NewDefaultConfig(utils.NewUint64(0)),
-				PredicateContext: &precompileinterfaces.PredicateContext{
-					ConsensusCtx: consensusCtx,
-					ProposerVMBlockCtx: &interfaces.Context{
+				PredicateContext: &precompileconfig.PredicateContext{
+					SnowCtx: snowCtx,
+					ProposerVMBlockCtx: &block.Context{
 						PChainHeight: 1,
 					},
 				},
@@ -564,11 +546,11 @@ func TestWarpMultiplePredicates(t *testing.T) {
 			}
 		}
 	}
-	testutils.RunPredicateTests(t, tests)
+	precompiletest.RunPredicateTests(t, tests)
 }
 
 func TestWarpSignatureWeightsNonDefaultQuorumNumerator(t *testing.T) {
-	consensusCtx := createConsensusCtx([]validatorRange{
+	snowCtx := createSnowCtx(t, []validatorRange{
 		{
 			start:     0,
 			end:       100,
@@ -577,7 +559,7 @@ func TestWarpSignatureWeightsNonDefaultQuorumNumerator(t *testing.T) {
 		},
 	})
 
-	tests := make(map[string]testutils.PredicateTest)
+	tests := make(map[string]precompiletest.PredicateTest)
 	nonDefaultQuorumNumerator := 50
 	// Ensure this test fails if the DefaultQuroumNumerator is changed to an unexpected value during development
 	require.NotEqual(t, nonDefaultQuorumNumerator, int(WarpDefaultQuorumNumerator))
@@ -593,11 +575,11 @@ func TestWarpSignatureWeightsNonDefaultQuorumNumerator(t *testing.T) {
 		}
 
 		name := fmt.Sprintf("non-default quorum %d signature(s)", numSigners)
-		tests[name] = testutils.PredicateTest{
+		tests[name] = precompiletest.PredicateTest{
 			Config: NewConfig(utils.NewUint64(0), uint64(nonDefaultQuorumNumerator), false),
-			PredicateContext: &precompileinterfaces.PredicateContext{
-				ConsensusCtx: consensusCtx,
-				ProposerVMBlockCtx: &interfaces.Context{
+			PredicateContext: &precompileconfig.PredicateContext{
+				SnowCtx: snowCtx,
+				ProposerVMBlockCtx: &block.Context{
 					PChainHeight: 1,
 				},
 			},
@@ -608,15 +590,16 @@ func TestWarpSignatureWeightsNonDefaultQuorumNumerator(t *testing.T) {
 		}
 	}
 
-	testutils.RunPredicateTests(t, tests)
+	precompiletest.RunPredicateTests(t, tests)
 }
 
-func initWarpPredicateTests() {
+func makeWarpPredicateTests(tb testing.TB) map[string]precompiletest.PredicateTest {
+	predicateTests := make(map[string]precompiletest.PredicateTest)
 	for _, totalNodes := range []int{10, 100, 1_000, 10_000} {
 		testName := fmt.Sprintf("%d signers/%d validators", totalNodes, totalNodes)
 
 		predicateBytes := createPredicate(totalNodes)
-		consensusCtx := createConsensusCtx([]validatorRange{
+		snowCtx := createSnowCtx(tb, []validatorRange{
 			{
 				start:     0,
 				end:       totalNodes,
@@ -624,7 +607,7 @@ func initWarpPredicateTests() {
 				publicKey: true,
 			},
 		})
-		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(totalNodes), predicateBytes)
+		predicateTests[testName] = createValidPredicateTest(snowCtx, uint64(totalNodes), predicateBytes)
 	}
 
 	numSigners := 10
@@ -632,7 +615,7 @@ func initWarpPredicateTests() {
 		testName := fmt.Sprintf("%d signers (heavily weighted)/%d validators", numSigners, totalNodes)
 
 		predicateBytes := createPredicate(numSigners)
-		consensusCtx := createConsensusCtx([]validatorRange{
+		snowCtx := createSnowCtx(tb, []validatorRange{
 			{
 				start:     0,
 				end:       numSigners,
@@ -646,14 +629,14 @@ func initWarpPredicateTests() {
 				publicKey: true,
 			},
 		})
-		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(numSigners), predicateBytes)
+		predicateTests[testName] = createValidPredicateTest(snowCtx, uint64(numSigners), predicateBytes)
 	}
 
 	for _, totalNodes := range []int{100, 1_000, 10_000} {
 		testName := fmt.Sprintf("%d signers (heavily weighted)/%d validators (non-signers without registered PublicKey)", numSigners, totalNodes)
 
 		predicateBytes := createPredicate(numSigners)
-		consensusCtx := createConsensusCtx([]validatorRange{
+		snowCtx := createSnowCtx(tb, []validatorRange{
 			{
 				start:     0,
 				end:       numSigners,
@@ -667,42 +650,45 @@ func initWarpPredicateTests() {
 				publicKey: false,
 			},
 		})
-		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(numSigners), predicateBytes)
+		predicateTests[testName] = createValidPredicateTest(snowCtx, uint64(numSigners), predicateBytes)
 	}
 
 	for _, totalNodes := range []int{100, 1_000, 10_000} {
 		testName := fmt.Sprintf("%d validators w/ %d signers/repeated PublicKeys", totalNodes, numSigners)
 
 		predicateBytes := createPredicate(numSigners)
-		getValidatorsOutput := make(map[ids.NodeID]*interfaces.GetValidatorOutput, totalNodes)
+		getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput, totalNodes)
 		for i := 0; i < totalNodes; i++ {
-			getValidatorsOutput[testVdrs[i].nodeID] = &interfaces.GetValidatorOutput{
+			getValidatorsOutput[testVdrs[i].nodeID] = &validators.GetValidatorOutput{
 				NodeID:    testVdrs[i].nodeID,
 				Weight:    20,
 				PublicKey: testVdrs[i%numSigners].vdr.PublicKey,
 			}
 		}
 
-		consensusCtx := utils.TestConsensusContext()
-		consensusCtx.NetworkID = networkID
+		snowCtx := utilstest.NewTestSnowContext(tb)
+
 		state := &validatorstest.State{
 			GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 				return sourceSubnetID, nil
 			},
-			GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*interfaces.GetValidatorOutput, error) {
+			GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 				return getValidatorsOutput, nil
 			},
 		}
-		consensusCtx.ValidatorState = state
+		snowCtx.ValidatorState = state
 
-		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(numSigners), predicateBytes)
+		predicateTests[testName] = createValidPredicateTest(snowCtx, uint64(numSigners), predicateBytes)
 	}
+	return predicateTests
 }
 
 func TestWarpPredicate(t *testing.T) {
-	testutils.RunPredicateTests(t, predicateTests)
+	predicateTests := makeWarpPredicateTests(t)
+	precompiletest.RunPredicateTests(t, predicateTests)
 }
 
 func BenchmarkWarpPredicate(b *testing.B) {
-	testutils.RunPredicateBenchmarks(b, predicateTests)
+	predicateTests := makeWarpPredicateTests(b)
+	precompiletest.RunPredicateBenchmarks(b, predicateTests)
 }

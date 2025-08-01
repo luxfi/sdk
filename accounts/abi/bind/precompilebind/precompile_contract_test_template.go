@@ -1,5 +1,7 @@
-// (c) 2019-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// #skiplint: import_testing_only_in_tests
 package precompilebind
 
 // tmplSourcePrecompileConfigGo is the Go precompiled config source template.
@@ -13,13 +15,13 @@ package {{.Package}}
 import (
 	"testing"
 	"math/big"
-	"github.com/luxfi/evm/core/state"
+
 	{{- if .Contract.AllowList}}
-	"github.com/luxfi/evm/precompile/allowlist"
+	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
 	{{- end}}
-	"github.com/luxfi/evm/precompile/testutils"
-	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +38,7 @@ var (
 // allowlist, readOnly behaviour, and gas cost. You should write your own
 // tests for specific cases.
 var(
-	tests = map[string]testutils.PrecompileTest{
+	tests = map[string]precompiletest.PrecompileTest{
 		{{- $contract := .Contract}}
 		{{- $structs := .Structs}}
 		{{- range .Contract.Funcs}}
@@ -46,8 +48,8 @@ var(
 		{{- range $role := $roles}}
 		{{- $fail := and (not $func.Original.IsConstant) (eq $role "NoRole")}}
 		"calling {{decapitalise $func.Normalized.Name}} from {{$role}} should {{- if $fail}} fail {{- else}} succeed{{- end}}":  {
-			Caller:     allowlist.Test{{$role}}Addr,
-			BeforeHook: allowlist.SetDefaultRoles(Module.Address),
+			Caller:     allowlisttest.Test{{$role}}Addr,
+			BeforeHook: allowlisttest.SetDefaultRoles(Module.Address),
 			InputFn: func(t testing.TB) []byte {
 				{{- if len $func.Normalized.Inputs | lt 1}}
 				// CUSTOM CODE STARTS HERE
@@ -186,12 +188,12 @@ func Test{{.Contract.Type}}Run(t *testing.T) {
 	// and runs them all together.
 	// Even if you don't add any custom tests, keep this. This will still
 	// run the default allowlist tests.
-	allowlist.RunPrecompileWithAllowListTests(t, Module, extstate.NewTestStateDB, tests)
+			allowlisttest.RunPrecompileWithAllowListTests(t, Module, tests)
 	{{- else}}
 	// Run tests.
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			test.Run(t, Module, extstate.NewTestStateDB(t))
+			test.Run(t, Module)
 		})
 	}
 	{{- end}}
@@ -238,23 +240,4 @@ func TestPackUnpack{{.Normalized.Name}}EventData(t *testing.T) {
 }
 {{end}}
 {{end}}
-
-func Benchmark{{.Contract.Type}}(b *testing.B) {
-	{{- if .Contract.AllowList}}
-	// Benchmark tests with allowlist tests.
-	// This adds allowlist tests to your custom tests
-	// and benchmarks them all together.
-	// Even if you don't add any custom tests, keep this. This will still
-	// run the default allowlist tests.
-	allowlist.BenchPrecompileWithAllowList(b, Module, extstate.NewTestStateDB, tests)
-	{{- else}}
-	// Benchmark tests.
-	for name, test := range tests {
-		b.Run(name, func(b *testing.B) {
-			test.Bench(b, Module, extstate.NewTestStateDB(b))
-		})
-	}
-	{{- end}}
-}
-
 `

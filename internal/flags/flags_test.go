@@ -1,3 +1,14 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+//
+// This file is a derived work, based on the go-ethereum library whose original
+// notices appear below.
+//
+// It is distributed under a license compatible with the licensing terms of the
+// original code from which it is derived.
+//
+// Much love to the original authors for their work.
+// **********
 // Copyright 2015 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -17,18 +28,19 @@
 package flags
 
 import (
+	"os/user"
 	"runtime"
 	"testing"
 )
 
 func TestPathExpansion(t *testing.T) {
-	home := HomeDir()
+	user, _ := user.Current()
 	var tests map[string]string
 
 	if runtime.GOOS == "windows" {
 		tests = map[string]string{
 			`/home/someuser/tmp`:        `\home\someuser\tmp`,
-			`~/tmp`:                     home + `\tmp`,
+			`~/tmp`:                     user.HomeDir + `\tmp`,
 			`~thisOtherUser/b/`:         `~thisOtherUser\b`,
 			`$DDDXXX/a/b`:               `\tmp\a\b`,
 			`/a/b/`:                     `\a\b`,
@@ -39,7 +51,7 @@ func TestPathExpansion(t *testing.T) {
 	} else {
 		tests = map[string]string{
 			`/home/someuser/tmp`:        `/home/someuser/tmp`,
-			`~/tmp`:                     home + `/tmp`,
+			`~/tmp`:                     user.HomeDir + `/tmp`,
 			`~thisOtherUser/b/`:         `~thisOtherUser/b`,
 			`$DDDXXX/a/b`:               `/tmp/a/b`,
 			`/a/b/`:                     `/a/b`,
@@ -51,13 +63,9 @@ func TestPathExpansion(t *testing.T) {
 
 	t.Setenv(`DDDXXX`, `/tmp`)
 	for test, expected := range tests {
-		t.Run(test, func(t *testing.T) {
-			t.Parallel()
-
-			got := expandPath(test)
-			if got != expected {
-				t.Errorf(`test %s, got %s, expected %s\n`, test, got, expected)
-			}
-		})
+		got := expandPath(test)
+		if got != expected {
+			t.Errorf(`test %s, got %s, expected %s\n`, test, got, expected)
+		}
 	}
 }

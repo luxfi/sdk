@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,12 +34,12 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"github.com/luxfi/evm/core/types"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/urfave/cli/v2"
 )
@@ -172,7 +173,7 @@ func (i *bbInput) ToBlock() *types.Block {
 	})
 }
 
-// SealBlock seals the given block using the configured common.
+// SealBlock seals the given block using the configured engine.
 func (i *bbInput) SealBlock(block *types.Block) (*types.Block, error) {
 	switch {
 	case i.Clique != nil:

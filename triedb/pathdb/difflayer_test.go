@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,9 +32,9 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/evm/interfaces/trie/testutil"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/trie/testutil"
+	"github.com/luxfi/geth/trie/trienode"
 )
 
 func emptyLayer() *diskLayer {

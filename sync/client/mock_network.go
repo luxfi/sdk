@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesyncclient
@@ -7,40 +7,40 @@ import (
 	"context"
 	"errors"
 
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/peer"
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/evm/network"
 
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/luxd/version"
 )
 
-var _ peer.NetworkClient = &mockNetwork{}
+var _ network.SyncedNetworkClient = (*mockNetwork)(nil)
 
 // TODO replace with gomock library
 type mockNetwork struct {
 	// captured request data
 	numCalls         uint
-	requestedVersion *interfaces.Application
+	requestedVersion *version.Application
 	request          []byte
 
 	// response mocking for RequestAny and Request calls
 	response       [][]byte
 	callback       func() // callback is called prior to processing each mock call
 	requestErr     []error
-	nodesRequested []interfaces.NodeID
+	nodesRequested []ids.NodeID
 }
 
-func (t *mockNetwork) SendAppRequestAny(ctx context.Context, minVersion *interfaces.Application, request []byte) ([]byte, interfaces.NodeID, error) {
+func (t *mockNetwork) SendSyncedAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte) ([]byte, ids.NodeID, error) {
 	if len(t.response) == 0 {
-		return nil, interfaces.EmptyIDNodeID, errors.New("no mocked response to return in mockNetwork")
+		return nil, ids.EmptyNodeID, errors.New("no mocked response to return in mockNetwork")
 	}
 
 	t.requestedVersion = minVersion
 
 	response, err := t.processMock(request)
-	return response, interfaces.EmptyIDNodeID, err
+	return response, ids.EmptyNodeID, err
 }
 
-func (t *mockNetwork) SendAppRequest(ctx context.Context, nodeID interfaces.NodeID, request []byte) ([]byte, error) {
+func (t *mockNetwork) SendSyncedAppRequest(ctx context.Context, nodeID ids.NodeID, request []byte) ([]byte, error) {
 	if len(t.response) == 0 {
 		return nil, errors.New("no mocked response to return in mockNetwork")
 	}
@@ -93,4 +93,4 @@ func (t *mockNetwork) mockResponses(callback func(), responses ...[]byte) {
 	t.numCalls = 0
 }
 
-func (t *mockNetwork) TrackBandwidth(interfaces.NodeID, float64) {}
+func (t *mockNetwork) TrackBandwidth(ids.NodeID, float64) {}

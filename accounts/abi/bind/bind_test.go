@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,6 +35,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
 	"github.com/luxfi/geth/common"
 )
 
@@ -298,7 +300,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -354,7 +356,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -400,7 +402,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -458,7 +460,7 @@ var bindTests = []struct {
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
 			"github.com/luxfi/geth/common"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -506,7 +508,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -573,7 +575,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -619,7 +621,7 @@ var bindTests = []struct {
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
 			"github.com/luxfi/geth/common"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 		`,
 		`
 			// Create a simulator and wrap a non-deployed contract
@@ -658,7 +660,7 @@ var bindTests = []struct {
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
 			"github.com/luxfi/geth/common"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 		`,
 		`
 			// Create a simulator and wrap a non-deployed contract
@@ -705,7 +707,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -755,7 +757,7 @@ var bindTests = []struct {
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
 			"github.com/luxfi/geth/common"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -830,7 +832,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -924,7 +926,7 @@ var bindTests = []struct {
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
 			"github.com/luxfi/geth/common"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -1114,7 +1116,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -1249,7 +1251,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 
@@ -1391,7 +1393,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -1457,9 +1459,8 @@ var bindTests = []struct {
 
 		"github.com/luxfi/evm/accounts/abi/bind"
 		"github.com/luxfi/evm/accounts/abi/bind/backends"
-		"github.com/luxfi/evm/core"
+		"github.com/luxfi/geth/core/types"
 		"github.com/luxfi/geth/crypto"
-		"github.com/luxfi/evm/params"
 		`,
 		`
 		// Initialize test accounts
@@ -1568,7 +1569,7 @@ var bindTests = []struct {
 		"github.com/luxfi/evm/accounts/abi/bind"
 		"github.com/luxfi/evm/accounts/abi/bind/backends"
 		"github.com/luxfi/geth/crypto"
-		"github.com/luxfi/evm/core"
+		"github.com/luxfi/geth/core/types"
 		`,
 		`
 		// Initialize test accounts
@@ -1631,7 +1632,7 @@ var bindTests = []struct {
 		"github.com/luxfi/evm/accounts/abi/bind"
 		"github.com/luxfi/evm/accounts/abi/bind/backends"
 		"github.com/luxfi/geth/crypto"
-		"github.com/luxfi/evm/core"
+		"github.com/luxfi/geth/core/types"
         `,
 		`
 		key, _ := crypto.GenerateKey()
@@ -1692,7 +1693,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		`
@@ -1750,10 +1751,10 @@ var bindTests = []struct {
 		`
 			"bytes"
 			"math/big"
-
+	
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 	   `,
 		`
@@ -1841,7 +1842,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 	   `,
 		`
@@ -1906,13 +1907,14 @@ var bindTests = []struct {
 		[]string{"0x6080604052348015600f57600080fd5b5060998061001e6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c8063726c638214602d575b600080fd5b60336035565b005b60405163024876cd60e61b815260016004820152600260248201526003604482015260640160405180910390fdfea264697066735822122093f786a1bc60216540cd999fbb4a6109e0fef20abcff6e9107fb2817ca968f3c64736f6c63430008070033"},
 		[]string{`[{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"MyError","type":"error"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"MyError1","type":"error"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"MyError2","type":"error"},{"inputs":[{"internalType":"uint256","name":"a","type":"uint256"},{"internalType":"uint256","name":"b","type":"uint256"},{"internalType":"uint256","name":"c","type":"uint256"}],"name":"MyError3","type":"error"},{"inputs":[],"name":"Error","outputs":[],"stateMutability":"pure","type":"function"}]`},
 		`
-				"math/big"
-
-				"github.com/luxfi/evm/accounts/abi/bind"
-				"github.com/luxfi/evm/accounts/abi/bind/backends"
-				"github.com/luxfi/evm/core"
-				"github.com/luxfi/geth/crypto"
-		   `,
+			"context"
+			"math/big"
+	
+			"github.com/luxfi/evm/accounts/abi/bind"
+			"github.com/luxfi/evm/accounts/abi/bind/backends"
+			"github.com/luxfi/geth/core/types"
+			"github.com/luxfi/geth/crypto"
+	   `,
 		`
 			var (
 				key, _  = crypto.GenerateKey()
@@ -1962,7 +1964,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		tester: `
@@ -2010,7 +2012,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		tester: `
@@ -2051,7 +2053,7 @@ var bindTests = []struct {
 
 			"github.com/luxfi/evm/accounts/abi/bind"
 			"github.com/luxfi/evm/accounts/abi/bind/backends"
-			"github.com/luxfi/evm/core"
+			"github.com/luxfi/geth/core/types"
 			"github.com/luxfi/geth/crypto"
 		`,
 		tester: `
@@ -2153,6 +2155,7 @@ func golangBindings(t *testing.T, overload bool) {
 			package bindtest
 
 			import (
+				"testing"
 				%s
 			)
 

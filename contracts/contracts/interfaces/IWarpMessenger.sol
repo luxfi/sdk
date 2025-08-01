@@ -1,6 +1,3 @@
-// (c) 2022-2023, Lux Industries, Inc. All rights reserved.
-// See the file LICENSE for licensing terms.
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.24;
@@ -44,7 +41,7 @@ interface IWarpMessenger {
     uint32 index
   ) external view returns (WarpBlockHash calldata warpBlockHash, bool valid);
 
-  // getBlockchainID returns the consensus.Context BlockchainID of this chain.
+  // getBlockchainID returns the snow.Context BlockchainID of this chain.
   // This blockchainID is the hash of the transaction that created this blockchain on the P-Chain
   // and is not related to the Ethereum ChainID.
   function getBlockchainID() external view returns (bytes32 blockchainID);

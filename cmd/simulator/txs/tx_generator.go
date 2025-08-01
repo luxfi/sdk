@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -7,9 +7,10 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/ethclient"
+
+	"github.com/luxfi/geth/core/types"
 	ethcrypto "github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/ethclient"
 )
 
 var _ TxSequence[*types.Transaction] = (*txSequence)(nil)

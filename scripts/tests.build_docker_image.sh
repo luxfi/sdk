@@ -5,12 +5,12 @@ set -euo pipefail
 # Sanity check the image build by attempting to build and run the image without error.
 
 # Directory above this script
-SUBNET_EVM_PATH=$(
+EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
 )
 # Load the constants
-source "$SUBNET_EVM_PATH"/scripts/constants.sh
+source "$EVM_PATH"/scripts/constants.sh
 
 build_and_test() {
   local imagename="${1}"

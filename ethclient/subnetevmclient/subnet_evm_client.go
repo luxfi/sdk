@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,15 +30,16 @@ package subnetevmclient
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"runtime"
 	"runtime/debug"
-	"github.com/luxfi/evm/core/types"
-	ethereum "github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/rpc"
+
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/evm/rpc"
 )
 
 // Client is a wrapper around rpc.Client that implements geth-specific functionality.
@@ -110,7 +112,7 @@ func (ec *Client) GetProof(ctx context.Context, account common.Address, keys []s
 	}
 
 	var res accountResult
-	err := ec.c.CallContext(ctx, &res, "eth_getProof", account, keys, toBlockNumArg(blockNumber))
+	err := ec.c.CallContext(ctx, &res, "eth_getProof", account, keys, ethclient.ToBlockNumArg(blockNumber))
 	// Turn hexutils back to normal datatypes
 	storageResults := make([]StorageResult, 0, len(res.StorageProof))
 	for _, st := range res.StorageProof {
@@ -155,7 +157,7 @@ func (ec *Client) CallContract(ctx context.Context, msg ethereum.CallMsg, blockN
 	var hex hexutil.Bytes
 	err := ec.c.CallContext(
 		ctx, &hex, "eth_call", toCallArg(msg),
-		toBlockNumArg(blockNumber), toOverrideMap(overrides),
+		ethclient.ToBlockNumArg(blockNumber), toOverrideMap(overrides),
 	)
 	return hex, err
 }
@@ -236,19 +238,4 @@ func toOverrideMap(overrides *map[common.Address]OverrideAccount) interface{} {
 		}
 	}
 	return &result
-}
-
-func toBlockNumArg(number *big.Int) string {
-	if number == nil {
-		return "latest"
-	}
-	if number.Sign() >= 0 {
-		return hexutil.EncodeBig(number)
-	}
-	// It's negative.
-	if number.IsInt64() {
-		return rpc.BlockNumber(number.Int64()).String()
-	}
-	// It's negative and large, which is invalid.
-	return fmt.Sprintf("<invalid %d>", number)
 }

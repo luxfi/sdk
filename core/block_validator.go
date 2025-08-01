@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,11 +30,13 @@ package core
 import (
 	"errors"
 	"fmt"
+
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and
@@ -95,8 +98,8 @@ func (v *BlockValidator) ValidateBody(block *types.Block) error {
 
 	// Check blob gas usage.
 	if header.BlobGasUsed != nil {
-		if want := *header.BlobGasUsed / params.BlobTxBlobGasPerBlob; uint64(blobs) != want { // div because the header is surely good vs the body might be bloated
-			return fmt.Errorf("blob gas used mismatch (header %v, calculated %v)", *header.BlobGasUsed, blobs*params.BlobTxBlobGasPerBlob)
+		if want := *header.BlobGasUsed / ethparams.BlobTxBlobGasPerBlob; uint64(blobs) != want { // div because the header is surely good vs the body might be bloated
+			return fmt.Errorf("blob gas used mismatch (header %v, calculated %v)", *header.BlobGasUsed, blobs*ethparams.BlobTxBlobGasPerBlob)
 		}
 	} else {
 		if blobs > 0 {
@@ -123,7 +126,7 @@ func (v *BlockValidator) ValidateState(block *types.Block, statedb *state.StateD
 	}
 	// Validate the received block's bloom with the one derived from the generated receipts.
 	// For valid blocks this should always validate to true.
-	rbloom := types.MergeBloom(receipts)
+	rbloom := types.CreateBloom(receipts)
 	if rbloom != header.Bloom {
 		return fmt.Errorf("invalid bloom (remote: %x  local: %x)", header.Bloom, rbloom)
 	}
@@ -146,10 +149,10 @@ func (v *BlockValidator) ValidateState(block *types.Block, statedb *state.StateD
 // the gas allowance.
 func CalcGasLimit(parentGasUsed, parentGasLimit, gasFloor, gasCeil uint64) uint64 {
 	// contrib = (parentGasUsed * 3 / 2) / 1024
-	contrib := (parentGasUsed + parentGasUsed/2) / params.GasLimitBoundDivisor
+	contrib := (parentGasUsed + parentGasUsed/2) / ethparams.GasLimitBoundDivisor
 
 	// decay = parentGasLimit / 1024 -1
-	decay := parentGasLimit/params.GasLimitBoundDivisor - 1
+	decay := parentGasLimit/ethparams.GasLimitBoundDivisor - 1
 
 	/*
 		strategy: gasLimit of block-to-mine is set based on parent's
@@ -159,8 +162,8 @@ func CalcGasLimit(parentGasUsed, parentGasLimit, gasFloor, gasCeil uint64) uint6
 		from parentGasLimit * (2/3) parentGasUsed is.
 	*/
 	limit := parentGasLimit - decay + contrib
-	if limit < params.MinGasLimit {
-		limit = params.MinGasLimit
+	if limit < ethparams.MinGasLimit {
+		limit = ethparams.MinGasLimit
 	}
 	// If we're outside our allowed gas range, we try to hone towards them
 	if limit < gasFloor {

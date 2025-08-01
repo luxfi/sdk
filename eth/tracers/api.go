@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -37,20 +38,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/eth/tracers/logger"
-	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/internal/ethapi"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 )
 
 const (
@@ -418,9 +419,7 @@ func (api *API) traceChain(start, end *types.Block, config *TraceConfig, closed 
 			// Send the block over to the concurrent tracers (if not in the fast-forward phase)
 			txs := next.Transactions()
 			select {
-			// TODO: Fix StateDB type mismatch
-			// case taskCh <- &blockTraceTask{statedb: statedb.Copy(), block: next, release: release, results: make([]*txTraceResult, len(txs))}:
-			case taskCh <- &blockTraceTask{statedb: nil, block: next, release: release, results: make([]*txTraceResult, len(txs))}:
+			case taskCh <- &blockTraceTask{statedb: statedb.Copy(), block: next, release: release, results: make([]*txTraceResult, len(txs))}:
 			case <-closed:
 				tracker.releaseState(number, release)
 				return
@@ -720,9 +719,7 @@ func (api *baseAPI) traceBlockParallel(ctx context.Context, block *types.Block, 
 txloop:
 	for i, tx := range txs {
 		// Send the trace task over for execution
-		// TODO: Fix StateDB type mismatch
-		// task := &txTraceTask{statedb: statedb.Copy(), index: i}
-		task := &txTraceTask{statedb: nil, index: i}
+		task := &txTraceTask{statedb: statedb.Copy(), index: i}
 		select {
 		case <-ctx.Done():
 			failed = ctx.Err()
@@ -963,13 +960,15 @@ func (api *API) TraceCall(ctx context.Context, args ethapi.TransactionArgs, bloc
 	defer release()
 
 	vmctx := core.NewEVMBlockContext(block.Header(), api.chainContext(ctx), nil)
+
 	// Apply the customization rules if required.
 	if config != nil {
 		originalTime := block.Time()
 		config.BlockOverrides.Apply(&vmctx)
 		// Apply all relevant upgrades from [originalTime] to the block time set in the override.
 		// Should be applied before the state overrides.
-		err = core.ApplyUpgrades(api.backend.ChainConfig(), &originalTime, &vmctx, statedb)
+		blockContext := core.NewBlockContext(vmctx.BlockNumber, vmctx.Time)
+		err = core.ApplyUpgrades(api.backend.ChainConfig(), &originalTime, blockContext, statedb)
 		if err != nil {
 			return nil, err
 		}
@@ -1060,70 +1059,38 @@ func APIs(backend Backend) []rpc.API {
 // along with a boolean that indicates whether the copy is canonical (equivalent to the original).
 func overrideConfig(original *params.ChainConfig, override *params.ChainConfig) (*params.ChainConfig, bool) {
 	copy := new(params.ChainConfig)
-	*copy = *original
+	*copy = params.Copy(original)
 	canon := true
 
-	// Apply network upgrades (after Berlin) to the copy.
-	// Note in geth, ApricotPhase2 is the "equivalent" to Berlin.
-	// TODO: Handle network upgrades using the NetworkUpgrades structure
-	// For now, we'll skip these old ApricotPhase fields that don't exist in our ChainConfig
-	/*
-	if timestamp := override.ApricotPhase2BlockTimestamp; timestamp != nil {
-		copy.ApricotPhase2BlockTimestamp = timestamp
+	overrideExtra := params.GetExtra(override)
+	if timestamp := overrideExtra.SubnetEVMTimestamp; timestamp != nil {
+		params.GetExtra(copy).SubnetEVMTimestamp = timestamp
 		canon = false
 	}
-	if timestamp := override.ApricotPhase3BlockTimestamp; timestamp != nil {
-		copy.ApricotPhase3BlockTimestamp = timestamp
+	if timestamp := overrideExtra.DurangoTimestamp; timestamp != nil {
+		params.GetExtra(copy).DurangoTimestamp = timestamp
 		canon = false
 	}
-	if timestamp := override.ApricotPhase4BlockTimestamp; timestamp != nil {
-		copy.ApricotPhase4BlockTimestamp = timestamp
+	if timestamp := overrideExtra.EtnaTimestamp; timestamp != nil {
+		params.GetExtra(copy).EtnaTimestamp = timestamp
 		canon = false
 	}
-	if timestamp := override.ApricotPhase5BlockTimestamp; timestamp != nil {
-		copy.ApricotPhase5BlockTimestamp = timestamp
+	if timestamp := overrideExtra.FortunaTimestamp; timestamp != nil {
+		params.GetExtra(copy).FortunaTimestamp = timestamp
 		canon = false
 	}
-	if timestamp := override.ApricotPhasePre6BlockTimestamp; timestamp != nil {
-		copy.ApricotPhasePre6BlockTimestamp = timestamp
+	if timestamp := overrideExtra.GraniteTimestamp; timestamp != nil {
+		params.GetExtra(copy).GraniteTimestamp = timestamp
 		canon = false
 	}
-	if timestamp := override.ApricotPhase6BlockTimestamp; timestamp != nil {
-		copy.ApricotPhase6BlockTimestamp = timestamp
-		canon = false
-	}
-	if timestamp := override.ApricotPhasePost6BlockTimestamp; timestamp != nil {
-		copy.ApricotPhasePost6BlockTimestamp = timestamp
-		canon = false
-	}
-	if timestamp := override.BanffBlockTimestamp; timestamp != nil {
-		copy.BanffBlockTimestamp = timestamp
-		canon = false
-	}
-	if timestamp := override.CortinaBlockTimestamp; timestamp != nil {
-		copy.CortinaBlockTimestamp = timestamp
-		canon = false
-	}
-	if timestamp := override.DurangoBlockTimestamp; timestamp != nil {
-		copy.DurangoBlockTimestamp = timestamp
-		canon = false
-	}
-	if timestamp := override.EtnaTimestamp; timestamp != nil {
-		copy.EtnaTimestamp = timestamp
-		canon = false
-	}
-	if timestamp := override.FortunaTimestamp; timestamp != nil {
-		copy.FortunaTimestamp = timestamp
-		canon = false
-	}
-	*/
-	
-	// Handle standard ethereum fields
 	if timestamp := override.CancunTime; timestamp != nil {
 		copy.CancunTime = timestamp
 		canon = false
 	}
-	// VerkleTime is not supported in our ChainConfig
+	if timestamp := override.VerkleTime; timestamp != nil {
+		copy.VerkleTime = timestamp
+		canon = false
+	}
 
 	return copy, canon
 }

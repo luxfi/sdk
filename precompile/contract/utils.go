@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package contract
@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"github.com/luxfi/evm/accounts/abi"
+
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/crypto"
-	"github.com/luxfi/evm/vmerrs"
+	"github.com/luxfi/evm/accounts/abi"
 )
 
 // Gas costs for stateful precompiles
@@ -42,7 +43,7 @@ func CalculateFunctionSelector(functionSignature string) []byte {
 // DeductGas checks if [suppliedGas] is sufficient against [requiredGas] and deducts [requiredGas] from [suppliedGas].
 func DeductGas(suppliedGas uint64, requiredGas uint64) (uint64, error) {
 	if suppliedGas < requiredGas {
-		return 0, vmerrs.ErrOutOfGas
+		return 0, vm.ErrOutOfGas
 	}
 	return suppliedGas - requiredGas, nil
 }

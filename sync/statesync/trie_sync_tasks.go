@@ -1,23 +1,24 @@
-// (c) 2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
 
 import (
 	"fmt"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/sync/syncutils"
-	"github.com/luxfi/geth/trie"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/evm/sync/syncutils"
 )
 
 var (
-	_ syncTask = &mainTrieTask{}
-	_ syncTask = &storageTrieTask{}
+	_ syncTask = (*mainTrieTask)(nil)
+	_ syncTask = (*storageTrieTask)(nil)
 )
 
 type syncTask interface {

@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -44,12 +45,6 @@ type binaryIterator struct {
 	k               common.Hash
 	account         common.Hash
 	fail            error
-}
-
-// hashIterator is an interface for iterators that can return their current hash
-type hashIterator interface {
-	Iterator
-	Hash() common.Hash
 }
 
 // initBinaryAccountIterator creates a simplistic iterator to step over all the
@@ -138,26 +133,16 @@ func (it *binaryIterator) Next() bool {
 	}
 first:
 	if it.aDone {
-		if hb, ok := it.b.(hashIterator); ok {
-			it.k = hb.Hash()
-		}
+		it.k = it.b.Hash()
 		it.bDone = !it.b.Next()
 		return true
 	}
 	if it.bDone {
-		if ha, ok := it.a.(hashIterator); ok {
-			it.k = ha.Hash()
-		}
+		it.k = it.a.Hash()
 		it.aDone = !it.a.Next()
 		return true
 	}
-	var nextA, nextB common.Hash
-	if ha, ok := it.a.(hashIterator); ok {
-		nextA = ha.Hash()
-	}
-	if hb, ok := it.b.(hashIterator); ok {
-		nextB = hb.Hash()
-	}
+	nextA, nextB := it.a.Hash(), it.b.Hash()
 	if diff := bytes.Compare(nextA[:], nextB[:]); diff < 0 {
 		it.aDone = !it.a.Next()
 		it.k = nextA

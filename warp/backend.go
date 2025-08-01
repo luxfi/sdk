@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -7,27 +7,30 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/luxfi/node/cache"
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/network/p2p/lp118"
-	"github.com/luxfi/node/consensus/chain"
-	"github.com/luxfi/node/consensus/validators"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+
+	"github.com/luxfi/luxd/cache"
+	"github.com/luxfi/luxd/cache/lru"
+	"github.com/luxfi/luxd/database"
+	"github.com/luxfi/luxd/ids"
+
+	"github.com/luxfi/luxd/network/p2p/acp118"
+	"github.com/luxfi/luxd/snow/consensus/snowman"
+	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
+
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 )
 
 var (
-	_                         Backend = &backend{}
+	_                         Backend = (*backend)(nil)
 	errParsingOffChainMessage         = errors.New("failed to parse off-chain message")
 
 	messageCacheSize = 500
-	batchSize        = 4096
 )
 
 type BlockClient interface {
-	GetAcceptedBlock(ctx context.Context, blockID ids.ID) (chain.Block, error)
+	GetAcceptedBlock(ctx context.Context, blockID ids.ID) (snowman.Block, error)
 }
 
 // Backend tracks signature-eligible warp messages and provides an interface to fetch them.
@@ -45,7 +48,7 @@ type Backend interface {
 	// GetMessage retrieves the [unsignedMessage] from the warp backend database if available
 	GetMessage(messageHash ids.ID) (*luxWarp.UnsignedMessage, error)
 
-	lp118.Verifier
+	acp118.Verifier
 }
 
 // backend implements Backend, keeps track of warp messages, and generates message signatures.
@@ -55,12 +58,11 @@ type backend struct {
 	db                        database.Database
 	warpSigner                luxWarp.Signer
 	blockClient               BlockClient
-	messageSignatureCache     cache.Cacher[ids.ID, []byte]
-	blockSignatureCache       cache.Cacher[ids.ID, []byte]
-	messageCache              cache.Cacher[ids.ID, *luxWarp.UnsignedMessage]
+	validatorReader           interfaces.ValidatorReader
+	signatureCache            cache.Cacher[ids.ID, []byte]
+	messageCache              *lru.Cache[ids.ID, *luxWarp.UnsignedMessage]
 	offchainAddressedCallMsgs map[ids.ID]*luxWarp.UnsignedMessage
 	stats                     *verifierStats
-	validatorReader           validators.State
 }
 
 // NewBackend creates a new Backend, and initializes the signature cache and message tracking database.
@@ -69,7 +71,7 @@ func NewBackend(
 	sourceChainID ids.ID,
 	warpSigner luxWarp.Signer,
 	blockClient BlockClient,
-	validatorReader validators.State,
+	validatorReader interfaces.ValidatorReader,
 	db database.Database,
 	signatureCache cache.Cacher[ids.ID, []byte],
 	offchainMessages [][]byte,
@@ -80,12 +82,11 @@ func NewBackend(
 		db:                        db,
 		warpSigner:                warpSigner,
 		blockClient:               blockClient,
-		messageSignatureCache:     signatureCache,
-		blockSignatureCache:       signatureCache,
-		messageCache:              &cache.Empty[ids.ID, *luxWarp.UnsignedMessage]{},
-		offchainAddressedCallMsgs: make(map[ids.ID]*luxWarp.UnsignedMessage),
-		stats:                     newVerifierStats(),
+		signatureCache:            signatureCache,
 		validatorReader:           validatorReader,
+		messageCache:              lru.NewCache[ids.ID, *luxWarp.UnsignedMessage](messageCacheSize),
+		stats:                     newVerifierStats(),
+		offchainAddressedCallMsgs: make(map[ids.ID]*luxWarp.UnsignedMessage),
 	}
 	return b, b.initOffChainMessages(offchainMessages)
 }
@@ -115,13 +116,6 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 	return nil
 }
 
-func (b *backend) Clear() error {
-	b.messageSignatureCache.Flush()
-	b.blockSignatureCache.Flush()
-	b.messageCache.Flush()
-	return database.Clear(b.db, batchSize)
-}
-
 func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 	messageID := unsignedMessage.ID()
 	log.Debug("Adding warp message to backend", "messageID", messageID)
@@ -133,11 +127,9 @@ func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 		return fmt.Errorf("failed to put warp signature in db: %w", err)
 	}
 
-	sig, err := b.signMessage(unsignedMessage)
-	if err != nil {
+	if _, err := b.signMessage(unsignedMessage); err != nil {
 		return fmt.Errorf("failed to sign warp message: %w", err)
 	}
-	b.messageSignatureCache.Put(messageID, sig)
 	return nil
 }
 
@@ -145,7 +137,7 @@ func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxW
 	messageID := unsignedMessage.ID()
 
 	log.Debug("Getting warp message from backend", "messageID", messageID)
-	if sig, ok := b.messageSignatureCache.Get(messageID); ok {
+	if sig, ok := b.signatureCache.Get(messageID); ok {
 		return sig, nil
 	}
 
@@ -168,7 +160,7 @@ func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte
 		return nil, fmt.Errorf("failed to create new unsigned warp message: %w", err)
 	}
 
-	if sig, ok := b.blockSignatureCache.Get(unsignedMessage.ID()); ok {
+	if sig, ok := b.signatureCache.Get(unsignedMessage.ID()); ok {
 		return sig, nil
 	}
 
@@ -180,7 +172,6 @@ func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign block message: %w", err)
 	}
-	b.blockSignatureCache.Put(unsignedMessage.ID(), sig)
 	return sig, nil
 }
 
@@ -212,7 +203,6 @@ func (b *backend) signMessage(unsignedMessage *luxWarp.UnsignedMessage) ([]byte,
 		return nil, fmt.Errorf("failed to sign warp message: %w", err)
 	}
 
-	// Cache the signature 
-	b.messageSignatureCache.Put(unsignedMessage.ID(), sig)
+	b.signatureCache.Put(unsignedMessage.ID(), sig)
 	return sig, nil
 }

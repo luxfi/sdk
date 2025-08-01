@@ -12,12 +12,17 @@ DEFAULT_VM_NAME="evm"
 DEFAULT_VM_ID="srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
 
 # Lux docker hub
-DOCKERHUB_REPO="luxdefi/node"
+# avaplatform/luxd - defaults to local as to avoid unintentional pushes
+# You should probably set it - export IMAGE_NAME='avaplatform/evm_luxd'
+IMAGE_NAME=${IMAGE_NAME:-"evm_luxd"}
+
+# Shared between ./scripts/build_docker_image.sh and ./scripts/tests.build_docker_image.sh
+LUXD_IMAGE_NAME="${LUXD_IMAGE_NAME:-avaplatform/luxd}"
 
 # if this isn't a git repository (say building from a release), don't set our git constants.
 if [ ! -d .git ]; then
     CURRENT_BRANCH=""
-    SUBNET_EVM_COMMIT=""
+    EVM_COMMIT=""
 else
     # Current branch
     CURRENT_BRANCH=${CURRENT_BRANCH:-$(git describe --tags --exact-match 2>/dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD || :)}
@@ -26,13 +31,13 @@ else
     #
     # Use an abbreviated version of the full commit to tag the image.
     # WARNING: this will use the most recent commit even if there are un-committed changes present
-    SUBNET_EVM_COMMIT="$(git --git-dir="$SUBNET_EVM_PATH/.git" rev-parse HEAD || :)"
+    EVM_COMMIT="$(git --git-dir="$EVM_PATH/.git" rev-parse HEAD || :)"
 fi
 
 # Don't export them as they're used in the context of other calls
 if [[ -z ${LUX_VERSION:-} ]]; then
   # Get module details from go.mod
-  MODULE_DETAILS="$(go list -m "github.com/luxfi/node" 2>/dev/null)"
+  MODULE_DETAILS="$(go list -m "github.com/luxfi/luxd" 2>/dev/null)"
 
   LUX_VERSION="$(echo "${MODULE_DETAILS}" | awk '{print $2}')"
 
@@ -49,7 +54,7 @@ if [[ -z ${LUX_VERSION:-} ]]; then
 fi
 
 # Shared between ./scripts/build_docker_image.sh and ./scripts/tests.build_docker_image.sh
-DOCKERHUB_TAG="${SUBNET_EVM_COMMIT::8}_${LUX_VERSION}"
+DOCKERHUB_TAG="${EVM_COMMIT::8}_${LUX_VERSION}"
 # WARNING: this will use the most recent commit even if there are un-committed changes present
 BUILD_IMAGE_ID=${BUILD_IMAGE_ID:-"${CURRENT_BRANCH}_${LUX_VERSION}"}
 

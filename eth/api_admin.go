@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,9 +35,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/core"
 )
 
 // AdminAPI is the collection of Ethereum full node related APIs for node

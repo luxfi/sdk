@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dummy
@@ -7,9 +7,11 @@ import (
 	"math"
 	"math/big"
 	"testing"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/params"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/plugin/evm/header"
 )
 
 var testFeeConfig = commontype.FeeConfig{
@@ -119,7 +121,7 @@ func TestVerifyBlockFee(t *testing.T) {
 			bigBlockGasCost := new(big.Int).SetUint64(blockGasCost)
 
 			engine := NewFaker()
-			if err := common.verifyBlockFee(test.baseFee, bigBlockGasCost, test.txs, test.receipts); err != nil {
+			if err := engine.verifyBlockFee(test.baseFee, bigBlockGasCost, test.txs, test.receipts); err != nil {
 				if !test.shouldErr {
 					t.Fatalf("Unexpected error: %s", err)
 				}

@@ -1,4 +1,4 @@
-// (c) 2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package core
@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/crypto"
-	ethparams "github.com/luxfi/evm/params"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
@@ -46,7 +46,7 @@ func TestBadTxAllowListBlock(t *testing.T) {
 			&extras.ChainConfig{
 				FeeConfig: params.DefaultFeeConfig,
 				NetworkUpgrades: extras.NetworkUpgrades{
-					EVMTimestamp: utils.NewUint64(0),
+					SubnetEVMTimestamp: utils.NewUint64(0),
 				},
 				GenesisPrecompiles: extras.Precompiles{
 					txallowlist.ConfigKey: txallowlist.NewConfig(utils.NewUint64(0), nil, nil, nil),

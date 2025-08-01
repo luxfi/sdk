@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package predicate
@@ -6,9 +6,8 @@ package predicate
 import (
 	"bytes"
 	"testing"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/utils"
+
+	"github.com/luxfi/luxd/utils"
 	"github.com/stretchr/testify/require"
 )
 

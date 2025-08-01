@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -35,54 +36,31 @@ import (
 	"math/big"
 	"sync"
 	"time"
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/utils/timer/mockable"
+	"github.com/luxfi/luxd/utils/units"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/commontype"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/holiman/uint256"
-	ethparams "github.com/luxfi/evm/params"
-	eparams "github.com/luxfi/evm/params"
 )
 
 const (
 	targetTxsSize = 1800 * units.KiB
-	blobTxBlobGasPerBlob = 131072 // Gas consumption of a single data blob
-	maxBlobGasPerBlock = 6 * blobTxBlobGasPerBlob
 )
-
-// convertToLazyTransactions converts regular transactions to lazy transactions
-func convertToLazyTransactions(txs map[common.Address][]*types.Transaction) map[common.Address][]*txpool.LazyTransaction {
-	result := make(map[common.Address][]*txpool.LazyTransaction)
-	for addr, list := range txs {
-		lazy := make([]*txpool.LazyTransaction, len(list))
-		for i, tx := range list {
-			lazy[i] = &txpool.LazyTransaction{
-				Hash:      tx.Hash(),
-				Tx:        tx,
-				Time:      time.Now(),
-				GasFeeCap: uint256.MustFromBig(tx.GasFeeCap()),
-				GasTipCap: uint256.MustFromBig(tx.GasTipCap()),
-				Gas:       tx.Gas(),
-				BlobGas:   tx.BlobGas(),
-			}
-		}
-		result[addr] = lazy
-	}
-	return result
-}
 
 // environment is the worker's current environment and holds all of the current state information.
 type environment struct {
@@ -127,11 +105,11 @@ type worker struct {
 	mux        *event.TypeMux // TODO replace
 	mu         sync.RWMutex   // The lock used to protect the coinbase and extra fields
 	coinbase   common.Address
-	clock      interfaces.MockableTimer // Allows us mock the clock for testing
+	clock      *mockable.Clock // Allows us mock the clock for testing
 	beaconRoot *common.Hash    // TODO: set to empty hash, retained for upstream compatibility and future use
 }
 
-func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, clock interfaces.MockableTimer) *worker {
+func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, clock *mockable.Clock) *worker {
 	worker := &worker{
 		config:      config,
 		chainConfig: chainConfig,
@@ -194,9 +172,9 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 	}
 
 	// Apply EIP-4844, EIP-4788.
-	if w.chainConfig.IsCancun(header.Time) {
+	if w.chainConfig.IsCancun(header.Number, header.Time) {
 		var excessBlobGas uint64
-		if w.chainConfig.IsCancun(parent.Time) {
+		if w.chainConfig.IsCancun(parent.Number, parent.Time) {
 			excessBlobGas = eip4844.CalcExcessBlobGas(*parent.ExcessBlobGas, *parent.BlobGasUsed)
 		} else {
 			// For the first post-fork block, both parent.data_gas_used and parent.excess_data_gas are evaluated as 0
@@ -234,9 +212,8 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 		return nil, fmt.Errorf("failed to create new current environment: %w", err)
 	}
 	if header.ParentBeaconRoot != nil {
-		blockCtx := core.NewEVMBlockContext(header, w.chain, nil)
-		ethConfig := &ethparams.ChainConfig{ChainID: w.chainConfig.ChainID}
-		vmenv := vm.NewEVM(blockCtx, vm.TxContext{}, env.state, ethConfig, vm.Config{})
+		context := core.NewEVMBlockContext(header, w.chain, nil)
+		vmenv := vm.NewEVM(context, vm.TxContext{}, env.state, w.chainConfig, vm.Config{})
 		core.ProcessBeaconBlockRoot(*header.ParentBeaconRoot, vmenv, env.state)
 	}
 	// Ensure we always stop prefetcher after block building is complete.
@@ -270,13 +247,9 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 	filter.OnlyPlainTxs, filter.OnlyBlobTxs = false, true
 	pendingBlobTxs := w.eth.TxPool().Pending(filter)
 
-	// Convert to lazy transactions
-	lazyPlainTxs := convertToLazyTransactions(pendingPlainTxs)
-	lazyBlobTxs := convertToLazyTransactions(pendingBlobTxs)
-	
 	// Split the pending transactions into locals and remotes.
-	localPlainTxs, remotePlainTxs := make(map[common.Address][]*txpool.LazyTransaction), lazyPlainTxs
-	localBlobTxs, remoteBlobTxs := make(map[common.Address][]*txpool.LazyTransaction), lazyBlobTxs
+	localPlainTxs, remotePlainTxs := make(map[common.Address][]*txpool.LazyTransaction), pendingPlainTxs
+	localBlobTxs, remoteBlobTxs := make(map[common.Address][]*txpool.LazyTransaction), pendingBlobTxs
 	for _, account := range w.eth.TxPool().Locals() {
 		if txs := remotePlainTxs[account]; len(txs) > 0 {
 			delete(remotePlainTxs, account)
@@ -309,17 +282,21 @@ func (w *worker) createCurrentEnvironment(predicateContext *precompileconfig.Pre
 	if err != nil {
 		return nil, err
 	}
-	// chainConfig := params.GetExtra(w.chainConfig)
-	// Note: GasCapacity calculation removed as it's not used and the function doesn't exist
-	currentState.StartPrefetcher("miner", nil)
+	chainConfig := params.GetExtra(w.chainConfig)
+	capacity, err := customheader.GasCapacity(chainConfig, feeConfig, parent, header.Time)
+	if err != nil {
+		return nil, fmt.Errorf("calculating gas capacity: %w", err)
+	}
+	numPrefetchers := w.chain.CacheConfig().TriePrefetcherParallelism
+	currentState.StartPrefetcher("miner", state.WithConcurrentWorkers(numPrefetchers))
 	return &environment{
-		signer:           types.MakeSigner(&eparams.ChainConfig{ChainID: w.chainConfig.ChainID}, header.Number, header.Time),
+		signer:           types.MakeSigner(w.chainConfig, header.Number, header.Time),
 		state:            currentState,
 		parent:           parent,
 		header:           header,
 		tcount:           0,
-		gasPool:          new(core.GasPool).AddGas(header.GasLimit),
-		rules:            w.chainConfig.GenesisRules(header.Number, header.Time),
+		gasPool:          new(core.GasPool).AddGas(capacity),
+		rules:            w.chainConfig.Rules(header.Number, params.IsMergeTODO, header.Time),
 		predicateContext: predicateContext,
 		predicateResults: predicate.NewResults(),
 		start:            tstart,
@@ -349,7 +326,7 @@ func (w *worker) commitBlobTransaction(env *environment, tx *types.Transaction, 
 	// isn't really a better place right now. The blob gas limit is checked at block validation time
 	// and not during execution. This means core.ApplyTransaction will not return an error if the
 	// tx has too many blobs. So we have to explicitly check it here.
-	if (env.blobs+len(sc.Blobs))*blobTxBlobGasPerBlob > maxBlobGasPerBlock {
+	if (env.blobs+len(sc.Blobs))*ethparams.BlobTxBlobGasPerBlob > ethparams.MaxBlobGasPerBlock {
 		return nil, errors.New("max data blobs reached")
 	}
 	receipt, err := w.applyTransaction(env, tx, coinbase)
@@ -407,14 +384,14 @@ func (w *worker) commitTransactions(env *environment, plainTxs, blobTxs *transac
 		}
 		// If we don't have enough blob space for any further blob transactions,
 		// skip that list altogether
-		if !blobTxs.Empty() && env.blobs*blobTxBlobGasPerBlob >= maxBlobGasPerBlock {
+		if !blobTxs.Empty() && env.blobs*ethparams.BlobTxBlobGasPerBlob >= ethparams.MaxBlobGasPerBlock {
 			log.Trace("Not enough blob space for further blob transactions")
 			blobTxs.Clear()
 			// Fall though to pick up any plain txs
 		}
 		// If we don't have enough blob space for any further blob transactions,
 		// skip that list altogether
-		if !blobTxs.Empty() && env.blobs*blobTxBlobGasPerBlob >= maxBlobGasPerBlock {
+		if !blobTxs.Empty() && env.blobs*ethparams.BlobTxBlobGasPerBlob >= ethparams.MaxBlobGasPerBlock {
 			log.Trace("Not enough blob space for further blob transactions")
 			blobTxs.Clear()
 			// Fall though to pick up any plain txs
@@ -448,7 +425,7 @@ func (w *worker) commitTransactions(env *environment, plainTxs, blobTxs *transac
 			txs.Pop()
 			continue
 		}
-		if left := uint64(maxBlobGasPerBlock - env.blobs*blobTxBlobGasPerBlob); left < ltx.BlobGas {
+		if left := uint64(ethparams.MaxBlobGasPerBlock - env.blobs*ethparams.BlobTxBlobGasPerBlob); left < ltx.BlobGas {
 			log.Trace("Not enough blob gas left for transaction", "hash", ltx.Hash, "left", left, "needed", ltx.BlobGas)
 			txs.Pop()
 			continue

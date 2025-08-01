@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -7,16 +7,20 @@ import (
 	"context"
 	"math/big"
 	"testing"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/luxd/utils/units"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -91,7 +95,7 @@ func executeBlockRequestTest(t testing.TB, test blockRequestTest, blocks []*type
 			t.Fatal("could not parse block", err)
 		}
 		assert.GreaterOrEqual(t, test.startBlockIndex, 0)
-		assert.Equal(t, blocks[test.startBlockIndex].Hash(), interfaces.Hash())
+		assert.Equal(t, blocks[test.startBlockIndex].Hash(), block.Hash())
 		test.startBlockIndex--
 	}
 	mockHandlerStats.Reset()
@@ -167,9 +171,9 @@ func TestBlockRequestHandlerLargeBlocks(t *testing.T) {
 		var data []byte
 		switch {
 		case i <= 32:
-			data = make([]byte, interfaces.MiB)
+			data = make([]byte, units.MiB)
 		default:
-			data = make([]byte, interfaces.MiB/16)
+			data = make([]byte, units.MiB/16)
 		}
 		tx, err := types.SignTx(types.NewTransaction(b.TxNonce(addr1), addr1, big.NewInt(10000), 4_215_304, nil, data), signer, key1)
 		if err != nil {
@@ -272,6 +276,6 @@ func TestBlockRequestHandlerCtxExpires(t *testing.T) {
 		if err := rlp.DecodeBytes(blockBytes, block); err != nil {
 			t.Fatal("could not parse block", err)
 		}
-		assert.Equal(t, blocks[len(blocks)-i-1].Hash(), interfaces.Hash())
+		assert.Equal(t, blocks[len(blocks)-i-1].Hash(), block.Hash())
 	}
 }

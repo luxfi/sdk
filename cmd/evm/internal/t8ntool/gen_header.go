@@ -6,10 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"math/big"
-	"github.com/luxfi/evm/core/types"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/types"
 )
 
 var _ = (*headerMarshaling)(nil)

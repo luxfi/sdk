@@ -1,4 +1,5 @@
-// (c) 2019-2025, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -27,9 +28,10 @@
 package state
 
 import (
-	"github.com/luxfi/geth/ethdb"
 	ethstate "github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/triedb/firewood"
 )
 
 type (
@@ -37,19 +39,26 @@ type (
 	Trie     = ethstate.Trie
 )
 
-func NewDatabase(db ethdb.Database) ethstate.Database {
-	// Create a triedb and pass to ethstate.NewDatabase
-	tdb := triedb.NewDatabase(db, nil)
-	return ethstate.NewDatabase(tdb, nil)
+func NewDatabase(db ethdb.Database) Database {
+	return ethstate.NewDatabase(db)
 }
 
-func NewDatabaseWithConfig(db ethdb.Database, config *triedb.Config) ethstate.Database {
-	// Create a triedb with the config and pass to ethstate.NewDatabase
-	tdb := triedb.NewDatabase(db, config)
-	return ethstate.NewDatabase(tdb, nil)
+func NewDatabaseWithConfig(db ethdb.Database, config *triedb.Config) Database {
+	coredb := ethstate.NewDatabaseWithConfig(db, config)
+	return wrapIfFirewood(coredb)
 }
 
-func NewDatabaseWithNodeDB(db ethdb.Database, tdb *triedb.Database) ethstate.Database {
-	// Use the provided triedb directly
-	return ethstate.NewDatabase(tdb, nil)
+func NewDatabaseWithNodeDB(db ethdb.Database, triedb *triedb.Database) Database {
+	coredb := ethstate.NewDatabaseWithNodeDB(db, triedb)
+	return wrapIfFirewood(coredb)
+}
+func wrapIfFirewood(db Database) Database {
+	fw, ok := db.TrieDB().Backend().(*firewood.Database)
+	if !ok {
+		return db
+	}
+	return &firewoodAccessorDb{
+		Database: db,
+		fw:       fw,
+	}
 }

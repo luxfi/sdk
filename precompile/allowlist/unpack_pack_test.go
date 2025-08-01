@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package allowlist
@@ -6,9 +6,10 @@ package allowlist
 import (
 	"fmt"
 	"testing"
-	"github.com/luxfi/evm/precompile/contract"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/precompile/contract"
 	"github.com/stretchr/testify/require"
 )
 

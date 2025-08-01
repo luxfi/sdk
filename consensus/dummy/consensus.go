@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dummy
@@ -8,19 +8,21 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-	
+
+	"github.com/luxfi/luxd/utils/timer/mockable"
 	"github.com/luxfi/geth/common"
-	
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
-	customtypes "github.com/luxfi/evm/plugin/evm/customtypes"
-	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/evm/vmerrs"
+
+	customheader "github.com/luxfi/evm/plugin/evm/header"
 )
 
 var (
@@ -40,14 +42,14 @@ type Mode struct {
 
 type (
 	DummyEngine struct {
-		clock         interfaces.MockableTimer
+		clock         *mockable.Clock
 		consensusMode Mode
 	}
 )
 
 func NewDummyEngine(
 	mode Mode,
-	clock interfaces.MockableTimer,
+	clock *mockable.Clock,
 ) *DummyEngine {
 	return &DummyEngine{
 		clock:         clock,
@@ -57,18 +59,18 @@ func NewDummyEngine(
 
 func NewETHFaker() *DummyEngine {
 	return &DummyEngine{
-		clock:         utils.NewMockableClock(),
+		clock:         &mockable.Clock{},
 		consensusMode: Mode{ModeSkipBlockFee: true},
 	}
 }
 
 func NewFaker() *DummyEngine {
 	return &DummyEngine{
-		clock: utils.NewMockableClock(),
+		clock: &mockable.Clock{},
 	}
 }
 
-func NewFakerWithClock(clock interfaces.MockableTimer) *DummyEngine {
+func NewFakerWithClock(clock *mockable.Clock) *DummyEngine {
 	return &DummyEngine{
 		clock: clock,
 	}
@@ -76,12 +78,12 @@ func NewFakerWithClock(clock interfaces.MockableTimer) *DummyEngine {
 
 func NewFakerWithMode(mode Mode) *DummyEngine {
 	return &DummyEngine{
-		clock:         utils.NewMockableClock(),
+		clock:         &mockable.Clock{},
 		consensusMode: mode,
 	}
 }
 
-func NewFakerWithModeAndClock(mode Mode, clock interfaces.MockableTimer) *DummyEngine {
+func NewFakerWithModeAndClock(mode Mode, clock *mockable.Clock) *DummyEngine {
 	return &DummyEngine{
 		clock:         clock,
 		consensusMode: mode,
@@ -90,14 +92,14 @@ func NewFakerWithModeAndClock(mode Mode, clock interfaces.MockableTimer) *DummyE
 
 func NewCoinbaseFaker() *DummyEngine {
 	return &DummyEngine{
-		clock:         utils.NewMockableClock(),
+		clock:         &mockable.Clock{},
 		consensusMode: Mode{ModeSkipCoinbase: true},
 	}
 }
 
 func NewFullFaker() *DummyEngine {
 	return &DummyEngine{
-		clock:         utils.NewMockableClock(),
+		clock:         &mockable.Clock{},
 		consensusMode: Mode{ModeSkipHeader: true},
 	}
 }
@@ -110,7 +112,7 @@ func (eng *DummyEngine) verifyCoinbase(header *types.Header, parent *types.Heade
 	// get the coinbase configured at parent
 	configuredAddressAtParent, isAllowFeeRecipients, err := chain.GetCoinbaseAt(parent)
 	if err != nil {
-		return fmt.Errorf("failed to get coinbase at %v: %w", parent.Hash(), err)
+		return fmt.Errorf("failed to get coinbase at %v: %w", header.Hash(), err)
 	}
 
 	if isAllowFeeRecipients {
@@ -120,12 +122,12 @@ func (eng *DummyEngine) verifyCoinbase(header *types.Header, parent *types.Heade
 	// we fetch the configured coinbase at the parent's state
 	// to check against the coinbase in [header].
 	if configuredAddressAtParent != header.Coinbase {
-		return fmt.Errorf("%w: %v does not match required coinbase address %v", vmerrs.ErrInvalidCoinbase, header.Coinbase, configuredAddressAtParent)
+		return fmt.Errorf("%w: %v does not match required coinbase address %v", vmerrors.ErrInvalidCoinbase, header.Coinbase, configuredAddressAtParent)
 	}
 	return nil
 }
 
-func verifyHeaderGasFields(chain consensus.ChainHeaderReader, header *types.Header, parent *types.Header) error {
+func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, parent *types.Header, chain consensus.ChainHeaderReader) error {
 	// We verify the current block by checking the parent fee config
 	// this is because the current block cannot set the fee config for itself
 	// Fee config might depend on the state when precompile is activated
@@ -135,23 +137,18 @@ func verifyHeaderGasFields(chain consensus.ChainHeaderReader, header *types.Head
 	if err != nil {
 		return err
 	}
-	// Get extras config and params config from chain
-	luxConfig := chain.Config()
-	extrasConfig := params.GetExtra(luxConfig)
-	paramsConfig := luxConfig
-	
-	if err := customheader.VerifyGasUsed(paramsConfig, feeConfig, parent, header); err != nil {
+	if err := customheader.VerifyGasUsed(config, feeConfig, parent, header); err != nil {
 		return err
 	}
-	if err := customheader.VerifyGasLimit(paramsConfig, feeConfig, parent, header); err != nil {
+	if err := customheader.VerifyGasLimit(config, feeConfig, parent, header); err != nil {
 		return err
 	}
-	if err := customheader.VerifyExtraPrefix(extrasConfig, parent, header); err != nil {
+	if err := customheader.VerifyExtraPrefix(config, parent, header); err != nil {
 		return err
 	}
 
 	// Verify header.BaseFee matches the expected value.
-	expectedBaseFee, err := customheader.BaseFee(extrasConfig, feeConfig, parent, header.Time)
+	expectedBaseFee, err := customheader.BaseFee(config, feeConfig, parent, header.Time)
 	if err != nil {
 		return fmt.Errorf("failed to calculate base fee: %w", err)
 	}
@@ -161,7 +158,7 @@ func verifyHeaderGasFields(chain consensus.ChainHeaderReader, header *types.Head
 
 	// Enforce BlockGasCost constraints
 	expectedBlockGasCost := customheader.BlockGasCost(
-		extrasConfig,
+		config,
 		feeConfig,
 		parent,
 		header.Time,
@@ -181,23 +178,14 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 	}
 
 	// Verify the extra data is well-formed.
-	// Get our lux config from chain
-	luxConfig := chain.Config()
-	
-	rules := extras.GenesisRules{
-		IsApricotPhase3: luxConfig.IsApricotPhase3(header.Time),
-		IsApricotPhase5: luxConfig.IsApricotPhase5(header.Time),
-		IsApricotPhase6: luxConfig.IsApricotPhase6(header.Time),
-		IsApricotPhasePre6: luxConfig.IsApricotPhasePre6(header.Time),
-		IsApricotPhasePost6: luxConfig.IsApricotPhasePost6(header.Time),
-	}
-	
+	config := params.GetExtra(chain.Config())
+	rules := config.GetLuxRules(header.Time)
 	if err := customheader.VerifyExtra(rules, header.Extra); err != nil {
 		return err
 	}
 
 	// Ensure gas-related header fields are correct
-	if err := verifyHeaderGasFields(chain, header, parent); err != nil {
+	if err := verifyHeaderGasFields(config, header, parent, chain); err != nil {
 		return err
 	}
 	// Ensure that coinbase is valid
@@ -219,7 +207,7 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 		return consensus.ErrInvalidNumber
 	}
 	// Verify the existence / non-existence of excessBlobGas
-	cancun := chain.Config().IsCancun(header.Time)
+	cancun := chain.Config().IsCancun(header.Number, header.Time)
 	if !cancun {
 		switch {
 		case header.ExcessBlobGas != nil:
@@ -236,10 +224,9 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 		if *header.ParentBeaconRoot != (common.Hash{}) {
 			return fmt.Errorf("invalid parentBeaconRoot, have %#x, expected empty", *header.ParentBeaconRoot)
 		}
-		// FIXME: Can't verify EIP4844 header with luxfi ChainConfig type
-		// if err := eip4844.VerifyEIP4844Header(chain.Config(), parent, header); err != nil {
-		// 	return err
-		// }
+		if err := eip4844.VerifyEIP4844Header(parent, header); err != nil {
+			return err
+		}
 		if *header.BlobGasUsed > 0 { // VerifyEIP4844Header ensures BlobGasUsed is non-nil
 			return fmt.Errorf("blobs not enabled on lux networks: used %d blob gas, expected 0", *header.BlobGasUsed)
 		}
@@ -291,10 +278,10 @@ func (eng *DummyEngine) verifyBlockFee(
 		return nil
 	}
 	if baseFee == nil || baseFee.Sign() <= 0 {
-		return fmt.Errorf("invalid base fee (%d) in EVM", baseFee)
+		return fmt.Errorf("invalid base fee (%d) in SubnetEVM", baseFee)
 	}
 	if requiredBlockGasCost == nil || !requiredBlockGasCost.IsUint64() {
-		return fmt.Errorf("invalid block gas cost (%d) in EVM", requiredBlockGasCost)
+		return fmt.Errorf("invalid block gas cost (%d) in SubnetEVM", requiredBlockGasCost)
 	}
 
 	var (
@@ -342,8 +329,6 @@ func (eng *DummyEngine) verifyBlockFee(
 }
 
 func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
-	// Get extras config from chain config
-	// chain.Config() returns our params.ChainConfig, not ethereum's
 	config := params.GetExtra(chain.Config())
 	timestamp := block.Time()
 	// we use the parent to determine the fee config
@@ -363,7 +348,7 @@ func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types
 	if !utils.BigEqual(blockGasCost, expectedBlockGasCost) {
 		return fmt.Errorf("invalid blockGasCost: have %d, want %d", blockGasCost, expectedBlockGasCost)
 	}
-	if config.IsEVM(timestamp) {
+	if config.IsSubnetEVM(timestamp) {
 		// Verify the block fee was paid.
 		if err := eng.verifyBlockFee(
 			block.BaseFee(),
@@ -387,8 +372,6 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	if err != nil {
 		return nil, err
 	}
-	// Get extras config from chain config
-	// chain.Config() returns our params.ChainConfig, not ethereum's
 	config := params.GetExtra(chain.Config())
 
 	// Calculate the required block gas cost for this block.
@@ -399,7 +382,7 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 		parent,
 		header.Time,
 	)
-	if config.IsEVM(header.Time) {
+	if config.IsSubnetEVM(header.Time) {
 		// Verify that this block covers the block fee.
 		if err := eng.verifyBlockFee(
 			header.BaseFee,
@@ -419,13 +402,12 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	header.Extra = append(extraPrefix, header.Extra...)
 
 	// commit the final state root
-	// NOTE: IntermediateRoot doesn't exist on vm.StateDB interface, use a workaround
-	// In a real implementation, this would need proper state handling
-	// For now, we'll skip this step and let the state root be set elsewhere
-	// header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 
 	// Header seems complete, assemble into a block and return
-	return types.NewBlock(header, txs, uncles, receipts, nil), nil
+	return types.NewBlock(
+		header, txs, uncles, receipts, trie.NewStackTrie(nil),
+	), nil
 }
 
 func (*DummyEngine) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {

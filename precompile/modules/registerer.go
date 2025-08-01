@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package modules
@@ -6,9 +6,10 @@ package modules
 import (
 	"fmt"
 	"sort"
+
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
 )
 
 var (

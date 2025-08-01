@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,20 +33,23 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/asm"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/eth/tracers"
-	"github.com/luxfi/geth/eth/tracers/logger"
+	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	// "github.com/luxfi/evm/core/asm" // TODO: asm package not available
+
 	// force-load js tracers to trigger registration
 	_ "github.com/luxfi/geth/eth/tracers/js"
+	"github.com/holiman/uint256"
 )
 
 func TestDefaults(t *testing.T) {
@@ -236,7 +240,7 @@ type dummyChain struct {
 	counter int
 }
 
-// Engine retrieves the chain's consensus common.
+// Engine retrieves the chain's consensus engine.
 func (d *dummyChain) Engine() consensus.Engine {
 	return nil
 }
@@ -497,8 +501,6 @@ func BenchmarkSimpleLoop(b *testing.B) {
 // EIP-2929 about gas repricings
 func TestEip2929Cases(t *testing.T) {
 	t.Skip("Test only useful for generating documentation")
-	// TODO: This test requires the asm package which is not available
-	/*
 	id := 1
 	prettyPrint := func(comment string, code []byte) {
 		instrs := make([]string, 0)
@@ -523,7 +525,6 @@ func TestEip2929Cases(t *testing.T) {
 			},
 		})
 	}
-	*/
 
 	{ // First eip testcase
 		code := []byte{
@@ -545,7 +546,7 @@ func TestEip2929Cases(t *testing.T) {
 
 			byte(vm.STOP),
 		}
-		// prettyPrint("This checks `EXT`(codehash,codesize,balance) of precompiles, which should be `100`, "+
+		prettyPrint("This checks `EXT`(codehash,codesize,balance) of precompiles, which should be `100`, "+
 			"and later checks the same operations twice against some non-precompiles. "+
 			"Those are cheaper second time they are accessed. Lastly, it checks the `BALANCE` of `origin` and `this`.", code)
 	}
@@ -564,7 +565,7 @@ func TestEip2929Cases(t *testing.T) {
 
 			byte(vm.STOP),
 		}
-		// prettyPrint("This checks `extcodecopy( 0xff,0,0,0,0)` twice, (should be expensive first time), "+
+		prettyPrint("This checks `extcodecopy( 0xff,0,0,0,0)` twice, (should be expensive first time), "+
 			"and then does `extcodecopy( this,0,0,0,0)`.", code)
 	}
 
@@ -584,7 +585,7 @@ func TestEip2929Cases(t *testing.T) {
 			// Read slot in access list (0x1)
 			byte(vm.PUSH1), 0x01, byte(vm.SLOAD), // SLOAD( 0x1)
 		}
-		// prettyPrint("This checks `sload( 0x1)` followed by `sstore(loc: 0x01, val:0x11)`, then 'naked' sstore:"+
+		prettyPrint("This checks `sload( 0x1)` followed by `sstore(loc: 0x01, val:0x11)`, then 'naked' sstore:"+
 			"`sstore(loc: 0x02, val:0x11)` twice, and `sload(0x2)`, `sload(0x1)`. ", code)
 	}
 	{ // Call variants
@@ -601,14 +602,14 @@ func TestEip2929Cases(t *testing.T) {
 			byte(vm.PUSH1), 0x0, byte(vm.DUP1), byte(vm.DUP1), byte(vm.DUP1), byte(vm.DUP1),
 			byte(vm.PUSH1), 0xff, byte(vm.PUSH1), 0x0, byte(vm.STATICCALL), byte(vm.POP),
 		}
-		// prettyPrint("This calls the `identity`-precompile (cheap), then calls an account (expensive) and `staticcall`s the same"+
+		prettyPrint("This calls the `identity`-precompile (cheap), then calls an account (expensive) and `staticcall`s the same"+
 			"account (cheap)", code)
 	}
 }
 
 // TestColdAccountAccessCost test that the cold account access cost is reported
 // correctly
-// see: https://github.com/luxfi/evm/issues/22649
+// see: https://github.com/ethereum/go-ethereum/issues/22649
 func TestColdAccountAccessCost(t *testing.T) {
 	for i, tc := range []struct {
 		code []byte

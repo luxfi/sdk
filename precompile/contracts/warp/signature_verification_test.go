@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -7,53 +7,52 @@ import (
 	"context"
 	"math"
 	"testing"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/node/consensus/validators/validatorsmock"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/luxd/snow/validators"
+	"github.com/luxfi/luxd/snow/validators/validatorsmock"
+	"github.com/luxfi/luxd/utils/constants"
+	"github.com/luxfi/luxd/utils/crypto/bls"
+	"github.com/luxfi/luxd/utils/set"
+	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
-// This test copies the test coverage from https://github.com/luxfi/node/blob/v1.10.0/vms/platformvm/warp/signature_test.go#L137.
-// These tests are only expected to fail if there is a breaking change in Lux that unexpectedly changes behavior.
 type signatureTest struct {
 	name         string
-	stateF       func(*gomock.Controller) interfaces.State
+	stateF       func(*gomock.Controller) validators.State
 	quorumNum    uint64
 	quorumDen    uint64
-	msgF         func(*require.Assertions) *interfaces.Message
+	msgF         func(*require.Assertions) *luxWarp.Message
 	verifyErr    error
 	canonicalErr error
 }
 
-// This test copies the test coverage from https://github.com/luxfi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
-// These tests are only expected to fail if there is a breaking change in Lux that unexpectedly changes behavior.
+// This test copies the test coverage from https://github.com/luxfi/luxd/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
+// These tests are only expected to fail if there is a breaking change in Luxd that unexpectedly changes behavior.
 func TestSignatureVerification(t *testing.T) {
 	tests := []signatureTest{
 		{
 			name: "can't get subnetID",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, errTest)
 				return state
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
 				require.NoError(err)
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{},
+					&luxWarp.BitSetSignature{},
 				)
 				require.NoError(err)
 				return msg
@@ -62,7 +61,7 @@ func TestSignatureVerification(t *testing.T) {
 		},
 		{
 			name: "can't get validator set",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(nil, errTest)
@@ -70,17 +69,17 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
 				require.NoError(err)
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{},
+					&luxWarp.BitSetSignature{},
 				)
 				require.NoError(err)
 				return msg
@@ -89,48 +88,47 @@ func TestSignatureVerification(t *testing.T) {
 		},
 		{
 			name: "weight overflow",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
-				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(map[ids.NodeID]*interfaces.GetValidatorOutput{
+				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(map[ids.NodeID]*validators.GetValidatorOutput{
 					testVdrs[0].nodeID: {
 						NodeID:    testVdrs[0].nodeID,
 						PublicKey: testVdrs[0].vdr.PublicKey,
-						Weight:    interfaces.MaxUint64,
+						Weight:    math.MaxUint64,
 					},
 					testVdrs[1].nodeID: {
 						NodeID:    testVdrs[1].nodeID,
 						PublicKey: testVdrs[1].vdr.PublicKey,
-						Weight:    interfaces.MaxUint64,
+						Weight:    math.MaxUint64,
 					},
 				}, nil)
 				return state
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
 				require.NoError(err)
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers: make([]byte, 8),
 					},
 				)
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrWeightOverflow,
-			canonicalErr: interfaces.ErrWeightOverflow,
+			canonicalErr: luxWarp.ErrWeightOverflow,
 		},
 		{
 			name: "invalid bit set index",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -138,30 +136,29 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
 				require.NoError(err)
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   make([]byte, 1),
-						Signature: [interfaces.SignatureLen]byte{},
+						Signature: [bls.SignatureLen]byte{},
 					},
 				)
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrInvalidBitSet,
-			verifyErr: interfaces.ErrInvalidBitSet,
+			verifyErr: luxWarp.ErrInvalidBitSet,
 		},
 		{
 			name: "unknown index",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -169,9 +166,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -180,22 +177,21 @@ func TestSignatureVerification(t *testing.T) {
 				signers := set.NewBits()
 				signers.Add(3) // vdr oob
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
-						Signature: [interfaces.SignatureLen]byte{},
+						Signature: [bls.SignatureLen]byte{},
 					},
 				)
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrUnknownValidator,
-			verifyErr: interfaces.ErrUnknownValidator,
+			verifyErr: luxWarp.ErrUnknownValidator,
 		},
 		{
 			name: "insufficient weight",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -203,9 +199,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 1,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -222,14 +218,14 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				vdr1Sig, err := testVdrs[1].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSig, err := interfaces.AggregateSignatures([]*interfaces.Signature{vdr0Sig, vdr1Sig})
+				aggSig, err := bls.AggregateSignatures([]*bls.Signature{vdr0Sig, vdr1Sig})
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(aggSig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -237,12 +233,11 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrInsufficientWeight,
-			verifyErr: interfaces.ErrInsufficientWeight,
+			verifyErr: luxWarp.ErrInsufficientWeight,
 		},
 		{
 			name: "can't parse sig",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -250,9 +245,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -262,22 +257,21 @@ func TestSignatureVerification(t *testing.T) {
 				signers.Add(0)
 				signers.Add(1)
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
-						Signature: [interfaces.SignatureLen]byte{},
+						Signature: [bls.SignatureLen]byte{},
 					},
 				)
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrParseSignature,
-			verifyErr: interfaces.ErrParseSignature,
+			verifyErr: luxWarp.ErrParseSignature,
 		},
 		{
 			name: "no validators",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(nil, nil)
@@ -285,9 +279,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -296,12 +290,12 @@ func TestSignatureVerification(t *testing.T) {
 				unsignedBytes := unsignedMsg.Bytes()
 				vdr0Sig, err := testVdrs[0].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(vdr0Sig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(vdr0Sig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   nil,
 						Signature: aggSigBytes,
 					},
@@ -309,11 +303,11 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			verifyErr: interfaces.ErrNoPublicKeys,
+			verifyErr: bls.ErrNoPublicKeys,
 		},
 		{
 			name: "invalid signature (substitute)",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -321,9 +315,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 3,
 			quorumDen: 5,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -340,14 +334,14 @@ func TestSignatureVerification(t *testing.T) {
 				// should be from vdr[1]
 				vdr2Sig, err := testVdrs[2].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSig, err := interfaces.AggregateSignatures([]*interfaces.Signature{vdr0Sig, vdr2Sig})
+				aggSig, err := bls.AggregateSignatures([]*bls.Signature{vdr0Sig, vdr2Sig})
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(aggSig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -355,12 +349,11 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrInvalidSignature,
-			verifyErr: interfaces.ErrInvalidSignature,
+			verifyErr: luxWarp.ErrInvalidSignature,
 		},
 		{
 			name: "invalid signature (missing one)",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -368,9 +361,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 3,
 			quorumDen: 5,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -384,12 +377,12 @@ func TestSignatureVerification(t *testing.T) {
 				vdr0Sig, err := testVdrs[0].sk.Sign(unsignedBytes)
 				require.NoError(err)
 				// Don't give the sig from vdr[1]
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(vdr0Sig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(vdr0Sig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -397,12 +390,11 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrInvalidSignature,
-			verifyErr: interfaces.ErrInvalidSignature,
+			verifyErr: luxWarp.ErrInvalidSignature,
 		},
 		{
 			name: "invalid signature (extra one)",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -410,9 +402,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 3,
 			quorumDen: 5,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -431,14 +423,14 @@ func TestSignatureVerification(t *testing.T) {
 				// it
 				vdr2Sig, err := testVdrs[2].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSig, err := interfaces.AggregateSignatures([]*interfaces.Signature{vdr0Sig, vdr1Sig, vdr2Sig})
+				aggSig, err := bls.AggregateSignatures([]*bls.Signature{vdr0Sig, vdr1Sig, vdr2Sig})
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(aggSig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -446,12 +438,11 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				return msg
 			},
-			err: interfaces.ErrInvalidSignature,
-			verifyErr: interfaces.ErrInvalidSignature,
+			verifyErr: luxWarp.ErrInvalidSignature,
 		},
 		{
 			name: "valid signature",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -459,9 +450,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 2,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -478,14 +469,14 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				vdr2Sig, err := testVdrs[2].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSig, err := interfaces.AggregateSignatures([]*interfaces.Signature{vdr1Sig, vdr2Sig})
+				aggSig, err := bls.AggregateSignatures([]*bls.Signature{vdr1Sig, vdr2Sig})
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(aggSig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -497,7 +488,7 @@ func TestSignatureVerification(t *testing.T) {
 		},
 		{
 			name: "valid signature (boundary)",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
 				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(vdrs, nil)
@@ -505,9 +496,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 2,
 			quorumDen: 3,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -524,14 +515,14 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				vdr2Sig, err := testVdrs[2].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSig, err := interfaces.AggregateSignatures([]*interfaces.Signature{vdr1Sig, vdr2Sig})
+				aggSig, err := bls.AggregateSignatures([]*bls.Signature{vdr1Sig, vdr2Sig})
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(aggSig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -543,10 +534,10 @@ func TestSignatureVerification(t *testing.T) {
 		},
 		{
 			name: "valid signature (missing key)",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
-				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(map[ids.NodeID]*interfaces.GetValidatorOutput{
+				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(map[ids.NodeID]*validators.GetValidatorOutput{
 					testVdrs[0].nodeID: {
 						NodeID:    testVdrs[0].nodeID,
 						PublicKey: nil,
@@ -567,9 +558,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 1,
 			quorumDen: 3,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -587,14 +578,14 @@ func TestSignatureVerification(t *testing.T) {
 				require.NoError(err)
 				vdr2Sig, err := testVdrs[2].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSig, err := interfaces.AggregateSignatures([]*interfaces.Signature{vdr1Sig, vdr2Sig})
+				aggSig, err := bls.AggregateSignatures([]*bls.Signature{vdr1Sig, vdr2Sig})
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(aggSig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(aggSig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -606,10 +597,10 @@ func TestSignatureVerification(t *testing.T) {
 		},
 		{
 			name: "valid signature (duplicate key)",
-			stateF: func(ctrl *gomock.Controller) interfaces.State {
+			stateF: func(ctrl *gomock.Controller) validators.State {
 				state := validatorsmock.NewState(ctrl)
 				state.EXPECT().GetSubnetID(gomock.Any(), sourceChainID).Return(sourceSubnetID, nil)
-				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(map[ids.NodeID]*interfaces.GetValidatorOutput{
+				state.EXPECT().GetValidatorSet(gomock.Any(), pChainHeight, sourceSubnetID).Return(map[ids.NodeID]*validators.GetValidatorOutput{
 					testVdrs[0].nodeID: {
 						NodeID:    testVdrs[0].nodeID,
 						PublicKey: nil,
@@ -630,9 +621,9 @@ func TestSignatureVerification(t *testing.T) {
 			},
 			quorumNum: 2,
 			quorumDen: 3,
-			msgF: func(require *require.Assertions) *interfaces.Message {
-				unsignedMsg, err := interfaces.NewUnsignedMessage(
-					networkID,
+			msgF: func(require *require.Assertions) *luxWarp.Message {
+				unsignedMsg, err := luxWarp.NewUnsignedMessage(
+					constants.UnitTestID,
 					sourceChainID,
 					addressedPayloadBytes,
 				)
@@ -649,12 +640,12 @@ func TestSignatureVerification(t *testing.T) {
 				// Because vdr[1] and vdr[2] share a key, only one of them sign.
 				vdr2Sig, err := testVdrs[2].sk.Sign(unsignedBytes)
 				require.NoError(err)
-				aggSigBytes := [interfaces.SignatureLen]byte{}
-				copy(aggSigBytes[:], interfaces.SignatureToBytes(vdr2Sig))
+				aggSigBytes := [bls.SignatureLen]byte{}
+				copy(aggSigBytes[:], bls.SignatureToBytes(vdr2Sig))
 
-				msg, err := interfaces.NewMessage(
+				msg, err := luxWarp.NewMessage(
 					unsignedMsg,
-					&interfaces.BitSetSignature{
+					&luxWarp.BitSetSignature{
 						Signers:   signers.Bytes(),
 						Signature: aggSigBytes,
 					},
@@ -675,7 +666,7 @@ func TestSignatureVerification(t *testing.T) {
 			msg := tt.msgF(require)
 			pChainState := tt.stateF(ctrl)
 
-			validatorSet, err := interfaces.GetCanonicalValidatorSetFromChainID(
+			validatorSet, err := luxWarp.GetCanonicalValidatorSetFromChainID(
 				context.Background(),
 				pChainState,
 				pChainHeight,
@@ -687,7 +678,7 @@ func TestSignatureVerification(t *testing.T) {
 			}
 			err = msg.Signature.Verify(
 				&msg.UnsignedMessage,
-				networkID,
+				constants.UnitTestID,
 				validatorSet,
 				tt.quorumNum,
 				tt.quorumDen,

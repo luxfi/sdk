@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -6,7 +6,8 @@ package utils
 import (
 	"bytes"
 	"testing"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

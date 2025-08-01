@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,12 +34,13 @@ import (
 	"math/big"
 	"strings"
 	"sync"
-	"github.com/luxfi/evm/accounts/abi"
+
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/event"
-	ethereum "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/rpc"
 )
 

@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package predicate
@@ -6,15 +6,17 @@ package predicate
 import (
 	"fmt"
 	"strings"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
+
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/codec/linearcodec"
+	"github.com/luxfi/luxd/utils/units"
+	"github.com/luxfi/luxd/utils/wrappers"
 	"github.com/luxfi/geth/common"
 )
 
 const (
 	Version        = uint16(0)
-	MaxResultsSize = interfaces.MiB
+	MaxResultsSize = units.MiB
 )
 
 var Codec codec.Manager
@@ -23,13 +25,13 @@ func init() {
 	Codec = codec.NewManager(MaxResultsSize)
 
 	c := linearcodec.NewDefault()
-	err := c.RegisterType(Results{})
-	if err != nil {
-		panic(err)
-	}
-	err = Codec.RegisterCodec(Version, c)
-	if err != nil {
-		panic(err)
+	errs := wrappers.Errs{}
+	errs.Add(
+		c.RegisterType(Results{}),
+		Codec.RegisterCodec(Version, c),
+	)
+	if errs.Errored() {
+		panic(errs.Err)
 	}
 }
 

@@ -1,4 +1,5 @@
-// (c) 2019-2022, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,8 +31,8 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/rpc"
 	lru "github.com/hashicorp/golang-lru"
 )
@@ -94,9 +95,6 @@ func (f *feeInfoProvider) addHeader(ctx context.Context, header *types.Header) (
 	}
 
 	totalGasUsed := new(big.Int).SetUint64(header.GasUsed)
-	if header.ExtDataGasUsed != nil {
-		totalGasUsed.Add(totalGasUsed, header.ExtDataGasUsed)
-	}
 	minGasUsed := new(big.Int).SetUint64(f.minGasUsed)
 
 	// Don't bias the estimate with blocks containing a limited number of transactions paying to
