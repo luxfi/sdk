@@ -1,4 +1,4 @@
-// (c) 2024 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package extras
@@ -10,7 +10,7 @@ import (
 
 type Rules struct {
 	// Rules for Lux releases
-	GenesisRules
+	LuxRules
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.

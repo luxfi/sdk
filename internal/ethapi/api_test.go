@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -41,27 +42,30 @@ import (
 	"testing"
 	"time"
 
+	"github.com/luxfi/luxd/upgrade"
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/accounts/keystore"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/internal/blocktest"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/upgrade/ap3"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/crypto/kzg4844"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/bloombits"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/internal/blocktest"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/evm/utils"
 	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/slices"
@@ -452,7 +456,7 @@ func newTestBackend(t *testing.T, n int, gspec *core.Genesis, engine consensus.E
 		}
 	)
 	accman, acc := newTestAccountManager(t)
-	gspec.Alloc[acc.Address] = types.GenesisAccount{Balance: big.NewInt(params.Ether)}
+	gspec.Alloc[acc.Address] = types.Account{Balance: big.NewInt(params.Ether)}
 	// Generate blocks for testing
 	db, blocks, _, _ := core.GenerateChainWithGenesis(gspec, engine, n, 10, generator)
 	chain, err := core.NewBlockChain(db, cacheConfig, gspec, engine, vm.Config{}, gspec.ToBlock().Hash(), false)
@@ -485,7 +489,6 @@ func (b testBackend) ExtRPCEnabled() bool                        { return false 
 func (b testBackend) RPCGasCap() uint64                          { return 10000000 }
 func (b testBackend) RPCEVMTimeout() time.Duration               { return time.Second }
 func (b testBackend) RPCTxFeeCap() float64                       { return 0 }
-func (b testBackend) PriceOptionsConfig() PriceOptionConfig      { return PriceOptionConfig{} }
 func (b testBackend) UnprotectedAllowed(*types.Transaction) bool { return false }
 func (b testBackend) SetHead(number uint64)                      {}
 func (b testBackend) HeaderByNumber(ctx context.Context, number rpc.BlockNumber) (*types.Header, error) {
@@ -579,6 +582,9 @@ func (b testBackend) SubscribeChainHeadEvent(ch chan<- core.ChainHeadEvent) even
 func (b testBackend) SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription {
 	panic("implement me")
 }
+func (b testBackend) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error) {
+	panic("implement me")
+}
 func (b testBackend) SendTx(ctx context.Context, signedTx *types.Transaction) error {
 	panic("implement me")
 }
@@ -654,7 +660,7 @@ func TestEstimateGas(t *testing.T) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &accounts[1].addr, Value: big.NewInt(1000), Gas: params.TxGas, GasPrice: b.BaseFee(), Data: nil}), signer, accounts[0].key)
+		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &accounts[1].addr, Value: big.NewInt(1000), Gas: ethparams.TxGas, GasPrice: b.BaseFee(), Data: nil}), signer, accounts[0].key)
 		b.AddTx(tx)
 		// b.SetPoS()
 	}))
@@ -730,7 +736,7 @@ func TestEstimateGas(t *testing.T) {
 			call: TransactionArgs{
 				From:     &accounts[0].addr,
 				Input:    hex2Bytes("6080604052348015600f57600080fd5b50483a1015601c57600080fd5b60003a111560315760004811603057600080fd5b5b603f80603e6000396000f3fe6080604052600080fdfea264697066735822122060729c2cee02b10748fae5200f1c9da4661963354973d9154c13a8e9ce9dee1564736f6c63430008130033"),
-				GasPrice: (*hexutil.Big)(big.NewInt(ap3.InitialBaseFee)), // Legacy as pricing
+				GasPrice: (*hexutil.Big)(big.NewInt(legacy.BaseFee)), // Legacy as pricing
 			},
 			expectErr: nil,
 			want:      67617,
@@ -740,7 +746,7 @@ func TestEstimateGas(t *testing.T) {
 			call: TransactionArgs{
 				From:         &accounts[0].addr,
 				Input:        hex2Bytes("6080604052348015600f57600080fd5b50483a1015601c57600080fd5b60003a111560315760004811603057600080fd5b5b603f80603e6000396000f3fe6080604052600080fdfea264697066735822122060729c2cee02b10748fae5200f1c9da4661963354973d9154c13a8e9ce9dee1564736f6c63430008130033"),
-				MaxFeePerGas: (*hexutil.Big)(big.NewInt(ap3.InitialBaseFee)), // 1559 gas pricing
+				MaxFeePerGas: (*hexutil.Big)(big.NewInt(legacy.BaseFee)), // 1559 gas pricing
 			},
 			expectErr: nil,
 			want:      67617,
@@ -815,7 +821,7 @@ func TestCall(t *testing.T) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &accounts[1].addr, Value: big.NewInt(1000), Gas: params.TxGas, GasPrice: b.BaseFee(), Data: nil}), signer, accounts[0].key)
+		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &accounts[1].addr, Value: big.NewInt(1000), Gas: ethparams.TxGas, GasPrice: b.BaseFee(), Data: nil}), signer, accounts[0].key)
 		b.AddTx(tx)
 		// b.SetPoS()
 	}))
@@ -1023,10 +1029,7 @@ func TestSignTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// The expected result has deviated from upstream because the base fee, and
-	// therefore the `maxFeePerGas`, resulting from [params.TestChainConfig] is
-	// different.
-	expect := `{"type":"0x2","chainId":"0x1","nonce":"0x0","to":"0x703c4b2bd70c169f5717101caee543299fc946c7","gas":"0x5208","gasPrice":null,"maxPriorityFeePerGas":"0x0","maxFeePerGas":"0x2","value":"0x1","input":"0x","accessList":[],"v":"0x1","r":"0x5a32230e497be0277b58afb995227a167e087462fb770057ed6946f5ef5a2df5","s":"0x431e048124baffbd67bc35df940bb9f5ddf8a36afb2672616d075ac39415e885","yParity":"0x1","hash":"0xf5e941beeca516d3d3dca2707d74c54a58e07365b89efc5de58dd7b6041ef78e"}`
+	expect := `{"type":"0x2","chainId":"0x1","nonce":"0x0","to":"0x703c4b2bd70c169f5717101caee543299fc946c7","gas":"0x5208","gasPrice":null,"maxPriorityFeePerGas":"0x0","maxFeePerGas":"0xba43b7400","value":"0x1","input":"0x","accessList":[],"v":"0x0","r":"0xa7bbf5672b6f78e934bd380aad0b2626d5337e96c12f1e755fa5522ba7a314bd","s":"0x4d661f8c7b850b7dc3ce1c8c7b443a4434a22fe3ad14cc463205e0259546f0c8","yParity":"0x0","hash":"0x0333d97cbdababb6af7cc55a6f64d47711b8e18a93d7343657508a454407a82c"}`
 	if !bytes.Equal(tx, []byte(expect)) {
 		t.Errorf("result mismatch. Have:\n%s\nWant:\n%s\n", tx, expect)
 	}
@@ -1378,13 +1381,11 @@ func TestRPCMarshalBlock(t *testing.T) {
 			inclTx: false,
 			fullTx: false,
 			want: `{
-				"blockExtraData":"0x",
 				"difficulty": "0x0",
-				"extDataHash":"0x0000000000000000000000000000000000000000000000000000000000000000",
 				"extraData": "0x",
 				"gasLimit": "0x0",
 				"gasUsed": "0x0",
-				"hash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+				"hash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 				"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 				"miner": "0x0000000000000000000000000000000000000000",
 				"mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -1393,7 +1394,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 				"parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
 				"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
 				"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
-				"size": "0x2b9",
+				"size": "0x296",
 				"stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
 				"timestamp": "0x0",
 				"transactionsRoot": "0x661a9febcfa8f1890af549b874faf9fa274aede26ef489d9db0b25daa569450e",
@@ -1405,13 +1406,11 @@ func TestRPCMarshalBlock(t *testing.T) {
 			inclTx: true,
 			fullTx: false,
 			want: `{
-				"blockExtraData":"0x",
 				"difficulty": "0x0",
-				"extDataHash":"0x0000000000000000000000000000000000000000000000000000000000000000",
 				"extraData": "0x",
 				"gasLimit": "0x0",
 				"gasUsed": "0x0",
-				"hash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+				"hash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 				"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 				"miner": "0x0000000000000000000000000000000000000000",
 				"mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -1420,7 +1419,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 				"parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
 				"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
 				"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
-				"size": "0x2b9",
+				"size": "0x296",
 				"stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
 				"timestamp": "0x0",
 				"transactions": [
@@ -1438,13 +1437,11 @@ func TestRPCMarshalBlock(t *testing.T) {
 			inclTx: true,
 			fullTx: true,
 			want: `{
-				"blockExtraData":"0x",
 				"difficulty": "0x0",
-				"extDataHash":"0x0000000000000000000000000000000000000000000000000000000000000000",
 				"extraData": "0x",
 				"gasLimit": "0x0",
 				"gasUsed": "0x0",
-				"hash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+				"hash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 				"logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 				"miner": "0x0000000000000000000000000000000000000000",
 				"mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -1453,12 +1450,12 @@ func TestRPCMarshalBlock(t *testing.T) {
 				"parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
 				"receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
 				"sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
-				"size": "0x2b9",
+				"size": "0x296",
 				"stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
 				"timestamp": "0x0",
 				"transactions": [
 					{
-						"blockHash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+						"blockHash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 						"blockNumber": "0x64",
 						"from": "0x0000000000000000000000000000000000000000",
 						"gas": "0x457",
@@ -1478,7 +1475,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 						"yParity": "0x0"
 					},
 					{
-						"blockHash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+						"blockHash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 						"blockNumber": "0x64",
 						"from": "0x0000000000000000000000000000000000000000",
 						"gas": "0x457",
@@ -1496,7 +1493,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 						"s": "0x0"
 					},
 					{
-						"blockHash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+						"blockHash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 						"blockNumber": "0x64",
 						"from": "0x0000000000000000000000000000000000000000",
 						"gas": "0x457",
@@ -1516,7 +1513,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 						"yParity": "0x0"
 					},
 					{
-						"blockHash": "0xed74541829e559a9256f4810c2358498c7fe41287cb57f4b8b8334ea81560757",
+						"blockHash": "0x9b73c83b25d0faf7eab854e3684c7e394336d6e135625aafa5c183f27baa8fee",
 						"blockNumber": "0x64",
 						"from": "0x0000000000000000000000000000000000000000",
 						"gas": "0x457",
@@ -1541,7 +1538,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 	}
 
 	for i, tc := range testSuite {
-		resp := RPCMarshalBlock(block, tc.inclTx, tc.fullTx, params.TestChainConfig)
+		resp := RPCMarshalBlock(block, tc.inclTx, tc.fullTx, params.TestSubnetEVMChainConfig)
 		out, err := json.Marshal(resp)
 		if err != nil {
 			t.Errorf("test %d: json marshal error: %v", i, err)
@@ -1579,11 +1576,11 @@ func TestRPCGetBlockOrHeader(t *testing.T) {
 		})
 		pending = types.NewBlock(&types.Header{Number: big.NewInt(11), Time: 42}, []*types.Transaction{tx}, nil, nil, blocktest.NewHasher())
 	)
-	backend := newTestBackend(t, genBlocks, genesis, dummy.NewFaker(), func(i int, b *core.BlockGen) {
+	backend := newTestBackend(t, genBlocks, genesis, dummy.NewCoinbaseFaker(), func(i int, b *core.BlockGen) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &acc2Addr, Value: big.NewInt(1000), Gas: params.TxGas, GasPrice: b.BaseFee(), Data: nil}), signer, acc1Key)
+		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &acc2Addr, Value: big.NewInt(1000), Gas: ethparams.TxGas, GasPrice: b.BaseFee(), Data: nil}), signer, acc1Key)
 		b.AddTx(tx)
 	})
 	api := NewBlockChainAPI(backend)
@@ -1812,6 +1809,7 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 			Config:        &config,
 			ExcessBlobGas: new(uint64),
 			BlobGasUsed:   new(uint64),
+			Timestamp:     uint64(upgrade.InitiallyActiveTime.Unix()),
 			Alloc: types.GenesisAlloc{
 				acc1Addr: {Balance: big.NewInt(params.Ether)},
 				acc2Addr: {Balance: big.NewInt(params.Ether)},
@@ -1832,7 +1830,6 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 		txHashes = make([]common.Hash, genBlocks)
 	)
 
-	// FullFaker used to skip header verification that enforces no blobs.
 	backend := newTestBackend(t, genBlocks, genesis, dummy.NewFullFaker(), func(i int, b *core.BlockGen) {
 		var (
 			tx  *types.Transaction
@@ -1842,7 +1839,7 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 		switch i {
 		case 0:
 			// transfer 1000wei
-			tx, err = types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &acc2Addr, Value: big.NewInt(1000), Gas: params.TxGas, GasPrice: b.BaseFee(), Data: nil}), types.HomesteadSigner{}, acc1Key)
+			tx, err = types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: &acc2Addr, Value: big.NewInt(1000), Gas: ethparams.TxGas, GasPrice: b.BaseFee(), Data: nil}), types.HomesteadSigner{}, acc1Key)
 		case 1:
 			// create contract
 			tx, err = types.SignTx(types.NewTx(&types.LegacyTx{Nonce: uint64(i), To: nil, Gas: 53100, GasPrice: b.BaseFee(), Data: common.FromHex("0x60806040")}), signer, acc1Key)
@@ -1873,7 +1870,7 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 				Nonce:      uint64(i),
 				GasTipCap:  uint256.NewInt(1),
 				GasFeeCap:  uint256.MustFromBig(fee),
-				Gas:        params.TxGas,
+				Gas:        ethparams.TxGas,
 				To:         acc2Addr,
 				BlobFeeCap: uint256.NewInt(1),
 				BlobHashes: []common.Hash{{1}},

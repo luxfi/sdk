@@ -1,11 +1,11 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
 
 import (
-	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 

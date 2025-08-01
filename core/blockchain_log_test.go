@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package core
@@ -7,14 +7,16 @@ import (
 	"math/big"
 	"strings"
 	"testing"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/stretchr/testify/require"
 )
 
@@ -87,8 +89,7 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 	require.NoError(err)
 
 	for _, block := range blocks {
-		err := chain.Accept(block)
-		require.NoError(err)
+		require.NoError(chain.Accept(block))
 	}
 	chain.DrainAcceptorQueue()
 

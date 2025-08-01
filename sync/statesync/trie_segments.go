@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -9,20 +9,21 @@ import (
 	"encoding/binary"
 	"fmt"
 	"sync"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
-	syncclient "github.com/luxfi/evm/sync/client"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/utils"
+
+	"github.com/luxfi/luxd/utils/wrappers"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	syncclient "github.com/luxfi/evm/sync/client"
+	"github.com/luxfi/evm/utils"
 )
 
 var (
-	_ syncclient.LeafSyncTask = &trieSegment{}
-	_ fmt.Stringer            = &trieSegment{}
+	_ syncclient.LeafSyncTask = (*trieSegment)(nil)
+	_ fmt.Stringer            = (*trieSegment)(nil)
 )
 
 // trieToSync keeps the state of a single trie syncing
@@ -218,7 +219,7 @@ func (t *trieToSync) segmentFinished(ctx context.Context, idx int) error {
 
 	// when the trie is finished, this hashes any remaining nodes in the stack
 	// trie and creates the root
-	actualRoot := t.stackTrie.Hash()
+	actualRoot := t.stackTrie.Commit()
 	if actualRoot != t.root {
 		return fmt.Errorf("unexpected root, expected=%s, actual=%s, account=%s", t.root, actualRoot, t.account)
 	}

@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,39 +30,69 @@ package core
 import (
 	"bytes"
 	"math/big"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/core/headerutil"
-	"github.com/luxfi/evm/predicate"
+	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/predicate"
 	"github.com/holiman/uint256"
 )
 
-// REMOVED: vm.RegisterHooks and hook functions are not available in ethereum v1.16.1
-// The StateDB wrapping and other customizations need to be done when creating the EVM
+func init() {
+	vm.RegisterHooks(hooks{})
+}
+
+type hooks struct{}
+
+// OverrideNewEVMArgs is a hook that is called in [vm.NewEVM].
+// It allows for the modification of the EVM arguments before the EVM is created.
+// Specifically, we set Random to be the same as Difficulty since Shanghai.
+// This allows using the same jump table as upstream.
+// Then we set Difficulty to 0 as it is post Merge in upstream.
+// Additionally we wrap the StateDB with the appropriate StateDB wrapper,
+// which is used in evm to process historical pre-AP1 blocks with the
+// [StateDbAP1.GetCommittedState] method as it was historically.
+func (hooks) OverrideNewEVMArgs(args *vm.NewEVMArgs) *vm.NewEVMArgs {
+	rules := args.ChainConfig.Rules(args.BlockContext.BlockNumber, params.IsMergeTODO, args.BlockContext.Time)
+	args.StateDB = wrapStateDB(rules, args.StateDB)
+
+	if rules.IsShanghai {
+		args.BlockContext.Random = new(common.Hash)
+		args.BlockContext.Random.SetBytes(args.BlockContext.Difficulty.Bytes())
+		args.BlockContext.Difficulty = new(big.Int)
+	}
+
+	return args
+}
+
+func (hooks) OverrideEVMResetArgs(rules params.Rules, args *vm.EVMResetArgs) *vm.EVMResetArgs {
+	args.StateDB = wrapStateDB(rules, args.StateDB)
+	return args
+}
+
+func wrapStateDB(rules params.Rules, db vm.StateDB) vm.StateDB {
+	return extstate.New(db.(extstate.VmStateDB))
+}
 
 // ChainContext supports retrieving headers and consensus parameters from the
 // current blockchain to be used during transaction processing.
 type ChainContext interface {
-	// Engine retrieves the chain's consensus common.
+	// Engine retrieves the chain's consensus engine.
 	Engine() consensus.Engine
 
 	// GetHeader returns the header corresponding to the hash/number argument pair.
 	GetHeader(common.Hash, uint64) *types.Header
-	
-	// Config returns the chain configuration
-	Config() *params.ChainConfig
 }
 
 // NewEVMBlockContext creates a new context for use in the EVM.
 func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address) vm.BlockContext {
-	config := chain.Config()
-	rules := config.Rules(header.Number, params.IsMergeTODO, header.Time)
-	predicateBytes := headerutil.PredicateBytesFromExtra(rules, header.Extra)
+	predicateBytes := customheader.PredicateBytesFromExtra(header.Extra)
 	if len(predicateBytes) == 0 {
 		return newEVMBlockContext(header, chain, author, nil)
 	}
@@ -84,14 +115,14 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 // This function is used to create a BlockContext when the header Extra data is not fully formed yet and it's more efficient to pass in predicateResults
 // directly rather than re-encode the latest results when executing each individual transaction.
 func NewEVMBlockContextWithPredicateResults(header *types.Header, chain ChainContext, author *common.Address, predicateBytes []byte) vm.BlockContext {
-	// Create a new header with the predicate bytes set in the extra field
-	modifiedHeader := types.CopyHeader(header)
-	modifiedHeader.Extra = headerutil.SetPredicateBytesInExtra(
+	blockCtx := NewEVMBlockContext(header, chain, author)
+	// Note this only sets the block context, which is the hand-off point for
+	// the EVM. The actual header is not modified.
+	blockCtx.Header.Extra = customheader.SetPredicateBytesInExtra(
 		bytes.Clone(header.Extra),
 		predicateBytes,
 	)
-	// Use the modified header to create the block context
-	return NewEVMBlockContext(modifiedHeader, chain, author)
+	return blockCtx
 }
 
 func newEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address, extra []byte) vm.BlockContext {
@@ -124,6 +155,11 @@ func newEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		BaseFee:     baseFee,
 		BlobBaseFee: blobBaseFee,
 		GasLimit:    header.GasLimit,
+		Header: &types.Header{
+			Number: new(big.Int).Set(header.Number),
+			Time:   header.Time,
+			Extra:  extra,
+		},
 	}
 }
 

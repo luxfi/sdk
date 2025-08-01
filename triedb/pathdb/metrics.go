@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -28,38 +29,41 @@ package pathdb
 
 import (
 	"github.com/luxfi/geth/metrics"
+
+	// Force geth metrics of the same name to be registered first.
+	_ "github.com/luxfi/geth/triedb/pathdb"
 )
 
 // ====== If resolving merge conflicts ======
 //
-// All calls to metrics.NewRegistered*() for metrics also defined in libevm/triedb/pathdb
+// All calls to metrics.NewRegistered*() for metrics also defined in geth/triedb/pathdb
 // have been replaced with metrics.GetOrRegister*() to get metrics already registered in
-// libevm/triedb/pathdb or register them here otherwise. These replacements ensure the same
+// geth/triedb/pathdb or register them here otherwise. These replacements ensure the same
 // metrics are shared between the two packages.
 //
 //nolint:unused
 var (
-	cleanHitMeter   = metrics.NewMeter()
-	cleanMissMeter  = metrics.NewMeter()
-	cleanReadMeter  = metrics.NewMeter()
-	cleanWriteMeter = metrics.NewMeter()
+	cleanHitMeter   = metrics.GetOrRegisterMeter("pathdb/clean/hit", nil)
+	cleanMissMeter  = metrics.GetOrRegisterMeter("pathdb/clean/miss", nil)
+	cleanReadMeter  = metrics.GetOrRegisterMeter("pathdb/clean/read", nil)
+	cleanWriteMeter = metrics.GetOrRegisterMeter("pathdb/clean/write", nil)
 
-	dirtyHitMeter         = metrics.NewMeter()
-	dirtyMissMeter        = metrics.NewMeter()
-	dirtyReadMeter        = metrics.NewMeter()
-	dirtyWriteMeter       = metrics.NewMeter()
-	dirtyNodeHitDepthHist = metrics.NewHistogram(metrics.NewExpDecaySample(1028, 0.015))
+	dirtyHitMeter         = metrics.GetOrRegisterMeter("pathdb/dirty/hit", nil)
+	dirtyMissMeter        = metrics.GetOrRegisterMeter("pathdb/dirty/miss", nil)
+	dirtyReadMeter        = metrics.GetOrRegisterMeter("pathdb/dirty/read", nil)
+	dirtyWriteMeter       = metrics.GetOrRegisterMeter("pathdb/dirty/write", nil)
+	dirtyNodeHitDepthHist = metrics.GetOrRegisterHistogram("pathdb/dirty/depth", nil, metrics.NewExpDecaySample(1028, 0.015))
 
-	cleanFalseMeter = metrics.NewMeter()
-	dirtyFalseMeter = metrics.NewMeter()
-	diskFalseMeter  = metrics.NewMeter()
+	cleanFalseMeter = metrics.GetOrRegisterMeter("pathdb/clean/false", nil)
+	dirtyFalseMeter = metrics.GetOrRegisterMeter("pathdb/dirty/false", nil)
+	diskFalseMeter  = metrics.GetOrRegisterMeter("pathdb/disk/false", nil)
 
-	commitTimeTimer  = metrics.NewTimer()
-	commitNodesMeter = metrics.NewMeter()
-	commitBytesMeter = metrics.NewMeter()
+	commitTimeTimer  = metrics.GetOrRegisterTimer("pathdb/commit/time", nil)
+	commitNodesMeter = metrics.GetOrRegisterMeter("pathdb/commit/nodes", nil)
+	commitBytesMeter = metrics.GetOrRegisterMeter("pathdb/commit/bytes", nil)
 
-	gcNodesMeter = metrics.NewMeter()
-	gcBytesMeter = metrics.NewMeter()
+	gcNodesMeter = metrics.GetOrRegisterMeter("pathdb/gc/nodes", nil)
+	gcBytesMeter = metrics.GetOrRegisterMeter("pathdb/gc/bytes", nil)
 
 	diffLayerBytesMeter = metrics.GetOrRegisterMeter("pathdb/diff/bytes", nil)
 	diffLayerNodesMeter = metrics.GetOrRegisterMeter("pathdb/diff/nodes", nil)

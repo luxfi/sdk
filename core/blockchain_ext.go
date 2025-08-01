@@ -1,5 +1,6 @@
-// (c) 2024 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package core
 
 import "github.com/luxfi/geth/metrics"
@@ -10,23 +11,17 @@ import "github.com/luxfi/geth/metrics"
 // a new registered [metrics.Counter]. If no metric is found, a new [metrics.Counter] is constructed
 // and registered.
 //
-// This is necessary for a metric defined in libevm with the same name but a
+// This is necessary for a metric defined in geth with the same name but a
 // different type to what we expect.
-func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) *metrics.Counter {
+func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) metrics.Counter {
 	if r == nil {
 		r = metrics.DefaultRegistry
 	}
 
-	// Try to get existing metric
-	if existing := r.Get(name); existing != nil {
-		// If it's already a counter, return it
-		if c, ok := existing.(*metrics.Counter); ok {
-			return c
-		}
-		// Otherwise unregister it
-		r.Unregister(name)
+	if c, ok := r.GetOrRegister(name, metrics.NewCounter).(metrics.Counter); ok {
+		return c
 	}
-	
-	// Register new counter
+	// `name` must have already been registered to be any other type
+	r.Unregister(name)
 	return metrics.NewRegisteredCounter(name, r)
 }

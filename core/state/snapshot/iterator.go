@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,37 +31,24 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
+
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/rawdb"
+	"github.com/luxfi/geth/core/rawdb"
+	ethsnapshot "github.com/luxfi/geth/core/state/snapshot"
 	"github.com/luxfi/geth/ethdb"
 )
 
 // Iterator is an iterator to step over all the accounts or the specific
 // storage in a snapshot which may or may not be composed of multiple layers.
-type Iterator interface {
-	// Next steps the iterator forward one element, returning false if exhausted.
-	Next() bool
-	// Error returns any failure that occurred during iteration.
-	Error() error
-	// Release releases any held resources.
-	Release()
-}
+type Iterator = ethsnapshot.Iterator
 
 // AccountIterator is an iterator to step over all the accounts in a snapshot,
 // which may or may not be composed of multiple layers.
-type AccountIterator interface {
-	Iterator
-	// Account returns the current account hash and RLP encoded account
-	Account() (common.Hash, []byte)
-}
+type AccountIterator = ethsnapshot.AccountIterator
 
 // StorageIterator is an iterator to step over the specific storage in a snapshot,
 // which may or may not be composed of multiple layers.
-type StorageIterator interface {
-	Iterator
-	// Slot returns the current storage slot
-	Slot() (common.Hash, []byte)
-}
+type StorageIterator = ethsnapshot.StorageIterator
 
 // diffAccountIterator is an account iterator that steps over the accounts (both
 // live and deleted) contained within a single diff layer. Higher order iterators
@@ -134,13 +122,13 @@ func (it *diffAccountIterator) Hash() common.Hash {
 // if elements have been deleted.
 //
 // Note the returned account is not a copy, please don't modify it.
-func (it *diffAccountIterator) Account() (common.Hash, []byte) {
+func (it *diffAccountIterator) Account() []byte {
 	it.layer.lock.RLock()
 	blob, ok := it.layer.accountData[it.curHash]
 	if !ok {
 		if _, ok := it.layer.destructSet[it.curHash]; ok {
 			it.layer.lock.RUnlock()
-			return it.curHash, nil
+			return nil
 		}
 		panic(fmt.Sprintf("iterator referenced non-existent account: %x", it.curHash))
 	}
@@ -148,7 +136,7 @@ func (it *diffAccountIterator) Account() (common.Hash, []byte) {
 	if it.layer.Stale() {
 		it.fail, it.keys = ErrSnapshotStale, nil
 	}
-	return it.curHash, blob
+	return blob
 }
 
 // Release is a noop for diff account iterators as there are no held resources.
@@ -208,8 +196,8 @@ func (it *diskAccountIterator) Hash() common.Hash {
 }
 
 // Account returns the RLP encoded slim account the iterator is currently at.
-func (it *diskAccountIterator) Account() (common.Hash, []byte) {
-	return it.Hash(), it.it.Value()
+func (it *diskAccountIterator) Account() []byte {
+	return it.it.Value()
 }
 
 // Release releases the database snapshot held during iteration.
@@ -301,7 +289,7 @@ func (it *diffStorageIterator) Hash() common.Hash {
 // if elements have been deleted.
 //
 // Note the returned slot is not a copy, please don't modify it.
-func (it *diffStorageIterator) Slot() (common.Hash, []byte) {
+func (it *diffStorageIterator) Slot() []byte {
 	it.layer.lock.RLock()
 	storage, ok := it.layer.storageData[it.account]
 	if !ok {
@@ -316,7 +304,7 @@ func (it *diffStorageIterator) Slot() (common.Hash, []byte) {
 	if it.layer.Stale() {
 		it.fail, it.keys = ErrSnapshotStale, nil
 	}
-	return it.curHash, blob
+	return blob
 }
 
 // Release is a noop for diff account iterators as there are no held resources.
@@ -387,8 +375,8 @@ func (it *diskStorageIterator) Hash() common.Hash {
 }
 
 // Slot returns the raw storage slot content the iterator is currently at.
-func (it *diskStorageIterator) Slot() (common.Hash, []byte) {
-	return it.Hash(), it.it.Value()
+func (it *diskStorageIterator) Slot() []byte {
+	return it.it.Value()
 }
 
 // Release releases the database snapshot held during iteration.

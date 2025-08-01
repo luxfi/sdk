@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,13 +34,16 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	ethsnapshot "github.com/luxfi/geth/core/state/snapshot"
 	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/geth/stateconf"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 const (
@@ -55,9 +59,9 @@ const (
 
 // ====== If resolving merge conflicts ======
 //
-// All calls to metrics.NewRegistered*() for metrics also defined in libevm/core/state/snapshot
+// All calls to metrics.NewRegistered*() for metrics also defined in geth/core/state/snapshot
 // have been replaced with metrics.GetOrRegister*() to get metrics already registered in
-// libevm/core/state/snapshot or register them here otherwise. These replacements ensure the
+// geth/core/state/snapshot or register them here otherwise. These replacements ensure the
 // same metrics are shared between the two packages.
 var (
 	snapshotCleanAccountHitMeter   = metrics.GetOrRegisterMeter("state/snapshot/clean/account/hit", nil)
@@ -123,22 +127,7 @@ var (
 )
 
 // Snapshot represents the functionality supported by a snapshot storage layer.
-type Snapshot interface {
-	// Root returns the root hash for which this snapshot was made.
-	Root() common.Hash
-
-	// Account directly retrieves the account associated with a particular hash in
-	// the snapshot slim data format.
-	Account(hash common.Hash) (*types.SlimAccount, error)
-
-	// AccountRLP directly retrieves the account RLP associated with a particular
-	// hash in the snapshot slim data format.
-	AccountRLP(hash common.Hash) ([]byte, error)
-
-	// Storage directly retrieves the storage data associated with a particular hash,
-	// within a particular account.
-	Storage(accountHash, storageHash common.Hash) ([]byte, error)
-}
+type Snapshot = ethsnapshot.Snapshot
 
 // snapshot is the internal version of the snapshot data layer that supports some
 // additional methods compared to the public API.
@@ -326,16 +315,13 @@ func (t *Tree) Snapshots(blockHash common.Hash, limits int, nodisk bool) []Snaps
 	return ret
 }
 
-// SnapshotUpdateOption is an option to be passed to the Update method.
-type SnapshotUpdateOption interface{}
-
 type blockHashes struct {
 	blockHash       common.Hash
 	parentBlockHash common.Hash
 }
 
-func WithBlockHashes(blockHash, parentBlockHash common.Hash) SnapshotUpdateOption {
-	return blockHashes{blockHash, parentBlockHash}
+func WithBlockHashes(blockHash, parentBlockHash common.Hash) stateconf.SnapshotUpdateOption {
+	return stateconf.WithSnapshotUpdatePayload(blockHashes{blockHash, parentBlockHash})
 }
 
 // Update adds a new snapshot into the tree, if that can be linked to an existing
@@ -346,15 +332,16 @@ func (t *Tree) Update(
 	destructs map[common.Hash]struct{},
 	accounts map[common.Hash][]byte,
 	storage map[common.Hash]map[common.Hash][]byte,
-	opts ...SnapshotUpdateOption,
+	opts ...stateconf.SnapshotUpdateOption,
 ) error {
 	if len(opts) == 0 {
 		return fmt.Errorf("missing block hashes")
 	}
 
-	p, ok := opts[0].(blockHashes)
+	payload := stateconf.ExtractSnapshotUpdatePayload(opts[0])
+	p, ok := payload.(blockHashes)
 	if !ok {
-		return fmt.Errorf("invalid block hashes payload type: %T", opts[0])
+		return fmt.Errorf("invalid block hashes payload type: %T", payload)
 	}
 
 	return t.UpdateWithBlockHashes(p.blockHash, blockRoot, p.parentBlockHash, destructs, accounts, storage)
@@ -651,7 +638,7 @@ func diffToDisk(bottom *diffLayer) (*diskLayer, bool, error) {
 	base.abortGeneration()
 
 	// Put the deletion in the batch writer, flush all updates in the final step.
-	DeleteSnapshotBlockHash(batch)
+	customrawdb.DeleteSnapshotBlockHash(batch)
 	rawdb.DeleteSnapshotRoot(batch)
 
 	// Mark the original base as stale as we're going to create a new wrapper
@@ -743,7 +730,7 @@ func diffToDisk(bottom *diffLayer) (*diskLayer, bool, error) {
 		}
 	}
 	// Update the snapshot block marker and write any remainder data
-	WriteSnapshotBlockHash(batch, bottom.blockHash)
+	customrawdb.WriteSnapshotBlockHash(batch, bottom.blockHash)
 	rawdb.WriteSnapshotRoot(batch, bottom.root)
 
 	// Write out the generator progress marker and report

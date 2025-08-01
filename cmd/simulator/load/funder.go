@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -8,14 +8,15 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
-	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/ethclient"
-	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
 )
 
 // DistributeFunds ensures that each address in keys has at least [minFundsPerAddr] by sending funds
@@ -70,9 +71,7 @@ func DistributeFunds(ctx context.Context, client ethclient.Client, keys []*key.K
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch chainID: %w", err)
 	}
-	// TODO: Fix - EstimateBaseFee is not a standard ethclient method
-	// For now, use SuggestGasPrice which includes base fee
-	gasFeeCap, err := client.SuggestGasPrice(ctx)
+	gasFeeCap, err := client.EstimateBaseFee(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch estimated base fee: %w", err)
 	}

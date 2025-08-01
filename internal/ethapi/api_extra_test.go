@@ -1,4 +1,4 @@
-// (c) 2019-2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package ethapi
@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/rpc"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/rpc"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -18,7 +18,10 @@ import (
 func TestBlockChainAPI_stateQueryBlockNumberAllowed(t *testing.T) {
 	t.Parallel()
 
-	const queryWindow uint64 = 1024
+	const (
+		queryWindow      uint64 = 1024
+		nonArchiveWindow uint64 = 32
+	)
 
 	makeBlockWithNumber := func(number uint64) *types.Block {
 		header := &types.Header{
@@ -104,7 +107,7 @@ func TestBlockChainAPI_stateQueryBlockNumberAllowed(t *testing.T) {
 			makeBackend: func(ctrl *gomock.Controller) *MockBackend {
 				backend := NewMockBackend(ctrl)
 				backend.EXPECT().IsArchive().Return(false)
-				// query window is 32 as set to core.TipBufferSize
+				backend.EXPECT().HistoricalProofQueryWindow().Return(nonArchiveWindow)
 				backend.EXPECT().LastAcceptedBlock().Return(makeBlockWithNumber(1033))
 				return backend
 			},

@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,28 +33,33 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/triedb/hashdb"
-	"github.com/luxfi/evm/triedb/pathdb"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/ethdb"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/geth/core/tracing"
-	"golang.org/x/crypto/sha3"
-	ethparams "github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/state/snapshot"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/triedb/firewood"
+	"github.com/luxfi/evm/triedb/hashdb"
+	"github.com/luxfi/evm/triedb/pathdb"
 	"github.com/holiman/uint256"
+	"golang.org/x/crypto/sha3"
 )
 
 // StateTest checks transaction processing without block context.
@@ -157,11 +163,11 @@ func GetChainConfig(forkString string) (baseConfig *params.ChainConfig, eips []i
 	// NOTE: this is added to support mapping geth fork names to
 	// evm fork names.
 	forkAliases := map[string]string{
-		"Berlin":       "Pre-EVM",
-		"London":       "EVM",
-		"ArrowGlacier": "EVM",
-		"GrayGlacier":  "EVM",
-		"Merge":        "EVM",
+		"Berlin":       "Pre-SubnetEVM",
+		"London":       "SubnetEVM",
+		"ArrowGlacier": "SubnetEVM",
+		"GrayGlacier":  "SubnetEVM",
+		"Merge":        "SubnetEVM",
 	}
 	if alias, ok := forkAliases[baseName]; ok {
 		baseName = alias
@@ -261,7 +267,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	state = MakePreState(rawdb.NewMemoryDatabase(), t.json.Pre, snapshotter, scheme)
 
 	var baseFee *big.Int
-	if params.GetExtra(config).IsEVM(0) {
+	if params.GetExtra(config).IsSubnetEVM(0) {
 		baseFee = t.json.Env.BaseFee
 		if baseFee == nil {
 			// Retesteth uses `0x10` for genesis baseFee. Therefore, it defaults to
@@ -281,7 +287,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 		// - the block body is verified against the header in block_validator.go:ValidateBody
 		// Here, we just do this shortcut smaller fix, since state tests do not
 		// utilize those codepaths
-		if len(msg.BlobHashes)*128*1024 > 6*128*1024 { // Blob gas calculation
+		if len(msg.BlobHashes)*ethparams.BlobTxBlobGasPerBlob > ethparams.MaxBlobGasPerBlock {
 			return state, common.Hash{}, errors.New("blob gas exceeds maximum")
 		}
 	}
@@ -293,7 +299,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 		if err != nil {
 			return state, common.Hash{}, err
 		}
-		if _, err := types.Sender(types.LatestSigner(&ethparams.ChainConfig{ChainID: config.ChainID}), &ttx); err != nil {
+		if _, err := types.Sender(types.LatestSigner(config), &ttx); err != nil {
 			return state, common.Hash{}, err
 		}
 	}
@@ -304,18 +310,15 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	context.GetHash = vmTestBlockHash
 	context.BaseFee = baseFee
 	context.Random = nil
-	if config.IsEVM(block.Time()) && t.json.Env.Random != nil {
+	if config.IsLondon(new(big.Int)) && t.json.Env.Random != nil {
 		rnd := common.BigToHash(t.json.Env.Random)
 		context.Random = &rnd
 		context.Difficulty = big.NewInt(0)
 	}
-	if config.IsCancun(block.Time()) && t.json.Env.ExcessBlobGas != nil {
-		// Calculate blob fee based on excess blob gas
-		excess := uint256.MustFromBig(new(big.Int).SetUint64(*t.json.Env.ExcessBlobGas))
-		context.BlobBaseFee = new(big.Int).Div(excess.ToBig(), big.NewInt(128))
+	if config.IsCancun(new(big.Int), block.Time()) && t.json.Env.ExcessBlobGas != nil {
+		context.BlobBaseFee = eip4844.CalcBlobFee(*t.json.Env.ExcessBlobGas)
 	}
-	evm := vm.NewEVM(context, state.StateDB, &ethparams.ChainConfig{ChainID: config.ChainID}, vmconfig)
-	evm.SetTxContext(txContext)
+	evm := vm.NewEVM(context, txContext, state.StateDB, config, vmconfig)
 
 	// Execute the message.
 	snapshot := state.StateDB.Snapshot()
@@ -330,10 +333,10 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	// - the coinbase self-destructed, or
 	// - there are only 'bad' transactions, which aren't executed. In those cases,
 	//   the coinbase gets no txfee, so isn't created, and thus needs to be touched
-	state.StateDB.AddBalance(block.Coinbase(), new(uint256.Int), tracing.BalanceChangeUnspecified)
+	state.StateDB.AddBalance(block.Coinbase(), new(uint256.Int))
 
 	// Commit state mutations into database.
-	root, _ = state.StateDB.Commit(block.NumberU64(), config.IsEIP158(block.Number()), false)
+	root, _ = state.StateDB.Commit(block.NumberU64(), config.IsEIP158(block.Number()))
 	return state, root, err
 }
 
@@ -419,13 +422,8 @@ func (tx *stTransaction) toMessage(ps stPostState, baseFee *big.Int) (*core.Mess
 		if tx.MaxPriorityFeePerGas == nil {
 			tx.MaxPriorityFeePerGas = tx.MaxFeePerGas
 		}
-		// Use minimum of (maxPriorityFee + baseFee) and maxFee
-		sum := new(big.Int).Add(tx.MaxPriorityFeePerGas, baseFee)
-		if sum.Cmp(tx.MaxFeePerGas) > 0 {
-			gasPrice = tx.MaxFeePerGas
-		} else {
-			gasPrice = sum
-		}
+		gasPrice = math.BigMin(new(big.Int).Add(tx.MaxPriorityFeePerGas, baseFee),
+			tx.MaxFeePerGas)
 	}
 	if gasPrice == nil {
 		return nil, errors.New("no gas price provided")
@@ -462,31 +460,49 @@ func vmTestBlockHash(n uint64) common.Hash {
 // StateTestState groups all the state database objects together for use in tests.
 type StateTestState struct {
 	StateDB   *state.StateDB
-	TrieDB    *triedb.Database // trie database
+	TrieDB    *triedb.Database
 	Snapshots *snapshot.Tree
+	TempDir   string
 }
 
 // MakePreState creates a state containing the given allocation.
 func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bool, scheme string) StateTestState {
-	tconf := &triedb.Config{Preimages: true}
-	if scheme == rawdb.HashScheme {
-		tconf.HashDB = hashdb.Defaults
-	} else {
-		tconf.PathDB = pathdb.Defaults
+	// Set database path
+	tempdir, err := os.MkdirTemp("", "coreth-state-test-*")
+	if err != nil {
+		panic("failed to create temporary directory: " + err.Error())
 	}
-	tdb := triedb.NewDatabase(db, tconf)
-	sdb := state.NewDatabaseWithNodeDB(db, tdb)
+
+	tconf := &triedb.Config{Preimages: true}
+	switch scheme {
+	case rawdb.HashScheme:
+		tconf.DBOverride = hashdb.Defaults.BackendConstructor
+	case rawdb.PathScheme:
+		tconf.DBOverride = pathdb.Defaults.BackendConstructor
+	case customrawdb.FirewoodScheme:
+		cfg := firewood.Defaults
+		cfg.FilePath = filepath.Join(tempdir, "firewood")
+		tconf.DBOverride = cfg.BackendConstructor
+	default:
+		panic("unknown trie database scheme" + scheme)
+	}
+
+	triedb := triedb.NewDatabase(db, tconf)
+	sdb := state.NewDatabaseWithNodeDB(db, triedb)
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
 		statedb.SetCode(addr, a.Code)
-		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeUnspecified)
-		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceChangeUnspecified)
+		statedb.SetNonce(addr, a.Nonce)
+		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance))
 		for k, v := range a.Storage {
 			statedb.SetState(addr, k, v)
 		}
 	}
 	// Commit and re-open to start with a clean state.
-	root, _ := statedb.Commit(0, false, false)
+	root, err := statedb.Commit(0, false)
+	if err != nil {
+		panic("failed to commit state: " + err.Error())
+	}
 
 	// If snapshot is requested, initialize the snapshotter and use it in state.
 	var snaps *snapshot.Tree
@@ -497,10 +513,10 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 			AsyncBuild: false,
 			SkipVerify: true,
 		}
-		snaps, _ = snapshot.New(snapconfig, db, tdb, common.Hash{}, root)
+		snaps, _ = snapshot.New(snapconfig, db, triedb, common.Hash{}, root)
 	}
 	statedb, _ = state.New(root, sdb, snaps)
-	return StateTestState{statedb, tdb, snaps}
+	return StateTestState{statedb, triedb, snaps, tempdir}
 }
 
 // Close should be called when the state is no longer needed, ie. after running the test.
@@ -514,5 +530,12 @@ func (st *StateTestState) Close() {
 		st.Snapshots.AbortGeneration()
 		st.Snapshots.Release()
 		st.Snapshots = nil
+	}
+
+	if st.TempDir != "" {
+		if err := os.RemoveAll(st.TempDir); err != nil {
+			panic("failed to remove temporary directory: " + err.Error())
+		}
+		st.TempDir = ""
 	}
 }

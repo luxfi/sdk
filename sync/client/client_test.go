@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesyncclient
@@ -10,20 +10,25 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/luxfi/evm/interfaces"
+
+	"github.com/luxfi/luxd/ids"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/ethdb/memorydb"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	clientstats "github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/sync/handlers"
 	handlerstats "github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/sync/statesync/statesynctest"
 )
 
 func TestGetCode(t *testing.T) {
@@ -408,8 +413,8 @@ func TestGetLeafs(t *testing.T) {
 	const leafsLimit = 1024
 
 	trieDB := triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)
-	largeTrieRoot, largeTrieKeys, _ := syncutils.GenerateTrie(t, trieDB, 100_000, common.HashLength)
-	smallTrieRoot, _, _ := syncutils.GenerateTrie(t, trieDB, leafsLimit, common.HashLength)
+	largeTrieRoot, largeTrieKeys, _ := statesynctest.GenerateTrie(t, trieDB, 100_000, common.HashLength)
+	smallTrieRoot, _, _ := statesynctest.GenerateTrie(t, trieDB, leafsLimit, common.HashLength)
 
 	handler := handlers.NewLeafsRequestHandler(trieDB, nil, message.Codec, handlerstats.NewNoopHandlerStats())
 	client := NewClient(&ClientConfig{
@@ -779,7 +784,7 @@ func TestGetLeafsRetries(t *testing.T) {
 	rand.Seed(1)
 
 	trieDB := triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)
-	root, _, _ := syncutils.GenerateTrie(t, trieDB, 100_000, common.HashLength)
+	root, _, _ := statesynctest.GenerateTrie(t, trieDB, 100_000, common.HashLength)
 
 	handler := handlers.NewLeafsRequestHandler(trieDB, nil, message.Codec, handlerstats.NewNoopHandlerStats())
 	mockNetClient := &mockNetwork{}

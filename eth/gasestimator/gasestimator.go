@@ -1,4 +1,5 @@
-// (c) 2019-2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,14 +34,14 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/luxfi/geth/core"
-	"github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
 )
 
 // Options are the contextual parameters to execute the requested call.
@@ -68,7 +69,7 @@ func Estimate(ctx context.Context, call *core.Message, opts *Options, gasCap uin
 	)
 	// Determine the highest gas limit can be used during the estimation.
 	hi = opts.Header.GasLimit
-	if call.GasLimit >= params.TxGas {
+	if call.GasLimit >= ethparams.TxGas {
 		hi = call.GasLimit
 	}
 	// Normalize the max fee per gas the call is willing to spend.
@@ -115,9 +116,9 @@ func Estimate(ctx context.Context, call *core.Message, opts *Options, gasCap uin
 	// unused access list items). Ever so slightly wasteful, but safer overall.
 	if len(call.Data) == 0 {
 		if call.To != nil && opts.State.GetCodeSize(*call.To) == 0 {
-			failed, _, err := execute(ctx, call, opts, params.TxGas)
+			failed, _, err := execute(ctx, call, opts, ethparams.TxGas)
 			if !failed && err == nil {
-				return params.TxGas, nil, nil
+				return ethparams.TxGas, nil, nil
 			}
 		}
 	}
@@ -128,7 +129,7 @@ func Estimate(ctx context.Context, call *core.Message, opts *Options, gasCap uin
 		return 0, nil, err
 	}
 	if failed {
-		if result != nil && !errors.Is(result.Err, vmerrs.ErrOutOfGas) {
+		if result != nil && !errors.Is(result.Err, vm.ErrOutOfGas) {
 			return 0, result.Revert(), result.Err
 		}
 		return 0, nil, fmt.Errorf("gas required exceeds allowance (%d)", hi)
@@ -141,9 +142,9 @@ func Estimate(ctx context.Context, call *core.Message, opts *Options, gasCap uin
 	lo = result.UsedGas - 1
 
 	// There's a fairly high chance for the transaction to execute successfully
-	// with gasLimit set to the first execution's usedGas. Explicitly
+	// with gasLimit set to the first execution's usedGas + gasRefund. Explicitly
 	// check that gas amount and use as a limit for the binary search.
-	optimisticGasLimit := (result.UsedGas + params.CallStipend) * 64 / 63
+	optimisticGasLimit := (result.UsedGas + result.RefundedGas + ethparams.CallStipend) * 64 / 63
 	if optimisticGasLimit < hi {
 		failed, _, err = execute(ctx, call, opts, optimisticGasLimit)
 		if err != nil {
@@ -222,9 +223,8 @@ func run(ctx context.Context, call *core.Message, opts *Options) (*core.Executio
 		evmContext = core.NewEVMBlockContext(opts.Header, opts.Chain, nil)
 
 		dirtyState = opts.State.Copy()
-		evm        = vm.NewEVM(evmContext, dirtyState, opts.Config, vm.Config{NoBaseFee: true})
+		evm        = vm.NewEVM(evmContext, msgContext, dirtyState, opts.Config, vm.Config{NoBaseFee: true})
 	)
-	evm.TxContext = msgContext
 	// Monitor the outer context and interrupt the EVM upon cancellation. To avoid
 	// a dangling goroutine until the outer estimation finishes, create an internal
 	// context for the lifetime of this method call.

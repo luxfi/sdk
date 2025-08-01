@@ -1,3 +1,14 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+//
+// This file is a derived work, based on the go-ethereum library whose original
+// notices appear below.
+//
+// It is distributed under a license compatible with the licensing terms of the
+// original code from which it is derived.
+//
+// Much love to the original authors for their work.
+// **********
 // Copyright 2021 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -19,10 +30,13 @@ package core
 import (
 	"context"
 	"time"
-	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/bitutil"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/evm/core/bloombits"
 )
 
 const (
@@ -44,14 +58,13 @@ type BloomIndexer struct {
 // NewBloomIndexer returns a chain indexer that generates bloom bits data for the
 // canonical chain for fast logs filtering.
 func NewBloomIndexer(db ethdb.Database, size, confirms uint64) *ChainIndexer {
-	_ = &BloomIndexer{
+	backend := &BloomIndexer{
 		db:   db,
 		size: size,
 	}
-	// TODO: Fix bloom indexer - ethdb.NewTable no longer exists
-	// table := ethdb.NewTable(db, "B")
-	// return NewChainIndexer(db, table, backend, size, confirms, bloomThrottling, "bloombits")
-	return nil
+	table := rawdb.NewTable(db, string(rawdb.BloomBitsIndexPrefix))
+
+	return NewChainIndexer(db, table, backend, size, confirms, bloomThrottling, "bloombits")
 }
 
 // Reset implements core.ChainIndexerBackend, starting a new bloombits index
@@ -79,9 +92,7 @@ func (b *BloomIndexer) Commit() error {
 		if err != nil {
 			return err
 		}
-		// TODO: Fix bloom bits writing - rawdb.WriteBloomBits no longer exists
-		// rawdb.WriteBloomBits(batch, uint(i), b.section, b.head, bitutil.CompressBytes(bits))
-		_ = bits
+		rawdb.WriteBloomBits(batch, uint(i), b.section, b.head, bitutil.CompressBytes(bits))
 	}
 	return batch.Write()
 }

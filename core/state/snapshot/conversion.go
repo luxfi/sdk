@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,34 +35,20 @@ import (
 	"runtime"
 	"sync"
 	"time"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/trie"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/trie"
 )
 
 // trieKV represents a trie key-value pair
 type trieKV struct {
 	key   common.Hash
 	value []byte
-}
-
-// FullAccount decodes the data on the 'slim RLP' format and returns
-// the consensus format account.
-func FullAccount(data []byte) (*types.StateAccount, error) {
-	account := new(types.SlimAccount)
-	if err := rlp.DecodeBytes(data, account); err != nil {
-		return nil, err
-	}
-	return &types.StateAccount{
-		Nonce:    account.Nonce,
-		Balance:  account.Balance,
-		Root:     common.BytesToHash(account.Root),
-		CodeHash: account.CodeHash,
-	}, nil
 }
 
 type (
@@ -324,12 +311,10 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 				fullData []byte
 			)
 			if leafCallback == nil {
-				accHash, data := it.(AccountIterator).Account()
-				fullData, err = types.FullAccountRLP(data)
+				fullData, err = types.FullAccountRLP(it.(AccountIterator).Account())
 				if err != nil {
 					return stop(err)
 				}
-				leaf = trieKV{accHash, fullData}
 			} else {
 				// Wait until the semaphore allows us to continue, aborting if
 				// a sub-task failed
@@ -338,8 +323,7 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 					return stop(err)
 				}
 				// Fetch the next account and process it concurrently
-				accHash, data := it.(AccountIterator).Account()
-				account, err := FullAccount(data)
+				account, err := types.FullAccount(it.(AccountIterator).Account())
 				if err != nil {
 					return stop(err)
 				}
@@ -354,16 +338,15 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 						return
 					}
 					results <- nil
-				}(accHash)
+				}(it.Hash())
 				fullData, err = rlp.EncodeToBytes(account)
 				if err != nil {
 					return stop(err)
 				}
-				leaf = trieKV{accHash, fullData}
 			}
+			leaf = trieKV{it.Hash(), fullData}
 		} else {
-			slotHash, slotData := it.(StorageIterator).Slot()
-			leaf = trieKV{slotHash, common.CopyBytes(slotData)}
+			leaf = trieKV{it.Hash(), common.CopyBytes(it.(StorageIterator).Slot())}
 		}
 		in <- leaf
 
@@ -371,9 +354,9 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 		processed++
 		if time.Since(logged) > 3*time.Second && stats != nil {
 			if account == (common.Hash{}) {
-				stats.progressAccounts(leaf.key, processed)
+				stats.progressAccounts(it.Hash(), processed)
 			} else {
-				stats.progressContract(account, leaf.key, processed)
+				stats.progressContract(account, it.Hash(), processed)
 			}
 			logged, processed = time.Now(), 0
 		}
@@ -390,15 +373,15 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 }
 
 func stackTrieGenerate(db ethdb.KeyValueWriter, scheme string, owner common.Hash, in chan trieKV, out chan common.Hash) {
-	var onTrieNode trie.OnTrieNode
+	options := trie.NewStackTrieOptions()
 	if db != nil {
-		onTrieNode = func(path []byte, hash common.Hash, blob []byte) {
+		options = options.WithWriter(func(path []byte, hash common.Hash, blob []byte) {
 			rawdb.WriteTrieNode(db, owner, path, hash, blob, scheme)
-		}
+		})
 	}
-	t := trie.NewStackTrie(onTrieNode)
+	t := trie.NewStackTrie(options)
 	for leaf := range in {
 		t.Update(leaf.key[:], leaf.value)
 	}
-	out <- t.Hash()
+	out <- t.Commit()
 }

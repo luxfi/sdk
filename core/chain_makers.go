@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,21 +30,21 @@ package core
 import (
 	"fmt"
 	"math/big"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/holiman/uint256"
-	"github.com/luxfi/evm/params"
-	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/evm/constants"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/header"
+	"github.com/holiman/uint256"
 )
 
 // BlockGen creates blocks for testing.
@@ -110,8 +111,7 @@ func (b *BlockGen) SetParentBeaconRoot(root common.Hash) {
 	b.header.ParentBeaconRoot = &root
 	var (
 		blockContext = NewEVMBlockContext(b.header, b.cm, &b.header.Coinbase)
-		txContext    = vm.TxContext{} // Empty TxContext for beacon root processing
-		vmenv        = vm.NewEVM(blockContext, txContext, b.statedb, b.cm.config, vm.Config{})
+		vmenv        = vm.NewEVM(blockContext, vm.TxContext{}, b.statedb, b.cm.config, vm.Config{})
 	)
 	ProcessBeaconBlockRoot(root, vmenv, b.statedb)
 }
@@ -380,12 +380,12 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 	if err != nil {
 		panic(err)
 	}
-	gasLimit, err := header.GasLimit(cm.config, feeConfig, parent.Header(), time)
+	config := params.GetExtra(cm.config)
+	gasLimit, err := header.GasLimit(config, feeConfig, parent.Header(), time)
 	if err != nil {
 		panic(err)
 	}
-	extrasConfig := params.GetExtra(cm.config)
-	baseFee, err := header.BaseFee(extrasConfig, feeConfig, parent.Header(), time)
+	baseFee, err := header.BaseFee(config, feeConfig, parent.Header(), time)
 	if err != nil {
 		panic(err)
 	}
@@ -401,9 +401,11 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 		BaseFee:    baseFee,
 	}
 
-	if cm.config.IsCancun(header.Time) {
-		var parentExcessBlobGas uint64
-		var parentBlobGasUsed uint64
+	if cm.config.IsCancun(header.Number, header.Time) {
+		var (
+			parentExcessBlobGas uint64
+			parentBlobGasUsed   uint64
+		)
 		if parent.ExcessBlobGas() != nil {
 			parentExcessBlobGas = *parent.ExcessBlobGas()
 			parentBlobGasUsed = *parent.BlobGasUsed()
@@ -502,24 +504,4 @@ func (cm *chainMaker) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig
 
 func (cm *chainMaker) GetCoinbaseAt(parent *types.Header) (common.Address, bool, error) {
 	return constants.BlackholeAddr, params.GetExtra(cm.config).AllowFeeRecipients, nil
-}
-
-// convertToEthChainConfig converts a Lux ChainConfig to ethereum ChainConfig
-func convertToEthChainConfig(config *params.ChainConfig) *ethparams.ChainConfig {
-	return &ethparams.ChainConfig{
-		ChainID:             config.ChainID,
-		HomesteadBlock:      config.HomesteadBlock,
-		EIP150Block:         config.EIP150Block,
-		EIP155Block:         config.EIP155Block,
-		EIP158Block:         config.EIP158Block,
-		ByzantiumBlock:      config.ByzantiumBlock,
-		ConstantinopleBlock: config.ConstantinopleBlock,
-		PetersburgBlock:     config.PetersburgBlock,
-		IstanbulBlock:       config.IstanbulBlock,
-		MuirGlacierBlock:    config.MuirGlacierBlock,
-		BerlinBlock:         config.BerlinBlock,
-		LondonBlock:         config.LondonBlock,
-		ShanghaiTime:        config.ShanghaiTime,
-		CancunTime:          config.CancunTime,
-	}
 }

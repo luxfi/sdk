@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,12 +34,18 @@ package core
 import (
 	"math/big"
 	"testing"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/params"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/crypto"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/stretchr/testify/require"
 )
 
 // rewindTest is a test case for chain rollback upon user request.
@@ -500,8 +507,10 @@ func testLongReorgedDeepRepair(t *testing.T, snapshots bool) {
 }
 
 func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
-	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme} {
-		testRepairWithScheme(t, tt, snapshots, scheme)
+	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme, customrawdb.FirewoodScheme} {
+		t.Run(scheme, func(t *testing.T) {
+			testRepairWithScheme(t, tt, snapshots, scheme)
+		})
 	}
 }
 
@@ -509,6 +518,10 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	// It's hard to follow the test case, visualize the input
 	//log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump(true))
+
+	if scheme == customrawdb.FirewoodScheme && snapshots {
+		t.Skip("Firewood scheme does not support snapshots")
+	}
 
 	// Create a temporary persistent database
 	datadir := t.TempDir()
@@ -542,10 +555,12 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 			TrieDirtyLimit:            256,
 			TriePrefetcherParallelism: 4,
 			SnapshotLimit:             0, // Disable snapshot by default
+			StateHistory:              32,
 			StateScheme:               scheme,
+			ChainDataDir:              datadir,
 		}
 	)
-	defer common.Close()
+	defer engine.Close()
 	if snapshots {
 		config.SnapshotLimit = 256
 		config.SnapshotWait = true

@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -8,9 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"github.com/luxfi/evm/cmd/simulator/metrics"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/cmd/simulator/metrics"
 )
 
 type THash interface {

@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -38,20 +39,18 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/utils"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/evm/interfaces/trie"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
+	"github.com/luxfi/evm/params"
 	"github.com/holiman/uint256"
 )
 

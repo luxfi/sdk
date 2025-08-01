@@ -1,10 +1,10 @@
-// (c) 2025 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 package prometheus
 
 import "github.com/luxfi/geth/metrics"
 
-var _ Registry = (*metrics.StandardRegistry)(nil)
+var _ Registry = metrics.Registry(nil)
 
 type Registry interface {
 	// Call the given function for each registered metric.

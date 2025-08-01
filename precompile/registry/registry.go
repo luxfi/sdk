@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Module to facilitate the registration of precompiles and their configuration.
@@ -8,11 +8,16 @@ package registry
 // with the registry.
 import (
 	_ "github.com/luxfi/evm/precompile/contracts/deployerallowlist"
+
 	_ "github.com/luxfi/evm/precompile/contracts/nativeminter"
+
 	_ "github.com/luxfi/evm/precompile/contracts/txallowlist"
+
 	_ "github.com/luxfi/evm/precompile/contracts/feemanager"
+
 	_ "github.com/luxfi/evm/precompile/contracts/rewardmanager"
-	_ "github.com/luxfi/evm/x/warp"
+
+	_ "github.com/luxfi/evm/precompile/contracts/warp"
 	// ADD YOUR PRECOMPILE HERE
 	// _ "github.com/luxfi/evm/precompile/contracts/yourprecompile"
 )
@@ -20,8 +25,8 @@ import (
 // This list is kept just for reference. The actual addresses defined in respective packages of precompiles.
 // Note: it is important that none of these addresses conflict with each other or any other precompiles
 // in core/vm/contracts.go.
-// The first stateful precompiles were added in geth to support nativeAssetCall and nativeAssetBalance. New stateful precompiles
-// originating in geth will continue at this prefix, so we reserve this range in evm so that they can be migrated into
+// The first stateful precompiles were added in coreth to support nativeAssetCall and nativeAssetBalance. New stateful precompiles
+// originating in coreth will continue at this prefix, so we reserve this range in evm so that they can be migrated into
 // evm without issue.
 // These start at the address: 0x0100000000000000000000000000000000000000 and will increment by 1.
 // Optional precompiles implemented in evm start at 0x0200000000000000000000000000000000000000 and will increment by 1

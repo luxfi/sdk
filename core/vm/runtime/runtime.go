@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -29,16 +30,18 @@ package runtime
 import (
 	"math"
 	"math/big"
-	"github.com/luxfi/evm/core/rawdb"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/crypto"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/holiman/uint256"
-	ethparams "github.com/luxfi/evm/params"
 )
 
 // Config is a basic type specifying certain configuration flags for running
@@ -85,7 +88,7 @@ func setDefaults(cfg *Config) {
 			},
 			&extras.ChainConfig{
 				NetworkUpgrades: extras.NetworkUpgrades{
-					EVMTimestamp: new(uint64),
+					SubnetEVMTimestamp: new(uint64),
 				},
 			},
 		)
@@ -112,7 +115,7 @@ func setDefaults(cfg *Config) {
 		}
 	}
 	if cfg.BaseFee == nil {
-		cfg.BaseFee = big.NewInt(ethparams.ApricotPhase3InitialBaseFee)
+		cfg.BaseFee = big.NewInt(legacy.BaseFee)
 	}
 	if cfg.BlobBaseFee == nil {
 		cfg.BlobBaseFee = big.NewInt(ethparams.BlobTxMinBlobGasprice)
@@ -137,8 +140,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 		address = common.BytesToAddress([]byte("contract"))
 		vmenv   = NewEnv(cfg)
 		sender  = vm.AccountRef(cfg.Origin)
-		ethCfg  = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
-		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, vmenv.Context.Time)
+		rules   = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, params.IsMergeTODO, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
@@ -172,8 +174,7 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 	var (
 		vmenv  = NewEnv(cfg)
 		sender = vm.AccountRef(cfg.Origin)
-		ethCfg = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
-		rules  = ethCfg.Rules(vmenv.Context.BlockNumber, vmenv.Context.Time)
+		rules  = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, params.IsMergeTODO, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
@@ -202,8 +203,7 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 		vmenv   = NewEnv(cfg)
 		sender  = vm.AccountRef(cfg.Origin)
 		statedb = cfg.State
-		ethCfg  = &ethparams.ChainConfig{ChainID: cfg.ChainConfig.ChainID}
-		rules   = ethCfg.Rules(vmenv.Context.BlockNumber, vmenv.Context.Time)
+		rules   = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, params.IsMergeTODO, vmenv.Context.Time)
 	)
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)

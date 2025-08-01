@@ -1,9 +1,12 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
 //nolint:unused
 package eth
 
 import (
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
 )
 
 const blocksToKeep = 604_800 // Approx. 2 weeks worth of blocks assuming 2s block time

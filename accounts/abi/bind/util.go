@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,9 +31,10 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
-	ethereum "github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/log"
 )
 
@@ -49,7 +51,7 @@ func WaitMined(ctx context.Context, b DeployBackend, tx *types.Transaction) (*ty
 			return receipt, nil
 		}
 
-		if errors.Is(err, ethereum.ErrNotFound) {
+		if errors.Is(err, ethereum.NotFound) {
 			logger.Trace("Transaction not yet mined")
 		} else {
 			logger.Trace("Receipt retrieval failed", "err", err)

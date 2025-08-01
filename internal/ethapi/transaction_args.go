@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,23 +33,24 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 
-	"github.com/luxfi/evm/consensus/misc/eip4844"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto/kzg4844"
 	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 	"github.com/holiman/uint256"
 )
 
 var (
-	maxBlobsPerTransaction = params.MaxBlobGasPerBlock / params.BlobTxBlobGasPerBlob
+	maxBlobsPerTransaction = ethparams.MaxBlobGasPerBlock / ethparams.BlobTxBlobGasPerBlob
 )
 
 // TransactionArgs represents the arguments to construct a new transaction
@@ -65,7 +67,7 @@ type TransactionArgs struct {
 
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	// "input" is the newer name and should be preferred by clients.
-	// Issue detail: https://github.com/luxfi/geth/issues/15628
+	// Issue detail: https://github.com/ethereum/go-ethereum/issues/15628
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input"`
 
@@ -214,7 +216,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	}
 	// If the tx has completely specified a fee mechanism, no default is needed.
 	// This allows users who are not yet synced past London to get defaults for
-	// other tx values. See https://github.com/luxfi/geth/pull/23274
+	// other tx values. See https://github.com/ethereum/go-ethereum/pull/23274
 	// for more information.
 	eip1559ParamsSet := args.MaxFeePerGas != nil && args.MaxPriorityFeePerGas != nil
 	// Sanity check the EIP-1559 fee parameters if present.
@@ -229,7 +231,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	}
 
 	// Sanity check the non-EIP-1559 fee parameters.
-	isLondon := b.ChainConfig().IsApricotPhase3(head.Time)
+	isLondon := b.ChainConfig().IsLondon(head.Number)
 	if args.GasPrice != nil && !eip1559ParamsSet {
 		// Zero gas-price is not allowed after London fork
 		if args.GasPrice.ToInt().Sign() == 0 && isLondon {
@@ -241,7 +243,7 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 	// Now attempt to fill in default value depending on whether London is active or not.
 	if isLondon {
 		// London is active, set maxPriorityFeePerGas and maxFeePerGas.
-		if err := args.setApricotPhase3FeeDefault(ctx, head, b); err != nil {
+		if err := args.setSubnetEVMFeeDefault(ctx, head, b); err != nil {
 			return err
 		}
 	} else {
@@ -277,8 +279,8 @@ func (args *TransactionArgs) setCancunFeeDefaults(ctx context.Context, head *typ
 	return nil
 }
 
-// setApricotPhase3FeeDefault fills in reasonable default fee values for unspecified fields.
-func (args *TransactionArgs) setApricotPhase3FeeDefault(ctx context.Context, head *types.Header, b feeBackend) error {
+// setSubnetEVMFeeDefault fills in reasonable default fee values for unspecified fields.
+func (args *TransactionArgs) setSubnetEVMFeeDefault(ctx context.Context, head *types.Header, b feeBackend) error {
 	// Set maxPriorityFeePerGas if it is missing.
 	if args.MaxPriorityFeePerGas == nil {
 		tip, err := b.SuggestGasTipCap(ctx)
@@ -342,12 +344,12 @@ func (args *TransactionArgs) setBlobTxSidecar(ctx context.Context, b Backend) er
 		commitments := make([]kzg4844.Commitment, n)
 		proofs := make([]kzg4844.Proof, n)
 		for i, b := range args.Blobs {
-			c, err := kzg4844.BlobToCommitment(&b)
+			c, err := kzg4844.BlobToCommitment(b)
 			if err != nil {
 				return fmt.Errorf("blobs[%d]: error computing commitment: %v", i, err)
 			}
 			commitments[i] = c
-			p, err := kzg4844.ComputeBlobProof(&b, c)
+			p, err := kzg4844.ComputeBlobProof(b, c)
 			if err != nil {
 				return fmt.Errorf("blobs[%d]: error computing proof: %v", i, err)
 			}
@@ -357,7 +359,7 @@ func (args *TransactionArgs) setBlobTxSidecar(ctx context.Context, b Backend) er
 		args.Proofs = proofs
 	} else {
 		for i, b := range args.Blobs {
-			if err := kzg4844.VerifyBlobProof(&b, args.Commitments[i], args.Proofs[i]); err != nil {
+			if err := kzg4844.VerifyBlobProof(b, args.Commitments[i], args.Proofs[i]); err != nil {
 				return fmt.Errorf("failed to verify blob proof: %v", err)
 			}
 		}
@@ -435,7 +437,7 @@ func (args *TransactionArgs) ToMessage(globalGasCap uint64, baseFee *big.Int) (*
 			// Backfill the legacy gasPrice for EVM execution, unless we're all zeroes
 			gasPrice = new(big.Int)
 			if gasFeeCap.BitLen() > 0 || gasTipCap.BitLen() > 0 {
-				gasPrice = BigMin(new(big.Int).Add(gasTipCap, baseFee), gasFeeCap)
+				gasPrice = math.BigMin(new(big.Int).Add(gasTipCap, baseFee), gasFeeCap)
 			}
 		}
 	}

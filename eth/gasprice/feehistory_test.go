@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,13 +33,14 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/core"
 	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/core"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 )
 
 func TestFeeHistory(t *testing.T) {
@@ -81,7 +83,7 @@ func TestFeeHistory(t *testing.T) {
 			MaxBlockHistory:     c.maxBlock,
 		}
 		tip := big.NewInt(1 * params.GWei)
-		backend := newTestBackendFakerEngine(t, params.TestChainConfig, 32, common.Big0, func(i int, b *core.BlockGen) {
+		backend := newTestBackendFakerEngine(t, params.TestChainConfig, 32, func(i int, b *core.BlockGen) {
 			signer := types.LatestSigner(params.TestChainConfig)
 
 			b.SetCoinbase(common.Address{1})
@@ -94,7 +96,7 @@ func TestFeeHistory(t *testing.T) {
 				ChainID:   params.TestChainConfig.ChainID,
 				Nonce:     b.TxNonce(addr),
 				To:        &common.Address{},
-				Gas:       params.TxGas,
+				Gas:       ethparams.TxGas,
 				GasFeeCap: feeCap,
 				GasTipCap: tip,
 				Data:      []byte{},

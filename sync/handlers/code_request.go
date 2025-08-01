@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -6,24 +6,27 @@ package handlers
 import (
 	"context"
 	"time"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/core/rawdb"
+
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/ids"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
 )
 
 // CodeRequestHandler is a peer.RequestHandler for message.CodeRequest
 // serving requested contract code bytes
 type CodeRequestHandler struct {
 	codeReader ethdb.KeyValueReader
-	codec      interfaces.Codec
+	codec      codec.Manager
 	stats      stats.CodeRequestHandlerStats
 }
 
-func NewCodeRequestHandler(codeReader ethdb.KeyValueReader, codec interfaces.Codec, stats stats.CodeRequestHandlerStats) *CodeRequestHandler {
+func NewCodeRequestHandler(codeReader ethdb.KeyValueReader, codec codec.Manager, stats stats.CodeRequestHandlerStats) *CodeRequestHandler {
 	handler := &CodeRequestHandler{
 		codeReader: codeReader,
 		codec:      codec,
@@ -37,7 +40,7 @@ func NewCodeRequestHandler(codeReader ethdb.KeyValueReader, codec interfaces.Cod
 // Returns nothing if code hash is not found
 // Expects returned errors to be treated as FATAL
 // Assumes ctx is active
-func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID interfaces.NodeID, requestID uint32, codeRequest message.CodeRequest) ([]byte, error) {
+func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID ids.NodeID, requestID uint32, codeRequest message.CodeRequest) ([]byte, error) {
 	startTime := time.Now()
 	n.stats.IncCodeRequest()
 
@@ -70,7 +73,7 @@ func (n *CodeRequestHandler) OnCodeRequest(_ context.Context, nodeID interfaces.
 	}
 
 	codeResponse := message.CodeResponse{Data: codeBytes}
-	responseBytes, err := n.codec.Marshal(codeResponse)
+	responseBytes, err := n.codec.Marshal(message.Version, codeResponse)
 	if err != nil {
 		log.Error("could not marshal CodeResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "request", codeRequest, "err", err)
 		return nil, nil

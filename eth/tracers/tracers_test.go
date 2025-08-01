@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,18 +31,27 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/core"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/tests"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/eth/tracers/logger"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/tests"
 )
 
-func BenchmarkTransactionTrace(b *testing.B) {
+func BenchmarkPrestateTracer(b *testing.B) {
+	for _, scheme := range []string{rawdb.HashScheme, customrawdb.FirewoodScheme} {
+		b.Run(scheme, func(b *testing.B) {
+			benchmarkTransactionTrace(b, scheme)
+		})
+	}
+}
+
+func benchmarkTransactionTrace(b *testing.B, scheme string) {
 	key, _ := crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 	from := crypto.PubkeyToAddress(key.PublicKey)
 	gas := uint64(1000000) // 1M gas
@@ -79,17 +89,17 @@ func BenchmarkTransactionTrace(b *testing.B) {
 		byte(vm.PUSH1), 0, // jumpdestination
 		byte(vm.JUMP),
 	}
-	alloc[common.HexToAddress("0x00000000000000000000000000000000deadbeef")] = types.GenesisAccount{
+	alloc[common.HexToAddress("0x00000000000000000000000000000000deadbeef")] = types.Account{
 		Nonce:   1,
 		Code:    loop,
 		Balance: big.NewInt(1),
 	}
-	alloc[from] = types.GenesisAccount{
+	alloc[from] = types.Account{
 		Nonce:   1,
 		Code:    []byte{},
 		Balance: big.NewInt(500000000000000),
 	}
-	state := tests.MakePreState(rawdb.NewMemoryDatabase(), alloc, false, rawdb.HashScheme)
+	state := tests.MakePreState(rawdb.NewMemoryDatabase(), alloc, false, scheme)
 	defer state.Close()
 
 	// Create the tracer, the EVM environment and run it

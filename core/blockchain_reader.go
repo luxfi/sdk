@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -28,21 +29,21 @@ package core
 
 import (
 	"math/big"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/evm/core/rawdb"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
-	ethparams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/event"
 )
 
 // CurrentHeader retrieves the current head header of the canonical chain. The
@@ -103,7 +104,7 @@ func (bc *BlockChain) GetBody(hash common.Hash) *types.Body {
 
 // HasBlock checks if a block is fully present in the database or not.
 func (bc *BlockChain) HasBlock(hash common.Hash, number uint64) bool {
-	if cached, _ := bc.blockCache.Get(hash); cached != nil {
+	if bc.blockCache.Contains(hash) {
 		return true
 	}
 	if !bc.HasHeader(hash, number) {
@@ -117,7 +118,7 @@ func (bc *BlockChain) HasFastBlock(hash common.Hash, number uint64) bool {
 	if !bc.HasBlock(hash, number) {
 		return false
 	}
-	if cached, _ := bc.receiptsCache.Get(hash); cached != nil {
+	if bc.receiptsCache.Contains(hash) {
 		return true
 	}
 	return rawdb.HasReceipts(bc.db, hash, number)
@@ -190,22 +191,7 @@ func (bc *BlockChain) GetReceiptsByHash(hash common.Hash) types.Receipts {
 	if header == nil {
 		return nil
 	}
-	// Create ethereum ChainConfig for rawdb
-	ethConfig := &ethparams.ChainConfig{
-		ChainID: bc.chainConfig.ChainID,
-		EIP155Block: bc.chainConfig.EIP155Block,
-		EIP158Block: bc.chainConfig.EIP158Block,
-		HomesteadBlock: bc.chainConfig.HomesteadBlock,
-		ByzantiumBlock: bc.chainConfig.ByzantiumBlock,
-		ConstantinopleBlock: bc.chainConfig.ConstantinopleBlock,
-		PetersburgBlock: bc.chainConfig.PetersburgBlock,
-		IstanbulBlock: bc.chainConfig.IstanbulBlock,
-		BerlinBlock: bc.chainConfig.BerlinBlock,
-		LondonBlock: bc.chainConfig.LondonBlock,
-		ShanghaiTime: bc.chainConfig.ShanghaiTime,
-		CancunTime: bc.chainConfig.CancunTime,
-	}
-	receipts := rawdb.ReadReceipts(bc.db, hash, *number, header.Time, ethConfig)
+	receipts := rawdb.ReadReceipts(bc.db, hash, *number, header.Time, bc.chainConfig)
 	if receipts == nil {
 		return nil
 	}
@@ -275,15 +261,13 @@ func (bc *BlockChain) State() (*state.StateDB, error) {
 
 // StateAt returns a new mutable state based on a particular point in time.
 func (bc *BlockChain) StateAt(root common.Hash) (*state.StateDB, error) {
-	// bc.snaps is *snapshot.Tree from evm package, but state.New expects geth's *snapshot.Tree
-	// For now, pass nil until we implement proper conversion
-	return state.New(root, bc.stateCache, nil)
+	return state.New(root, bc.stateCache, bc.snaps)
 }
 
 // Config retrieves the chain's fork configuration.
 func (bc *BlockChain) Config() *params.ChainConfig { return bc.chainConfig }
 
-// Engine retrieves the blockchain's consensus common.
+// Engine retrieves the blockchain's consensus engine.
 func (bc *BlockChain) Engine() consensus.Engine { return bc.engine }
 
 // Snapshots returns the blockchain snapshot tree.
@@ -378,13 +362,13 @@ func (bc *BlockChain) SubscribeAcceptedTransactionEvent(ch chan<- NewTxsEvent) e
 }
 
 // GetFeeConfigAt returns the fee configuration and the last changed block number at [parent].
-// If EVM is not activated, returns default fee config and nil block number.
+// If Subnet-EVM is not activated, returns default fee config and nil block number.
 // If FeeManager is activated at [parent], returns the fee config in the precompile contract state.
 // Otherwise returns the fee config in the chain config.
 // Assumes that a valid configuration is stored when the precompile is activated.
 func (bc *BlockChain) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error) {
 	config := params.GetExtra(bc.Config())
-	if !config.IsEVM(parent.Time) {
+	if !config.IsSubnetEVM(parent.Time) {
 		return params.DefaultFeeConfig, nil, nil
 	}
 	if !config.IsPrecompileEnabled(feemanager.ContractAddress, parent.Time) {
@@ -421,7 +405,7 @@ func (bc *BlockChain) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig
 // If fee recipients are allowed, returns true in the second return value.
 func (bc *BlockChain) GetCoinbaseAt(parent *types.Header) (common.Address, bool, error) {
 	configExtra := params.GetExtra(bc.Config())
-	if !configExtra.IsEVM(parent.Time) {
+	if !configExtra.IsSubnetEVM(parent.Time) {
 		return constants.BlackholeAddr, false, nil
 	}
 

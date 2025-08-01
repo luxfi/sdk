@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package load
@@ -13,17 +13,18 @@ import (
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	ethcrypto "github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/cmd/simulator/config"
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
-	"github.com/luxfi/evm/core/types"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/common"
-	ethcrypto "github.com/luxfi/geth/crypto"
-	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/evm/params"
 	"golang.org/x/sync/errgroup"
 )
 

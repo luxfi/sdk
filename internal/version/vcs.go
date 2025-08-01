@@ -1,3 +1,14 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+//
+// This file is a derived work, based on the go-ethereum library whose original
+// notices appear below.
+//
+// It is distributed under a license compatible with the licensing terms of the
+// original code from which it is derived.
+//
+// Much love to the original authors for their work.
+// **********
 // Copyright 2022 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -27,31 +38,6 @@ const (
 	govcsTimeLayout = "2006-01-02T15:04:05Z"
 	ourTimeLayout   = "20060102"
 )
-
-// These variables are set at build-time by the linker when the build is
-// done by build/ci.go.
-var gitCommit, gitDate string
-
-// VCSInfo represents the git repository state.
-type VCSInfo struct {
-	Commit string // head commit hash
-	Date   string // commit time in YYYYMMDD format
-	Dirty  bool
-}
-
-// VCS returns version control information of the current executable.
-func VCS() (VCSInfo, bool) {
-	if gitCommit != "" {
-		// Use information set by the build script if present.
-		return VCSInfo{Commit: gitCommit, Date: gitDate}, true
-	}
-	if buildInfo, ok := debug.ReadBuildInfo(); ok {
-		if buildInfo.Main.Path == ourPath {
-			return buildInfoVCS(buildInfo)
-		}
-	}
-	return VCSInfo{}, false
-}
 
 // buildInfoVCS returns VCS information of the build.
 func buildInfoVCS(info *debug.BuildInfo) (s VCSInfo, ok bool) {

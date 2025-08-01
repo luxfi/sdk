@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -7,14 +7,15 @@ import (
 	"context"
 	"crypto/rand"
 	"testing"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/ethdb/memorydb"
+
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
 	"github.com/stretchr/testify/assert"
 )
 

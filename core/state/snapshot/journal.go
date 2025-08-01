@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,12 +32,14 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/triedb"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // journalGenerator is a disk layer entry containing the generator progress marker.
@@ -58,7 +61,7 @@ type journalGenerator struct {
 func loadSnapshot(diskdb ethdb.KeyValueStore, triedb *triedb.Database, cache int, blockHash, root common.Hash, noBuild bool) (snapshot, bool, error) {
 	// Retrieve the block number and hash of the snapshot, failing if no snapshot
 	// is present in the database (or crashed mid-update).
-	baseBlockHash := ReadSnapshotBlockHash(diskdb)
+	baseBlockHash := customrawdb.ReadSnapshotBlockHash(diskdb)
 	if baseBlockHash == (common.Hash{}) {
 		return nil, false, errors.New("missing or corrupted snapshot, no snapshot block hash")
 	}

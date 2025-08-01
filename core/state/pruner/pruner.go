@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -36,16 +37,17 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"github.com/luxfi/evm/core/rawdb"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
 )
 
 const (
@@ -428,24 +430,4 @@ func findBloomFilter(datadir string) (string, common.Hash, error) {
 		return "", common.Hash{}, err
 	}
 	return stateBloomPath, stateBloomRoot, nil
-}
-
-const warningLog = `
-
-WARNING!
-
-The clean trie cache is not found. Please delete it by yourself after the
-pruning. Remember don't start the EVM without deleting the clean trie cache
-otherwise the entire database may be damaged!
-
-Check the configuration option "offline-pruning-enabled" for more details.
-`
-
-func deleteCleanTrieCache(path string) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Warn(warningLog)
-		return
-	}
-	os.RemoveAll(path)
-	log.Info("Deleted trie clean cache", "path", path)
 }

@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,12 +35,13 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/trie/trienode"
+	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/geth/trie/triestate"
 )
 
 var (
@@ -124,11 +126,8 @@ func (db *Database) loadJournal(diskRoot common.Hash) (layer, error) {
 // loadLayers loads a pre-existing state layer backed by a key-value store.
 func (db *Database) loadLayers() layer {
 	// Retrieve the root node of persistent state.
-	rootData, _ := rawdb.ReadAccountTrieNode(db.diskdb, nil)
-	var root common.Hash
-	if len(rootData) > 0 {
-		root = crypto.Keccak256Hash(rootData)
-	}
+	_, root := rawdb.ReadAccountTrieNode(db.diskdb, nil)
+	root = types.TrieRootHash(root)
 
 	// Load the layers by resolving the journal
 	head, err := db.loadJournal(root)
@@ -250,9 +249,7 @@ func (db *Database) loadDiffLayer(parent layer, r *rlp.Stream) (layer, error) {
 		}
 		storages[entry.Account] = set
 	}
-	// FIXME: triestate.New doesn't exist, use NewStateSetWithOrigin instead
-	states := NewStateSetWithOrigin(accounts, storages, nil, nil, false)
-	return db.loadDiffLayer(newDiffLayer(parent, root, parent.stateID()+1, block, nodes, states), r)
+	return db.loadDiffLayer(newDiffLayer(parent, root, parent.stateID()+1, block, nodes, triestate.New(accounts, storages, incomplete)), r)
 }
 
 // journal implements the layer interface, marshaling the un-flushed trie nodes
@@ -320,14 +317,25 @@ func (dl *diffLayer) journal(w io.Writer) error {
 	}
 	// Write the accumulated state changes into buffer
 	var jacct journalAccounts
-	// FIXME: Can't access fields of StateSetWithOrigin as they are unexported
-	// The journal encoding would need to be reimplemented using the proper API
-	// For now, return empty data structures
+	for addr, account := range dl.states.Accounts {
+		jacct.Addresses = append(jacct.Addresses, addr)
+		jacct.Accounts = append(jacct.Accounts, account)
+	}
 	if err := rlp.Encode(w, jacct); err != nil {
 		return err
 	}
-	storage := make([]journalStorage, 0)
-	// FIXME: Need to access states data through proper API
+	storage := make([]journalStorage, 0, len(dl.states.Storages))
+	for addr, slots := range dl.states.Storages {
+		entry := journalStorage{Account: addr}
+		if _, ok := dl.states.Incomplete[addr]; ok {
+			entry.Incomplete = true
+		}
+		for slotHash, slot := range slots {
+			entry.Hashes = append(entry.Hashes, slotHash)
+			entry.Slots = append(entry.Slots, slot)
+		}
+		storage = append(storage, entry)
+	}
 	if err := rlp.Encode(w, storage); err != nil {
 		return err
 	}
@@ -368,11 +376,8 @@ func (db *Database) Journal(root common.Hash) error {
 	}
 	// The stored state in disk might be empty, convert the
 	// root to emptyRoot in this case.
-	rootData, _ := rawdb.ReadAccountTrieNode(db.diskdb, nil)
-	var diskroot common.Hash
-	if len(rootData) > 0 {
-		diskroot = crypto.Keccak256Hash(rootData)
-	}
+	_, diskroot := rawdb.ReadAccountTrieNode(db.diskdb, nil)
+	diskroot = types.TrieRootHash(diskroot)
 
 	// Secondly write out the state root in disk, ensure all layers
 	// on top are continuous with disk.

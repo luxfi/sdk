@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,17 +34,18 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
 )
 
 // Backend interface provides the common API services (that are provided by
@@ -61,7 +63,6 @@ type Backend interface {
 	RPCEVMTimeout() time.Duration // global timeout for eth_call over rpc: DoS protection
 	RPCTxFeeCap() float64         // global tx fee cap for all transaction related APIs
 
-	PriceOptionsConfig() PriceOptionConfig
 	UnprotectedAllowed(tx *types.Transaction) bool // allows only for EIP155 transactions.
 
 	// Blockchain API
@@ -80,6 +81,7 @@ type Backend interface {
 	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
 	SubscribeChainHeadEvent(ch chan<- core.ChainHeadEvent) event.Subscription
 	SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription
+	GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error)
 	BadBlocks() ([]*types.Block, []*core.BadBlockReason)
 	IsArchive() bool
 	HistoricalProofQueryWindow() uint64
@@ -117,31 +119,31 @@ func GetAPIs(apiBackend Backend) []rpc.API {
 		{
 			Namespace: "eth",
 			Service:   NewEthereumAPI(apiBackend),
-			// Name:      "internal-eth",
+			Name:      "internal-eth",
 		}, {
 			Namespace: "eth",
 			Service:   NewBlockChainAPI(apiBackend),
-			// Name:      "internal-blockchain",
+			Name:      "internal-blockchain",
 		}, {
 			Namespace: "eth",
 			Service:   NewTransactionAPI(apiBackend, nonceLock),
-			// Name:      "internal-transaction",
+			Name:      "internal-transaction",
 		}, {
 			Namespace: "txpool",
 			Service:   NewTxPoolAPI(apiBackend),
-			// Name:      "internal-tx-pool",
+			Name:      "internal-tx-pool",
 		}, {
 			Namespace: "debug",
 			Service:   NewDebugAPI(apiBackend),
-			// Name:      "internal-debug",
+			Name:      "internal-debug",
 		}, {
 			Namespace: "eth",
 			Service:   NewEthereumAccountAPI(apiBackend.AccountManager()),
-			// Name:      "internal-account",
+			Name:      "internal-account",
 		}, {
 			Namespace: "personal",
 			Service:   NewPersonalAccountAPI(apiBackend, nonceLock),
-			// Name:      "internal-personal",
+			Name:      "internal-personal",
 		},
 	}
 }

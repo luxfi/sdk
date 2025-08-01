@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,6 +33,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
@@ -156,7 +158,7 @@ var Forks = map[string]*params.ChainConfig{
 		PetersburgBlock:     big.NewInt(0),
 		IstanbulBlock:       big.NewInt(5),
 	},
-	"Pre-EVM": {
+	"Pre-SubnetEVM": {
 		ChainID:             big.NewInt(1),
 		HomesteadBlock:      big.NewInt(0),
 		EIP150Block:         big.NewInt(0),
@@ -168,7 +170,7 @@ var Forks = map[string]*params.ChainConfig{
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 	},
-	"EVM": params.WithExtra(
+	"SubnetEVM": params.WithExtra(
 		&params.ChainConfig{
 			ChainID:             big.NewInt(1),
 			HomesteadBlock:      big.NewInt(0),
@@ -184,7 +186,7 @@ var Forks = map[string]*params.ChainConfig{
 		},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				EVMTimestamp: utils.NewUint64(0),
+				SubnetEVMTimestamp: utils.NewUint64(0),
 			},
 		},
 	),
@@ -204,7 +206,7 @@ var Forks = map[string]*params.ChainConfig{
 		},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				EVMTimestamp: utils.NewUint64(0),
+				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(0),
 			},
 		},
@@ -227,7 +229,7 @@ var Forks = map[string]*params.ChainConfig{
 		},
 		&extras.ChainConfig{
 			NetworkUpgrades: extras.NetworkUpgrades{
-				EVMTimestamp: utils.NewUint64(0),
+				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(0),
 			},
 		},

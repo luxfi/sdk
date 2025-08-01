@@ -13,6 +13,6 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$SCRIPT_DIR"/constants.sh
 
 # Start a dev shell with the luxd flake
-FLAKE="github:luxfi/node?ref=${LUX_VERSION}"
+FLAKE="github:luxfi/luxd?ref=${LUX_VERSION}"
 echo "Starting nix shell for ${FLAKE}"
 nix develop "${FLAKE}" "${@}"

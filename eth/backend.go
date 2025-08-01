@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,17 +35,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/luxd/utils/timer/mockable"
 	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/geth/core/state/pruner"
+	"github.com/luxfi/evm/core/state/pruner"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/core/txpool/legacypool"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/eth/ethconfig"
 	"github.com/luxfi/evm/eth/filters"
 	"github.com/luxfi/evm/eth/gasprice"
@@ -52,13 +57,10 @@ import (
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/internal/shutdowncheck"
 	"github.com/luxfi/evm/miner"
-	"github.com/luxfi/geth/node"
+	"github.com/luxfi/evm/node"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
 )
 
 // Config contains the configuration options of the ETH protocol.
@@ -149,7 +151,7 @@ func New(
 		"snapshot clean", common.StorageSize(config.SnapshotCache)*1024*1024,
 	)
 
-	scheme, err := rawdb.ParseStateScheme(config.StateScheme, chainDb)
+	scheme, err := customrawdb.ParseStateSchemeExt(config.StateScheme, chainDb)
 	if err != nil {
 		return nil, err
 	}
@@ -194,12 +196,19 @@ func New(
 
 	if !config.SkipBcVersionCheck {
 		if bcVersion != nil && *bcVersion > core.BlockChainVersion {
-			return nil, fmt.Errorf("database version is v%d, Geth %s only supports v%d", *bcVersion, params.VersionWithMeta, core.BlockChainVersion)
+			return nil, fmt.Errorf("database version is v%d, Subnet-EVM %s only supports v%d", *bcVersion, params.VersionWithMeta, core.BlockChainVersion)
 		} else if bcVersion == nil || *bcVersion < core.BlockChainVersion {
 			log.Warn("Upgrade blockchain database version", "from", dbVer, "to", core.BlockChainVersion)
 			rawdb.WriteDatabaseVersion(chainDb, core.BlockChainVersion)
 		}
 	}
+
+	// If the context is not set, avoid a panic. Only necessary during firewood use.
+	chainDataDir := ""
+	if ctx := params.GetExtra(config.Genesis.Config).SnowCtx; ctx != nil {
+		chainDataDir = ctx.ChainDataDir
+	}
+
 	var (
 		vmConfig = vm.Config{
 			EnablePreimageRecording: config.EnablePreimageRecording,
@@ -226,6 +235,7 @@ func New(
 			SkipTxIndexing:                  config.SkipTxIndexing,
 			StateHistory:                    config.StateHistory,
 			StateScheme:                     scheme,
+			ChainDataDir:                    chainDataDir,
 		}
 	)
 
@@ -237,13 +247,16 @@ func New(
 		return nil, err
 	}
 
+	// Free airdrop data to save memory usage
+	defer func() {
+		config.Genesis.AirdropData = nil
+	}()
+
 	if err := eth.handleOfflinePruning(cacheConfig, config.Genesis, vmConfig, lastAcceptedHash); err != nil {
 		return nil, err
 	}
 
 	eth.bloomIndexer.Start(eth.blockchain)
-
-	// Uncomment the following to enable the new blobpool
 
 	// config.BlobPool.Datadir = ""
 	// blobPool := blobpool.New(config.BlobPool, &chainWithFinalBlock{eth.blockchain})
@@ -270,6 +283,9 @@ func New(
 		historicalProofQueryWindow: config.HistoricalProofQueryWindow,
 		eth:                        eth,
 	}
+	if config.Pruning {
+		eth.APIBackend.historicalProofQueryWindow = config.StateHistory
+	}
 	if config.AllowUnprotectedTxs {
 		log.Info("Unprotected transactions allowed")
 	}
@@ -283,7 +299,7 @@ func New(
 	// Start the RPC service
 	eth.netRPCService = ethapi.NewNetAPI(eth.NetVersion())
 
-	// eth.stackRPCs = stack.APIs() // TODO: APIs() method not available on node.Node
+	eth.stackRPCs = stack.APIs()
 
 	// Successful startup; push a marker and check previous unclean shutdowns.
 	eth.shutdownTracker.MarkStartup()
@@ -415,13 +431,13 @@ func (s *Ethereum) precheckPopulateMissingTries() error {
 	if s.config.PopulateMissingTries == nil {
 		// Delete the populate missing tries marker to indicate that the node started with
 		// populate missing tries disabled.
-		if err := rawdb.DeletePopulateMissingTries(s.chainDb); err != nil {
+		if err := customrawdb.DeletePopulateMissingTries(s.chainDb); err != nil {
 			return fmt.Errorf("failed to write populate missing tries disabled marker: %w", err)
 		}
 		return nil
 	}
 
-	if lastRun, err := rawdb.ReadPopulateMissingTries(s.chainDb); err == nil {
+	if lastRun, err := customrawdb.ReadPopulateMissingTries(s.chainDb); err == nil {
 		log.Error("Populate missing tries is not meant to be left enabled permanently. Please disable populate missing tries and allow your node to start successfully before running again.")
 		return fmt.Errorf("cannot start chain with populate missing tries enabled on consecutive starts (last=%v)", lastRun)
 	}
@@ -438,7 +454,7 @@ func (s *Ethereum) handleOfflinePruning(cacheConfig *core.CacheConfig, gspec *co
 
 	if !s.config.OfflinePruning {
 		// Delete the offline pruning marker to indicate that the node started with offline pruning disabled.
-		if err := rawdb.DeleteOfflinePruning(s.chainDb); err != nil {
+		if err := customrawdb.DeleteOfflinePruning(s.chainDb); err != nil {
 			return fmt.Errorf("failed to write offline pruning disabled marker: %w", err)
 		}
 		return nil
@@ -448,7 +464,7 @@ func (s *Ethereum) handleOfflinePruning(cacheConfig *core.CacheConfig, gspec *co
 	// to the last accepted block before pruning begins.
 	// If offline pruning marker is on disk, then we force the node to be started with offline pruning disabled
 	// before allowing another run of offline pruning.
-	if lastRun, err := rawdb.ReadOfflinePruning(s.chainDb); err == nil {
+	if lastRun, err := customrawdb.ReadOfflinePruning(s.chainDb); err == nil {
 		log.Error("Offline pruning is not meant to be left enabled permanently. Please disable offline pruning and allow your node to start successfully before running offline pruning again.")
 		return fmt.Errorf("cannot start chain with offline pruning enabled on consecutive starts (last=%v)", lastRun)
 	}

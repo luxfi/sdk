@@ -1,4 +1,4 @@
-// (c) 2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package messages
@@ -6,14 +6,15 @@ package messages
 import (
 	"errors"
 
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/codec/linearcodec"
+	"github.com/luxfi/luxd/utils/units"
 )
 
 const (
 	CodecVersion = 0
 
-	MaxMessageSize = 24 * 1024 // 24 KiB
+	MaxMessageSize = 24 * units.KiB
 )
 
 var Codec codec.Manager

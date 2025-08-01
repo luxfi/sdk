@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,9 +32,10 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"github.com/luxfi/evm/core/types"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
 )
 
 type ValidationInfo struct {
@@ -89,7 +91,7 @@ type SendTxArgs struct {
 
 	// We accept "data" and "input" for backwards-compatibility reasons.
 	// "input" is the newer name and should be preferred by clients.
-	// Issue detail: https://github.com/luxfi/evm/issues/15628
+	// Issue detail: https://github.com/ethereum/go-ethereum/issues/15628
 	Data  *hexutil.Bytes `json:"data"`
 	Input *hexutil.Bytes `json:"input,omitempty"`
 

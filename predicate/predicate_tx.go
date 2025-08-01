@@ -1,13 +1,14 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package predicate
 
 import (
 	"math/big"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/utils"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/utils"
 )
 
 // NewPredicateTx returns a transaction with the predicateAddress/predicateBytes tuple

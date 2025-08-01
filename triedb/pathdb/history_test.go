@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,13 +33,14 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/interfaces/trie/testutil"
+	"github.com/luxfi/geth/trie/testutil"
+	"github.com/luxfi/geth/trie/triestate"
 )
 
 // randomStateSet generates a random state change set.
-func randomStateSet(n int) *Set {
+func randomStateSet(n int) *triestate.Set {
 	var (
 		accounts = make(map[common.Address][]byte)
 		storages = make(map[common.Address]map[common.Hash][]byte)

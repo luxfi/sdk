@@ -1,4 +1,4 @@
-// (c) 2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesync
@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/evm/interfaces/metrics"
+	"github.com/luxfi/geth/metrics"
 	"github.com/stretchr/testify/require"
 )
 

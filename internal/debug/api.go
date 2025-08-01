@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -47,7 +48,7 @@ import (
 
 	"github.com/luxfi/geth/log"
 	"github.com/hashicorp/go-bexpr"
-	"log/slog"
+	"golang.org/x/exp/slog"
 )
 
 // Handler is the global debugging handler.

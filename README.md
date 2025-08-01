@@ -1,120 +1,99 @@
-# Lux EVM
+# Subnet EVM
 
-[![Build + Test + Release](https://github.com/luxfi/evm/actions/workflows/lint-tests-release.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/lint-tests-release.yml)
+[![Releases](https://img.shields.io/github/v/tag/luxfi/evm.svg?sort=semver)](https://github.com/luxfi/evm/releases)
+[![CI](https://github.com/luxfi/evm/actions/workflows/ci.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/luxfi/evm/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/luxfi/evm/actions/workflows/codeql-analysis.yml)
+[![License](https://img.shields.io/github/license/luxfi/evm)](https://github.com/luxfi/evm/blob/master/LICENSE)
 
-[Lux](https://docs.lux.network/overview/getting-started/lux-platform) is a network composed of multiple blockchains.
+[Lux](https://docs.lux.network/lux-l1s) is a network composed of multiple blockchains.
 Each blockchain is an instance of a Virtual Machine (VM), much like an object in an object-oriented language is an instance of a class.
 That is, the VM defines the behavior of the blockchain.
 
-EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/lux/virtual-machines) that defines the EVM Contract Chains. Lux EVM is a fully compatible Ethereum Virtual Machine implementation.
+Subnet EVM is the [Virtual Machine (VM)](https://docs.lux.network/learn/virtual-machines) that defines the Subnet Contract Chains. Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxfi/coreth).
 
 This chain implements the Ethereum Virtual Machine and supports Solidity smart contracts as well as most other Ethereum client functionality.
 
 ## Building
 
-The EVM runs in a separate process from the main Lux process and communicates with it over a local gRPC connection.
+The Subnet EVM runs in a separate process from the main Luxd process and communicates with it over a local gRPC connection.
 
-### Lux Compatibility
+### Luxd Compatibility
 
 ```text
-[v0.7.7] First Official Release - Based on subnet-evm v0.7.7
-[v0.8.0] Lux EVM v2 Initial Development
-[v0.8.1] Lux EVM v2 Development Release (current)
+[v0.7.0] Luxd@v1.12.0-v1.12.1 (Protocol Version: 38)
+[v0.7.1] Luxd@v1.12.2 (Protocol Version: 39)
+[v0.7.2] Luxd@v1.12.2/1.13.0-fuji (Protocol Version: 39)
+[v0.7.3] Luxd@v1.12.2/1.13.0 (Protocol Version: 39)
+[v0.7.4] Luxd@v1.13.1 (Protocol Version: 40)
+[v0.7.5] Luxd@v1.13.2 (Protocol Version: 41)
+[v0.7.6] Luxd@v1.13.3-rc.2 (Protocol Version: 42)
+[v0.7.7] Luxd@v1.13.3 (Protocol Version: 42)
 ```
 
-### Building the EVM
+## API
 
-To build a binary for the EVM, run the build script:
+The Subnet EVM supports the following API namespaces:
 
-```bash
-./scripts/build.sh
+- `eth`
+- `personal`
+- `txpool`
+- `debug`
+
+Only the `eth` namespace is enabled by default.
+Subnet EVM is a simplified version of [Coreth VM (C-Chain)](https://github.com/luxfi/coreth).
+Full documentation for the C-Chain's API can be found [here](https://build.lux.network/docs/api-reference/c-chain/api).
+
+## Compatibility
+
+The Subnet EVM is compatible with almost all Ethereum tooling, including [Remix](https://docs.lux.network/build/dapp/smart-contracts/remix-deploy), [Metamask](https://docs.lux.network/build/dapp/chain-settings), and [Foundry](https://docs.lux.network/build/dapp/smart-contracts/toolchains/foundry).
+
+## Differences Between Subnet EVM and Coreth
+
+- Added configurable fees and gas limits in genesis
+- Merged Lux hardforks into the single "Subnet EVM" hardfork
+- Removed Atomic Txs and Shared Memory
+- Removed Multicoin Contract and State
+
+## Block Format
+
+To support these changes, there have been a number of changes to the SubnetEVM block format compared to what exists on the C-Chain and Ethereum. Here we list the changes to the block format as compared to Ethereum.
+
+### Block Header
+
+- `BaseFee`: Added by EIP-1559 to represent the base fee of the block (present in Ethereum as of EIP-1559)
+- `BlockGasCost`: surcharge for producing a block faster than the target rate
+
+## Create an EVM Subnet on a Local Network
+
+### Clone Subnet-evm
+
+First install Go 1.23.9 or later. Follow the instructions [here](https://go.dev/doc/install). You can verify by running `go version`.
+
+Set `$GOPATH` environment variable properly for Go to look for Go Workspaces. Please read [this](https://go.dev/doc/code) for details. You can verify by running `echo $GOPATH`.
+
+As a few software will be installed into `$GOPATH/bin`, please make sure that `$GOPATH/bin` is in your `$PATH`, otherwise, you may get error running the commands below.
+
+Download the `evm` repository into your `$GOPATH`:
+
+```sh
+cd $GOPATH
+mkdir -p src/github.com/luxfi
+cd src/github.com/luxfi
+git clone git@github.com:luxfi/evm.git
+cd evm
 ```
 
-This will build the EVM binary and place it in `./build/`.
+This will clone and checkout to `master` branch.
 
-The binary built by `build.sh` is compatible with Lux Node.
+### Run Local Network
 
-#### Building EVM in Docker
+To run a local network, it is recommended to use the [lux-cli](https://github.com/luxfi/lux-cli#lux-cli) to set up an instance of Subnet-EVM on a local Lux Network.
 
-To build a Docker image for the latest EVM version, run:
+There are two options when using the Lux-CLI:
 
-```bash
-./scripts/build_docker_image.sh
-```
+1. Use an official Subnet-EVM release: <https://docs.lux.network/subnets/build-first-subnet>
+2. Build and deploy a locally built (and optionally modified) version of Subnet-EVM: <https://docs.lux.network/subnets/create-custom-subnet>
 
-To build a Docker image from a specific EVM commit or branch, run:
+## Releasing
 
-```bash
-EVM_COMMIT=<commit_or_branch> ./scripts/build_docker_image.sh
-```
-
-### Running the EVM
-
-To start a node with the EVM binary, use:
-
-```bash
-./build/luxd --network-id=96369
-```
-
-## Testing
-
-### Running Tests
-
-To run all tests, use:
-
-```bash
-./scripts/build_test.sh
-```
-
-To run a specific test or set of tests, use:
-
-```bash
-./scripts/build_test.sh <test_name>
-```
-
-## Configuration
-
-### Network Configuration
-
-The EVM supports multiple networks:
-- **LUX Mainnet**: Chain ID 96369
-- **LUX Testnet**: Chain ID 96368
-- **ZOO Network**: Chain ID 200200 (L2/Subnet)
-- **SPC Network**: Chain ID 36911 (L2/Subnet)
-- **Hanzo Network**: Chain ID 36963 (Prepared for deployment)
-
-### Development Configuration
-
-For local development with POA consensus:
-```json
-{
-  "network-id": 96369,
-  "staking-enabled": false,
-  "sybil-protection-enabled": false,
-  "snow-sample-size": 1,
-  "snow-quorum-size": 1
-}
-```
-
-## Docker
-
-### Build the Docker image
-
-```bash
-docker build -t luxfi/evm:latest .
-```
-
-### Run the Docker image
-
-```bash
-docker run -it luxfi/evm:latest
-```
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for more information.
-
-## License
-
-This project is licensed under the LGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
+You can refer to the [`docs/releasing/README.md`](docs/releasing/README.md) file for the release process.

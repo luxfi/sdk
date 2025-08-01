@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,12 +33,13 @@ import (
 	"math/big"
 	"testing"
 	"time"
-	"github.com/luxfi/evm/accounts/abi/bind"
-	"github.com/luxfi/evm/accounts/abi/bind/backends"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/ethclient/simulated"
+	"github.com/luxfi/evm/params"
 )
 
 var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")

@@ -1,15 +1,15 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txallowlist
 
 import (
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/geth/common"
 )
 
-var _ precompileconfig.Config = &Config{}
+var _ precompileconfig.Config = (*Config)(nil)
 
 // Config implements the StatefulPrecompileConfig interface while adding in the
 // TxAllowList specific precompile config.

@@ -1,89 +1,163 @@
 # Release Notes
 
-## Historical Timeline
-
-### Private Testing Phase (January 2021)
-- Initial private alpha testing and benchmarking
-- Based on early Avalanche EVM implementation
-- Used for internal evaluation and performance testing
-
-### Mainnet Launch (January 1, 2022)
-- Lux mainnet launched with Chain ID 96369
-- Based on subnet-evm v0.2.x (contemporary with avalanchego v1.7.x)
-- Initial production deployment
-
-### Second Major Update (January 2023)
-- Network upgrade to subnet-evm v0.4.x (contemporary with avalanchego v1.9.x)
-- Enhanced stability and performance
-- Added new precompiles and features
-
-### Third Major Update (November 2024)
-- Upgraded to subnet-evm v0.6.x (contemporary with avalanchego v1.11.x)
-- Running stable through July 2025
-- Enhanced Warp messaging and cross-chain capabilities
-
-### Current Sync (July 26, 2025)
-- Full synchronization with latest upstream versions
-- Now at parity with subnet-evm v0.7.7
-- All tests passing with upstream compatibility
-- Final compatibility build for Lux network
-
----
-
-## Current Releases
-
-## [v0.8.1](https://github.com/luxfi/evm/releases/tag/v0.8.1)
-
-**Development Release**
-
-Ongoing development work with enhanced features and optimizations.
-
-## [v0.8.0](https://github.com/luxfi/evm/releases/tag/v0.8.0)
-
-**Development Release**
-
-Initial development work for new features.
+## Pending Release
+- Enable expermiental `state-scheme` flag to specify Firewood as a state database.
+- Added prometheus metrics for Firewood if it is enabled and expensive metrics are being used.
+- Add pending releases here
 
 ## [v0.7.7](https://github.com/luxfi/evm/releases/tag/v0.7.7)
 
-**First Official Tagged Release of Lux EVM**
+This version is backwards compatible to v0.7.0. It is optional, but encouraged.
 
-This is the first officially tagged release of Lux EVM, fully synchronized with subnet-evm v0.7.7.
+### Luxd Compatibility
 
-### Key Features
+The plugin version is **updated** to 42 and is compatible with Luxd version v1.13.3.
 
-- Full EVM compatibility for smart contracts and DApps
-- Support for Lux mainnet (Chain ID 96369) and testnet (Chain ID 96368)
-- POA consensus mode with automining for development environments
-- Compatible with ZOO (200200), SPC (36911), and Hanzo (36963/36962) L2 networks
-- Built with Go 1.24.5
-- All upstream tests passing
+### Updates
 
-### Major Enhancements
+- Demoted unnecessary error log in core/txpool/legacypool.go to warning, displaying unexpected but valid behavior
+- Added maximum number of addresses (1000) to be queried in a single filter
+- Use state-history eth config flag to designate the number of recent states queryable
 
-- **Core EVM Engine**: Full Ethereum Virtual Machine implementation
-- **Type System**: Uses Ethereum types throughout for compatibility
-- **Adapter Layer**: Proper intermediate layer between node and EVM via geth
-- **Consensus**: Our own consensus implementation
-- **Test Suite**: Full test compatibility with upstream
 
-### Configuration
+## [v0.7.6](https://github.com/luxfi/evm/releases/tag/v0.7.6)
 
-- Network ID matches Chain ID for consistency
-- Modified consensus parameters for single-node development (snow-sample-size=1, snow-quorum-size=1)
-- APIs enabled: eth, web3, admin, debug, personal, txpool, miner
-- Test account: 0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC
+_This release should be skipped entirely in favor of 0.7.7 due to the use of a Luxd release candidate version._
 
-### Network Support
+## [v0.7.5](https://github.com/luxfi/evm/releases/tag/v0.7.5)
 
-- **LUX Network**: Primary network with LUX coin
-- **ZOO Network**: L2/Subnet with ZOO coin
-- **SPC Network**: L2/Subnet with SPC coin  
-- **Hanzo Network**: Prepared for AI coin deployment
+This version is backwards compatible to v0.7.0. It is optional, but encouraged.
 
-### Development
+### Luxd Compatibility
 
-- Extensive test suite with full upstream compatibility
-- Docker support for easy deployment
-- Comprehensive documentation
-- Active development and community support
+The plugin version is **updated** to 41 and is compatible with Luxd version v1.13.2.
+
+### Breaking changes
+
+- Removed static API handler and functions: `subnetevm.decodeGenesis`, `subnetevm.buildGenesis`
+
+### Updates
+
+- Updated Luxd dependency to v1.13.2
+- Updated geth dependency to v1.13.14-0.3.0.rc.1
+- Reduced custom types and simplified VM tests
+- Fixed log structuring and removed handler special cases
+
+
+## [v0.7.4](https://github.com/luxfi/evm/releases/tag/v0.7.4)
+
+- Major refactor to use [`geth`](https://github.com/luxfi/geth) for EVM execution, database access, types & chain configuration. This improves maintainability and enables keeping up with upstream changes more easily.
+- Wrapped database with `corruptabledb` to prevent corruption of the database.
+- Updated dockerhub image name to `avaplatform/evm_luxd` and tags to accommodate the new versioning scheme: {evm version}_{luxd version}
+- Updated golang version to 1.23.9
+- Fixed a bug in mempool where the min fee was not updated after restart
+
+## [v0.7.3](https://github.com/luxfi/evm/releases/tag/v0.7.3)
+
+This version is backwards compatible to v0.7.0. It is optional, but encouraged.
+
+### Luxd Compatibility
+
+The plugin version is unchanged at 39 and is compatible with Luxd version v1.13.0.
+
+### Breaking changes
+
+- `eth_getProof` calls for historical state will be rejected by default (#1494: 4e5b9d86c617f046fd7ce36b9cbd76a6e27b4bc5)
+  - On archive nodes (`"pruning-enabled": false`): queries for historical proofs for state older than approximately 24 hours preceding the last accepted block will be rejected by default. This can be adjusted with the new option `historical-proof-query-window` which defines the number of blocks before the last accepted block which should be accepted for state proof queries, or set to `0` to accept any block number state query (previous behavior).
+  - On `pruning` nodes: queries for proofs past the tip buffer (32 blocks) will be rejected. This is in support of moving to a path based storage scheme, which does not support historical state proofs.
+
+### Features
+
+- Add `Fortuna` upgrade as optional and defaulting to a `nil` timestamp  (#1494, #1498)
+- Docker images Debian base upgraded from Bullseye (11) to Bookworm (12) (#1497)
+- Luxd version upgraded from `v1.12.3-0.20250218154446-f1ec9a13b90a` to `v1.13.0`
+- plugin/evm/client: add `NewClientWithURL` function (#1509)
+
+### Fixes
+
+- Fix nil block possible bug in debug APIs (#1494: 0af9717087e6adafccf3486c770ae08cba09b751)
+
+### Documentation
+
+- plugin/evm: add local API docs (#1513)
+- 2023 Least Authority Audit (#1499)
+- precompile/contracts/warp:
+  - changes for 9000 upgrade (#1494)
+  - differentiate between L1 and Subnet self-signing optimization cases (#1529)
+- simulator: fix wrong flag name `staking-enabled` -> `--sybil-protection-enabled=false` (#1476)
+- typo fixes (#1491, #1506)
+
+**Full Changelog**: <https://github.com/luxfi/evm/compare/v0.7.2...v0.7.3>
+
+## [v0.7.2](https://github.com/luxfi/evm/releases/tag/v0.7.2)
+
+This version is backwards compatible to [v0.7.0](https://github.com/luxfi/evm/releases/tag/v0.7.0). It is optional, **but strongly encouraged as it's fixing an important bug in uptime tracking.**
+
+### Luxd Compatibility
+
+The plugin version is unchanged at 39 and is compatible with Luxd version v1.12.2.
+
+### Updates
+
+* Fixed concurrency issue in validators/uptime manager
+* Bump golang version to v1.23.6
+* Bump golangci-lint to v1.63 and add linters
+
+## [v0.7.1](https://github.com/luxfi/evm/releases/tag/v0.7.1)
+
+This release focuses on code quality improvements and post-Etna cleanups.
+
+### Compatibility
+
+The plugin version is **updated** to 39 and is compatible with Luxd version v1.12.2.
+
+### Updates
+
+* Moved client type and structs to new `plugin/evm/client` package
+* Fixed statedb improper copy issue
+* Limited the maximum number of query-able rewardPercentile by 100 in `eth_feeHistory` API
+* Refactored `trie_prefetcher.go` to be structurally similar to upstream
+* Removed deprecated legacy gossip handler and metrics
+* Removed unnecessary locks in mempool
+
+## [v0.7.0](https://github.com/luxfi/evm/releases/tag/v0.7.0)
+
+### Updates
+
+* Changed default write option from `Sync` to `NoSync` in PebbleDB
+
+### Fixes
+
+* Fixed database close on shutdown
+
+## [v0.6.11](https://github.com/luxfi/evm/releases/tag/v0.6.11)
+
+This release focuses on Standalone DB and database configs.
+
+This version is backwards compatible to [v0.6.0](https://github.com/luxfi/evm/releases/tag/v0.6.0). It is optional, but encouraged.
+
+The plugin version is unchanged at 37 and is compatible with Luxd versions v1.11.12.
+
+### Updates
+
+* Added Standalone DB creation in chain data directory (`~/.luxd/chainData/{chain-ID}/db/`). Subnet-EVM will create seperate databases for chains by default if there is no accepted blocks previously
+* Refactored Warp Backend to support new payload types
+* Refactored TrieDB reference root configuration
+* Bumped Luxd dependency to v1.11.12
+* Bumped minimum Golang version to v1.22.8
+
+### Configs
+
+* Added following new database options:
+  * `"use-standalone-database"` (`bool`): If true it enables creation of standalone database. If false it uses the GRPC Database provided by Luxd. Default is nil and creates the standalone database only if there is no accepted block in the Luxd database (node has not accepted any blocks for this chain)
+  * `"database-type"` (`string`): Specifies the type of database to use. Must be one of `pebbledb`, `leveldb` or `memdb`. memdb is an in-memory, non-persisted database. Default is `pebbledb`
+  * `"database-config-file"` (`string`): Path to the database config file. Config file is changed for every database type. See [docs](https://docs.lux.network/api-reference/lux-go-configs-flags#database-config) for available configs per database type. Ignored if --config-file-content is specified
+  * `"database-config-file-content"` (`string`): As an alternative to `database-config-file`, it allows specifying base64 encoded database config content
+  * `"database-path"` (`string`): Specifies the directory to which the standalone database is persisted. Defaults to "`$HOME/.luxd/chainData/{chainID}`"
+  * `"database-read-only"` (`bool`) : Specifies if the standalone database should be a read-only type. Defaults to false
+
+### Fixes
+
+* Fixed Eth upgrade mapping with Lux upgrades in genesis
+* Fixed transaction size tracking in worker environment
+* Fixed a rare case of VM's shutting down ends up panicking in RPC server

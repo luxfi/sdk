@@ -1,4 +1,5 @@
-// (c) 2022, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,11 +34,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/params"
 )
 
 var _ feeBackend = &backendMock{}
@@ -266,8 +266,6 @@ func newBackendMock() *backendMock {
 	config := &params.ChainConfig{
 		ChainID:             big.NewInt(42),
 		HomesteadBlock:      big.NewInt(0),
-		DAOForkBlock:        nil,
-		DAOForkSupport:      true,
 		EIP150Block:         big.NewInt(0),
 		EIP155Block:         big.NewInt(0),
 		EIP158Block:         big.NewInt(0),
@@ -276,10 +274,8 @@ func newBackendMock() *backendMock {
 		PetersburgBlock:     big.NewInt(0),
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
+		LondonBlock:         big.NewInt(1100),
 		CancunTime:          &cancunTime,
-		NetworkUpgrades: params.NetworkUpgrades{
-			ApricotPhase3BlockTimestamp: utils.NewUint64(100),
-		},
 	}
 	return &backendMock{
 		current: &types.Header{
@@ -297,9 +293,11 @@ func newBackendMock() *backendMock {
 
 func (b *backendMock) setFork(fork string) error {
 	if fork == "legacy" {
-		b.current.Time = uint64(90) // Before ApricotPhase3BlockTimestamp
+		b.current.Number = big.NewInt(900)
+		b.current.Time = 555
 	} else if fork == "london" {
-		b.current.Time = uint64(110) // After ApricotPhase3BlockTimestamp
+		b.current.Number = big.NewInt(1100)
+		b.current.Time = 555
 	} else if fork == "cancun" {
 		b.current.Number = big.NewInt(1100)
 		b.current.Time = 700

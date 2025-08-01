@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -7,12 +7,15 @@ import (
 	"bytes"
 	"context"
 	"time"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/plugin/evm/message"
-	"github.com/luxfi/evm/sync/handlers/stats"
+
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/luxd/utils/units"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/evm/sync/handlers/stats"
 )
 
 const (
@@ -27,10 +30,10 @@ const (
 type BlockRequestHandler struct {
 	stats         stats.BlockRequestHandlerStats
 	blockProvider BlockProvider
-	codec         interfaces.Codec
+	codec         codec.Manager
 }
 
-func NewBlockRequestHandler(blockProvider BlockProvider, codec interfaces.Codec, handlerStats stats.BlockRequestHandlerStats) *BlockRequestHandler {
+func NewBlockRequestHandler(blockProvider BlockProvider, codec codec.Manager, handlerStats stats.BlockRequestHandlerStats) *BlockRequestHandler {
 	return &BlockRequestHandler{
 		blockProvider: blockProvider,
 		codec:         codec,
@@ -43,7 +46,7 @@ func NewBlockRequestHandler(blockProvider BlockProvider, codec interfaces.Codec,
 // Expects returned errors to be treated as FATAL
 // Returns empty response or subset of requested blocks if ctx expires during fetch
 // Assumes ctx is active
-func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, blockRequest message.BlockRequest) ([]byte, error) {
+func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, blockRequest message.BlockRequest) ([]byte, error) {
 	startTime := time.Now()
 	b.stats.IncBlockRequest()
 
@@ -106,7 +109,7 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID interfa
 	response := message.BlockResponse{
 		Blocks: blocks,
 	}
-	responseBytes, err := b.codec.Marshal(response)
+	responseBytes, err := b.codec.Marshal(message.Version, response)
 	if err != nil {
 		log.Error("failed to marshal BlockResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "hash", blockRequest.Hash, "parents", blockRequest.Parents, "blocksLen", len(response.Blocks), "err", err)
 		return nil, nil

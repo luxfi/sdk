@@ -1,17 +1,17 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package syncutils
 
 import (
-	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/evm/core/state/snapshot"
 )
 
 var (
-	_ ethdb.Iterator = &AccountIterator{}
-	_ ethdb.Iterator = &StorageIterator{}
+	_ ethdb.Iterator = (*AccountIterator)(nil)
+	_ ethdb.Iterator = (*StorageIterator)(nil)
 )
 
 // AccountIterator wraps a [snapshot.AccountIterator] to conform to [ethdb.Iterator]
@@ -27,8 +27,7 @@ func (it *AccountIterator) Next() bool {
 		return false
 	}
 	for it.AccountIterator.Next() {
-		_, data := it.Account()
-		it.val, it.err = types.FullAccountRLP(data)
+		it.val, it.err = types.FullAccountRLP(it.Account())
 		return it.err == nil
 	}
 	it.val = nil
@@ -39,8 +38,7 @@ func (it *AccountIterator) Key() []byte {
 	if it.err != nil {
 		return nil
 	}
-	hash, _ := it.Account()
-	return hash.Bytes()
+	return it.Hash().Bytes()
 }
 
 func (it *AccountIterator) Value() []byte {
@@ -63,11 +61,9 @@ type StorageIterator struct {
 }
 
 func (it *StorageIterator) Key() []byte {
-	hash, _ := it.Slot()
-	return hash.Bytes()
+	return it.Hash().Bytes()
 }
 
 func (it *StorageIterator) Value() []byte {
-	_, slot := it.Slot()
-	return slot
+	return it.Slot()
 }

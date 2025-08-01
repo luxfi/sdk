@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,22 +34,22 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
 	"github.com/luxfi/evm/eth/gasprice"
 	"github.com/luxfi/evm/eth/tracers"
-	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/params"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
 )
 
 var ErrUnfinalizedData = errors.New("cannot query unfinalized data")
@@ -120,6 +121,10 @@ func (b *EthAPIBackend) HeaderByNumber(ctx context.Context, number rpc.BlockNumb
 	}
 
 	return b.eth.blockchain.GetHeaderByNumber(uint64(number)), nil
+}
+
+func (b *EthAPIBackend) GetFeeConfigAt(parent *types.Header) (commontype.FeeConfig, *big.Int, error) {
+	return b.eth.blockchain.GetFeeConfigAt(parent)
 }
 
 func (b *EthAPIBackend) HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error) {
@@ -367,8 +372,10 @@ func (b *EthAPIBackend) GetPoolTransactions() (types.Transactions, error) {
 	pending := b.eth.txPool.Pending(txpool.PendingFilter{})
 	var txs types.Transactions
 	for _, batch := range pending {
-		for _, tx := range batch {
-			txs = append(txs, tx)
+		for _, lazy := range batch {
+			if tx := lazy.Resolve(); tx != nil {
+				txs = append(txs, tx)
+			}
 		}
 	}
 	return txs, nil
@@ -418,7 +425,7 @@ func (b *EthAPIBackend) TxPoolContentFrom(addr common.Address) ([]*types.Transac
 }
 
 func (b *EthAPIBackend) SubscribeNewTxsEvent(ch chan<- core.NewTxsEvent) event.Subscription {
-	return b.eth.txPool.SubscribeNewTxsEvent(ch)
+	return b.eth.txPool.SubscribeTransactions(ch, true)
 }
 
 func (b *EthAPIBackend) EstimateBaseFee(ctx context.Context) (*big.Int, error) {
@@ -485,10 +492,6 @@ func (b *EthAPIBackend) RPCTxFeeCap() float64 {
 	return b.eth.config.RPCTxFeeCap
 }
 
-func (b *EthAPIBackend) PriceOptionsConfig() ethapi.PriceOptionConfig {
-	return b.eth.config.PriceOptionConfig
-}
-
 func (b *EthAPIBackend) BloomStatus() (uint64, uint64) {
 	sections, _, _ := b.eth.bloomIndexer.Sections()
 	return params.BloomBitsBlocks, sections
@@ -525,7 +528,8 @@ func (b *EthAPIBackend) StateAtTransaction(ctx context.Context, block *types.Blo
 }
 
 func (b *EthAPIBackend) MinRequiredTip(ctx context.Context, header *types.Header) (*big.Int, error) {
-	return customheader.EstimateRequiredTip(b.ChainConfig(), header)
+	config := params.GetExtra(b.ChainConfig())
+	return customheader.EstimateRequiredTip(config, header)
 }
 
 func (b *EthAPIBackend) isLatestAndAllowed(number rpc.BlockNumber) bool {

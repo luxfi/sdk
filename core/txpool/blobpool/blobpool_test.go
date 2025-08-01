@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -40,13 +41,13 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/interfaces/core/rawdb"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/crypto/kzg4844"
-	"github.com/luxfi/evm/interfaces/ethdb/memorydb"
+	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/evm/params"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/misc/eip4844"

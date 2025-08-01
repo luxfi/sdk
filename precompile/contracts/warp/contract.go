@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -7,14 +7,15 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	
-	"github.com/luxfi/evm/iface"
-	"github.com/luxfi/evm/accounts/abi"
-	"github.com/luxfi/evm/precompile/contract"
+
+	"github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/precompile/contract"
 )
 
 const (
@@ -89,12 +90,12 @@ func PackGetBlockchainIDOutput(blockchainID common.Hash) ([]byte, error) {
 	return WarpABI.PackOutput("getBlockchainID", blockchainID)
 }
 
-// getBlockchainID returns the consensus Chain Context ChainID of this blockchain.
+// getBlockchainID returns the snow Chain Context ChainID of this blockchain.
 func getBlockchainID(accessibleState contract.AccessibleState, caller common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, GetBlockchainIDGasCost); err != nil {
 		return nil, 0, err
 	}
-	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(accessibleState.GetConsensusContext().ChainID))
+	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(accessibleState.GetSnowContext().ChainID))
 	if err != nil {
 		return nil, remainingGas, err
 	}
@@ -224,15 +225,15 @@ func UnpackSendWarpMessageOutput(output []byte) (common.Hash, error) {
 	return unpacked, nil
 }
 
-// sendWarpMessage constructs a Lux Warp Message containing an AddressedPayload and emits a log to signal validators that they should
+// sendWarpMessage constructs an Lux Warp Message containing an AddressedPayload and emits a log to signal validators that they should
 // be willing to sign this message.
 func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, SendWarpMessageGasCost); err != nil {
 		return nil, 0, err
 	}
-	// This gas cost includes buffer room because it is based off of the total size of the input instead of the produced iface.
+	// This gas cost includes buffer room because it is based off of the total size of the input instead of the produced payload.
 	// This ensures that we charge gas before we unpack the variable sized input.
-	payloadGas, overflow := iface.SafeMul(SendWarpMessageGasCostPerByte, uint64(len(input)))
+	payloadGas, overflow := math.SafeMul(SendWarpMessageGasCostPerByte, uint64(len(input)))
 	if overflow {
 		return nil, 0, vm.ErrOutOfGas
 	}
@@ -249,19 +250,19 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 	}
 
 	var (
-		sourceChainID = accessibleState.GetConsensusContext().ChainID
+		sourceChainID = accessibleState.GetSnowContext().ChainID
 		sourceAddress = caller
 	)
 
-	addressedPayload, err := iface.NewAddressedCall(
+	addressedPayload, err := payload.NewAddressedCall(
 		sourceAddress.Bytes(),
 		payloadData,
 	)
 	if err != nil {
 		return nil, remainingGas, err
 	}
-	unsignedWarpMessage, err := iface.NewUnsignedMessage(
-		accessibleState.GetConsensusContext().NetworkID,
+	unsignedWarpMessage, err := warp.NewUnsignedMessage(
+		accessibleState.GetSnowContext().NetworkID,
 		sourceChainID,
 		addressedPayload.Bytes(),
 	)
@@ -299,14 +300,14 @@ func PackSendWarpMessageEvent(sourceAddress common.Address, unsignedMessageID co
 	return WarpABI.PackEvent("SendWarpMessage", sourceAddress, unsignedMessageID, unsignedMessageBytes)
 }
 
-// UnpackSendWarpEventDataToMessage attempts to unpack event [data] as iface.UnsignedMessage.
-func UnpackSendWarpEventDataToMessage(data []byte) (*iface.UnsignedMessage, error) {
+// UnpackSendWarpEventDataToMessage attempts to unpack event [data] as warp.UnsignedMessage.
+func UnpackSendWarpEventDataToMessage(data []byte) (*warp.UnsignedMessage, error) {
 	event := SendWarpMessageEventData{}
 	err := WarpABI.UnpackIntoInterface(&event, "SendWarpMessage", data)
 	if err != nil {
 		return nil, err
 	}
-	return iface.ParseUnsignedMessage(event.Message)
+	return warp.ParseUnsignedMessage(event.Message)
 }
 
 // createWarpPrecompile returns a StatefulPrecompiledContract with getters and setters for the precompile.

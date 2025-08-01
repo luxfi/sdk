@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handlers
@@ -8,19 +8,21 @@ import (
 	"context"
 	"sync"
 	"time"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/core/types"
+
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/ethdb/memorydb"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/luxfi/evm/sync/syncutils"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
 )
 
 const (
@@ -42,12 +44,12 @@ const (
 type LeafsRequestHandler struct {
 	trieDB           *triedb.Database
 	snapshotProvider SnapshotProvider
-	codec            interfaces.Codec
+	codec            codec.Manager
 	stats            stats.LeafsRequestHandlerStats
 	pool             sync.Pool
 }
 
-func NewLeafsRequestHandler(trieDB *triedb.Database, snapshotProvider SnapshotProvider, codec interfaces.Codec, syncerStats stats.LeafsRequestHandlerStats) *LeafsRequestHandler {
+func NewLeafsRequestHandler(trieDB *triedb.Database, snapshotProvider SnapshotProvider, codec codec.Manager, syncerStats stats.LeafsRequestHandlerStats) *LeafsRequestHandler {
 	return &LeafsRequestHandler{
 		trieDB:           trieDB,
 		snapshotProvider: snapshotProvider,
@@ -69,7 +71,7 @@ func NewLeafsRequestHandler(trieDB *triedb.Database, snapshotProvider SnapshotPr
 // Never returns errors
 // Returns nothing if the requested trie root is not found
 // Assumes ctx is active
-func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID interfaces.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
+func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, leafsRequest message.LeafsRequest) ([]byte, error) {
 	startTime := time.Now()
 	lrh.stats.IncLeafsRequest()
 
@@ -150,7 +152,7 @@ func (lrh *LeafsRequestHandler) OnLeafsRequest(ctx context.Context, nodeID inter
 		return nil, nil
 	}
 
-	responseBytes, err := lrh.codec.Marshal(leafsResponse)
+	responseBytes, err := lrh.codec.Marshal(message.Version, leafsResponse)
 	if err != nil {
 		log.Debug("failed to marshal LeafsResponse, dropping request", "nodeID", nodeID, "requestID", requestID, "request", leafsRequest, "err", err)
 		return nil, nil
@@ -321,7 +323,7 @@ func (rb *responseBuilder) fillFromSnapshot(ctx context.Context) (bool, error) {
 }
 
 // generateRangeProof returns a range proof for the range specified by [start] and [keys] using [t].
-func (rb *responseBuilder) generateRangeProof(start []byte, keys [][]byte) (ethdb.KeyValueStore, error) {
+func (rb *responseBuilder) generateRangeProof(start []byte, keys [][]byte) (*memorydb.Database, error) {
 	proof := memorydb.New()
 	startTime := time.Now()
 	defer func() { rb.proofTime += time.Since(startTime) }()
@@ -348,7 +350,7 @@ func (rb *responseBuilder) generateRangeProof(start []byte, keys [][]byte) (ethd
 
 // verifyRangeProof verifies the provided range proof with [keys/vals], starting at [start].
 // Returns a boolean indicating if there are more leaves to the right of the last key in the trie and a nil error if the range proof is successfully verified.
-func (rb *responseBuilder) verifyRangeProof(keys, vals [][]byte, start []byte, proof ethdb.KeyValueStore) (bool, error) {
+func (rb *responseBuilder) verifyRangeProof(keys, vals [][]byte, start []byte, proof *memorydb.Database) (bool, error) {
 	startTime := time.Now()
 	defer func() { rb.proofTime += time.Since(startTime) }()
 
@@ -360,7 +362,7 @@ func (rb *responseBuilder) verifyRangeProof(keys, vals [][]byte, start []byte, p
 }
 
 // iterateVals returns the values contained in [db]
-func iterateVals(db ethdb.KeyValueStore) ([][]byte, error) {
+func iterateVals(db *memorydb.Database) ([][]byte, error) {
 	if db == nil {
 		return nil, nil
 	}
@@ -368,7 +370,7 @@ func iterateVals(db ethdb.KeyValueStore) ([][]byte, error) {
 	it := db.NewIterator(nil, nil)
 	defer it.Release()
 
-	vals := make([][]byte, 0)
+	vals := make([][]byte, 0, db.Len())
 	for it.Next() {
 		vals = append(vals, it.Value())
 	}
@@ -381,7 +383,7 @@ func iterateVals(db ethdb.KeyValueStore) ([][]byte, error) {
 // existing response. If [hasGap] is false, the range proof begins at a key which
 // guarantees the range can be appended to the response.
 // Additionally returns a boolean indicating if there are more leaves in the trie.
-func (rb *responseBuilder) isRangeValid(keys, vals [][]byte, hasGap bool) (ethdb.KeyValueStore, bool, bool, error) {
+func (rb *responseBuilder) isRangeValid(keys, vals [][]byte, hasGap bool) (*memorydb.Database, bool, bool, error) {
 	var startKey []byte
 	if hasGap {
 		startKey = keys[0]

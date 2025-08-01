@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,8 +35,9 @@ import (
 	"runtime"
 	"strings"
 	"testing"
-	"github.com/luxfi/evm/accounts/abi/bind"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/stretchr/testify/require"
 )
 
@@ -451,7 +453,9 @@ var bindTests = []struct {
 		`"github.com/stretchr/testify/require"
 		 "math/big"
 		 "github.com/luxfi/geth/common"
+		 "github.com/luxfi/geth/core/rawdb"
 		 "github.com/luxfi/evm/core/state"
+		 "github.com/luxfi/evm/core/extstate"
 		 "github.com/luxfi/evm/precompile/allowlist"
 		`,
 		`
@@ -465,10 +469,12 @@ var bindTests = []struct {
 			require.Equal(t, testGreeting, unpackedGreeting)
 
 			// test that the allow list is generated correctly
-			stateDB := extstate.NewTestStateDB(t)
+			statedb, err := state.New(common.Hash{}, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
+			require.NoError(t, err)
+			wrappedStateDB := extstate.New(statedb)
 			address := common.BigToAddress(big.NewInt(1))
-			SetHelloWorldAllowListStatus(stateDB, address, allowlist.EnabledRole)
-			role := GetHelloWorldAllowListStatus(stateDB, address)
+			SetHelloWorldAllowListStatus(wrappedStateDB, address, allowlist.EnabledRole)
+			role := GetHelloWorldAllowListStatus(wrappedStateDB, address)
 			require.Equal(t, role, allowlist.EnabledRole)
 		`,
 		"",
@@ -669,6 +675,7 @@ func TestPrecompileBind(t *testing.T) {
 			package %s
 
 			import (
+				"testing"
 				%s
 			)
 

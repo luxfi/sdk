@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -40,10 +41,11 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/core/types"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
@@ -58,12 +60,12 @@ import (
 const (
 	// blobSize is the protocol constrained byte size of a single blob in a
 	// transaction. There can be multiple of these embedded into a single tx.
-	blobSize = params.BlobTxFieldElementsPerBlob * params.BlobTxBytesPerFieldElement
+	blobSize = ethparams.BlobTxFieldElementsPerBlob * ethparams.BlobTxBytesPerFieldElement
 
 	// maxBlobsPerTransaction is the maximum number of blobs a single transaction
 	// is allowed to contain. Whilst the spec states it's unlimited, the block
 	// data slots are protocol bound, which implicitly also limit this.
-	maxBlobsPerTransaction = 6 // MaxBlobGasPerBlock / BlobTxBlobGasPerBlob
+	maxBlobsPerTransaction = ethparams.MaxBlobGasPerBlock / ethparams.BlobTxBlobGasPerBlob
 
 	// txAvgSize is an approximate byte size of a transaction metadata to avoid
 	// tiny overflows causing all txs to move a shelf higher, wasting disk space.
@@ -141,7 +143,7 @@ func newBlobTxMeta(id uint64, size uint32, tx *types.Transaction) *blobTxMeta {
 
 // BlobPool is the transaction pool dedicated to EIP-4844 blob transactions.
 //
-// Blob transactions are special consensusflakes that are designed for a very specific
+// Blob transactions are special snowflakes that are designed for a very specific
 // purpose (rollups) and are expected to adhere to that specific use case. These
 // behavioural expectations allow us to design a transaction pool that is more robust
 // (i.e. resending issues) and more resilient to DoS attacks (e.g. replace-flush
@@ -336,7 +338,7 @@ func New(config Config, chain BlockChain) *BlobPool {
 	// Create the transaction pool with its initial settings
 	return &BlobPool{
 		config: config,
-		signer: types.LatestSigner(&params.ChainConfig{ChainID: chain.Config().ChainID}),
+		signer: types.LatestSigner(chain.Config()),
 		chain:  chain,
 		lookup: make(map[common.Hash]uint64),
 		index:  make(map[common.Address][]*blobTxMeta),
@@ -410,9 +412,14 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 	for addr := range p.index {
 		p.recheck(addr, nil)
 	}
-	// feeConfig removed - not used in EstimateNextBaseFee anymore
+	feeConfig, _, err := p.chain.GetFeeConfigAt(p.head)
+	if err != nil {
+		p.Close()
+		return err
+	}
 	baseFee, err := header.EstimateNextBaseFee(
-		p.chain.Config(),
+		params.GetExtra(p.chain.Config()),
+		feeConfig,
 		p.head,
 		uint64(time.Now().Unix()),
 	)
@@ -423,7 +430,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 	var (
 		// basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), p.head))
 		basefee = uint256.MustFromBig(baseFee)
-		blobfee = uint256.NewInt(params.BlobTxMinBlobGasprice)
+		blobfee = uint256.NewInt(ethparams.BlobTxMinBlobGasprice)
 	)
 	if p.head.ExcessBlobGas != nil {
 		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(*p.head.ExcessBlobGas))
@@ -838,12 +845,17 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 		}
 	}
 	// Flush out any blobs from limbo that are older than the latest finality
-	if p.chain.Config().IsCancun(p.head.Time) {
+	if p.chain.Config().IsCancun(p.head.Number, p.head.Time) {
 		p.limbo.finalize(p.chain.CurrentFinalBlock())
 	}
-	// feeConfig removed - not used in EstimateNextBaseFee anymore
+	feeConfig, _, err := p.chain.GetFeeConfigAt(p.head)
+	if err != nil {
+		log.Error("Failed to get fee config to reset blobpool fees", "err", err)
+		return
+	}
 	baseFeeBig, err := header.EstimateNextBaseFee(
-		p.chain.Config(),
+		params.GetExtra(p.chain.Config()),
+		feeConfig,
 		p.head,
 		uint64(time.Now().Unix()),
 	)
@@ -855,7 +867,7 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 	var (
 		// basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), newHead))
 		basefee = uint256.MustFromBig(baseFeeBig)
-		blobfee = uint256.MustFromBig(big.NewInt(params.BlobTxMinBlobGasprice))
+		blobfee = uint256.MustFromBig(big.NewInt(ethparams.BlobTxMinBlobGasprice))
 	)
 	if newHead.ExcessBlobGas != nil {
 		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(*newHead.ExcessBlobGas))

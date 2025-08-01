@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,9 +34,10 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
 	"github.com/luxfi/evm/cmd/evm/internal/t8ntool"
 	"github.com/luxfi/evm/internal/cmdtest"
-	"github.com/docker/docker/pkg/reexec"
+	"github.com/luxfi/evm/internal/reexec"
 )
 
 func TestMain(m *testing.M) {
@@ -256,7 +258,7 @@ func TestT8n(t *testing.T) {
 		// 	expExitCode: 3,
 		// },
 		// NOTE: this test was modified to test a non-trivial calculation
-		// of dynamic EVM fees (instead of the original EIP-1559
+		// of dynamic Subnet-EVM fees (instead of the original EIP-1559
 		// [misc.CalcBaseFee] calculation).
 		{ // Test base fee calculation
 			base: "./testdata/25",

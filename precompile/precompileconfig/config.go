@@ -1,19 +1,19 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Defines the stateless interface for unmarshalling an arbitrary config of a precompile
 package precompileconfig
 
 import (
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/interfaces"
+	"github.com/luxfi/luxd/snow"
+	"github.com/luxfi/luxd/snow/engine/snowman/block"
+	"github.com/luxfi/luxd/vms/platformvm/warp"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/evm/commontype"
 )
 
 // StatefulPrecompileConfig defines the interface for a stateful precompile to
-// be enabled via a network interfaces.
+// be enabled via a network upgrade.
 type Config interface {
 	// Key returns the unique key for the stateful precompile.
 	Key() string
@@ -33,18 +33,20 @@ type Config interface {
 // PredicateContext is the context passed in to the Predicater interface to verify
 // a precompile predicate within a specific ProposerVM wrapper.
 type PredicateContext struct {
-	ConsensusCtx *interfaces.ChainContext
+	SnowCtx *snow.Context
 	// ProposerVMBlockCtx defines the ProposerVM context the predicate is verified within
-	ProposerVMBlockCtx *consensus.Context
+	ProposerVMBlockCtx *block.Context
 }
 
 // Predicater is an optional interface for StatefulPrecompileContracts to implement.
-// If implemented, the predicate will be enforced on every transaction in a block, prior to
-// the block's execution.
-// If VerifyPredicate returns an error, the block will fail verification with no further processing.
-// WARNING: If you are implementing a custom precompile, beware that evm
-// will not maintain backwards compatibility of this interface and your code should not
-// rely on this. Designed for use only by precompiles that ship with evm.
+// If implemented, the predicate will be called for each predicate included in the
+// access list of a transaction.
+// PredicateGas will be called while calculating the IntrinsicGas of a transaction
+// causing it to be dropped if the total gas goes above the tx gas limit.
+// VerifyPredicate is used to populate a bit set of predicates verified prior to
+// block execution, which can be accessed via the StateDB during execution.
+// The bitset is stored in the block, so that historical blocks can be re-verified
+// without calling VerifyPredicate.
 type Predicater interface {
 	PredicateGas(predicateBytes []byte) (uint64, error)
 	VerifyPredicate(predicateContext *PredicateContext, predicateBytes []byte) error
@@ -56,7 +58,7 @@ type WarpMessageWriter interface {
 
 // AcceptContext defines the context passed in to a precompileconfig's Accepter
 type AcceptContext struct {
-	ConsensusCtx *interfaces.ChainContext
+	SnowCtx *snow.Context
 	Warp    WarpMessageWriter
 }
 

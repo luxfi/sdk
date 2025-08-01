@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -7,15 +7,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	
-	"github.com/luxfi/evm/iface"
-	"github.com/luxfi/evm/precompile/contract"
-	precompileinterfaces "github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/evm/predicate"
-	warpValidators "github.com/luxfi/evm/warp/validators"
+
+	"github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/predicate"
+	warpValidators "github.com/luxfi/evm/warp/validators"
 )
 
 const (
@@ -25,9 +25,9 @@ const (
 )
 
 var (
-	_ precompileinterfaces.Config     = &Config{}
-	_ precompileinterfaces.Predicater = &Config{}
-	_ precompileinterfaces.Accepter   = &Config{}
+	_ precompileconfig.Config     = (*Config)(nil)
+	_ precompileconfig.Predicater = (*Config)(nil)
+	_ precompileconfig.Accepter   = (*Config)(nil)
 )
 
 var (
@@ -44,10 +44,10 @@ var (
 	errCannotRetrieveValidatorSet = errors.New("cannot retrieve validator set")
 )
 
-// Config implements the precompileinterfaces.Config interface and
+// Config implements the precompileconfig.Config interface and
 // adds specific configuration for Warp.
 type Config struct {
-	precompileinterfaces.Upgrade
+	precompileconfig.Upgrade
 	QuorumNumerator              uint64 `json:"quorumNumerator"`
 	RequirePrimaryNetworkSigners bool   `json:"requirePrimaryNetworkSigners"`
 }
@@ -56,7 +56,7 @@ type Config struct {
 // Warp with the given quorum numerator.
 func NewConfig(blockTimestamp *uint64, quorumNumerator uint64, requirePrimaryNetworkSigners bool) *Config {
 	return &Config{
-		Upgrade:                      precompileinterfaces.Upgrade{BlockTimestamp: blockTimestamp},
+		Upgrade:                      precompileconfig.Upgrade{BlockTimestamp: blockTimestamp},
 		QuorumNumerator:              quorumNumerator,
 		RequirePrimaryNetworkSigners: requirePrimaryNetworkSigners,
 	}
@@ -72,19 +72,19 @@ func NewDefaultConfig(blockTimestamp *uint64) *Config {
 // that disables Warp.
 func NewDisableConfig(blockTimestamp *uint64) *Config {
 	return &Config{
-		Upgrade: precompileinterfaces.Upgrade{
+		Upgrade: precompileconfig.Upgrade{
 			BlockTimestamp: blockTimestamp,
 			Disable:        true,
 		},
 	}
 }
 
-// Key returns the key for the Warp precompileinterfaces.
+// Key returns the key for the Warp precompileconfig.
 // This should be the same key as used in the precompile module.
 func (*Config) Key() string { return ConfigKey }
 
 // Verify tries to verify Config and returns an error accordingly.
-func (c *Config) Verify(chainConfig precompileinterfaces.ChainConfig) error {
+func (c *Config) Verify(chainConfig precompileconfig.ChainConfig) error {
 	if c.Timestamp() != nil {
 		// If Warp attempts to activate before Durango, fail verification
 		timestamp := *c.Timestamp()
@@ -104,7 +104,7 @@ func (c *Config) Verify(chainConfig precompileinterfaces.ChainConfig) error {
 }
 
 // Equal returns true if [s] is a [*Config] and it has been configured identical to [c].
-func (c *Config) Equal(s precompileinterfaces.Config) bool {
+func (c *Config) Equal(s precompileconfig.Config) bool {
 	// typecast before comparison
 	other, ok := (s).(*Config)
 	if !ok {
@@ -114,7 +114,7 @@ func (c *Config) Equal(s precompileinterfaces.Config) bool {
 	return equals && c.QuorumNumerator == other.QuorumNumerator
 }
 
-func (c *Config) Accept(acceptCtx *precompileinterfaces.AcceptContext, blockHash common.Hash, blockNumber uint64, txHash common.Hash, logIndex int, topics []common.Hash, logData []byte) error {
+func (c *Config) Accept(acceptCtx *precompileconfig.AcceptContext, blockHash common.Hash, blockNumber uint64, txHash common.Hash, logIndex int, topics []common.Hash, logData []byte) error {
 	unsignedMessage, err := UnpackSendWarpEventDataToMessage(logData)
 	if err != nil {
 		return fmt.Errorf("failed to parse warp log data into unsigned message (TxHash: %s, LogIndex: %d): %w", txHash, logIndex, err)
@@ -144,11 +144,11 @@ func (c *Config) Accept(acceptCtx *precompileinterfaces.AcceptContext, blockHash
 // If the payload of the warp message fails parsing, return a non-nil error invalidating the transaction.
 func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	totalGas := GasCostPerSignatureVerification
-	bytesGasCost, overflow := iface.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
+	bytesGasCost, overflow := math.SafeMul(GasCostPerWarpMessageBytes, uint64(len(predicateBytes)))
 	if overflow {
 		return 0, fmt.Errorf("overflow calculating gas cost for warp message bytes of size %d", len(predicateBytes))
 	}
-	totalGas, overflow = iface.SafeAdd(totalGas, bytesGasCost)
+	totalGas, overflow = math.SafeAdd(totalGas, bytesGasCost)
 	if overflow {
 		return 0, fmt.Errorf("overflow adding bytes gas cost of size %d", len(predicateBytes))
 	}
@@ -157,11 +157,11 @@ func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidPredicateBytes, err)
 	}
-	warpMessage, err := iface.ParseMessage(unpackedPredicateBytes)
+	warpMessage, err := warp.ParseMessage(unpackedPredicateBytes)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidWarpMsg, err)
 	}
-	_, err = iface.Parse(warpMessage.Payload)
+	_, err = payload.Parse(warpMessage.Payload)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidWarpMsgPayload, err)
 	}
@@ -170,11 +170,11 @@ func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errCannotGetNumSigners, err)
 	}
-	signerGas, overflow := iface.SafeMul(uint64(numSigners), GasCostPerWarpSigner)
+	signerGas, overflow := math.SafeMul(uint64(numSigners), GasCostPerWarpSigner)
 	if overflow {
 		return 0, errOverflowSignersGasCost
 	}
-	totalGas, overflow = iface.SafeAdd(totalGas, signerGas)
+	totalGas, overflow = math.SafeAdd(totalGas, signerGas)
 	if overflow {
 		return 0, fmt.Errorf("overflow adding signer gas (PrevTotal: %d, VerificationGas: %d)", totalGas, signerGas)
 	}
@@ -183,14 +183,14 @@ func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 }
 
 // VerifyPredicate returns whether the predicate described by [predicateBytes] passes verification.
-func (c *Config) VerifyPredicate(predicateContext *precompileinterfaces.PredicateContext, predicateBytes []byte) error {
+func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateContext, predicateBytes []byte) error {
 	unpackedPredicateBytes, err := predicate.UnpackPredicate(predicateBytes)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errInvalidPredicateBytes, err)
 	}
 
 	// Note: PredicateGas should be called before VerifyPredicate, so we should never reach an error case here.
-	warpMsg, err := iface.ParseMessage(unpackedPredicateBytes)
+	warpMsg, err := warp.ParseMessage(unpackedPredicateBytes)
 	if err != nil {
 		return fmt.Errorf("%w: %w", errCannotParseWarpMsg, err)
 	}
@@ -202,15 +202,15 @@ func (c *Config) VerifyPredicate(predicateContext *precompileinterfaces.Predicat
 
 	log.Debug("verifying warp message", "warpMsg", warpMsg, "quorumNum", quorumNumerator, "quorumDenom", WarpQuorumDenominator)
 
-	// Wrap iface.State on the chain consensus context to special case the Primary Network
+	// Wrap validators.State on the chain snow context to special case the Primary Network
 	state := warpValidators.NewState(
-		predicateContext.ConsensusCtx.ValidatorState,
-		predicateContext.ConsensusCtx.SubnetID,
+		predicateContext.SnowCtx.ValidatorState,
+		predicateContext.SnowCtx.SubnetID,
 		warpMsg.SourceChainID,
 		c.RequirePrimaryNetworkSigners,
 	)
 
-	validatorSet, err := iface.GetCanonicalValidatorSetFromChainID(
+	validatorSet, err := warp.GetCanonicalValidatorSetFromChainID(
 		context.Background(),
 		state,
 		predicateContext.ProposerVMBlockCtx.PChainHeight,
@@ -223,7 +223,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileinterfaces.Predicat
 
 	err = warpMsg.Signature.Verify(
 		&warpMsg.UnsignedMessage,
-		predicateContext.ConsensusCtx.NetworkID,
+		predicateContext.SnowCtx.NetworkID,
 		validatorSet,
 		quorumNumerator,
 		WarpQuorumDenominator,

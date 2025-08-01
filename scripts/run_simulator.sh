@@ -11,12 +11,12 @@ if ! [[ "$0" =~ scripts/run_simulator.sh ]]; then
   exit 255
 fi
 
-SUBNET_EVM_PATH=$(
+EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
 )
 # Load the constants
-source "$SUBNET_EVM_PATH"/scripts/constants.sh
+source "$EVM_PATH"/scripts/constants.sh
 
 run_simulator() {
     #################################

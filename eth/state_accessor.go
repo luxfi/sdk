@@ -1,4 +1,5 @@
-// (c) 2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,16 +33,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/eth/tracers"
-	"github.com/luxfi/evm/trie"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // noopReleaser is returned in case there is no operation expected
@@ -187,6 +189,7 @@ func (eth *Ethereum) hashState(ctx context.Context, block *types.Block, reexec u
 	return statedb, func() { tdb.Dereference(block.Root()) }, nil
 }
 
+// This is compatible with both PathDB and FirewoodDB schemes.
 func (eth *Ethereum) pathState(block *types.Block) (*state.StateDB, func(), error) {
 	// Check if the requested state is available in the live chain.
 	statedb, err := eth.blockchain.StateAt(block.Root())
@@ -222,7 +225,10 @@ func (eth *Ethereum) pathState(block *types.Block) (*state.StateDB, func(), erro
 //     provided, it would be preferable to start from a fresh state, if we have it
 //     on disk.
 func (eth *Ethereum) stateAtBlock(ctx context.Context, block *types.Block, reexec uint64, base *state.StateDB, readOnly bool, preferDisk bool) (statedb *state.StateDB, release tracers.StateReleaseFunc, err error) {
-	if eth.blockchain.TrieDB().Scheme() == rawdb.HashScheme {
+	isFirewood := eth.blockchain.CacheConfig().StateScheme == customrawdb.FirewoodScheme
+
+	// Use `hashState` if the state can be recomputed from the live database.
+	if eth.blockchain.TrieDB().Scheme() == rawdb.HashScheme && !isFirewood {
 		return eth.hashState(ctx, block, reexec, base, readOnly, preferDisk)
 	}
 	return eth.pathState(block)
@@ -284,7 +290,8 @@ func (eth *Ethereum) StateAtNextBlock(ctx context.Context, parent *types.Block, 
 	}
 
 	// Apply upgrades here for the [nextBlock]
-	err = core.ApplyUpgrades(eth.blockchain.Config(), &parent.Header().Time, nextBlock, statedb)
+	blockContext := core.NewBlockContext(nextBlock.Number(), nextBlock.Time())
+	err = core.ApplyUpgrades(eth.blockchain.Config(), &parent.Header().Time, blockContext, statedb)
 	if err != nil {
 		release()
 		return nil, nil, err

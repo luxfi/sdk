@@ -1,4 +1,5 @@
-// (c) 2019-2022, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -34,17 +35,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/accounts/abi"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/geth/core"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rpc"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/rpc"
 	"github.com/stretchr/testify/require"
 )
 
@@ -273,7 +275,7 @@ func TestFilters(t *testing.T) {
 
 	// Set block 998 as Finalized (-3)
 	// bc.SetFinalized(chain[998].Header())
-	err = rawdb.WriteAcceptorTip(db, chain[998].Hash())
+	err = customrawdb.WriteAcceptorTip(db, chain[998].Hash())
 	require.NoError(t, err)
 
 	for i, tc := range []struct {

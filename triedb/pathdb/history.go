@@ -1,4 +1,5 @@
-// (c) 2024, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,7 +34,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/geth/common"
-	"slices"
+	"github.com/luxfi/geth/trie/triestate"
+	"golang.org/x/exp/slices"
 )
 
 // State history records the state changes involved in executing a block. The
@@ -258,31 +260,28 @@ type history struct {
 }
 
 // newHistory constructs the state history object with provided state change set.
-func newHistory(root common.Hash, parent common.Hash, block uint64, states *Set) *history {
+func newHistory(root common.Hash, parent common.Hash, block uint64, states *triestate.Set) *history {
 	var (
 		accountList []common.Address
 		storageList = make(map[common.Address][]common.Hash)
 		incomplete  []common.Address
 	)
-	// FIXME: Can't access unexported stateSet field
-	// for addr := range states.stateSet.accountData {
-	// 	accountList = append(accountList, common.BytesToAddress(addr.Bytes()))
-	// }
+	for addr := range states.Accounts {
+		accountList = append(accountList, addr)
+	}
 	slices.SortFunc(accountList, common.Address.Cmp)
 
-	// FIXME: Can't access unexported stateSet field
-	// for addr, slots := range states.stateSet.storageData {
-	// 	slist := make([]common.Hash, 0, len(slots))
-	// 	for slotHash := range slots {
-	// 		slist = append(slist, slotHash)
-	// 	}
-	// 	slices.SortFunc(slist, common.Hash.Cmp)
-	// 	storageList[common.BytesToAddress(addr.Bytes())] = slist
-	// }
-	// FIXME: Incomplete doesn't exist in StateSetWithOrigin
-	// for addr := range states.Incomplete {
-	// 	incomplete = append(incomplete, addr)
-	// }
+	for addr, slots := range states.Storages {
+		slist := make([]common.Hash, 0, len(slots))
+		for slotHash := range slots {
+			slist = append(slist, slotHash)
+		}
+		slices.SortFunc(slist, common.Hash.Cmp)
+		storageList[addr] = slist
+	}
+	for addr := range states.Incomplete {
+		incomplete = append(incomplete, addr)
+	}
 	slices.SortFunc(incomplete, common.Address.Cmp)
 
 	return &history{
@@ -293,9 +292,9 @@ func newHistory(root common.Hash, parent common.Hash, block uint64, states *Set)
 			block:      block,
 			incomplete: incomplete,
 		},
-		accounts:    make(map[common.Address][]byte), // FIXME: Convert from states.stateSet.accountData
+		accounts:    states.Accounts,
 		accountList: accountList,
-		storages:    make(map[common.Address]map[common.Hash][]byte), // FIXME: Convert from states.stateSet.storageData
+		storages:    states.Storages,
 		storageList: storageList,
 	}
 }

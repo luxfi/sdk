@@ -1,3 +1,14 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+//
+// This file is a derived work, based on the go-ethereum library whose original
+// notices appear below.
+//
+// It is distributed under a license compatible with the licensing terms of the
+// original code from which it is derived.
+//
+// Much love to the original authors for their work.
+// **********
 // Copyright 2024 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
@@ -22,11 +33,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/geth/core"
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/plugin/evm/upgrade/lp176"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/core"
 )
 
 // Tests that the simulator starts with the initial gas limit in the genesis block,
@@ -50,8 +60,8 @@ func TestWithBlockGasLimitOption(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to retrieve head block: %v", err)
 	}
-	if head.GasLimit() != lp176.MinMaxCapacity {
-		t.Errorf("head gas limit mismatch: have %v, want %v", head.GasLimit(), lp176.MinMaxCapacity)
+	if head.GasLimit() != 12_345_678 {
+		t.Errorf("head gas limit mismatch: have %v, want %v", head.GasLimit(), 12_345_678)
 	}
 }
 
@@ -60,11 +70,11 @@ func TestWithCallGasLimitOption(t *testing.T) {
 	// Construct a simulator, targeting a different gas limit
 	sim := NewBackend(types.GenesisAlloc{
 		testAddr: {Balance: big.NewInt(10000000000000000)},
-	}, WithCallGasLimit(params.TxGas-1))
+	}, WithCallGasLimit(ethparams.TxGas-1))
 	defer sim.Close()
 
 	client := sim.Client()
-	_, err := client.CallContract(context.Background(), interfaces.CallMsg{
+	_, err := client.CallContract(context.Background(), ethereum.CallMsg{
 		From: testAddr,
 		To:   &testAddr,
 		Gas:  21000,

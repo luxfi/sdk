@@ -1,11 +1,9 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
 
-import (
-	"github.com/luxfi/geth/metrics"
-)
+import "github.com/luxfi/geth/metrics"
 
 type verifierStats struct {
 	messageParseFail metrics.Counter

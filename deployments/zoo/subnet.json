@@ -1,9 +1,0 @@
-{
-  "subnetID": "",
-  "chainID": 200200,
-  "vmID": "subnetevm",
-  "vmGenesis": "genesis.json",
-  "blockchainName": "ZOO Network",
-  "tokenName": "ZOO",
-  "tokenSymbol": "ZOO"
-}

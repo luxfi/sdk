@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,10 +32,11 @@ import (
 	crand "crypto/rand"
 	"math/rand"
 	"testing"
-	"github.com/luxfi/evm/ethdb/memorydb"
-	"github.com/luxfi/evm/utils"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/evm/utils"
 )
 
 func copyDestructs(destructs map[common.Hash]struct{}) map[common.Hash]struct{} {

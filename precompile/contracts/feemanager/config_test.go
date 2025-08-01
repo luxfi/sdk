@@ -1,4 +1,4 @@
-// (c) 2022 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package feemanager
@@ -6,12 +6,13 @@ package feemanager
 import (
 	"math/big"
 	"testing"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/precompile/allowlist"
-	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/evm/precompile/testutils"
-	"github.com/luxfi/evm/utils"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/precompile/precompiletest"
+	"github.com/luxfi/evm/utils"
 	"go.uber.org/mock/gomock"
 )
 
@@ -29,10 +30,10 @@ var validFeeConfig = commontype.FeeConfig{
 }
 
 func TestVerify(t *testing.T) {
-	admins := []common.Address{allowlist.TestAdminAddr}
+	admins := []common.Address{allowlisttest.TestAdminAddr}
 	invalidFeeConfig := validFeeConfig
 	invalidFeeConfig.GasLimit = big.NewInt(0)
-	tests := map[string]testutils.ConfigVerifyTest{
+	tests := map[string]precompiletest.ConfigVerifyTest{
 		"invalid initial fee manager config": {
 			Config:        NewConfig(utils.NewUint64(3), admins, nil, nil, &invalidFeeConfig),
 			ExpectedError: "gasLimit = 0 cannot be less than or equal to 0",
@@ -42,13 +43,13 @@ func TestVerify(t *testing.T) {
 			ExpectedError: "gasLimit cannot be nil",
 		},
 	}
-	allowlist.VerifyPrecompileWithAllowListTests(t, Module, tests)
+	allowlisttest.VerifyPrecompileWithAllowListTests(t, Module, tests)
 }
 
 func TestEqual(t *testing.T) {
-	admins := []common.Address{allowlist.TestAdminAddr}
-	enableds := []common.Address{allowlist.TestEnabledAddr}
-	tests := map[string]testutils.ConfigEqualTest{
+	admins := []common.Address{allowlisttest.TestAdminAddr}
+	enableds := []common.Address{allowlisttest.TestEnabledAddr}
+	tests := map[string]precompiletest.ConfigEqualTest{
 		"non-nil config and nil other": {
 			Config:   NewConfig(utils.NewUint64(3), admins, enableds, nil, nil),
 			Other:    nil,
@@ -85,5 +86,5 @@ func TestEqual(t *testing.T) {
 			Expected: true,
 		},
 	}
-	allowlist.EqualPrecompileWithAllowListTests(t, Module, tests)
+	allowlisttest.EqualPrecompileWithAllowListTests(t, Module, tests)
 }

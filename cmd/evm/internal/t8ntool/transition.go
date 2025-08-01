@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,19 +34,19 @@ import (
 	"math/big"
 	"os"
 	"path"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/tests"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/evm/params"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
+	"github.com/luxfi/evm/tests"
 	"github.com/urfave/cli/v2"
 )
 

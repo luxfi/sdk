@@ -1,4 +1,4 @@
-// Copyright (C) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -7,13 +7,14 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/ethclient"
-	"github.com/luxfi/evm/params"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/log"
-	ethparams "github.com/luxfi/evm/params"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 )
 
 const numTriggerTxs = 2 // Number of txs needed to activate the proposer VM fork
@@ -41,7 +42,7 @@ func IssueTxsToActivateProposerVMFork(
 	}
 	defer sub.Unsubscribe()
 
-	gasPrice := big.NewInt(params.TestInitialBaseFee)
+	gasPrice := big.NewInt(legacy.BaseFee)
 	txSigner := types.LatestSignerForChainID(chainID)
 	for i := 0; i < numTriggerTxs; i++ {
 		tx := types.NewTransaction(

@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -33,16 +34,15 @@ import (
 	"math/big"
 	"os"
 	"strings"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/params"
-	ethparams "github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/tests"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/tests"
 	"github.com/urfave/cli/v2"
 )
 
@@ -118,7 +118,7 @@ func Transaction(ctx *cli.Context) error {
 			return NewError(ErrorIO, errors.New("only rlp supported"))
 		}
 	}
-	signer := types.LatestSigner(vm.ConvertChainConfig(chainConfig))
+	signer := types.MakeSigner(chainConfig, new(big.Int), 0)
 	// We now have the transactions in 'body', which is supposed to be an
 	// rlp list of transactions
 	it, err := rlp.NewListIterator([]byte(body))
@@ -145,7 +145,7 @@ func Transaction(ctx *cli.Context) error {
 			r.Address = sender
 		}
 		// Check intrinsic gas
-		rules := chainConfig.GenesisRules(new(big.Int), 0)
+		rules := chainConfig.Rules(new(big.Int), params.IsMergeTODO, 0)
 		if gas, err := core.IntrinsicGas(tx.Data(), tx.AccessList(), tx.To() == nil, rules); err != nil {
 			r.Error = err
 			results = append(results, r)

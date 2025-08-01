@@ -1,12 +1,13 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package modules
 
 import (
 	"bytes"
-	"github.com/luxfi/evm/precompile/contract"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/precompile/contract"
 )
 
 type Module struct {

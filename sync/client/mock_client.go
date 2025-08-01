@@ -1,4 +1,4 @@
-// (c) 2021-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package statesyncclient
@@ -7,13 +7,14 @@ import (
 	"context"
 	"fmt"
 	"sync/atomic"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/core/types"
+
+	"github.com/luxfi/luxd/codec"
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/rlp"
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 
 // TODO replace with gomock library
 type MockClient struct {
-	codec          interfaces.Codec
+	codec          codec.Manager
 	leafsHandler   *handlers.LeafsRequestHandler
 	leavesReceived int32
 	codesHandler   *handlers.CodeRequestHandler
@@ -42,7 +43,7 @@ type MockClient struct {
 }
 
 func NewMockClient(
-	codec interfaces.Codec,
+	codec codec.Manager,
 	leafHandler *handlers.LeafsRequestHandler,
 	codesHandler *handlers.CodeRequestHandler,
 	blocksHandler *handlers.BlockRequestHandler,
@@ -56,7 +57,7 @@ func NewMockClient(
 }
 
 func (ml *MockClient) GetLeafs(ctx context.Context, request message.LeafsRequest) (message.LeafsResponse, error) {
-	response, err := ml.leafsHandler.OnLeafsRequest(ctx, interfaces.GenerateTestNodeID(), 1, request)
+	response, err := ml.leafsHandler.OnLeafsRequest(ctx, ids.GenerateTestNodeID(), 1, request)
 	if err != nil {
 		return message.LeafsResponse{}, err
 	}
@@ -83,7 +84,7 @@ func (ml *MockClient) GetCode(ctx context.Context, hashes []common.Hash) ([][]by
 		panic("no code handler for mock client")
 	}
 	request := message.CodeRequest{Hashes: hashes}
-	response, err := ml.codesHandler.OnCodeRequest(ctx, interfaces.GenerateTestNodeID(), 1, request)
+	response, err := ml.codesHandler.OnCodeRequest(ctx, ids.GenerateTestNodeID(), 1, request)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +116,7 @@ func (ml *MockClient) GetBlocks(ctx context.Context, blockHash common.Hash, heig
 		Height:  height,
 		Parents: numParents,
 	}
-	response, err := ml.blocksHandler.OnBlockRequest(ctx, interfaces.GenerateTestNodeID(), 1, request)
+	response, err := ml.blocksHandler.OnBlockRequest(ctx, ids.GenerateTestNodeID(), 1, request)
 	if err != nil {
 		return nil, err
 	}

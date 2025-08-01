@@ -1,4 +1,4 @@
-// (c) 2023 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package extras
@@ -9,10 +9,10 @@ import (
 	"fmt"
 
 	"github.com/luxfi/geth/common"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
-	gethparams "github.com/luxfi/geth/params"
 )
 
 var errNoKey = errors.New("PrecompileUpgrade cannot be empty")
@@ -194,7 +194,7 @@ func (c *ChainConfig) GetActivatingPrecompileConfigs(address common.Address, fro
 // Assumes given timestamp is the last accepted block timestamp.
 // This ensures that as long as the node has not accepted a block with a different rule set it will allow a
 // new upgrade to be applied as long as it activates after the last accepted block.
-func (c *ChainConfig) checkPrecompilesCompatible(precompileUpgrades []PrecompileUpgrade, time uint64) *gethparams.ConfigCompatError {
+func (c *ChainConfig) checkPrecompilesCompatible(precompileUpgrades []PrecompileUpgrade, time uint64) *ethparams.ConfigCompatError {
 	for _, module := range modules.RegisteredModules() {
 		if err := c.checkPrecompileCompatible(module.Address, precompileUpgrades, time); err != nil {
 			return err
@@ -208,7 +208,7 @@ func (c *ChainConfig) checkPrecompilesCompatible(precompileUpgrades []Precompile
 // and [precompileUpgrades] at [headTimestamp].
 // Returns an error if upgrades already activated at [headTimestamp] are missing from [precompileUpgrades].
 // Upgrades that have already gone into effect cannot be modified or absent from [precompileUpgrades].
-func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompileUpgrades []PrecompileUpgrade, time uint64) *gethparams.ConfigCompatError {
+func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompileUpgrades []PrecompileUpgrade, time uint64) *ethparams.ConfigCompatError {
 	// All active upgrades (from nil to [lastTimestamp]) must match.
 	activeUpgrades := c.GetActivatingPrecompileConfigs(address, nil, time, c.PrecompileUpgrades)
 	newUpgrades := c.GetActivatingPrecompileConfigs(address, nil, time, precompileUpgrades)
@@ -217,7 +217,7 @@ func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompi
 	for i, upgrade := range activeUpgrades {
 		if len(newUpgrades) <= i {
 			// missing upgrade
-			return newTimestampCompatError(
+			return ethparams.NewTimestampCompatError(
 				fmt.Sprintf("missing PrecompileUpgrade[%d]", i),
 				upgrade.Timestamp(),
 				nil,
@@ -225,7 +225,7 @@ func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompi
 		}
 		// All upgrades that have activated must be identical.
 		if !upgrade.Equal(newUpgrades[i]) {
-			return newTimestampCompatError(
+			return ethparams.NewTimestampCompatError(
 				fmt.Sprintf("PrecompileUpgrade[%d]", i),
 				upgrade.Timestamp(),
 				newUpgrades[i].Timestamp(),
@@ -235,7 +235,7 @@ func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompi
 	// then, make sure newUpgrades does not have additional upgrades
 	// that are already activated. (cannot perform retroactive upgrade)
 	if len(newUpgrades) > len(activeUpgrades) {
-		return newTimestampCompatError(
+		return ethparams.NewTimestampCompatError(
 			fmt.Sprintf("cannot retroactively enable PrecompileUpgrade[%d]", len(activeUpgrades)),
 			nil,
 			newUpgrades[len(activeUpgrades)].Timestamp(), // this indexes to the first element in newUpgrades after the end of activeUpgrades

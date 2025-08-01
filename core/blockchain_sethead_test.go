@@ -1,4 +1,5 @@
-// (c) 2019-2021, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,7 +32,8 @@ package core
 
 import (
 	"testing"
-	"github.com/luxfi/evm/core/types"
+
+	"github.com/luxfi/geth/core/types"
 )
 
 // verifyNoGaps checks that there are no gaps after the initial set of blocks in

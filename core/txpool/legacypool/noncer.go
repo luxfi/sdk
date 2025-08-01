@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -28,8 +29,9 @@ package legacypool
 
 import (
 	"sync"
-	"github.com/luxfi/evm/core/state"
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/evm/core/state"
 )
 
 // noncer is a tiny virtual state database to manage the executable nonces of
@@ -44,7 +46,7 @@ type noncer struct {
 // newNoncer creates a new virtual state database to track the pool nonces.
 func newNoncer(statedb *state.StateDB) *noncer {
 	return &noncer{
-		fallback: statedb,
+		fallback: statedb.Copy(),
 		nonces:   make(map[common.Address]uint64),
 	}
 }

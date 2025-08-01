@@ -1,11 +1,11 @@
-// (c) 2023 Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package stateupgrade
 
 import (
 	"math/big"
-	
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/holiman/uint256"

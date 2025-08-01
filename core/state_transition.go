@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -30,23 +31,19 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/utils"
+
 	"github.com/luxfi/geth/common"
 	cmath "github.com/luxfi/geth/common/math"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/crypto/kzg4844"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/vmerrors"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/utils"
+	"github.com/holiman/uint256"
 )
-
-// BigMin returns the smaller of x or y.
-func BigMin(x, y *big.Int) *big.Int {
-	if x.Cmp(y) < 0 {
-		return x
-	}
-	return y
-}
 
 // ExecutionResult includes all output after executing given evm
 // message no matter the execution itself is successful or not.
@@ -89,9 +86,9 @@ func IntrinsicGas(data []byte, accessList types.AccessList, isContractCreation b
 	// Set the starting gas for the raw transaction
 	var gas uint64
 	if isContractCreation && rules.IsHomestead {
-		gas = params.TxGasContractCreation
+		gas = ethparams.TxGasContractCreation
 	} else {
-		gas = params.TxGas
+		gas = ethparams.TxGas
 	}
 	dataLen := uint64(len(data))
 	// Bump the required gas by the amount of transactional data
@@ -104,9 +101,9 @@ func IntrinsicGas(data []byte, accessList types.AccessList, isContractCreation b
 			}
 		}
 		// Make sure we don't exceed uint64 for all data combinations
-		nonZeroGas := params.TxDataNonZeroGasFrontier
+		nonZeroGas := ethparams.TxDataNonZeroGasFrontier
 		if rules.IsIstanbul {
-			nonZeroGas = params.TxDataNonZeroGasEIP2028
+			nonZeroGas = ethparams.TxDataNonZeroGasEIP2028
 		}
 		if (math.MaxUint64-gas)/nonZeroGas < nz {
 			return 0, ErrGasUintOverflow
@@ -114,17 +111,17 @@ func IntrinsicGas(data []byte, accessList types.AccessList, isContractCreation b
 		gas += nz * nonZeroGas
 
 		z := dataLen - nz
-		if (math.MaxUint64-gas)/params.TxDataZeroGas < z {
+		if (math.MaxUint64-gas)/ethparams.TxDataZeroGas < z {
 			return 0, ErrGasUintOverflow
 		}
-		gas += z * params.TxDataZeroGas
+		gas += z * ethparams.TxDataZeroGas
 
 		if isContractCreation && params.GetRulesExtra(rules).IsDurango {
 			lenWords := toWordSize(dataLen)
-			if (math.MaxUint64-gas)/params.InitCodeWordGas < lenWords {
+			if (math.MaxUint64-gas)/ethparams.InitCodeWordGas < lenWords {
 				return 0, ErrGasUintOverflow
 			}
-			gas += lenWords * params.InitCodeWordGas
+			gas += lenWords * ethparams.InitCodeWordGas
 		}
 	}
 	if accessList != nil {
@@ -146,8 +143,8 @@ func accessListGas(rules params.Rules, accessList types.AccessList) (uint64, err
 	var gas uint64
 	rulesExtra := params.GetRulesExtra(rules)
 	if !rulesExtra.PredicatersExist() {
-		gas += uint64(len(accessList)) * params.TxAccessListAddressGas
-		gas += uint64(accessList.StorageKeys()) * params.TxAccessListStorageKeyGas
+		gas += uint64(len(accessList)) * ethparams.TxAccessListAddressGas
+		gas += uint64(accessList.StorageKeys()) * ethparams.TxAccessListStorageKeyGas
 		return gas, nil
 	}
 
@@ -159,7 +156,7 @@ func accessListGas(rules params.Rules, accessList types.AccessList) (uint64, err
 			// the size of access lists that could be included in a block and standard access list gas costs.
 			// Therefore, we only check for overflow when adding to [totalGas], which could include the sum of values
 			// returned by a predicate.
-			accessTupleGas := params.TxAccessListAddressGas + uint64(len(accessTuple.StorageKeys))*params.TxAccessListStorageKeyGas
+			accessTupleGas := ethparams.TxAccessListAddressGas + uint64(len(accessTuple.StorageKeys))*ethparams.TxAccessListStorageKeyGas
 			totalGas, overflow := cmath.SafeAdd(gas, accessTupleGas)
 			if overflow {
 				return 0, ErrGasUintOverflow
@@ -230,12 +227,7 @@ func TransactionToMessage(tx *types.Transaction, s types.Signer, baseFee *big.In
 	}
 	// If baseFee provided, set gasPrice to effectiveGasPrice.
 	if baseFee != nil {
-		// Calculate effective gas price
-		effectivePrice := new(big.Int).Add(msg.GasTipCap, baseFee)
-		if effectivePrice.Cmp(msg.GasFeeCap) > 0 {
-			effectivePrice = msg.GasFeeCap
-		}
-		msg.GasPrice = effectivePrice
+		msg.GasPrice = cmath.BigMin(msg.GasPrice.Add(msg.GasTipCap, baseFee), msg.GasFeeCap)
 	}
 	var err error
 	msg.From, err = types.Sender(s, tx)
@@ -282,7 +274,6 @@ type StateTransition struct {
 	initialGas   uint64
 	state        vm.StateDB
 	evm          *vm.EVM
-	config       *params.ChainConfig
 }
 
 // NewStateTransition initialises and returns a new state transition object.
@@ -292,9 +283,6 @@ func NewStateTransition(evm *vm.EVM, msg *Message, gp *GasPool) *StateTransition
 		evm:   evm,
 		msg:   msg,
 		state: evm.StateDB,
-		// config is set to nil here as we don't have access to luxfi ChainConfig
-		// from go-ethereum's EVM. This will need to be refactored.
-		config: nil,
 	}
 }
 
@@ -315,7 +303,7 @@ func (st *StateTransition) buyGas() error {
 		balanceCheck = balanceCheck.Mul(balanceCheck, st.msg.GasFeeCap)
 		balanceCheck.Add(balanceCheck, st.msg.Value)
 	}
-	if st.evm.ChainConfig().IsCancun(st.evm.Context.Time) {
+	if st.evm.ChainConfig().IsCancun(st.evm.Context.BlockNumber, st.evm.Context.Time) {
 		if blobGas := st.blobGasUsed(); blobGas > 0 {
 			// Check that the user has enough funds to cover blobGasUsed * tx.BlobGasFeeCap
 			blobBalanceCheck := new(big.Int).SetUint64(blobGas)
@@ -369,14 +357,12 @@ func (st *StateTransition) preCheck() error {
 		}
 
 		// Check that the sender is on the tx allow list if enabled
-		// TODO: This check is disabled because we don't have access to luxfi ChainConfig
-		// from go-ethereum's EVM. This needs to be refactored to pass the config properly.
-		// if st.config != nil && params.GetExtra(st.config).IsPrecompileEnabled(txallowlist.ContractAddress, st.evm.Context.Time) {
-		// 	txAllowListRole := txallowlist.GetTxAllowListStatus(st.state, msg.From)
-		// 	if !txAllowListRole.IsEnabled() {
-		// 		return fmt.Errorf("%w: %s", vmerrs.ErrSenderAddressNotAllowListed, msg.From)
-		// 	}
-		// }
+		if params.GetExtra(st.evm.ChainConfig()).IsPrecompileEnabled(txallowlist.ContractAddress, st.evm.Context.Time) {
+			txAllowListRole := txallowlist.GetTxAllowListStatus(st.state, msg.From)
+			if !txAllowListRole.IsEnabled() {
+				return fmt.Errorf("%w: %s", vmerrors.ErrSenderAddressNotAllowListed, msg.From)
+			}
+		}
 	}
 	// Make sure that transaction gasFeeCap is greater than the baseFee (post london)
 	if st.evm.ChainConfig().IsLondon(st.evm.Context.BlockNumber) {
@@ -421,7 +407,7 @@ func (st *StateTransition) preCheck() error {
 		}
 	}
 	// Check that the user is paying at least the current blob fee
-	if st.evm.ChainConfig().IsCancun(st.evm.Context.Time) {
+	if st.evm.ChainConfig().IsCancun(st.evm.Context.BlockNumber, st.evm.Context.Time) {
 		if st.blobGasUsed() > 0 {
 			// Skip the checks if gas fields are zero and blobBaseFee was explicitly disabled (eth_call)
 			skipCheck := st.evm.Config.NoBaseFee && msg.BlobGasFeeCap.BitLen() == 0
@@ -465,15 +451,17 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 		return nil, err
 	}
 
-	// Tracer API has changed in newer versions - these methods no longer exist
-	// TODO: Update to use new tracer API if needed
+	if tracer := st.evm.Config.Tracer; tracer != nil {
+		tracer.CaptureTxStart(st.initialGas)
+		defer func() {
+			tracer.CaptureTxEnd(st.gasRemaining)
+		}()
+	}
 
 	var (
 		msg              = st.msg
-		sender           = common.Address(msg.From)
-		// Create rules from ethereum's ChainConfig
-		ethConfig        = st.evm.ChainConfig()
-		rules            = ethConfig.Rules(st.evm.Context.BlockNumber, params.IsMergeTODO, st.evm.Context.Time)
+		sender           = vm.AccountRef(msg.From)
+		rules            = st.evm.ChainConfig().Rules(st.evm.Context.BlockNumber, params.IsMergeTODO, st.evm.Context.Time)
 		rulesExtra       = params.GetRulesExtra(rules)
 		contractCreation = msg.To == nil
 	)
@@ -498,38 +486,31 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	}
 
 	// Check whether the init code size has been exceeded.
-	if rulesExtra.IsDurango && contractCreation && len(msg.Data) > params.MaxInitCodeSize {
-		return nil, fmt.Errorf("max init code size exceeded: code size %v limit %v", len(msg.Data), params.MaxInitCodeSize)
+	if rulesExtra.IsDurango && contractCreation && len(msg.Data) > ethparams.MaxInitCodeSize {
+		return nil, fmt.Errorf("%w: code size %v limit %v", vm.ErrMaxInitCodeSizeExceeded, len(msg.Data), ethparams.MaxInitCodeSize)
 	}
 
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
 	// - reset transient storage(eip 1153)
-	// Get precompiles from rulesExtra
-	var precompiles []common.Address
-	if rulesExtra != nil && rulesExtra.Precompiles != nil {
-		for addr := range rulesExtra.Precompiles {
-			precompiles = append(precompiles, addr)
-		}
-	}
-	st.state.Prepare(rules, msg.From, st.evm.Context.Coinbase, msg.To, precompiles, msg.AccessList)
+	st.state.Prepare(rules, msg.From, st.evm.Context.Coinbase, msg.To, vm.ActivePrecompiles(rules), msg.AccessList)
 
 	var (
 		ret   []byte
 		vmerr error // vm errors do not effect consensus and are therefore not assigned to err
 	)
 	if contractCreation {
-		ret, _, st.gasRemaining, vmerr = st.evm.Create(vm.AccountRef(sender), msg.Data, st.gasRemaining, value)
+		ret, _, st.gasRemaining, vmerr = st.evm.Create(sender, msg.Data, st.gasRemaining, value)
 	} else {
 		// Increment the nonce for the next transaction
-		st.state.SetNonce(msg.From, st.state.GetNonce(msg.From)+1)
-		ret, st.gasRemaining, vmerr = st.evm.Call(vm.AccountRef(sender), st.to(), msg.Data, st.gasRemaining, value)
+		st.state.SetNonce(msg.From, st.state.GetNonce(sender.Address())+1)
+		ret, st.gasRemaining, vmerr = st.evm.Call(sender, st.to(), msg.Data, st.gasRemaining, value)
 	}
 	price, overflow := uint256.FromBig(msg.GasPrice)
 	if overflow {
 		return nil, ErrGasUintOverflow
 	}
-	gasRefund := st.refundGas(rulesExtra.IsEVM)
+	gasRefund := st.refundGas(rulesExtra.IsSubnetEVM)
 	fee := new(uint256.Int).SetUint64(st.gasUsed())
 	fee.Mul(fee, price)
 	st.state.AddBalance(st.evm.Context.Coinbase, fee)
@@ -542,10 +523,10 @@ func (st *StateTransition) TransitionDb() (*ExecutionResult, error) {
 	}, nil
 }
 
-func (st *StateTransition) refundGas(evm bool) uint64 {
+func (st *StateTransition) refundGas(subnetEVM bool) uint64 {
 	var refund uint64
 	// Inspired by: https://gist.github.com/holiman/460f952716a74eeb9ab358bb1836d821#gistcomment-3642048
-	if !evm {
+	if !subnetEVM {
 		// Apply refund counter, capped to half of the used gas.
 		refund = st.gasUsed() / 2
 		if refund > st.state.GetRefund() {
@@ -573,5 +554,5 @@ func (st *StateTransition) gasUsed() uint64 {
 
 // blobGasUsed returns the amount of blob gas used by the message.
 func (st *StateTransition) blobGasUsed() uint64 {
-	return uint64(len(st.msg.BlobHashes) * params.BlobTxBlobGasPerBlob)
+	return uint64(len(st.msg.BlobHashes) * ethparams.BlobTxBlobGasPerBlob)
 }

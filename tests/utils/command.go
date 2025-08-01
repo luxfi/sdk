@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -10,10 +10,11 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/luxfi/luxd/api/health"
 	"github.com/luxfi/geth/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,45 +51,45 @@ func RunCommand(bin string, args ...string) (*cmd.Cmd, error) {
 }
 
 func RegisterPingTest() {
-	_ = require.New(ginkgo.GinkgoT())
+	require := require.New(ginkgo.GinkgoT())
 
 	ginkgo.It("ping the network", ginkgo.Label("ping"), func() {
-		// TODO: Fix - interfaces.NewClient doesn't exist
-		// client := interfaces.NewClient(DefaultLocalNodeURI)
-		// healthy, err := client.Readiness(context.Background(), nil)
-		// require.NoError(err)
-		// require.True(healthy.Healthy)
+		client := health.NewClient(DefaultLocalNodeURI)
+		healthy, err := client.Readiness(context.Background(), nil)
+		require.NoError(err)
+		require.True(healthy.Healthy)
 	})
 }
 
-// RegisterNodeRun registers a before suite that starts a Lux process to use for the e2e tests
-// and an after suite that stops the Lux process
+// RegisterNodeRun registers a before suite that starts an Luxd process to use for the e2e tests
+// and an after suite that stops the Luxd process
 func RegisterNodeRun() {
-	// BeforeSuite starts a Lux process to use for the e2e tests
+	require := require.New(ginkgo.GinkgoT())
+
+	// BeforeSuite starts an Luxd process to use for the e2e tests
 	var startCmd *cmd.Cmd
 	_ = ginkgo.BeforeSuite(func() {
-		_, cancel := context.WithTimeout(context.Background(), time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
 
 		wd, err := os.Getwd()
-		gomega.Expect(err).Should(gomega.BeNil())
-		log.Info("Starting Lux node", "wd", wd)
+		require.NoError(err)
+		log.Info("Starting Luxd node", "wd", wd)
 		cmd, err := RunCommand("./scripts/run.sh")
 		startCmd = cmd
-		gomega.Expect(err).Should(gomega.BeNil())
+		require.NoError(err)
 
-		// TODO: Fix - interfaces.NewClient doesn't exist
 		// Assumes that startCmd will launch a node with HTTP Port at [utils.DefaultLocalNodeURI]
-		// healthClient := interfaces.NewClient(DefaultLocalNodeURI)
-		// healthy, err := interfaces.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
-		// gomega.Expect(err).Should(gomega.BeNil())
-		// gomega.Expect(healthy).Should(gomega.BeTrue())
-		log.Info("Lux node is healthy")
+		healthClient := health.NewClient(DefaultLocalNodeURI)
+		healthy, err := health.AwaitReady(ctx, healthClient, HealthCheckTimeout, nil)
+		require.NoError(err)
+		require.True(healthy)
+		log.Info("Luxd node is healthy")
 	})
 
 	ginkgo.AfterSuite(func() {
-		gomega.Expect(startCmd).ShouldNot(gomega.BeNil())
-		gomega.Expect(startCmd.Stop()).Should(gomega.Succeed())
+		require.NotNil(startCmd)
+		require.NoError(startCmd.Stop())
 		// TODO add a new node to bootstrap off of the existing node and ensure it can bootstrap all subnets
 		// created during the test
 	})
@@ -114,8 +115,7 @@ func RunHardhatTestsCustomURI(ctx context.Context, chainURI string, execPath str
 	cmd.Dir = execPath
 
 	log.Info("Sleeping to wait for test ping", "rpcURI", chainURI)
-	err := os.Setenv("RPC_URI", chainURI)
-	require.NoError(err)
+	require.NoError(os.Setenv("RPC_URI", chainURI))
 	log.Info("Running test command", "cmd", cmd.String())
 
 	out, err := cmd.CombinedOutput()

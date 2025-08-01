@@ -1,4 +1,4 @@
-// (c) 2022, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sync/atomic"
 	"time"
+
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/luxfi/geth/metrics"
 )
@@ -17,13 +18,13 @@ type MeteredCache struct {
 	namespace string
 
 	// stats to be surfaced
-	entriesCount *metrics.Gauge
-	bytesSize    *metrics.Gauge
-	collisions   *metrics.Gauge
-	gets         *metrics.Gauge
-	sets         *metrics.Gauge
-	misses       *metrics.Gauge
-	statsTime    *metrics.Gauge
+	entriesCount metrics.Gauge
+	bytesSize    metrics.Gauge
+	collisions   metrics.Gauge
+	gets         metrics.Gauge
+	sets         metrics.Gauge
+	misses       metrics.Gauge
+	statsTime    metrics.Gauge
 
 	// count all operations to decide when to update stats
 	ops             uint64

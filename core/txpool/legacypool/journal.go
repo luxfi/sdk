@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -31,11 +32,11 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	
+
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/core/types"
 )
 
 // errNoActiveJournal is returned if a transaction is attempted to be inserted

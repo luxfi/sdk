@@ -1,4 +1,4 @@
-// (c) 2023, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Defines the interface for the configuration and execution of a precompile contract
@@ -6,10 +6,11 @@ package contract
 
 import (
 	"math/big"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/precompile/precompileconfig"
+
+	"github.com/luxfi/luxd/snow"
 	"github.com/luxfi/geth/common"
 	ethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/holiman/uint256"
 )
 
@@ -38,9 +39,7 @@ type StateDB interface {
 	Exist(common.Address) bool
 
 	AddLog(*ethtypes.Log)
-	GetLogData() (topics [][]common.Hash, data [][]byte)
-	GetPredicateStorageSlots(address common.Address, index int) (predicate []byte, exists bool)
-	SetPredicateStorageSlots(address common.Address, predicates [][]byte)
+	GetPredicateStorageSlots(address common.Address, index int) ([]byte, bool)
 
 	GetTxHash() common.Hash
 
@@ -52,7 +51,7 @@ type StateDB interface {
 type AccessibleState interface {
 	GetStateDB() StateDB
 	GetBlockContext() BlockContext
-	GetConsensusContext() *interfaces.ChainContext
+	GetSnowContext() *snow.Context
 	GetChainConfig() precompileconfig.ChainConfig
 }
 

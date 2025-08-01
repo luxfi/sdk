@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -28,27 +29,13 @@ package backends
 
 import (
 	"context"
-	"github.com/luxfi/geth/eth"
-	"github.com/luxfi/evm/vmerrs"
-	"github.com/luxfi/evm/accounts/abi"
-	"github.com/luxfi/evm/accounts/abi/bind"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/bloombits"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/geth/eth/filters"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/interfaces"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
+
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/evm/ethclient/simulated"
+	"github.com/luxfi/evm/interfaces"
 )
 
 // Verify that SimulatedBackend implements required interfaces

@@ -1,4 +1,4 @@
-// (c) 2024, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // warptest exposes common functionality for testing the warp package.
@@ -7,12 +7,12 @@ package warptest
 import (
 	"time"
 
-	"github.com/luxfi/node/ids"
-	validatorinterfaces "github.com/luxfi/evm/plugin/evm/validators/interfaces"
+	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
-var _ validatorinterfaces.ValidatorReader = &NoOpValidatorReader{}
+var _ interfaces.ValidatorReader = (*NoOpValidatorReader)(nil)
 
 type NoOpValidatorReader struct{}
 

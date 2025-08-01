@@ -1,4 +1,5 @@
-// (c) 2019-2020, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -32,20 +33,25 @@ import (
 	"fmt"
 	"math/big"
 	"time"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/geth/stateconf"
 	"github.com/luxfi/geth/log"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/evm/triedb/pathdb"
 	"github.com/holiman/uint256"
-	ethparams "github.com/luxfi/evm/params"
 )
 
 //go:generate go run github.com/fjl/gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -154,8 +160,7 @@ func SetupGenesisBlock(
 	// is initialized with an external ancient store. Commit genesis state
 	// in this case.
 	header := rawdb.ReadHeader(db, stored, 0)
-	// Check if genesis state is already initialized
-	if header.Root != types.EmptyRootHash && !rawdb.HasLegacyTrieNode(db, header.Root) {
+	if header.Root != types.EmptyRootHash && !triedb.Initialized(header.Root) {
 		// Ensure the stored genesis matches with the given one.
 		hash := genesis.ToBlock().Hash()
 		if hash != stored {
@@ -174,21 +179,23 @@ func SetupGenesisBlock(
 	if err := newcfg.CheckConfigForkOrder(); err != nil {
 		return newcfg, common.Hash{}, err
 	}
-	storedcfg := rawdb.ReadChainConfig(db, stored)
+	storedcfg := customrawdb.ReadChainConfig(db, stored)
 	// If there is no previously stored chain config, write the chain config to disk.
 	if storedcfg == nil {
 		// Note: this can happen since we did not previously write the genesis block and chain config in the same batch.
 		log.Warn("Found genesis block without chain config")
-		rawdb.WriteChainConfig(db, stored, newcfg)
+		customrawdb.WriteChainConfig(db, stored, newcfg)
 		return newcfg, stored, nil
 	}
 
 	// Notes on the following line:
-	// - this is needed in geth to handle the case where existing nodes do not
+	// - this is needed in coreth to handle the case where existing nodes do not
 	//   have the Berlin or London forks initialized by block number on disk.
-	//   See https://github.com/luxfi/evm/pull/667/files
+	//   See https://github.com/luxfi/coreth/pull/667/files
 	// - this is not needed in evm but it does not impact it either
-	params.SetEthUpgrades(storedcfg, params.GetExtra(storedcfg).NetworkUpgrades)
+	if err := params.SetEthUpgrades(storedcfg); err != nil {
+		return genesis.Config, common.Hash{}, err
+	}
 	// Check config compatibility and write the config. Compatibility errors
 	// are returned to the caller unless we're already at block zero.
 	// we use last accepted block for cfg compatibility check. Note this allows
@@ -208,23 +215,22 @@ func SetupGenesisBlock(
 	} else {
 		compatErr := storedcfg.CheckCompatible(newcfg, height, timestamp)
 		if compatErr != nil && ((height != 0 && compatErr.RewindToBlock != 0) || (timestamp != 0 && compatErr.RewindToTime != 0)) {
-			storedData, _ := storedcfg.ToWithUpgradesJSON().MarshalJSON()
-			newData, _ := newcfg.ToWithUpgradesJSON().MarshalJSON()
+			storedData, _ := params.ToWithUpgradesJSON(storedcfg).MarshalJSON()
+			newData, _ := params.ToWithUpgradesJSON(newcfg).MarshalJSON()
 			log.Error("found mismatch between config on database vs. new config", "storedConfig", string(storedData), "newConfig", string(newData), "err", compatErr)
 			return newcfg, stored, compatErr
 		}
 	}
 	// Required to write the chain config to disk to ensure both the chain config and upgrade bytes are persisted to disk.
 	// Note: this intentionally removes an extra check from upstream.
-	rawdb.WriteChainConfig(db, stored, newcfg)
+	customrawdb.WriteChainConfig(db, stored, newcfg)
 	return newcfg, stored, nil
 }
 
 // IsVerkle indicates whether the state is already stored in a verkle
 // tree at genesis time.
 func (g *Genesis) IsVerkle() bool {
-	// IsVerkle is not implemented in luxfi/evm
-	return false
+	return g.Config.IsVerkle(new(big.Int).SetUint64(g.Number), g.Timestamp)
 }
 
 // ToBlock returns the genesis block according to genesis specification.
@@ -237,8 +243,10 @@ func (g *Genesis) trieConfig() *triedb.Config {
 	if !g.IsVerkle() {
 		return nil
 	}
-	// Return nil for non-verkle tries
-	return nil
+	return &triedb.Config{
+		DBOverride: pathdb.Defaults.BackendConstructor,
+		IsVerkle:   true,
+	}
 }
 
 // TODO: migrate this function to "flush" for more similarity with upstream.
@@ -259,7 +267,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 		airdropAmount := uint256.MustFromBig(g.AirdropAmount)
 		for _, alloc := range airdrop {
-			statedb.AddBalance(alloc.Address, airdropAmount)
+			statedb.SetBalance(alloc.Address, airdropAmount)
 		}
 		log.Debug(
 			"applied airdrop allocation",
@@ -292,11 +300,9 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	// Do custom allocation after airdrop in case an address shows up in standard
 	// allocation
 	for addr, account := range g.Alloc {
-		statedb.AddBalance(addr, uint256.MustFromBig(account.Balance))
+		statedb.SetBalance(addr, uint256.MustFromBig(account.Balance))
 		statedb.SetCode(addr, account.Code)
-		if account.Nonce > 0 {
-			statedb.SetNonce(addr, account.Nonce)
-		}
+		statedb.SetNonce(addr, account.Nonce)
 		for key, value := range account.Storage {
 			statedb.SetState(addr, key, value)
 		}
@@ -311,15 +317,15 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		head.Difficulty = ethparams.GenesisDifficulty
 	}
 	if conf := g.Config; conf != nil {
-		// num := new(big.Int).SetUint64(g.Number) // unused after IsCancun API change
-		if params.GetExtra(conf).IsEVM(g.Timestamp) {
+		num := new(big.Int).SetUint64(g.Number)
+		if params.GetExtra(conf).IsSubnetEVM(g.Timestamp) {
 			if g.BaseFee != nil {
 				head.BaseFee = g.BaseFee
 			} else {
 				head.BaseFee = new(big.Int).Set(params.GetExtra(g.Config).FeeConfig.MinBaseFee)
 			}
 		}
-		if conf.IsCancun(g.Timestamp) {
+		if conf.IsCancun(num, g.Timestamp) {
 			// EIP-4788: The parentBeaconBlockRoot of the genesis block is always
 			// the zero hash. This is because the genesis block does not have a parent
 			// by definition.
@@ -336,9 +342,12 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 	}
 
-	root, err = statedb.Commit(0, false)
-	if err != nil {
-		panic(fmt.Sprintf("failed to commit state: %v", err))
+	// Create the genesis block to use the block hash
+	block := types.NewBlock(head, nil, nil, nil, trie.NewStackTrie(nil))
+	triedbOpt := stateconf.WithTrieDBUpdatePayload(common.Hash{}, block.Hash())
+
+	if _, err := statedb.Commit(0, false, stateconf.WithTrieDBUpdateOpts(triedbOpt)); err != nil {
+		panic(fmt.Sprintf("unable to commit genesis block to statedb: %v", err))
 	}
 	// Commit newly generated states into disk if it's not empty.
 	if root != types.EmptyRootHash {
@@ -346,8 +355,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 			panic(fmt.Sprintf("unable to commit genesis block: %v", err))
 		}
 	}
-	// Create block with empty transactions, uncles, and receipts
-	return types.NewBlock(head, nil, nil, nil, trie.NewStackTrie(nil))
+	return block
 }
 
 // Commit writes the block and state of a genesis specification to the database.
@@ -370,7 +378,7 @@ func (g *Genesis) Commit(db ethdb.Database, triedb *triedb.Database) (*types.Blo
 	rawdb.WriteCanonicalHash(batch, block.Hash(), block.NumberU64())
 	rawdb.WriteHeadBlockHash(batch, block.Hash())
 	rawdb.WriteHeadHeaderHash(batch, block.Hash())
-	rawdb.WriteChainConfig(batch, block.Hash(), config)
+	customrawdb.WriteChainConfig(batch, block.Hash(), config)
 	if err := batch.Write(); err != nil {
 		return nil, fmt.Errorf("failed to write genesis block: %w", err)
 	}
@@ -409,7 +417,7 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 	g := Genesis{
 		Config:  params.TestChainConfig,
 		Alloc:   GenesisAlloc{addr: {Balance: balance}},
-		BaseFee: big.NewInt(params.TestInitialBaseFee),
+		BaseFee: big.NewInt(legacy.BaseFee),
 	}
 	return g.MustCommit(db, triedb.NewDatabase(db, triedb.HashDefaults))
 }

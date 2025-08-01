@@ -1,4 +1,5 @@
-// (c) 2023, Lux Industries, Inc.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
 //
 // This file is a derived work, based on the go-ethereum library whose original
 // notices appear below.
@@ -36,20 +37,20 @@ import (
 	goruntime "runtime"
 	"testing"
 	"time"
-	"github.com/luxfi/evm/cmd/evm/internal/compiler"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/rawdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/core/types"
-	"github.com/luxfi/evm/core/vm"
-	"github.com/luxfi/evm/core/vm/runtime"
+
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/evm/cmd/evm/internal/compiler"
+	"github.com/luxfi/evm/cmd/utils"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/core/vm/runtime"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/cmd/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/evm/triedb/hashdb"
 	"github.com/urfave/cli/v2"
 )
 
@@ -154,7 +155,7 @@ func runCmd(ctx *cli.Context) error {
 			initialGas = genesisConfig.GasLimit
 		}
 	} else {
-		genesisConfig.Config = params.TestEVMChainConfig
+		genesisConfig.Config = params.TestSubnetEVMChainConfig
 	}
 
 	db := rawdb.NewMemoryDatabase()
@@ -241,7 +242,7 @@ func runCmd(ctx *cli.Context) error {
 	if chainConfig != nil {
 		runtimeConfig.ChainConfig = chainConfig
 	} else {
-		runtimeConfig.ChainConfig = params.EVMDefaultChainConfig // NOTE: Replaced AllEthashProtocolChanges with EVMDefaultChainConfig here
+		runtimeConfig.ChainConfig = params.SubnetEVMDefaultChainConfig // NOTE: Replaced AllEthashProtocolChanges with SubnetEVMDefaultChainConfig here
 	}
 
 	var hexInput []byte

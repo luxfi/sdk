@@ -1,4 +1,4 @@
-// (c) 2019-2020, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package nativeminter
@@ -8,12 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	
-	"github.com/luxfi/evm/precompile/allowlist"
-	"github.com/luxfi/evm/precompile/contract"
+
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/core/vm"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/evm/precompile/allowlist"
+	"github.com/luxfi/evm/precompile/contract"
 	"github.com/holiman/uint256"
 )
 
