@@ -13,7 +13,7 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	snow "github.com/luxfi/luxd/snow"
+	snow "github.com/luxfi/node/snow"
 	common "github.com/luxfi/geth/common"
 	types "github.com/luxfi/geth/core/types"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"

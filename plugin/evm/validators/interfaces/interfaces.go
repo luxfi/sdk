@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/luxd/ids"
-	luxuptime "github.com/luxfi/luxd/snow/uptime"
+	"github.com/luxfi/node/ids"
+	luxuptime "github.com/luxfi/node/snow/uptime"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 

@@ -4,7 +4,7 @@
 package customrawdb
 
 import (
-	"github.com/luxfi/luxd/utils/wrappers"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/geth/common"
 )
 
@@ -54,7 +54,8 @@ var (
 	syncPerformedKeyLength = len(syncPerformedPrefix) + wrappers.LongLen
 )
 
-var FirewoodScheme = "firewood"
+// var FirewoodScheme = "firewood"
+var FirewoodScheme = "" // Disabled - use HashScheme instead
 
 // upgradeConfigKey = upgradeConfigPrefix + hash
 func upgradeConfigKey(hash common.Hash) []byte {

@@ -55,7 +55,7 @@ import (
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
-	"github.com/luxfi/evm/triedb/firewood"
+	// "github.com/luxfi/evm/triedb/firewood"
 	"github.com/luxfi/evm/triedb/hashdb"
 	"github.com/luxfi/evm/triedb/pathdb"
 	"github.com/holiman/uint256"
@@ -480,9 +480,11 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 	case rawdb.PathScheme:
 		tconf.DBOverride = pathdb.Defaults.BackendConstructor
 	case customrawdb.FirewoodScheme:
-		cfg := firewood.Defaults
-		cfg.FilePath = filepath.Join(tempdir, "firewood")
-		tconf.DBOverride = cfg.BackendConstructor
+		// Firewood disabled - use HashScheme instead
+		tconf.DBOverride = hashdb.Defaults.BackendConstructor
+		// cfg := firewood.Defaults
+		// cfg.FilePath = filepath.Join(tempdir, "firewood")
+		// tconf.DBOverride = cfg.BackendConstructor
 	default:
 		panic("unknown trie database scheme" + scheme)
 	}

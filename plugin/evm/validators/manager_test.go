@@ -6,14 +6,14 @@ package validators
 import (
 	"testing"
 
-	"github.com/luxfi/luxd/database/memdb"
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/database/memdb"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/plugin/evm/validators/state"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	luxdvalidators "github.com/luxfi/luxd/snow/validators"
+	luxdvalidators "github.com/luxfi/node/snow/validators"
 )
 
 func TestLoadNewValidators(t *testing.T) {

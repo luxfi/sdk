@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/luxfi/luxd/utils/wrappers"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/trie/trienode"

@@ -13,9 +13,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	ids "github.com/luxfi/luxd/ids"
-	bls "github.com/luxfi/luxd/utils/crypto/bls"
-	warp "github.com/luxfi/luxd/vms/platformvm/warp"
+	ids "github.com/luxfi/node/ids"
+	bls "github.com/luxfi/crypto/bls"
+	warp "github.com/luxfi/node/vms/platformvm/warp"
 	gomock "go.uber.org/mock/gomock"
 )
 

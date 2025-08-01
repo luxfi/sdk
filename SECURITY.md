@@ -10,7 +10,7 @@ responsible disclosures. Valid reports will be eligible for a reward (terms and 
 Vulnerabilities must be disclosed to us privately with reasonable time to respond, and avoid compromise of other users and accounts, or loss of funds that are not your own. We do not reward spam or
 social engineering vulnerabilities.
 
-Do not test for or validate any security issues in the live Lux networks (Mainnet and Fuji testnet), confirm all exploits in a local private testnet.
+Do not test for or validate any security issues in the live Lux networks (Mainnet and Testnet testnet), confirm all exploits in a local private testnet.
 
 Please refer to the [Bug Bounty Page](https://hackenproof.com/lux) for the most up-to-date program rules and scope.
 

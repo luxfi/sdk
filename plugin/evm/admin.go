@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/luxfi/luxd/api"
-	"github.com/luxfi/luxd/utils/profiler"
+	"github.com/luxfi/node/api"
+	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/client"
 )

@@ -3,6 +3,9 @@
 
 package state
 
+// Firewood implementation disabled - use luxfi/database instead
+
+/*
 import (
 	"fmt"
 
@@ -47,3 +50,4 @@ func (db *firewoodAccessorDb) CopyTrie(t Trie) Trie {
 		panic(fmt.Errorf("unknown trie type %T", t))
 	}
 }
+*/

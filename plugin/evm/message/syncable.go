@@ -7,14 +7,20 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"
-
-	"github.com/luxfi/luxd/snow/engine/snowman/block"
 )
 
-var _ block.StateSummary = (*SyncSummary)(nil)
+// TODO: These types seem to be missing from the node package, define them temporarily
+type StateSyncMode int
+
+const (
+	StateSyncSkipped StateSyncMode = iota
+)
+
+// var _ block.StateSummary = (*SyncSummary)(nil)
+// Note: StateSummary interface seems to be removed from node/snow/engine/snowman/block
 
 // SyncSummary provides the information necessary to sync a node starting
 // at the given block.
@@ -25,10 +31,10 @@ type SyncSummary struct {
 
 	summaryID  ids.ID
 	bytes      []byte
-	acceptImpl func(SyncSummary) (block.StateSyncMode, error)
+	acceptImpl func(SyncSummary) (StateSyncMode, error)
 }
 
-func NewSyncSummaryFromBytes(summaryBytes []byte, acceptImpl func(SyncSummary) (block.StateSyncMode, error)) (SyncSummary, error) {
+func NewSyncSummaryFromBytes(summaryBytes []byte, acceptImpl func(SyncSummary) (StateSyncMode, error)) (SyncSummary, error) {
 	summary := SyncSummary{}
 	if codecVersion, err := Codec.Unmarshal(summaryBytes, &summary); err != nil {
 		return SyncSummary{}, err
@@ -83,9 +89,9 @@ func (s SyncSummary) String() string {
 	return fmt.Sprintf("SyncSummary(BlockHash=%s, BlockNumber=%d, BlockRoot=%s)", s.BlockHash, s.BlockNumber, s.BlockRoot)
 }
 
-func (s SyncSummary) Accept(context.Context) (block.StateSyncMode, error) {
+func (s SyncSummary) Accept(context.Context) (StateSyncMode, error) {
 	if s.acceptImpl == nil {
-		return block.StateSyncSkipped, fmt.Errorf("accept implementation not specified for summary: %s", s)
+		return StateSyncSkipped, fmt.Errorf("accept implementation not specified for summary: %s", s)
 	}
 	return s.acceptImpl(s)
 }

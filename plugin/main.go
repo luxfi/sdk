@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/version"
 	"github.com/luxfi/evm/plugin/evm"
 	"github.com/luxfi/evm/plugin/runner"
 )

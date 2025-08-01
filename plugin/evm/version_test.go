@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/version"
 	"github.com/stretchr/testify/require"
 )
 

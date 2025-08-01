@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
 )
 
 // Request represents a Network request type

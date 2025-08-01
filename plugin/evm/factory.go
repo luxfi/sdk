@@ -4,9 +4,9 @@
 package evm
 
 import (
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/logging"
-	"github.com/luxfi/luxd/vms"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/node/vms"
 )
 
 var (

@@ -6,8 +6,8 @@ package evm
 import (
 	"context"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"

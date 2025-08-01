@@ -19,10 +19,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/tests/antithesis"
-	"github.com/luxfi/luxd/tests/fixture/tmpnet"
-	"github.com/luxfi/luxd/utils/logging"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/tests/antithesis"
+	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/utils/logging"
 
 	"github.com/luxfi/geth/core/types"
 	ethparams "github.com/luxfi/geth/params"
@@ -31,8 +31,8 @@ import (
 	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/evm/tests/utils"
 
-	ago_tests "github.com/luxfi/luxd/tests"
-	timerpkg "github.com/luxfi/luxd/utils/timer"
+	ago_tests "github.com/luxfi/node/tests"
+	timerpkg "github.com/luxfi/node/utils/timer"
 )
 
 const NumKeys = 5

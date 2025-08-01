@@ -10,17 +10,21 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	ethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
 	"github.com/luxfi/geth/rlp"
 )
 
 // GetHeaderExtra returns the [HeaderExtra] from the given [Header].
 func GetHeaderExtra(h *ethtypes.Header) *HeaderExtra {
-	return extras.Header.Get(h)
+	// TODO: Fix when extras is available
+	// return extras.Header.Get(h)
+	return nil
 }
 
 // SetHeaderExtra sets the given [HeaderExtra] on the [Header].
 func SetHeaderExtra(h *ethtypes.Header, extra *HeaderExtra) {
-	extras.Header.Set(h, extra)
+	// TODO: Fix when extras is available
+	// extras.Header.Set(h, extra)
 }
 
 // WithHeaderExtra sets the given [HeaderExtra] on the [Header]
@@ -208,5 +212,13 @@ type headerMarshaling struct {
 // This function MUST be exported and is used in [HeaderSerializable.EncodeJSON] which is
 // generated to the file gen_header_json.go.
 func (h *HeaderSerializable) Hash() common.Hash {
-	return ethtypes.RLPHash(h)
+	return rlpHash(h)
+}
+
+// rlpHash encodes x and hashes the encoded bytes.
+func rlpHash(x interface{}) (h common.Hash) {
+	hw := crypto.NewKeccakState()
+	rlp.Encode(hw, x)
+	hw.Sum(h[:0])
+	return h
 }

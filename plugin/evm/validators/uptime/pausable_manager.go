@@ -9,9 +9,9 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/uptime"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/uptime"
+	"github.com/luxfi/node/utils/set"
 )
 
 var errPausedDisconnect = errors.New("paused node cannot be disconnected")

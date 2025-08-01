@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/units"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"

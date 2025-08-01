@@ -8,13 +8,13 @@ import (
 	"math"
 	"testing"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/validators"
-	"github.com/luxfi/luxd/snow/validators/validatorsmock"
-	"github.com/luxfi/luxd/utils/constants"
-	"github.com/luxfi/luxd/utils/crypto/bls"
-	"github.com/luxfi/luxd/utils/set"
-	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/snow/validators/validatorsmock"
+	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/node/utils/set"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -29,7 +29,7 @@ type signatureTest struct {
 	canonicalErr error
 }
 
-// This test copies the test coverage from https://github.com/luxfi/luxd/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
+// This test copies the test coverage from https://github.com/luxfi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
 // These tests are only expected to fail if there is a breaking change in Luxd that unexpectedly changes behavior.
 func TestSignatureVerification(t *testing.T) {
 	tests := []signatureTest{

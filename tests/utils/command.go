@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/luxd/api/health"
+	"github.com/luxfi/node/api/health"
 	"github.com/luxfi/geth/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"

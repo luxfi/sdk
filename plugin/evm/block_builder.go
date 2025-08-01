@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/luxd/snow"
-	commonEng "github.com/luxfi/luxd/snow/engine/common"
-	"github.com/luxfi/luxd/utils/lock"
+	"github.com/luxfi/node/snow"
+	commonEng "github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/utils/lock"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"

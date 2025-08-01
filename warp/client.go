@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/evm/rpc"
 )

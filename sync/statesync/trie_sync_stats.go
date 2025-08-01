@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	utils_math "github.com/luxfi/luxd/utils/math"
-	"github.com/luxfi/luxd/utils/timer"
+	utils_math "github.com/luxfi/node/utils/math"
+	"github.com/luxfi/node/utils/timer"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"

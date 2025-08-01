@@ -52,7 +52,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
-	"github.com/luxfi/evm/triedb/firewood"
+	// "github.com/luxfi/evm/triedb/firewood"
 	"github.com/luxfi/evm/triedb/pathdb"
 	"github.com/luxfi/evm/utils"
 	"github.com/davecgh/go-spew/spew"
@@ -371,10 +371,12 @@ func newDbConfig(t *testing.T, scheme string) *triedb.Config {
 	case rawdb.PathScheme:
 		return &triedb.Config{DBOverride: pathdb.Defaults.BackendConstructor}
 	case customrawdb.FirewoodScheme:
-		fwCfg := firewood.Defaults
-		// Create a unique temporary directory for each test
-		fwCfg.FilePath = filepath.Join(t.TempDir(), "firewood_state") // matches blockchain.go
-		return &triedb.Config{DBOverride: fwCfg.BackendConstructor}
+		// Firewood disabled - use HashScheme instead
+		return triedb.HashDefaults
+		// fwCfg := firewood.Defaults
+		// // Create a unique temporary directory for each test
+		// fwCfg.FilePath = filepath.Join(t.TempDir(), "firewood_state") // matches blockchain.go
+		// return &triedb.Config{DBOverride: fwCfg.BackendConstructor}
 	default:
 		t.Fatalf("unknown scheme %s", scheme)
 	}

@@ -11,12 +11,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 
 	"github.com/luxfi/evm/sync/client/stats"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/version"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"

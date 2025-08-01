@@ -32,7 +32,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/luxd/upgrade"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"

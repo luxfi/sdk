@@ -6,9 +6,9 @@ package warp
 import (
 	"fmt"
 
-	"github.com/luxfi/luxd/utils/set"
-	"github.com/luxfi/luxd/vms/platformvm/warp"
-	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/vm"

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/luxd/snow/engine/snowman/block"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"

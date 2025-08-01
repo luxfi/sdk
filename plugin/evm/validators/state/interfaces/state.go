@@ -4,9 +4,9 @@
 package interfaces
 
 import (
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/uptime"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/uptime"
+	"github.com/luxfi/node/utils/set"
 )
 
 type StateReader interface {

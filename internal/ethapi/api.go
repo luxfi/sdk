@@ -58,7 +58,7 @@ import (
 	"github.com/luxfi/evm/rpc"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/holiman/uint256"
-	"github.com/tyler-smith/go-bip39"
+	"github.com/luxfi/go-bip39"
 )
 
 // estimateGasErrorRatio is the amount of overestimation eth_estimateGas is

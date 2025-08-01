@@ -8,15 +8,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/luxd/cache"
-	"github.com/luxfi/luxd/cache/lru"
-	"github.com/luxfi/luxd/database"
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/cache"
+	"github.com/luxfi/node/cache/lru"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/ids"
 
-	"github.com/luxfi/luxd/network/p2p/acp118"
-	"github.com/luxfi/luxd/snow/consensus/snowman"
-	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
-	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
+	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/snow/consensus/snowman"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
 
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"

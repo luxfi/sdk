@@ -6,7 +6,7 @@ package messages
 import (
 	"fmt"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 )
 
 // ValidatorUptime is signed when the ValidationID is known and the validator

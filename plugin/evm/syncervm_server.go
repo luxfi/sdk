@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/luxd/database"
-	"github.com/luxfi/luxd/snow/engine/snowman/block"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/snow/engine/snowman/block"
 
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/core"

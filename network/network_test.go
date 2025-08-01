@@ -12,11 +12,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/luxd/network/p2p"
-	"github.com/luxfi/luxd/snow/engine/common"
-	"github.com/luxfi/luxd/snow/engine/enginetest"
-	"github.com/luxfi/luxd/snow/snowtest"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/snow/engine/enginetest"
+	"github.com/luxfi/node/snow/snowtest"
+	"github.com/luxfi/node/utils/set"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
@@ -25,10 +25,10 @@ import (
 	"github.com/luxfi/evm/network/peertest"
 	"github.com/luxfi/evm/plugin/evm/message"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/codec/linearcodec"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/version"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/luxd/utils"
+	"github.com/luxfi/node/utils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/crypto"

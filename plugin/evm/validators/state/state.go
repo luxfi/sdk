@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/luxd/database"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/uptime"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/uptime"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 

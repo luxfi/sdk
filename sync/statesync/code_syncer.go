@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb"

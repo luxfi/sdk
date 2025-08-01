@@ -67,12 +67,11 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 	metric := registry.Get(name)
 	name = strings.ReplaceAll(name, "/", "_")
 
-	switch m := metric.(type) {
-	case metrics.NilCounter, metrics.NilCounterFloat64, metrics.NilEWMA,
-		metrics.NilGauge, metrics.NilGaugeFloat64, metrics.NilGaugeInfo,
-		metrics.NilHealthcheck, metrics.NilHistogram, metrics.NilMeter,
-		metrics.NilResettingTimer, metrics.NilSample, metrics.NilTimer:
+	if metric == nil {
 		return nil, fmt.Errorf("%w: %q metric is nil", errMetricSkip, name)
+	}
+
+	switch m := metric.(type) {
 	case metrics.Counter:
 		return &dto.MetricFamily{
 			Name: &name,

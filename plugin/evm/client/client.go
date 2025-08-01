@@ -9,9 +9,9 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	"github.com/luxfi/luxd/api"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/rpc"
+	"github.com/luxfi/node/api"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/evm/plugin/evm/config"
 )
 

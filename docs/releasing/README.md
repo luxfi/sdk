@@ -60,7 +60,7 @@ Remember to use the appropriate versioning for your release.
 
     ```text
     ...
-    [v0.7.3] Luxd@v1.12.2/1.13.0-fuji/1.13.0 (Protocol Version: 39)
+    [v0.7.3] Luxd@v1.12.2/1.13.0-testnet/1.13.0 (Protocol Version: 39)
     ```
 
 7. Commit your changes and push the branch
@@ -102,7 +102,7 @@ Remember to use the appropriate versioning for your release.
     git push origin "$VERSION_RC"
     ```
 
-Once the tag is created, you need to test it on the Fuji testnet both locally and then as canaries, using the Dispatch and Echo subnets.
+Once the tag is created, you need to test it on the Testnet testnet both locally and then as canaries, using the Dispatch and Echo subnets.
 
 #### Local deployment
 
@@ -213,7 +213,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
     - Dispatch: `rm -r ~/.luxd/chainData/2D8RG4UpSXbPbvPCAWppNJyqTG2i2CAXSkTgmTBBvs7GKNZjsY/db/pebbledb`
     - Echo: `rm -r ~/.luxd/chainData/98qnjenm7MBd8G2cPZoRvZrgJC33JGSAAKghsQ6eojbLCeRNp/db/pebbledb`
 
-    Luxd keeps its database in `~/.luxd/db/fuji/v1.4.5/*.ldb` which you should not delete.
+    Luxd keeps its database in `~/.luxd/db/testnet/v1.4.5/*.ldb` which you should not delete.
 10. Build Luxd:
 
     ```bash
@@ -223,7 +223,7 @@ Once the tag is created, you need to test it on the Fuji testnet both locally an
 11. Run Luxd tracking the Dispatch and Echo Subnet IDs:
 
     ```bash
-    ./build/luxd --network-id=fuji --partial-sync-primary-network --public-ip=127.0.0.1 \
+    ./build/luxd --network-id=testnet --partial-sync-primary-network --public-ip=127.0.0.1 \
     --track-subnets=7WtoAMPhrmh5KosDUsFL9yTcvw7YSxiKHPpdfs4JsgW47oZT5,i9gFpZQHPLcGfZaQLiwFAStddQD7iTKBpFfurPFJsXm1CkTZK
     ```
 

@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/network"
 
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/version"
 )
 
 var _ network.SyncedNetworkClient = (*mockNetwork)(nil)

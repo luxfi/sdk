@@ -7,7 +7,7 @@ package contract
 import (
 	"math/big"
 
-	"github.com/luxfi/luxd/snow"
+	"github.com/luxfi/node/snow"
 	"github.com/luxfi/geth/common"
 	ethtypes "github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/precompile/precompileconfig"
