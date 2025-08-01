@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"

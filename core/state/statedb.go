@@ -31,6 +31,7 @@ package state
 import (
 	"github.com/luxfi/geth/common"
 	ethstate "github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/core/state/snapshot"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -54,12 +55,12 @@ type StateDB struct {
 
 	// Some fields remembered as they are used in tests
 	db    Database
-	snaps ethstate.SnapshotTree
+	snaps *snapshot.Tree
 }
 
 // New creates a new state from a given trie.
-func New(root common.Hash, db Database, snaps ethstate.SnapshotTree) (*StateDB, error) {
-	stateDB, err := ethstate.New(root, db, snaps)
+func New(root common.Hash, db Database, snaps *snapshot.Tree) (*StateDB, error) {
+	stateDB, err := ethstate.New(root, db)
 	if err != nil {
 		return nil, err
 	}
@@ -80,12 +81,13 @@ func (wp *workerPool) Done() {
 	wp.BoundedWorkers.Wait()
 }
 
-func WithConcurrentWorkers(prefetchers int) ethstate.PrefetcherOption {
-	pool := &workerPool{
-		BoundedWorkers: utils.NewBoundedWorkers(prefetchers),
-	}
-	return ethstate.WithWorkerPools(func() ethstate.WorkerPool { return pool })
-}
+// TODO: PrefetcherOption and WithWorkerPools seem to be removed from geth
+// func WithConcurrentWorkers(prefetchers int) ethstate.PrefetcherOption {
+// 	pool := &workerPool{
+// 		BoundedWorkers: utils.NewBoundedWorkers(prefetchers),
+// 	}
+// 	return ethstate.WithWorkerPools(func() ethstate.WorkerPool { return pool })
+// }
 
 // GetState retrieves a value from the given account's storage trie.
 func (s *StateDB) GetState(addr common.Address, hash common.Hash) common.Hash {

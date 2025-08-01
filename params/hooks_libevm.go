@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/luxd/snow"
+	"github.com/luxfi/node/snow"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/geth"

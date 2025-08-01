@@ -30,8 +30,8 @@ package params
 import (
 	"math/big"
 
-	"github.com/luxfi/luxd/upgrade"
-	"github.com/luxfi/luxd/utils/constants"
+	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/node/utils/constants"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"

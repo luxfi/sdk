@@ -17,10 +17,10 @@ import (
 
 	"github.com/luxfi/geth/log"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/tests/fixture/e2e"
-	"github.com/luxfi/luxd/tests/fixture/tmpnet"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/tests/fixture/e2e"
+	"github.com/luxfi/node/tests/fixture/tmpnet"
+	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/evm/tests/utils"

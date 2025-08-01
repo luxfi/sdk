@@ -36,9 +36,16 @@ import (
 	ethparams "github.com/luxfi/geth/params"
 )
 
+const (
+	// TODO: These constants seem to be missing from geth params
+	BlobTxBlobGaspriceUpdateFraction = 3338477
+	BlobTxTargetBlobGasPerBlock      = 3 * ethparams.BlobTxBlobGasPerBlob
+	MaxBlobGasPerBlock               = 6 * ethparams.BlobTxBlobGasPerBlob
+)
+
 var (
 	minBlobGasPrice            = big.NewInt(ethparams.BlobTxMinBlobGasprice)
-	blobGaspriceUpdateFraction = big.NewInt(ethparams.BlobTxBlobGaspriceUpdateFraction)
+	blobGaspriceUpdateFraction = big.NewInt(BlobTxBlobGaspriceUpdateFraction)
 )
 
 // VerifyEIP4844Header verifies the presence of the excessBlobGas field and that
@@ -53,8 +60,8 @@ func VerifyEIP4844Header(parent, header *types.Header) error {
 		return errors.New("header is missing blobGasUsed")
 	}
 	// Verify that the blob gas used remains within reasonable limits.
-	if *header.BlobGasUsed > ethparams.MaxBlobGasPerBlock {
-		return fmt.Errorf("blob gas used %d exceeds maximum allowance %d", *header.BlobGasUsed, ethparams.MaxBlobGasPerBlock)
+	if *header.BlobGasUsed > MaxBlobGasPerBlock {
+		return fmt.Errorf("blob gas used %d exceeds maximum allowance %d", *header.BlobGasUsed, MaxBlobGasPerBlock)
 	}
 	if *header.BlobGasUsed%ethparams.BlobTxBlobGasPerBlob != 0 {
 		return fmt.Errorf("blob gas used %d not a multiple of blob gas per blob %d", header.BlobGasUsed, ethparams.BlobTxBlobGasPerBlob)
@@ -80,10 +87,10 @@ func VerifyEIP4844Header(parent, header *types.Header) error {
 // blobs on top of the excess blob gas.
 func CalcExcessBlobGas(parentExcessBlobGas uint64, parentBlobGasUsed uint64) uint64 {
 	excessBlobGas := parentExcessBlobGas + parentBlobGasUsed
-	if excessBlobGas < ethparams.BlobTxTargetBlobGasPerBlock {
+	if excessBlobGas < BlobTxTargetBlobGasPerBlock {
 		return 0
 	}
-	return excessBlobGas - ethparams.BlobTxTargetBlobGasPerBlock
+	return excessBlobGas - BlobTxTargetBlobGasPerBlock
 }
 
 // CalcBlobFee calculates the blobfee from the header's excess blob gas field.

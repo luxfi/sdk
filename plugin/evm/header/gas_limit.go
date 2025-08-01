@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/luxd/utils/math"
+	"github.com/luxfi/node/utils/math"
 	"github.com/luxfi/geth/core/types"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"

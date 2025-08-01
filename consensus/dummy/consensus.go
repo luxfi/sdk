@@ -9,7 +9,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/luxd/utils/timer/mockable"
+	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/trie"

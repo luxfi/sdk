@@ -6,15 +6,15 @@ package customtypes
 import (
 	"io"
 
-	ethtypes "github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
 )
 
-var extras = ethtypes.RegisterExtras[
-	HeaderExtra, *HeaderExtra,
-	ethtypes.NOOPBlockBodyHooks, *ethtypes.NOOPBlockBodyHooks,
-	noopStateAccountExtras,
-]()
+// TODO: Fix RegisterExtras when available in geth
+// var extras = ethtypes.RegisterExtras[
+// 	HeaderExtra, *HeaderExtra,
+// 	ethtypes.NOOPBlockBodyHooks, *ethtypes.NOOPBlockBodyHooks,
+// 	noopStateAccountExtras,
+// ]()
 
 type noopStateAccountExtras struct{}
 

@@ -6,7 +6,7 @@ package customrawdb
 import (
 	"encoding/binary"
 
-	"github.com/luxfi/luxd/utils/wrappers"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/geth/common"
 	ethrawdb "github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb"

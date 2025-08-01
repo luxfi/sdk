@@ -42,7 +42,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/luxd/upgrade"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/geth/common"

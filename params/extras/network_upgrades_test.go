@@ -6,9 +6,9 @@ package extras
 import (
 	"testing"
 
-	"github.com/luxfi/luxd/upgrade"
-	"github.com/luxfi/luxd/upgrade/upgradetest"
-	"github.com/luxfi/luxd/utils/constants"
+	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -162,29 +162,29 @@ func TestCheckNetworkUpgradesCompatible(t *testing.T) {
 		{
 			name: "Incompatible_fastforward_nil_NetworkUpgrades",
 			upgrades1: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(upgrade.Testnet)
 				return &upgrades
 			}(),
 			upgrades2: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(upgrade.Testnet)
 				upgrades.EtnaTimestamp = nil
 				return &upgrades
 			}(),
-			time:  uint64(upgrade.Fuji.EtnaTime.Unix()),
+			time:  uint64(upgrade.Testnet.EtnaTime.Unix()),
 			valid: false,
 		},
 		{
 			name: "Compatible_Fortuna_fastforward_nil_NetworkUpgrades",
 			upgrades1: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(upgrade.Testnet)
 				return &upgrades
 			}(),
 			upgrades2: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(upgrade.Testnet)
 				upgrades.FortunaTimestamp = nil
 				return &upgrades
 			}(),
-			time:  uint64(upgrade.Fuji.FortunaTime.Unix()),
+			time:  uint64(upgrade.Testnet.FortunaTime.Unix()),
 			valid: true,
 		},
 	}
@@ -245,21 +245,21 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 			valid:         false,
 		},
 		{
-			name: "Invalid_Mainnet_Durango_reconfigured_to_Fuji",
+			name: "Invalid_Mainnet_Durango_reconfigured_to_Testnet",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
-				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.GetConfig(constants.FujiID).DurangoTime),
+				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.GetConfig(constants.TestnetID).DurangoTime),
 			},
 			luxdUpgrades: upgrade.Mainnet,
 			valid:         false,
 		},
 		{
-			name: "Valid_Fuji_Durango_reconfigured_to_Mainnet",
+			name: "Valid_Testnet_Durango_reconfigured_to_Mainnet",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.GetConfig(constants.MainnetID).DurangoTime),
 			},
-			luxdUpgrades: upgrade.Fuji,
+			luxdUpgrades: upgrade.Testnet,
 			valid:         false,
 		},
 		{
@@ -286,11 +286,11 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 			name: "Valid_Fortuna_nil",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
-				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.Fuji.DurangoTime),
-				EtnaTimestamp:      utils.TimeToNewUint64(upgrade.Fuji.EtnaTime),
+				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.Testnet.DurangoTime),
+				EtnaTimestamp:      utils.TimeToNewUint64(upgrade.Testnet.EtnaTime),
 				FortunaTimestamp:   nil,
 			},
-			luxdUpgrades: upgrade.Fuji,
+			luxdUpgrades: upgrade.Testnet,
 			valid:         true,
 		},
 	}

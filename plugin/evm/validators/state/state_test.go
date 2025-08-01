@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/database"
-	"github.com/luxfi/luxd/database/memdb"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/wrappers"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/database/memdb"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 

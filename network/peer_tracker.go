@@ -8,10 +8,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/luxfi/luxd/ids"
-	utils_math "github.com/luxfi/luxd/utils/math"
-	"github.com/luxfi/luxd/utils/set"
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/ids"
+	utils_math "github.com/luxfi/node/utils/math"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/version"
 
 	"github.com/luxfi/geth/log"
 

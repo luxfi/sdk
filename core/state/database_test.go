@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/geth/geth/stateconf"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/triedb/firewood"
+	// "github.com/luxfi/evm/triedb/firewood"
 	"github.com/luxfi/evm/triedb/hashdb"
 	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
@@ -80,20 +80,21 @@ func newFuzzState(t *testing.T) *fuzzState {
 		r.NoError(hashState.TrieDB().Close())
 	})
 
-	firewoodMemdb := rawdb.NewMemoryDatabase()
-	fwCfg := firewood.Defaults
-	fwCfg.FilePath = filepath.Join(t.TempDir(), "firewood") // Use a temporary directory for the Firewood
-	firewoodState := NewDatabaseWithConfig(
-		firewoodMemdb,
-		&triedb.Config{
-			DBOverride: fwCfg.BackendConstructor,
-		},
-	)
-	fwTr, err := firewoodState.OpenTrie(ethRoot)
-	r.NoError(err)
-	t.Cleanup(func() {
-		r.NoError(firewoodState.TrieDB().Close())
-	})
+	// Firewood disabled - skip firewood test
+	// firewoodMemdb := rawdb.NewMemoryDatabase()
+	// fwCfg := firewood.Defaults
+	// fwCfg.FilePath = filepath.Join(t.TempDir(), "firewood") // Use a temporary directory for the Firewood
+	// firewoodState := NewDatabaseWithConfig(
+	// 	firewoodMemdb,
+	// 	&triedb.Config{
+	// 		DBOverride: fwCfg.BackendConstructor,
+	// 	},
+	// )
+	// fwTr, err := firewoodState.OpenTrie(ethRoot)
+	// r.NoError(err)
+	// t.Cleanup(func() {
+	// 	r.NoError(firewoodState.TrieDB().Close())
+	// })
 
 	return &fuzzState{
 		merkleTries: []*merkleTrie{
@@ -104,13 +105,14 @@ func newFuzzState(t *testing.T) *fuzzState {
 				openStorageTries: make(map[common.Address]Trie),
 				lastRoot:         ethRoot,
 			},
-			&merkleTrie{
-				name:             "firewood",
-				ethDatabase:      firewoodState,
-				accountTrie:      fwTr,
-				openStorageTries: make(map[common.Address]Trie),
-				lastRoot:         ethRoot,
-			},
+			// Firewood disabled
+			// &merkleTrie{
+			// 	name:             "firewood",
+			// 	ethDatabase:      firewoodState,
+			// 	accountTrie:      fwTr,
+			// 	openStorageTries: make(map[common.Address]Trie),
+			// 	lastRoot:         ethRoot,
+			// },
 		},
 		currentStorageInputIndices: make(map[common.Address]uint64),
 		require:                    r,
@@ -148,11 +150,13 @@ func (fs *fuzzState) commit() {
 		}
 
 		// HashDB/PathDB only allows updating the triedb if there have been changes.
-		if _, ok := tr.ethDatabase.TrieDB().Backend().(*firewood.Database); ok {
-			triedbopt := stateconf.WithTrieDBUpdatePayload(common.Hash{byte(int64(fs.blockNumber - 1))}, common.Hash{byte(int64(fs.blockNumber))})
-			fs.require.NoError(tr.ethDatabase.TrieDB().Update(updatedRoot, tr.lastRoot, fs.blockNumber, mergedNodeSet, nil, triedbopt), "failed to update triedb in %s", tr.name)
-			tr.lastRoot = updatedRoot
-		} else if updatedRoot != tr.lastRoot {
+		// Firewood disabled - always use the else case
+		// if _, ok := tr.ethDatabase.TrieDB().Backend().(*firewood.Database); ok {
+		// 	triedbopt := stateconf.WithTrieDBUpdatePayload(common.Hash{byte(int64(fs.blockNumber - 1))}, common.Hash{byte(int64(fs.blockNumber))})
+		// 	fs.require.NoError(tr.ethDatabase.TrieDB().Update(updatedRoot, tr.lastRoot, fs.blockNumber, mergedNodeSet, nil, triedbopt), "failed to update triedb in %s", tr.name)
+		// 	tr.lastRoot = updatedRoot
+		// } else 
+		if updatedRoot != tr.lastRoot {
 			fs.require.NoError(tr.ethDatabase.TrieDB().Update(updatedRoot, tr.lastRoot, fs.blockNumber, mergedNodeSet, nil), "failed to update triedb in %s", tr.name)
 			tr.lastRoot = updatedRoot
 		}

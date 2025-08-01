@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/luxfi/luxd/upgrade"
+	"github.com/luxfi/node/upgrade"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/utils"
 )
@@ -160,11 +160,11 @@ func (n *NetworkUpgrades) IsGranite(time uint64) bool {
 
 func (n *NetworkUpgrades) Description() string {
 	var banner string
-	banner += fmt.Sprintf(" - SubnetEVM Timestamp:          @%-10v (https://github.com/luxfi/luxd/releases/tag/v1.10.0)\n", ptrToString(n.SubnetEVMTimestamp))
-	banner += fmt.Sprintf(" - Durango Timestamp:            @%-10v (https://github.com/luxfi/luxd/releases/tag/v1.11.0)\n", ptrToString(n.DurangoTimestamp))
-	banner += fmt.Sprintf(" - Etna Timestamp:               @%-10v (https://github.com/luxfi/luxd/releases/tag/v1.12.0)\n", ptrToString(n.EtnaTimestamp))
-	banner += fmt.Sprintf(" - Fortuna Timestamp:            @%-10v (https://github.com/luxfi/luxd/releases/tag/v1.13.0)\n", ptrToString(n.FortunaTimestamp))
-	banner += fmt.Sprintf(" - Granite Timestamp:            @%-10v (https://github.com/luxfi/luxd/releases/tag/v1.14.0)\n", ptrToString(n.GraniteTimestamp))
+	banner += fmt.Sprintf(" - SubnetEVM Timestamp:          @%-10v (https://github.com/luxfi/node/releases/tag/v1.10.0)\n", ptrToString(n.SubnetEVMTimestamp))
+	banner += fmt.Sprintf(" - Durango Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.11.0)\n", ptrToString(n.DurangoTimestamp))
+	banner += fmt.Sprintf(" - Etna Timestamp:               @%-10v (https://github.com/luxfi/node/releases/tag/v1.12.0)\n", ptrToString(n.EtnaTimestamp))
+	banner += fmt.Sprintf(" - Fortuna Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.13.0)\n", ptrToString(n.FortunaTimestamp))
+	banner += fmt.Sprintf(" - Granite Timestamp:            @%-10v (https://github.com/luxfi/node/releases/tag/v1.14.0)\n", ptrToString(n.GraniteTimestamp))
 	return banner
 }
 
@@ -189,12 +189,24 @@ func (n *NetworkUpgrades) GetLuxRules(time uint64) LuxRules {
 // GetNetworkUpgrades returns the network upgrades for the specified luxd upgrades.
 // Nil values are used to indicate optional upgrades.
 func GetNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
+	// TODO: DurangoTime and EtnaTime seem to be removed from upgrade.Config
 	return NetworkUpgrades{
 		SubnetEVMTimestamp: utils.NewUint64(0),
-		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.DurangoTime),
-		EtnaTimestamp:      utils.TimeToNewUint64(agoUpgrade.EtnaTime),
+		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.ActivationTime),
+		EtnaTimestamp:      nil, // TODO: EtnaTime not available in upgrade.Config
 		FortunaTimestamp:   nil, // Fortuna is optional and has no effect on Subnet-EVM
 		GraniteTimestamp:   nil, // Granite is optional and has no effect on Subnet-EVM
+	}
+}
+
+// GetDefaultNetworkUpgrades returns default network upgrades
+func GetDefaultNetworkUpgrades() NetworkUpgrades {
+	return NetworkUpgrades{
+		SubnetEVMTimestamp: utils.NewUint64(0),
+		DurangoTimestamp:   utils.NewUint64(0), // Already activated
+		EtnaTimestamp:      nil, // Not scheduled
+		FortunaTimestamp:   nil, // Not scheduled
+		GraniteTimestamp:   nil, // Not scheduled
 	}
 }
 

@@ -6,9 +6,9 @@ package state
 import (
 	"math"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/codec/linearcodec"
-	"github.com/luxfi/luxd/utils/wrappers"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/node/utils/wrappers"
 )
 
 const (

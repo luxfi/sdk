@@ -16,12 +16,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/luxd/cache/lru"
-	"github.com/luxfi/luxd/cache/metercacher"
-	"github.com/luxfi/luxd/network/p2p"
-	"github.com/luxfi/luxd/network/p2p/acp118"
-	"github.com/luxfi/luxd/network/p2p/gossip"
-	"github.com/luxfi/firewood-go-ethhash/ffi"
+	"github.com/luxfi/node/cache/lru"
+	"github.com/luxfi/node/cache/metercacher"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/gossip"
+	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/luxfi/geth/core/rawdb"
@@ -75,24 +75,24 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/database/versiondb"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow"
-	"github.com/luxfi/luxd/snow/consensus/snowman"
-	"github.com/luxfi/luxd/snow/engine/snowman/block"
-	"github.com/luxfi/luxd/utils/perms"
-	"github.com/luxfi/luxd/utils/profiler"
-	"github.com/luxfi/luxd/utils/timer/mockable"
-	"github.com/luxfi/luxd/utils/units"
-	"github.com/luxfi/luxd/version"
-	"github.com/luxfi/luxd/vms/components/chain"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/database/versiondb"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/snow/consensus/snowman"
+	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/utils/perms"
+	"github.com/luxfi/node/utils/profiler"
+	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/node/version"
+	"github.com/luxfi/node/vms/components/chain"
 
-	commonEng "github.com/luxfi/luxd/snow/engine/common"
+	commonEng "github.com/luxfi/node/snow/engine/common"
 
-	"github.com/luxfi/luxd/database"
-	luxUtils "github.com/luxfi/luxd/utils"
-	luxJSON "github.com/luxfi/luxd/utils/json"
+	"github.com/luxfi/node/database"
+	luxUtils "github.com/luxfi/node/utils"
+	luxJSON "github.com/luxfi/node/utils/json"
 )
 
 var (
@@ -346,7 +346,7 @@ func (vm *VM) Initialize(
 	vm.ethConfig.Genesis = g
 	// NetworkID here is different than Lux's NetworkID.
 	// Lux's NetworkID represents the Lux network is running on
-	// like Fuji, Mainnet, Local, etc.
+	// like Testnet, Mainnet, Local, etc.
 	// The NetworkId here is kept same as ChainID to be compatible with
 	// Ethereum tooling.
 	vm.ethConfig.NetworkId = g.Config.ChainID.Uint64()
@@ -396,26 +396,26 @@ func (vm *VM) Initialize(
 	vm.ethConfig.SkipTxIndexing = vm.config.SkipTxIndexing
 	vm.ethConfig.StateScheme = vm.config.StateScheme
 
-	if vm.ethConfig.StateScheme == customrawdb.FirewoodScheme {
-		log.Warn("Firewood state scheme is enabled")
-		log.Warn("This is untested in production, use at your own risk")
-		// Firewood only supports pruning for now.
-		if !vm.config.Pruning {
-			return errors.New("Pruning must be enabled for Firewood")
-		}
-		// Firewood does not support iterators, so the snapshot cannot be constructed
-		if vm.config.SnapshotCache > 0 {
-			return errors.New("Snapshot cache must be disabled for Firewood")
-		}
-		if vm.config.OfflinePruning {
-			return errors.New("Offline pruning is not supported for Firewood")
-		}
-		if vm.config.StateSyncEnabled {
-			return errors.New("State sync is not yet supported for Firewood")
-		}
-	}
+	// if vm.ethConfig.StateScheme == customrawdb.FirewoodScheme {
+	// 	log.Warn("Firewood state scheme is enabled")
+	// 	log.Warn("This is untested in production, use at your own risk")
+	// 	// Firewood only supports pruning for now.
+	// 	if !vm.config.Pruning {
+	// 		return errors.New("Pruning must be enabled for Firewood")
+	// 	}
+	// 	// Firewood does not support iterators, so the snapshot cannot be constructed
+	// 	if vm.config.SnapshotCache > 0 {
+	// 		return errors.New("Snapshot cache must be disabled for Firewood")
+	// 	}
+	// 	if vm.config.OfflinePruning {
+	// 		return errors.New("Offline pruning is not supported for Firewood")
+	// 	}
+	// 	if vm.config.StateSyncEnabled {
+	// 		return errors.New("State sync is not yet supported for Firewood")
+	// 	}
+	// }
 	if vm.ethConfig.StateScheme == rawdb.PathScheme {
-		log.Error("Path state scheme is not supported. Please use HashDB or Firewood state schemes instead")
+		log.Error("Path state scheme is not supported. Please use HashDB state scheme instead")
 		return errors.New("Path state scheme is not supported")
 	}
 
@@ -591,14 +591,14 @@ func (vm *VM) initializeMetrics() error {
 		return err
 	}
 
-	if vm.config.MetricsExpensiveEnabled && vm.config.StateScheme == customrawdb.FirewoodScheme {
-		if err := ffi.StartMetrics(); err != nil {
-			return fmt.Errorf("failed to start firewood metrics collection: %w", err)
-		}
-		if err := vm.ctx.Metrics.Register("firewood", ffi.Gatherer{}); err != nil {
-			return fmt.Errorf("failed to register firewood metrics: %w", err)
-		}
-	}
+	// if vm.config.MetricsExpensiveEnabled && vm.config.StateScheme == customrawdb.FirewoodScheme {
+	// 	if err := ffi.StartMetrics(); err != nil {
+	// 		return fmt.Errorf("failed to start firewood metrics collection: %w", err)
+	// 	}
+	// 	if err := vm.ctx.Metrics.Register("firewood", ffi.Gatherer{}); err != nil {
+	// 		return fmt.Errorf("failed to register firewood metrics: %w", err)
+	// 	}
+	// }
 	return vm.ctx.Metrics.Register(sdkMetricsPrefix, vm.sdkMetrics)
 }
 

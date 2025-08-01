@@ -15,15 +15,15 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/network/p2p"
-	"github.com/luxfi/luxd/snow"
-	"github.com/luxfi/luxd/snow/engine/common"
-	"github.com/luxfi/luxd/snow/validators"
-	"github.com/luxfi/luxd/utils"
-	"github.com/luxfi/luxd/utils/set"
-	"github.com/luxfi/luxd/version"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/utils"
+	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/node/version"
 
 	"github.com/luxfi/evm/network/stats"
 	"github.com/luxfi/evm/plugin/evm/message"
@@ -507,7 +507,7 @@ func (n *network) nextRequestID() uint32 {
 
 // IsNetworkRequest checks if the given requestID is a request for this network handler (even-numbered requestIDs)
 // SDK requests are odd-numbered requestIDs
-// (see invariant: https://github.com/luxfi/luxd/blob/v1.13.0/network/p2p/router.go#L83)
+// (see invariant: https://github.com/luxfi/node/blob/v1.13.0/network/p2p/router.go#L83)
 func IsNetworkRequest(requestID uint32) bool {
 	return requestID%2 == 0
 }

@@ -6,7 +6,7 @@ package message
 import (
 	"context"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 )
 
 var (

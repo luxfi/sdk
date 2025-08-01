@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/set"
 
-	commonEng "github.com/luxfi/luxd/snow/engine/common"
+	commonEng "github.com/luxfi/node/snow/engine/common"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/crypto"

@@ -8,11 +8,11 @@ import (
 	"context"
 	"slices"
 
-	"github.com/luxfi/luxd/database"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/consensus/snowman"
-	"github.com/luxfi/luxd/snow/consensus/snowman/snowmantest"
-	"github.com/luxfi/luxd/snow/snowtest"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/consensus/snowman"
+	"github.com/luxfi/node/snow/consensus/snowman/snowmantest"
+	"github.com/luxfi/node/snow/snowtest"
 )
 
 // EmptyBlockClient returns an error if a block is requested

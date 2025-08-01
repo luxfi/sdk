@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/utils/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/evm/plugin/evm/client"
 )
 

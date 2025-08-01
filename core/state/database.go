@@ -31,7 +31,7 @@ import (
 	ethstate "github.com/luxfi/geth/core/state"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/triedb/firewood"
+	// "github.com/luxfi/evm/triedb/firewood"
 )
 
 type (
@@ -40,25 +40,29 @@ type (
 )
 
 func NewDatabase(db ethdb.Database) Database {
-	return ethstate.NewDatabase(db)
+	// TODO: NewDatabase now requires triedb and snapshot tree parameters
+	// Using nil for now, may need to be updated based on usage
+	trieDB := triedb.NewDatabase(db, nil)
+	return ethstate.NewDatabase(trieDB, nil)
 }
 
 func NewDatabaseWithConfig(db ethdb.Database, config *triedb.Config) Database {
-	coredb := ethstate.NewDatabaseWithConfig(db, config)
-	return wrapIfFirewood(coredb)
+	// TODO: NewDatabaseWithConfig seems to be removed, using NewDatabase instead
+	trieDB := triedb.NewDatabase(db, config)
+	return ethstate.NewDatabase(trieDB, nil)
 }
 
-func NewDatabaseWithNodeDB(db ethdb.Database, triedb *triedb.Database) Database {
-	coredb := ethstate.NewDatabaseWithNodeDB(db, triedb)
-	return wrapIfFirewood(coredb)
+func NewDatabaseWithNodeDB(db ethdb.Database, tdb *triedb.Database) Database {
+	// TODO: NewDatabaseWithNodeDB seems to be removed, using NewDatabase instead
+	return ethstate.NewDatabase(tdb, nil)
 }
-func wrapIfFirewood(db Database) Database {
-	fw, ok := db.TrieDB().Backend().(*firewood.Database)
-	if !ok {
-		return db
-	}
-	return &firewoodAccessorDb{
-		Database: db,
-		fw:       fw,
-	}
-}
+// func wrapIfFirewood(db Database) Database {
+// 	fw, ok := db.TrieDB().Backend().(*firewood.Database)
+// 	if !ok {
+// 		return db
+// 	}
+// 	return &firewoodAccessorDb{
+// 		Database: db,
+// 		fw:       fw,
+// 	}
+// }

@@ -7,8 +7,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"

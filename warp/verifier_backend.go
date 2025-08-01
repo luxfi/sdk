@@ -9,10 +9,10 @@ import (
 
 	"github.com/luxfi/evm/warp/messages"
 
-	"github.com/luxfi/luxd/database"
-	"github.com/luxfi/luxd/snow/engine/common"
-	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
-	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
+	"github.com/luxfi/node/database"
+	"github.com/luxfi/node/snow/engine/common"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
 )
 
 const (

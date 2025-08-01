@@ -10,7 +10,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/luxfi/luxd/ids"
+	"github.com/luxfi/node/ids"
 
 	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"

@@ -22,7 +22,7 @@ The Subnet EVM runs in a separate process from the main Luxd process and communi
 ```text
 [v0.7.0] Luxd@v1.12.0-v1.12.1 (Protocol Version: 38)
 [v0.7.1] Luxd@v1.12.2 (Protocol Version: 39)
-[v0.7.2] Luxd@v1.12.2/1.13.0-fuji (Protocol Version: 39)
+[v0.7.2] Luxd@v1.12.2/1.13.0-testnet (Protocol Version: 39)
 [v0.7.3] Luxd@v1.12.2/1.13.0 (Protocol Version: 39)
 [v0.7.4] Luxd@v1.13.1 (Protocol Version: 40)
 [v0.7.5] Luxd@v1.13.2 (Protocol Version: 41)

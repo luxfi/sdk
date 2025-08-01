@@ -8,12 +8,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow"
-	"github.com/luxfi/luxd/snow/snowtest"
-	"github.com/luxfi/luxd/snow/validators"
-	"github.com/luxfi/luxd/snow/validators/validatorstest"
-	"github.com/luxfi/luxd/utils/constants"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/snow/snowtest"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/snow/validators/validatorstest"
+	"github.com/luxfi/node/utils/constants"
 )
 
 // SubnetEVMTestChainID is a evm specific chain ID for testing

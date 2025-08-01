@@ -5,9 +5,9 @@
 package precompileconfig
 
 import (
-	"github.com/luxfi/luxd/snow"
-	"github.com/luxfi/luxd/snow/engine/snowman/block"
-	"github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 )

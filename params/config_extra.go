@@ -8,7 +8,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/luxd/upgrade"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
 )

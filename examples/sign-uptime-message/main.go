@@ -12,19 +12,19 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/luxfi/luxd/api/info"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/network/p2p"
-	"github.com/luxfi/luxd/network/peer"
-	"github.com/luxfi/luxd/proto/pb/sdk"
-	"github.com/luxfi/luxd/snow/networking/router"
-	"github.com/luxfi/luxd/utils/compression"
-	"github.com/luxfi/luxd/vms/platformvm/warp"
-	"github.com/luxfi/luxd/vms/platformvm/warp/payload"
-	"github.com/luxfi/luxd/wallet/subnet/primary"
+	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/network/peer"
+	"github.com/luxfi/node/proto/pb/sdk"
+	"github.com/luxfi/node/snow/networking/router"
+	"github.com/luxfi/node/utils/compression"
+	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/evm/warp/messages"
 
-	p2pmessage "github.com/luxfi/luxd/message"
+	p2pmessage "github.com/luxfi/node/message"
 )
 
 // An example application demonstrating how to request a signature for

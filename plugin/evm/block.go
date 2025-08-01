@@ -22,9 +22,9 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/consensus/snowman"
-	"github.com/luxfi/luxd/snow/engine/snowman/block"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/snow/consensus/snowman"
+	"github.com/luxfi/node/snow/engine/snowman/block"
 )
 
 var (

@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/luxd/codec"
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/proto/pb/sdk"
-	"github.com/luxfi/luxd/utils/crypto/bls"
-	luxWarp "github.com/luxfi/luxd/vms/platformvm/warp"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/proto/pb/sdk"
+	"github.com/luxfi/crypto/bls"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"google.golang.org/protobuf/proto"
 )
 

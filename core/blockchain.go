@@ -62,14 +62,14 @@ import (
 	"github.com/luxfi/evm/plugin/evm/customlogs"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
-	"github.com/luxfi/evm/triedb/firewood"
+	// "github.com/luxfi/evm/triedb/firewood"
 	"github.com/luxfi/evm/triedb/hashdb"
 	"github.com/luxfi/evm/triedb/pathdb"
 
 	// Force geth metrics of the same name to be registered first.
 	_ "github.com/luxfi/geth/core"
 
-	ffi "github.com/luxfi/firewood-go-ethhash/ffi"
+	// ffi "github.com/luxfi/firewood-go-ethhash/ffi"
 )
 
 // ====== If resolving merge conflicts ======
@@ -236,19 +236,19 @@ func (c *CacheConfig) triedbConfig() *triedb.Config {
 			DirtyCacheSize: c.TrieDirtyLimit * 1024 * 1024,
 		}.BackendConstructor
 	}
-	if c.StateScheme == customrawdb.FirewoodScheme {
-		// ChainDataDir may not be set during some tests, where this path won't be called.
-		if c.ChainDataDir == "" {
-			log.Crit("Chain data directory must be specified for Firewood")
-		}
-		config.DBOverride = firewood.Config{
-			FilePath:             filepath.Join(c.ChainDataDir, firewoodFileName),
-			CleanCacheSize:       c.TrieCleanLimit * 1024 * 1024,
-			FreeListCacheEntries: firewood.Defaults.FreeListCacheEntries,
-			Revisions:            uint(c.StateHistory), // must be at least 2
-			ReadCacheStrategy:    ffi.CacheAllReads,
-		}.BackendConstructor
-	}
+	// if c.StateScheme == customrawdb.FirewoodScheme {
+	// 	// ChainDataDir may not be set during some tests, where this path won't be called.
+	// 	if c.ChainDataDir == "" {
+	// 		log.Crit("Chain data directory must be specified for Firewood")
+	// 	}
+	// 	config.DBOverride = firewood.Config{
+	// 		FilePath:             filepath.Join(c.ChainDataDir, firewoodFileName),
+	// 		CleanCacheSize:       c.TrieCleanLimit * 1024 * 1024,
+	// 		FreeListCacheEntries: firewood.Defaults.FreeListCacheEntries,
+	// 		Revisions:            uint(c.StateHistory), // must be at least 2
+	// 		ReadCacheStrategy:    ffi.CacheAllReads,
+	// 	}.BackendConstructor
+	// }
 	return config
 }
 

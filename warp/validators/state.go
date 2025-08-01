@@ -4,11 +4,9 @@
 package validators
 
 import (
-	"context"
-
-	"github.com/luxfi/luxd/ids"
-	"github.com/luxfi/luxd/snow/validators"
-	"github.com/luxfi/luxd/utils/constants"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/utils/constants"
 )
 
 var _ validators.State = (*State)(nil)
@@ -38,18 +36,17 @@ func NewState(state validators.State, mySubnetID ids.ID, sourceChainID ids.ID, r
 }
 
 func (s *State) GetValidatorSet(
-	ctx context.Context,
 	height uint64,
 	subnetID ids.ID,
-) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+) (map[ids.NodeID]*validators.Validator, error) {
 	// If the subnetID is anything other than the Primary Network, or Primary
 	// Network signers are required (except P-Chain), this is a direct passthrough.
 	usePrimary := s.requirePrimaryNetworkSigners && s.sourceChainID != constants.PlatformChainID
 	if usePrimary || subnetID != constants.PrimaryNetworkID {
-		return s.State.GetValidatorSet(ctx, height, subnetID)
+		return s.State.GetValidatorSet(height, subnetID)
 	}
 
 	// If the requested subnet is the primary network, then we return the validator
 	// set for the Subnet that is receiving the message instead.
-	return s.State.GetValidatorSet(ctx, height, s.mySubnetID)
+	return s.State.GetValidatorSet(height, s.mySubnetID)
 }
