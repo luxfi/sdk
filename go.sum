@@ -262,7 +262,7 @@ github.com/luxfi/log v0.1.1/go.mod h1:trb99HbI+YW6nu+So4jWKey20oHeRhlee70xbuR6Ga
 github.com/luxfi/metrics v1.1.1 h1:aKVEtytAl3TqSvInRpDc6ZdSJsCbTmCCl0UAl2YNXWU=
 github.com/luxfi/metrics v1.1.1/go.mod h1:ynSRcRjG+t1snUvFUbQFEu0UGibyw8gsitltQ9H1YDA=
 github.com/luxfi/trace v0.1.0 h1:rwJb/1EtYbjcokLe8/fU0yD8oBGs9QF7DCBO+dk/WGs=
-github.com/luxfi/trace v0.1.0/go.mod h1:6jhCW0hPCFv7qzFsL0w/amHRv7PfNIyW77N4WDS3U5Q=
+github.com/luxfi/trace v0.1.0/go.mod h1:nxbVJybpgn9JI38vYrguYUYwQDaqCMG5hHy73k/j9e4=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
 github.com/mattn/go-colorable v0.1.14/go.mod h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stgPZH1UqBm1s8=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
