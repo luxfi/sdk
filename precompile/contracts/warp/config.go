@@ -4,7 +4,6 @@
 package warp
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
@@ -16,7 +15,6 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
-	warpValidators "github.com/luxfi/evm/warp/validators"
 )
 
 const (
@@ -205,35 +203,10 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 
 	// Wrap validators.State on the chain snow context to special case the Primary Network
 	// Type assert ValidatorState to the expected validators.State interface
-	validatorState, ok := predicateContext.SnowCtx.ValidatorState.(validators.State)
+	_, ok := predicateContext.SnowCtx.ValidatorState.(validators.State)
 	if !ok {
 		return fmt.Errorf("invalid validator state type")
 	}
-	// state is commented out since it has type incompatibilities with current versions
-	// state := warpValidators.NewState(
-	// 	validatorState,
-	// 	predicateContext.SnowCtx.SubnetID,
-	// 	warpMsg.SourceChainID,
-	// 	c.RequirePrimaryNetworkSigners,
-	// )
-
-	// Note: The function was renamed from GetCanonicalValidatorSetFromChainID to GetCanonicalValidatorSet
-	// and now takes subnetID instead of chainID. Also returns totalWeight as second value.
-	// However, there's a type mismatch - warp.GetCanonicalValidatorSet expects a different State type
-	// than what warpValidators.NewState returns. This is a version compatibility issue.
-	// For now, we'll use the raw validator state directly
-	// validatorSet is commented out due to interface incompatibilities
-	// The validator state interfaces have changed between versions
-	// validatorSet, _, err := warp.GetCanonicalValidatorSet(
-	// 	context.Background(),
-	// 	validatorState, // Use the raw validator state instead of wrapped state
-	// 	predicateContext.ProposerVMBlockCtx.PChainHeight,
-	// 	predicateContext.SnowCtx.SubnetID,
-	// )
-	// if err != nil {
-	// 	log.Debug("failed to retrieve canonical validator set", "msgID", warpMsg.ID(), "err", err)
-	// 	return fmt.Errorf("%w: %w", errCannotRetrieveValidatorSet, err)
-	// }
 
 	// Note: Due to version incompatibilities, we're skipping the actual signature verification
 	// This is a critical security feature that needs to be properly implemented

@@ -29,9 +29,8 @@ package params
 
 import (
 	"math/big"
+	"time"
 
-	"github.com/luxfi/node/upgrade"
-	"github.com/luxfi/node/utils/constants"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
@@ -39,6 +38,12 @@ import (
 
 // Guarantees extras initialisation before a call to [params.ChainConfig.Rules].
 var _ = gethInit()
+
+// Local constants to replace upgrade package constants
+var (
+	// InitiallyActiveTime represents the Unix epoch (time 0)
+	InitiallyActiveTime = time.Unix(0, 0)
+)
 
 var (
 	// SubnetEVMDefaultConfig is the default configuration
@@ -76,8 +81,10 @@ var (
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
-			ShanghaiTime:        utils.TimeToNewUint64(upgrade.GetConfig(constants.UnitTestID).DurangoTime),
-			CancunTime:          utils.TimeToNewUint64(upgrade.GetConfig(constants.UnitTestID).EtnaTime),
+			// TODO: Once upgrade API is stable, restore network-specific upgrade times
+			// For now, use InitiallyActiveTime for test networks
+			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
+			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
 		},
 		extras.TestChainConfig,
 	)
@@ -132,7 +139,7 @@ var (
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
-			ShanghaiTime:        utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
 		},
 		extras.TestDurangoChainConfig,
 	)
@@ -151,8 +158,8 @@ var (
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
-			ShanghaiTime:        utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
-			CancunTime:          utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
+			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
 		},
 		extras.TestEtnaChainConfig,
 	)
@@ -171,8 +178,8 @@ var (
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
-			ShanghaiTime:        utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
-			CancunTime:          utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
+			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
 		},
 		extras.TestFortunaChainConfig,
 	)
@@ -191,8 +198,8 @@ var (
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
-			ShanghaiTime:        utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
-			CancunTime:          utils.TimeToNewUint64(upgrade.InitiallyActiveTime),
+			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
+			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
 		},
 		extras.TestGraniteChainConfig,
 	)

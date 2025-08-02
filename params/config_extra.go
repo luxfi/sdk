@@ -8,7 +8,6 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
 )
@@ -25,8 +24,9 @@ var (
 	DefaultChainID   = big.NewInt(43214)
 	DefaultFeeConfig = extras.DefaultFeeConfig
 
-	initiallyActive       = uint64(upgrade.InitiallyActiveTime.Unix())
-	unscheduledActivation = uint64(upgrade.UnscheduledActivationTime.Unix())
+	// Use the constants from extras package
+	initiallyActive       = uint64(extras.InitiallyActiveTime.Unix())
+	unscheduledActivation = uint64(extras.UnscheduledActivationTime.Unix())
 )
 
 // SetEthUpgrades enables Ethereum network upgrades using the same time as
