@@ -79,7 +79,7 @@ func (c *ChainConfig) checkStateUpgradesCompatible(stateUpgrades []StateUpgrade,
 	for i, upgrade := range activeUpgrades {
 		if len(newUpgrades) <= i {
 			// missing upgrade
-			return ethparams.NewTimestampCompatError(
+			return newTimestampCompatError(
 				fmt.Sprintf("missing StateUpgrade[%d]", i),
 				upgrade.BlockTimestamp,
 				nil,
@@ -87,7 +87,7 @@ func (c *ChainConfig) checkStateUpgradesCompatible(stateUpgrades []StateUpgrade,
 		}
 		// All upgrades that have activated must be identical.
 		if !upgrade.Equal(&newUpgrades[i]) {
-			return ethparams.NewTimestampCompatError(
+			return newTimestampCompatError(
 				fmt.Sprintf("StateUpgrade[%d]", i),
 				upgrade.BlockTimestamp,
 				newUpgrades[i].BlockTimestamp,
@@ -97,7 +97,7 @@ func (c *ChainConfig) checkStateUpgradesCompatible(stateUpgrades []StateUpgrade,
 	// then, make sure newUpgrades does not have additional upgrades
 	// that are already activated. (cannot perform retroactive upgrade)
 	if len(newUpgrades) > len(activeUpgrades) {
-		return ethparams.NewTimestampCompatError(
+		return newTimestampCompatError(
 			fmt.Sprintf("cannot retroactively enable StateUpgrade[%d]", len(activeUpgrades)),
 			nil,
 			newUpgrades[len(activeUpgrades)].BlockTimestamp, // this indexes to the first element in newUpgrades after the end of activeUpgrades

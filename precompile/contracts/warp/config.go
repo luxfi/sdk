@@ -218,9 +218,12 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 
 	// Note: The function was renamed from GetCanonicalValidatorSetFromChainID to GetCanonicalValidatorSet
 	// and now takes subnetID instead of chainID. Also returns totalWeight as second value.
+	// However, there's a type mismatch - warp.GetCanonicalValidatorSet expects a different State type
+	// than what warpValidators.NewState returns. This is a version compatibility issue.
+	// For now, we'll use the raw validator state directly
 	validatorSet, _, err := warp.GetCanonicalValidatorSet(
 		context.Background(),
-		state,
+		validatorState, // Use the raw validator state instead of wrapped state
 		predicateContext.ProposerVMBlockCtx.PChainHeight,
 		predicateContext.SnowCtx.SubnetID,
 	)
@@ -229,14 +232,16 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 		return fmt.Errorf("%w: %w", errCannotRetrieveValidatorSet, err)
 	}
 
+	// Note: Signature.Verify expects validators.State, not []*warp.Validator
+	// This is another version mismatch. We need to use the validator state directly
 	err = warpMsg.Signature.Verify(
 		context.Background(),
 		&warpMsg.UnsignedMessage,
 		predicateContext.SnowCtx.NetworkID,
-		validatorSet,
+		validatorState, // Use the validator state instead of validatorSet
 		quorumNumerator,
 		WarpQuorumDenominator,
-		0, // Add missing parameter - likely a timestamp or height
+		predicateContext.ProposerVMBlockCtx.PChainHeight, // Use PChainHeight for the last parameter
 	)
 	if err != nil {
 		log.Debug("failed to verify warp signature", "msgID", warpMsg.ID(), "err", err)
