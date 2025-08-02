@@ -17,7 +17,7 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.1.1
-	github.com/luxfi/geth v0.15.2
+	github.com/luxfi/geth v1.16.7
 	github.com/luxfi/go-bip39 v1.1.0
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/node v1.13.2
@@ -44,7 +44,6 @@ require (
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
-
 
 require (
 	github.com/DataDog/zstd v1.5.7 // indirect
