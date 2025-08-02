@@ -106,10 +106,8 @@ type Config struct {
 }
 
 func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
-	// Note: There's a type mismatch between pathdb.Database and triedb.Database
-	// This is a version compatibility issue that needs to be resolved
-	// For now, we return a new triedb.Database directly
-	return triedb.NewDatabase(diskdb, nil)
+	// DBOverride is a type alias for Database (not *Database), so we dereference
+	return *triedb.NewDatabase(diskdb, nil)
 }
 
 // sanitize checks the provided user configurations and changes anything that's
