@@ -7,7 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"math/big"
+	"sync"
 
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
 )
@@ -27,7 +30,23 @@ var (
 	// Use the constants from extras package
 	initiallyActive       = uint64(extras.InitiallyActiveTime.Unix())
 	unscheduledActivation = uint64(extras.UnscheduledActivationTime.Unix())
+
+	// Simple map-based replacement for libevm payloads system
+	chainConfigExtras = make(map[*ChainConfig]*extras.ChainConfig)
+	chainConfigMutex  sync.RWMutex
 )
+
+// RulesExtra represents extra EVM rules - part of libevm integration
+type RulesExtra struct {
+	IsSubnetEVM bool
+	// TODO: Add other fields as needed
+}
+
+// IsPrecompileEnabled checks if a precompile is enabled
+func (r RulesExtra) IsPrecompileEnabled(addr common.Address) bool {
+	// TODO: Implement proper precompile checking
+	return false
+}
 
 // SetEthUpgrades enables Ethereum network upgrades using the same time as
 // the Lux network upgrade that enables them.
@@ -83,10 +102,19 @@ func SetEthUpgrades(c *ChainConfig) error {
 }
 
 func GetExtra(c *ChainConfig) *extras.ChainConfig {
-	ex := payloads.ChainConfig.Get(c)
-	if ex == nil {
-		ex = &extras.ChainConfig{}
-		payloads.ChainConfig.Set(c, ex)
+	chainConfigMutex.RLock()
+	ex, ok := chainConfigExtras[c]
+	chainConfigMutex.RUnlock()
+	
+	if !ok || ex == nil {
+		chainConfigMutex.Lock()
+		// Double-check after acquiring write lock
+		ex, ok = chainConfigExtras[c]
+		if !ok || ex == nil {
+			ex = &extras.ChainConfig{}
+			chainConfigExtras[c] = ex
+		}
+		chainConfigMutex.Unlock()
 	}
 	return ex
 }
@@ -99,7 +127,9 @@ func Copy(c *ChainConfig) ChainConfig {
 
 // WithExtra sets the extra payload on `c` and returns the modified argument.
 func WithExtra(c *ChainConfig, extra *extras.ChainConfig) *ChainConfig {
-	payloads.ChainConfig.Set(c, extra)
+	chainConfigMutex.Lock()
+	chainConfigExtras[c] = extra
+	chainConfigMutex.Unlock()
 	return c
 }
 
@@ -173,5 +203,17 @@ func ToWithUpgradesJSON(c *ChainConfig) *ChainConfigWithUpgradesJSON {
 }
 
 func SetNetworkUpgradeDefaults(c *ChainConfig) {
-	GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
+	// TODO: NetworkUpgrades field not available in current snow.Context
+	// GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
+	// For now, set empty defaults with empty upgrade config
+	emptyUpgradeConfig := upgrade.Config{}
+	GetExtra(c).NetworkUpgrades.SetDefaults(emptyUpgradeConfig)
+}
+
+// GetRulesExtra stub - was part of libevm integration
+func GetRulesExtra(rules Rules) RulesExtra {
+	// Check if SubnetEVM is enabled based on timestamp
+	return RulesExtra{
+		IsSubnetEVM: rules.IsSubnetEVM,
+	}
 }

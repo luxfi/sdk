@@ -37,7 +37,8 @@ import (
 )
 
 // Guarantees extras initialisation before a call to [params.ChainConfig.Rules].
-var _ = gethInit()
+// Disabled: libevm integration removed
+// var _ = gethInit()
 
 // Local constants to replace upgrade package constants
 var (
