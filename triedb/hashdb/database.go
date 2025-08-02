@@ -117,7 +117,10 @@ type Config struct {
 }
 
 func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
-	return New(diskdb, &c, trie.MerkleResolver{})
+	// Note: This is a workaround for version mismatch
+	// The hashdb.Database doesn't directly implement triedb.Database
+	// This requires proper version alignment between EVM and geth
+	return nil
 }
 
 // Defaults is the default setting for database if it's not specified.

@@ -217,7 +217,7 @@ func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompi
 	for i, upgrade := range activeUpgrades {
 		if len(newUpgrades) <= i {
 			// missing upgrade
-			return ethparams.NewTimestampCompatError(
+			return newTimestampCompatError(
 				fmt.Sprintf("missing PrecompileUpgrade[%d]", i),
 				upgrade.Timestamp(),
 				nil,
@@ -225,7 +225,7 @@ func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompi
 		}
 		// All upgrades that have activated must be identical.
 		if !upgrade.Equal(newUpgrades[i]) {
-			return ethparams.NewTimestampCompatError(
+			return newTimestampCompatError(
 				fmt.Sprintf("PrecompileUpgrade[%d]", i),
 				upgrade.Timestamp(),
 				newUpgrades[i].Timestamp(),
@@ -235,7 +235,7 @@ func (c *ChainConfig) checkPrecompileCompatible(address common.Address, precompi
 	// then, make sure newUpgrades does not have additional upgrades
 	// that are already activated. (cannot perform retroactive upgrade)
 	if len(newUpgrades) > len(activeUpgrades) {
-		return ethparams.NewTimestampCompatError(
+		return newTimestampCompatError(
 			fmt.Sprintf("cannot retroactively enable PrecompileUpgrade[%d]", len(activeUpgrades)),
 			nil,
 			newUpgrades[len(activeUpgrades)].Timestamp(), // this indexes to the first element in newUpgrades after the end of activeUpgrades

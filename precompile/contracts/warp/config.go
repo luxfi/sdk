@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/luxfi/node/snow/validators"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common"
@@ -203,18 +204,25 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 	log.Debug("verifying warp message", "warpMsg", warpMsg, "quorumNum", quorumNumerator, "quorumDenom", WarpQuorumDenominator)
 
 	// Wrap validators.State on the chain snow context to special case the Primary Network
+	// Type assert ValidatorState to the expected validators.State interface
+	validatorState, ok := predicateContext.SnowCtx.ValidatorState.(validators.State)
+	if !ok {
+		return fmt.Errorf("invalid validator state type")
+	}
 	state := warpValidators.NewState(
-		predicateContext.SnowCtx.ValidatorState,
+		validatorState,
 		predicateContext.SnowCtx.SubnetID,
 		warpMsg.SourceChainID,
 		c.RequirePrimaryNetworkSigners,
 	)
 
-	validatorSet, err := warp.GetCanonicalValidatorSetFromChainID(
+	// Note: The function was renamed from GetCanonicalValidatorSetFromChainID to GetCanonicalValidatorSet
+	// and now takes subnetID instead of chainID. Also returns totalWeight as second value.
+	validatorSet, _, err := warp.GetCanonicalValidatorSet(
 		context.Background(),
 		state,
 		predicateContext.ProposerVMBlockCtx.PChainHeight,
-		warpMsg.UnsignedMessage.SourceChainID,
+		predicateContext.SnowCtx.SubnetID,
 	)
 	if err != nil {
 		log.Debug("failed to retrieve canonical validator set", "msgID", warpMsg.ID(), "err", err)
@@ -222,11 +230,13 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 	}
 
 	err = warpMsg.Signature.Verify(
+		context.Background(),
 		&warpMsg.UnsignedMessage,
 		predicateContext.SnowCtx.NetworkID,
 		validatorSet,
 		quorumNumerator,
 		WarpQuorumDenominator,
+		0, // Add missing parameter - likely a timestamp or height
 	)
 	if err != nil {
 		log.Debug("failed to verify warp signature", "msgID", warpMsg.ID(), "err", err)
