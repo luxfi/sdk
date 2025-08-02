@@ -23,6 +23,14 @@ var (
 	errInvalidTimestamp = errors.New("invalid timestamp")
 )
 
+// bigMax returns the larger of x or y.
+func bigMax(x, y *big.Int) *big.Int {
+	if x.Cmp(y) > 0 {
+		return x
+	}
+	return y
+}
+
 // baseFeeFromWindow should only be called if `timestamp` >= `config.SubnetEVMTimestamp`
 func baseFeeFromWindow(config *extras.ChainConfig, feeConfig commontype.FeeConfig, parent *types.Header, timestamp uint64) (*big.Int, error) {
 	// If the current block is the first EIP-1559 block, or it is the genesis block
@@ -63,7 +71,7 @@ func baseFeeFromWindow(config *extras.ChainConfig, feeConfig commontype.FeeConfi
 		num.Mul(num, parent.BaseFee)
 		num.Div(num, parentGasTargetBig)
 		num.Div(num, baseFeeChangeDenominator)
-		baseFeeDelta := math.BigMax(num, common.Big1)
+		baseFeeDelta := bigMax(num, common.Big1)
 
 		baseFee.Add(baseFee, baseFeeDelta)
 	} else {
@@ -72,7 +80,7 @@ func baseFeeFromWindow(config *extras.ChainConfig, feeConfig commontype.FeeConfi
 		num.Mul(num, parent.BaseFee)
 		num.Div(num, parentGasTargetBig)
 		num.Div(num, baseFeeChangeDenominator)
-		baseFeeDelta := math.BigMax(num, common.Big1)
+		baseFeeDelta := bigMax(num, common.Big1)
 
 		if timestamp < parent.Time {
 			// This should never happen as the fee window calculations should

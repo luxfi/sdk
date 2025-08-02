@@ -108,14 +108,9 @@ type Config struct {
 func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
 	// Note: There's a type mismatch between pathdb.Database and triedb.Database
 	// This is a version compatibility issue that needs to be resolved
-	// For now, we create a dummy implementation
-	return &dummyDBOverride{}
+	// For now, we return a new triedb.Database directly
+	return triedb.NewDatabase(diskdb, nil)
 }
-
-// dummyDBOverride is a temporary workaround for the type mismatch
-type dummyDBOverride struct{}
-
-func (d *dummyDBOverride) Close() error { return nil }
 
 // sanitize checks the provided user configurations and changes anything that's
 // unreasonable or unworkable.

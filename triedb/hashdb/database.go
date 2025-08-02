@@ -118,14 +118,9 @@ type Config struct {
 func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
 	// Note: There's a type mismatch between hashdb.Database and triedb.Database
 	// This is a version compatibility issue that needs to be resolved
-	// For now, we create a dummy implementation
-	return &dummyDBOverride{}
+	// For now, we return a new triedb.Database directly
+	return triedb.NewDatabase(diskdb, nil)
 }
-
-// dummyDBOverride is a temporary workaround for the type mismatch
-type dummyDBOverride struct{}
-
-func (d *dummyDBOverride) Close() error { return nil }
 
 // Defaults is the default setting for database if it's not specified.
 // Notably, clean cache is disabled explicitly,
