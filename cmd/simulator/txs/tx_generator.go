@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/geth/core/types"
-	ethcrypto "github.com/luxfi/geth/crypto"
+	ethcrypto "github.com/luxfi/crypto"
 	"github.com/luxfi/evm/ethclient"
 )
 

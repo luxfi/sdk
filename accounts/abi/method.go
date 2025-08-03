@@ -31,7 +31,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 )
 
 // FunctionType represents different types of functions a contract might have.

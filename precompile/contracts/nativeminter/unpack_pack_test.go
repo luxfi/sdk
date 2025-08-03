@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/precompile/contract"

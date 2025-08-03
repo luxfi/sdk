@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi"
 )
 

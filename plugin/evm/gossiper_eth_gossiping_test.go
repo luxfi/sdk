@@ -19,7 +19,7 @@ import (
 	commonEng "github.com/luxfi/node/snow/engine/common"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 
 	"github.com/stretchr/testify/assert"
 

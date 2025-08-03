@@ -16,7 +16,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	ethcrypto "github.com/luxfi/geth/crypto"
+	ethcrypto "github.com/luxfi/crypto"
 	"github.com/luxfi/geth/log"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/cmd/simulator/config"

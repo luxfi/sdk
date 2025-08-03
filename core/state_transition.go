@@ -36,7 +36,7 @@ import (
 	cmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/crypto/kzg4844"
+	"github.com/luxfi/crypto/kzg4844"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
