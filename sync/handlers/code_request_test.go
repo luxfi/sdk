@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb/memorydb"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/plugin/evm/message"

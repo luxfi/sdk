@@ -32,7 +32,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

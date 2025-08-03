@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/geth/common"
-	ethcrypto "github.com/luxfi/geth/crypto"
+	ethcrypto "github.com/luxfi/crypto"
 )
 
 type Key struct {

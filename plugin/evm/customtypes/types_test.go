@@ -32,7 +32,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/rlp"
 
 	// TODO(arr4n) These tests were originally part of the `evm/core/types`

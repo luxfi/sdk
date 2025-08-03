@@ -36,7 +36,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient/simulated"
 	"github.com/luxfi/evm/params"
