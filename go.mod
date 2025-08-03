@@ -17,7 +17,7 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.1.1
-	github.com/luxfi/geth v1.16.7
+	github.com/luxfi/geth v1.16.8
 	github.com/luxfi/go-bip39 v1.1.0
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/node v1.13.2
@@ -112,7 +112,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.5 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/database v1.1.4 // indirect
+	github.com/luxfi/database v1.1.5 // indirect
 	github.com/luxfi/log v0.1.1 // indirect
 	github.com/luxfi/metrics v1.1.1 // indirect
 	github.com/luxfi/trace v0.1.0 // indirect
