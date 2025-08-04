@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
@@ -25,11 +25,11 @@ var errNoValidators = errors.New("cannot aggregate signatures from subnet with n
 type API struct {
 	chainContext                 *consensus.Context
 	backend                      Backend
-	signatureAggregator          *acp118.SignatureAggregator
+	signatureAggregator          *lp118.SignatureAggregator
 	requirePrimaryNetworkSigners func() bool
 }
 
-func NewAPI(chainCtx *consensus.Context, backend Backend, signatureAggregator *acp118.SignatureAggregator, requirePrimaryNetworkSigners func() bool) *API {
+func NewAPI(chainCtx *consensus.Context, backend Backend, signatureAggregator *lp118.SignatureAggregator, requirePrimaryNetworkSigners func() bool) *API {
 	return &API{
 		backend:                      backend,
 		chainContext:                 chainCtx,

@@ -281,8 +281,15 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 	
 	// Add genesis precompiles if at genesis
 	if timestamp == 0 {
-		for address, config := range extra.GenesisPrecompiles {
+		for key, config := range extra.GenesisPrecompiles {
 			if !config.IsDisabled() {
+				// Get address from the key
+				module, ok := modules.GetPrecompileModule(key)
+				if !ok {
+					continue // Skip unknown precompiles
+				}
+				address := module.Address
+				
 				rules.Precompiles[address] = config
 				if predicater, ok := config.(precompileconfig.Predicater); ok {
 					rules.Predicaters[address] = predicater
