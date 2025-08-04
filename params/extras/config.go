@@ -124,7 +124,7 @@ type UpgradeConfig struct {
 
 // LuxContext provides Lux specific context directly into the EVM.
 type LuxContext struct {
-	SnowCtx *consensus.Context
+	ConsensusCtx *consensus.Context
 }
 
 type ChainConfig struct {

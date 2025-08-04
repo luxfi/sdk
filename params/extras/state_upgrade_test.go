@@ -62,7 +62,7 @@ func TestVerifyStateUpgrades(t *testing.T) {
 			require := require.New(t)
 			copy := *TestChainConfig
 			config := &copy
-			config.SnowCtx = utilstest.NewTestSnowContext(t)
+			config.ConsensusCtx = utilstest.NewTestConsensusContext(t)
 			config.StateUpgrades = tt.upgrades
 
 			err := config.Verify()

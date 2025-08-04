@@ -2,10 +2,6 @@ module github.com/luxfi/evm
 
 go 1.24.5
 
-replace (
-	github.com/luxfi/geth => github.com/luxfi/geth v1.16.1
-)
-
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
 	github.com/antithesishq/antithesis-sdk-go v0.3.8
@@ -22,7 +18,7 @@ require (
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.1
 	github.com/luxfi/database v1.1.7
-	github.com/luxfi/geth v1.16.24
+	github.com/luxfi/geth v1.16.2
 	github.com/luxfi/go-bip39 v1.1.0
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/metrics v1.1.1
@@ -49,6 +45,14 @@ require (
 	golang.org/x/tools v0.35.0
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+)
+
+replace (
+	github.com/gojuukaze/go-bip39 => github.com/luxfi/go-bip39 v1.1.0
+	github.com/luxfi/database => ../database
+	github.com/luxfi/geth => ../geth
+	github.com/luxfi/go-bip39 => ../go-bip39
+	github.com/luxfi/node => ../node
 )
 
 require (
@@ -84,7 +88,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.1 // indirect
-	github.com/luxfi/geth v1.16.1 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/ferranbt/fastssz v0.1.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect

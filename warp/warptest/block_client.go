@@ -18,9 +18,9 @@ import (
 // EmptyBlockClient returns an error if a block is requested
 var EmptyBlockClient BlockClient = MakeBlockClient()
 
-type BlockClient func(ctx context.Context, blockID ids.ID) (snowman.Block, error)
+type BlockClient func(ctx context.Context, blockID ids.ID) (chain.Block, error)
 
-func (f BlockClient) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (snowman.Block, error) {
+func (f BlockClient) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (chain.Block, error) {
 	return f(ctx, blockID)
 }
 
@@ -28,15 +28,15 @@ func (f BlockClient) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (snow
 // If a block is requested that isn't part of the provided blocks, an error is
 // returned.
 func MakeBlockClient(blkIDs ...ids.ID) BlockClient {
-	return func(_ context.Context, blkID ids.ID) (snowman.Block, error) {
+	return func(_ context.Context, blkID ids.ID) (chain.Block, error) {
 		if !slices.Contains(blkIDs, blkID) {
 			return nil, database.ErrNotFound
 		}
 
-		return &snowmantest.Block{
-			Decidable: snowtest.Decidable{
+		return &chaintest.Block{
+			Decidable: consensustest.Decidable{
 				IDV:    blkID,
-				Status: snowtest.Accepted,
+				Status: consensustest.Accepted,
 			},
 		}, nil
 	}

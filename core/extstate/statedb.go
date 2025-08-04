@@ -8,6 +8,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/predicate"
 )
 
 type VmStateDB interface {
@@ -37,9 +38,15 @@ func New(vm VmStateDB) *StateDB {
 }
 
 func (s *StateDB) Prepare(rules params.Rules, sender, coinbase common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {
-	// For now, we'll skip predicate storage slots preparation
-	// TODO: Integrate with extras.Rules when available
+	// Note: This method cannot access extras.Rules directly without chainConfig and timestamp
+	// Predicate storage slots will be empty unless PrepareWithExtrasRules is used
 	s.predicateStorageSlots = make(map[common.Address][][]byte)
+	s.vmStateDB.Prepare(rules, sender, coinbase, dst, precompiles, list)
+}
+
+// PrepareWithExtrasRules prepares the state with extras.Rules for predicate support
+func (s *StateDB) PrepareWithExtrasRules(rules params.Rules, extrasRules predicate.PredicaterExistChecker, sender, coinbase common.Address, dst *common.Address, precompiles []common.Address, list types.AccessList) {
+	s.predicateStorageSlots = predicate.PreparePredicateStorageSlots(extrasRules, list)
 	s.vmStateDB.Prepare(rules, sender, coinbase, dst, precompiles, list)
 }
 
