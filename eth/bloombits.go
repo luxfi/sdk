@@ -32,6 +32,7 @@ import (
 
 	"github.com/luxfi/geth/common/bitutil"
 	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 const (
@@ -67,7 +68,7 @@ func (eth *Ethereum) startBloomHandlers(sectionSize uint64) {
 					task.Bitsets = make([][]byte, len(task.Sections))
 					for i, section := range task.Sections {
 						head := rawdb.ReadCanonicalHash(eth.chainDb, (section+1)*sectionSize-1)
-						if compVector, err := rawdb.ReadBloomBits(eth.chainDb, task.Bit, section, head); err == nil {
+						if compVector, err := customrawdb.ReadBloomBits(eth.chainDb, task.Bit, section, head); err == nil {
 							if blob, err := bitutil.DecompressBytes(compVector, int(sectionSize/8)); err == nil {
 								task.Bitsets[i] = blob
 							} else {

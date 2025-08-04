@@ -61,6 +61,9 @@ type RulesExtra struct {
 	// Fields for predicate support
 	PredicatersExist bool
 	Predicaters      map[common.Address]precompileconfig.Predicater
+	
+	// LuxRules for header verification
+	LuxRules extras.LuxRules
 }
 
 // IsPrecompileEnabled checks if a precompile is enabled
@@ -231,19 +234,28 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 	GetExtra(c).NetworkUpgrades.SetDefaults(emptyUpgradeConfig)
 }
 
-// GetRulesExtra stub - was part of libevm integration
+// GetRulesExtra returns genesis rules with all upgrades activated as of August 2025
 func GetRulesExtra(rules Rules) RulesExtra {
-	// Note: This is a simplified version that doesn't have access to ChainConfig
-	// For full functionality, use GetExtrasRules instead
-	return RulesExtra{
-		IsSubnetEVM: true, // Default to true for SubnetEVM
-		IsDurango:   true, // Assume Durango is activated
-		IsEtna:      false,
-		IsFortuna:   false,
-		IsGranite:   false,
+	// All upgrades are activated by default as of August 2025
+	// Keep the infrastructure upgradeable for future changes
+	rulesExtra := RulesExtra{
+		IsSubnetEVM: true,
+		IsDurango:   true,
+		IsEtna:      true,
+		IsFortuna:   true,
+		IsGranite:   true,
 		PredicatersExist: false,
 		Predicaters:      make(map[common.Address]precompileconfig.Predicater),
 	}
+	// Set LuxRules - all activated as genesis rules
+	rulesExtra.LuxRules = extras.LuxRules{
+		IsSubnetEVM: true,
+		IsDurango:   true,
+		IsEtna:      true,
+		IsFortuna:   true,
+		IsGranite:   true,
+	}
+	return rulesExtra
 }
 
 // GetExtrasRules returns the extras.Rules for the given params.Rules and timestamp

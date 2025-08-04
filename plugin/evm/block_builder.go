@@ -10,7 +10,6 @@ import (
 
 	"github.com/luxfi/node/consensus"
 	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/utils/lock"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
@@ -31,7 +30,7 @@ type blockBuilder struct {
 	shutdownChan <-chan struct{}
 	shutdownWg   *sync.WaitGroup
 
-	pendingSignal *lock.Cond
+	pendingSignal *sync.Cond
 
 	buildBlockLock sync.Mutex
 
@@ -48,7 +47,7 @@ func (vm *VM) NewBlockBuilder() *blockBuilder {
 		shutdownChan: vm.shutdownChan,
 		shutdownWg:   &vm.shutdownWg,
 	}
-	b.pendingSignal = lock.NewCond(&b.buildBlockLock)
+	b.pendingSignal = sync.NewCond(&b.buildBlockLock)
 	return b
 }
 
@@ -128,9 +127,13 @@ func (b *blockBuilder) waitForNeedToBuild(ctx context.Context) (time.Time, error
 	b.buildBlockLock.Lock()
 	defer b.buildBlockLock.Unlock()
 	for !b.needToBuild() {
-		if err := b.pendingSignal.Wait(ctx); err != nil {
-			return time.Time{}, err
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return time.Time{}, ctx.Err()
+		default:
 		}
+		b.pendingSignal.Wait()
 	}
 	return b.lastBuildTime, nil
 }

@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/cache/metercacher"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/network/p2p/gossip"
 	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
@@ -27,7 +27,6 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/metrics"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
@@ -43,12 +42,11 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/config"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	subnetevmlog "github.com/luxfi/evm/plugin/evm/log"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
-	"github.com/luxfi/evm/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/hashdb"
 
 	warpcontract "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/evm/rpc"
@@ -79,7 +77,7 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/chain"
+	consensuschain "github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
@@ -90,7 +88,7 @@ import (
 
 	commonEng "github.com/luxfi/node/consensus/engine/core"
 
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
 	luxJSON "github.com/luxfi/node/utils/json"
 )
@@ -116,6 +114,9 @@ const (
 	ethMetricsPrefix        = "eth"
 	sdkMetricsPrefix        = "sdk"
 	chainStateMetricsPrefix = "chain_state"
+	
+	// TxGossipHandlerID is the handler ID for transaction gossip
+	TxGossipHandlerID = uint64(0x1)
 )
 
 // Define the API endpoints for the VM
@@ -305,7 +306,7 @@ func (vm *VM) Initialize(
 	}
 	vm.logger = subnetEVMLogger
 
-	log.Info("Initializing Subnet EVM VM", "Version", Version, "geth version", ethparams.LibEVMVersion, "Config", vm.config)
+	log.Info("Initializing Subnet EVM VM", "Version", Version, "geth version", params.VersionWithMeta, "Config", vm.config)
 
 	if deprecateMsg != "" {
 		log.Warn("Deprecation Warning", "msg", deprecateMsg)
@@ -316,7 +317,8 @@ func (vm *VM) Initialize(
 	}
 
 	// Enable debug-level metrics that might impact runtime performance
-	metrics.EnabledExpensive = vm.config.MetricsExpensiveEnabled
+	// Note: metrics.EnabledExpensive is not a global in our geth fork
+	// TODO: Handle expensive metrics configuration
 
 	vm.shutdownChan = make(chan struct{}, 1)
 
@@ -481,11 +483,14 @@ func (vm *VM) Initialize(
 		}
 	}
 
+	// Create a wrapper that implements warp.BlockClient
+	warpBlockClient := &warpBlockClientWrapper{vm: vm}
+	
 	vm.warpBackend, err = warp.NewBackend(
 		vm.ctx.NetworkID,
 		vm.ctx.ChainID,
 		vm.ctx.WarpSigner,
-		vm,
+		warpBlockClient,
 		validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
 		vm.warpDB,
 		meteredCache,
@@ -502,8 +507,8 @@ func (vm *VM) Initialize(
 	go vm.ctx.Log.RecoverAndPanic(vm.startContinuousProfiler)
 
 	// Add p2p warp message warpHandler
-	warpHandler := acp118.NewCachedHandler(meteredCache, vm.warpBackend, vm.ctx.WarpSigner)
-	vm.Network.AddHandler(p2p.SignatureRequestHandlerID, warpHandler)
+	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, vm.ctx.WarpSigner)
+	vm.Network.AddHandler(lp118.HandlerID, warpHandler)
 
 	vm.setAppRequestHandlers()
 
@@ -537,10 +542,8 @@ func parseGenesis(ctx *consensus.Context, genesisBytes []byte, upgradeBytes []by
 				}
 			}
 			
-			// Mark this as a database replay
-			g.Config.IsDatabaseReplay = true
-			g.Config.DatabasePath = dbPath
-			g.Config.DatabaseType = dbType
+			// Note: Database replay fields are not present in our ChainConfig
+			// These would need to be added if database replay functionality is needed
 			
 			return g, nil
 		}
@@ -614,9 +617,8 @@ func parseGenesis(ctx *consensus.Context, genesisBytes []byte, upgradeBytes []by
 }
 
 func (vm *VM) initializeMetrics() error {
-	// [metrics.Enabled] is a global variable imported from go-ethereum/metrics
-	// and must be set to true to enable metrics collection.
-	metrics.Enabled = true
+	// Enable metrics collection using our geth's Enable function
+	metrics.Enable()
 	vm.sdkMetrics = prometheus.NewRegistry()
 	gatherer := subnetevmprometheus.NewGatherer(metrics.DefaultRegistry)
 	if err := vm.ctx.Metrics.Register(ethMetricsPrefix, gatherer); err != nil {
@@ -748,7 +750,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	}
 	vm.State = state
 
-	if !metrics.Enabled {
+	if !metrics.Enabled() {
 		return nil
 	}
 
@@ -813,7 +815,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 	// Initialize goroutines related to block building
 	// once we enter normal operation as there is no need to handle mempool gossip before this point.
 	ethTxGossipMarshaller := GossipEthTxMarshaller{}
-	ethTxGossipClient := vm.Network.NewClient(p2p.TxGossipHandlerID, p2p.WithValidatorSampling(vm.P2PValidators()))
+	ethTxGossipClient := vm.Network.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(vm.P2PValidators()))
 	ethTxGossipMetrics, err := gossip.NewMetrics(vm.sdkMetrics, ethTxGossipNamespace)
 	if err != nil {
 		return fmt.Errorf("failed to initialize eth tx gossip metrics: %w", err)
@@ -877,7 +879,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 		)
 	}
 
-	if err := vm.Network.AddHandler(p2p.TxGossipHandlerID, vm.ethTxGossipHandler); err != nil {
+	if err := vm.Network.AddHandler(TxGossipHandlerID, vm.ethTxGossipHandler); err != nil {
 		return fmt.Errorf("failed to add eth tx gossip handler: %w", err)
 	}
 
@@ -921,9 +923,9 @@ func (vm *VM) setAppRequestHandlers() {
 	evmTrieDB := triedb.NewDatabase(
 		vm.chaindb,
 		&triedb.Config{
-			DBOverride: hashdb.Config{
+			HashDB: &hashdb.Config{
 				CleanCacheSize: vm.config.StateSyncServerTrieCache * units.MiB,
-			}.BackendConstructor,
+			},
 		},
 	)
 
@@ -990,11 +992,11 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // buildBlock builds a block to be wrapped by ChainState
-func (vm *VM) buildBlock(ctx context.Context) (chain.Block, error) {
+func (vm *VM) buildBlock(ctx context.Context) (consensuschain.Block, error) {
 	return vm.buildBlockWithContext(ctx, nil)
 }
 
-func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
+func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (consensuschain.Block, error) {
 	if proposerVMBlockCtx != nil {
 		log.Debug("Building block with context", "pChainBlockHeight", proposerVMBlockCtx.PChainHeight)
 	} else {
@@ -1039,7 +1041,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 }
 
 // parseBlock parses [b] into a block to be wrapped by ChainState.
-func (vm *VM) parseBlock(_ context.Context, b []byte) (chain.Block, error) {
+func (vm *VM) parseBlock(_ context.Context, b []byte) (consensuschain.Block, error) {
 	ethBlock := new(types.Block)
 	if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 		return nil, err
@@ -1056,17 +1058,17 @@ func (vm *VM) parseBlock(_ context.Context, b []byte) (chain.Block, error) {
 }
 
 func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
-	block, err := vm.parseBlock(context.TODO(), b)
-	if err != nil {
+	// Parse the raw bytes into an Ethereum block
+	ethBlock := new(types.Block)
+	if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 		return nil, err
 	}
-
-	return block.(*Block).ethBlock, nil
+	return ethBlock, nil
 }
 
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
-func (vm *VM) getBlock(_ context.Context, id ids.ID) (chain.Block, error) {
+func (vm *VM) getBlock(_ context.Context, id ids.ID) (consensuschain.Block, error) {
 	ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 	// If [ethBlock] is nil, return [database.ErrNotFound] here
 	// so that the miss is considered cacheable.
@@ -1079,23 +1081,68 @@ func (vm *VM) getBlock(_ context.Context, id ids.ID) (chain.Block, error) {
 
 // GetAcceptedBlock attempts to retrieve block [blkID] from the VM. This method
 // only returns accepted blocks.
+// 
+// Note: This method is not used in our implementation since we don't use
+// the chain.State's block management. We implement it to satisfy interfaces
+// but it's not called in practice.
 func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (chain.Block, error) {
-	blk, err := vm.GetBlock(ctx, blkID)
-	if err != nil {
-		return nil, err
-	}
+	// This method expects to return a vms/components/chain.Block
+	// but our blocks implement consensus/chain.Block
+	// Since this method is not used in our flow, we return an error
+	return nil, fmt.Errorf("GetAcceptedBlock not implemented - use GetAcceptedBlockForWarp instead")
+}
 
-	height := blk.Height()
-	acceptedBlkID, err := vm.GetBlockIDAtHeight(ctx, height)
-	if err != nil {
-		return nil, err
-	}
-
-	if acceptedBlkID != blkID {
-		// The provided block is not accepted.
+// GetAcceptedBlockForWarp implements the warp.BlockClient interface by returning
+// a block that implements the consensus chain.Block interface
+func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (consensuschain.Block, error) {
+	// First verify the block is accepted
+	ethBlock := vm.blockChain.GetBlockByHash(common.BytesToHash(blkID[:]))
+	if ethBlock == nil {
 		return nil, database.ErrNotFound
 	}
-	return blk, nil
+	
+	// Check if this block is accepted by comparing with canonical chain
+	acceptedHash := vm.blockChain.GetCanonicalHash(ethBlock.NumberU64())
+	if acceptedHash != ethBlock.Hash() {
+		return nil, database.ErrNotFound
+	}
+	
+	// Get the block from our State
+	blk, err := vm.State.GetBlock(ctx, blkID)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Extract the actual Block from the chain.BlockWrapper
+	switch b := blk.(type) {
+	case *chain.BlockWrapper:
+		if evmBlock, ok := b.Block.(*Block); ok {
+			return &consensusBlockWrapper{Block: evmBlock}, nil
+		}
+		return nil, fmt.Errorf("unexpected block type in wrapper: %T", b.Block)
+	case *Block:
+		return &consensusBlockWrapper{Block: b}, nil
+	default:
+		return nil, fmt.Errorf("unexpected block type: %T", blk)
+	}
+}
+
+// consensusBlockWrapper wraps our Block to implement consensus/chain.Block interface
+type consensusBlockWrapper struct {
+	*Block
+}
+
+// Verify that consensusBlockWrapper implements consensuschain.Block
+var _ consensuschain.Block = (*consensusBlockWrapper)(nil)
+
+// warpBlockClientWrapper wraps VM to implement warp.BlockClient interface
+type warpBlockClientWrapper struct {
+	vm *VM
+}
+
+// GetAcceptedBlock implements warp.BlockClient
+func (w *warpBlockClientWrapper) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (consensuschain.Block, error) {
+	return w.vm.GetAcceptedBlockForWarp(ctx, blockID)
 }
 
 // SetPreference sets what the current tail of the chain is
@@ -1175,8 +1222,8 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 	}
 
 	if vm.config.WarpAPIEnabled {
-		warpSDKClient := vm.Network.NewClient(p2p.SignatureRequestHandlerID)
-		signatureAggregator := acp118.NewSignatureAggregator(vm.ctx.Log, warpSDKClient)
+		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
+		signatureAggregator := lp118.NewSignatureAggregator(vm.ctx.Log, warpSDKClient)
 
 		if err := handler.RegisterName("warp", warp.NewAPI(vm.ctx, vm.warpBackend, signatureAggregator, vm.requirePrimaryNetworkSigners)); err != nil {
 			return nil, err
@@ -1309,11 +1356,11 @@ func (vm *VM) readLastAccepted() (common.Hash, uint64, error) {
 		return common.Hash{}, 0, fmt.Errorf("last accepted bytes should have been length %d, but found %d", common.HashLength, len(lastAcceptedBytes))
 	default:
 		lastAcceptedHash := common.BytesToHash(lastAcceptedBytes)
-		height := rawdb.ReadHeaderNumber(vm.chaindb, lastAcceptedHash)
-		if height == nil {
+		height, found := rawdb.ReadHeaderNumber(vm.chaindb, lastAcceptedHash)
+		if !found {
 			return common.Hash{}, 0, fmt.Errorf("failed to retrieve header number of last accepted block: %s", lastAcceptedHash)
 		}
-		return lastAcceptedHash, *height, nil
+		return lastAcceptedHash, height, nil
 	}
 }
 

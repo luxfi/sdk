@@ -315,7 +315,9 @@ func (b *EthAPIBackend) GetEVM(ctx context.Context, msg *core.Message, state *st
 	} else {
 		context = core.NewEVMBlockContext(header, b.eth.BlockChain(), nil)
 	}
-	return vm.NewEVM(context, txContext, state, b.ChainConfig(), *vmConfig)
+	evm := vm.NewEVM(context, state, b.ChainConfig(), *vmConfig)
+	evm.SetTxContext(txContext)
+	return evm
 }
 
 func (b *EthAPIBackend) SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription {
