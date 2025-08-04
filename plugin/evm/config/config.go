@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/database/pebbledb"
+	"github.com/luxfi/database/pebbledb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/spf13/cast"

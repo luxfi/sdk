@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	stdlog "log/slog"
 	"runtime"
 	"strings"
 
@@ -45,9 +46,10 @@ func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (
 		handler = termHandler
 	}
 
-	// Create handler
+	// Create handler with wrapper to convert exp/slog to std slog
+	wrapper := &slogWrapper{handler: handler}
 	c := Logger{
-		Logger:   ethlog.NewLogger(handler),
+		Logger:   ethlog.NewLogger(wrapper),
 		logLevel: logLevel,
 	}
 
@@ -103,4 +105,75 @@ func (a *addContext) Handle(ctx context.Context, r slog.Record) error {
 		r.Add(slog.String("caller", fmt.Sprintf("%s:%d", file, line)))
 	}
 	return a.Handler.Handle(ctx, r)
+}
+
+// slogWrapper wraps exp/slog.Handler to implement std slog.Handler
+type slogWrapper struct {
+	handler slog.Handler
+}
+
+func (s *slogWrapper) Enabled(ctx context.Context, level stdlog.Level) bool {
+	// Convert std slog level to exp slog level
+	expLevel := slog.Level(level)
+	return s.handler.Enabled(ctx, expLevel)
+}
+
+func (s *slogWrapper) Handle(ctx context.Context, r stdlog.Record) error {
+	// Convert std slog record to exp slog record
+	expRecord := slog.Record{
+		Time: r.Time,
+		Level: slog.Level(r.Level),
+		Message: r.Message,
+		PC: r.PC,
+	}
+	
+	// Copy attributes
+	r.Attrs(func(a stdlog.Attr) bool {
+		expRecord.Add(convertAttr(a))
+		return true
+	})
+	
+	return s.handler.Handle(ctx, expRecord)
+}
+
+func (s *slogWrapper) WithAttrs(attrs []stdlog.Attr) stdlog.Handler {
+	expAttrs := make([]slog.Attr, len(attrs))
+	for i, a := range attrs {
+		expAttrs[i] = convertAttr(a)
+	}
+	return &slogWrapper{handler: s.handler.WithAttrs(expAttrs)}
+}
+
+func (s *slogWrapper) WithGroup(name string) stdlog.Handler {
+	return &slogWrapper{handler: s.handler.WithGroup(name)}
+}
+
+func convertAttr(a stdlog.Attr) slog.Attr {
+	return slog.Attr{
+		Key: a.Key,
+		Value: convertValue(a.Value),
+	}
+}
+
+func convertValue(v stdlog.Value) slog.Value {
+	switch v.Kind() {
+	case stdlog.KindBool:
+		return slog.BoolValue(v.Bool())
+	case stdlog.KindInt64:
+		return slog.Int64Value(v.Int64())
+	case stdlog.KindUint64:
+		return slog.Uint64Value(v.Uint64())
+	case stdlog.KindFloat64:
+		return slog.Float64Value(v.Float64())
+	case stdlog.KindString:
+		return slog.StringValue(v.String())
+	case stdlog.KindTime:
+		return slog.TimeValue(v.Time())
+	case stdlog.KindDuration:
+		return slog.DurationValue(v.Duration())
+	case stdlog.KindAny:
+		return slog.AnyValue(v.Any())
+	default:
+		return slog.AnyValue(v.Any())
+	}
 }
