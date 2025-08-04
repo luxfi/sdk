@@ -1,13 +1,18 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package constants
 
 import (
+	"errors"
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/units"
+)
+
+// Errors
+var (
+	ErrUnknownNetwork = errors.New("unknown network")
 )
 
 // Network IDs
@@ -82,12 +87,12 @@ const (
 // Staking parameters
 const (
 	// Minimum stake amounts
-	MinValidatorStake = 2_000 * LUX
-	MinDelegatorStake = 25 * LUX
+	MinValidatorStake = 2_000 * GWei  // 2,000 LUX worth of GWei
+	MinDelegatorStake = 25 * GWei     // 25 LUX worth of GWei
 	
 	// Maximum stake amounts
-	MaxValidatorStake = 3_000_000 * LUX
-	MaxDelegatorStake = 3_000_000 * LUX
+	MaxValidatorStake = 3_000_000 * GWei  // 3M LUX worth of GWei
+	MaxDelegatorStake = 3_000_000 * GWei  // 3M LUX worth of GWei
 	
 	// Weight factors
 	MaxValidatorWeightFactor = 5
@@ -103,10 +108,10 @@ const (
 // Supply and economics
 const (
 	// Total supply
-	TotalSupply = 720_000_000 * LUX
+	TotalSupply = 720_000_000 * GWei  // 720M LUX worth of GWei
 	
 	// Initial supply distribution
-	InitialSupply = 360_000_000 * LUX
+	InitialSupply = 360_000_000 * GWei  // 360M LUX worth of GWei
 	
 	// Reward config
 	RewardPercentDenominator = 1_000_000
@@ -116,8 +121,8 @@ const (
 // Transaction fees
 const (
 	// Base fees
-	TxFee            = 0.001 * LUX
-	CreateAssetTxFee = 0.01 * LUX
+	TxFee            = 1_000_000 * GWei // 0.001 LUX
+	CreateAssetTxFee = 10_000_000 * GWei // 0.01 LUX
 	CreateChainTxFee = 1 * LUX
 	CreateSubnetTxFee = 1 * LUX
 	
@@ -130,7 +135,7 @@ const (
 // Block parameters
 const (
 	// Block size limits
-	MaxBlockSize       = 2 * units.MiB
+	MaxBlockSize       = 2 * 1024 * 1024 // 2 MiB
 	MaxBlockGas        = 15_000_000
 	TargetBlockRate    = 2 * time.Second
 	
@@ -187,7 +192,7 @@ const (
 	MaxOutstandingRequests  = 1024
 	
 	// Network limits
-	MaxMessageSize          = 2 * units.MiB
+	MaxMessageSize          = 2 * 1024 * 1024 // 2 MiB
 	MaxClockDifference      = 10 * time.Second
 )
 
@@ -242,14 +247,14 @@ const (
 	
 	// Subnet limits
 	MaxSubnetValidators    = 100
-	MinSubnetValidatorStake = 1 * LUX
+	MinSubnetValidatorStake = 1 * GWei  // 1 LUX worth of GWei
 )
 
 // Cross-chain (Warp) messaging
 const (
 	// Warp message size limits
-	MaxWarpMessageSize     = 256 * units.KiB
-	MaxWarpMessagePayload  = 200 * units.KiB
+	MaxWarpMessageSize     = 256 * 1024 // 256 KiB
+	MaxWarpMessagePayload  = 200 * 1024 // 200 KiB
 	
 	// Warp signature parameters
 	WarpQuorumNumerator    = 67
@@ -259,7 +264,7 @@ const (
 // Platform limits
 const (
 	// Transaction limits
-	MaxTxSize              = 64 * units.KiB
+	MaxTxSize              = 64 * 1024 // 64 KiB
 	MaxMemoSize            = 256
 	
 	// UTXO limits

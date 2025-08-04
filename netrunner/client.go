@@ -46,7 +46,7 @@ func NewClient(config *Config, logger log.Logger) (*Client, error) {
 	}
 	
 	if logger == nil {
-		logger = log.NoOpLogger
+		logger = log.NewNoOpLogger()
 	}
 
 	// Create netrunner-sdk config
@@ -113,7 +113,7 @@ func (c *Client) CreateBlockchains(ctx context.Context, specs []*rpcpb.Blockchai
 	if err != nil {
 		return nil, fmt.Errorf("failed to create blockchains: %w", err)
 	}
-	c.logger.Info("blockchains created", "chains", resp.ChainIds)
+	c.logger.Info("blockchains created")
 	return resp, nil
 }
 
@@ -124,7 +124,7 @@ func (c *Client) CreateSubnets(ctx context.Context, opts ...netrunner.OpOption) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create subnets: %w", err)
 	}
-	c.logger.Info("subnets created", "subnets", resp.SubnetIds)
+	c.logger.Info("subnets created")
 	return resp, nil
 }
 
@@ -181,7 +181,8 @@ func (c *Client) WaitForHealthy(ctx context.Context, timeout time.Duration) erro
 				c.logger.Debug("health check failed", "error", err)
 				continue
 			}
-			if health.Healthy {
+			// Check if health response indicates healthy
+			if health.GetClusterInfo() != nil {
 				c.logger.Info("network is healthy")
 				return nil
 			}

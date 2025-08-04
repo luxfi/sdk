@@ -44,7 +44,7 @@ func New(opts ...Option) (*LuxSDK, error) {
 	}
 	
 	// Initialize logger
-	logger := logging.NewLogger(cfg.LogLevel)
+	logger := log.NewZapLogger(cfg.LogLevel)
 	
 	// Initialize CLI wrapper
 	// TODO: Implement CLI wrapper

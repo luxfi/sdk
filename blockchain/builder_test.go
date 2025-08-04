@@ -17,7 +17,7 @@ import (
 )
 
 func TestBuilder_CreateBlockchain(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 
 	tests := []struct {
@@ -133,7 +133,7 @@ func TestBuilder_CreateBlockchain(t *testing.T) {
 }
 
 func TestBuilder_Deploy(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
@@ -212,7 +212,7 @@ func TestBuilder_Deploy(t *testing.T) {
 }
 
 func TestBuilder_GenerateGenesis(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 
 	tests := []struct {
@@ -304,7 +304,7 @@ func TestBuilder_GenerateGenesis(t *testing.T) {
 }
 
 func TestBuilder_ValidateConfig(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 
 	tests := []struct {
@@ -390,7 +390,7 @@ func TestBuilder_ValidateConfig(t *testing.T) {
 }
 
 func TestBuilder_ListBlockchains(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
@@ -429,7 +429,7 @@ func TestBuilder_ListBlockchains(t *testing.T) {
 }
 
 func TestBuilder_GetBlockchain(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
@@ -456,7 +456,7 @@ func TestBuilder_GetBlockchain(t *testing.T) {
 }
 
 func TestBuilder_CreateChainConfig(t *testing.T) {
-	logger := log.NoOpLogger
+	logger := log.NewNoOpLogger()
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
