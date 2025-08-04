@@ -34,7 +34,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/internal/version"
 	"github.com/luxfi/evm/params"
 	"github.com/mattn/go-isatty"

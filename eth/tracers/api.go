@@ -40,11 +40,12 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
@@ -572,8 +573,9 @@ func (api *API) IntermediateRoots(ctx context.Context, hash common.Hash, config 
 		var (
 			msg, _    = core.TransactionToMessage(tx, signer, block.BaseFee())
 			txContext = core.NewEVMTxContext(msg)
-			vmenv     = vm.NewEVM(vmctx, txContext, statedb, chainConfig, vm.Config{})
+			vmenv     = vm.NewEVM(vmctx, statedb, chainConfig, vm.Config{})
 		)
+		vmenv.SetTxContext(txContext)
 		statedb.SetTxContext(tx.Hash(), i)
 		if _, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit)); err != nil {
 			log.Warn("Tracing intermediate roots did not complete", "txindex", i, "txhash", tx.Hash(), "err", err)
@@ -730,7 +732,8 @@ txloop:
 		// Generate the next state snapshot fast without tracing
 		msg, _ := core.TransactionToMessage(tx, signer, block.BaseFee())
 		statedb.SetTxContext(tx.Hash(), i)
-		vmenv := vm.NewEVM(blockCtx, core.NewEVMTxContext(msg), statedb, api.backend.ChainConfig(), vm.Config{})
+		vmenv := vm.NewEVM(blockCtx, statedb, api.backend.ChainConfig(), vm.Config{})
+		vmenv.SetTxContext(core.NewEVMTxContext(msg))
 		if _, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit)); err != nil {
 			failed = err
 			break txloop
@@ -786,7 +789,7 @@ func (api *FileTracerAPI) standardTraceBlockToFile(ctx context.Context, block *t
 		logConfig = config.Config
 		txHash = config.TxHash
 	}
-	logConfig.Debug = true
+	// logConfig.Debug = true // Debug field no longer exists in logger.Config
 
 	// Execute transaction, either tracing all or just the requested one
 	var (
@@ -836,7 +839,8 @@ func (api *FileTracerAPI) standardTraceBlockToFile(ctx context.Context, block *t
 			}
 		}
 		// Execute the transaction and flush any traces to disk
-		vmenv := vm.NewEVM(vmctx, txContext, statedb, chainConfig, vmConf)
+		vmenv := vm.NewEVM(vmctx, statedb, chainConfig, vmConf)
+		vmenv.SetTxContext(txContext)
 		statedb.SetTxContext(tx.Hash(), i)
 		_, err = core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit))
 		if writer != nil {
@@ -1004,14 +1008,28 @@ func (api *baseAPI) traceTx(ctx context.Context, message *core.Message, txctx *C
 		config = &TraceConfig{}
 	}
 	// Default tracer is the struct logger
-	tracer = logger.NewStructLogger(config.Config)
+	var hooks *tracing.Hooks
+	structLogger := logger.NewStructLogger(config.Config)
+	hooks = structLogger.Hooks()
+	
 	if config.Tracer != nil {
-		tracer, err = DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig)
+		// Use the native tracer from the directory
+		t, err := DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig, api.backend.ChainConfig())
 		if err != nil {
 			return nil, err
 		}
+		tracer = *t
+		hooks = tracer.Hooks
+	} else {
+		// For struct logger, we need to wrap it properly
+		tracer = Tracer{
+			Hooks: hooks,
+			GetResult: structLogger.GetResult,
+			Stop: structLogger.Stop,
+		}
 	}
-	vmenv := vm.NewEVM(vmctx, txContext, statedb, api.backend.ChainConfig(), vm.Config{Tracer: tracer, NoBaseFee: true})
+	vmenv := vm.NewEVM(vmctx, statedb, api.backend.ChainConfig(), vm.Config{Tracer: hooks, NoBaseFee: true})
+	vmenv.SetTxContext(txContext)
 
 	// Define a meaningful timeout of a single transaction trace
 	if config.Timeout != nil {

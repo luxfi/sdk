@@ -70,14 +70,14 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/database/versiondb"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/consensus/engine/chain/block"
@@ -515,6 +515,38 @@ func (vm *VM) Initialize(
 }
 
 func parseGenesis(ctx *consensus.Context, genesisBytes []byte, upgradeBytes []byte, airdropFile string) (*core.Genesis, error) {
+	// First check if this is a database replay genesis
+	var genesisMap map[string]interface{}
+	if err := json.Unmarshal(genesisBytes, &genesisMap); err == nil {
+		if replay, ok := genesisMap["replay"].(bool); ok && replay {
+			// This is a database replay genesis
+			dbPath, _ := genesisMap["dbPath"].(string)
+			dbType, _ := genesisMap["dbType"].(string)
+			log.Info("Database replay genesis detected", "dbPath", dbPath, "dbType", dbType)
+			
+			// Return a special genesis that signals database replay
+			g := &core.Genesis{
+				Config: &params.ChainConfig{},
+			}
+			
+			// Extract the chain config from the genesis map
+			if configData, ok := genesisMap["config"].(map[string]interface{}); ok {
+				configBytes, _ := json.Marshal(configData)
+				if err := json.Unmarshal(configBytes, g.Config); err != nil {
+					return nil, fmt.Errorf("failed to parse chain config: %w", err)
+				}
+			}
+			
+			// Mark this as a database replay
+			g.Config.IsDatabaseReplay = true
+			g.Config.DatabasePath = dbPath
+			g.Config.DatabaseType = dbType
+			
+			return g, nil
+		}
+	}
+	
+	// Normal genesis parsing
 	g := new(core.Genesis)
 	if err := json.Unmarshal(genesisBytes, g); err != nil {
 		return nil, fmt.Errorf("parsing genesis: %w", err)

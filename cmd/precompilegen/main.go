@@ -36,7 +36,6 @@ import (
 
 	_ "embed"
 
-	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/accounts/abi/bind/precompilebind"
 	"github.com/luxfi/evm/cmd/utils"
@@ -190,7 +189,7 @@ func precompilegen(c *cli.Context) error {
 }
 
 func main() {
-	log.SetDefault(log.NewLogger(log.NewTerminalHandlerWithLevel(os.Stderr, log.LevelInfo, true)))
+	// Setup logging - use default logger
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)

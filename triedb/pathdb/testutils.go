@@ -107,7 +107,8 @@ func (h *testHasher) Commit(collectLeaf bool) (common.Hash, *trienode.NodeSet, e
 		if len(val) == 0 {
 			set.AddNode(hash.Bytes(), trienode.NewDeleted())
 		} else {
-			set.AddNode(hash.Bytes(), trienode.New(crypto.Keccak256Hash(val), val))
+			h := crypto.Keccak256Hash(val)
+			set.AddNode(hash.Bytes(), trienode.New(common.BytesToHash(h[:]), val))
 		}
 	}
 	root, blob := hash(nodes)
@@ -141,7 +142,8 @@ func hash(states map[common.Hash][]byte) (common.Hash, []byte) {
 	if len(input) == 0 {
 		return types.EmptyRootHash, nil
 	}
-	return crypto.Keccak256Hash(input), input
+	h := crypto.Keccak256Hash(input)
+	return common.BytesToHash(h[:]), input
 }
 
 type hashLoader struct {

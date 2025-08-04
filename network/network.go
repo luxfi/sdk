@@ -12,15 +12,15 @@ import (
 
 	"golang.org/x/sync/semaphore"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/node/codec"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/consensus/validators"
+	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"

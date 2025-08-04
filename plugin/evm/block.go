@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 
 	"github.com/luxfi/geth/core/rawdb"
@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 )

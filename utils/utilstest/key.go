@@ -25,8 +25,9 @@ func NewKey(t *testing.T) *Key {
 	t.Helper()
 	privateKeyECDSA, err := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
 	require.NoError(t, err)
+	cryptoAddr := crypto.PubkeyToAddress(privateKeyECDSA.PublicKey)
 	return &Key{
-		Address:    crypto.PubkeyToAddress(privateKeyECDSA.PublicKey),
+		Address:    common.BytesToAddress(cryptoAddr[:]),
 		PrivateKey: privateKeyECDSA,
 	}
 }

@@ -156,7 +156,7 @@ func RunPrecompileTests(t *testing.T, module modules.Module, contractTests map[s
 // testStateDB allows for mocking the predicate storage slots without calling
 // Prepare on the statedb.
 type testStateDB struct {
-	*extstate.StateDB
+	*extstate.PrecompileStateDBAdapter
 
 	predicateStorageSlots map[common.Address][][]byte
 }
@@ -175,8 +175,9 @@ func newTestStateDB(t testing.TB, predicateStorageSlots map[common.Address][][]b
 	db := rawdb.NewMemoryDatabase()
 	statedb, err := state.New(common.Hash{}, state.NewDatabase(db), nil)
 	require.NoError(t, err)
+	extStateDB := extstate.New(statedb)
 	return &testStateDB{
-		StateDB:               extstate.New(statedb),
-		predicateStorageSlots: predicateStorageSlots,
+		PrecompileStateDBAdapter: extstate.NewPrecompileAdapter(extStateDB),
+		predicateStorageSlots:    predicateStorageSlots,
 	}
 }

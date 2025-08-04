@@ -341,13 +341,13 @@ func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 	)
 
 	// Ensure that key1 has some funds in the genesis block.
-	genesisBalance := big.NewInt(1000000)
+	// genesisBalance := big.NewInt(1000000)
 	gspec := &Genesis{
 		Config: params.WithExtra(
 			&params.ChainConfig{HomesteadBlock: new(big.Int)},
 			&extras.ChainConfig{FeeConfig: params.DefaultFeeConfig},
 		),
-		Alloc: types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc: types.GenesisAlloc{common.Address(addr1): {Balance: big.NewInt(1000000)}},
 	}
 
 	blockchain, err := createBlockChain(chainDB, pruningConfig, gspec, common.Hash{})
@@ -359,7 +359,7 @@ func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 	// This call generates a chain of 3 blocks.
 	signer := types.HomesteadSigner{}
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 10, 10, func(i int, gen *BlockGen) {
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -676,7 +676,7 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		address     = crypto.PubkeyToAddress(key.PublicKey)
 		destAddress = crypto.CreateAddress(address, 0)
-		funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
+		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 	)
 
 	// runtime code is 	0x60ffff : PUSH1 0xFF SELFDESTRUCT, a.k.a SELFDESTRUCT(0xFF)
@@ -699,7 +699,7 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 	gspec := &Genesis{
 		Config: config,
 		Alloc: types.GenesisAlloc{
-			address: {Balance: funds},
+			common.Address(address): {Balance: big.NewInt(params.Ether)},
 		},
 	}
 	nonce := uint64(0)
@@ -722,7 +722,7 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 			Nonce:    nonce,
 			GasPrice: new(big.Int).Set(fee),
 			Gas:      100000,
-			To:       &destAddress,
+			To:       (*common.Address)(&destAddress),
 		})
 		b.AddTx(tx)
 		nonce++
@@ -750,7 +750,7 @@ func TestDeleteThenCreate(t *testing.T) {
 		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		address     = crypto.PubkeyToAddress(key.PublicKey)
 		factoryAddr = crypto.CreateAddress(address, 0)
-		funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
+		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 	)
 	/*
 		contract Factory {
@@ -785,7 +785,7 @@ func TestDeleteThenCreate(t *testing.T) {
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
 		Alloc: types.GenesisAlloc{
-			address: {Balance: funds},
+			common.Address(address): {Balance: big.NewInt(params.Ether)},
 		},
 	}
 	nonce := uint64(0)
@@ -813,7 +813,7 @@ func TestDeleteThenCreate(t *testing.T) {
 				Nonce:    nonce,
 				GasPrice: new(big.Int).Set(fee),
 				Gas:      500000,
-				To:       &factoryAddr,
+				To:       (*common.Address)(&factoryAddr),
 				Data:     data,
 			})
 			b.AddTx(tx)
@@ -824,7 +824,7 @@ func TestDeleteThenCreate(t *testing.T) {
 				Nonce:    nonce,
 				GasPrice: new(big.Int).Set(fee),
 				Gas:      500000,
-				To:       &contractAddr,
+				To:       (*common.Address)(&contractAddr),
 				Data:     common.Hex2Bytes("2b68b9c6"), // destruct
 			})
 			nonce++
@@ -835,7 +835,7 @@ func TestDeleteThenCreate(t *testing.T) {
 				Nonce:    nonce,
 				GasPrice: new(big.Int).Set(fee),
 				Gas:      500000,
-				To:       &factoryAddr, // re-creation
+				To:       (*common.Address)(&factoryAddr), // re-creation
 				Data:     data,
 			})
 			b.AddTx(tx)
@@ -866,7 +866,7 @@ func TestTransientStorageReset(t *testing.T) {
 		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		address     = crypto.PubkeyToAddress(key.PublicKey)
 		destAddress = crypto.CreateAddress(address, 0)
-		funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
+		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 		vmConfig    = vm.Config{
 			ExtraEips: []int{1153}, // Enable transient storage EIP
 		}
@@ -901,7 +901,7 @@ func TestTransientStorageReset(t *testing.T) {
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
 		Alloc: types.GenesisAlloc{
-			address: {Balance: funds},
+			common.Address(address): {Balance: big.NewInt(params.Ether)},
 		},
 	}
 	nonce := uint64(0)
@@ -925,7 +925,7 @@ func TestTransientStorageReset(t *testing.T) {
 			Nonce:    nonce,
 			GasPrice: new(big.Int).Set(fee),
 			Gas:      100000,
-			To:       &destAddress,
+			To:       (*common.Address)(&destAddress),
 		})
 		b.AddTxWithVMConfig(tx, vmConfig)
 		nonce++
@@ -947,7 +947,7 @@ func TestTransientStorageReset(t *testing.T) {
 		t.Fatalf("Failed to load state %v", err)
 	}
 	loc := common.BytesToHash([]byte{1})
-	slot := state.GetState(destAddress, loc)
+	slot := state.GetState(common.Address(destAddress), loc)
 	if slot != (common.Hash{}) {
 		t.Fatalf("Unexpected dirty storage slot")
 	}
@@ -967,10 +967,10 @@ func TestEIP3651(t *testing.T) {
 		funds   = new(big.Int).Mul(common.Big1, big.NewInt(params.Ether))
 		gspec   = &Genesis{
 			Config:    params.TestChainConfig,
-			Timestamp: uint64(upgrade.InitiallyActiveTime.Unix()),
+			Timestamp: uint64(params.InitiallyActiveTime.Unix()),
 			Alloc: types.GenesisAlloc{
-				addr1: {Balance: funds},
-				addr2: {Balance: funds},
+				common.Address(addr1): {Balance: funds},
+				common.Address(addr2): {Balance: funds},
 				// The address 0xAAAA sloads 0x00 and 0x01
 				aa: {
 					Code: []byte{
@@ -1022,7 +1022,7 @@ func TestEIP3651(t *testing.T) {
 
 		b.AddTx(tx)
 	})
-	chain, err := NewBlockChain(rawdb.NewMemoryDatabase(), DefaultCacheConfig, gspec, engine, vm.Config{Tracer: logger.NewMarkdownLogger(&logger.Config{}, os.Stderr)}, common.Hash{}, false)
+	chain, err := NewBlockChain(rawdb.NewMemoryDatabase(), DefaultCacheConfig, gspec, engine, vm.Config{}, common.Hash{}, false)
 	if err != nil {
 		t.Fatalf("failed to create tester chain: %v", err)
 	}
@@ -1048,7 +1048,8 @@ func TestEIP3651(t *testing.T) {
 	// Note we use block.GasUsed() here as there is only one tx.
 	actual := state.GetBalance(block.Coinbase()).ToBig()
 	tx := block.Transactions()[0]
-	gasPrice := new(big.Int).Add(block.BaseFee(), tx.EffectiveGasTipValue(block.BaseFee()))
+	effectiveTip, _ := tx.EffectiveGasTip(block.BaseFee())
+	gasPrice := new(big.Int).Add(block.BaseFee(), effectiveTip)
 	expected := new(big.Int).SetUint64(block.GasUsed() * gasPrice.Uint64())
 	if actual.Cmp(expected) != 0 {
 		t.Fatalf("miner balance incorrect: expected %d, got %d", expected, actual)
@@ -1057,7 +1058,7 @@ func TestEIP3651(t *testing.T) {
 	// 4: Ensure the tx sender paid for the gasUsed * (block baseFee + effectiveGasTip).
 	// Note this differs from go-ethereum where the miner receives the gasUsed * block baseFee,
 	// as our handling of the coinbase payment is different.
-	actual = new(big.Int).Sub(funds, state.GetBalance(addr1).ToBig())
+	actual = new(big.Int).Sub(funds, state.GetBalance(common.Address(addr1)).ToBig())
 	if actual.Cmp(expected) != 0 {
 		t.Fatalf("sender balance incorrect: expected %d, got %d", expected, actual)
 	}

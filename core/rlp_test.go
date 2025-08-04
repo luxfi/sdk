@@ -49,10 +49,9 @@ func getBlock(transactions int, uncles int, dataSize int) *types.Block {
 		// A sender who makes transactions, has some funds
 		key, _  = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		address = crypto.PubkeyToAddress(key.PublicKey)
-		funds   = big.NewInt(50000 * 225000000000 * 200)
 		gspec   = &Genesis{
 			Config: params.TestChainConfig,
-			Alloc:  types.GenesisAlloc{address: {Balance: funds}},
+			Alloc:  types.GenesisAlloc{common.Address(address): {Balance: big.NewInt(50000 * 225000000000 * 200)}},
 		}
 	)
 	// We need to generate as many blocks +1 as uncles
@@ -119,7 +118,7 @@ func testRlpIterator(t *testing.T, txs, uncles, datasize int) {
 	var gotHashes []common.Hash
 	var expHashes []common.Hash
 	for txIt.Next() {
-		gotHashes = append(gotHashes, crypto.Keccak256Hash(txIt.Value()))
+		gotHashes = append(gotHashes, common.Hash(crypto.Keccak256Hash(txIt.Value())))
 	}
 
 	var expBody types.Body

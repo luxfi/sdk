@@ -40,10 +40,10 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 		engine  = dummy.NewCoinbaseFaker()
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		funds   = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
+		// funds   = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
 		gspec   = &Genesis{
 			Config:  params.TestChainConfig,
-			Alloc:   GenesisAlloc{addr1: {Balance: funds}},
+			Alloc:   GenesisAlloc{common.Address(addr1): {Balance: new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))}},
 			BaseFee: big.NewInt(legacy.BaseFee),
 		}
 		contractAddress = crypto.CreateAddress(addr1, 0)
@@ -66,7 +66,7 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 			b.AddTx(contractSignedTx)
 		case 1:
 			// In the next block, we call the contract function
-			tx := types.NewTransaction(1, contractAddress, common.Big0, 23000, big.NewInt(legacy.BaseFee), packedFunction)
+			tx := types.NewTransaction(1, common.Address(contractAddress), common.Big0, 23000, big.NewInt(legacy.BaseFee), packedFunction)
 			tx, err := types.SignTx(tx, signer, key1)
 			require.NoError(err)
 			b.AddTx(tx)

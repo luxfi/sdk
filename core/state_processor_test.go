@@ -117,7 +117,7 @@ func TestStateProcessorErrors(t *testing.T) {
 			db    = rawdb.NewMemoryDatabase()
 			gspec = &Genesis{
 				Config:    config,
-				Timestamp: uint64(upgrade.InitiallyActiveTime.Unix()),
+				Timestamp: uint64(extras.InitiallyActiveTime.Unix()),
 				Alloc: types.GenesisAlloc{
 					common.HexToAddress("0x71562b71999873DB5b286dF957af199Ec94617F7"): types.Account{
 						Balance: big.NewInt(4000000000000000000), // 4 ether

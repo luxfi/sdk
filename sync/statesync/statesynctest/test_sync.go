@@ -96,7 +96,8 @@ func FillAccountsWithStorage(t *testing.T, serverDB ethdb.Database, serverTrieDB
 			t.Fatalf("error reading random code bytes: %v", err)
 		}
 
-		codeHash := crypto.Keccak256Hash(codeBytes)
+		cryptoHash := crypto.Keccak256Hash(codeBytes)
+		codeHash := common.BytesToHash(cryptoHash[:])
 		rawdb.WriteCode(serverDB, codeHash, codeBytes)
 		account.CodeHash = codeHash[:]
 

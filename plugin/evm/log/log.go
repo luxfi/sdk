@@ -4,71 +4,86 @@
 package log
 
 import (
-	"context"
 	"fmt"
 	"io"
-	stdlog "log/slog"
-	"runtime"
+	"log/slog"
 	"strings"
 
-	ethlog "github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/log"
-	"golang.org/x/exp/slog"
+	"github.com/luxfi/log"
 )
 
 type Logger struct {
-	ethlog.Logger
-
-	logLevel *slog.LevelVar
+	log.Logger
 }
 
 // InitLogger initializes logger with alias and sets the log level and format with the original [os.StdErr] interface
 // along with the context logger.
 func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (Logger, error) {
-	logLevel := &slog.LevelVar{}
+	// Parse log level
+	logLevel, err := ParseLogLevel(level)
+	if err != nil {
+		return Logger{}, err
+	}
 
 	var handler slog.Handler
 	if jsonFormat {
-		chainStr := fmt.Sprintf("%s Chain", alias)
 		handler = log.JSONHandlerWithLevel(writer, logLevel)
-		handler = &addContext{Handler: handler, logger: chainStr}
+		// Add context to the handler
+		handler = handler.WithAttrs([]slog.Attr{
+			slog.String("logger", fmt.Sprintf("%s Chain", alias)),
+		})
 	} else {
 		useColor := false
 		chainStr := fmt.Sprintf("<%s Chain> ", alias)
 		termHandler := log.NewTerminalHandlerWithLevel(writer, logLevel, useColor)
-		termHandler.Prefix = func(r slog.Record) string {
-			file, line := getSource(r)
-			if file != "" {
-				return fmt.Sprintf("%s%s:%d ", chainStr, file, line)
-			}
-			return chainStr
-		}
+		// TODO: Add chain prefix to terminal handler when API is available
 		handler = termHandler
+		_ = chainStr
 	}
 
-	// Create handler with wrapper to convert exp/slog to std slog
-	wrapper := &slogWrapper{handler: handler}
+	// Create logger
+	logger := log.Root().With("chain", alias)
+	
 	c := Logger{
-		Logger:   ethlog.NewLogger(wrapper),
-		logLevel: logLevel,
+		Logger: logger,
 	}
 
-	if err := c.SetLogLevel(level); err != nil {
-		return Logger{}, err
-	}
-	ethlog.SetDefault(c.Logger)
+	log.SetDefault(c.Logger)
 	return c, nil
 }
 
 // SetLogLevel sets the log level of initialized log handler.
 func (l *Logger) SetLogLevel(level string) error {
-	// Set log level
-	logLevel, err := log.LvlFromString(level)
+	// Parse and set new log level
+	logLevel, err := ParseLogLevel(level)
 	if err != nil {
 		return err
 	}
-	l.logLevel.Set(logLevel)
+	
+	// Set the level on the logger
+	l.SetLevel(logLevel)
+	
 	return nil
+}
+
+// ParseLogLevel parses a string log level
+func ParseLogLevel(level string) (slog.Level, error) {
+	switch strings.ToLower(level) {
+	case "trace":
+		return log.LevelTrace, nil
+	case "debug":
+		return log.LevelDebug, nil
+	case "info":
+		return log.LevelInfo, nil
+	case "warn", "warning":
+		return log.LevelWarn, nil
+	case "error":
+		return log.LevelError, nil
+	case "crit", "critical":
+		return log.LevelCrit, nil
+	default:
+		return log.LevelInfo, fmt.Errorf("unknown log level: %s", level)
+	}
 }
 
 // locationTrims are trimmed for display to avoid unwieldy log lines.
@@ -84,96 +99,4 @@ func trimPrefixes(s string) string {
 		}
 	}
 	return s
-}
-
-func getSource(r slog.Record) (string, int) {
-	frames := runtime.CallersFrames([]uintptr{r.PC})
-	frame, _ := frames.Next()
-	return trimPrefixes(frame.File), frame.Line
-}
-
-type addContext struct {
-	slog.Handler
-
-	logger string
-}
-
-func (a *addContext) Handle(ctx context.Context, r slog.Record) error {
-	r.Add(slog.String("logger", a.logger))
-	file, line := getSource(r)
-	if file != "" {
-		r.Add(slog.String("caller", fmt.Sprintf("%s:%d", file, line)))
-	}
-	return a.Handler.Handle(ctx, r)
-}
-
-// slogWrapper wraps exp/slog.Handler to implement std slog.Handler
-type slogWrapper struct {
-	handler slog.Handler
-}
-
-func (s *slogWrapper) Enabled(ctx context.Context, level stdlog.Level) bool {
-	// Convert std slog level to exp slog level
-	expLevel := slog.Level(level)
-	return s.handler.Enabled(ctx, expLevel)
-}
-
-func (s *slogWrapper) Handle(ctx context.Context, r stdlog.Record) error {
-	// Convert std slog record to exp slog record
-	expRecord := slog.Record{
-		Time: r.Time,
-		Level: slog.Level(r.Level),
-		Message: r.Message,
-		PC: r.PC,
-	}
-	
-	// Copy attributes
-	r.Attrs(func(a stdlog.Attr) bool {
-		expRecord.Add(convertAttr(a))
-		return true
-	})
-	
-	return s.handler.Handle(ctx, expRecord)
-}
-
-func (s *slogWrapper) WithAttrs(attrs []stdlog.Attr) stdlog.Handler {
-	expAttrs := make([]slog.Attr, len(attrs))
-	for i, a := range attrs {
-		expAttrs[i] = convertAttr(a)
-	}
-	return &slogWrapper{handler: s.handler.WithAttrs(expAttrs)}
-}
-
-func (s *slogWrapper) WithGroup(name string) stdlog.Handler {
-	return &slogWrapper{handler: s.handler.WithGroup(name)}
-}
-
-func convertAttr(a stdlog.Attr) slog.Attr {
-	return slog.Attr{
-		Key: a.Key,
-		Value: convertValue(a.Value),
-	}
-}
-
-func convertValue(v stdlog.Value) slog.Value {
-	switch v.Kind() {
-	case stdlog.KindBool:
-		return slog.BoolValue(v.Bool())
-	case stdlog.KindInt64:
-		return slog.Int64Value(v.Int64())
-	case stdlog.KindUint64:
-		return slog.Uint64Value(v.Uint64())
-	case stdlog.KindFloat64:
-		return slog.Float64Value(v.Float64())
-	case stdlog.KindString:
-		return slog.StringValue(v.String())
-	case stdlog.KindTime:
-		return slog.TimeValue(v.Time())
-	case stdlog.KindDuration:
-		return slog.DurationValue(v.Duration())
-	case stdlog.KindAny:
-		return slog.AnyValue(v.Any())
-	default:
-		return slog.AnyValue(v.Any())
-	}
 }

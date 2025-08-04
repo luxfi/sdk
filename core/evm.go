@@ -28,147 +28,56 @@
 package core
 
 import (
-	"bytes"
 	"math/big"
 
+	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
-	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/params"
-	customheader "github.com/luxfi/evm/plugin/evm/header"
-	"github.com/luxfi/evm/predicate"
-	"github.com/holiman/uint256"
 )
-
-func init() {
-	vm.RegisterHooks(hooks{})
-}
 
 type hooks struct{}
 
-// OverrideNewEVMArgs is a hook that is called in [vm.NewEVM].
-// It allows for the modification of the EVM arguments before the EVM is created.
-// Specifically, we set Random to be the same as Difficulty since Shanghai.
-// This allows using the same jump table as upstream.
-// Then we set Difficulty to 0 as it is post Merge in upstream.
-// Additionally we wrap the StateDB with the appropriate StateDB wrapper,
-// which is used in evm to process historical pre-AP1 blocks with the
-// [StateDbAP1.GetCommittedState] method as it was historically.
-func (hooks) OverrideNewEVMArgs(args *vm.NewEVMArgs) *vm.NewEVMArgs {
-	rules := args.ChainConfig.Rules(args.BlockContext.BlockNumber, params.IsMergeTODO, args.BlockContext.Time)
-	args.StateDB = wrapStateDB(rules, args.StateDB)
-
-	if rules.IsShanghai {
-		args.BlockContext.Random = new(common.Hash)
-		args.BlockContext.Random.SetBytes(args.BlockContext.Difficulty.Bytes())
-		args.BlockContext.Difficulty = new(big.Int)
-	}
-
-	return args
-}
-
-func (hooks) OverrideEVMResetArgs(rules params.Rules, args *vm.EVMResetArgs) *vm.EVMResetArgs {
-	args.StateDB = wrapStateDB(rules, args.StateDB)
-	return args
-}
-
-func wrapStateDB(rules params.Rules, db vm.StateDB) vm.StateDB {
-	return extstate.New(db.(extstate.VmStateDB))
-}
-
-// ChainContext supports retrieving headers and consensus parameters from the
-// current blockchain to be used during transaction processing.
-type ChainContext interface {
-	// Engine retrieves the chain's consensus engine.
-	Engine() consensus.Engine
-
-	// GetHeader returns the header corresponding to the hash/number argument pair.
-	GetHeader(common.Hash, uint64) *types.Header
-}
+var Hooks = &hooks{}
 
 // NewEVMBlockContext creates a new context for use in the EVM.
 func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address) vm.BlockContext {
-	predicateBytes := customheader.PredicateBytesFromExtra(header.Extra)
-	if len(predicateBytes) == 0 {
-		return newEVMBlockContext(header, chain, author, nil)
-	}
-	// Prior to Durango, the VM enforces the extra data is smaller than or
-	// equal to this size. After Durango, the VM pre-verifies the extra
-	// data past the dynamic fee rollup window is valid.
-	_, err := predicate.ParseResults(predicateBytes)
-	if err != nil {
-		log.Error("failed to parse predicate results creating new block context", "err", err, "extra", header.Extra)
-		// As mentioned above, we pre-verify the extra data to ensure this never happens.
-		// If we hit an error, construct a new block context rather than use a potentially half initialized value
-		// as defense in depth.
-		return newEVMBlockContext(header, chain, author, nil)
-	}
-	return newEVMBlockContext(header, chain, author, header.Extra)
-}
-
-// NewEVMBlockContextWithPredicateResults creates a new context for use in the EVM with an override for the predicate results that is not present
-// in header.Extra.
-// This function is used to create a BlockContext when the header Extra data is not fully formed yet and it's more efficient to pass in predicateResults
-// directly rather than re-encode the latest results when executing each individual transaction.
-func NewEVMBlockContextWithPredicateResults(header *types.Header, chain ChainContext, author *common.Address, predicateBytes []byte) vm.BlockContext {
-	blockCtx := NewEVMBlockContext(header, chain, author)
-	// Note this only sets the block context, which is the hand-off point for
-	// the EVM. The actual header is not modified.
-	blockCtx.Header.Extra = customheader.SetPredicateBytesInExtra(
-		bytes.Clone(header.Extra),
-		predicateBytes,
-	)
-	return blockCtx
-}
-
-func newEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address, extra []byte) vm.BlockContext {
-	var (
-		beneficiary common.Address
-		baseFee     *big.Int
-		blobBaseFee *big.Int
-	)
-
-	// If we don't have an explicit author (i.e. not mining), extract from the header
-	if author == nil {
-		beneficiary, _ = chain.Engine().Author(header) // Ignore error, we're past header validation
-	} else {
-		beneficiary = *author
-	}
-	if header.BaseFee != nil {
-		baseFee = new(big.Int).Set(header.BaseFee)
-	}
-	if header.ExcessBlobGas != nil {
-		blobBaseFee = eip4844.CalcBlobFee(*header.ExcessBlobGas)
-	}
-	return vm.BlockContext{
+	blockContext := vm.BlockContext{
 		CanTransfer: CanTransfer,
 		Transfer:    Transfer,
 		GetHash:     GetHashFn(header, chain),
-		Coinbase:    beneficiary,
+		Coinbase:    GetCoinbase(author, header),
 		BlockNumber: new(big.Int).Set(header.Number),
 		Time:        header.Time,
 		Difficulty:  new(big.Int).Set(header.Difficulty),
-		BaseFee:     baseFee,
-		BlobBaseFee: blobBaseFee,
+		BaseFee:     header.BaseFee,
 		GasLimit:    header.GasLimit,
-		Header: &types.Header{
-			Number: new(big.Int).Set(header.Number),
-			Time:   header.Time,
-			Extra:  extra,
-		},
+		Random:      nil,
+		BlobBaseFee: eip4844.CalcBlobFee(chain.Config(), header),
 	}
+
+	// Shangai rules - set Random to Difficulty value
+	rules := chain.Config().Rules(header.Number, params.IsMergeTODO, header.Time)
+	if rules.IsShanghai {
+		blockContext.Random = new(common.Hash)
+		blockContext.Random.SetBytes(header.Difficulty.Bytes())
+		blockContext.Difficulty = new(big.Int)
+	}
+
+	return blockContext
 }
 
 // NewEVMTxContext creates a new transaction context for a single transaction.
 func NewEVMTxContext(msg *Message) vm.TxContext {
 	ctx := vm.TxContext{
-		Origin:     msg.From,
-		GasPrice:   new(big.Int).Set(msg.GasPrice),
-		BlobHashes: msg.BlobHashes,
+		Origin:       msg.From,
+		GasPrice:     new(big.Int).Set(msg.GasPrice),
+		BlobHashes:   msg.BlobHashes,
+		// AccessEvents: msg.AccessEvents, // TODO: Add AccessEvents to Message
 	}
 	if msg.BlobGasFeeCap != nil {
 		ctx.BlobFeeCap = new(big.Int).Set(msg.BlobGasFeeCap)
@@ -216,13 +125,43 @@ func GetHashFn(ref *types.Header, chain ChainContext) func(n uint64) common.Hash
 }
 
 // CanTransfer checks whether there are enough funds in the address' account to make a transfer.
-// This does not take the necessary gas in to account to make the transfer valid.
+// This does not take the necessary gas into account to make the transfer valid.
 func CanTransfer(db vm.StateDB, addr common.Address, amount *uint256.Int) bool {
 	return db.GetBalance(addr).Cmp(amount) >= 0
 }
 
 // Transfer subtracts amount from sender and adds amount to recipient using the given Db
 func Transfer(db vm.StateDB, sender, recipient common.Address, amount *uint256.Int) {
-	db.SubBalance(sender, amount)
-	db.AddBalance(recipient, amount)
+	db.SubBalance(sender, amount, tracing.BalanceChangeTransfer)
+	db.AddBalance(recipient, amount, tracing.BalanceChangeTransfer)
+}
+
+// ChainContext supports retrieving headers and consensus parameters from the
+// current blockchain to be used during transaction processing.
+type ChainContext interface {
+	// Engine retrieves the chain's consensus engine.
+	Engine() consensus.Engine
+
+	// GetHeader returns the header corresponding to the hash/number argument pair.
+	GetHeader(common.Hash, uint64) *types.Header
+
+	// Config returns the blockchain's chain configuration
+	Config() *params.ChainConfig
+}
+
+func wrapStateDB(rules params.Rules, db vm.StateDB) vm.StateDB {
+	// [AP1] was activated at genesis for mainnet
+	// it is only activated on the testnet at block 3,114,811 
+	// we need to use the correct StateDB wrapper to process historical
+	// blocks correctly.
+	// TODO: Implement StateDB wrapper when needed
+	return db
+}
+
+// GetCoinbase returns the coinbase for the given header and author.
+func GetCoinbase(author *common.Address, header *types.Header) common.Address {
+	if author != nil {
+		return *author
+	}
+	return header.Coinbase
 }

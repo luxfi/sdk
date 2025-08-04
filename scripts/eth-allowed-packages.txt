@@ -29,7 +29,7 @@
 "github.com/luxfi/geth/geth"
 "github.com/luxfi/geth/geth/legacy"
 "github.com/luxfi/geth/geth/stateconf"
-"github.com/luxfi/geth/log"
+"github.com/luxfi/log"
 "github.com/luxfi/geth/metrics"
 "github.com/luxfi/geth/rlp"
 "github.com/luxfi/geth/trie"

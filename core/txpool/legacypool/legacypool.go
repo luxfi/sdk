@@ -41,7 +41,7 @@ import (
 	"github.com/luxfi/geth/common/prque"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"

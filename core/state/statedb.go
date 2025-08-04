@@ -31,7 +31,7 @@ package state
 import (
 	"github.com/luxfi/geth/common"
 	ethstate "github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/state/snapshot"
+	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -94,8 +94,8 @@ func (s *StateDB) GetState(addr common.Address, hash common.Hash) common.Hash {
 	return s.StateDB.GetState(addr, hash)
 }
 
-func (s *StateDB) SetState(addr common.Address, key, value common.Hash) {
-	s.StateDB.SetState(addr, key, value)
+func (s *StateDB) SetState(addr common.Address, key, value common.Hash) common.Hash {
+	return s.StateDB.SetState(addr, key, value)
 }
 
 // SetTxContext sets the current transaction hash and index which are

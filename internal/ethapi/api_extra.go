@@ -155,16 +155,17 @@ func (s *BlockChainAPI) GetActiveRulesAt(ctx context.Context, blockTimestamp *ui
 		timestamp = *blockTimestamp
 	}
 	rules := s.b.ChainConfig().Rules(common.Big0, params.IsMergeTODO, timestamp)
+	extrasRules := params.GetExtrasRules(rules, s.b.ChainConfig(), timestamp)
 	res := ActiveRulesResult{
 		EthRules:       rules,
-		LuxRules: params.GetRulesExtra(rules).LuxRules,
+		LuxRules: extrasRules.LuxRules,
 	}
 	res.ActivePrecompiles = make(map[string]ActivePrecompilesResult)
-	for _, precompileConfig := range params.GetRulesExtra(rules).Precompiles {
+	for addr, precompileConfig := range extrasRules.Precompiles {
 		if precompileConfig.Timestamp() == nil {
 			continue
 		}
-		res.ActivePrecompiles[precompileConfig.Key()] = ActivePrecompilesResult{
+		res.ActivePrecompiles[addr.Hex()] = ActivePrecompilesResult{
 			Timestamp: *precompileConfig.Timestamp(),
 		}
 	}

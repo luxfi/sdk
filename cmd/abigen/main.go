@@ -37,7 +37,6 @@ import (
 
 	"github.com/luxfi/geth/common/compiler"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/cmd/utils"
 	"github.com/luxfi/evm/internal/flags"
@@ -243,7 +242,7 @@ func abigen(c *cli.Context) error {
 }
 
 func main() {
-	log.SetDefault(log.NewLogger(log.NewTerminalHandlerWithLevel(os.Stderr, log.LevelInfo, true)))
+	// Setup logging - use default logger
 
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)

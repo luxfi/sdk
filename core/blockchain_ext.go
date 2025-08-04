@@ -13,15 +13,19 @@ import "github.com/luxfi/geth/metrics"
 //
 // This is necessary for a metric defined in geth with the same name but a
 // different type to what we expect.
-func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) metrics.Counter {
+func getOrOverrideAsRegisteredCounter(name string, r metrics.Registry) *metrics.Counter {
 	if r == nil {
 		r = metrics.DefaultRegistry
 	}
 
-	if c, ok := r.GetOrRegister(name, metrics.NewCounter).(metrics.Counter); ok {
-		return c
+	if i := r.Get(name); i != nil {
+		if c, ok := i.(*metrics.Counter); ok {
+			return c
+		}
+		// `name` must have already been registered to be any other type
+		r.Unregister(name)
 	}
-	// `name` must have already been registered to be any other type
-	r.Unregister(name)
-	return metrics.NewRegisteredCounter(name, r)
+	c := metrics.NewCounter()
+	r.Register(name, c)
+	return c
 }

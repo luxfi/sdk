@@ -22,10 +22,10 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/tests/fixture/e2e"
 	"github.com/luxfi/node/tests/fixture/tmpnet"

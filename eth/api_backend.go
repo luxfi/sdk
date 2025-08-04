@@ -493,14 +493,12 @@ func (b *EthAPIBackend) RPCTxFeeCap() float64 {
 }
 
 func (b *EthAPIBackend) BloomStatus() (uint64, uint64) {
-	sections, _, _ := b.eth.bloomIndexer.Sections()
-	return params.BloomBitsBlocks, sections
+	// Bloom indexer is deprecated in newer geth
+	return 0, 0
 }
 
 func (b *EthAPIBackend) ServiceFilter(ctx context.Context, session *bloombits.MatcherSession) {
-	for i := 0; i < bloomFilterThreads; i++ {
-		go session.Multiplex(bloomRetrievalBatch, bloomRetrievalWait, b.eth.bloomRequests)
-	}
+	// Bloom service is deprecated in newer geth
 }
 
 func (b *EthAPIBackend) Engine() consensus.Engine {

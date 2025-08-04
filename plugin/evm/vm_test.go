@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/trie"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ import (
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/consensus/chain"
 	commonEng "github.com/luxfi/node/consensus/engine/core"

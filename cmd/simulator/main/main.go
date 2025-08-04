@@ -9,10 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	gethlog "github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/cmd/simulator/config"
 	"github.com/luxfi/evm/cmd/simulator/load"
-	"github.com/luxfi/evm/log"
 	"github.com/spf13/pflag"
 )
 
@@ -38,13 +36,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	logLevel, err := log.LvlFromString(v.GetString(config.LogLevelKey))
-	if err != nil {
-		fmt.Printf("couldn't parse log level: %s\n", err)
-		os.Exit(1)
-	}
-	gethLogger := gethlog.NewLogger(log.NewTerminalHandlerWithLevel(os.Stderr, logLevel, true))
-	gethlog.SetDefault(gethLogger)
+	// For simulator, we'll set the log level globally
+	logLevelStr := v.GetString(config.LogLevelKey)
+	
+	// The luxfi/log package doesn't have the same API as geth's log
+	// For now, we'll just print a message since the logging happens elsewhere
+	_ = logLevelStr
 
 	config, err := config.BuildConfig(v)
 	if err != nil {

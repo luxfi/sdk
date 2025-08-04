@@ -46,5 +46,5 @@ func Compile(fn string, src []byte, debug bool) (string, error) {
 		}
 		return "", errors.New("compiling failed")
 	}
-	return bin, nil
+	return string(bin), nil
 }

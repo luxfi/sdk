@@ -6,14 +6,16 @@ package warptest
 
 import (
 	"context"
+	"errors"
 	"slices"
 
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/consensus/chain/chaintest"
 	"github.com/luxfi/node/consensus/consensustest"
 )
+
+var ErrNotFound = errors.New("not found")
 
 // EmptyBlockClient returns an error if a block is requested
 var EmptyBlockClient BlockClient = MakeBlockClient()
@@ -30,7 +32,7 @@ func (f BlockClient) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (chai
 func MakeBlockClient(blkIDs ...ids.ID) BlockClient {
 	return func(_ context.Context, blkID ids.ID) (chain.Block, error) {
 		if !slices.Contains(blkIDs, blkID) {
-			return nil, database.ErrNotFound
+			return nil, ErrNotFound
 		}
 
 		return &chaintest.Block{

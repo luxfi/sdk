@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	ethrawdb "github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/log"
 )
 
 // writeCurrentTimeMarker writes a marker of the current time in the db at `key`.

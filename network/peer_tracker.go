@@ -8,12 +8,12 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	utils_math "github.com/luxfi/node/utils/math"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 
 	"github.com/luxfi/geth/metrics"
 )
@@ -43,12 +43,12 @@ type peerInfo struct {
 // Note: is not thread safe, caller must handle synchronization.
 type peerTracker struct {
 	peers                  map[ids.NodeID]*peerInfo // all peers we are connected to
-	numTrackedPeers        metrics.Gauge
+	numTrackedPeers        *metrics.Gauge
 	trackedPeers           set.Set[ids.NodeID] // peers that we have sent a request to
-	numResponsivePeers     metrics.Gauge
+	numResponsivePeers     *metrics.Gauge
 	responsivePeers        set.Set[ids.NodeID]     // peers that responded to the last request they were sent
 	bandwidthHeap          utils_math.AveragerHeap // tracks bandwidth peers are responding with
-	averageBandwidthMetric metrics.GaugeFloat64
+	averageBandwidthMetric *metrics.GaugeFloat64
 	averageBandwidth       utils_math.Averager
 }
 

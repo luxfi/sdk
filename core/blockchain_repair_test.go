@@ -516,7 +516,7 @@ func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
 
 func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme string) {
 	// It's hard to follow the test case, visualize the input
-	//log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	//log.Root().SetHandler(log.LevelFilterHandler(log.LevelTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump(true))
 
 	if scheme == customrawdb.FirewoodScheme && snapshots {
@@ -526,13 +526,8 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	// Create a temporary persistent database
 	datadir := t.TempDir()
 
-	db, err := rawdb.Open(rawdb.OpenOptions{
-		Directory: datadir,
-		Ephemeral: true,
-	})
-	if err != nil {
-		t.Fatalf("Failed to create persistent database: %v", err)
-	}
+	// For testing, use a memory database instead
+	db := rawdb.NewMemoryDatabase()
 	defer db.Close() // Might double close, should be fine
 
 	// Initialize a fresh chain
@@ -546,7 +541,7 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 		gspec   = &Genesis{
 			BaseFee: feeConfig.MinBaseFee,
 			Config:  &chainConfig,
-			Alloc:   GenesisAlloc{addr1: {Balance: big.NewInt(params.Ether)}},
+			Alloc:   GenesisAlloc{common.Address(addr1): {Balance: big.NewInt(params.Ether)}},
 		}
 		signer = types.LatestSigner(gspec.Config)
 		engine = dummy.NewFullFaker()
@@ -579,7 +574,7 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 		gspec.MustCommit(genDb, triedb.NewDatabase(genDb, nil))
 		sideblocks, _, err = GenerateChain(gspec.Config, gspec.ToBlock(), engine, genDb, tt.sidechainBlocks, 10, func(i int, b *BlockGen) {
 			b.SetCoinbase(common.Address{0x01})
-			tx, err := types.SignTx(types.NewTransaction(b.TxNonce(addr1), common.Address{0x01}, big.NewInt(10000), ethparams.TxGas, feeConfig.MinBaseFee, nil), signer, key1)
+			tx, err := types.SignTx(types.NewTransaction(b.TxNonce(common.Address(addr1)), common.Address{0x01}, big.NewInt(10000), ethparams.TxGas, feeConfig.MinBaseFee, nil), signer, key1)
 			require.NoError(err)
 			b.AddTx(tx)
 		})
@@ -593,7 +588,7 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	canonblocks, _, err := GenerateChain(gspec.Config, gspec.ToBlock(), engine, genDb, tt.canonicalBlocks, 10, func(i int, b *BlockGen) {
 		b.SetCoinbase(common.Address{0x02})
 		b.SetDifficulty(big.NewInt(1000000))
-		tx, err := types.SignTx(types.NewTransaction(b.TxNonce(addr1), common.Address{0x02}, big.NewInt(10000), ethparams.TxGas, feeConfig.MinBaseFee, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(b.TxNonce(common.Address(addr1)), common.Address{0x02}, big.NewInt(10000), ethparams.TxGas, feeConfig.MinBaseFee, nil), signer, key1)
 		require.NoError(err)
 		b.AddTx(tx)
 	})
@@ -622,13 +617,8 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	chain.stopWithoutSaving()
 
 	// Start a new blockchain back up and see where the repair leads us
-	db, err = rawdb.Open(rawdb.OpenOptions{
-		Directory: datadir,
-		Ephemeral: true,
-	})
-	if err != nil {
-		t.Fatalf("Failed to reopen persistent database: %v", err)
-	}
+	// For testing, use a memory database instead
+	db = rawdb.NewMemoryDatabase()
 	defer db.Close()
 
 	newChain, err := NewBlockChain(db, config, gspec, engine, vm.Config{}, lastAcceptedHash, false)

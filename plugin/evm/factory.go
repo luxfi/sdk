@@ -4,7 +4,7 @@
 package evm
 
 import (
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms"
 )

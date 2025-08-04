@@ -65,7 +65,7 @@ func TestGenesisEthUpgrades(t *testing.T) {
 			ParentHash: genHash,
 			Time:       uint64(time.Now().Unix()),
 		},
-		nil, nil, nil, nil,
+		nil, nil, nil,
 	)
 	rawdb.WriteBlock(db, block)
 	// We should still be able to re-initialize

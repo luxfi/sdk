@@ -53,7 +53,14 @@ func getPrecompileAddress(config precompileconfig.Config) common.Address {
 // RulesExtra represents extra EVM rules - part of libevm integration
 type RulesExtra struct {
 	IsSubnetEVM bool
-	// TODO: Add other fields as needed
+	IsDurango   bool
+	IsEtna      bool
+	IsFortuna   bool
+	IsGranite   bool
+	
+	// Fields for predicate support
+	PredicatersExist bool
+	Predicaters      map[common.Address]precompileconfig.Predicater
 }
 
 // IsPrecompileEnabled checks if a precompile is enabled
@@ -226,9 +233,16 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 
 // GetRulesExtra stub - was part of libevm integration
 func GetRulesExtra(rules Rules) RulesExtra {
-	// Return default RulesExtra
+	// Note: This is a simplified version that doesn't have access to ChainConfig
+	// For full functionality, use GetExtrasRules instead
 	return RulesExtra{
 		IsSubnetEVM: true, // Default to true for SubnetEVM
+		IsDurango:   true, // Assume Durango is activated
+		IsEtna:      false,
+		IsFortuna:   false,
+		IsGranite:   false,
+		PredicatersExist: false,
+		Predicaters:      make(map[common.Address]precompileconfig.Predicater),
 	}
 }
 

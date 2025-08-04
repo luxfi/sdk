@@ -40,7 +40,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
 )
@@ -373,15 +373,15 @@ func generateTrieRoot(db ethdb.KeyValueWriter, scheme string, it Iterator, accou
 }
 
 func stackTrieGenerate(db ethdb.KeyValueWriter, scheme string, owner common.Hash, in chan trieKV, out chan common.Hash) {
-	options := trie.NewStackTrieOptions()
+	var onTrieNode trie.OnTrieNode
 	if db != nil {
-		options = options.WithWriter(func(path []byte, hash common.Hash, blob []byte) {
+		onTrieNode = func(path []byte, hash common.Hash, blob []byte) {
 			rawdb.WriteTrieNode(db, owner, path, hash, blob, scheme)
-		})
+		}
 	}
-	t := trie.NewStackTrie(options)
+	t := trie.NewStackTrie(onTrieNode)
 	for leaf := range in {
 		t.Update(leaf.key[:], leaf.value)
 	}
-	out <- t.Commit()
+	out <- t.Hash()
 }
