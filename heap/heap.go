@@ -6,7 +6,7 @@ package heap
 import (
 	"container/heap"
 
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/ids"
 	"golang.org/x/exp/constraints"
 )
 

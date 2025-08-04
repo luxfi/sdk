@@ -1,36 +1,36 @@
-// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-//nolint:revive
 package config
 
 import (
-	"runtime"
-	"time"
-
-	"github.com/luxdefi/node/utils/logging"
-	"github.com/luxdefi/node/utils/units"
-	"github.com/luxdefi/vmsdk/trace"
-	"github.com/luxdefi/vmsdk/vm"
+	"math/big"
 )
 
-var _ vm.Config = (*Config)(nil)
+// Config represents the SDK configuration
+type Config struct {
+	LogLevel string
+	DataDir  string
+	Network  *NetworkConfig
+}
 
-type Config struct{}
+// NetworkConfig represents network configuration
+type NetworkConfig struct {
+	NetrunnerEndpoint string
+	NodeEndpoint      string
+	NetworkID         uint32
+	APIEndpoint       string
+	P2PPort           int
+	HTTPPort          int
+	StakingPort       int
+	LogLevel          string
+	DataDir           string
+	DBType            string
+	GenesisFile       string
+	StakeAmount       uint64
+}
 
-func (c *Config) GetLogLevel() logging.Level             { return logging.Info }
-func (c *Config) GetParallelism() int                    { return runtime.NumCPU() }
-func (c *Config) GetMempoolSize() int                    { return 2_048 }
-func (c *Config) GetMempoolPayerSize() int               { return 32 }
-func (c *Config) GetMempoolExemptPayers() [][]byte       { return nil }
-func (c *Config) GetDecisionsPort() uint16               { return 0 } // auto-assigned
-func (c *Config) GetBlocksPort() uint16                  { return 0 } // auto-assigned
-func (c *Config) GetStreamingBacklogSize() int           { return 1024 }
-func (c *Config) GetStateHistoryLength() int             { return 256 }
-func (c *Config) GetStateCacheSize() int                 { return 1 * units.GiB }
-func (c *Config) GetAcceptorSize() int                   { return 1024 }
-func (c *Config) GetTraceConfig() *trace.Config          { return &trace.Config{Enabled: false} }
-func (c *Config) GetStateSyncParallelism() int           { return 4 }
-func (c *Config) GetStateSyncMinBlocks() uint64          { return 256 }
-func (c *Config) GetStateSyncServerDelay() time.Duration { return 0 } // used for testing
-func (c *Config) GetBlockLRUSize() int                   { return 128 }
+// ChainID returns a big.Int representation of the NetworkID
+func (nc *NetworkConfig) ChainID() *big.Int {
+	return big.NewInt(int64(nc.NetworkID))
+}

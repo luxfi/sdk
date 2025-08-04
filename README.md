@@ -1,578 +1,328 @@
-<h1>Lux Chain SDK</h1>
-<p>
-  Framework for Building Hyper-Scalable Blockchains on Lux
-</p>
-<p>
-  <a href="https://goreportcard.com/report/github.com/luxdefi/vmsdk"><img src="https://goreportcard.com/badge/github.com/luxdefi/vmsdk" /></a>
-  <a href="https://github.com/luxdefi/vmsdk/actions/workflows/unit-tests.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/unit-tests.yml/badge.svg" /></a>
-  <a href="https://github.com/luxdefi/vmsdk/actions/workflows/static-analysis.yml"><img src="https://github.com/luxdefi/vmsdk/actions/workflows/static-analysis.yml/badge.svg" /></a>
-</p>
+# Lux SDK
 
----
-
-The freedom to create your own [Virtual Machine (VM)](https://docs.lux.network/subnets#virtual-machines),
-or blockchain runtime, is one of the most exciting and powerful aspects of building
-on Lux, however, it is difficult and time-intensive to do from scratch. Forking
-existing Lux VMs makes it easier to get started, like [Lux EVM](https://github.com/luxdefi/evm), but is time-consuming
-but it is complex to ensure correctness as changes occur upstream (in repos which
-often weren't meant to be used as a library).
-
-The `vmsdk` is the first (of many) frameworks dedicated to making it
-faster, safer, and easier to launch your own optimized blockchain on an Lux
-Subnet. By hiding much of the complexity of building your own blockchain
-runtime behind Lux-optimized data structures and algorithms, the
-`vmsdk` enables builders to focus their attention on the aspects of their
-runtime that make their project unique (and override the defaults only if needed).
-For example, a DEX-based project should focus on implementing a novel trading
-system and not on transaction serialization, assuming that is already done
-efficiently for them.
-
-This opinionated design methodology means that most runtimes built on the
-`vmsdk`, called a `luxvm`, only need to implement 500-1000 lines of their own
-code to add custom interaction patterns (and don't need to copy-pasta code from upstream
-that they need to keep up-to-date). However, if you do want to provide your own
-mechanism, you can always override anything you are using upstream if you can
-compose something better suited for your application. That same DEX-based
-project may wish to implement custom block building logic that prioritizes the
-inclusions of trades of certain partners or that interact with certain order
-books.
-
-Last but certainly not least, the usage of these Lux-optimized data structures
-and algorithms means that your `luxchain` can process thousands of transactions per second
-without needing to hire a team of engineers to optimize it or understanding
-anything about how it works under the hood...but you can certainly achieve
-higher throughput if you do ;).
-
-### Terminology
-* `vmsdk`: framework for building high-performance blockchains on Lux
-* `luxvm`: Lux Virtual Machine built using the `vmsdk`
-* `luxchain`: `luxvm` deployed on the Lux Network
-
-## Status
-`vmsdk` is considered **ALPHA** software and is not safe to use in
-production. The framework is under active development and may change
-significantly over the coming months as its modules are optimized and
-audited.
+The official Go SDK for building and managing Lux-compatible networks and blockchains. This SDK provides a comprehensive, easy-to-use interface for all Lux blockchain operations.
 
 ## Features
-### Efficient State Management
-All `vmsdk` state is stored using [`x/merkledb`](https://github.com/luxdefi/node/blob/master/x/merkledb/README.md),
-a path-based merkelized radix tree implementation provided by `node`. This high-performance
-data structure minimizes the on-disk footprint of any `luxvm` out-of-the-box by deleting
-any data that is no longer part of the current state (without performing any costly reference counting).
 
-The use of this type of data structure in the blockchain context was pioneered
-by the [go-ethereum](https://github.com/ethereum/go-ethereum) team in an effort
-to minimize the on-disk footprint of the EVM. We wanted to give a Huge shoutout
-to that team for all the work they put into researching this approach.
+- 🚀 **Network Management**: Create and manage Lux networks using netrunner
+- 🔗 **Blockchain Building**: Build L1/L2/L3 chains with custom VMs
+- 💰 **Staking & Validation**: Programmatic staking, delegation, and validation
+- 🪙 **Asset Management**: Create and manage assets on X-Chain
+- 📜 **Smart Contracts**: Deploy and interact with smart contracts on C-Chain
+- 🌉 **Cross-Chain Operations**: Seamless asset transfers between chains
+- 👛 **Wallet Integration**: Built-in wallet management via M-Chain
+- 🛡️ **Quantum-Resistant**: Q-Chain integration for post-quantum security
+- 🌐 **WASM Support**: Multi-language support via WebAssembly
 
-#### Dynamic State Sync
-Instead of requiring nodes to execute all previous transactions when joining
-any `luxchain` (which may not be possible if there is very high throughput on a Subnet),
-the `vmsdk` just syncs the most recent state from the network. To avoid falling
-behind the network while syncing this state, the `vmsdk` acts as an Lux Light
-Client and performs consensus on newly processed blocks without verifying them (updating its
-state sync target whenever a new block is accepted).
+## Installation
 
-The `vmsdk` relies on [`x/sync`](https://github.com/luxdefi/node/tree/master/x/sync),
-a bandwidth-aware dynamic sync implementation provided by `node`, to
-sync to the tip of any `luxchain`.
+```bash
+go get github.com/luxfi/sdk
+```
 
-#### Pebble as Default
-Instead of employing [`goleveldb`](https://github.com/syndtr/goleveldb), the
-`vmsdk` uses CockroachDB's [`pebble`](https://github.com/cockroachdb/pebble) database for
-on-disk storage. This database is inspired by LevelDB/RocksDB but offers [a few
-improvements](https://github.com/cockroachdb/pebble#advantages).
+## Quick Start
 
-Unlike other Lux VMs, which store data inside `node's` root
-database, `luxvms` store different types of data (state, blocks, metadata, etc.) under
-a set of distinct paths in `node's` provided `chainData` directory.
-This structure enables anyone running a `luxvm` to employ multiple logical disk
-drives to increase a `luxchain's` throughput (which may otherwise be capped by a single disk's IO).
+```go
+import (
+    "github.com/luxfi/sdk"
+)
 
-### Optimized Block Execution Out-of-the-Box
-The `vmsdk` is primarily about an obsession with hyper-speed and
-hyper-scalability (and making it easy for developers to achieve both by
-wrapping their work in opinionated and performant abstractions).
-Developers don't care how easy it is to launch or maintain their own
-blockchain if it can't process thousands of transactions per second with low
-time-to-finality. For this reason, most development time on the `vmsdk`
-thus far has been dedicated to making block verification and state management
-as fast and efficient as possible, which both play a large role in making this
-happen.
+// Initialize the SDK
+luxSDK, err := sdk.New(
+    sdk.WithLogLevel("info"),
+    sdk.WithDataDir("~/.lux"),
+)
+if err != nil {
+    log.Fatal(err)
+}
+defer luxSDK.Close()
 
-#### State Pre-Fetching
-`vmsdk` transactions must specify the keys they will touch in state (read
-or write) during execution and authentication so that all relevant data can be
-pre-fetched before block execution starts, which ensures all data accessed during
-verification of a block is done so in memory). Notably, the keys specified here
-are not keys in a merkle trie (which may be quite volatile) but are instead the
-actual keys used to access data by the storage engine (like your address, which
-is much less volatile and not as cumbersome of a UX barrier).
+// Create a network
+network, err := luxSDK.CreateNetwork(ctx, &network.NetworkParams{
+    Name:     "my-network",
+    Type:     network.NetworkTypeLocal,
+    NumNodes: 5,
+})
 
-This restriction also enables transactions to be processed in parallel as distinct,
-ordered transaction sets can be trivially formed by looking at the overlap of keys
-that transactions will touch.
+// Create an L1 blockchain
+blockchain, err := luxSDK.CreateL1(ctx, "my-chain", &blockchain.L1Params{
+    VMType: blockchain.VMTypeEVM,
+})
+```
 
-_Parallel transaction execution was originally included in `vmsdk` but
-removed because the overhead of the naïve mechanism used to group transactions
-into execution sets prior to execution was slower than just executing transactions
-serially with state pre-fetching. Rewriting this mechanism has been moved to the
-`Future Work` section and we expect to re-enable this functionality soon._
+## Core Components
 
-#### Parallel Signature Verification
-The `Auth` interface (detailed below) exposes a function called `AsyncVerify` that
-the `vmsdk` may call concurrently (may invoke on other transactions in the same
-block) at any time prior/during block execution. Most `luxvms` perform signature
-verification in this function and save any state lookups for the full `Auth.Verify`
-(which has access to state, unlike `AsyncVerify`). The generic support for performing certain
-stateless activities during execution can greatly reduce the e2e verification
-time of a block when running on powerful hardware.
+### Network Management (via netrunner)
 
-### Account Abstraction
-The `vmsdk` makes no assumptions about how `Actions` (the primitive for
-interactions with any `luxchain`, as explained below) are verified. Rather,
-`luxvms` provide the `vmsdk` with a registry of supported `Auth` modules
-that can be used to validate each type of transaction. These `Auth` modules can
-perform simple things like signature verification or complex tasks like
-executing a WASM blob.
+The SDK uses netrunner for comprehensive network management:
 
-### Nonce-less and Expiring Transactions
-`vmsdk` transactions don't use [nonces](https://help.myetherwallet.com/en/articles/5461509-what-is-a-nonce)
-to protect against replay attack like many other account-based blockchains. This means users
-can submit transactions concurrently from a single account without worrying about ordering them properly
-or getting stuck on a transaction that was dropped by the mempool.
+```go
+// Create a network
+network, err := sdk.CreateNetwork(ctx, &network.NetworkParams{
+    Name:             "test-network",
+    Type:             network.NetworkTypeLocal,
+    NumNodes:         5,
+    EnableStaking:    true,
+    EnableMonitoring: true,
+})
 
-Additionally, `vmsdk` transactions contain a time past which they can no longer be included inside
-of a `vmsdk` block. This makes it straightforward to take advantage of temporary situations on a
-`luxchain` (if you only wanted your transaction to be valid for a few seconds) and removes
-the need to broadcast replacement transactions (if the fee changes or you want
-to cancel a transaction).
+// Add nodes
+node, err := sdk.AddNode(ctx, network.ID, &network.NodeParams{
+    Name:        "validator-01",
+    Type:        network.NodeTypeValidator,
+    StakeAmount: 2000,
+})
 
-On the performance side of things, a lack of transaction nonces makes the
-mempool more performant (as we no longer need to maintain multiple transactions
-for a single account and ensure they are ordered) and makes the network layer
-more efficient (we can gossip any valid transaction to any node instead of just
-the transactions for each account that can be executed at the moment).
+// Manage network lifecycle
+err = sdk.StartNetwork(ctx, networkID)
+err = sdk.StopNetwork(ctx, networkID)
+```
 
-### Lux Warp Messaging Support
-`vmsdk` provides support for Lux Warp Messaging (LWM) out-of-the-box. LWM enables any
-Lux Subnet to send arbitrary messages to any another Lux Subnet in just a few
-seconds (or less) without relying on a trusted relayer or bridge (just the validators of the Subnet sending the message).
-You can learn more about LWM and how it works
-[here](https://docs.google.com/presentation/d/1eV4IGMB7qNV7Fc4hp7NplWxK_1cFycwCMhjrcnsE9mU/edit).
+### Blockchain Building
 
-<p align="center">
-  <img width="90%" alt="warp" src="assets/warp.png">
-</p>
+Build any type of blockchain on Lux:
 
-LWM is a primitive provided by the Lux Network used to verify that
-a particular [BLS Multi-Signatures](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html)
-is valid and signed by some % of the stake weight of a particular Lux
-Subnet (typically the Subnet where the message originated). Specifying when an
-Lux Custom VM produces a Warp Message for signing, defining the format
-of Warp Messages sent between Subnets, implementing some mechanism to gather
-individual signatures from validators (to aggregate into a BLS
-Multi-Signature) over this user-defined message, articulating how an imported
-Warp Message from another Subnet is handled on a destination (if the
-destination chooses to even accept the message), and enabling retries in the
-case that a message is dropped or the BLS Multi-Signature expires are just a few of the items
-left to the implementer.
+```go
+// Create L1 (Sovereign Chain)
+l1, err := sdk.CreateL1(ctx, "my-l1", &blockchain.L1Params{
+    VMType:      blockchain.VMTypeEVM,
+    Genesis:     genesisBytes,
+    ChainConfig: configBytes,
+})
 
-The `vmsdk` handles all of the above items for you except for defining when
-you should emit a Warp Message to send to another Subnet (i.e. what an export looks like on-chain),
-what this Warp Message should look like (i.e. what do you want to send to another Subnet), and
-what you should do if you recieve a Warp Message (i.e. mint assets if you
-receive an import).
+// Create L2 (Based Rollup)
+l2, err := sdk.CreateL2(ctx, "my-rollup", &blockchain.L2Params{
+    VMType:          blockchain.VMTypeEVM,
+    SequencerType:   "centralized",
+    DALayer:         "celestia",
+    SettlementChain: l1.ID,
+})
 
-### Easy Functionality Upgrades
-Every object that can appear on-chain (i.e. `Actions` and/or `Auth`) and every chain
-parameter (i.e. `Unit Price`) is scoped by block timestamp. This makes it
-possible to easily modify existing rules (like how much people pay for certain
-types of transactions) or even disable certain types of `Actions` altogether.
+// Create L3 (App Chain)
+l3, err := sdk.CreateL3(ctx, "my-game", &blockchain.L3Params{
+    VMType:  blockchain.VMTypeWASM,
+    L2Chain: l2.ID,
+    AppType: "gaming",
+})
+```
 
-Launching your own blockchain is the first step of a long journey of continuous
-evolution. Making it straightforward and explicit to activate/deactivate any
-feature or config is critical to making this evolution safely.
+### Chain Operations
 
-### Proposer-Aware Gossip
-Unlike the Virtual Machines live on the Lux Primary Network (which gossip
-transactions uniformly to all validators), the `vmsdk` only gossips
-transactions to the next few preferred block proposers ([using Snowman++'s
-lookahead logic](https://github.com/luxdefi/node/blob/master/vms/proposervm/README.md)).
-This change greatly reduces the amount of unnecessary transaction gossip
-(which we define as gossiping a transaction to a node that will not produce
-a block during a transaction's validity period) for any `luxchain` out-of-the-box.
+#### P-Chain (Platform Chain)
 
-If you prefer to employ a different gossiping mechanism (that may be more
-aligned with the `Actions` you define in your `luxvm`), you can always
-override the default gossip technique with your own. For example, you may wish
-to not have any node-to-node gossip and just require validators to propose
-blocks only with the transactions they've received over RPC.
+```go
+// Stake on primary network
+txID, err := chainManager.Stake(ctx, 
+    big.NewInt(2000), // 2000 LUX
+    14 * 24 * time.Hour, // 14 days
+)
 
-### Transaction Results and Execution Rollback
-The `vmsdk` allows for any `Action` to return a result from execution
-(which can be any arbitrary bytes), the amount of fee units it consumed, and
-whether or not it was successful (if unsuccessful, all state changes are rolled
-back). This support is typically required by anyone using the `vmsdk` to
-implement a smart contract-based runtime that allows for cost-effective
-conditional execution (exiting early if a condition does not hold can be much
-cheaper than the full execution of the transaction).
+// Delegate to validator
+txID, err := chainManager.Delegate(ctx, nodeID, amount, duration)
 
-The outcome of execution is not stored/indexed by the `vmsdk`. Unlike most other
-blockchains/blockchain frameworks, which provide an optional "archival mode" for historical access,
-the `vmsdk` only stores what is necessary to validate the next valid block and to help new nodes
-sync to the current state. Rather, the `vmsdk` invokes the `luxvm` with all execution
-results whenever a block is accepted for it to perform arbitrary operations (as
-required by a developer's use case). In this callback, a `luxvm` could store
-results in a SQL database or write to a Kafka stream.
+// Create subnet
+subnetID, err := chainManager.P().CreateSubnet(ctx, &CreateSubnetParams{
+    ControlKeys: []ids.ShortID{key1, key2},
+    Threshold:   2,
+})
 
-### Support for Generic Storage Backends
-When initializing a `luxvm`, the developer explicitly specifies which storage backends
-to use for each object type (state vs blocks vs metadata). As noted above, this
-defaults to CockroachDB's `pebble` but can be swapped with experimental storage
-backends and/or traditional cloud infrastructure. For example, a `luxvm`
-developer may wish to manage state objects (for the Path-Based Merkelized Radix
-Tree) on-disk but use S3 to store blocks and PostgreSQL to store transaction metadata.
+// Add subnet validator
+txID, err := chainManager.P().AddSubnetValidator(ctx, &AddSubnetValidatorParams{
+    NodeID:   nodeID,
+    SubnetID: subnetID,
+    Weight:   100,
+})
+```
 
-### Unified Metrics, Tracing, and Logging
-It is functionally impossible to improve the performance of any runtime without
-detailed metrics and comprehensive tracing. For this reason, the `vmsdk`
-provides both to any `luxvm` out-of-the-box. These metrics and traces are
-aggregated by node and can be accessed using the
-[`/ext/metrics`](https://docs.lux.network/apis/node/apis/metrics)
-endpoint. Additionally, all logs in the `vmsdk` use the standard `node` logger
-and are stored alongside all other runtime logs. The unification of all of
-these functions with node means existing node monitoring tools
-work out of the box on your `luxvm`.
+#### X-Chain (Exchange Chain)
 
-## Examples
-### Beginner: `tokenvm`
-We created the [`tokenvm`](./examples/tokenvm) to showcase how to use the
-`vmsdk` in an application most readers are already familiar with, token minting
-and token trading. The `tokenvm` lets anyone create any asset, mint more of
-their asset, modify the metadata of their asset (if they reveal some info), and
-burn their asset. Additionally, there is an embedded on-chain exchange that
-allows anyone to create orders and fill (partial) orders of anyone else. To
-make this example easy to play with, the `tokenvm` also bundles a powerful CLI
-tool and serves RPC requests for trades out of an in-memory order book it
-maintains by syncing blocks. If you are interested in the intersection of
-exchanges and blockchains, it is definitely worth a read (the logic for filling
-orders is < 100 lines of code!).
+```go
+// Create asset
+assetID, err := chainManager.CreateAsset(ctx, "MyToken", "MTK", totalSupply)
 
-To ensure the `vmsdk` remains reliable as we optimize and evolve the codebase,
-we also run E2E tests in the `tokenvm` on each PR to the `vmsdk` core modules.
+// Send asset
+txID, err := chainManager.SendAsset(ctx, assetID, amount, recipient)
 
-### Expert: `indexvm`
-The [`indexvm`](https://github.com/luxdefi/indexvm) is much more complex than
-the `tokenvm` (more elaborate mechanisms and a new use case you may not be
-familiar with). It was built during the design of the `vmsdk` to test out the
-limits of the abstractions for building complex on-chain mechanisms. We recommend
-taking a look at this `luxvm` once you already have familiarity with the `vmsdk` to gain an
-even deeper understanding of how you can build a complex runtime on top of the `vmsdk`.
+// Create NFT collection
+nftID, err := chainManager.X().CreateNFT(ctx, &CreateNFTParams{
+    Name:   "LuxNFT",
+    Symbol: "LNFT",
+})
 
-The `indexvm` is dedicated to increasing the usefulness of the world's
-content-addressable data (like IPFS) by enabling anyone to "index it" by
-providing useful annotations (i.e. ratings, abuse reports, etc.) on it.
-Think up/down vote on any static file on the decentralized web.
+// Trade assets
+orderID, err := chainManager.TradeAssets(ctx, 
+    sellAsset, sellAmount,
+    buyAsset, buyAmount,
+)
+```
 
-The transparent data feed generated by interactions on the `indexvm` can
-then be used by any third-party (or yourself) to build an AI/recommender
-system to curate things people might find interesting, based on their
-previous interactions/annotations.
+#### C-Chain (Contract Chain)
 
-Less technical plz? Think TikTok/StumbleUpon over arbitrary IPFS data (like NFTs) but
-all your previous likes (across all services you've ever used) can be used to
-generate the next content recommendation for you.
+```go
+// Deploy contract
+address, txHash, err := chainManager.C().DeployContract(ctx, &DeployContractParams{
+    Bytecode: contractBytecode,
+    GasLimit: 300000,
+})
 
-The fastest way to expedite the transition to a decentralized web is to make it
-more fun and more useful than the existing web. The `indexvm` hopes to play
-a small part in this movement by making it easier for anyone to generate
-world-class recommendations for anyone on the internet, even if you've never
-interacted with them before.
+// Call contract
+result, err := chainManager.C().CallContract(ctx, &CallContractParams{
+    To:   contractAddress,
+    Data: callData,
+})
 
-We'll use both of these `luxvms` to explain how to use the `vmsdk` below.
+// DeFi operations (coming soon)
+txHash, err := chainManager.C().SwapTokens(ctx, &SwapParams{
+    TokenIn:  USDC,
+    TokenOut: LUX,
+    Amount:   amount,
+})
+```
 
-## How It Works
-To use the `vmsdk`, you must import it into your own `luxvm` and implement the
-required interfaces. Below, we'll cover some of the ones that your
-`luxvm` must implement.
+### Cross-Chain Operations
 
-> _Note: `vmsdk` requires a minimum Go version of 1.20_
+```go
+// Transfer between chains
+txID, err := chainManager.TransferCrossChain(ctx, &CrossChainTransferParams{
+    SourceChain: "C",
+    TargetChain: "P",
+    AssetID:     luxAssetID,
+    Amount:      amount,
+    To:          recipient,
+})
 
-### Controller
-```golang
-type Controller interface {
-	Initialize(
-		inner *VM, // vmsdk VM
-		snowCtx *snow.Context,
-		gatherer ametrics.MultiGatherer,
-		genesisBytes []byte,
-		upgradeBytes []byte,
-		configBytes []byte,
-	) (
-		config Config,
-		genesis Genesis,
-		builder builder.Builder,
-		gossiper gossiper.Gossiper,
-		vmDB database.Database,
-		stateDB database.Database,
-		handler Handlers,
-		actionRegistry chain.ActionRegistry,
-		authRegistry chain.AuthRegistry,
-		err error,
-	)
-
-	Rules(t int64) chain.Rules
-	StateManager() chain.StateManager
-
-	Accepted(ctx context.Context, blk *chain.StatelessBlock) error
-	Rejected(ctx context.Context, blk *chain.StatelessBlock) error
-
-	Shutdown(context.Context) error
+// Get balances across all chains
+balances, err := chainManager.GetBalance(ctx, address)
+for chain, balance := range balances.Chains {
+    fmt.Printf("%s-Chain: %s\n", chain, balance)
 }
 ```
 
-The `Controller` is the entry point of any `luxvm`. It initializes the data
-structures utilized by the `vmsdk` and handles both `Accepted` and
-`Rejected` block callbacks. Most `luxvms` use the default `Builder`,
-`Gossiper`, `Handlers`, and `Database` packages so this is typically a lot of
-boilerplate code.
+### Wallet Management
 
-You can view what this looks like in the `tokenvm` by clicking this
-[link](./examples/tokenvm/controller/controller.go).
+```go
+// Create wallet
+wallet, err := chainManager.CreateWallet(ctx, "my-wallet")
 
-#### Registry
-```golang
-ActionRegistry *codec.TypeParser[Action, *warp.Message, bool]
-AuthRegistry   *codec.TypeParser[Auth, *warp.Message, bool]
+// Create multisig wallet
+multisig, err := chainManager.CreateMultisigWallet(ctx, "treasury", 
+    []ids.ShortID{owner1, owner2, owner3},
+    2, // threshold
+)
+
+// List wallets
+wallets, err := chainManager.ListWallets(ctx)
 ```
 
-The `ActionRegistry` and `AuthRegistry` are inform the `vmsdk` how to
-marshal/unmarshal bytes on-the-wire. If the `Controller` did not provide these,
-the `vmsdk` would not know how to extract anything from the bytes it was
-provded by the Lux Consensus Engine.
+## Advanced Features
 
-_In the future, we will provide an option to automatically marshal/unmarshal
-objects if an `ActionRegistry` and/or `AuthRegistry` is not provided using
-a default codec._
+### Custom VM Development
 
-### Genesis
-```golang
-type Genesis interface {
-	GetHRP() string
-	Load(context.Context, atrace.Tracer, chain.Database) error
-}
+```go
+// Create custom VM
+vm, err := sdk.CreateVM(ctx, &vm.CreateParams{
+    Name:     "MyVM",
+    Type:     vm.TypeWASM,
+    Runtime:  wasmRuntime,
+    Handlers: handlers,
+})
+
+// Register VM
+err = sdk.RegisterVM(ctx, vm)
 ```
 
-`Genesis` is typically the list of initial balances that accounts have at the
-start of the network and a list of default configurations that exist at the
-start of the network (fee price, enabled txs, etc.). The serialized genesis of
-any `luxchain` is persisted on the P-Chain for anyone to see when the network
-is created.
+### High-Performance Features
 
-You can view what this looks like in the `tokenvm` by clicking this
-[link](./examples/tokenvm/genesis/genesis.go).
+- **Parallel Processing**: Leverage Go's concurrency for parallel operations
+- **Batch Operations**: Execute multiple operations in a single transaction
+- **Connection Pooling**: Efficient connection management for high throughput
+- **Caching**: Built-in caching for frequently accessed data
 
-### Action
-```golang
-type Action interface {
-	MaxUnits(Rules) uint64
-	ValidRange(Rules) (start int64, end int64)
+### WASM Support
 
-	StateKeys(auth Auth, txID ids.ID) [][]byte
-	Execute(
-		ctx context.Context,
-		r Rules,
-		db Database,
-		timestamp int64,
-		auth Auth,
-		txID ids.ID,
-		warpVerified bool,
-	) (result *Result, err error)
+```go
+// Deploy WASM contract
+wasmID, err := sdk.DeployWASM(ctx, &WASMDeployParams{
+    Code:     wasmBytes,
+    InitArgs: initParams,
+})
 
-	Marshal(p *codec.Packer)
-}
+// Execute WASM function
+result, err := sdk.ExecuteWASM(ctx, wasmID, "transfer", args)
 ```
 
-`Actions` are the heart of any `luxvm`. They define how users interact with
-the blockchain runtime. Specifically, they are "user-defined" element of
-any `vmsdk` transaction that is processed by all participants of any
-`luxchain`.
+## CLI Integration
 
-You can view what a simple transfer `Action` looks like [here](./examples/tokenvm/actions/transfer.go)
-and what a more complex "fill order" `Action` looks like [here](./examples/tokenvm/actions/fill_order.go).
+The SDK wraps the Lux CLI for seamless command execution:
 
-#### Result
-```golang
-type Result struct {
-	Success     bool
-	Units       uint64
-	Output      []byte
-	WarpMessage *warp.UnsignedMessage
-}
+```go
+// Execute any CLI command programmatically
+output, err := sdk.ExecuteCommand(ctx, "network", "status")
+
+// Use CLI commands with Go types
+result, err := sdk.ExecuteCommand(ctx, "subnet", "create", 
+    "--control-keys", strings.Join(keys, ","),
+    "--threshold", "2",
+)
 ```
 
-`Actions` emit a `Result` at the end of their execution. This `Result`
-indicates if the execution was a `Success` (if not, all effects are rolled
-back), how many `Units` were used (failed execution may not use all units an
-`Action` requested), an `Output` (arbitrary bytes specific to the `luxvm`),
-and optionally a `WarpMessage` (which Subnet Validators will sign).
+## Complete Example
 
-### Auth
-```golang
-type Auth interface {
-	MaxUnits(Rules) uint64
-	ValidRange(Rules) (start int64, end int64)
+See [examples/complete/main.go](examples/complete/main.go) for a comprehensive example covering:
 
-	StateKeys() [][]byte
-	AsyncVerify(msg []byte) error
-	Verify(ctx context.Context, r Rules, db Database, action Action) (units uint64, err error)
+- Network creation and management
+- Blockchain deployment (L1/L2/L3)
+- Staking and delegation
+- Asset creation and trading
+- Smart contract deployment
+- Cross-chain transfers
 
-	Payer() []byte
-	CanDeduct(ctx context.Context, db Database, amount uint64) error
-	Deduct(ctx context.Context, db Database, amount uint64) error
-	Refund(ctx context.Context, db Database, amount uint64) error
+## Architecture
 
-	Marshal(p *codec.Packer)
-}
+```
+┌─────────────────────────────────────────────────────┐
+│                    Lux SDK                          │
+├─────────────────────────────────────────────────────┤
+│                  CLI Wrapper                        │
+├─────────────────────────────────────────────────────┤
+│   Network Manager  │  Blockchain Builder  │  VM Mgr │
+├─────────────────────────────────────────────────────┤
+│              Chain Manager                          │
+│  ┌───────┬───────┬───────┬───────┬───────┐        │
+│  │   P   │   X   │   C   │   M   │   Q   │        │
+│  │ Chain │ Chain │ Chain │ Chain │ Chain │        │
+│  └───────┴───────┴───────┴───────┴───────┘        │
+├─────────────────────────────────────────────────────┤
+│            Core Lux Components                      │
+│  netrunner, node, consensus, database, etc.        │
+└─────────────────────────────────────────────────────┘
 ```
 
-`Auth` shares many similarities with `Action` (recall that authentication is
-abstract and defined by the `luxvm`) but adds the notion of some abstract
-"payer" that must pay fees for the operations that occur in an `Action`. Any
-fees that are not consumed can be returned to said "payer" if specified in the
-corresponding `Action` that was authenticated.
+## Requirements
 
-The `Auth` mechanism is arguably the most powerful core module of the
-`vmsdk` because it lets the builder create arbitrary authentication rules
-that align with their goals. The `indexvm`, for example, allows users to rotate
-their keys and to enable others to perform specific actions on their behalf. It also
-lets accounts natively pay for the fees of other accounts. These features are particularly
-useful for server-based accounts that want to implement a periodic key rotation
-scheme without losing the history of their rating activity on-chain (which
-determines their reputation).
+- Go 1.22 or higher
+- Access to a Lux node endpoint
+- For local development: Docker (for netrunner)
 
-You can view what direct (simple account signature) `Auth` looks like
-[here](https://github.com/luxdefi/indexvm/blob/main/auth/direct.go) and what
-delegate (acting on behalf of another account) `Auth` looks like
-[here](https://github.com/luxdefi/indexvm/blob/main/auth/delegate.go). The
-`indexvm` provides an ["authorize" `Action`](https://github.com/luxdefi/indexvm/blob/main/actions/authorize.go)
-that an account owner can call to perform any ACL modifications.
+## Contributing
 
-### Rules
-```golang
-type Rules interface {
-	GetMaxBlockTxs() int
-	GetMaxBlockUnits() uint64 // should ensure can't get above block max size
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-	GetValidityWindow() int64
-	GetBaseUnits() uint64
+## License
 
-	GetMinUnitPrice() uint64
-	GetUnitPriceChangeDenominator() uint64
-	GetWindowTargetUnits() uint64
+This SDK is licensed under the [BSD 3-Clause License](LICENSE).
 
-	GetMinBlockCost() uint64
-	GetBlockCostChangeDenominator() uint64
-	GetWindowTargetBlocks() uint64
+## Support
 
-	GetWarpConfig(sourceChainID ids.ID) (bool, uint64, uint64)
-	GetWarpBaseFee() uint64
-	GetWarpFeePerSigner() uint64
+- Documentation: https://docs.lux.network/sdk
+- GitHub Issues: https://github.com/luxfi/sdk/issues
+- Discord: https://discord.gg/lux
 
-	FetchCustom(string) (any, bool)
-}
-```
+## Roadmap
 
-`Rules` govern block validity and are requested from the `Controller` prior to
-executing any block. The `vmsdk` performs this request so that the
-`Controller` can modify any `Rules` on-the-fly. Many common rules are provided
-directly in the interface but there is also an option to provide custom rules
-that can be accessed during `Auth` or `Action` execution.
-
-You can view what this looks like in the `indexvm` by clicking
-[here](https://github.com/luxdefi/indexvm/blob/main/genesis/rules.go). In the
-case of the `indexvm`, the custom rule support is used to set the cost for
-adding anything to state (which is a very `luxvm-specific` value).
-
-### Lux Warp Messaging
-To add LWM support to a `luxvm`, an implementer first specifies whether a
-particular `Action`/`Auth` item expects a `*warp.Message` when registering
-them with their corresponding registry (`false` if no expected and `true` if
-so):
-```golang
-ActionRegistry.Register(&actions.Transfer{}, actions.UnmarshalTransfer, false)
-ActionRegistry.Register(&actions.ImportAsset{}, actions.UnmarshalImportAsset, true)
-```
-
-You can view what this looks like in the `tokenvm` by clicking
-[here](./examples/tokenvm/controller/registry.go). The `vmsdk` uses this
-boolean to enforce the existence/non-existence of a `*warp.Message` on the
-`chain.Transaction` that wraps the `Action` (marking a block as invalid if there is
-something unexpected).
-
-`Actions` can use the provided `*warp.Message` in their registered unmarshaler
-(in this case, the provided `*warp.Message` is parsed into a format specified
-by the `tokenvm`):
-```golang
-func UnmarshalImportAsset(p *codec.Packer, wm *warp.Message) (chain.Action, error) {
-	var (
-		imp ImportAsset
-		err error
-	)
-	imp.Fill = p.UnpackBool()
-	if err := p.Err(); err != nil {
-		return nil, err
-	}
-	imp.warpMessage = wm
-	imp.warpTransfer, err = UnmarshalWarpTransfer(imp.warpMessage.Payload)
-	if err != nil {
-		return nil, err
-	}
-	// Ensure we can fill the swap if it exists
-	if imp.Fill && imp.warpTransfer.SwapIn == 0 {
-		return nil, ErrNoSwapToFill
-	}
-	return &imp, nil
-}
-```
-
-This `WarpTransfer` object looks like:
-```golang
-type WarpTransfer struct {
-	To    crypto.PublicKey `json:"to"`
-	Asset ids.ID           `json:"asset"`
-	Value uint64           `json:"value"`
-
-	// Return is set to true when a warp message is sending funds back to the
-	// chain where they were created.
-	Return bool `json:"return"`
-
-	// Reward is the amount of [Asset] to send the [Actor] that submits this
-	// transaction.
-	Reward uint64 `json:"reward"`
-
-	// SwapIn is the amount of [Asset] we are willing to swap for [AssetOut].
-	SwapIn uint64 `json:"swapIn"`
-	// AssetOut is the asset we are seeking to get for [SwapIn].
-	AssetOut ids.ID `json:"assetOut"`
-	// SwapOut is the amount of [AssetOut] we are seeking.
-	SwapOut uint64 `json:"swapOut"`
-	// SwapExpiry is the unix timestamp at which the swap becomes invalid (and
-	// the message can be processed without a swap.
-	SwapExpiry int64 `json:"swapExpiry"`
-
-	// TxID is the transaction that created this message. This is used to ensure
-	// there is WarpID uniqueness.
-	TxID ids.ID `json:"txID"`
-}
-```
-
-You can view what the import `Action` associated with the above examples looks like
-[here](./examples/tokenvm/actions/import_asset.go)
-
-_As mentioned above, it is up to the `luxvm` to implement a message format
-that it can understand (so that it can parse inbound LWM messages). In the
-future, we expect that there will be common message definitions that will be
-compatible with most `luxvms` (and maintained in the `vmsdk`)._
+- [ ] Enhanced WASM support with more runtimes
+- [ ] Advanced DeFi protocol integrations
+- [ ] Improved cross-chain messaging
+- [ ] Hardware wallet support
+- [ ] Mobile SDK variants
+- [ ] GraphQL API support
