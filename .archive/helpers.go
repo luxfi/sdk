@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/validators"
-	autils "github.com/luxfi/utils"
 	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
-	"github.com/luxfi/set"
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/set"
+	autils "github.com/luxfi/utils"
+	"github.com/luxfi/vms/platformvm/warp"
 	"golang.org/x/exp/maps"
 )
 

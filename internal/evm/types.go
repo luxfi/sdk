@@ -11,10 +11,10 @@ import (
 
 // Genesis represents an EVM genesis block
 type Genesis struct {
-	Config    *ChainConfig                    `json:"config"`
+	Config    *ChainConfig                      `json:"config"`
 	Alloc     map[common.Address]GenesisAccount `json:"alloc"`
-	Timestamp uint64                          `json:"timestamp"`
-	GasLimit  uint64                          `json:"gasLimit"`
+	Timestamp uint64                            `json:"timestamp"`
+	GasLimit  uint64                            `json:"gasLimit"`
 }
 
 // ChainConfig represents the chain configuration

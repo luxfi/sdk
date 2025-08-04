@@ -12,9 +12,9 @@ import (
 	context "context"
 	reflect "reflect"
 
+	gomock "github.com/golang/mock/gomock"
 	ids "github.com/luxfi/ids"
 	codec "github.com/luxfi/sdk/codec"
-	gomock "github.com/golang/mock/gomock"
 )
 
 // MockAction is a mock of Action interface.

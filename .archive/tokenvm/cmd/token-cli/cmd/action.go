@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/set"
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/consts"
 	"github.com/luxfi/sdk/crypto"
@@ -19,6 +17,8 @@ import (
 	"github.com/luxfi/sdk/examples/tokenvm/client"
 	"github.com/luxfi/sdk/examples/tokenvm/utils"
 	hutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/set"
+	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )

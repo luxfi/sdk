@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/crypto/bls"
-	"github.com/luxfi/vms/platformvm/warp"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/codec"
+	"github.com/luxfi/vms/platformvm/warp"
 	"go.uber.org/zap"
 )
 

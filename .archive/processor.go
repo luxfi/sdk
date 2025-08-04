@@ -8,8 +8,8 @@ import (
 	"errors"
 
 	"github.com/luxfi/database"
-	"github.com/luxfi/trace"
 	"github.com/luxfi/set"
+	"github.com/luxfi/trace"
 
 	"github.com/luxfi/sdk/tstate"
 )

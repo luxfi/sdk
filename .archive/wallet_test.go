@@ -31,19 +31,19 @@ func TestWallet_New(t *testing.T) {
 
 func TestWallet_ImportKey(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Generate a private key
 	privateKey, err := crypto.GeneratePrivateKey()
 	require.NoError(t, err)
-	
+
 	// Import the key
 	address, err := wallet.ImportKey(privateKey)
 	require.NoError(t, err)
 	assert.NotEqual(t, ids.ShortID{}, address)
-	
+
 	// Verify the key was added
 	assert.True(t, wallet.addresses.Contains(address))
-	
+
 	// Try to import the same key again
 	_, err = wallet.ImportKey(privateKey)
 	assert.Error(t, err, "should error when importing duplicate key")
@@ -51,20 +51,20 @@ func TestWallet_ImportKey(t *testing.T) {
 
 func TestWallet_GenerateKey(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Generate a new key
 	address1, err := wallet.GenerateKey()
 	require.NoError(t, err)
 	assert.NotEqual(t, ids.ShortID{}, address1)
-	
+
 	// Generate another key
 	address2, err := wallet.GenerateKey()
 	require.NoError(t, err)
 	assert.NotEqual(t, ids.ShortID{}, address2)
-	
+
 	// Addresses should be different
 	assert.NotEqual(t, address1, address2)
-	
+
 	// Both should be in the wallet
 	assert.True(t, wallet.addresses.Contains(address1))
 	assert.True(t, wallet.addresses.Contains(address2))
@@ -72,15 +72,15 @@ func TestWallet_GenerateKey(t *testing.T) {
 
 func TestWallet_GetAddress(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// No addresses initially
 	_, err := wallet.GetAddress()
 	assert.Error(t, err)
-	
+
 	// Generate an address
 	address, err := wallet.GenerateKey()
 	require.NoError(t, err)
-	
+
 	// Should return the address
 	gotAddress, err := wallet.GetAddress()
 	require.NoError(t, err)
@@ -89,11 +89,11 @@ func TestWallet_GetAddress(t *testing.T) {
 
 func TestWallet_GetAllAddresses(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Initially empty
 	addresses := wallet.GetAllAddresses()
 	assert.Empty(t, addresses)
-	
+
 	// Generate multiple addresses
 	expectedAddresses := make([]ids.ShortID, 3)
 	for i := 0; i < 3; i++ {
@@ -101,11 +101,11 @@ func TestWallet_GetAllAddresses(t *testing.T) {
 		require.NoError(t, err)
 		expectedAddresses[i] = addr
 	}
-	
+
 	// Get all addresses
 	addresses = wallet.GetAllAddresses()
 	assert.Len(t, addresses, 3)
-	
+
 	// Verify all expected addresses are present
 	for _, expected := range expectedAddresses {
 		found := false
@@ -121,17 +121,17 @@ func TestWallet_GetAllAddresses(t *testing.T) {
 
 func TestWallet_UTXO_Management(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Generate an address
 	address, err := wallet.GenerateKey()
 	require.NoError(t, err)
-	
+
 	assetID := ids.GenerateID()
-	
+
 	// Initially no balance
 	balance := wallet.GetBalance(assetID)
 	assert.Equal(t, uint64(0), balance)
-	
+
 	// Add a UTXO
 	utxo1 := &UTXO{
 		ID:       ids.GenerateID(),
@@ -141,11 +141,11 @@ func TestWallet_UTXO_Management(t *testing.T) {
 		Locktime: 0,
 	}
 	wallet.AddUTXO(utxo1)
-	
+
 	// Check balance
 	balance = wallet.GetBalance(assetID)
 	assert.Equal(t, uint64(1000), balance)
-	
+
 	// Add another UTXO
 	utxo2 := &UTXO{
 		ID:       ids.GenerateID(),
@@ -155,14 +155,14 @@ func TestWallet_UTXO_Management(t *testing.T) {
 		Locktime: 0,
 	}
 	wallet.AddUTXO(utxo2)
-	
+
 	// Check updated balance
 	balance = wallet.GetBalance(assetID)
 	assert.Equal(t, uint64(1500), balance)
-	
+
 	// Remove a UTXO
 	wallet.RemoveUTXO(utxo1.ID)
-	
+
 	// Check balance after removal
 	balance = wallet.GetBalance(assetID)
 	assert.Equal(t, uint64(500), balance)
@@ -170,13 +170,13 @@ func TestWallet_UTXO_Management(t *testing.T) {
 
 func TestWallet_GetUTXOs(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Generate an address
 	address, err := wallet.GenerateKey()
 	require.NoError(t, err)
-	
+
 	assetID := ids.GenerateID()
-	
+
 	// Add multiple UTXOs
 	utxo1 := &UTXO{
 		ID:       ids.GenerateID(),
@@ -199,11 +199,11 @@ func TestWallet_GetUTXOs(t *testing.T) {
 		Owner:    address,
 		Locktime: 0,
 	}
-	
+
 	wallet.AddUTXO(utxo1)
 	wallet.AddUTXO(utxo2)
 	wallet.AddUTXO(utxo3)
-	
+
 	tests := []struct {
 		name        string
 		amount      uint64
@@ -238,11 +238,11 @@ func TestWallet_GetUTXOs(t *testing.T) {
 			expectError: true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			utxos, total, err := wallet.GetUTXOs(assetID, tt.amount)
-			
+
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Equal(t, ErrInsufficientFunds, err)
@@ -257,17 +257,17 @@ func TestWallet_GetUTXOs(t *testing.T) {
 
 func TestWallet_BLSKey(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Initially no BLS key
 	_, err := wallet.GetBLSKey()
 	assert.Error(t, err)
-	
+
 	// Generate and set BLS key
 	blsKey, err := bls.NewSecretKey()
 	require.NoError(t, err)
-	
+
 	wallet.SetBLSKey(blsKey)
-	
+
 	// Get BLS key
 	gotKey, err := wallet.GetBLSKey()
 	require.NoError(t, err)
@@ -276,14 +276,14 @@ func TestWallet_BLSKey(t *testing.T) {
 
 func TestWallet_CreateTransferTx(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Generate addresses
 	from, err := wallet.GenerateKey()
 	require.NoError(t, err)
-	
+
 	to := ids.GenerateTestShortID()
 	assetID := ids.GenerateID()
-	
+
 	// Add UTXOs
 	utxo1 := &UTXO{
 		ID:       ids.GenerateID(),
@@ -293,18 +293,18 @@ func TestWallet_CreateTransferTx(t *testing.T) {
 		Locktime: 0,
 	}
 	wallet.AddUTXO(utxo1)
-	
+
 	// Create transfer
 	tx, err := wallet.CreateTransferTx(to, assetID, 700, []byte("test memo"))
 	require.NoError(t, err)
 	require.NotNil(t, tx)
-	
+
 	// Verify transaction
 	assert.Equal(t, wallet.networkID, tx.NetworkID)
 	assert.Equal(t, wallet.chainID, tx.ChainID)
 	assert.Len(t, tx.Inputs, 1)
 	assert.Len(t, tx.Outputs, 2) // Transfer + change
-	
+
 	// Verify outputs
 	assert.Equal(t, uint64(700), tx.Outputs[0].Amount)
 	assert.Equal(t, to, tx.Outputs[0].Recipient)
@@ -314,14 +314,14 @@ func TestWallet_CreateTransferTx(t *testing.T) {
 
 func TestWallet_CreateTransferTx_InsufficientFunds(t *testing.T) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Generate address
 	from, err := wallet.GenerateKey()
 	require.NoError(t, err)
-	
+
 	to := ids.GenerateTestShortID()
 	assetID := ids.GenerateID()
-	
+
 	// Add insufficient UTXO
 	utxo := &UTXO{
 		ID:       ids.GenerateID(),
@@ -331,7 +331,7 @@ func TestWallet_CreateTransferTx_InsufficientFunds(t *testing.T) {
 		Locktime: 0,
 	}
 	wallet.AddUTXO(utxo)
-	
+
 	// Try to create transfer for more than balance
 	_, err = wallet.CreateTransferTx(to, assetID, 1000, nil)
 	assert.Error(t, err)
@@ -341,7 +341,7 @@ func TestWallet_CreateTransferTx_InsufficientFunds(t *testing.T) {
 // Benchmark tests
 func BenchmarkWallet_GenerateKey(b *testing.B) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := wallet.GenerateKey()
@@ -353,11 +353,11 @@ func BenchmarkWallet_GenerateKey(b *testing.B) {
 
 func BenchmarkWallet_GetBalance(b *testing.B) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Setup: Generate address and add UTXOs
 	address, _ := wallet.GenerateKey()
 	assetID := ids.GenerateID()
-	
+
 	for i := 0; i < 100; i++ {
 		utxo := &UTXO{
 			ID:       ids.GenerateID(),
@@ -368,7 +368,7 @@ func BenchmarkWallet_GetBalance(b *testing.B) {
 		}
 		wallet.AddUTXO(utxo)
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = wallet.GetBalance(assetID)
@@ -377,11 +377,11 @@ func BenchmarkWallet_GetBalance(b *testing.B) {
 
 func BenchmarkWallet_GetUTXOs(b *testing.B) {
 	wallet := New(1, ids.GenerateID())
-	
+
 	// Setup: Generate address and add UTXOs
 	address, _ := wallet.GenerateKey()
 	assetID := ids.GenerateID()
-	
+
 	for i := 0; i < 1000; i++ {
 		utxo := &UTXO{
 			ID:       ids.GenerateID(),
@@ -392,7 +392,7 @@ func BenchmarkWallet_GetUTXOs(b *testing.B) {
 		}
 		wallet.AddUTXO(utxo)
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _, err := wallet.GetUTXOs(assetID, 2500)

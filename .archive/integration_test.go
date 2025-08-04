@@ -14,12 +14,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/network"
-	"github.com/luxfi/ids"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestIntegration_FullWorkflow tests the complete SDK workflow
@@ -253,7 +253,7 @@ func TestIntegration_Performance(t *testing.T) {
 		elapsed := time.Since(start)
 		avgTime := elapsed / time.Duration(numBlockchains)
 		t.Logf("Created %d blockchains in %v (avg: %v per blockchain)", numBlockchains, elapsed, avgTime)
-		
+
 		// Performance assertion
 		assert.Less(t, avgTime, 100*time.Millisecond, "Blockchain creation should be fast")
 	})
@@ -293,7 +293,7 @@ func TestIntegration_Performance(t *testing.T) {
 		elapsed := time.Since(start)
 		totalOps := numGoroutines * numOpsPerGoroutine
 		opsPerSecond := float64(totalOps) / elapsed.Seconds()
-		
+
 		t.Logf("Completed %d concurrent operations in %v (%.2f ops/sec)", totalOps, elapsed, opsPerSecond)
 		assert.Greater(t, opsPerSecond, 50.0, "Should handle at least 50 ops/sec")
 	})
@@ -338,7 +338,7 @@ func TestIntegration_ErrorHandling(t *testing.T) {
 	t.Run("RecoveryFromErrors", func(t *testing.T) {
 		// Create a blockchain with invalid parameters
 		_, err := luxSDK.CreateBlockchain(ctx, &blockchain.CreateParams{
-			Name:   "",  // Invalid empty name
+			Name:   "", // Invalid empty name
 			Type:   blockchain.TypeL1,
 			VMType: blockchain.VMTypeEVM,
 		})

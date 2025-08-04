@@ -6,9 +6,9 @@ package vm
 import (
 	"context"
 
+	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/snow/choices"
 	"github.com/luxfi/snow/engine/snowman/block"
-	"github.com/luxfi/sdk/chain"
 	"go.uber.org/zap"
 )
 

@@ -7,10 +7,10 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/client"
 	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vms/platformvm/warp"
 )
 
 func (cli *Client) GenerateTransaction(

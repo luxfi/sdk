@@ -5,10 +5,10 @@ package consts
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/codec"
 	"github.com/luxfi/sdk/consts"
+	"github.com/luxfi/vms/platformvm/warp"
 )
 
 const (

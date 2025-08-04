@@ -12,8 +12,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	codec "github.com/luxfi/sdk/codec"
 	gomock "github.com/golang/mock/gomock"
+	codec "github.com/luxfi/sdk/codec"
 )
 
 // MockAuth is a mock of Auth interface.
