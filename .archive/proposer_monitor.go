@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/luxfi/cache"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/snow/validators"
 	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/set"
+	"github.com/luxfi/snow/validators"
 	"github.com/luxfi/vms/proposervm/proposer"
 	"go.uber.org/zap"
 )

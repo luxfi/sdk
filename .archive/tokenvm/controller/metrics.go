@@ -5,8 +5,8 @@ package controller
 
 import (
 	ametrics "github.com/luxfi/api/metrics"
-	"github.com/luxfi/wrappers"
 	"github.com/luxfi/sdk/examples/tokenvm/consts"
+	"github.com/luxfi/wrappers"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

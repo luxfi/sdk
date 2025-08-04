@@ -11,8 +11,8 @@ package chain
 import (
 	reflect "reflect"
 
-	ids "github.com/luxfi/ids"
 	gomock "github.com/golang/mock/gomock"
+	ids "github.com/luxfi/ids"
 )
 
 // MockRules is a mock of Rules interface.

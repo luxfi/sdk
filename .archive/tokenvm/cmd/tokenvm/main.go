@@ -9,10 +9,10 @@ import (
 	"os"
 
 	"github.com/luxfi/log"
-	"github.com/luxfi/ulimit"
-	"github.com/luxfi/vms/rpcchainvm"
 	"github.com/luxfi/sdk/examples/tokenvm/cmd/tokenvm/version"
 	"github.com/luxfi/sdk/examples/tokenvm/controller"
+	"github.com/luxfi/ulimit"
+	"github.com/luxfi/vms/rpcchainvm"
 	"github.com/spf13/cobra"
 )
 

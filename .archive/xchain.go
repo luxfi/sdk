@@ -9,9 +9,9 @@ import (
 	"math/big"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vms/avm"
-	"github.com/luxfi/sdk/wallet"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/wallet"
+	"github.com/luxfi/vms/avm"
 )
 
 // XChainClient handles all X-Chain operations for asset management
@@ -25,7 +25,7 @@ type XChainClient struct {
 // NewXChainClient creates a new X-Chain client
 func NewXChainClient(endpoint string, wallet *wallet.Wallet, logger log.Logger) (*XChainClient, error) {
 	client := avm.NewClient(endpoint)
-	
+
 	return &XChainClient{
 		client:   client,
 		wallet:   wallet,
@@ -139,7 +139,7 @@ func (x *XChainClient) CreateNFT(ctx context.Context, params *CreateNFTParams) (
 
 	// NFT initial state - groups represent different NFT types/traits
 	initialState := make(map[uint32][]avm.Verify)
-	
+
 	for groupID, group := range params.Groups {
 		initialState[groupID] = []avm.Verify{
 			&avm.TransferableOutput{

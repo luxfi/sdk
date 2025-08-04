@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/trace"
 	smath "github.com/luxfi/math"
+	"github.com/luxfi/trace"
 
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/crypto"

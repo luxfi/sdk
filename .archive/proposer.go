@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/luxfi/cache"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/engine/common"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/set"
 	"github.com/luxfi/vms/proposervm/proposer"
-	"github.com/luxfi/sdk/chain"
 	"go.uber.org/zap"
 )
 

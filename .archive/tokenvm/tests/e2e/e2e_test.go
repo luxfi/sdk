@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	runner_sdk "github.com/luxfi/netrunner/client"
-	"github.com/luxfi/netrunner/rpcpb"
+	"github.com/fatih/color"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/vms/platformvm/warp"
+	runner_sdk "github.com/luxfi/netrunner/client"
+	"github.com/luxfi/netrunner/rpcpb"
 	"github.com/luxfi/sdk/crypto"
 	"github.com/luxfi/sdk/examples/tokenvm/actions"
 	"github.com/luxfi/sdk/examples/tokenvm/auth"
@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/sdk/examples/tokenvm/genesis"
 	"github.com/luxfi/sdk/examples/tokenvm/utils"
 	hutils "github.com/luxfi/sdk/utils"
-	"github.com/fatih/color"
+	"github.com/luxfi/vms/platformvm/warp"
 	ginkgo "github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )

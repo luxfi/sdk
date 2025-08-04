@@ -6,8 +6,8 @@ package gossiper
 import (
 	"context"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/engine/common"
+	"github.com/luxfi/ids"
 )
 
 type Gossiper interface {
