@@ -11,25 +11,25 @@ import (
 // Metrics tracks blockchain performance metrics
 type Metrics struct {
 	mu sync.RWMutex
-	
+
 	// Block metrics
 	BlocksProduced   uint64
 	LastBlockTime    time.Time
 	AverageBlockTime time.Duration
-	
+
 	// Transaction metrics
-	TxProcessed      uint64
-	TxFailed         uint64
-	TPS              float64
-	
+	TxProcessed uint64
+	TxFailed    uint64
+	TPS         float64
+
 	// Network metrics
-	PeersConnected   int
-	NetworkLatency   time.Duration
-	
+	PeersConnected int
+	NetworkLatency time.Duration
+
 	// Resource metrics
-	CPUUsage         float64
-	MemoryUsage      uint64
-	DiskUsage        uint64
+	CPUUsage    float64
+	MemoryUsage uint64
+	DiskUsage   uint64
 }
 
 // NewMetrics creates a new metrics instance
@@ -41,7 +41,7 @@ func NewMetrics() *Metrics {
 func (m *Metrics) RecordBlock(blockTime time.Time) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.BlocksProduced++
 	if !m.LastBlockTime.IsZero() {
 		interval := blockTime.Sub(m.LastBlockTime)
@@ -59,7 +59,7 @@ func (m *Metrics) RecordBlock(blockTime time.Time) {
 func (m *Metrics) RecordTransaction(success bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if success {
 		m.TxProcessed++
 	} else {
@@ -71,7 +71,7 @@ func (m *Metrics) RecordTransaction(success bool) {
 func (m *Metrics) UpdateTPS(tps float64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.TPS = tps
 }
 
@@ -79,7 +79,7 @@ func (m *Metrics) UpdateTPS(tps float64) {
 func (m *Metrics) UpdateNetwork(peers int, latency time.Duration) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.PeersConnected = peers
 	m.NetworkLatency = latency
 }
@@ -88,7 +88,7 @@ func (m *Metrics) UpdateNetwork(peers int, latency time.Duration) {
 func (m *Metrics) UpdateResources(cpu float64, memory, disk uint64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	m.CPUUsage = cpu
 	m.MemoryUsage = memory
 	m.DiskUsage = disk
@@ -98,7 +98,7 @@ func (m *Metrics) UpdateResources(cpu float64, memory, disk uint64) {
 func (m *Metrics) GetSnapshot() map[string]interface{} {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	
+
 	return map[string]interface{}{
 		"blocks": map[string]interface{}{
 			"produced":         m.BlocksProduced,
@@ -111,8 +111,8 @@ func (m *Metrics) GetSnapshot() map[string]interface{} {
 			"tps":       m.TPS,
 		},
 		"network": map[string]interface{}{
-			"peers":    m.PeersConnected,
-			"latency":  m.NetworkLatency.String(),
+			"peers":   m.PeersConnected,
+			"latency": m.NetworkLatency.String(),
 		},
 		"resources": map[string]interface{}{
 			"cpuUsage":    m.CPUUsage,

@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/set"
 	"github.com/luxfi/sdk/heap"
+	"github.com/luxfi/set"
 )
 
 type bucket struct {

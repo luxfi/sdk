@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vms/platformvm"
-	"github.com/luxfi/sdk/wallet"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/wallet"
+	"github.com/luxfi/vms/platformvm"
 )
 
 // PChainClient handles all P-Chain operations
@@ -26,7 +26,7 @@ type PChainClient struct {
 // NewPChainClient creates a new P-Chain client
 func NewPChainClient(endpoint string, wallet *wallet.Wallet, logger log.Logger) (*PChainClient, error) {
 	client := platformvm.NewClient(endpoint)
-	
+
 	return &PChainClient{
 		client:   client,
 		wallet:   wallet,
@@ -39,7 +39,7 @@ func NewPChainClient(endpoint string, wallet *wallet.Wallet, logger log.Logger) 
 
 // AddValidator adds a validator to the primary network
 func (p *PChainClient) AddValidator(ctx context.Context, params *AddValidatorParams) (ids.ID, error) {
-	p.logger.Info("adding validator", 
+	p.logger.Info("adding validator",
 		"nodeID", params.NodeID,
 		"stake", params.StakeAmount,
 		"duration", params.Duration,
@@ -152,10 +152,10 @@ func (p *PChainClient) GetStake(ctx context.Context, addresses []string) (*GetSt
 	}
 
 	return &GetStakeResponse{
-		Staked:     big.NewInt(int64(stake.Staked)),
-		Stakeds:    stake.Stakeds,
-		Outputs:    stake.Outputs,
-		Encoding:   stake.Encoding,
+		Staked:   big.NewInt(int64(stake.Staked)),
+		Stakeds:  stake.Stakeds,
+		Outputs:  stake.Outputs,
+		Encoding: stake.Encoding,
 	}, nil
 }
 

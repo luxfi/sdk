@@ -9,17 +9,18 @@ import (
 	"fmt"
 
 	"github.com/luxfi/crypto/bls"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/set"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/crypto"
+	"github.com/luxfi/sdk/key"
 )
 
 var (
 	ErrInsufficientFunds = errors.New("insufficient funds")
-	ErrNoUTXOs          = errors.New("no UTXOs available")
-	ErrInvalidAddress   = errors.New("invalid address")
+	ErrNoUTXOs           = errors.New("no UTXOs available")
+	ErrInvalidAddress    = errors.New("invalid address")
 )
 
 // UTXO represents an unspent transaction output
@@ -38,7 +39,7 @@ type Wallet struct {
 	chainID   ids.ID
 
 	// Key management
-	keychain  *Keychain
+	keychain  *key.Keychain
 	addresses set.Set[ids.ShortID]
 
 	// UTXO management
@@ -53,7 +54,7 @@ func New(networkID uint32, chainID ids.ID) *Wallet {
 	return &Wallet{
 		networkID: networkID,
 		chainID:   chainID,
-		keychain:  NewKeychain(),
+		keychain:  key.NewKeychain(),
 		addresses: set.NewSet[ids.ShortID](10),
 		utxos:     make(map[ids.ID]*UTXO),
 	}
@@ -62,12 +63,20 @@ func New(networkID uint32, chainID ids.ID) *Wallet {
 // ImportKey imports a private key into the wallet
 func (w *Wallet) ImportKey(privateKey crypto.PrivateKey) (ids.ShortID, error) {
 	pubKey := privateKey.PublicKey()
-	address := pubKey.Address()
-	
+
+	// Generate address from public key
+	address := ids.ShortID{}
+	copy(address[:], pubKey[:20])
+
+	// Check if already imported
+	if w.addresses.Contains(address) {
+		return address, nil // Return the existing address
+	}
+
 	if err := w.keychain.Add(privateKey); err != nil {
 		return ids.ShortID{}, err
 	}
-	
+
 	w.addresses.Add(address)
 	return address, nil
 }
@@ -78,7 +87,7 @@ func (w *Wallet) GenerateKey() (ids.ShortID, error) {
 	if err != nil {
 		return ids.ShortID{}, err
 	}
-	
+
 	return w.ImportKey(privateKey)
 }
 
@@ -123,55 +132,43 @@ func (w *Wallet) GetUTXOs(assetID ids.ID, amount uint64) ([]*UTXO, uint64, error
 		utxos    []*UTXO
 		totalAmt uint64
 	)
-	
+
 	for _, utxo := range w.utxos {
 		if utxo.AssetID != assetID {
 			continue
 		}
-		
+
 		// Check if we own this UTXO
 		if !w.addresses.Contains(utxo.Owner) {
 			continue
 		}
-		
+
 		utxos = append(utxos, utxo)
 		totalAmt += utxo.Amount
-		
+
 		if totalAmt >= amount {
 			return utxos, totalAmt, nil
 		}
 	}
-	
+
 	if totalAmt < amount {
 		return nil, 0, ErrInsufficientFunds
 	}
-	
+
 	return utxos, totalAmt, nil
 }
 
 // Sign signs a transaction with the wallet's keys
 func (w *Wallet) Sign(ctx context.Context, tx chain.Transaction) error {
-	// Get the required signers for this transaction
-	signers := tx.Auth().Actor()
-	
-	// Find the appropriate key and sign
-	for _, signer := range []ids.ShortID{signers} {
-		if w.addresses.Contains(signer) {
-			privateKey, err := w.keychain.Get(signer)
-			if err != nil {
-				return fmt.Errorf("failed to get key for %s: %w", signer, err)
-			}
-			
-			// Sign the transaction
-			if err := tx.Sign(privateKey); err != nil {
-				return fmt.Errorf("failed to sign transaction: %w", err)
-			}
-			
-			return nil
-		}
+	// Get addresses that can sign
+	addresses := w.keychain.Addresses()
+
+	// Sign the transaction with available signers
+	if err := tx.Sign(addresses); err != nil {
+		return fmt.Errorf("failed to sign transaction: %w", err)
 	}
-	
-	return errors.New("no signing key found for transaction")
+
+	return nil
 }
 
 // SetBLSKey sets the BLS key for validator operations
@@ -214,7 +211,7 @@ func (w *Wallet) CreateTransferTx(
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Create inputs
 	var inputs []TransferInput
 	for _, utxo := range utxos {
@@ -225,7 +222,7 @@ func (w *Wallet) CreateTransferTx(
 		}
 		inputs = append(inputs, input)
 	}
-	
+
 	// Create outputs
 	outputs := []TransferOutput{
 		{
@@ -234,14 +231,14 @@ func (w *Wallet) CreateTransferTx(
 			Recipient: to,
 		},
 	}
-	
+
 	// Add change output if necessary
 	if totalAmt > amount {
 		from, err := w.GetAddress()
 		if err != nil {
 			return nil, err
 		}
-		
+
 		changeOutput := TransferOutput{
 			AssetID:   assetID,
 			Amount:    totalAmt - amount,
@@ -249,7 +246,7 @@ func (w *Wallet) CreateTransferTx(
 		}
 		outputs = append(outputs, changeOutput)
 	}
-	
+
 	return &TransferTx{
 		NetworkID: w.networkID,
 		ChainID:   w.chainID,

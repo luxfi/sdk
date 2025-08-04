@@ -10,13 +10,13 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/wallet"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/geth/common"
 )
 
 func main() {
@@ -151,9 +151,9 @@ func blockchainExample(ctx context.Context, sdk *sdk.LuxSDK) error {
 		L2Chain: l2Chain.ID,
 		AppType: "gaming",
 		AppConfig: map[string]interface{}{
-			"tickRate":     60,
-			"maxPlayers":   1000,
-			"assetTypes":   []string{"weapons", "armor", "consumables"},
+			"tickRate":   60,
+			"maxPlayers": 1000,
+			"assetTypes": []string{"weapons", "armor", "consumables"},
 		},
 	})
 	if err != nil {
@@ -180,7 +180,7 @@ func stakingExample(ctx context.Context, sdk *sdk.LuxSDK) error {
 	}
 
 	// Stake on primary network
-	stakeAmount := big.NewInt(2000) // 2000 LUX
+	stakeAmount := big.NewInt(2000)      // 2000 LUX
 	stakeDuration := 14 * 24 * time.Hour // 14 days
 
 	txID, err := chainManager.Stake(ctx, stakeAmount, stakeDuration)
@@ -207,7 +207,7 @@ func stakingExample(ctx context.Context, sdk *sdk.LuxSDK) error {
 		return fmt.Errorf("failed to get validators: %w", err)
 	}
 
-	fmt.Printf("Current validators: %d, Pending validators: %d\n", 
+	fmt.Printf("Current validators: %d, Pending validators: %d\n",
 		len(validators.Current), len(validators.Pending))
 
 	return nil
@@ -357,7 +357,7 @@ func crossChainExample(ctx context.Context, sdk *sdk.LuxSDK) error {
 
 	// Transfer LUX from C-Chain to P-Chain
 	transferAmount := big.NewInt(100 * 1e9) // 100 LUX
-	
+
 	transferTxID, err := chainManager.TransferCrossChain(ctx, &chain.CrossChainTransferParams{
 		SourceChain: "C",
 		TargetChain: "P",

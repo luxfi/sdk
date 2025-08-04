@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/sdk/netrunner"
 )
 
@@ -23,13 +23,13 @@ type NetworkManager struct {
 
 // Network represents a managed Lux network
 type Network struct {
-	ID          string
-	Name        string
-	Type        NetworkType
-	Status      NetworkStatus
-	Nodes       []*Node
-	ChainIDs    []string
-	CreatedAt   time.Time
+	ID        string
+	Name      string
+	Type      NetworkType
+	Status    NetworkStatus
+	Nodes     []*Node
+	ChainIDs  []string
+	CreatedAt time.Time
 	// netrunner   *netrunner.Network // TODO: Add netrunner integration
 }
 
@@ -265,8 +265,8 @@ type NodeParams struct {
 
 // ChainConfig defines configuration for a chain
 type ChainConfig struct {
-	ChainID     string
-	VMType      string
-	Genesis     []byte
-	Config      []byte
+	ChainID string
+	VMType  string
+	Genesis []byte
+	Config  []byte
 }

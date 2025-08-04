@@ -145,7 +145,7 @@ func (m *Manager) Delete(keyID ids.ID) error {
 	}
 
 	delete(m.keys, keyID)
-	
+
 	// Delete from disk
 	keyFile := filepath.Join(m.keyDir, fmt.Sprintf("%s.key", keyID))
 	if err := os.Remove(keyFile); err != nil && !os.IsNotExist(err) {
@@ -163,7 +163,7 @@ func (m *Manager) Save(keyID ids.ID) error {
 	}
 
 	keyFile := filepath.Join(m.keyDir, fmt.Sprintf("%s.key", keyID))
-	
+
 	// Serialize key (excluding private key for security)
 	data, err := json.MarshalIndent(key, "", "  ")
 	if err != nil {
