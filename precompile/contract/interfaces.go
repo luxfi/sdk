@@ -51,7 +51,7 @@ type StateDB interface {
 type AccessibleState interface {
 	GetStateDB() StateDB
 	GetBlockContext() BlockContext
-	GetSnowContext() *consensus.Context
+	GetConsensusContext() *consensus.Context
 	GetChainConfig() precompileconfig.ChainConfig
 }
 

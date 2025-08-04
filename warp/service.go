@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/network/p2p/acp118"
 	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/vms/platformvm/warp"
@@ -21,7 +21,7 @@ import (
 
 var errNoValidators = errors.New("cannot aggregate signatures from subnet with no validators")
 
-// API introduces snowman specific functionality to the evm
+// API introduces chain specific functionality to the evm
 type API struct {
 	chainContext                 *consensus.Context
 	backend                      Backend

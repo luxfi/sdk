@@ -90,12 +90,12 @@ func PackGetBlockchainIDOutput(blockchainID common.Hash) ([]byte, error) {
 	return WarpABI.PackOutput("getBlockchainID", blockchainID)
 }
 
-// getBlockchainID returns the snow Chain Context ChainID of this blockchain.
+// getBlockchainID returns the consensus Chain Context ChainID of this blockchain.
 func getBlockchainID(accessibleState contract.AccessibleState, caller common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 	if remainingGas, err = contract.DeductGas(suppliedGas, GetBlockchainIDGasCost); err != nil {
 		return nil, 0, err
 	}
-	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(accessibleState.GetSnowContext().ChainID))
+	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(accessibleState.GetConsensusContext().ChainID))
 	if err != nil {
 		return nil, remainingGas, err
 	}
@@ -250,7 +250,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 	}
 
 	var (
-		sourceChainID = accessibleState.GetSnowContext().ChainID
+		sourceChainID = accessibleState.GetConsensusContext().ChainID
 		sourceAddress = caller
 	)
 
@@ -262,7 +262,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 		return nil, remainingGas, err
 	}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
-		accessibleState.GetSnowContext().NetworkID,
+		accessibleState.GetConsensusContext().NetworkID,
 		sourceChainID,
 		addressedPayload.Bytes(),
 	)

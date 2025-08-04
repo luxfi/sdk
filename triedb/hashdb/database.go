@@ -38,7 +38,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/stateconf"
+	"github.com/luxfi/geth/geth/stateconf"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/rlp"

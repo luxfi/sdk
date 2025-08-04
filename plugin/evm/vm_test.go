@@ -143,7 +143,7 @@ type testVM struct {
 }
 
 func newVM(t *testing.T, config testVMConfig) *testVM {
-	ctx := utilstest.NewTestSnowContext(t)
+	ctx := utilstest.NewTestConsensusContext(t)
 	fork := upgradetest.Latest
 	if config.fork != nil {
 		fork = *config.fork
@@ -218,7 +218,7 @@ func setupGenesis(
 	[]byte,
 	*atomic.Memory,
 ) {
-	ctx := utilstest.NewTestSnowContext(t)
+	ctx := utilstest.NewTestConsensusContext(t)
 
 	genesisJSON := toGenesisJSON(forkToChainConfig[fork])
 	ctx.NetworkUpgrades = upgradetest.GetConfig(fork)
@@ -352,7 +352,7 @@ func testVMUpgrades(t *testing.T, scheme string) {
 	}
 }
 
-func issueAndAccept(t *testing.T, vm *VM) snowman.Block {
+func issueAndAccept(t *testing.T, vm *VM) chain.Block {
 	t.Helper()
 
 	msg, err := vm.WaitForEvent(context.Background())
@@ -477,7 +477,7 @@ func testBuildEthTxBlock(t *testing.T, scheme string) {
 	}
 
 	restartedVM := &VM{}
-	newCTX := utilstest.NewTestSnowContext(t)
+	newCTX := utilstest.NewTestConsensusContext(t)
 	newCTX.NetworkUpgrades = upgradetest.GetConfig(fork)
 	newCTX.ChainDataDir = tvm.vm.ctx.ChainDataDir
 	if err := restartedVM.Initialize(
@@ -3311,7 +3311,7 @@ func TestParentBeaconRootBlock(t *testing.T) {
 
 func TestStandaloneDB(t *testing.T) {
 	vm := &VM{}
-	ctx := utilstest.NewTestSnowContext(t)
+	ctx := utilstest.NewTestConsensusContext(t)
 	baseDB := memdb.New()
 	atomicMemory := atomic.NewMemory(prefixdb.New([]byte{0}, baseDB))
 	ctx.SharedMemory = atomicMemory.NewSharedMemory(ctx.ChainID)

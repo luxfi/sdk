@@ -130,7 +130,7 @@ const (
 var (
 	// Set last accepted key to be longer than the keys used to store accepted block IDs.
 	lastAcceptedKey    = []byte("last_accepted_key")
-	acceptedPrefix     = []byte("snowman_accepted")
+	acceptedPrefix     = []byte("chain_accepted")
 	metadataPrefix     = []byte("metadata")
 	warpPrefix         = []byte("warp")
 	ethDBPrefix        = []byte("ethdb")
@@ -169,7 +169,7 @@ var legacyApiNames = map[string]string{
 	"private-debug":     "debug",
 }
 
-// VM implements the snowman.ChainVM interface
+// VM implements the chain.ChainVM interface
 type VM struct {
 	ctx *consensus.Context
 	// contextLock is used to coordinate global VM operations.
@@ -263,7 +263,7 @@ type VM struct {
 	rpcHandlers []interface{ Stop() }
 }
 
-// Initialize implements the snowman.ChainVM interface
+// Initialize implements the chain.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
 	chainCtx *consensus.Context,
@@ -528,7 +528,7 @@ func parseGenesis(ctx *consensus.Context, genesisBytes []byte, upgradeBytes []by
 	// Populate the Lux config extras.
 	configExtra := params.GetExtra(g.Config)
 	configExtra.LuxContext = extras.LuxContext{
-		SnowCtx: ctx,
+		ConsensusCtx: ctx,
 	}
 
 	if configExtra.FeeConfig == commontype.EmptyFeeConfig {
@@ -919,7 +919,7 @@ func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
 	return builder.waitForEvent(ctx)
 }
 
-// Shutdown implements the snowman.ChainVM interface
+// Shutdown implements the chain.ChainVM interface
 func (vm *VM) Shutdown(context.Context) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
@@ -958,18 +958,18 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // buildBlock builds a block to be wrapped by ChainState
-func (vm *VM) buildBlock(ctx context.Context) (snowman.Block, error) {
+func (vm *VM) buildBlock(ctx context.Context) (chain.Block, error) {
 	return vm.buildBlockWithContext(ctx, nil)
 }
 
-func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (snowman.Block, error) {
+func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
 	if proposerVMBlockCtx != nil {
 		log.Debug("Building block with context", "pChainBlockHeight", proposerVMBlockCtx.PChainHeight)
 	} else {
 		log.Debug("Building block without context")
 	}
 	predicateCtx := &precompileconfig.PredicateContext{
-		SnowCtx:            vm.ctx,
+		ConsensusCtx:            vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}
 
@@ -1007,7 +1007,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 }
 
 // parseBlock parses [b] into a block to be wrapped by ChainState.
-func (vm *VM) parseBlock(_ context.Context, b []byte) (snowman.Block, error) {
+func (vm *VM) parseBlock(_ context.Context, b []byte) (chain.Block, error) {
 	ethBlock := new(types.Block)
 	if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 		return nil, err
@@ -1034,7 +1034,7 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
-func (vm *VM) getBlock(_ context.Context, id ids.ID) (snowman.Block, error) {
+func (vm *VM) getBlock(_ context.Context, id ids.ID) (chain.Block, error) {
 	ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 	// If [ethBlock] is nil, return [database.ErrNotFound] here
 	// so that the miss is considered cacheable.
@@ -1047,7 +1047,7 @@ func (vm *VM) getBlock(_ context.Context, id ids.ID) (snowman.Block, error) {
 
 // GetAcceptedBlock attempts to retrieve block [blkID] from the VM. This method
 // only returns accepted blocks.
-func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (snowman.Block, error) {
+func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (chain.Block, error) {
 	blk, err := vm.GetBlock(ctx, blkID)
 	if err != nil {
 		return nil, err
@@ -1212,7 +1212,7 @@ func (vm *VM) chainConfigExtra() *extras.ChainConfig {
 
 func (vm *VM) rules(number *big.Int, time uint64) extras.Rules {
 	ethrules := vm.chainConfig.Rules(number, params.IsMergeTODO, time)
-	return *params.GetRulesExtra(ethrules)
+	return *params.GetExtrasRules(ethrules, vm.chainConfig, time)
 }
 
 // currentRules returns the chain rules for the current block.

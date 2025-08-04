@@ -33,13 +33,13 @@ func TestAddressedCallSignatures(t *testing.T) {
 	metricstest.WithMetrics(t)
 
 	database := memdb.New()
-	snowCtx := utilstest.NewTestSnowContext(t)
+	consensusCtx := utilstest.NewTestConsensusContext(t)
 
 	offChainPayload, err := payload.NewAddressedCall([]byte{1, 2, 3}, []byte{1, 2, 3})
 	require.NoError(t, err)
-	offchainMessage, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, offChainPayload.Bytes())
+	offchainMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, offChainPayload.Bytes())
 	require.NoError(t, err)
-	offchainSignature, err := snowCtx.WarpSigner.Sign(offchainMessage)
+	offchainSignature, err := consensusCtx.WarpSigner.Sign(offchainMessage)
 	require.NoError(t, err)
 
 	tests := map[string]struct {
@@ -51,9 +51,9 @@ func TestAddressedCallSignatures(t *testing.T) {
 			setup: func(backend Backend) (request []byte, expectedResponse []byte) {
 				knownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("test"))
 				require.NoError(t, err)
-				msg, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, knownPayload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, knownPayload.Bytes())
 				require.NoError(t, err)
-				signature, err := snowCtx.WarpSigner.Sign(msg)
+				signature, err := consensusCtx.WarpSigner.Sign(msg)
 				require.NoError(t, err)
 
 				backend.AddMessage(msg)
@@ -77,7 +77,7 @@ func TestAddressedCallSignatures(t *testing.T) {
 			setup: func(_ Backend) (request []byte, expectedResponse []byte) {
 				unknownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("unknown message"))
 				require.NoError(t, err)
-				unknownMessage, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, unknownPayload.Bytes())
+				unknownMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, unknownPayload.Bytes())
 				require.NoError(t, err)
 				return unknownMessage.Bytes(), nil
 			},
@@ -104,9 +104,9 @@ func TestAddressedCallSignatures(t *testing.T) {
 					sigCache = &cache.Empty[ids.ID, []byte]{}
 				}
 				warpBackend, err := NewBackend(
-					snowCtx.NetworkID,
-					snowCtx.ChainID,
-					snowCtx.WarpSigner,
+					consensusCtx.NetworkID,
+					consensusCtx.ChainID,
+					consensusCtx.WarpSigner,
 					warptest.EmptyBlockClient,
 					nil,
 					database,
@@ -114,7 +114,7 @@ func TestAddressedCallSignatures(t *testing.T) {
 					[][]byte{offchainMessage.Bytes()},
 				)
 				require.NoError(t, err)
-				handler := acp118.NewCachedHandler(sigCache, warpBackend, snowCtx.WarpSigner)
+				handler := acp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
 
 				requestBytes, expectedResponse := test.setup(warpBackend)
 				protoMsg := &sdk.SignatureRequest{Message: requestBytes}
@@ -155,7 +155,7 @@ func TestBlockSignatures(t *testing.T) {
 	metricstest.WithMetrics(t)
 
 	database := memdb.New()
-	snowCtx := utilstest.NewTestSnowContext(t)
+	consensusCtx := utilstest.NewTestConsensusContext(t)
 
 	knownBlkID := ids.GenerateTestID()
 	blockClient := warptest.MakeBlockClient(knownBlkID)
@@ -166,7 +166,7 @@ func TestBlockSignatures(t *testing.T) {
 			panic(err)
 		}
 
-		msg, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, idPayload.Bytes())
+		msg, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, idPayload.Bytes())
 		if err != nil {
 			panic(err)
 		}
@@ -183,9 +183,9 @@ func TestBlockSignatures(t *testing.T) {
 			setup: func() (request []byte, expectedResponse []byte) {
 				hashPayload, err := payload.NewHash(knownBlkID)
 				require.NoError(t, err)
-				unsignedMessage, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, hashPayload.Bytes())
+				unsignedMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, hashPayload.Bytes())
 				require.NoError(t, err)
-				signature, err := snowCtx.WarpSigner.Sign(unsignedMessage)
+				signature, err := consensusCtx.WarpSigner.Sign(unsignedMessage)
 				require.NoError(t, err)
 				return toMessageBytes(knownBlkID), signature[:]
 			},
@@ -222,9 +222,9 @@ func TestBlockSignatures(t *testing.T) {
 					sigCache = &cache.Empty[ids.ID, []byte]{}
 				}
 				warpBackend, err := NewBackend(
-					snowCtx.NetworkID,
-					snowCtx.ChainID,
-					snowCtx.WarpSigner,
+					consensusCtx.NetworkID,
+					consensusCtx.ChainID,
+					consensusCtx.WarpSigner,
 					blockClient,
 					warptest.NoOpValidatorReader{},
 					database,
@@ -232,7 +232,7 @@ func TestBlockSignatures(t *testing.T) {
 					nil,
 				)
 				require.NoError(t, err)
-				handler := acp118.NewCachedHandler(sigCache, warpBackend, snowCtx.WarpSigner)
+				handler := acp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
 
 				requestBytes, expectedResponse := test.setup()
 				protoMsg := &sdk.SignatureRequest{Message: requestBytes}
@@ -270,14 +270,14 @@ func TestBlockSignatures(t *testing.T) {
 
 func TestUptimeSignatures(t *testing.T) {
 	database := memdb.New()
-	snowCtx := utilstest.NewTestSnowContext(t)
+	consensusCtx := utilstest.NewTestConsensusContext(t)
 
 	getUptimeMessageBytes := func(sourceAddress []byte, vID ids.ID, totalUptime uint64) ([]byte, *luxWarp.UnsignedMessage) {
 		uptimePayload, err := messages.NewValidatorUptime(vID, 80)
 		require.NoError(t, err)
 		addressedCall, err := payload.NewAddressedCall(sourceAddress, uptimePayload.Bytes())
 		require.NoError(t, err)
-		unsignedMessage, err := luxWarp.NewUnsignedMessage(snowCtx.NetworkID, snowCtx.ChainID, addressedCall.Bytes())
+		unsignedMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, addressedCall.Bytes())
 		require.NoError(t, err)
 
 		protoMsg := &sdk.SignatureRequest{Message: unsignedMessage.Bytes()}
@@ -293,7 +293,7 @@ func TestUptimeSignatures(t *testing.T) {
 		} else {
 			sigCache = &cache.Empty[ids.ID, []byte]{}
 		}
-		chainCtx := utilstest.NewTestSnowContext(t)
+		chainCtx := utilstest.NewTestConsensusContext(t)
 		clk := &mockable.Clock{}
 		validatorsManager, err := validators.NewManager(chainCtx, memdb.New(), clk)
 		require.NoError(t, err)
@@ -301,9 +301,9 @@ func TestUptimeSignatures(t *testing.T) {
 		newLockedValidatorManager := validators.NewLockedValidatorReader(validatorsManager, lock)
 		validatorsManager.StartTracking([]ids.NodeID{})
 		warpBackend, err := NewBackend(
-			snowCtx.NetworkID,
-			snowCtx.ChainID,
-			snowCtx.WarpSigner,
+			consensusCtx.NetworkID,
+			consensusCtx.ChainID,
+			consensusCtx.WarpSigner,
 			warptest.EmptyBlockClient,
 			newLockedValidatorManager,
 			database,
@@ -311,7 +311,7 @@ func TestUptimeSignatures(t *testing.T) {
 			nil,
 		)
 		require.NoError(t, err)
-		handler := acp118.NewCachedHandler(sigCache, warpBackend, snowCtx.WarpSigner)
+		handler := acp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
 
 		// sourceAddress nonZero
 		protoBytes, _ := getUptimeMessageBytes([]byte{1, 2, 3}, ids.GenerateTestID(), 80)
@@ -355,7 +355,7 @@ func TestUptimeSignatures(t *testing.T) {
 		protoBytes, msg := getUptimeMessageBytes([]byte{}, validationID, 80)
 		responseBytes, appErr := handler.AppRequest(context.Background(), nodeID, time.Time{}, protoBytes)
 		require.Nil(t, appErr)
-		expectedSignature, err := snowCtx.WarpSigner.Sign(msg)
+		expectedSignature, err := consensusCtx.WarpSigner.Sign(msg)
 		require.NoError(t, err)
 		response := &sdk.SignatureResponse{}
 		require.NoError(t, proto.Unmarshal(responseBytes, response))

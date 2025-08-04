@@ -11,6 +11,7 @@ import (
 
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/node/consensus/engine/core/common"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 )

@@ -53,7 +53,7 @@ var (
 )
 
 func TestNetworkDoesNotConnectToItself(t *testing.T) {
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	n, err := NewNetwork(ctx, nil, nil, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	assert.NoError(t, n.Connected(context.Background(), ctx.NodeID, defaultPeerVersion))
@@ -90,7 +90,7 @@ func TestRequestAnyRequestsRoutingAndResponse(t *testing.T) {
 	}
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	net, err := NewNetwork(ctx, sender, codecManager, 16, prometheus.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
@@ -141,8 +141,8 @@ func TestAppRequestOnCtxCancellation(t *testing.T) {
 		},
 	}
 
-	snowCtx := snowtest.Context(t, snowtest.CChainID)
-	net, err := NewNetwork(snowCtx, sender, codecManager, 1, prometheus.NewRegistry())
+	consensusCtx := consensustest.Context(t, consensustest.CChainID)
+	net, err := NewNetwork(consensusCtx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	handler := &HelloGreetingRequestHandler{codec: codecManager}
 	net.SetRequestHandler(handler)
@@ -194,7 +194,7 @@ func TestRequestRequestsRoutingAndResponse(t *testing.T) {
 	}
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	net, err := NewNetwork(ctx, sender, codecManager, 16, prometheus.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
@@ -275,7 +275,7 @@ func TestAppRequestOnShutdown(t *testing.T) {
 	}
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	net, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	nodeID := ids.GenerateTestNodeID()
@@ -323,8 +323,8 @@ func TestSyncedAppRequestAnyOnCtxCancellation(t *testing.T) {
 		},
 	}
 
-	snowCtx := snowtest.Context(t, snowtest.CChainID)
-	net, err := NewNetwork(snowCtx, sender, codecManager, 1, prometheus.NewRegistry())
+	consensusCtx := consensustest.Context(t, consensustest.CChainID)
+	net, err := NewNetwork(consensusCtx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
 	assert.NoError(t,
@@ -398,7 +398,7 @@ func TestRequestMinVersion(t *testing.T) {
 	}
 
 	// passing nil as codec works because the net.AppRequest is never called
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	net, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	requestMessage := TestMessage{Message: "this is a request"}
@@ -463,7 +463,7 @@ func TestOnRequestHonoursDeadline(t *testing.T) {
 		processingDuration: 500 * time.Millisecond,
 	}
 
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	net, err = NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(requestHandler)
@@ -491,7 +491,7 @@ func TestHandleInvalidMessages(t *testing.T) {
 			return nil
 		},
 	}
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	clientNetwork, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	clientNetwork.SetRequestHandler(&testRequestHandler{})
@@ -540,7 +540,7 @@ func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
 	requestID := peertest.TestPeerRequestID
 	sender := testAppSender{}
 
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	clientNetwork, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
 	clientNetwork.SetRequestHandler(&testRequestHandler{err: errors.New("fail")}) // Return an error from the request handler
@@ -560,7 +560,7 @@ func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
 func TestNetworkAppRequestAfterShutdown(t *testing.T) {
 	require := require.New(t)
 
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	net, err := NewNetwork(ctx, nil, nil, 16, prometheus.NewRegistry())
 	require.NoError(err)
 	net.Shutdown()
@@ -584,7 +584,7 @@ func TestNetworkRouting(t *testing.T) {
 	handler := &testSDKHandler{}
 
 	networkCodec := codec.NewManager(0)
-	ctx := snowtest.Context(t, snowtest.CChainID)
+	ctx := consensustest.Context(t, consensustest.CChainID)
 	network, err := NewNetwork(ctx, sender, networkCodec, 1, prometheus.NewRegistry())
 	require.NoError(err)
 	require.NoError(network.AddHandler(uint64(protocol), handler))

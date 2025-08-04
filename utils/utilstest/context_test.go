@@ -11,13 +11,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewTestSnowContext(t *testing.T) {
-	// Test that NewTestSnowContext creates a context with validator state
-	snowCtx := NewTestSnowContext(t)
-	require.NotNil(t, snowCtx.ValidatorState)
+func TestNewTestConsensusContext(t *testing.T) {
+	// Test that NewTestConsensusContext creates a context with validator state
+	consensusCtx := NewTestConsensusContext(t)
+	require.NotNil(t, consensusCtx.ValidatorState)
 
 	// Test that the validator state has the required functions
-	validatorState := snowCtx.ValidatorState
+	validatorState := consensusCtx.ValidatorState
 	require.NotNil(t, validatorState)
 
 	// Test that we can call GetValidatorSetF without panicking

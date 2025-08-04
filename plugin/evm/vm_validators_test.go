@@ -96,7 +96,7 @@ func TestValidatorState(t *testing.T) {
 	vm = &VM{}
 	err = vm.Initialize(
 		context.Background(),
-		utilstest.NewTestSnowContext(t), // this context does not have validators state, making VM to source it from the database
+		utilstest.NewTestConsensusContext(t), // this context does not have validators state, making VM to source it from the database
 		dbManager,
 		genesisBytes,
 		[]byte(""),

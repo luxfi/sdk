@@ -68,7 +68,7 @@ build/Release
 node_modules/
 jspm_packages/
 
-# Snowpack dependency directory (https://snowpack.dev/)
+# Consensuspack dependency directory (https://consensuspack.dev/)
 web_modules/
 
 # TypeScript cache

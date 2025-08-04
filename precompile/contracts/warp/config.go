@@ -201,9 +201,9 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 
 	log.Debug("verifying warp message", "warpMsg", warpMsg, "quorumNum", quorumNumerator, "quorumDenom", WarpQuorumDenominator)
 
-	// Wrap validators.State on the chain snow context to special case the Primary Network
+	// Wrap validators.State on the chain consensus context to special case the Primary Network
 	// Type assert ValidatorState to the expected validators.State interface
-	_, ok := predicateContext.SnowCtx.ValidatorState.(validators.State)
+	_, ok := predicateContext.ConsensusCtx.ValidatorState.(validators.State)
 	if !ok {
 		return fmt.Errorf("invalid validator state type")
 	}
@@ -217,7 +217,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 	// err := warpMsg.Signature.Verify(
 	// 	context.Background(),
 	// 	&warpMsg.UnsignedMessage,
-	// 	predicateContext.SnowCtx.NetworkID,
+	// 	predicateContext.ConsensusCtx.NetworkID,
 	// 	validatorState, // Use the validator state instead of validatorSet
 	// 	quorumNumerator,
 	// 	WarpQuorumDenominator,

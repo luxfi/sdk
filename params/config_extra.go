@@ -12,6 +12,8 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
 )
 
@@ -35,6 +37,18 @@ var (
 	chainConfigExtras = make(map[*ChainConfig]*extras.ChainConfig)
 	chainConfigMutex  sync.RWMutex
 )
+
+// getPrecompileAddress returns the address for a precompile config
+func getPrecompileAddress(config precompileconfig.Config) common.Address {
+	// Get all registered modules
+	for _, module := range modules.RegisteredModules() {
+		// Match by config key
+		if module.ConfigKey == config.Key() {
+			return module.Address
+		}
+	}
+	return common.Address{}
+}
 
 // RulesExtra represents extra EVM rules - part of libevm integration
 type RulesExtra struct {
@@ -204,7 +218,7 @@ func ToWithUpgradesJSON(c *ChainConfig) *ChainConfigWithUpgradesJSON {
 
 func SetNetworkUpgradeDefaults(c *ChainConfig) {
 	// TODO: NetworkUpgrades field not available in current consensus.Context
-	// GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
+	// GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).ConsensusCtx.NetworkUpgrades)
 	// For now, set empty defaults with empty upgrade config
 	emptyUpgradeConfig := upgrade.Config{}
 	GetExtra(c).NetworkUpgrades.SetDefaults(emptyUpgradeConfig)
@@ -216,4 +230,69 @@ func GetRulesExtra(rules Rules) RulesExtra {
 	return RulesExtra{
 		IsSubnetEVM: true, // Default to true for SubnetEVM
 	}
+}
+
+// GetExtrasRules returns the extras.Rules for the given params.Rules and timestamp
+func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Rules {
+	if c == nil {
+		return &extras.Rules{
+			LuxRules:            extras.LuxRules{},
+			Precompiles:         make(map[common.Address]precompileconfig.Config),
+			Predicaters:         make(map[common.Address]precompileconfig.Predicater),
+			AccepterPrecompiles: make(map[common.Address]precompileconfig.Accepter),
+		}
+	}
+	
+	extra := GetExtra(c)
+	luxRules := extra.NetworkUpgrades.GetLuxRules(timestamp)
+	
+	// Build extras.Rules
+	rules := &extras.Rules{
+		LuxRules:            luxRules,
+		Precompiles:         make(map[common.Address]precompileconfig.Config),
+		Predicaters:         make(map[common.Address]precompileconfig.Predicater),
+		AccepterPrecompiles: make(map[common.Address]precompileconfig.Accepter),
+	}
+	
+	// Add active precompiles based on upgrades
+	for _, upgrade := range extra.PrecompileUpgrades {
+		if upgrade.Timestamp() != nil && *upgrade.Timestamp() <= timestamp {
+			// Get address from the registry based on the config
+			address := getPrecompileAddress(upgrade.Config)
+			if address == (common.Address{}) {
+				continue // Skip if no address found
+			}
+			
+			if upgrade.IsDisabled() {
+				delete(rules.Precompiles, address)
+				delete(rules.Predicaters, address)
+				delete(rules.AccepterPrecompiles, address)
+			} else {
+				rules.Precompiles[address] = upgrade.Config
+				if predicater, ok := upgrade.Config.(precompileconfig.Predicater); ok {
+					rules.Predicaters[address] = predicater
+				}
+				if accepter, ok := upgrade.Config.(precompileconfig.Accepter); ok {
+					rules.AccepterPrecompiles[address] = accepter
+				}
+			}
+		}
+	}
+	
+	// Add genesis precompiles if at genesis
+	if timestamp == 0 {
+		for address, config := range extra.GenesisPrecompiles {
+			if !config.IsDisabled() {
+				rules.Precompiles[address] = config
+				if predicater, ok := config.(precompileconfig.Predicater); ok {
+					rules.Predicaters[address] = predicater
+				}
+				if accepter, ok := config.(precompileconfig.Accepter); ok {
+					rules.AccepterPrecompiles[address] = accepter
+				}
+			}
+		}
+	}
+	
+	return rules
 }

@@ -29,8 +29,8 @@ func NewTestValidatorState() *validatorstest.State {
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
 				constants.PlatformChainID: constants.PrimaryNetworkID,
-				snowtest.XChainID:         constants.PrimaryNetworkID,
-				snowtest.CChainID:         constants.PrimaryNetworkID,
+				consensustest.XChainID:         constants.PrimaryNetworkID,
+				consensustest.CChainID:         constants.PrimaryNetworkID,
 				SubnetEVMTestChainID:      constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
@@ -47,31 +47,31 @@ func NewTestValidatorState() *validatorstest.State {
 	}
 }
 
-// NewTestSnowContext returns a consensus.Context with validator state properly configured for testing.
-// This wraps snowtest.Context and sets the validator state to avoid the missing GetValidatorSetF issue.
+// NewTestConsensusContext returns a consensus.Context with validator state properly configured for testing.
+// This wraps consensustest.Context and sets the validator state to avoid the missing GetValidatorSetF issue.
 //
 // Usage example:
 //
 //	// Instead of:
-//	// snowCtx := utilstest.NewTestSnowContext(t, snowtest.CChainID)
+//	// consensusCtx := utilstest.NewTestConsensusContext(t, consensustest.CChainID)
 //	// validatorState := utils.NewTestValidatorState()
-//	// snowCtx.ValidatorState = validatorState
+//	// consensusCtx.ValidatorState = validatorState
 //
 //	// Use:
-//	snowCtx := utils.NewTestSnowContext(t)
+//	consensusCtx := utils.NewTestConsensusContext(t)
 //
-// This function ensures that the snow context has a properly configured validator state
+// This function ensures that the consensus context has a properly configured validator state
 // that includes the GetValidatorSetF function, which is required by many tests.
-func NewTestSnowContext(t testing.TB) *consensus.Context {
-	snowCtx := snowtest.Context(t, SubnetEVMTestChainID)
-	snowCtx.ValidatorState = NewTestValidatorState()
-	return snowCtx
+func NewTestConsensusContext(t testing.TB) *consensus.Context {
+	consensusCtx := consensustest.Context(t, SubnetEVMTestChainID)
+	consensusCtx.ValidatorState = NewTestValidatorState()
+	return consensusCtx
 }
 
-// NewTestSnowContextWithChainID returns a consensus.Context with validator state properly configured for testing
+// NewTestConsensusContextWithChainID returns a consensus.Context with validator state properly configured for testing
 // with a specific chain ID. This is provided for backward compatibility when a specific chain ID is needed.
-func NewTestSnowContextWithChainID(t testing.TB, chainID ids.ID) *consensus.Context {
-	snowCtx := snowtest.Context(t, chainID)
-	snowCtx.ValidatorState = NewTestValidatorState()
-	return snowCtx
+func NewTestConsensusContextWithChainID(t testing.TB, chainID ids.ID) *consensus.Context {
+	consensusCtx := consensustest.Context(t, chainID)
+	consensusCtx.ValidatorState = NewTestValidatorState()
+	return consensusCtx
 }
