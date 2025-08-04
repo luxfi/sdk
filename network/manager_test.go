@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/sdk/internal/logging"
+	"github.com/luxfi/log"
 )
 
 func TestNetworkManager_CreateNetwork(t *testing.T) {
@@ -54,7 +54,7 @@ func TestNetworkManager_CreateNetwork(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logger := logging.NewNoop()
+			logger := log.NoOpLogger
 			nm, err := NewNetworkManager(&config.NetworkConfig{}, logger)
 			require.NoError(t, err)
 
@@ -80,7 +80,7 @@ func TestNetworkManager_CreateNetwork(t *testing.T) {
 }
 
 func TestNetworkManager_StartNetwork(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	nm, err := NewNetworkManager(&config.NetworkConfig{}, logger)
 	require.NoError(t, err)
 	ctx := context.Background()
@@ -105,7 +105,7 @@ func TestNetworkManager_StartNetwork(t *testing.T) {
 }
 
 func TestNetworkManager_StopNetwork(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	nm, err := NewNetworkManager(&config.NetworkConfig{}, logger)
 	require.NoError(t, err)
 	ctx := context.Background()
@@ -133,7 +133,7 @@ func TestNetworkManager_StopNetwork(t *testing.T) {
 }
 
 func TestNetworkManager_DeleteNetwork(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	nm, err := NewNetworkManager(&config.NetworkConfig{}, logger)
 	require.NoError(t, err)
 	ctx := context.Background()
@@ -158,7 +158,7 @@ func TestNetworkManager_DeleteNetwork(t *testing.T) {
 }
 
 func TestNetworkManager_GetNodeStatus(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	nm, err := NewNetworkManager(&config.NetworkConfig{}, logger)
 	require.NoError(t, err)
 	ctx := context.Background()
@@ -183,7 +183,7 @@ func TestNetworkManager_GetNodeStatus(t *testing.T) {
 }
 
 func TestNetworkManager_ListNetworks(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	nm, err := NewNetworkManager(&config.NetworkConfig{}, logger)
 	require.NoError(t, err)
 	ctx := context.Background()

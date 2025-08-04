@@ -1,0 +1,537 @@
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package chain
+
+import (
+	"context"
+	"math/big"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/golang/mock/gomock"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/wallet"
+	"github.com/luxfi/log"
+)
+
+func TestChainManager_Stake(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPChain := NewMockPChainClient(ctrl)
+	mockWallet := NewMockWallet(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		pChain: mockPChain,
+		wallet: mockWallet,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	amount := big.NewInt(2000)
+	duration := 14 * 24 * time.Hour
+	nodeID, _ := ids.NodeIDFromString("NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg")
+	address, _ := ids.ShortFromString("P-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6")
+	expectedTxID := ids.GenerateTestID()
+
+	// Set up mock expectations
+	mockWallet.EXPECT().NodeID().Return(nodeID)
+	mockWallet.EXPECT().P().Return(&MockPChainWallet{address: address}).Times(2)
+
+	mockPChain.EXPECT().
+		AddValidator(ctx, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, params *AddValidatorParams) (ids.ID, error) {
+			assert.Equal(t, nodeID, params.NodeID)
+			assert.Equal(t, amount, params.StakeAmount)
+			assert.Equal(t, duration, params.Duration)
+			assert.Equal(t, address, params.RewardAddress)
+			assert.Equal(t, uint32(20000), params.DelegationFeeRate)
+			return expectedTxID, nil
+		})
+
+	// Execute test
+	txID, err := cm.Stake(ctx, amount, duration)
+	
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTxID, txID)
+}
+
+func TestChainManager_StakeOnSubnet(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPChain := NewMockPChainClient(ctrl)
+	mockWallet := NewMockWallet(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		pChain: mockPChain,
+		wallet: mockWallet,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	subnetID := ids.GenerateTestID()
+	weight := uint64(100)
+	duration := 30 * 24 * time.Hour
+	nodeID, _ := ids.NodeIDFromString("NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg")
+	expectedTxID := ids.GenerateTestID()
+
+	// Set up mock expectations
+	mockWallet.EXPECT().NodeID().Return(nodeID)
+
+	mockPChain.EXPECT().
+		AddSubnetValidator(ctx, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, params *AddSubnetValidatorParams) (ids.ID, error) {
+			assert.Equal(t, nodeID, params.NodeID)
+			assert.Equal(t, subnetID, params.SubnetID)
+			assert.Equal(t, weight, params.Weight)
+			return expectedTxID, nil
+		})
+
+	// Execute test
+	txID, err := cm.StakeOnSubnet(ctx, subnetID, weight, duration)
+	
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTxID, txID)
+}
+
+func TestChainManager_Delegate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPChain := NewMockPChainClient(ctrl)
+	mockWallet := NewMockWallet(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		pChain: mockPChain,
+		wallet: mockWallet,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	nodeID, _ := ids.NodeIDFromString("NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg")
+	amount := big.NewInt(25)
+	duration := 14 * 24 * time.Hour
+	address, _ := ids.ShortFromString("P-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6")
+	expectedTxID := ids.GenerateTestID()
+
+	// Set up mock expectations
+	mockWallet.EXPECT().P().Return(&MockPChainWallet{address: address})
+
+	mockPChain.EXPECT().
+		AddDelegator(ctx, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, params *AddDelegatorParams) (ids.ID, error) {
+			assert.Equal(t, nodeID, params.NodeID)
+			assert.Equal(t, amount, params.StakeAmount)
+			assert.Equal(t, duration, params.Duration)
+			assert.Equal(t, address, params.RewardAddress)
+			return expectedTxID, nil
+		})
+
+	// Execute test
+	txID, err := cm.Delegate(ctx, nodeID, amount, duration)
+	
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTxID, txID)
+}
+
+func TestChainManager_CreateAsset(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockXChain := NewMockXChainClient(ctrl)
+	mockWallet := NewMockWallet(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		xChain: mockXChain,
+		wallet: mockWallet,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	name := "MyToken"
+	symbol := "MTK"
+	supply := big.NewInt(1000000)
+	address, _ := ids.ShortFromString("X-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6")
+	expectedAssetID := ids.GenerateTestID()
+
+	// Set up mock expectations
+	mockWallet.EXPECT().X().Return(&MockXChainWallet{address: address}).Times(2)
+
+	mockXChain.EXPECT().
+		CreateAsset(ctx, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, params *CreateAssetParams) (ids.ID, error) {
+			assert.Equal(t, name, params.Name)
+			assert.Equal(t, symbol, params.Symbol)
+			assert.Equal(t, 9, params.Denomination)
+			assert.Len(t, params.InitialHolders, 1)
+			assert.Equal(t, address, params.InitialHolders[0].Address)
+			assert.Equal(t, supply, params.InitialHolders[0].Amount)
+			assert.Equal(t, []ids.ShortID{address}, params.Minters)
+			assert.Equal(t, uint32(1), params.MintThreshold)
+			return expectedAssetID, nil
+		})
+
+	// Execute test
+	assetID, err := cm.CreateAsset(ctx, name, symbol, supply)
+	
+	assert.NoError(t, err)
+	assert.Equal(t, expectedAssetID, assetID)
+}
+
+func TestChainManager_SendAsset(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockXChain := NewMockXChainClient(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		xChain: mockXChain,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	assetID := ids.GenerateTestID()
+	amount := big.NewInt(1000)
+	to, _ := ids.ShortFromString("X-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6")
+	expectedTxID := ids.GenerateTestID()
+
+	// Set up mock expectations
+	mockXChain.EXPECT().
+		Send(ctx, gomock.Any()).
+		DoAndReturn(func(ctx context.Context, params *SendParams) (ids.ID, error) {
+			assert.Equal(t, assetID, params.AssetID)
+			assert.Equal(t, amount, params.Amount)
+			assert.Equal(t, to, params.To)
+			return expectedTxID, nil
+		})
+
+	// Execute test
+	txID, err := cm.SendAsset(ctx, assetID, amount, to)
+	
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTxID, txID)
+}
+
+func TestChainManager_TransferCrossChain(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPChain := NewMockPChainClient(ctrl)
+	mockXChain := NewMockXChainClient(ctrl)
+	mockCChain := NewMockCChainClient(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		pChain: mockPChain,
+		xChain: mockXChain,
+		cChain: mockCChain,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	amount := big.NewInt(100)
+	to, _ := ids.ShortFromString("P-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6")
+	exportTxID := ids.GenerateTestID()
+	importTxID := ids.GenerateTestID()
+
+	tests := []struct {
+		name        string
+		params      *CrossChainTransferParams
+		setupMocks  func()
+		expectedErr bool
+	}{
+		{
+			name: "C to P transfer",
+			params: &CrossChainTransferParams{
+				SourceChain: "C",
+				TargetChain: "P",
+				AssetID:     ids.Empty,
+				Amount:      amount,
+				To:          to,
+			},
+			setupMocks: func() {
+				mockCChain.EXPECT().
+					Export(ctx, amount, to, gomock.Any()).
+					Return(common.HexToHash(exportTxID.String()), nil)
+
+				mockPChain.EXPECT().
+					ImportLUX(ctx, gomock.Any()).
+					Return(importTxID, nil)
+			},
+			expectedErr: false,
+		},
+		{
+			name: "P to X transfer",
+			params: &CrossChainTransferParams{
+				SourceChain: "P",
+				TargetChain: "X",
+				AssetID:     ids.Empty,
+				Amount:      amount,
+				To:          to,
+			},
+			setupMocks: func() {
+				mockPChain.EXPECT().
+					ExportLUX(ctx, gomock.Any()).
+					Return(exportTxID, nil)
+
+				mockXChain.EXPECT().
+					ImportAsset(ctx, gomock.Any()).
+					Return(importTxID, nil)
+			},
+			expectedErr: false,
+		},
+		{
+			name: "X to C transfer",
+			params: &CrossChainTransferParams{
+				SourceChain: "X",
+				TargetChain: "C",
+				AssetID:     ids.GenerateTestID(),
+				Amount:      amount,
+				To:          to,
+			},
+			setupMocks: func() {
+				mockXChain.EXPECT().
+					ExportAsset(ctx, gomock.Any()).
+					Return(exportTxID, nil)
+
+				mockCChain.EXPECT().
+					Import(ctx, gomock.Any(), to).
+					Return(common.HexToHash(importTxID.String()), nil)
+			},
+			expectedErr: false,
+		},
+		{
+			name: "unsupported source chain",
+			params: &CrossChainTransferParams{
+				SourceChain: "Z",
+				TargetChain: "P",
+				AssetID:     ids.Empty,
+				Amount:      amount,
+				To:          to,
+			},
+			setupMocks:  func() {},
+			expectedErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setupMocks()
+
+			txID, err := cm.TransferCrossChain(ctx, tt.params)
+
+			if tt.expectedErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, importTxID, txID)
+			}
+		})
+	}
+}
+
+func TestChainManager_GetBalance(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPChain := NewMockPChainClient(ctrl)
+	mockXChain := NewMockXChainClient(ctrl)
+	mockCChain := NewMockCChainClient(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		pChain: mockPChain,
+		xChain: mockXChain,
+		cChain: mockCChain,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+	address := "P-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6"
+	
+	pBalance := big.NewInt(1000)
+	cBalance := big.NewInt(2000)
+	xAsset1 := ids.GenerateTestID()
+	xAsset2 := ids.GenerateTestID()
+	xBalances := map[ids.ID]*big.Int{
+		ids.Empty: big.NewInt(500),  // LUX
+		xAsset1:   big.NewInt(1500),
+		xAsset2:   big.NewInt(2500),
+	}
+
+	// Set up mock expectations
+	mockPChain.EXPECT().
+		GetBalance(ctx, address).
+		Return(pBalance, nil)
+
+	mockXChain.EXPECT().
+		GetAllBalances(ctx, address).
+		Return(xBalances, nil)
+
+	mockCChain.EXPECT().
+		GetBalance(ctx, address).
+		Return(cBalance, nil)
+
+	// Execute test
+	balances, err := cm.GetBalance(ctx, address)
+	
+	assert.NoError(t, err)
+	assert.NotNil(t, balances)
+	assert.Equal(t, address, balances.Address)
+	
+	// Check P-Chain balance
+	assert.Equal(t, pBalance, balances.Chains["P"].LUX)
+	
+	// Check X-Chain balances
+	assert.Equal(t, xBalances, balances.Chains["X"].Assets)
+	
+	// Check C-Chain balance
+	assert.Equal(t, cBalance, balances.Chains["C"].LUX)
+}
+
+func TestChainManager_GetValidators(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockPChain := NewMockPChainClient(ctrl)
+	logger := log.NewNoop()
+
+	cm := &ChainManager{
+		pChain: mockPChain,
+		logger: logger,
+	}
+
+	ctx := context.Background()
+
+	currentValidators := []*platformvm.Validator{
+		{NodeID: ids.GenerateTestNodeID(), Wght: 2000},
+		{NodeID: ids.GenerateTestNodeID(), Wght: 3000},
+	}
+	
+	pendingValidators := []*platformvm.Validator{
+		{NodeID: ids.GenerateTestNodeID(), Wght: 2500},
+	}
+
+	// Set up mock expectations
+	mockPChain.EXPECT().
+		GetCurrentValidators(ctx, nil).
+		Return(currentValidators, nil)
+
+	mockPChain.EXPECT().
+		GetPendingValidators(ctx, nil).
+		Return(pendingValidators, nil)
+
+	// Execute test
+	validatorInfo, err := cm.GetValidators(ctx)
+	
+	assert.NoError(t, err)
+	assert.NotNil(t, validatorInfo)
+	assert.Equal(t, currentValidators, validatorInfo.Current)
+	assert.Equal(t, pendingValidators, validatorInfo.Pending)
+}
+
+// Mock types for testing
+
+type MockPChainClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockPChainClientMockRecorder
+}
+
+type MockPChainClientMockRecorder struct {
+	mock *MockPChainClient
+}
+
+func NewMockPChainClient(ctrl *gomock.Controller) *MockPChainClient {
+	mock := &MockPChainClient{ctrl: ctrl}
+	mock.recorder = &MockPChainClientMockRecorder{mock}
+	return mock
+}
+
+func (m *MockPChainClient) EXPECT() *MockPChainClientMockRecorder {
+	return m.recorder
+}
+
+func (m *MockPChainClient) AddValidator(ctx context.Context, params *AddValidatorParams) (ids.ID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddValidator", ctx, params)
+	ret0, _ := ret[0].(ids.ID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockPChainClientMockRecorder) AddValidator(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddValidator", reflect.TypeOf((*MockPChainClient)(nil).AddValidator), ctx, params)
+}
+
+// Similar mock implementations for other methods...
+
+type MockWallet struct {
+	ctrl     *gomock.Controller
+	recorder *MockWalletMockRecorder
+}
+
+type MockWalletMockRecorder struct {
+	mock *MockWallet
+}
+
+func NewMockWallet(ctrl *gomock.Controller) *MockWallet {
+	mock := &MockWallet{ctrl: ctrl}
+	mock.recorder = &MockWalletMockRecorder{mock}
+	return mock
+}
+
+func (m *MockWallet) EXPECT() *MockWalletMockRecorder {
+	return m.recorder
+}
+
+func (m *MockWallet) NodeID() ids.NodeID {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NodeID")
+	ret0, _ := ret[0].(ids.NodeID)
+	return ret0
+}
+
+func (mr *MockWalletMockRecorder) NodeID() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeID", reflect.TypeOf((*MockWallet)(nil).NodeID))
+}
+
+func (m *MockWallet) P() wallet.PChainWallet {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "P")
+	ret0, _ := ret[0].(wallet.PChainWallet)
+	return ret0
+}
+
+func (mr *MockWalletMockRecorder) P() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "P", reflect.TypeOf((*MockWallet)(nil).P))
+}
+
+// Mock wallet implementations
+type MockPChainWallet struct {
+	address ids.ShortID
+}
+
+func (m *MockPChainWallet) Address() ids.ShortID {
+	return m.address
+}
+
+type MockXChainWallet struct {
+	address ids.ShortID
+}
+
+func (m *MockXChainWallet) Address() ids.ShortID {
+	return m.address
+}

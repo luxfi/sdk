@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package pebble
@@ -52,7 +52,7 @@ func NewDefaultConfig() Config {
 }
 
 func New(file string, cfg Config) (database.Database, error) {
-	// These default settings are based on https://github.com/ethereum/go-ethereum/blob/master/ethdb/pebble/pebble.go
+	// These default settings are based on https://github.com/luxfi/geth/blob/master/ethdb/pebble/pebble.go
 	opts := &pebble.Options{
 		Cache:        pebble.NewCache(int64(cfg.CacheSize)),
 		BytesPerSync: cfg.BytesPerSync,

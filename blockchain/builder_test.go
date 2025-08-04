@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blockchain
@@ -12,12 +12,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/sdk/internal/logging"
+	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 )
 
 func TestBuilder_CreateBlockchain(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 
 	tests := []struct {
@@ -133,7 +133,7 @@ func TestBuilder_CreateBlockchain(t *testing.T) {
 }
 
 func TestBuilder_Deploy(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
@@ -212,7 +212,7 @@ func TestBuilder_Deploy(t *testing.T) {
 }
 
 func TestBuilder_GenerateGenesis(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 
 	tests := []struct {
@@ -304,7 +304,7 @@ func TestBuilder_GenerateGenesis(t *testing.T) {
 }
 
 func TestBuilder_ValidateConfig(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 
 	tests := []struct {
@@ -390,7 +390,7 @@ func TestBuilder_ValidateConfig(t *testing.T) {
 }
 
 func TestBuilder_ListBlockchains(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
@@ -429,7 +429,7 @@ func TestBuilder_ListBlockchains(t *testing.T) {
 }
 
 func TestBuilder_GetBlockchain(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 
@@ -456,7 +456,7 @@ func TestBuilder_GetBlockchain(t *testing.T) {
 }
 
 func TestBuilder_CreateChainConfig(t *testing.T) {
-	logger := logging.NewNoop()
+	logger := log.NoOpLogger
 	builder := NewBuilder(logger)
 	ctx := context.Background()
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package main
@@ -13,7 +13,7 @@ import (
 
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/sdk/internal/logging"
+	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 )
 
