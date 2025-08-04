@@ -40,7 +40,7 @@ var (
 	errExpiredRequest                          = errors.New("expired request")
 	_                     Network              = (*network)(nil)
 	_                     validators.Connector = (*network)(nil)
-	_                     common.AppHandler    = (*network)(nil)
+	_                     core.AppHandler    = (*network)(nil)
 )
 
 // SyncedNetworkClient defines ability to send request / response through the Network
@@ -62,7 +62,7 @@ type SyncedNetworkClient interface {
 
 type Network interface {
 	validators.Connector
-	common.AppHandler
+	core.AppHandler
 
 	SyncedNetworkClient
 
@@ -103,7 +103,7 @@ type network struct {
 	outstandingRequestHandlers map[uint32]message.ResponseHandler // maps luxd requestID => message.ResponseHandler
 	activeAppRequests          *semaphore.Weighted                // controls maximum number of active outbound requests
 	sdkNetwork                 *p2p.Network                       // SDK network (luxd p2p) for sending messages to peers
-	appSender                  common.AppSender                   // luxd AppSender for sending messages
+	appSender                  core.AppSender                   // luxd AppSender for sending messages
 	codec                      codec.Manager                      // Codec used for parsing messages
 	appRequestHandler          message.RequestHandler             // maps request type => handler
 	peers                      *peerTracker                       // tracking of peers & bandwidth
@@ -124,7 +124,7 @@ type network struct {
 
 func NewNetwork(
 	ctx *consensus.Context,
-	appSender common.AppSender,
+	appSender core.AppSender,
 	codec codec.Manager,
 	maxActiveAppRequests int64,
 	registerer prometheus.Registerer,
@@ -322,7 +322,7 @@ func (n *network) AppResponse(ctx context.Context, nodeID ids.NodeID, requestID 
 // - request times out before a response is provided
 // error returned by this function is expected to be treated as fatal by the engine
 // returns error only when the response handler returns an error
-func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *common.AppError) error {
+func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *core.AppError) error {
 	log.Debug("received AppRequestFailed from peer", "nodeID", nodeID, "requestID", requestID)
 
 	handler, exists := n.markRequestFulfilled(requestID)

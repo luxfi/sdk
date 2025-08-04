@@ -15,9 +15,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/node/api/metrics"
+	"github.com/luxfi/metrics"
 	luxdatabase "github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/prefixdb"
+	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/consensus"
 	commonEng "github.com/luxfi/node/consensus/engine/core"

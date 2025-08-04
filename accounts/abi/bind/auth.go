@@ -96,11 +96,12 @@ func NewKeyStoreTransactor(keystore *keystore.KeyStore, account accounts.Account
 func NewKeyedTransactor(key *ecdsa.PrivateKey) *TransactOpts {
 	log.Warn("WARNING: NewKeyedTransactor has been deprecated in favour of NewKeyedTransactorWithChainID")
 	keyAddr := crypto.PubkeyToAddress(key.PublicKey)
+	keyAddrCommon := common.Address(keyAddr)
 	signer := types.HomesteadSigner{}
 	return &TransactOpts{
-		From: keyAddr,
+		From: keyAddrCommon,
 		Signer: func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			if address != keyAddr {
+			if address != keyAddrCommon {
 				return nil, ErrNotAuthorized
 			}
 			signature, err := crypto.Sign(signer.Hash(tx).Bytes(), key)
@@ -154,14 +155,15 @@ func NewKeyStoreTransactorWithChainID(keystore *keystore.KeyStore, account accou
 // from a single private key.
 func NewKeyedTransactorWithChainID(key *ecdsa.PrivateKey, chainID *big.Int) (*TransactOpts, error) {
 	keyAddr := crypto.PubkeyToAddress(key.PublicKey)
+	keyAddrCommon := common.Address(keyAddr)
 	if chainID == nil {
 		return nil, ErrNoChainID
 	}
 	signer := types.LatestSignerForChainID(chainID)
 	return &TransactOpts{
-		From: keyAddr,
+		From: keyAddrCommon,
 		Signer: func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-			if address != keyAddr {
+			if address != keyAddrCommon {
 				return nil, ErrNotAuthorized
 			}
 			signature, err := crypto.Sign(signer.Hash(tx).Bytes(), key)

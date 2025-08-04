@@ -2,6 +2,10 @@ module github.com/luxfi/evm
 
 go 1.24.5
 
+replace (
+	github.com/luxfi/geth => github.com/luxfi/geth v1.16.1
+)
+
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
 	github.com/antithesishq/antithesis-sdk-go v0.3.8
@@ -18,7 +22,7 @@ require (
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.1
 	github.com/luxfi/database v1.1.7
-	github.com/luxfi/geth v1.16.1
+	github.com/luxfi/geth v1.16.24
 	github.com/luxfi/go-bip39 v1.1.0
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/metrics v1.1.1

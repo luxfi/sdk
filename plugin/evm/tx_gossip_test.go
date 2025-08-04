@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/database/memdb"
+	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"

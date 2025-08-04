@@ -6,7 +6,7 @@ package database
 import (
 	"errors"
 
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/database"
 	"github.com/luxfi/geth/ethdb"
 )
 
@@ -22,24 +22,29 @@ type ethDbWrapper struct{ database.Database }
 func WrapDatabase(db database.Database) ethdb.KeyValueStore { return ethDbWrapper{db} }
 
 // Stat implements ethdb.Database
-func (db ethDbWrapper) Stat() (string, error) { return "", database.ErrNotFound }
+func (db ethDbWrapper) Stat() (string, error) { return "", errors.New("stat not supported") }
 
 // NewBatch implements ethdb.Database
-func (db ethDbWrapper) NewBatch() ethdb.Batch { return wrappedBatch{db.Database.NewBatch()} }
+func (db ethDbWrapper) NewBatch() ethdb.Batch { return &wrappedBatch{db.Database.NewBatch()} }
 
 // NewBatchWithSize implements ethdb.Database
 // TODO: propagate size through luxd Database interface
 func (db ethDbWrapper) NewBatchWithSize(size int) ethdb.Batch {
-	return wrappedBatch{db.Database.NewBatch()}
+	return &wrappedBatch{db.Database.NewBatch()}
 }
 
-func (db ethDbWrapper) NewSnapshot() (ethdb.Snapshot, error) {
+func (db ethDbWrapper) NewSnapshot() (interface{}, error) {
 	return nil, ErrSnapshotNotSupported
 }
 
 // DeleteRange implements ethdb.KeyValueRangeDeleter
 func (db ethDbWrapper) DeleteRange(start, end []byte) error {
 	return errors.New("DeleteRange not supported")
+}
+
+// SyncKeyValue implements ethdb.KeyValueStore
+func (db ethDbWrapper) SyncKeyValue() error {
+	return nil
 }
 
 // NewIterator implements ethdb.Database
@@ -64,15 +69,32 @@ func (db ethDbWrapper) NewIteratorWithStart(start []byte) ethdb.Iterator {
 }
 
 // wrappedBatch implements ethdb.wrappedBatch
-type wrappedBatch struct{ database.Batch }
+type wrappedBatch struct{ batch database.Batch }
 
 // ValueSize implements ethdb.Batch
-func (batch wrappedBatch) ValueSize() int { return batch.Batch.Size() }
+func (batch wrappedBatch) ValueSize() int { return batch.batch.Size() }
 
 // Replay implements ethdb.Batch
-func (batch wrappedBatch) Replay(w ethdb.KeyValueWriter) error { return batch.Batch.Replay(w) }
+func (batch wrappedBatch) Replay(w ethdb.KeyValueWriter) error { return batch.batch.Replay(w) }
 
 // DeleteRange implements ethdb.KeyValueRangeDeleter for the batch
 func (batch wrappedBatch) DeleteRange(start, end []byte) error {
 	return errors.New("DeleteRange not supported in batch")
+}
+
+// Implement missing methods from database.Batch
+func (batch wrappedBatch) Put(key []byte, value []byte) error {
+	return batch.batch.Put(key, value)
+}
+
+func (batch wrappedBatch) Delete(key []byte) error {
+	return batch.batch.Delete(key)
+}
+
+func (batch wrappedBatch) Write() error {
+	return batch.batch.Write()
+}
+
+func (batch wrappedBatch) Reset() {
+	batch.batch.Reset()
 }
