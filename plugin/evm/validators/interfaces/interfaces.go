@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/ids"
-	luxuptime "github.com/luxfi/node/snow/uptime"
+	luxuptime "github.com/luxfi/node/consensus/uptime"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 

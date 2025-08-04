@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/luxfi/node/api/metrics"
-	"github.com/luxfi/node/snow"
-	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/engine/enginetest"
+	"github.com/luxfi/node/consensus"
+	commonEng "github.com/luxfi/node/consensus/engine/common"
+	"github.com/luxfi/node/consensus/engine/enginetest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/vms/components/chain"
@@ -114,10 +114,10 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 		}
 	}()
 	// Set the VM's state to NormalOp to initialize the tx pool.
-	if err := tvm.vm.SetState(context.Background(), snow.Bootstrapping); err != nil {
+	if err := tvm.vm.SetState(context.Background(), consensus.Bootstrapping); err != nil {
 		t.Fatal(err)
 	}
-	if err := tvm.vm.SetState(context.Background(), snow.NormalOp); err != nil {
+	if err := tvm.vm.SetState(context.Background(), consensus.NormalOp); err != nil {
 		t.Fatal(err)
 	}
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
@@ -204,8 +204,8 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	)
 	require.NoError(t, err, "error initializing GenesisVM")
 
-	require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
+	require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {

@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/consensus/engine/common"
 	"github.com/luxfi/node/utils/logging"
 
 	"github.com/luxfi/geth/core/types"

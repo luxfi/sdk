@@ -78,9 +78,9 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/database/versiondb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/consensus/snowman"
-	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/chain"
+	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/node/utils/timer/mockable"
@@ -88,7 +88,7 @@ import (
 	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/components/chain"
 
-	commonEng "github.com/luxfi/node/snow/engine/common"
+	commonEng "github.com/luxfi/node/consensus/engine/common"
 
 	"github.com/luxfi/node/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -171,11 +171,11 @@ var legacyApiNames = map[string]string{
 
 // VM implements the snowman.ChainVM interface
 type VM struct {
-	ctx *snow.Context
+	ctx *consensus.Context
 	// contextLock is used to coordinate global VM operations.
-	// This can be used safely instead of snow.Context.Lock which is deprecated and should not be used in rpcchainvm.
+	// This can be used safely instead of consensus.Context.Lock which is deprecated and should not be used in rpcchainvm.
 	vmLock sync.RWMutex
-	// [cancel] may be nil until [snow.NormalOp] starts
+	// [cancel] may be nil until [consensus.NormalOp] starts
 	cancel context.CancelFunc
 	// *chain.State helps to implement the VM interface by wrapping blocks
 	// with an efficient caching layer.
@@ -266,7 +266,7 @@ type VM struct {
 // Initialize implements the snowman.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
-	chainCtx *snow.Context,
+	chainCtx *consensus.Context,
 	db database.Database,
 	genesisBytes []byte,
 	upgradeBytes []byte,
@@ -514,7 +514,7 @@ func (vm *VM) Initialize(
 	return vm.initializeStateSyncClient(lastAcceptedHeight)
 }
 
-func parseGenesis(ctx *snow.Context, genesisBytes []byte, upgradeBytes []byte, airdropFile string) (*core.Genesis, error) {
+func parseGenesis(ctx *consensus.Context, genesisBytes []byte, upgradeBytes []byte, airdropFile string) (*core.Genesis, error) {
 	g := new(core.Genesis)
 	if err := json.Unmarshal(genesisBytes, g); err != nil {
 		return nil, fmt.Errorf("parsing genesis: %w", err)
@@ -723,19 +723,19 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return vm.ctx.Metrics.Register(chainStateMetricsPrefix, chainStateRegisterer)
 }
 
-func (vm *VM) SetState(_ context.Context, state snow.State) error {
+func (vm *VM) SetState(_ context.Context, state consensus.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 	switch state {
-	case snow.StateSyncing:
+	case consensus.StateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case snow.Bootstrapping:
+	case consensus.Bootstrapping:
 		return vm.onBootstrapStarted()
-	case snow.NormalOp:
+	case consensus.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
-		return snow.ErrUnknownState
+		return consensus.ErrUnknownState
 	}
 }
 

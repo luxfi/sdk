@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/snow"
-	commonEng "github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/consensus"
+	commonEng "github.com/luxfi/node/consensus/engine/common"
 	"github.com/luxfi/node/utils/lock"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/core"
@@ -24,7 +24,7 @@ const (
 )
 
 type blockBuilder struct {
-	ctx *snow.Context
+	ctx *consensus.Context
 
 	txPool *txpool.TxPool
 

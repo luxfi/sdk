@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/snow"
+	"github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
@@ -147,7 +147,7 @@ func TestChainConfigVerify(t *testing.T) {
 				NetworkUpgrades: NetworkUpgrades{
 					SubnetEVMTimestamp: nil,
 				},
-				LuxContext: LuxContext{SnowCtx: &snow.Context{}},
+				LuxContext: LuxContext{SnowCtx: &consensus.Context{}},
 			},
 			errRegex: "^invalid network upgrades: ",
 		},
@@ -160,7 +160,7 @@ func TestChainConfigVerify(t *testing.T) {
 					EtnaTimestamp:      pointer(uint64(3)),
 					FortunaTimestamp:   pointer(uint64(4)),
 				},
-				LuxContext: LuxContext{SnowCtx: &snow.Context{
+				LuxContext: LuxContext{SnowCtx: &consensus.Context{
 					NetworkUpgrades: upgrade.Config{
 						DurangoTime: time.Unix(2, 0),
 						EtnaTime:    time.Unix(3, 0),

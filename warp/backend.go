@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/node/ids"
 
 	"github.com/luxfi/node/network/p2p/acp118"
-	"github.com/luxfi/node/snow/consensus/snowman"
+	"github.com/luxfi/node/consensus/chain"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 

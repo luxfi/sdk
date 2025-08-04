@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/peer"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/node/snow/networking/router"
+	"github.com/luxfi/node/consensus/networking/router"
 	"github.com/luxfi/node/utils/compression"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"

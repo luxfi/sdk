@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/snowtest"
-	"github.com/luxfi/node/snow/validators"
-	"github.com/luxfi/node/snow/validators/validatorstest"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/consensustest"
+	"github.com/luxfi/node/consensus/validators"
+	"github.com/luxfi/node/consensus/validators/validatorstest"
 	"github.com/luxfi/node/utils/constants"
 )
 
@@ -47,7 +47,7 @@ func NewTestValidatorState() *validatorstest.State {
 	}
 }
 
-// NewTestSnowContext returns a snow.Context with validator state properly configured for testing.
+// NewTestSnowContext returns a consensus.Context with validator state properly configured for testing.
 // This wraps snowtest.Context and sets the validator state to avoid the missing GetValidatorSetF issue.
 //
 // Usage example:
@@ -62,15 +62,15 @@ func NewTestValidatorState() *validatorstest.State {
 //
 // This function ensures that the snow context has a properly configured validator state
 // that includes the GetValidatorSetF function, which is required by many tests.
-func NewTestSnowContext(t testing.TB) *snow.Context {
+func NewTestSnowContext(t testing.TB) *consensus.Context {
 	snowCtx := snowtest.Context(t, SubnetEVMTestChainID)
 	snowCtx.ValidatorState = NewTestValidatorState()
 	return snowCtx
 }
 
-// NewTestSnowContextWithChainID returns a snow.Context with validator state properly configured for testing
+// NewTestSnowContextWithChainID returns a consensus.Context with validator state properly configured for testing
 // with a specific chain ID. This is provided for backward compatibility when a specific chain ID is needed.
-func NewTestSnowContextWithChainID(t testing.TB, chainID ids.ID) *snow.Context {
+func NewTestSnowContextWithChainID(t testing.TB, chainID ids.ID) *consensus.Context {
 	snowCtx := snowtest.Context(t, chainID)
 	snowCtx.ValidatorState = NewTestValidatorState()
 	return snowCtx

@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/evm/warp/messages"
 
 	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/consensus/engine/common"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 )

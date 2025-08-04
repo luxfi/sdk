@@ -203,7 +203,7 @@ func ToWithUpgradesJSON(c *ChainConfig) *ChainConfigWithUpgradesJSON {
 }
 
 func SetNetworkUpgradeDefaults(c *ChainConfig) {
-	// TODO: NetworkUpgrades field not available in current snow.Context
+	// TODO: NetworkUpgrades field not available in current consensus.Context
 	// GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).SnowCtx.NetworkUpgrades)
 	// For now, set empty defaults with empty upgrade config
 	emptyUpgradeConfig := upgrade.Config{}
