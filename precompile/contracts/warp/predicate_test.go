@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/engine/snowman/block"
-	"github.com/luxfi/node/snow/validators"
-	"github.com/luxfi/node/snow/validators/validatorstest"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/node/consensus/validators"
+	"github.com/luxfi/node/consensus/validators/validatorstest"
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/crypto/bls"
@@ -169,8 +169,8 @@ type validatorRange struct {
 	publicKey bool
 }
 
-// createSnowCtx creates a snow.Context instance with a validator state specified by the given validatorRanges
-func createSnowCtx(tb testing.TB, validatorRanges []validatorRange) *snow.Context {
+// createSnowCtx creates a consensus.Context instance with a validator state specified by the given validatorRanges
+func createSnowCtx(tb testing.TB, validatorRanges []validatorRange) *consensus.Context {
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
 
 	for _, validatorRange := range validatorRanges {
@@ -199,7 +199,7 @@ func createSnowCtx(tb testing.TB, validatorRanges []validatorRange) *snow.Contex
 	return snowCtx
 }
 
-func createValidPredicateTest(snowCtx *snow.Context, numKeys uint64, predicateBytes []byte) precompiletest.PredicateTest {
+func createValidPredicateTest(snowCtx *consensus.Context, numKeys uint64, predicateBytes []byte) precompiletest.PredicateTest {
 	return precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
 		PredicateContext: &precompileconfig.PredicateContext{

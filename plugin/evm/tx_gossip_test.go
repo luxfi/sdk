@@ -16,9 +16,9 @@ import (
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/engine/enginetest"
-	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/engine/enginetest"
+	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/logging"
@@ -55,7 +55,7 @@ func TestEthTxGossip(t *testing.T) {
 		nil,
 		responseSender,
 	))
-	require.NoError(vm.SetState(ctx, snow.NormalOp))
+	require.NoError(vm.SetState(ctx, consensus.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
@@ -170,7 +170,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 		nil,
 		sender,
 	))
-	require.NoError(vm.SetState(ctx, snow.NormalOp))
+	require.NoError(vm.SetState(ctx, consensus.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
@@ -221,7 +221,7 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 		nil,
 		sender,
 	))
-	require.NoError(vm.SetState(ctx, snow.NormalOp))
+	require.NoError(vm.SetState(ctx, consensus.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))

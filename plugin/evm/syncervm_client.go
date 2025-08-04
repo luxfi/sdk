@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/database/versiondb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow/engine/snowman/block"
+	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
@@ -210,7 +210,7 @@ func (client *stateSyncerClient) acceptSyncSummary(proposedSummary message.SyncS
 		}
 		// notify engine regardless of whether err == nil,
 		// this error will be propagated to the engine when it calls
-		// vm.SetState(snow.Bootstrapping)
+		// vm.SetState(consensus.Bootstrapping)
 		log.Info("stateSync completed, notifying engine", "err", client.stateSyncErr)
 		close(client.stateSyncDone)
 	}()

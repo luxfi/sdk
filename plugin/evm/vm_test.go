@@ -31,10 +31,10 @@ import (
 	"github.com/luxfi/node/database/memdb"
 	"github.com/luxfi/node/database/prefixdb"
 	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/consensus/snowman"
-	commonEng "github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/engine/enginetest"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/chain"
+	commonEng "github.com/luxfi/node/consensus/engine/common"
+	"github.com/luxfi/node/consensus/engine/enginetest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/crypto/secp256k1"
@@ -184,8 +184,8 @@ func newVM(t *testing.T, config testVMConfig) *testVM {
 	require.NoError(t, err, "error initializing vm")
 
 	if !config.isSyncing {
-		require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-		require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+		require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
+		require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
 	}
 
 	return &testVM{
@@ -213,7 +213,7 @@ func getConfig(scheme, otherConfig string) string {
 func setupGenesis(
 	t *testing.T,
 	fork upgradetest.Fork,
-) (*snow.Context,
+) (*consensus.Context,
 	*prefixdb.Database,
 	[]byte,
 	*atomic.Memory,
@@ -3343,8 +3343,8 @@ func TestStandaloneDB(t *testing.T) {
 	)
 	defer vm.Shutdown(context.Background())
 	require.NoError(t, err, "error initializing VM")
-	require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
+	require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
 
 	// Issue a block
 	acceptedBlockEvent := make(chan core.ChainEvent, 1)
@@ -3519,11 +3519,11 @@ func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, appSende
 	}
 
 	if finishBootstrapping {
-		err = restartedVM.SetState(context.Background(), snow.Bootstrapping)
+		err = restartedVM.SetState(context.Background(), consensus.Bootstrapping)
 		if err != nil {
 			return nil, err
 		}
-		err = restartedVM.SetState(context.Background(), snow.NormalOp)
+		err = restartedVM.SetState(context.Background(), consensus.NormalOp)
 		if err != nil {
 			return nil, err
 		}

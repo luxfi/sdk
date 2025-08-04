@@ -18,9 +18,9 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/snow"
-	"github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/snow/validators"
+	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/consensus/engine/common"
+	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/version"
@@ -123,7 +123,7 @@ type network struct {
 }
 
 func NewNetwork(
-	ctx *snow.Context,
+	ctx *consensus.Context,
 	appSender common.AppSender,
 	codec codec.Manager,
 	maxActiveAppRequests int64,
