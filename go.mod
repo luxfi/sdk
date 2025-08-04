@@ -2,6 +2,8 @@ module github.com/luxfi/evm
 
 go 1.24.5
 
+replace github.com/luxfi/geth => github.com/luxfi/geth v1.16.1
+
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.5
 	github.com/antithesishq/antithesis-sdk-go v0.3.8
@@ -17,11 +19,12 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.1
-	github.com/luxfi/geth v1.16.24
+	github.com/luxfi/database v1.1.7
+	github.com/luxfi/geth v1.16.1
 	github.com/luxfi/go-bip39 v1.1.0
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/metrics v1.1.1
-	github.com/luxfi/node v1.13.4
+	github.com/luxfi/node v1.13.5
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -79,6 +82,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.1 // indirect
+	github.com/ethereum/go-ethereum v1.16.1 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/ferranbt/fastssz v0.1.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
@@ -109,7 +113,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/database v1.1.7 // indirect
 	github.com/luxfi/log v0.1.1 // indirect
 	github.com/luxfi/trace v0.1.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
