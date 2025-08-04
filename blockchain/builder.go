@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blockchain
@@ -12,14 +12,14 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/sdk/internal/evm"
-	"github.com/luxfi/sdk/internal/logging"
+	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/internal/types"
 	"github.com/luxfi/sdk/network"
 )
 
 // Builder handles blockchain creation and deployment
 type Builder struct {
-	logger      logging.Logger
+	logger      log.Logger
 	blockchains map[string]*Blockchain
 }
 
@@ -71,7 +71,7 @@ const (
 )
 
 // NewBuilder creates a new blockchain builder
-func NewBuilder(logger logging.Logger) *Builder {
+func NewBuilder(logger log.Logger) *Builder {
 	return &Builder{
 		logger:      logger,
 		blockchains: make(map[string]*Blockchain),

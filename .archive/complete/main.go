@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package main
@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/wallet"
 	"github.com/luxfi/ids"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 func main() {

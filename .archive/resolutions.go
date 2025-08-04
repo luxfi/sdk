@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package vm
@@ -58,7 +58,7 @@ func (vm *VM) Tracer() trace.Tracer {
 	return vm.tracer
 }
 
-func (vm *VM) Logger() logging.Logger {
+func (vm *VM) Logger() log.Logger {
 	return vm.snowCtx.Log
 }
 

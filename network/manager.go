@@ -1,4 +1,4 @@
-// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -9,17 +9,16 @@ import (
 	"time"
 
 	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/sdk/internal/logging"
+	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/netrunner"
 )
 
 // NetworkManager handles all network operations using netrunner
 type NetworkManager struct {
-	config    *config.NetworkConfig
-	logger    logging.Logger
-	networks  map[string]*Network
-	// netrunner integration
-	netrunnerPath string
-	// tmpnetConfig will be added when netrunner is available
+	config          *config.NetworkConfig
+	logger          log.Logger
+	networks        map[string]*Network
+	netrunnerClient *netrunner.Client
 }
 
 // Network represents a managed Lux network
@@ -86,7 +85,7 @@ const (
 )
 
 // NewNetworkManager creates a new network manager
-func NewNetworkManager(config *config.NetworkConfig, logger logging.Logger) (*NetworkManager, error) {
+func NewNetworkManager(config *config.NetworkConfig, logger log.Logger) (*NetworkManager, error) {
 	// TODO: Implement netrunner client
 	// client, err := netrunner.NewClient(config.NetrunnerEndpoint)
 	// if err != nil {
