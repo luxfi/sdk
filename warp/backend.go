@@ -10,11 +10,10 @@ import (
 
 	"github.com/luxfi/node/cache"
 	"github.com/luxfi/node/cache/lru"
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 
-	"github.com/luxfi/node/network/p2p/acp118"
-	"github.com/luxfi/node/consensus/chain"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/consensus/chain"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
@@ -49,7 +48,7 @@ type Backend interface {
 	// GetMessage retrieves the [unsignedMessage] from the warp backend database if available
 	GetMessage(messageHash ids.ID) (*luxWarp.UnsignedMessage, error)
 
-	acp118.Verifier
+	lp118.Verifier
 }
 
 // backend implements Backend, keeps track of warp messages, and generates message signatures.
