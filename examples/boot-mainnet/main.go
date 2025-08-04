@@ -19,7 +19,7 @@ import (
 
 func main() {
 	// Create logger
-	logger := logging.NewLogger("info")
+	logger := log.NewZapLogger("info")
 	
 	// Create network configuration for mainnet
 	networkConfig := &config.NetworkConfig{
