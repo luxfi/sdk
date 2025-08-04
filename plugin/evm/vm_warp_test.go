@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/acp118"
 	"github.com/luxfi/node/proto/pb/sdk"
-	commonEng "github.com/luxfi/node/consensus/engine/common"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/consensus/engine/enginetest"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/consensus/validators"
