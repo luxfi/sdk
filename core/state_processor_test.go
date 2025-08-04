@@ -418,5 +418,5 @@ func GenerateBadBlock(parent *types.Block, engine consensus.Engine, txs types.Tr
 		header.ParentBeaconRoot = new(common.Hash)
 	}
 	// Assemble and return the final block for sealing
-	return types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil))
+	return types.NewBlock(header, &types.Body{Transactions: txs}, receipts, trie.NewStackTrie(nil))
 }
