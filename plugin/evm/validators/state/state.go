@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
+	luxdb "github.com/luxfi/node/database"
+	"github.com/luxfi/database"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus/uptime"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
@@ -45,13 +46,13 @@ type state struct {
 	index map[ids.NodeID]ids.ID     // nodeID -> vID
 	// updatedData tracks the updates since WriteValidator was last called
 	updatedData map[ids.ID]dbUpdateStatus // vID -> updated status
-	db          database.Database
+	db          luxdb.Database
 
 	listeners []interfaces.StateCallbackListener
 }
 
 // NewState creates a new State, it also loads the data from the disk
-func NewState(db database.Database) (interfaces.State, error) {
+func NewState(db luxdb.Database) (interfaces.State, error) {
 	s := &state{
 		index:       make(map[ids.NodeID]ids.ID),
 		data:        make(map[ids.ID]*validatorData),
