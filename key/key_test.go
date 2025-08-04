@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	
-	"github.com/luxfi/ids"
+
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/sdk/crypto"
 )
 
@@ -20,9 +20,9 @@ func TestManager_GenerateKey(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := []struct {
-		name     string
-		keyType  string
-		wantErr  bool
+		name    string
+		keyType string
+		wantErr bool
 	}{
 		{
 			name:    "generate ed25519 key",
@@ -95,8 +95,7 @@ func TestManager_ImportKey(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generate a private key
-	factory := crypto.FactorySECP256K1R{}
-	priv, err := factory.NewPrivateKey()
+	priv, err := crypto.GeneratePrivateKey()
 	require.NoError(t, err)
 
 	// Import the key
@@ -168,14 +167,12 @@ func TestGenerateMnemonic(t *testing.T) {
 	// Test 12-word mnemonic
 	mnemonic12, err := GenerateMnemonic(128)
 	require.NoError(t, err)
-	words12 := len(mnemonic12)
-	require.Equal(t, 12, words12/2) // Rough estimate
+	require.Len(t, mnemonic12, 12)
 
 	// Test 24-word mnemonic
 	mnemonic24, err := GenerateMnemonic(256)
 	require.NoError(t, err)
-	words24 := len(mnemonic24)
-	require.Greater(t, words24, words12)
+	require.Len(t, mnemonic24, 24)
 }
 
 func TestDeriveKey(t *testing.T) {
@@ -218,7 +215,7 @@ func TestKeychain_Sign(t *testing.T) {
 	require.NotNil(t, sig)
 
 	// Verify signature
-	valid := key.PublicKey.Verify(message, sig)
+	valid := crypto.Verify(message, key.PublicKey, sig)
 	require.True(t, valid)
 }
 
@@ -226,9 +223,8 @@ func TestKeychain_Addresses(t *testing.T) {
 	keychain := NewKeychain()
 
 	// Add multiple keys
-	factory := crypto.FactorySECP256K1R{}
 	for i := 0; i < 3; i++ {
-		priv, err := factory.NewPrivateKey()
+		priv, err := crypto.GeneratePrivateKey()
 		require.NoError(t, err)
 		keychain.Add(priv)
 	}

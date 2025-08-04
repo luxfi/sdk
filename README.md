@@ -53,7 +53,7 @@ package main
 import (
     "context"
     "log"
-    
+
     "github.com/luxfi/sdk"
     "github.com/luxfi/sdk/config"
 )
@@ -62,20 +62,20 @@ func main() {
     // Initialize SDK with auto-detection of available tools
     cfg := config.Default()
     cfg.NodeEndpoint = "http://localhost:9650" // Optional: connect to existing node
-    
+
     luxSDK, err := sdk.New(cfg)
     if err != nil {
         log.Fatal(err)
     }
-    
+
     ctx := context.Background()
-    
+
     // Launch a network (uses CLI or netrunner automatically)
     network, err := luxSDK.LaunchNetwork(ctx, "local", 5)
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Create and deploy blockchain with best available method
     blockchain, err := luxSDK.CreateAndDeployBlockchain(ctx, &sdk.BlockchainParams{
         Name:    "my-chain",
@@ -86,7 +86,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     log.Printf("Blockchain %s deployed on network %s", blockchain.Name, network.Name)
 }
 ```
@@ -103,10 +103,10 @@ netrunner := luxSDK.Netrunner()
 if netrunner != nil {
     // Start netrunner server
     err := netrunner.StartServer(ctx)
-    
+
     // Create complex network topology
     network, err := netrunner.CreateNetwork(ctx, "testnet", 11)
-    
+
     // Deploy blockchain with specific configuration
     err = netrunner.DeployBlockchain(ctx, networkID, &BlockchainSpec{
         Name:   "my-blockchain",
@@ -124,11 +124,11 @@ cli := luxSDK.CLI()
 if cli != nil {
     // Execute any CLI command
     output, err := cli.Execute(ctx, "network", "status")
-    
+
     // Type-safe wrappers for common operations
     err = cli.CreateBlockchain(ctx, "my-chain", "evm")
     err = cli.DeployBlockchain(ctx, "my-chain", "local")
-    
+
     // Key management
     keys, err := cli.ListKeys(ctx)
     key, err := cli.CreateKey(ctx, "validator-key")
@@ -143,10 +143,10 @@ node := luxSDK.Node()
 if node != nil {
     // Get node information
     info, err := node.GetNodeInfo(ctx)
-    
+
     // Platform chain operations
     validators, err := node.GetCurrentValidators(ctx, constants.PrimaryNetworkID)
-    
+
     // Keystore operations
     addresses, err := node.ListAddresses(ctx, "my-user")
 }
@@ -309,7 +309,7 @@ l3, err := sdk.CreateL3(ctx, "my-game", &blockchain.L3Params{
 
 ```go
 // Stake on primary network
-txID, err := chainManager.Stake(ctx, 
+txID, err := chainManager.Stake(ctx,
     big.NewInt(2000), // 2000 LUX
     14 * 24 * time.Hour, // 14 days
 )
@@ -347,7 +347,7 @@ nftID, err := chainManager.X().CreateNFT(ctx, &CreateNFTParams{
 })
 
 // Trade assets
-orderID, err := chainManager.TradeAssets(ctx, 
+orderID, err := chainManager.TradeAssets(ctx,
     sellAsset, sellAmount,
     buyAsset, buyAmount,
 )
@@ -402,7 +402,7 @@ for chain, balance := range balances.Chains {
 wallet, err := chainManager.CreateWallet(ctx, "my-wallet")
 
 // Create multisig wallet
-multisig, err := chainManager.CreateMultisigWallet(ctx, "treasury", 
+multisig, err := chainManager.CreateMultisigWallet(ctx, "treasury",
     []ids.ShortID{owner1, owner2, owner3},
     2, // threshold
 )
@@ -457,7 +457,7 @@ The SDK wraps the Lux CLI for seamless command execution:
 output, err := sdk.ExecuteCommand(ctx, "network", "status")
 
 // Use CLI commands with Go types
-result, err := sdk.ExecuteCommand(ctx, "subnet", "create", 
+result, err := sdk.ExecuteCommand(ctx, "subnet", "create",
     "--control-keys", strings.Join(keys, ","),
     "--threshold", "2",
 )
@@ -572,7 +572,7 @@ plan := migrator.Plan(ctx, analysis, &MigrationTarget{
 
 // Execute migration
 result := migrator.Execute(ctx, plan)
-log.Printf("Migration complete: %d contracts, %d users migrated", 
+log.Printf("Migration complete: %d contracts, %d users migrated",
     result.ContractsMigrated, result.UsersMigrated)
 ```
 

@@ -11,24 +11,25 @@ import (
 	"os/signal"
 	"syscall"
 
+	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 )
 
 func main() {
 	// Create logger
-	logger := log.NewZapLogger("info")
-	
+	logger := luxlog.NewTestLogger(level.Info)
+
 	// Create network configuration for mainnet
 	networkConfig := &config.NetworkConfig{
-		NetworkID:     96369, // Lux mainnet ID
-		APIEndpoint:   "https://api.mainnet.lux.network",
-		P2PPort:       9651,
-		HTTPPort:      9650,
-		StakingPort:   9651,
-		LogLevel:      "info",
+		NetworkID:   96369, // Lux mainnet ID
+		APIEndpoint: "https://api.mainnet.lux.network",
+		P2PPort:     9651,
+		HTTPPort:    9650,
+		StakingPort: 9651,
+		LogLevel:    "info",
 	}
 
 	// Create network manager
@@ -44,7 +45,7 @@ func main() {
 	fmt.Println("Booting Lux Mainnet...")
 	fmt.Printf("Network ID: %d\n", networkConfig.NetworkID)
 	fmt.Printf("API Endpoint: %s\n", networkConfig.APIEndpoint)
-	
+
 	// Create mainnet network parameters
 	mainnetParams := &network.NetworkParams{
 		Name:             "lux-mainnet",

@@ -12,6 +12,7 @@ import (
 
 	ametrics "github.com/luxfi/api/metrics"
 	"github.com/luxfi/cache"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/manager"
 	"github.com/luxfi/ids"
@@ -22,7 +23,6 @@ import (
 	smblock "github.com/luxfi/snow/engine/snowman/block"
 	"github.com/luxfi/trace"
 	"github.com/luxfi/utils"
-	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/version"
 	"github.com/luxfi/x/merkledb"
 	syncEng "github.com/luxfi/x/sync"

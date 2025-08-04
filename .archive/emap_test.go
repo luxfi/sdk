@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/set"
 	"github.com/luxfi/sdk/heap"
+	"github.com/luxfi/set"
 	"github.com/stretchr/testify/require"
 )
 

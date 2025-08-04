@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/network"
-	"github.com/luxfi/ids"
 )
 
 // BenchmarkCreateNetwork benchmarks network creation
@@ -33,12 +33,12 @@ func BenchmarkCreateNetwork(b *testing.B) {
 			Type:     network.NetworkTypeLocal,
 			NumNodes: 5,
 		}
-		
+
 		network, err := sdk.CreateNetwork(ctx, params)
 		if err != nil {
 			b.Fatal(err)
 		}
-		
+
 		// Clean up
 		_ = sdk.DeleteNetwork(ctx, network.ID)
 	}
@@ -103,7 +103,7 @@ func BenchmarkCreateBlockchain(b *testing.B) {
 func BenchmarkChainOperations(b *testing.B) {
 	// This benchmark requires mocked chain clients
 	// since we can't connect to real chains in benchmarks
-	
+
 	b.Run("GetBalance", func(b *testing.B) {
 		// Mock implementation
 		b.ResetTimer()
@@ -156,7 +156,7 @@ func BenchmarkConcurrentOperations(b *testing.B) {
 					ChainID: big.NewInt(int64(10000 + counter)),
 				}
 				counter++
-				
+
 				_, err := sdk.CreateBlockchain(ctx, params)
 				if err != nil {
 					b.Fatal(err)

@@ -14,8 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/wallet"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/wallet"
 )
 
 // CChainClient handles all C-Chain (EVM) operations
@@ -241,7 +241,7 @@ func (c *CChainClient) GetBalance(ctx context.Context, address string) (*big.Int
 func (c *CChainClient) GetTokenBalance(ctx context.Context, token, holder common.Address) (*big.Int, error) {
 	// ERC20 balanceOf method ID
 	balanceOfMethod := "0x70a08231"
-	
+
 	data := common.FromHex(balanceOfMethod)
 	data = append(data, common.LeftPadBytes(holder.Bytes(), 32)...)
 
@@ -358,14 +358,14 @@ type SwapParams struct {
 }
 
 type LiquidityParams struct {
-	TokenA        common.Address
-	TokenB        common.Address
-	AmountA       *big.Int
-	AmountB       *big.Int
-	AmountAMin    *big.Int
-	AmountBMin    *big.Int
-	To            common.Address
-	Deadline      *big.Int
+	TokenA     common.Address
+	TokenB     common.Address
+	AmountA    *big.Int
+	AmountB    *big.Int
+	AmountAMin *big.Int
+	AmountBMin *big.Int
+	To         common.Address
+	Deadline   *big.Int
 }
 
 type StakeTokensParams struct {

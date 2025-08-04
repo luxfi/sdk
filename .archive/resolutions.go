@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/log"
+	"github.com/luxfi/set"
 	"github.com/luxfi/snow/engine/common"
 	"github.com/luxfi/snow/engine/snowman/block"
 	"github.com/luxfi/snow/validators"
 	"github.com/luxfi/trace"
-	"github.com/luxfi/log"
-	"github.com/luxfi/set"
 	"github.com/luxfi/x/merkledb"
 
 	"go.uber.org/zap"

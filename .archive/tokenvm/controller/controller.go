@@ -9,14 +9,14 @@ import (
 
 	ametrics "github.com/luxfi/api/metrics"
 	"github.com/luxfi/database"
-	"github.com/luxfi/snow"
-	"github.com/luxfi/snow/engine/common"
 	"github.com/luxfi/sdk/builder"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/gossiper"
 	"github.com/luxfi/sdk/pebble"
 	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/vm"
+	"github.com/luxfi/snow"
+	"github.com/luxfi/snow/engine/common"
 	"go.uber.org/zap"
 
 	"github.com/luxfi/sdk/examples/tokenvm/actions"

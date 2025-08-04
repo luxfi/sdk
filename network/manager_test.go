@@ -7,10 +7,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/log"
 )
 
 func TestNetworkManager_CreateNetwork(t *testing.T) {
@@ -97,7 +97,7 @@ func TestNetworkManager_StartNetwork(t *testing.T) {
 	// Test starting the network
 	err = nm.StartNetwork(ctx, network.ID)
 	assert.NoError(t, err)
-	
+
 	// Verify network status
 	updatedNetwork, err := nm.GetNetwork(network.ID)
 	assert.NoError(t, err)
@@ -118,14 +118,14 @@ func TestNetworkManager_StopNetwork(t *testing.T) {
 	}
 	network, err := nm.CreateNetwork(ctx, params)
 	require.NoError(t, err)
-	
+
 	err = nm.StartNetwork(ctx, network.ID)
 	require.NoError(t, err)
 
 	// Test stopping the network
 	err = nm.StopNetwork(ctx, network.ID)
 	assert.NoError(t, err)
-	
+
 	// Verify network status
 	updatedNetwork, err := nm.GetNetwork(network.ID)
 	assert.NoError(t, err)
@@ -150,7 +150,7 @@ func TestNetworkManager_DeleteNetwork(t *testing.T) {
 	// Test deleting the network
 	err = nm.DeleteNetwork(ctx, network.ID)
 	assert.NoError(t, err)
-	
+
 	// Verify network is deleted
 	_, err = nm.GetNetwork(network.ID)
 	assert.Error(t, err)
@@ -207,7 +207,7 @@ func TestNetworkManager_ListNetworks(t *testing.T) {
 	// Test listing networks
 	list = nm.ListNetworks()
 	assert.Equal(t, initialCount+3, len(list))
-	
+
 	// Verify all created networks are in the list
 	names := make(map[string]bool)
 	for _, n := range list {

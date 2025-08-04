@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/luxfi/sdk/internal/evm"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/internal/evm"
 	"github.com/luxfi/sdk/internal/types"
 	"github.com/luxfi/sdk/network"
 )
@@ -51,10 +51,10 @@ const (
 type VMType string
 
 const (
-	VMTypeEVM      VMType = "evm"
-	VMTypeWASM     VMType = "wasm"
-	VMTypeCustom   VMType = "custom"
-	VMTypeTokenVM  VMType = "tokenvm"
+	VMTypeEVM        VMType = "evm"
+	VMTypeWASM       VMType = "wasm"
+	VMTypeCustom     VMType = "custom"
+	VMTypeTokenVM    VMType = "tokenvm"
 	VMTypeMorpheusVM VMType = "morpheusvm"
 )
 
@@ -231,15 +231,15 @@ func (b *Builder) createChainConfig(params *CreateParams) ([]byte, error) {
 		"consensus": map[string]interface{}{
 			"type": "lux",
 			"parameters": map[string]interface{}{
-				"k":               21,
-				"alpha":           13,
-				"beta":            8,
-				"maxBlockTime":    "10s",
-				"minBlockTime":    "1s",
+				"k":            21,
+				"alpha":        13,
+				"beta":         8,
+				"maxBlockTime": "10s",
+				"minBlockTime": "1s",
 			},
 		},
 		"vm": map[string]interface{}{
-			"type": string(params.VMType),
+			"type":   string(params.VMType),
 			"config": params.VMConfig,
 		},
 		"network": map[string]interface{}{
@@ -257,14 +257,14 @@ func (b *Builder) createChainConfig(params *CreateParams) ([]byte, error) {
 func (b *Builder) deployL1(ctx context.Context, blockchain *Blockchain, network *network.Network) error {
 	// L1 deployment logic
 	b.logger.Info("deploying L1 blockchain", "chain", blockchain.Name)
-	
+
 	// TODO: Implement actual L1 deployment using netrunner
 	// This would involve:
 	// 1. Creating subnet
 	// 2. Adding validators
 	// 3. Creating blockchain in subnet
 	// 4. Starting blockchain
-	
+
 	return nil
 }
 
@@ -272,14 +272,14 @@ func (b *Builder) deployL1(ctx context.Context, blockchain *Blockchain, network 
 func (b *Builder) deployL2(ctx context.Context, blockchain *Blockchain, network *network.Network) error {
 	// L2 deployment logic
 	b.logger.Info("deploying L2 blockchain", "chain", blockchain.Name)
-	
+
 	// TODO: Implement L2 deployment
 	// This would involve:
 	// 1. Setting up sequencer
 	// 2. Configuring DA layer
 	// 3. Setting up bridge contracts
 	// 4. Starting L2 chain
-	
+
 	return nil
 }
 
@@ -287,13 +287,13 @@ func (b *Builder) deployL2(ctx context.Context, blockchain *Blockchain, network 
 func (b *Builder) deployL3(ctx context.Context, blockchain *Blockchain, network *network.Network) error {
 	// L3 deployment logic
 	b.logger.Info("deploying L3 blockchain", "chain", blockchain.Name)
-	
+
 	// TODO: Implement L3 deployment
 	// This would involve:
 	// 1. Connecting to L2
 	// 2. Deploying app-specific contracts
 	// 3. Starting L3 chain
-	
+
 	return nil
 }
 
@@ -308,12 +308,12 @@ func (b *Builder) generateEVMGenesis(params *GenesisParams) ([]byte, error) {
 			Storage: account.Storage,
 		}
 	}
-	
+
 	genesis := evm.Genesis{
 		Config: &evm.ChainConfig{
 			ChainID: params.ChainID,
 		},
-		Alloc: evmAlloc,
+		Alloc:     evmAlloc,
 		Timestamp: uint64(time.Now().Unix()),
 		GasLimit:  8000000,
 	}
@@ -406,4 +406,3 @@ type GenesisParams struct {
 	ValidatorSet  []Validator
 	InitialSupply *big.Int
 }
-

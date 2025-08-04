@@ -38,14 +38,20 @@ func (id ShortID) String() string {
 // GenerateTestID generates a random ID for testing
 func GenerateTestID() ID {
 	var id ID
-	rand.Read(id[:])
+	if _, err := rand.Read(id[:]); err != nil {
+		// For test ID generation, we panic on error as this should never fail
+		panic("failed to generate test ID: " + err.Error())
+	}
 	return id
 }
 
 // GenerateTestNodeID generates a random NodeID for testing
 func GenerateTestNodeID() NodeID {
 	var id NodeID
-	rand.Read(id[:])
+	if _, err := rand.Read(id[:]); err != nil {
+		// For test ID generation, we panic on error as this should never fail
+		panic("failed to generate test NodeID: " + err.Error())
+	}
 	return id
 }
 

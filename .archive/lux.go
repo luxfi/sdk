@@ -8,24 +8,24 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/client"
 	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/vm"
-	"github.com/luxfi/log"
 )
 
 // LuxSDK is the main entrypoint for the Lux SDK
 type LuxSDK struct {
 	// CLI wrapper for command execution
 	// cli *cli.CLI // TODO: Implement CLI wrapper
-	
+
 	// Core managers
 	networkManager    *network.NetworkManager
 	blockchainBuilder *blockchain.Builder
 	vmManager         *vm.Manager
-	
+
 	// Configuration
 	config *config.Config
 	logger log.Logger
@@ -38,14 +38,14 @@ func New(opts ...Option) (*LuxSDK, error) {
 		LogLevel: "info",
 		DataDir:  "~/.lux",
 	}
-	
+
 	for _, opt := range opts {
 		opt(cfg)
 	}
-	
+
 	// Initialize logger
 	logger := log.NewZapLogger(cfg.LogLevel)
-	
+
 	// Initialize CLI wrapper
 	// TODO: Implement CLI wrapper
 	// cliWrapper, err := cli.New(cli.Config{
@@ -55,23 +55,23 @@ func New(opts ...Option) (*LuxSDK, error) {
 	// if err != nil {
 	// 	return nil, fmt.Errorf("failed to initialize CLI: %w", err)
 	// }
-	
+
 	// Initialize managers
 	networkManager, err := network.NewNetworkManager(cfg.Network, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize network manager: %w", err)
 	}
-	
+
 	blockchainBuilder := blockchain.NewBuilder(logger)
 	vmManager := vm.NewManager(logger)
-	
+
 	return &LuxSDK{
 		// cli:               cliWrapper,
 		networkManager:    networkManager,
 		blockchainBuilder: blockchainBuilder,
 		vmManager:         vmManager,
-		config:           cfg,
-		logger:           logger,
+		config:            cfg,
+		logger:            logger,
 	}, nil
 }
 
@@ -139,12 +139,12 @@ func (sdk *LuxSDK) DeployBlockchain(ctx context.Context, blockchainID, networkID
 	if err != nil {
 		return err
 	}
-	
+
 	network, err := sdk.networkManager.GetNetwork(networkID)
 	if err != nil {
 		return err
 	}
-	
+
 	return sdk.blockchainBuilder.Deploy(ctx, blockchain, network)
 }
 
@@ -186,7 +186,7 @@ func (sdk *LuxSDK) CreateL1(ctx context.Context, name string, params *blockchain
 		Genesis:     params.Genesis,
 		ChainConfig: params.ChainConfig,
 	}
-	
+
 	return sdk.CreateBlockchain(ctx, createParams)
 }
 
@@ -199,12 +199,12 @@ func (sdk *LuxSDK) CreateL2(ctx context.Context, name string, params *blockchain
 		Genesis:     params.Genesis,
 		ChainConfig: params.ChainConfig,
 		L2Config: &blockchain.L2Config{
-			SequencerType: params.SequencerType,
-			DALayer:       params.DALayer,
+			SequencerType:   params.SequencerType,
+			DALayer:         params.DALayer,
 			SettlementChain: params.SettlementChain,
 		},
 	}
-	
+
 	return sdk.CreateBlockchain(ctx, createParams)
 }
 
@@ -217,12 +217,12 @@ func (sdk *LuxSDK) CreateL3(ctx context.Context, name string, params *blockchain
 		Genesis:     params.Genesis,
 		ChainConfig: params.ChainConfig,
 		L3Config: &blockchain.L3Config{
-			L2Chain:     params.L2Chain,
-			AppType:     params.AppType,
-			AppConfig:   params.AppConfig,
+			L2Chain:   params.L2Chain,
+			AppType:   params.AppType,
+			AppConfig: params.AppConfig,
 		},
 	}
-	
+
 	return sdk.CreateBlockchain(ctx, createParams)
 }
 

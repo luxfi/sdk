@@ -9,11 +9,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBuilder_CreateBlockchain(t *testing.T) {
@@ -67,7 +67,7 @@ func TestBuilder_CreateBlockchain(t *testing.T) {
 					L2Chain: "l2-chain-456",
 					AppType: "defi",
 					AppConfig: map[string]interface{}{
-						"dex": true,
+						"dex":     true,
 						"lending": true,
 					},
 				},
@@ -122,7 +122,7 @@ func TestBuilder_CreateBlockchain(t *testing.T) {
 				assert.NotEmpty(t, blockchain.ID)
 				assert.NotNil(t, blockchain.Genesis)
 				assert.NotNil(t, blockchain.ChainConfig)
-				
+
 				// Verify blockchain is stored
 				stored, err := builder.GetBlockchain(blockchain.ID)
 				assert.NoError(t, err)
@@ -237,10 +237,10 @@ func TestBuilder_GenerateGenesis(t *testing.T) {
 				var g map[string]interface{}
 				err := json.Unmarshal(genesis, &g)
 				assert.NoError(t, err)
-				
+
 				config, ok := g["config"].(map[string]interface{})
 				assert.True(t, ok)
-				
+
 				chainID, ok := config["chainId"].(float64)
 				assert.True(t, ok)
 				assert.Equal(t, float64(12345), chainID)
@@ -419,9 +419,9 @@ func TestBuilder_ListBlockchains(t *testing.T) {
 
 	// List all blockchains
 	list := builder.ListBlockchains()
-	
+
 	assert.Len(t, list, 3)
-	
+
 	// Verify all blockchains are present
 	for _, bc := range list {
 		assert.True(t, createdIDs[bc.ID])
@@ -478,22 +478,22 @@ func TestBuilder_CreateChainConfig(t *testing.T) {
 	var config map[string]interface{}
 	err = json.Unmarshal(blockchain.ChainConfig, &config)
 	assert.NoError(t, err)
-	
+
 	// Check chain ID
 	chainID, ok := config["chainId"].(float64)
 	assert.True(t, ok)
 	assert.Equal(t, float64(77777), chainID)
-	
+
 	// Check consensus config
 	consensus, ok := config["consensus"].(map[string]interface{})
 	assert.True(t, ok)
 	assert.Equal(t, "lux", consensus["type"])
-	
+
 	// Check VM config
 	vm, ok := config["vm"].(map[string]interface{})
 	assert.True(t, ok)
 	assert.Equal(t, "evm", vm["type"])
-	
+
 	vmConfig, ok := vm["config"].(map[string]interface{})
 	assert.True(t, ok)
 	assert.Equal(t, float64(15000000), vmConfig["gasLimit"])

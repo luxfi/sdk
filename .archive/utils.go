@@ -12,12 +12,12 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/snow/engine/common"
+	"github.com/gorilla/rpc/v2"
 	"github.com/luxfi/hashing"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/json"
 	"github.com/luxfi/perms"
-	"github.com/gorilla/rpc/v2"
+	"github.com/luxfi/snow/engine/common"
 	formatter "github.com/onsi/ginkgo/v2/formatter"
 )
 

@@ -10,19 +10,19 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/wallet"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/wallet"
 )
 
 // ChainManager provides unified access to all Lux chains
 type ChainManager struct {
-	pChain  *PChainClient
-	xChain  *XChainClient
-	cChain  *CChainClient
-	mChain  *MChainClient
-	qChain  *QChainClient
-	wallet  *wallet.Wallet
-	logger  log.Logger
+	pChain *PChainClient
+	xChain *XChainClient
+	cChain *CChainClient
+	mChain *MChainClient
+	qChain *QChainClient
+	wallet *wallet.Wallet
+	logger log.Logger
 }
 
 // NewChainManager creates a new chain manager
@@ -73,7 +73,7 @@ func NewChainManager(endpoint string, wallet *wallet.Wallet, logger log.Logger) 
 // Stake stakes tokens on the primary network
 func (cm *ChainManager) Stake(ctx context.Context, amount *big.Int, duration time.Duration) (ids.ID, error) {
 	nodeID := cm.wallet.NodeID()
-	
+
 	params := &AddValidatorParams{
 		NodeID:            nodeID,
 		StakeAmount:       amount,
@@ -83,14 +83,14 @@ func (cm *ChainManager) Stake(ctx context.Context, amount *big.Int, duration tim
 		RewardAddress:     cm.wallet.P().Address(),
 		DelegationFeeRate: 20000, // 2%
 	}
-	
+
 	return cm.pChain.AddValidator(ctx, params)
 }
 
 // StakeOnSubnet stakes tokens on a specific subnet
 func (cm *ChainManager) StakeOnSubnet(ctx context.Context, subnetID ids.ID, weight uint64, duration time.Duration) (ids.ID, error) {
 	nodeID := cm.wallet.NodeID()
-	
+
 	params := &AddSubnetValidatorParams{
 		NodeID:    nodeID,
 		SubnetID:  subnetID,
@@ -98,7 +98,7 @@ func (cm *ChainManager) StakeOnSubnet(ctx context.Context, subnetID ids.ID, weig
 		StartTime: time.Now().Add(30 * time.Second),
 		EndTime:   time.Now().Add(duration),
 	}
-	
+
 	return cm.pChain.AddSubnetValidator(ctx, params)
 }
 
@@ -112,7 +112,7 @@ func (cm *ChainManager) Delegate(ctx context.Context, nodeID ids.NodeID, amount 
 		Duration:      duration,
 		RewardAddress: cm.wallet.P().Address(),
 	}
-	
+
 	return cm.pChain.AddDelegator(ctx, params)
 }
 
@@ -123,7 +123,7 @@ func (cm *ChainManager) Vote(ctx context.Context, proposalID ids.ID, vote bool, 
 		Vote:       vote,
 		Reason:     reason,
 	}
-	
+
 	return cm.pChain.Vote(ctx, params)
 }
 
@@ -142,7 +142,7 @@ func (cm *ChainManager) CreateAsset(ctx context.Context, name, symbol string, su
 		Minters:       []ids.ShortID{cm.wallet.X().Address()},
 		MintThreshold: 1,
 	}
-	
+
 	return cm.xChain.CreateAsset(ctx, params)
 }
 
@@ -153,7 +153,7 @@ func (cm *ChainManager) SendAsset(ctx context.Context, assetID ids.ID, amount *b
 		Amount:  amount,
 		To:      to,
 	}
-	
+
 	return cm.xChain.Send(ctx, params)
 }
 
@@ -164,7 +164,7 @@ func (cm *ChainManager) TradeAssets(ctx context.Context, sellAsset ids.ID, sellA
 	if err != nil {
 		return ids.Empty, err
 	}
-	
+
 	// Find suitable UTXO
 	var inputTxID ids.ID
 	var inputIndex uint32
@@ -175,7 +175,7 @@ func (cm *ChainManager) TradeAssets(ctx context.Context, sellAsset ids.ID, sellA
 			break
 		}
 	}
-	
+
 	params := &CreateOrderParams{
 		SellAsset:     sellAsset,
 		SellAmount:    sellAmount,
@@ -186,7 +186,7 @@ func (cm *ChainManager) TradeAssets(ctx context.Context, sellAsset ids.ID, sellA
 		InputTxID:     inputTxID,
 		InputIndex:    inputIndex,
 	}
-	
+
 	return cm.xChain.CreateOrder(ctx, params)
 }
 
@@ -197,7 +197,7 @@ func (cm *ChainManager) TransferCrossChain(ctx context.Context, params *CrossCha
 	// First export from source chain
 	var exportTxID ids.ID
 	var err error
-	
+
 	switch params.SourceChain {
 	case "P":
 		exportParams := &ExportParams{
@@ -219,17 +219,17 @@ func (cm *ChainManager) TransferCrossChain(ctx context.Context, params *CrossCha
 	default:
 		return ids.Empty, fmt.Errorf("unsupported source chain: %s", params.SourceChain)
 	}
-	
+
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failed to export: %w", err)
 	}
-	
+
 	// Wait for export to be accepted
 	time.Sleep(2 * time.Second)
-	
+
 	// Then import to target chain
 	var importTxID ids.ID
-	
+
 	switch params.TargetChain {
 	case "P":
 		importParams := &ImportParams{
@@ -248,16 +248,16 @@ func (cm *ChainManager) TransferCrossChain(ctx context.Context, params *CrossCha
 	default:
 		return ids.Empty, fmt.Errorf("unsupported target chain: %s", params.TargetChain)
 	}
-	
+
 	if err != nil {
 		return ids.Empty, fmt.Errorf("failed to import: %w", err)
 	}
-	
+
 	cm.logger.Info("cross-chain transfer completed",
 		"exportTx", exportTxID,
 		"importTx", importTxID,
 	)
-	
+
 	return importTxID, nil
 }
 
@@ -286,7 +286,7 @@ func (cm *ChainManager) GetBalance(ctx context.Context, address string) (*Balanc
 		Address: address,
 		Chains:  make(map[string]*ChainBalance),
 	}
-	
+
 	// P-Chain balance
 	pBalance, err := cm.pChain.GetBalance(ctx, address)
 	if err == nil {
@@ -294,7 +294,7 @@ func (cm *ChainManager) GetBalance(ctx context.Context, address string) (*Balanc
 			LUX: pBalance,
 		}
 	}
-	
+
 	// X-Chain balances
 	xBalances, err := cm.xChain.GetAllBalances(ctx, address)
 	if err == nil {
@@ -302,7 +302,7 @@ func (cm *ChainManager) GetBalance(ctx context.Context, address string) (*Balanc
 			Assets: xBalances,
 		}
 	}
-	
+
 	// C-Chain balance
 	cBalance, err := cm.cChain.GetBalance(ctx, address)
 	if err == nil {
@@ -310,7 +310,7 @@ func (cm *ChainManager) GetBalance(ctx context.Context, address string) (*Balanc
 			LUX: cBalance,
 		}
 	}
-	
+
 	return balances, nil
 }
 
@@ -320,12 +320,12 @@ func (cm *ChainManager) GetValidators(ctx context.Context) (*ValidatorInfo, erro
 	if err != nil {
 		return nil, err
 	}
-	
+
 	pending, err := cm.pChain.GetPendingValidators(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &ValidatorInfo{
 		Current: current,
 		Pending: pending,

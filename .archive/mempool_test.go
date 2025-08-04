@@ -7,8 +7,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/luxfi/sdk/trace"
 	"github.com/golang/mock/gomock"
+	"github.com/luxfi/sdk/trace"
 	"github.com/stretchr/testify/require"
 )
 

@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/set"
 	hconsts "github.com/luxfi/sdk/consts"
 	"github.com/luxfi/sdk/crypto"
 	"github.com/luxfi/sdk/examples/tokenvm/auth"
@@ -18,6 +17,7 @@ import (
 	"github.com/luxfi/sdk/examples/tokenvm/consts"
 	"github.com/luxfi/sdk/examples/tokenvm/utils"
 	hutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/set"
 	"github.com/manifoldco/promptui"
 )
 

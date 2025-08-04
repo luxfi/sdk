@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	runner "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
+	runner "github.com/luxfi/netrunner/client"
 	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/vm"
 	"github.com/spf13/cobra"

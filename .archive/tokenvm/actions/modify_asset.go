@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/codec"
 	"github.com/luxfi/sdk/consts"
@@ -15,6 +14,7 @@ import (
 	"github.com/luxfi/sdk/examples/tokenvm/auth"
 	"github.com/luxfi/sdk/examples/tokenvm/storage"
 	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vms/platformvm/warp"
 )
 
 var _ chain.Action = (*ModifyAsset)(nil)

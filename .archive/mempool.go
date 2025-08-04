@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/trace"
 	"github.com/luxfi/set"
+	"github.com/luxfi/trace"
 )
 
 type Mempool[T Item] struct {

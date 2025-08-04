@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/luxfi/cache"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/vms/platformvm/warp"
 
 	"github.com/luxfi/sdk/chain"

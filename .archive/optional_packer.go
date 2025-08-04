@@ -5,9 +5,9 @@ package codec
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/set"
 	"github.com/luxfi/sdk/consts"
 	"github.com/luxfi/sdk/crypto"
+	"github.com/luxfi/set"
 )
 
 // OptionalPacker defines a struct that includes a Packer [ip], a bitset

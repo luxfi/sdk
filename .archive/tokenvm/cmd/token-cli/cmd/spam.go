@@ -18,7 +18,6 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
-	"github.com/luxfi/set"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/crypto"
 	"github.com/luxfi/sdk/examples/tokenvm/actions"
@@ -28,6 +27,7 @@ import (
 	"github.com/luxfi/sdk/listeners"
 	hutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/vm"
+	"github.com/luxfi/set"
 	"github.com/spf13/cobra"
 )
 

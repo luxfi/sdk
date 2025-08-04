@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/golang/mock/gomock"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/wallet"
 	"github.com/luxfi/log"
+	"github.com/luxfi/sdk/wallet"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestChainManager_Stake(t *testing.T) {
@@ -56,7 +56,7 @@ func TestChainManager_Stake(t *testing.T) {
 
 	// Execute test
 	txID, err := cm.Stake(ctx, amount, duration)
-	
+
 	assert.NoError(t, err)
 	assert.Equal(t, expectedTxID, txID)
 }
@@ -96,7 +96,7 @@ func TestChainManager_StakeOnSubnet(t *testing.T) {
 
 	// Execute test
 	txID, err := cm.StakeOnSubnet(ctx, subnetID, weight, duration)
-	
+
 	assert.NoError(t, err)
 	assert.Equal(t, expectedTxID, txID)
 }
@@ -137,7 +137,7 @@ func TestChainManager_Delegate(t *testing.T) {
 
 	// Execute test
 	txID, err := cm.Delegate(ctx, nodeID, amount, duration)
-	
+
 	assert.NoError(t, err)
 	assert.Equal(t, expectedTxID, txID)
 }
@@ -182,7 +182,7 @@ func TestChainManager_CreateAsset(t *testing.T) {
 
 	// Execute test
 	assetID, err := cm.CreateAsset(ctx, name, symbol, supply)
-	
+
 	assert.NoError(t, err)
 	assert.Equal(t, expectedAssetID, assetID)
 }
@@ -217,7 +217,7 @@ func TestChainManager_SendAsset(t *testing.T) {
 
 	// Execute test
 	txID, err := cm.SendAsset(ctx, assetID, amount, to)
-	
+
 	assert.NoError(t, err)
 	assert.Equal(t, expectedTxID, txID)
 }
@@ -358,13 +358,13 @@ func TestChainManager_GetBalance(t *testing.T) {
 
 	ctx := context.Background()
 	address := "P-lux1q0qvmc2sfp9c7hgdcxn7xyvj0xjdzj2w8tfgw6"
-	
+
 	pBalance := big.NewInt(1000)
 	cBalance := big.NewInt(2000)
 	xAsset1 := ids.GenerateTestID()
 	xAsset2 := ids.GenerateTestID()
 	xBalances := map[ids.ID]*big.Int{
-		ids.Empty: big.NewInt(500),  // LUX
+		ids.Empty: big.NewInt(500), // LUX
 		xAsset1:   big.NewInt(1500),
 		xAsset2:   big.NewInt(2500),
 	}
@@ -384,17 +384,17 @@ func TestChainManager_GetBalance(t *testing.T) {
 
 	// Execute test
 	balances, err := cm.GetBalance(ctx, address)
-	
+
 	assert.NoError(t, err)
 	assert.NotNil(t, balances)
 	assert.Equal(t, address, balances.Address)
-	
+
 	// Check P-Chain balance
 	assert.Equal(t, pBalance, balances.Chains["P"].LUX)
-	
+
 	// Check X-Chain balances
 	assert.Equal(t, xBalances, balances.Chains["X"].Assets)
-	
+
 	// Check C-Chain balance
 	assert.Equal(t, cBalance, balances.Chains["C"].LUX)
 }
@@ -417,7 +417,7 @@ func TestChainManager_GetValidators(t *testing.T) {
 		{NodeID: ids.GenerateTestNodeID(), Wght: 2000},
 		{NodeID: ids.GenerateTestNodeID(), Wght: 3000},
 	}
-	
+
 	pendingValidators := []*platformvm.Validator{
 		{NodeID: ids.GenerateTestNodeID(), Wght: 2500},
 	}
@@ -433,7 +433,7 @@ func TestChainManager_GetValidators(t *testing.T) {
 
 	// Execute test
 	validatorInfo, err := cm.GetValidators(ctx)
-	
+
 	assert.NoError(t, err)
 	assert.NotNil(t, validatorInfo)
 	assert.Equal(t, currentValidators, validatorInfo.Current)

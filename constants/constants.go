@@ -29,9 +29,9 @@ const (
 
 // Network HRP (Human Readable Part) for addresses
 const (
-	MainnetHRP = "lux"
-	TestnetHRP = "test"
-	LocalHRP   = "local"
+	MainnetHRP  = "lux"
+	TestnetHRP  = "test"
+	LocalHRP    = "local"
 	FallbackHRP = "custom"
 )
 
@@ -75,10 +75,10 @@ var (
 
 // Denominations
 const (
-	Wei   uint64 = 1
-	GWei  uint64 = 1e9
-	LUX   uint64 = 1e18
-	
+	Wei  uint64 = 1
+	GWei uint64 = 1e9
+	LUX  uint64 = 1e18
+
 	// Legacy compatibility
 	NanoLux  = Wei
 	MicroLux = GWei
@@ -87,20 +87,20 @@ const (
 // Staking parameters
 const (
 	// Minimum stake amounts
-	MinValidatorStake = 2_000 * GWei  // 2,000 LUX worth of GWei
-	MinDelegatorStake = 25 * GWei     // 25 LUX worth of GWei
-	
+	MinValidatorStake = 2_000 * GWei // 2,000 LUX worth of GWei
+	MinDelegatorStake = 25 * GWei    // 25 LUX worth of GWei
+
 	// Maximum stake amounts
-	MaxValidatorStake = 3_000_000 * GWei  // 3M LUX worth of GWei
-	MaxDelegatorStake = 3_000_000 * GWei  // 3M LUX worth of GWei
-	
+	MaxValidatorStake = 3_000_000 * GWei // 3M LUX worth of GWei
+	MaxDelegatorStake = 3_000_000 * GWei // 3M LUX worth of GWei
+
 	// Weight factors
 	MaxValidatorWeightFactor = 5
-	
+
 	// Time parameters
 	MinStakeDuration = 2 * 7 * 24 * time.Hour // 2 weeks
 	MaxStakeDuration = 365 * 24 * time.Hour   // 1 year
-	
+
 	// Reward parameters
 	MaxDelegationFee = 100 // 100% (in basis points / 100)
 )
@@ -108,92 +108,92 @@ const (
 // Supply and economics
 const (
 	// Total supply
-	TotalSupply = 720_000_000 * GWei  // 720M LUX worth of GWei
-	
+	TotalSupply = 720_000_000 * GWei // 720M LUX worth of GWei
+
 	// Initial supply distribution
-	InitialSupply = 360_000_000 * GWei  // 360M LUX worth of GWei
-	
+	InitialSupply = 360_000_000 * GWei // 360M LUX worth of GWei
+
 	// Reward config
 	RewardPercentDenominator = 1_000_000
-	InflationRate           = 0.05 // 5% annual
+	InflationRate            = 0.05 // 5% annual
 )
 
 // Transaction fees
 const (
 	// Base fees
-	TxFee            = 1_000_000 * GWei // 0.001 LUX
-	CreateAssetTxFee = 10_000_000 * GWei // 0.01 LUX
-	CreateChainTxFee = 1 * LUX
+	TxFee             = 1_000_000 * GWei  // 0.001 LUX
+	CreateAssetTxFee  = 10_000_000 * GWei // 0.01 LUX
+	CreateChainTxFee  = 1 * LUX
 	CreateSubnetTxFee = 1 * LUX
-	
+
 	// Gas parameters
-	GasPrice         = 25 * GWei
-	MaxGasPrice      = 1000 * GWei
-	MinGasPrice      = 1 * GWei
+	GasPrice    = 25 * GWei
+	MaxGasPrice = 1000 * GWei
+	MinGasPrice = 1 * GWei
 )
 
 // Block parameters
 const (
 	// Block size limits
-	MaxBlockSize       = 2 * 1024 * 1024 // 2 MiB
-	MaxBlockGas        = 15_000_000
-	TargetBlockRate    = 2 * time.Second
-	
+	MaxBlockSize    = 2 * 1024 * 1024 // 2 MiB
+	MaxBlockGas     = 15_000_000
+	TargetBlockRate = 2 * time.Second
+
 	// Genesis block
-	GenesisHeight      = 0
-	GenesisTimestamp   = 1640995200 // Jan 1, 2022 00:00:00 UTC
+	GenesisHeight    = 0
+	GenesisTimestamp = 1640995200 // Jan 1, 2022 00:00:00 UTC
 )
 
 // VM parameters
 const (
 	// VM types
-	EVMID          = "evm"
-	WasmVMID       = "wasm"
-	CustomVMID     = "custom"
-	TokenVMID      = "tokenvm"
-	
+	EVMID      = "evm"
+	WasmVMID   = "wasm"
+	CustomVMID = "custom"
+	TokenVMID  = "tokenvm"
+
 	// VM versions
-	EVMVersion     = "v0.13.0"
-	WasmVMVersion  = "v0.1.0"
+	EVMVersion    = "v0.13.0"
+	WasmVMVersion = "v0.1.0"
 )
 
 // Consensus parameters
 const (
 	// Snow consensus
-	SnowmanK                     = 20
-	SnowmanAlphaPreference       = 15
-	SnowmanAlphaConfidence       = 15
-	SnowmanBeta                  = 20
-	SnowmanConcurrentRepolls     = 4
-	SnowmanOptimalProcessing     = 10
-	SnowmanMaxProcessing         = 1000
-	SnowmanMaxTimeProcessing     = 2 * time.Minute
-	
+	SnowmanK                 = 20
+	SnowmanAlphaPreference   = 15
+	SnowmanAlphaConfidence   = 15
+	SnowmanBeta              = 20
+	SnowmanConcurrentRepolls = 4
+	SnowmanOptimalProcessing = 10
+	SnowmanMaxProcessing     = 1000
+	SnowmanMaxTimeProcessing = 2 * time.Minute
+
 	// For different network types
-	TestnetSnowmanK              = 11
+	TestnetSnowmanK               = 11
 	TestnetSnowmanAlphaPreference = 7
-	LocalSnowmanK                = 5
-	LocalSnowmanAlphaPreference  = 3
+	LocalSnowmanK                 = 5
+	LocalSnowmanAlphaPreference   = 3
 )
 
 // Network timeouts
 const (
 	// Request timeouts
-	RequestTimeout          = 30 * time.Second
-	RequestRetryTimeout     = 1 * time.Second
-	
+	RequestTimeout      = 30 * time.Second
+	RequestRetryTimeout = 1 * time.Second
+
 	// Gossip parameters
-	GossipFrequency         = 10 * time.Second
-	GossipBatchSize         = 30
-	GossipPollSize          = 10
-	
+	GossipFrequency = 10 * time.Second
+	GossipBatchSize = 30
+	GossipPollSize  = 10
+
 	// Health check
-	HealthCheckFrequency    = 30 * time.Second
-	MaxOutstandingRequests  = 1024
-	
+	HealthCheckFrequency   = 30 * time.Second
+	MaxOutstandingRequests = 1024
+
 	// Network limits
-	MaxMessageSize          = 2 * 1024 * 1024 // 2 MiB
-	MaxClockDifference      = 10 * time.Second
+	MaxMessageSize     = 2 * 1024 * 1024 // 2 MiB
+	MaxClockDifference = 10 * time.Second
 )
 
 // API endpoints
@@ -205,7 +205,7 @@ const (
 	InfoAPIEndpoint     = "/ext/info"
 	KeystoreAPIEndpoint = "/ext/keystore"
 	MetricsAPIEndpoint  = "/ext/metrics"
-	
+
 	// Chain endpoints
 	PChainEndpoint = "/ext/P"
 	XChainEndpoint = "/ext/X"
@@ -216,16 +216,16 @@ const (
 const (
 	// Default data directory
 	DefaultDataDir = "~/.luxd"
-	
+
 	// Database names
-	ChainDataDir   = "chainData"
-	StateDir       = "state"
-	LogDir         = "logs"
-	KeystoreDir    = "keystore"
-	
+	ChainDataDir = "chainData"
+	StateDir     = "state"
+	LogDir       = "logs"
+	KeystoreDir  = "keystore"
+
 	// Database prefixes
-	ChainDBPrefix  = "chain"
-	StateDBPrefix  = "state"
+	ChainDBPrefix = "chain"
+	StateDBPrefix = "state"
 )
 
 // Bootstrapping
@@ -233,45 +233,45 @@ const (
 	// Bootstrap retry parameters
 	BootstrapRetryAttempts = 50
 	BootstrapRetryDelay    = 1 * time.Second
-	
+
 	// Bootstrap timeouts
-	BootstrapTimeout       = 1 * time.Hour
-	MinBootstrapPeers      = 1
+	BootstrapTimeout  = 1 * time.Hour
+	MinBootstrapPeers = 1
 )
 
 // Validator set parameters
 const (
 	// Validator limits
-	MaxValidators          = 10_000
-	MaxPendingValidators   = 4_096
-	
+	MaxValidators        = 10_000
+	MaxPendingValidators = 4_096
+
 	// Subnet limits
-	MaxSubnetValidators    = 100
-	MinSubnetValidatorStake = 1 * GWei  // 1 LUX worth of GWei
+	MaxSubnetValidators     = 100
+	MinSubnetValidatorStake = 1 * GWei // 1 LUX worth of GWei
 )
 
 // Cross-chain (Warp) messaging
 const (
 	// Warp message size limits
-	MaxWarpMessageSize     = 256 * 1024 // 256 KiB
-	MaxWarpMessagePayload  = 200 * 1024 // 200 KiB
-	
+	MaxWarpMessageSize    = 256 * 1024 // 256 KiB
+	MaxWarpMessagePayload = 200 * 1024 // 200 KiB
+
 	// Warp signature parameters
-	WarpQuorumNumerator    = 67
-	WarpQuorumDenominator  = 100
+	WarpQuorumNumerator   = 67
+	WarpQuorumDenominator = 100
 )
 
 // Platform limits
 const (
 	// Transaction limits
-	MaxTxSize              = 64 * 1024 // 64 KiB
-	MaxMemoSize            = 256
-	
+	MaxTxSize   = 64 * 1024 // 64 KiB
+	MaxMemoSize = 256
+
 	// UTXO limits
-	MaxUTXOsToFetch        = 1024
-	
+	MaxUTXOsToFetch = 1024
+
 	// Import/Export limits
-	MaxImportSize          = 1024
+	MaxImportSize = 1024
 )
 
 // GetNetworkID returns the network ID from name

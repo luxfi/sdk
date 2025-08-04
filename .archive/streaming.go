@@ -15,8 +15,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/ips"
 
 	"github.com/luxfi/sdk/chain"

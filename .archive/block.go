@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/set"
 	"github.com/luxfi/snow/choices"
 	"github.com/luxfi/snow/consensus/snowman"
 	"github.com/luxfi/snow/engine/snowman/block"
 	"github.com/luxfi/snow/validators"
-	"github.com/luxfi/set"
 	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/x/merkledb"
 	"go.opentelemetry.io/otel/attribute"

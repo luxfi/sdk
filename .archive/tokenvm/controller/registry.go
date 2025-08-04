@@ -4,10 +4,10 @@
 package controller
 
 import (
-	"github.com/luxfi/wrappers"
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/codec"
+	"github.com/luxfi/vms/platformvm/warp"
+	"github.com/luxfi/wrappers"
 
 	"github.com/luxfi/sdk/examples/tokenvm/actions"
 	"github.com/luxfi/sdk/examples/tokenvm/auth"

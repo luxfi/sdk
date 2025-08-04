@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/luxfi/database"
-	"github.com/luxfi/utils"
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/bloom"
+	"github.com/luxfi/database"
+	"github.com/luxfi/utils"
 	"golang.org/x/exp/slices"
 )
 

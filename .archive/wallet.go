@@ -18,8 +18,8 @@ import (
 
 var (
 	ErrInsufficientFunds = errors.New("insufficient funds")
-	ErrNoUTXOs          = errors.New("no UTXOs available")
-	ErrInvalidAddress   = errors.New("invalid address")
+	ErrNoUTXOs           = errors.New("no UTXOs available")
+	ErrInvalidAddress    = errors.New("invalid address")
 )
 
 // UTXO represents an unspent transaction output
@@ -63,11 +63,11 @@ func New(networkID uint32, chainID ids.ID) *Wallet {
 func (w *Wallet) ImportKey(privateKey crypto.PrivateKey) (ids.ShortID, error) {
 	pubKey := privateKey.PublicKey()
 	address := pubKey.Address()
-	
+
 	if err := w.keychain.Add(privateKey); err != nil {
 		return ids.ShortID{}, err
 	}
-	
+
 	w.addresses.Add(address)
 	return address, nil
 }
@@ -78,7 +78,7 @@ func (w *Wallet) GenerateKey() (ids.ShortID, error) {
 	if err != nil {
 		return ids.ShortID{}, err
 	}
-	
+
 	return w.ImportKey(privateKey)
 }
 
@@ -123,29 +123,29 @@ func (w *Wallet) GetUTXOs(assetID ids.ID, amount uint64) ([]*UTXO, uint64, error
 		utxos    []*UTXO
 		totalAmt uint64
 	)
-	
+
 	for _, utxo := range w.utxos {
 		if utxo.AssetID != assetID {
 			continue
 		}
-		
+
 		// Check if we own this UTXO
 		if !w.addresses.Contains(utxo.Owner) {
 			continue
 		}
-		
+
 		utxos = append(utxos, utxo)
 		totalAmt += utxo.Amount
-		
+
 		if totalAmt >= amount {
 			return utxos, totalAmt, nil
 		}
 	}
-	
+
 	if totalAmt < amount {
 		return nil, 0, ErrInsufficientFunds
 	}
-	
+
 	return utxos, totalAmt, nil
 }
 
@@ -153,7 +153,7 @@ func (w *Wallet) GetUTXOs(assetID ids.ID, amount uint64) ([]*UTXO, uint64, error
 func (w *Wallet) Sign(ctx context.Context, tx chain.Transaction) error {
 	// Get the required signers for this transaction
 	signers := tx.Auth().Actor()
-	
+
 	// Find the appropriate key and sign
 	for _, signer := range []ids.ShortID{signers} {
 		if w.addresses.Contains(signer) {
@@ -161,16 +161,16 @@ func (w *Wallet) Sign(ctx context.Context, tx chain.Transaction) error {
 			if err != nil {
 				return fmt.Errorf("failed to get key for %s: %w", signer, err)
 			}
-			
+
 			// Sign the transaction
 			if err := tx.Sign(privateKey); err != nil {
 				return fmt.Errorf("failed to sign transaction: %w", err)
 			}
-			
+
 			return nil
 		}
 	}
-	
+
 	return errors.New("no signing key found for transaction")
 }
 
@@ -214,7 +214,7 @@ func (w *Wallet) CreateTransferTx(
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Create inputs
 	var inputs []TransferInput
 	for _, utxo := range utxos {
@@ -225,7 +225,7 @@ func (w *Wallet) CreateTransferTx(
 		}
 		inputs = append(inputs, input)
 	}
-	
+
 	// Create outputs
 	outputs := []TransferOutput{
 		{
@@ -234,14 +234,14 @@ func (w *Wallet) CreateTransferTx(
 			Recipient: to,
 		},
 	}
-	
+
 	// Add change output if necessary
 	if totalAmt > amount {
 		from, err := w.GetAddress()
 		if err != nil {
 			return nil, err
 		}
-		
+
 		changeOutput := TransferOutput{
 			AssetID:   assetID,
 			Amount:    totalAmt - amount,
@@ -249,7 +249,7 @@ func (w *Wallet) CreateTransferTx(
 		}
 		outputs = append(outputs, changeOutput)
 	}
-	
+
 	return &TransferTx{
 		NetworkID: w.networkID,
 		ChainID:   w.chainID,
