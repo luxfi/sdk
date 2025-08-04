@@ -6,7 +6,7 @@ package heap
 import (
 	"testing"
 
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/stretchr/testify/require"
 )
 

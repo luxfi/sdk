@@ -1,12 +1,12 @@
-# Contributing to vmsdk
+# Contributing to sdk
 
-Thank you for your interest in contributing to `vmsdk`! By contributing to vmsdk, you are helping to build the foundation for the next generation of blockchains and decentralized applications.
+Thank you for your interest in contributing to `sdk`! By contributing to sdk, you are helping to build the foundation for the next generation of blockchains and decentralized applications.
 
 ## Getting Started
 
 ### Prerequisites
 
-To contribute to `vmsdk`, you'll need:
+To contribute to `sdk`, you'll need:
 
 - [Go](https://golang.org/dl/) 1.20 or higher
 
@@ -15,8 +15,8 @@ To contribute to `vmsdk`, you'll need:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/luxdefi/vmsdk.git
-cd vmsdk
+git clone https://github.com/luxfi/sdk.git
+cd sdk
 ```
 
 2. Install the dependencies:
@@ -29,7 +29,7 @@ This will download and install all required dependencies for the project.
 
 ## Building and running tests
 
-To build and run tests for the vmsdk, simply run:
+To build and run tests for the sdk, simply run:
 
 ```go
 ./scripts/tests.unit.sh
@@ -47,7 +47,7 @@ To run the linters, simply run:
 
 This will run the linters on all code in the project.
 
-The `vmsdk` project also has a fixer that tries to help. To run the fixer, simply run:
+The `sdk` project also has a fixer that tries to help. To run the fixer, simply run:
 
 ```go
 ./scripts/fix.lint.sh
@@ -55,7 +55,7 @@ The `vmsdk` project also has a fixer that tries to help. To run the fixer, simpl
 
 ## Contributing
 
-We welcome contributions to vmsdk! To contribute, please follow these steps:
+We welcome contributions to sdk! To contribute, please follow these steps:
 
 1. Fork the repository and create a new branch for your contribution.
 
