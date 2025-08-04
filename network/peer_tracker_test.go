@@ -6,7 +6,7 @@ package network
 import (
 	"testing"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/stretchr/testify/require"
 )
 

@@ -8,20 +8,18 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"path"
 	"strconv"
 	"testing"
 
-	"github.com/luxfi/node/database"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/geth/stateconf"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/hashdb"
 	"github.com/stretchr/testify/require"
 )
 
@@ -44,10 +42,10 @@ const (
 func BenchmarkPrefetcherDatabase(b *testing.B) {
 	require := require.New(b)
 
-	dir := b.TempDir()
-	if env := os.Getenv("TEST_DB_DIR"); env != "" {
-		dir = env
-	}
+	// dir := b.TempDir()
+	// if env := os.Getenv("TEST_DB_DIR"); env != "" {
+	// 	dir = env
+	// }
 	wantKVs := 100_000
 	if env := os.Getenv("TEST_DB_KVS"); env != "" {
 		var err error
@@ -55,8 +53,8 @@ func BenchmarkPrefetcherDatabase(b *testing.B) {
 		require.NoError(err)
 	}
 
-	levelDB, err := rawdb.NewLevelDBDatabase(path.Join(dir, "level.db"), 0, 0, "", false)
-	require.NoError(err)
+	// Use memory database for testing
+	levelDB := rawdb.NewMemoryDatabase()
 
 	root := types.EmptyRootHash
 	count := uint64(0)
@@ -99,14 +97,18 @@ func BenchmarkPrefetcherDatabase(b *testing.B) {
 
 		// update the tracking keys
 		require.NoError(levelDB.Put(rootKey, root.Bytes()))
-		require.NoError(database.PutUInt64(levelDB, blockKey, block))
-		require.NoError(database.PutUInt64(levelDB, countKey, count))
+		blockBytes := make([]byte, 8)
+		binary.BigEndian.PutUint64(blockBytes, block)
+		require.NoError(levelDB.Put(blockKey, blockBytes))
+		countBytes := make([]byte, 8)
+		binary.BigEndian.PutUint64(countBytes, count)
+		require.NoError(levelDB.Put(countKey, countBytes))
 	}
 
 	tdbConfig := &triedb.Config{
-		DBOverride: hashdb.Config{
+		HashDB: &hashdb.Config{
 			CleanCacheSize: 3 * 1024 * 1024 * 1024,
-		}.BackendConstructor,
+		},
 	}
 	db := NewDatabaseWithConfig(levelDB, tdbConfig)
 	snaps := snapshot.NewTestTree(levelDB, fakeHash(block), root)
@@ -135,8 +137,8 @@ func BenchmarkPrefetcherDatabase(b *testing.B) {
 				startRoot, startBlock, startCount := root, block, count
 				defer func() { root, block, count = startRoot, startBlock, startCount }()
 
-				levelDB, err := rawdb.NewLevelDBDatabase(path.Join(dir, "level.db"), 0, 0, "", false)
-				require.NoError(err)
+				// Use memory database for testing
+				levelDB := rawdb.NewMemoryDatabase()
 				snaps := snapshot.NewTestTree(levelDB, fakeHash(block), root)
 				db := NewDatabaseWithConfig(levelDB, tdbConfig)
 				getMetric := func(metric string) int64 {
@@ -170,11 +172,11 @@ func addKVs(
 		return nil, common.Hash{}, fmt.Errorf("creating state with snapshot: %w", err)
 	}
 	if prefetchers > 0 {
-		statedb.StartPrefetcher(namespace, WithConcurrentWorkers(prefetchers))
+		statedb.StartPrefetcher(namespace, nil)
 		defer statedb.StopPrefetcher()
 	}
 	for _, address := range []common.Address{address1, address2} {
-		statedb.SetNonce(address, 1)
+		statedb.SetNonce(address, 1, tracing.NonceChangeUnspecified)
 		for i := 0; i < count/2; i++ {
 			key := make([]byte, 32)
 			value := make([]byte, 32)
@@ -184,8 +186,8 @@ func addKVs(
 			statedb.SetState(address, common.BytesToHash(key), common.BytesToHash(value))
 		}
 	}
-	snapshotOpt := snapshot.WithBlockHashes(fakeHash(block+1), fakeHash(block))
-	root, err = statedb.Commit(block+1, true, stateconf.WithSnapshotUpdateOpts(snapshotOpt))
+	// snapshotOpt := snapshot.WithBlockHashes(fakeHash(block+1), fakeHash(block))
+	root, err = statedb.Commit(block+1, true, false)
 	if err != nil {
 		return nil, common.Hash{}, fmt.Errorf("committing with snap: %w", err)
 	}

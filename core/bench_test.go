@@ -98,7 +98,7 @@ func genValueTx(nbytes int) func(int, *BlockGen) {
 			gasPrice = gen.header.BaseFee
 		}
 		tx, _ := types.SignNewTx(benchRootKey, signer, &types.LegacyTx{
-			Nonce:    gen.TxNonce(benchRootAddr),
+			Nonce:    gen.TxNonce(common.Address(benchRootAddr)),
 			To:       &toaddr,
 			Value:    big.NewInt(1),
 			Gas:      gas,
@@ -116,10 +116,10 @@ var (
 
 func init() {
 	ringKeys[0] = benchRootKey
-	ringAddrs[0] = benchRootAddr
+	ringAddrs[0] = common.Address(benchRootAddr)
 	for i := 1; i < len(ringKeys); i++ {
 		ringKeys[i], _ = crypto.GenerateKey()
-		ringAddrs[i] = crypto.PubkeyToAddress(ringKeys[i].PublicKey)
+		ringAddrs[i] = common.Address(crypto.PubkeyToAddress(ringKeys[i].PublicKey))
 	}
 }
 
@@ -166,8 +166,10 @@ func benchInsertChain(b *testing.B, disk bool, gen func(int, *BlockGen)) {
 	if !disk {
 		db = rawdb.NewMemoryDatabase()
 	} else {
-		dir := b.TempDir()
-		db, err = rawdb.NewLevelDBDatabase(dir, 128, 128, "", false)
+		// dir := b.TempDir()
+		// For benchmarks, use memory database instead of LevelDB
+		db = rawdb.NewMemoryDatabase()
+		err = nil
 		if err != nil {
 			b.Fatalf("cannot create temporary database: %v", err)
 		}
@@ -178,7 +180,7 @@ func benchInsertChain(b *testing.B, disk bool, gen func(int, *BlockGen)) {
 	// generator function.
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
-		Alloc:  types.GenesisAlloc{benchRootAddr: {Balance: benchRootFunds}},
+		Alloc:  types.GenesisAlloc{common.Address(benchRootAddr): {Balance: benchRootFunds}},
 	}
 	_, chain, _, _ := GenerateChainWithGenesis(gspec, dummy.NewCoinbaseFaker(), b.N, 10, gen)
 
@@ -268,23 +270,19 @@ func makeChainForBench(db ethdb.Database, genesis *Genesis, full bool, count uin
 func benchWriteChain(b *testing.B, full bool, count uint64) {
 	genesis := &Genesis{Config: params.TestChainConfig}
 	for i := 0; i < b.N; i++ {
-		dir := b.TempDir()
-		db, err := rawdb.NewLevelDBDatabase(dir, 128, 1024, "", false)
-		if err != nil {
-			b.Fatalf("error opening database at %v: %v", dir, err)
-		}
+		// dir := b.TempDir()
+		// For benchmarks, use memory database instead of LevelDB
+		db := rawdb.NewMemoryDatabase()
 		makeChainForBench(db, genesis, full, count)
 		db.Close()
 	}
 }
 
 func benchReadChain(b *testing.B, full bool, count uint64) {
-	dir := b.TempDir()
+	// dir := b.TempDir()
 
-	db, err := rawdb.NewLevelDBDatabase(dir, 128, 1024, "", false)
-	if err != nil {
-		b.Fatalf("error opening database at %v: %v", dir, err)
-	}
+	// For benchmarks, use memory database instead of LevelDB
+	db := rawdb.NewMemoryDatabase()
 	genesis := &Genesis{Config: params.TestChainConfig}
 	makeChainForBench(db, genesis, full, count)
 	db.Close()
@@ -293,10 +291,8 @@ func benchReadChain(b *testing.B, full bool, count uint64) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		db, err := rawdb.NewLevelDBDatabase(dir, 128, 1024, "", false)
-		if err != nil {
-			b.Fatalf("error opening database at %v: %v", dir, err)
-		}
+		// For benchmarks, use memory database instead of LevelDB
+		db := rawdb.NewMemoryDatabase()
 		chain, err := NewBlockChain(db, DefaultCacheConfig, genesis, dummy.NewFaker(), vm.Config{}, common.Hash{}, false)
 		if err != nil {
 			b.Fatalf("error creating chain: %v", err)

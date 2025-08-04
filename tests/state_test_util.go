@@ -34,7 +34,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -42,6 +41,7 @@ import (
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
@@ -56,8 +56,8 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	// "github.com/luxfi/evm/triedb/firewood"
-	"github.com/luxfi/evm/triedb/hashdb"
-	"github.com/luxfi/evm/triedb/pathdb"
+	"github.com/luxfi/geth/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/pathdb"
 	"github.com/holiman/uint256"
 	"golang.org/x/crypto/sha3"
 )
@@ -287,7 +287,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 		// - the block body is verified against the header in block_validator.go:ValidateBody
 		// Here, we just do this shortcut smaller fix, since state tests do not
 		// utilize those codepaths
-		if len(msg.BlobHashes)*ethparams.BlobTxBlobGasPerBlob > ethparams.MaxBlobGasPerBlock {
+		if len(msg.BlobHashes) > ethparams.BlobTxMaxBlobs {
 			return state, common.Hash{}, errors.New("blob gas exceeds maximum")
 		}
 	}
@@ -318,7 +318,8 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	if config.IsCancun(new(big.Int), block.Time()) && t.json.Env.ExcessBlobGas != nil {
 		context.BlobBaseFee = eip4844.CalcBlobFee(*t.json.Env.ExcessBlobGas)
 	}
-	evm := vm.NewEVM(context, txContext, state.StateDB, config, vmconfig)
+	evm := vm.NewEVM(context, state.StateDB, config, vmconfig)
+	evm.SetTxContext(txContext)
 
 	// Execute the message.
 	snapshot := state.StateDB.Snapshot()
@@ -333,10 +334,10 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 	// - the coinbase self-destructed, or
 	// - there are only 'bad' transactions, which aren't executed. In those cases,
 	//   the coinbase gets no txfee, so isn't created, and thus needs to be touched
-	state.StateDB.AddBalance(block.Coinbase(), new(uint256.Int))
+	state.StateDB.AddBalance(block.Coinbase(), new(uint256.Int), tracing.BalanceIncreaseRewardTransactionFee)
 
 	// Commit state mutations into database.
-	root, _ = state.StateDB.Commit(block.NumberU64(), config.IsEIP158(block.Number()))
+	root, _ = state.StateDB.Commit(block.NumberU64(), config.IsEIP158(block.Number()), false)
 	return state, root, err
 }
 
@@ -369,7 +370,8 @@ func (tx *stTransaction) toMessage(ps stPostState, baseFee *big.Int) (*core.Mess
 		if err != nil {
 			return nil, fmt.Errorf("invalid private key: %v", err)
 		}
-		from = crypto.PubkeyToAddress(key.PublicKey)
+		cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+		from = common.BytesToAddress(cryptoAddr[:])
 	}
 	// Parse recipient if present.
 	var to *common.Address
@@ -422,8 +424,13 @@ func (tx *stTransaction) toMessage(ps stPostState, baseFee *big.Int) (*core.Mess
 		if tx.MaxPriorityFeePerGas == nil {
 			tx.MaxPriorityFeePerGas = tx.MaxFeePerGas
 		}
-		gasPrice = math.BigMin(new(big.Int).Add(tx.MaxPriorityFeePerGas, baseFee),
-			tx.MaxFeePerGas)
+		// Calculate gasPrice = min(maxPriorityFeePerGas + baseFee, maxFeePerGas)
+		sum := new(big.Int).Add(tx.MaxPriorityFeePerGas, baseFee)
+		if sum.Cmp(tx.MaxFeePerGas) > 0 {
+			gasPrice = tx.MaxFeePerGas
+		} else {
+			gasPrice = sum
+		}
 	}
 	if gasPrice == nil {
 		return nil, errors.New("no gas price provided")
@@ -476,12 +483,12 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 	tconf := &triedb.Config{Preimages: true}
 	switch scheme {
 	case rawdb.HashScheme:
-		tconf.DBOverride = hashdb.Defaults.BackendConstructor
+		tconf.HashDB = &hashdb.Config{}
 	case rawdb.PathScheme:
-		tconf.DBOverride = pathdb.Defaults.BackendConstructor
+		tconf.PathDB = &pathdb.Config{}
 	case customrawdb.FirewoodScheme:
 		// Firewood disabled - use HashScheme instead
-		tconf.DBOverride = hashdb.Defaults.BackendConstructor
+		tconf.HashDB = &hashdb.Config{}
 		// cfg := firewood.Defaults
 		// cfg.FilePath = filepath.Join(tempdir, "firewood")
 		// tconf.DBOverride = cfg.BackendConstructor
@@ -494,14 +501,14 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
 		statedb.SetCode(addr, a.Code)
-		statedb.SetNonce(addr, a.Nonce)
-		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance))
+		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeGenesis)
+		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceIncreaseGenesisBalance)
 		for k, v := range a.Storage {
 			statedb.SetState(addr, k, v)
 		}
 	}
 	// Commit and re-open to start with a clean state.
-	root, err := statedb.Commit(0, false)
+	root, err := statedb.Commit(0, false, false)
 	if err != nil {
 		panic("failed to commit state: " + err.Error())
 	}

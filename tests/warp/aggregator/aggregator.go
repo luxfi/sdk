@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/node/utils/set"

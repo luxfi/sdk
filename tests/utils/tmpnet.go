@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/luxfi/node/config"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 
 	"github.com/luxfi/evm/plugin/evm"

@@ -45,4 +45,4 @@ var DefaultDirectory = ethtracers.DefaultDirectory
 
 // GetMemoryCopyPadded returns offset + size as a new slice.
 // It zero-pads the slice if it extends beyond memory bounds.
-var GetMemoryCopyPadded = ethtracers.GetMemoryCopyPadded
+// Note: This function is in the internal package in geth, so we can't directly export it.

@@ -76,13 +76,8 @@ func (basic *snapshotTestBasic) prepare(t *testing.T) (*BlockChain, []*types.Blo
 	datadir := t.TempDir()
 	ancient := path.Join(datadir, "ancient")
 
-	db, err := rawdb.Open(rawdb.OpenOptions{
-		Directory: datadir,
-		Ephemeral: true,
-	})
-	if err != nil {
-		t.Fatalf("Failed to create persistent database: %v", err)
-	}
+	// For testing, use a memory database instead
+	db := rawdb.NewMemoryDatabase()
 	// Initialize a fresh chain
 	var (
 		gspec = &Genesis{
@@ -225,7 +220,7 @@ type snapshotTest struct {
 
 func (snaptest *snapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().SetHandler(log.LevelFilterHandler(log.LevelTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -248,7 +243,7 @@ type crashSnapshotTest struct {
 
 func (snaptest *crashSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().SetHandler(log.LevelFilterHandler(log.LevelTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -259,13 +254,8 @@ func (snaptest *crashSnapshotTest) test(t *testing.T) {
 	chain.triedb.Close()
 
 	// Start a new blockchain back up and see where the repair leads us
-	newdb, err := rawdb.Open(rawdb.OpenOptions{
-		Directory: snaptest.datadir,
-		Ephemeral: true,
-	})
-	if err != nil {
-		t.Fatalf("Failed to reopen persistent database: %v", err)
-	}
+	// For testing, use a memory database instead
+	newdb := rawdb.NewMemoryDatabase()
 	defer newdb.Close()
 
 	// The interesting thing is: instead of starting the blockchain after
@@ -299,7 +289,7 @@ type gappedSnapshotTest struct {
 
 func (snaptest *gappedSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().SetHandler(log.LevelFilterHandler(log.LevelTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 
@@ -346,7 +336,7 @@ type wipeCrashSnapshotTest struct {
 
 func (snaptest *wipeCrashSnapshotTest) test(t *testing.T) {
 	// It's hard to follow the test case, visualize the input
-	// log.Root().SetHandler(log.LvlFilterHandler(log.LvlTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
+	// log.Root().SetHandler(log.LevelFilterHandler(log.LevelTrace, log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	// fmt.Println(tt.dump())
 	chain, blocks := snaptest.prepare(t)
 

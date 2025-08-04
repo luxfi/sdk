@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

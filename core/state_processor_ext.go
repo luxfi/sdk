@@ -8,7 +8,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/core/tracing"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -55,13 +56,14 @@ func ApplyPrecompileActivations(c *params.ChainConfig, parentTimestamp *uint64, 
 			log.Info("Activating new precompile", "name", module.ConfigKey, "config", printIntf)
 			// Set the nonce of the precompile's address (as is done when a contract is created) to ensure
 			// that it is marked as non-empty and will not be cleaned up when the statedb is finalized.
-			statedb.SetNonce(module.Address, 1)
+			statedb.SetNonce(module.Address, 1, tracing.NonceChangeUnspecified)
 			// Set the code of the precompile's address to a non-zero length byte slice to ensure that the precompile
 			// can be called from within Solidity contracts. Solidity adds a check before invoking a contract to ensure
 			// that it does not attempt to invoke a non-existent contract.
 			statedb.SetCode(module.Address, []byte{0x1})
 			extstatedb := extstate.New(statedb)
-			if err := module.Configure(params.GetExtra(c), activatingConfig, extstatedb, blockContext); err != nil {
+			adapter := extstate.NewPrecompileAdapter(extstatedb)
+			if err := module.Configure(params.GetExtra(c), activatingConfig, adapter, blockContext); err != nil {
 				return fmt.Errorf("could not configure precompile, name: %s, reason: %w", module.ConfigKey, err)
 			}
 		}
@@ -77,7 +79,8 @@ func applyStateUpgrades(c *params.ChainConfig, parentTimestamp *uint64, blockCon
 	configExtra := params.GetExtra(c)
 	for _, upgrade := range configExtra.GetActivatingStateUpgrades(parentTimestamp, blockContext.Timestamp(), configExtra.StateUpgrades) {
 		log.Info("Applying state upgrade", "blockNumber", blockContext.Number(), "upgrade", upgrade)
-		if err := stateupgrade.Configure(&upgrade, c, statedb, blockContext); err != nil {
+		adapter := state.NewStateUpgradeAdapter(statedb)
+		if err := stateupgrade.Configure(&upgrade, c, adapter, blockContext); err != nil {
 			return fmt.Errorf("could not configure state upgrade: %w", err)
 		}
 	}

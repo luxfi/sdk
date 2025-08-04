@@ -234,7 +234,7 @@ func InsertChainAcceptSingleBlock(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
 	if err != nil {
@@ -245,7 +245,7 @@ func InsertChainAcceptSingleBlock(t *testing.T, create createFunc) {
 	// This call generates a chain of 3 blocks.
 	signer := types.HomesteadSigner{}
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 3, 10, func(i int, gen *BlockGen) {
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -263,25 +263,25 @@ func InsertChainAcceptSingleBlock(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce := sdb.GetNonce(addr1)
+		nonce := sdb.GetNonce(common.Address(addr1))
 		if nonce != 1 {
 			return fmt.Errorf("expected nonce addr1: 1, found nonce: %d", nonce)
 		}
 		transferredFunds := uint256.MustFromBig(big.NewInt(10000))
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance1 := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance1) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance1, balance1)
 		}
 
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		expectedBalance2 := transferredFunds
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
 		}
 
-		nonce = sdb.GetNonce(addr2)
+		nonce = sdb.GetNonce(common.Address(addr2))
 		if nonce != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce)
 		}
@@ -304,7 +304,7 @@ func InsertLongForkedChain(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -317,7 +317,7 @@ func InsertLongForkedChain(t *testing.T, create createFunc) {
 	signer := types.HomesteadSigner{}
 	_, chain1, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, numBlocks, 10, func(i int, gen *BlockGen) {
 		// Generate a transaction to create a unique block
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -327,7 +327,7 @@ func InsertLongForkedChain(t *testing.T, create createFunc) {
 	// a longer chain can trigger a reorg.
 	_, chain2, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, numBlocks+1, 10, func(i int, gen *BlockGen) {
 		// Generate a transaction with a different amount to ensure [chain2] is different than [chain1].
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(5000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(5000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -430,22 +430,22 @@ func InsertLongForkedChain(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 129 {
 			return fmt.Errorf("expected addr1 nonce: 129, found nonce %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		transferredFunds := uint256.NewInt(129 * 10_000)
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		if balance2.Cmp(transferredFunds) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", transferredFunds, balance2)
 		}
@@ -468,7 +468,7 @@ func AcceptNonCanonicalBlock(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -481,7 +481,7 @@ func AcceptNonCanonicalBlock(t *testing.T, create createFunc) {
 	signer := types.HomesteadSigner{}
 	_, chain1, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, numBlocks, 10, func(i int, gen *BlockGen) {
 		// Generate a transaction to create a unique block
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -489,7 +489,7 @@ func AcceptNonCanonicalBlock(t *testing.T, create createFunc) {
 	}
 	_, chain2, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, numBlocks, 10, func(i int, gen *BlockGen) {
 		// Generate a transaction with a different amount to create a chain of blocks different from [chain1]
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(5000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(5000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -539,22 +539,22 @@ func AcceptNonCanonicalBlock(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 1 {
 			return fmt.Errorf("expected addr1 nonce: 1, found nonce: %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		transferredFunds := uint256.NewInt(5000)
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		if balance2.Cmp(transferredFunds) != 0 {
 			return fmt.Errorf("expected balance2: %d, found %d", transferredFunds, balance2)
 		}
@@ -577,7 +577,7 @@ func SetPreferenceRewind(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -590,7 +590,7 @@ func SetPreferenceRewind(t *testing.T, create createFunc) {
 	signer := types.HomesteadSigner{}
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, numBlocks, 10, func(i int, gen *BlockGen) {
 		// Generate a transaction to create a unique block
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -634,20 +634,20 @@ func SetPreferenceRewind(t *testing.T, create createFunc) {
 	}
 	// check the state of the last accepted block
 	checkGenesisState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 0 {
 			return fmt.Errorf("expected addr1 nonce: 0, found nonce: %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		if balance1.Cmp(genesisBalance) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", genesisBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		if balance2.Cmp(common.U2560) != 0 {
 			return fmt.Errorf("expected addr2 balance: 0, found balance %d", balance2)
 		}
@@ -669,25 +669,25 @@ func SetPreferenceRewind(t *testing.T, create createFunc) {
 		t.Fatal(err)
 	}
 	checkUpdatedState := func(sdb *state.StateDB) error {
-		nonce := sdb.GetNonce(addr1)
+		nonce := sdb.GetNonce(common.Address(addr1))
 		if nonce != 1 {
 			return fmt.Errorf("expected addr1 nonce: 1, found nonce: %d", nonce)
 		}
 		transferredFunds := uint256.NewInt(10000)
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance1 := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance1) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance %d", expectedBalance1, balance1)
 		}
 
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		expectedBalance2 := transferredFunds
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
 		}
 
-		nonce = sdb.GetNonce(addr2)
+		nonce = sdb.GetNonce(common.Address(addr2))
 		if nonce != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce)
 		}
@@ -712,8 +712,8 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
 		Alloc: GenesisAlloc{
-			addr1: {Balance: genesisBalance},
-			addr3: {Balance: genesisBalance},
+			common.Address(addr1): {Balance: genesisBalance},
+			common.Address(addr3): {Balance: genesisBalance},
 		},
 	}
 
@@ -728,10 +728,10 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 	genDB, chain1, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 20, 10, func(i int, gen *BlockGen) {
 		// Send all funds back and forth between the two accounts
 		if i%2 == 0 {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, genesisBalance, ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), genesisBalance, ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		} else {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr2), addr1, genesisBalance, ethparams.TxGas, nil, nil), signer, key2)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr2)), common.Address(addr1), genesisBalance, ethparams.TxGas, nil, nil), signer, key2)
 			gen.AddTx(tx)
 		}
 	})
@@ -742,10 +742,10 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 	chain2, _, err := GenerateChain(gspec.Config, chain1[9], blockchain.engine, genDB, 10, 10, func(i int, gen *BlockGen) {
 		// Send all funds back and forth between the two accounts
 		if i%2 == 0 {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr3), addr2, genesisBalance, ethparams.TxGas, nil, nil), signer, key3)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr3)), common.Address(addr2), genesisBalance, ethparams.TxGas, nil, nil), signer, key3)
 			gen.AddTx(tx)
 		} else {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr2), addr3, genesisBalance, ethparams.TxGas, nil, nil), signer, key2)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr2)), common.Address(addr3), genesisBalance, ethparams.TxGas, nil, nil), signer, key2)
 			gen.AddTx(tx)
 		}
 	})
@@ -758,10 +758,10 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 	chain3, _, err := GenerateChain(gspec.Config, chain1[4], blockchain.engine, genDB, 10, 10, func(i int, gen *BlockGen) {
 		// Send all funds back and forth between accounts 2 and 3.
 		if i%2 == 0 {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr2), addr3, genesisBalance, ethparams.TxGas, nil, nil), signer, key2)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr2)), common.Address(addr3), genesisBalance, ethparams.TxGas, nil, nil), signer, key2)
 			gen.AddTx(tx)
 		} else {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr3), addr2, genesisBalance, ethparams.TxGas, nil, nil), signer, key3)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr3)), common.Address(addr2), genesisBalance, ethparams.TxGas, nil, nil), signer, key3)
 			gen.AddTx(tx)
 		}
 	})
@@ -825,35 +825,35 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce := sdb.GetNonce(addr1)
+		nonce := sdb.GetNonce(common.Address(addr1))
 		if nonce != 5 {
 			return fmt.Errorf("expected nonce addr1: 5, found nonce: %d", nonce)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance1 := genesisBalance
 		if balance1.Cmp(expectedBalance1) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance1, balance1)
 		}
 
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		expectedBalance2 := genesisBalance
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
 		}
 
-		nonce = sdb.GetNonce(addr2)
+		nonce = sdb.GetNonce(common.Address(addr2))
 		if nonce != 5 {
 			return fmt.Errorf("expected addr2 nonce: 5, found nonce: %d", nonce)
 		}
 
-		balance3 := sdb.GetBalance(addr3)
+		balance3 := sdb.GetBalance(common.Address(addr3))
 		expectedBalance3 := common.U2560
 		if balance3.Cmp(expectedBalance3) != 0 {
 			return fmt.Errorf("expected addr3 balance: %d, found balance: %d", expectedBalance3, balance3)
 		}
 
-		nonce = sdb.GetNonce(addr3)
+		nonce = sdb.GetNonce(common.Address(addr3))
 		if nonce != 1 {
 			return fmt.Errorf("expected addr3 nonce: 1, found nonce: %d", nonce)
 		}
@@ -914,7 +914,7 @@ func EmptyAndNonEmptyBlocks(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -926,7 +926,7 @@ func EmptyAndNonEmptyBlocks(t *testing.T, create createFunc) {
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 5, 10, func(i int, gen *BlockGen) {
 		if i == 3 {
 			// Generate a transaction to create a unique block
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), types.HomesteadSigner{}, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), types.HomesteadSigner{}, key1)
 			gen.AddTx(tx)
 		}
 	})
@@ -946,22 +946,22 @@ func EmptyAndNonEmptyBlocks(t *testing.T, create createFunc) {
 
 	// We expect results from block 3
 	checkState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 1 {
 			return fmt.Errorf("expected addr1 nonce: 3, found nonce: %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		transferredFunds := uint256.NewInt(10000)
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		if balance2.Cmp(transferredFunds) != 0 {
 			return fmt.Errorf("expected balance2: %d, found %d", transferredFunds, balance2)
 		}
@@ -984,7 +984,7 @@ func ReorgReInsert(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -997,7 +997,7 @@ func ReorgReInsert(t *testing.T, create createFunc) {
 	numBlocks := 3
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, numBlocks, 10, func(i int, gen *BlockGen) {
 		// Generate a transaction to create a unique block
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -1039,22 +1039,22 @@ func ReorgReInsert(t *testing.T, create createFunc) {
 
 	// Nothing to assert about the state
 	checkState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 3 {
 			return fmt.Errorf("expected addr1 nonce: 3, found nonce: %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		transferredFunds := uint256.NewInt(30000)
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		if balance2.Cmp(transferredFunds) != 0 {
 			return fmt.Errorf("expected balance2: %d, found %d", transferredFunds, balance2)
 		}
@@ -1090,7 +1090,7 @@ func AcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -1103,7 +1103,7 @@ func AcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 	_, chain1, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 3, 10, func(i int, gen *BlockGen) {
 		if i < 2 {
 			// Send half the funds from addr1 to addr2 in one transaction per each of the two blocks in [chain1]
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(500000000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(500000000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		}
 		// Allow the third block to be empty.
@@ -1115,10 +1115,10 @@ func AcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 		// Send 1/4 of the funds from addr1 to addr2 in tx1 and 3/4 of the funds in tx2. This will produce the identical state
 		// root in the second block of [chain2] as is present in the second block of [chain1].
 		if i == 0 {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(250000000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(250000000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		} else {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(750000000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(750000000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		}
 	})
@@ -1183,20 +1183,20 @@ func AcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 2 {
 			return fmt.Errorf("expected addr1 nonce: 2, found nonce: %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		expectedBalance := common.U2560
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		if balance2.Cmp(genesisBalance) != 0 {
 			return fmt.Errorf("expected balance2: %d, found %d", genesisBalance, balance2)
@@ -1234,7 +1234,7 @@ func ReprocessAcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 	genesisBalance := big.NewInt(1000000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -1246,7 +1246,7 @@ func ReprocessAcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 	_, chain1, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 3, 10, func(i int, gen *BlockGen) {
 		if i < 2 {
 			// Send half the funds from addr1 to addr2 in one transaction per each of the two blocks in [chain1]
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(500000000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(500000000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		}
 		// Allow the third block to be empty.
@@ -1258,10 +1258,10 @@ func ReprocessAcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 		// Send 1/4 of the funds from addr1 to addr2 in tx1 and 3/4 of the funds in tx2. This will produce the identical state
 		// root in the second block of [chain2] as is present in the second block of [chain1].
 		if i == 0 {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(250000000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(250000000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		} else {
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(750000000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(750000000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		}
 	})
@@ -1351,20 +1351,20 @@ func ReprocessAcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce1 := sdb.GetNonce(addr1)
+		nonce1 := sdb.GetNonce(common.Address(addr1))
 		if nonce1 != 2 {
 			return fmt.Errorf("expected addr1 nonce: 2, found nonce: %d", nonce1)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		expectedBalance := common.U2560
 		if balance1.Cmp(expectedBalance) != 0 {
 			return fmt.Errorf("expected balance1: %d, found balance: %d", expectedBalance, balance1)
 		}
-		nonce2 := sdb.GetNonce(addr2)
+		nonce2 := sdb.GetNonce(common.Address(addr2))
 		if nonce2 != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce %d", nonce2)
 		}
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		if balance2.Cmp(genesisBalance) != 0 {
 			return fmt.Errorf("expected balance2: %d, found %d", genesisBalance, balance2)
@@ -1389,7 +1389,7 @@ func GenerateChainInvalidBlockFee(t *testing.T, create createFunc) {
 	genesisBalance := new(big.Int).Mul(big.NewInt(1000000), big.NewInt(params.Ether))
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
-		Alloc:  GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -1401,8 +1401,8 @@ func GenerateChainInvalidBlockFee(t *testing.T, create createFunc) {
 	_, _, _, err = GenerateChainWithGenesis(gspec, blockchain.engine, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
 		tx := types.NewTx(&types.DynamicFeeTx{
 			ChainID:   params.TestChainConfig.ChainID,
-			Nonce:     gen.TxNonce(addr1),
-			To:        &addr2,
+			Nonce:     gen.TxNonce(common.Address(addr1)),
+			To:        (*common.Address)(&addr2),
 			Gas:       ethparams.TxGas,
 			GasFeeCap: gen.BaseFee(),
 			GasTipCap: big.NewInt(0),
@@ -1430,7 +1430,7 @@ func InsertChainInvalidBlockFee(t *testing.T, create createFunc) {
 	genesisBalance := new(big.Int).Mul(big.NewInt(1000000), big.NewInt(params.Ether))
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
-		Alloc:  GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -1443,8 +1443,8 @@ func InsertChainInvalidBlockFee(t *testing.T, create createFunc) {
 	_, chain, _, err := GenerateChainWithGenesis(gspec, eng, 3, extras.TestChainConfig.FeeConfig.TargetBlockRate-1, func(i int, gen *BlockGen) {
 		tx := types.NewTx(&types.DynamicFeeTx{
 			ChainID:   params.TestChainConfig.ChainID,
-			Nonce:     gen.TxNonce(addr1),
-			To:        &addr2,
+			Nonce:     gen.TxNonce(common.Address(addr1)),
+			To:        (*common.Address)(&addr2),
 			Gas:       ethparams.TxGas,
 			GasFeeCap: gen.BaseFee(),
 			GasTipCap: big.NewInt(0),
@@ -1474,7 +1474,7 @@ func InsertChainValidBlockFee(t *testing.T, create createFunc) {
 	genesisBalance := new(big.Int).Mul(big.NewInt(1000000), big.NewInt(params.Ether))
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -1489,8 +1489,8 @@ func InsertChainValidBlockFee(t *testing.T, create createFunc) {
 		feeCap := new(big.Int).Add(gen.BaseFee(), tip)
 		tx := types.NewTx(&types.DynamicFeeTx{
 			ChainID:   params.TestChainConfig.ChainID,
-			Nonce:     gen.TxNonce(addr1),
-			To:        &addr2,
+			Nonce:     gen.TxNonce(common.Address(addr1)),
+			To:        (*common.Address)(&addr2),
 			Gas:       ethparams.TxGas,
 			Value:     transfer,
 			GasFeeCap: feeCap,
@@ -1512,11 +1512,11 @@ func InsertChainValidBlockFee(t *testing.T, create createFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce := sdb.GetNonce(addr1)
+		nonce := sdb.GetNonce(common.Address(addr1))
 		if nonce != 1 {
 			return fmt.Errorf("expected nonce addr1: 1, found nonce: %d", nonce)
 		}
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		transfer := uint256.MustFromBig(transfer)
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance1 := new(uint256.Int).Sub(genesisBalance, transfer)
@@ -1527,13 +1527,13 @@ func InsertChainValidBlockFee(t *testing.T, create createFunc) {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance1, balance1)
 		}
 
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		expectedBalance2 := transfer
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
 		}
 
-		nonce = sdb.GetNonce(addr2)
+		nonce = sdb.GetNonce(common.Address(addr2))
 		if nonce != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce)
 		}
@@ -1558,12 +1558,12 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 	config := params.Copy(params.TestChainConfig)
 	// Set all of the required config parameters
 	params.GetExtra(&config).GenesisPrecompiles = extras.Precompiles{
-		deployerallowlist.ConfigKey: deployerallowlist.NewConfig(utils.NewUint64(0), []common.Address{addr1}, nil, nil),
-		feemanager.ConfigKey:        feemanager.NewConfig(utils.NewUint64(0), []common.Address{addr1}, nil, nil, nil),
+		deployerallowlist.ConfigKey: deployerallowlist.NewConfig(utils.NewUint64(0), []common.Address{common.Address(addr1)}, nil, nil),
+		feemanager.ConfigKey:        feemanager.NewConfig(utils.NewUint64(0), []common.Address{common.Address(addr1)}, nil, nil, nil),
 	}
 	gspec := &Genesis{
 		Config: &config,
-		Alloc:  GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
@@ -1598,13 +1598,13 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 		"allow list": {
 			addTx: func(gen *BlockGen) {
 				feeCap := new(big.Int).Add(gen.BaseFee(), tip)
-				input, err := allowlist.PackModifyAllowList(addr2, allowlist.AdminRole)
+				input, err := allowlist.PackModifyAllowList(common.Address(addr2), allowlist.AdminRole)
 				if err != nil {
 					t.Fatal(err)
 				}
 				tx := types.NewTx(&types.DynamicFeeTx{
 					ChainID:   params.TestChainConfig.ChainID,
-					Nonce:     gen.TxNonce(addr1),
+					Nonce:     gen.TxNonce(common.Address(addr1)),
 					To:        &deployerallowlist.ContractAddress,
 					Gas:       3_000_000,
 					Value:     common.Big0,
@@ -1620,22 +1620,22 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 				gen.AddTx(signedTx)
 			},
 			verifyState: func(sdb *state.StateDB) error {
-				res := deployerallowlist.GetContractDeployerAllowListStatus(sdb, addr1)
+				res := deployerallowlist.GetContractDeployerAllowListStatus(sdb, common.Address(addr1))
 				if allowlist.AdminRole != res {
 					return fmt.Errorf("unexpected allow list status for addr1 %s, expected %s", res, allowlist.AdminRole)
 				}
-				res = deployerallowlist.GetContractDeployerAllowListStatus(sdb, addr2)
+				res = deployerallowlist.GetContractDeployerAllowListStatus(sdb, common.Address(addr2))
 				if allowlist.AdminRole != res {
 					return fmt.Errorf("unexpected allow list status for addr2 %s, expected %s", res, allowlist.AdminRole)
 				}
 				return nil
 			},
 			verifyGenesis: func(sdb *state.StateDB) {
-				res := deployerallowlist.GetContractDeployerAllowListStatus(sdb, addr1)
+				res := deployerallowlist.GetContractDeployerAllowListStatus(sdb, common.Address(addr1))
 				if allowlist.AdminRole != res {
 					t.Fatalf("unexpected allow list status for addr1 %s, expected %s", res, allowlist.AdminRole)
 				}
-				res = deployerallowlist.GetContractDeployerAllowListStatus(sdb, addr2)
+				res = deployerallowlist.GetContractDeployerAllowListStatus(sdb, common.Address(addr2))
 				if allowlist.NoRole != res {
 					t.Fatalf("unexpected allow list status for addr2 %s, expected %s", res, allowlist.NoRole)
 				}
@@ -1650,7 +1650,7 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 				}
 				tx := types.NewTx(&types.DynamicFeeTx{
 					ChainID:   params.TestChainConfig.ChainID,
-					Nonce:     gen.TxNonce(addr1),
+					Nonce:     gen.TxNonce(common.Address(addr1)),
 					To:        &feemanager.ContractAddress,
 					Gas:       3_000_000,
 					Value:     common.Big0,
@@ -1666,7 +1666,7 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 				gen.AddTx(signedTx)
 			},
 			verifyState: func(sdb *state.StateDB) error {
-				res := feemanager.GetFeeManagerStatus(sdb, addr1)
+				res := feemanager.GetFeeManagerStatus(sdb, common.Address(addr1))
 				assert.Equal(allowlist.AdminRole, res)
 
 				storedConfig := feemanager.GetStoredFeeConfig(sdb)
@@ -1678,7 +1678,7 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 				return nil
 			},
 			verifyGenesis: func(sdb *state.StateDB) {
-				res := feemanager.GetFeeManagerStatus(sdb, addr1)
+				res := feemanager.GetFeeManagerStatus(sdb, common.Address(addr1))
 				assert.Equal(allowlist.AdminRole, res)
 
 				feeConfig, _, err := blockchain.GetFeeConfigAt(blockchain.Genesis().Header())
@@ -1746,7 +1746,7 @@ func ReexecBlocks(t *testing.T, create ReexecTestFunc) {
 	genesisBalance := big.NewInt(1000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir(), 4096)
@@ -1758,7 +1758,7 @@ func ReexecBlocks(t *testing.T, create ReexecTestFunc) {
 	// This call generates a chain of 10 blocks.
 	signer := types.HomesteadSigner{}
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 10, 10, func(i int, gen *BlockGen) {
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -1814,25 +1814,25 @@ func ReexecBlocks(t *testing.T, create ReexecTestFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce := sdb.GetNonce(addr1)
+		nonce := sdb.GetNonce(common.Address(addr1))
 		if nonce != 10 {
 			return fmt.Errorf("expected nonce addr1: 10, found nonce: %d", nonce)
 		}
 		transferredFunds := uint256.MustFromBig(big.NewInt(100000))
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance1 := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance1) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance1, balance1)
 		}
 
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		expectedBalance2 := transferredFunds
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
 		}
 
-		nonce = sdb.GetNonce(addr2)
+		nonce = sdb.GetNonce(common.Address(addr2))
 		if nonce != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce)
 		}
@@ -1876,7 +1876,7 @@ func ReexecMaxBlocks(t *testing.T, create ReexecTestFunc) {
 	genesisBalance := big.NewInt(1000000)
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},
+		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: genesisBalance}},
 	}
 
 	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir(), 4096)
@@ -1892,7 +1892,7 @@ func ReexecMaxBlocks(t *testing.T, create ReexecTestFunc) {
 
 	signer := types.HomesteadSigner{}
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, genNumBlocks, 10, func(i int, gen *BlockGen) {
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -1948,25 +1948,25 @@ func ReexecMaxBlocks(t *testing.T, create ReexecTestFunc) {
 
 	// check the state of the last accepted block
 	checkState := func(sdb *state.StateDB) error {
-		nonce := sdb.GetNonce(addr1)
+		nonce := sdb.GetNonce(common.Address(addr1))
 		if nonce != uint64(genNumBlocks) {
 			return fmt.Errorf("expected nonce addr1: %d, found nonce: %d", genNumBlocks, nonce)
 		}
 		transferredFunds := uint256.MustFromBig(big.NewInt(int64(10000 * genNumBlocks)))
-		balance1 := sdb.GetBalance(addr1)
+		balance1 := sdb.GetBalance(common.Address(addr1))
 		genesisBalance := uint256.MustFromBig(genesisBalance)
 		expectedBalance1 := new(uint256.Int).Sub(genesisBalance, transferredFunds)
 		if balance1.Cmp(expectedBalance1) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance1, balance1)
 		}
 
-		balance2 := sdb.GetBalance(addr2)
+		balance2 := sdb.GetBalance(common.Address(addr2))
 		expectedBalance2 := transferredFunds
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
 		}
 
-		nonce = sdb.GetNonce(addr2)
+		nonce = sdb.GetNonce(common.Address(addr2))
 		if nonce != 0 {
 			return fmt.Errorf("expected addr2 nonce: 0, found nonce: %d", nonce)
 		}

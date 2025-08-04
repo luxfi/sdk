@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	ethcrypto "github.com/luxfi/crypto"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/cmd/simulator/config"
 	"github.com/luxfi/evm/cmd/simulator/key"
@@ -212,7 +212,8 @@ func ExecuteLoader(ctx context.Context, config config.Config) error {
 
 	log.Info("Creating transaction sequences...")
 	txGenerator := func(key *ecdsa.PrivateKey, nonce uint64) (*types.Transaction, error) {
-		addr := ethcrypto.PubkeyToAddress(key.PublicKey)
+		cryptoAddr := ethcrypto.PubkeyToAddress(key.PublicKey)
+		addr := common.BytesToAddress(cryptoAddr[:])
 		return types.SignNewTx(key, signer, &types.DynamicFeeTx{
 			ChainID:   chainID,
 			Nonce:     nonce,
@@ -233,7 +234,9 @@ func ExecuteLoader(ctx context.Context, config config.Config) error {
 
 	workers := make([]txs.Worker[*types.Transaction], 0, len(clients))
 	for i, client := range clients {
-		workers = append(workers, NewSingleAddressTxWorker(ctx, client, ethcrypto.PubkeyToAddress(pks[i].PublicKey)))
+		cryptoAddr := ethcrypto.PubkeyToAddress(pks[i].PublicKey)
+		commonAddr := common.BytesToAddress(cryptoAddr[:])
+		workers = append(workers, NewSingleAddressTxWorker(ctx, client, commonAddr))
 	}
 	loader := New(workers, txSequences, config.BatchSize, m)
 	err = loader.Execute(ctx)

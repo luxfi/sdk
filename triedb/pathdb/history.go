@@ -266,14 +266,23 @@ func newHistory(root common.Hash, parent common.Hash, block uint64, states *trie
 		storageList = make(map[common.Address][]common.Hash)
 		incomplete  []common.Address
 	)
-	// states.Accounts uses Hash as key, but we need Address
-	// TODO: Properly convert between Hash and Address
-	// For now, skip account processing
+	// Process accounts from the state set
+	for addr := range states.Accounts {
+		accountList = append(accountList, addr)
+	}
 	slices.SortFunc(accountList, common.Address.Cmp)
 
-	// states.Storages uses Hash as key, but we need Address
-	// TODO: Properly convert between Hash and Address
-	// For now, skip storage processing
+	// Process storage slots from the state set
+	for addr, storage := range states.Storages {
+		var slotList []common.Hash
+		for slot := range storage {
+			slotList = append(slotList, slot)
+		}
+		slices.SortFunc(slotList, common.Hash.Cmp)
+		storageList[addr] = slotList
+	}
+
+	// Process incomplete addresses
 	for addr := range states.Incomplete {
 		incomplete = append(incomplete, addr)
 	}
@@ -287,10 +296,9 @@ func newHistory(root common.Hash, parent common.Hash, block uint64, states *trie
 			block:      block,
 			incomplete: incomplete,
 		},
-		// TODO: Properly convert StateSet types to history types
-		accounts:    make(map[common.Address][]byte),
+		accounts:    states.Accounts,
 		accountList: accountList,
-		storages:    make(map[common.Address]map[common.Hash][]byte),
+		storages:    states.Storages,
 		storageList: storageList,
 	}
 }

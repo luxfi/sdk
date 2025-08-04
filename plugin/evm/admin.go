@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/node/api"
 	"github.com/luxfi/node/utils/profiler"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/plugin/evm/client"
 )
 

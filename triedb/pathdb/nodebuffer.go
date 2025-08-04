@@ -36,7 +36,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/trie/trienode"
 )
 
@@ -167,9 +167,13 @@ func (b *nodebuffer) revert(db ethdb.KeyValueReader, nodes map[common.Hash]map[s
 				// node occurs which is not present in buffer.
 				var nhash common.Hash
 				if owner == (common.Hash{}) {
-					_, nhash = rawdb.ReadAccountTrieNode(db, []byte(path))
+					data := rawdb.ReadAccountTrieNode(db, []byte(path))
+					h := crypto.Keccak256Hash(data)
+					nhash = common.BytesToHash(h[:])
 				} else {
-					_, nhash = rawdb.ReadStorageTrieNode(db, owner, []byte(path))
+					data := rawdb.ReadStorageTrieNode(db, owner, []byte(path))
+					h := crypto.Keccak256Hash(data)
+					nhash = common.BytesToHash(h[:])
 				}
 				// Ignore the clean node in the case described above.
 				if nhash == n.Hash {

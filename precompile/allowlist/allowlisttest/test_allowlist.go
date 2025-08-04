@@ -654,13 +654,14 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 // to have the AdminRole and EnabledRole respectively.
 func SetDefaultRoles(contractAddress common.Address) func(t testing.TB, state *extstate.StateDB) {
 	return func(t testing.TB, state *extstate.StateDB) {
-		allowlist.SetAllowListRole(state, contractAddress, TestAdminAddr, allowlist.AdminRole)
-		allowlist.SetAllowListRole(state, contractAddress, TestManagerAddr, allowlist.ManagerRole)
-		allowlist.SetAllowListRole(state, contractAddress, TestEnabledAddr, allowlist.EnabledRole)
-		require.Equal(t, allowlist.AdminRole, allowlist.GetAllowListStatus(state, contractAddress, TestAdminAddr))
-		require.Equal(t, allowlist.ManagerRole, allowlist.GetAllowListStatus(state, contractAddress, TestManagerAddr))
-		require.Equal(t, allowlist.EnabledRole, allowlist.GetAllowListStatus(state, contractAddress, TestEnabledAddr))
-		require.Equal(t, allowlist.NoRole, allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr))
+		adapter := extstate.NewPrecompileAdapter(state)
+		allowlist.SetAllowListRole(adapter, contractAddress, TestAdminAddr, allowlist.AdminRole)
+		allowlist.SetAllowListRole(adapter, contractAddress, TestManagerAddr, allowlist.ManagerRole)
+		allowlist.SetAllowListRole(adapter, contractAddress, TestEnabledAddr, allowlist.EnabledRole)
+		require.Equal(t, allowlist.AdminRole, allowlist.GetAllowListStatus(adapter, contractAddress, TestAdminAddr))
+		require.Equal(t, allowlist.ManagerRole, allowlist.GetAllowListStatus(adapter, contractAddress, TestManagerAddr))
+		require.Equal(t, allowlist.EnabledRole, allowlist.GetAllowListStatus(adapter, contractAddress, TestEnabledAddr))
+		require.Equal(t, allowlist.NoRole, allowlist.GetAllowListStatus(adapter, contractAddress, TestNoRoleAddr))
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/trie"
 
 	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +49,7 @@ func TestCappedMemoryTrieWriter(t *testing.T) {
 				Root:   common.BigToHash(bigI),
 				Number: bigI,
 			},
-			nil, nil, nil, nil,
+			nil, nil, trie.NewStackTrie(nil),
 		)
 
 		assert.NoError(w.InsertTrie(block))
@@ -87,7 +88,7 @@ func TestNoPruningTrieWriter(t *testing.T) {
 				Root:   common.BigToHash(bigI),
 				Number: bigI,
 			},
-			nil, nil, nil, nil,
+			nil, nil, trie.NewStackTrie(nil),
 		)
 
 		assert.NoError(w.InsertTrie(block))

@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm/message"
 )

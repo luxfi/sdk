@@ -35,7 +35,7 @@ import (
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/accounts/external"
 	"github.com/luxfi/geth/accounts/keystore"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 )
 
 // Config represents a small collection of configuration values to fine tune the

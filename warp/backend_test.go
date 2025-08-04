@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/database"
 	"github.com/luxfi/database/memdb"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"

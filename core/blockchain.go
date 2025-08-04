@@ -34,7 +34,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -48,8 +47,7 @@ import (
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/geth/stateconf"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
@@ -63,8 +61,8 @@ import (
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
 	// "github.com/luxfi/evm/triedb/firewood"
-	"github.com/luxfi/evm/triedb/hashdb"
-	"github.com/luxfi/evm/triedb/pathdb"
+	"github.com/luxfi/geth/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/pathdb"
 
 	// Force geth metrics of the same name to be registered first.
 	_ "github.com/luxfi/geth/core"
@@ -223,18 +221,17 @@ type CacheConfig struct {
 func (c *CacheConfig) triedbConfig() *triedb.Config {
 	config := &triedb.Config{Preimages: c.Preimages}
 	if c.StateScheme == rawdb.HashScheme || c.StateScheme == "" {
-		config.DBOverride = hashdb.Config{
-			CleanCacheSize:                  c.TrieCleanLimit * 1024 * 1024,
-			StatsPrefix:                     trieCleanCacheStatsNamespace,
-			ReferenceRootAtomicallyOnUpdate: true,
-		}.BackendConstructor
+		config.HashDB = &hashdb.Config{
+			CleanCacheSize: c.TrieCleanLimit * 1024 * 1024,
+		}
 	}
 	if c.StateScheme == rawdb.PathScheme {
-		config.DBOverride = pathdb.Config{
+		config.PathDB = &pathdb.Config{
 			StateHistory:   c.StateHistory,
-			CleanCacheSize: c.TrieCleanLimit * 1024 * 1024,
-			DirtyCacheSize: c.TrieDirtyLimit * 1024 * 1024,
-		}.BackendConstructor
+			TrieCleanSize:  c.TrieCleanLimit * 1024 * 1024,
+			StateCleanSize: c.SnapshotLimit * 1024 * 1024,
+			WriteBufferSize: c.TrieDirtyLimit * 1024 * 1024,
+		}
 	}
 	// if c.StateScheme == customrawdb.FirewoodScheme {
 	// 	// ChainDataDir may not be set during some tests, where this path won't be called.
@@ -1152,7 +1149,8 @@ func TotalFees(block *types.Block, receipts []*types.Receipt) (*big.Int, error) 
 			// legacy block, no baseFee
 			minerFee = tx.GasPrice()
 		} else {
-			minerFee = new(big.Int).Add(baseFee, tx.EffectiveGasTipValue(baseFee))
+			effectiveTip, _ := tx.EffectiveGasTip(baseFee)
+			minerFee = new(big.Int).Add(baseFee, effectiveTip)
 		}
 		feesWei.Add(feesWei, new(big.Int).Mul(new(big.Int).SetUint64(receipts[i].GasUsed), minerFee))
 	}
@@ -1405,7 +1403,7 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	blockStateInitTimer.Inc(time.Since(substart).Milliseconds())
 
 	// Enable prefetching to pull in trie node paths while processing transactions
-	statedb.StartPrefetcher("chain", state.WithConcurrentWorkers(bc.cacheConfig.TriePrefetcherParallelism))
+	statedb.StartPrefetcher("chain", nil)
 	defer statedb.StopPrefetcher()
 
 	// Process block using the parent state as reference point
@@ -1429,20 +1427,22 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	vtime := time.Since(vstart)
 
 	// Update the metrics touched during block processing and validation
-	accountReadTimer.Inc(statedb.AccountReads.Milliseconds())                  // Account reads are complete(in processing)
-	storageReadTimer.Inc(statedb.StorageReads.Milliseconds())                  // Storage reads are complete(in processing)
-	snapshotAccountReadTimer.Inc(statedb.SnapshotAccountReads.Milliseconds())  // Account reads are complete(in processing)
-	snapshotStorageReadTimer.Inc(statedb.SnapshotStorageReads.Milliseconds())  // Storage reads are complete(in processing)
-	accountUpdateTimer.Inc(statedb.AccountUpdates.Milliseconds())              // Account updates are complete(in validation)
-	storageUpdateTimer.Inc(statedb.StorageUpdates.Milliseconds())              // Storage updates are complete(in validation)
-	accountHashTimer.Inc(statedb.AccountHashes.Milliseconds())                 // Account hashes are complete(in validation)
-	storageHashTimer.Inc(statedb.StorageHashes.Milliseconds())                 // Storage hashes are complete(in validation)
-	triehash := statedb.AccountHashes + statedb.StorageHashes                  // The time spent on tries hashing
-	trieUpdate := statedb.AccountUpdates + statedb.StorageUpdates              // The time spent on tries update
-	trieRead := statedb.SnapshotAccountReads + statedb.AccountReads            // The time spent on account read
-	trieRead += statedb.SnapshotStorageReads + statedb.StorageReads            // The time spent on storage read
-	blockExecutionTimer.Inc((ptime - trieRead).Milliseconds())                 // The time spent on EVM processing
-	blockValidationTimer.Inc((vtime - (triehash + trieUpdate)).Milliseconds()) // The time spent on block validation
+	// TODO: Fix metrics - these fields don't exist on our StateDB
+	// accountReadTimer.Inc(statedb.AccountReads.Milliseconds())                  // Account reads are complete(in processing)
+	// storageReadTimer.Inc(statedb.StorageReads.Milliseconds())                  // Storage reads are complete(in processing)
+	// snapshotAccountReadTimer.Inc(statedb.SnapshotAccountReads.Milliseconds())  // Account reads are complete(in processing)
+	// snapshotStorageReadTimer.Inc(statedb.SnapshotStorageReads.Milliseconds())  // Storage reads are complete(in processing)
+	// accountUpdateTimer.Inc(statedb.AccountUpdates.Milliseconds())              // Account updates are complete(in validation)
+	// storageUpdateTimer.Inc(statedb.StorageUpdates.Milliseconds())              // Storage updates are complete(in validation)
+	// accountHashTimer.Inc(statedb.AccountHashes.Milliseconds())                 // Account hashes are complete(in validation)
+	// storageHashTimer.Inc(statedb.StorageHashes.Milliseconds())                 // Storage hashes are complete(in validation)
+	// triehash := statedb.AccountHashes + statedb.StorageHashes                  // The time spent on tries hashing
+	// trieUpdate := statedb.AccountUpdates + statedb.StorageUpdates              // The time spent on tries update
+	// trieRead := statedb.SnapshotAccountReads + statedb.AccountReads            // The time spent on account read
+	var triehash, trieUpdate, trieRead time.Duration
+	// trieRead += statedb.SnapshotStorageReads + statedb.StorageReads            // The time spent on storage read
+	blockExecutionTimer.Inc(ptime.Milliseconds())                              // The time spent on EVM processing (approximate)
+	blockValidationTimer.Inc(vtime.Milliseconds())                             // The time spent on block validation (approximate)
 	blockTrieOpsTimer.Inc((triehash + trieUpdate + trieRead).Milliseconds())   // The time spent on trie operations
 
 	// If [writes] are disabled, skip [writeBlockWithState] so that we do not write the block
@@ -1764,7 +1764,7 @@ func (bc *BlockChain) reprocessBlock(parent *types.Block, current *types.Block) 
 	}
 
 	// Enable prefetching to pull in trie node paths while processing transactions
-	statedb.StartPrefetcher("chain", state.WithConcurrentWorkers(bc.cacheConfig.TriePrefetcherParallelism))
+	statedb.StartPrefetcher("chain", nil)
 	defer statedb.StopPrefetcher()
 
 	// Process previously stored block
@@ -1789,12 +1789,10 @@ func (bc *BlockChain) commitWithSnap(
 	// We pass through block hashes to the Update calls to ensure that we can uniquely
 	// identify states despite identical state roots.
 	snapshotOpt := snapshot.WithBlockHashes(current.Hash(), current.ParentHash())
-	triedbOpt := stateconf.WithTrieDBUpdatePayload(current.ParentHash(), current.Hash())
 	root, err := statedb.Commit(
 		current.NumberU64(),
 		bc.chainConfig.IsEIP158(current.Number()),
-		stateconf.WithSnapshotUpdateOpts(snapshotOpt),
-		stateconf.WithTrieDBUpdateOpts(triedbOpt),
+		false, // noStorageWiping
 	)
 	if err != nil {
 		return common.Hash{}, err
@@ -1811,7 +1809,7 @@ func (bc *BlockChain) commitWithSnap(
 	// Because Firewood relies on tracking block hashes in a tree, we need to notify the
 	// database that this block is empty.
 	if bc.CacheConfig().StateScheme == customrawdb.FirewoodScheme && root == parentRoot {
-		if err := bc.triedb.Update(root, parentRoot, current.NumberU64(), nil, nil, triedbOpt); err != nil {
+		if err := bc.triedb.Update(root, parentRoot, current.NumberU64(), nil, nil); err != nil {
 			return common.Hash{}, fmt.Errorf("failed to update trie for block %s: %w", current.Hash(), err)
 		}
 	}

@@ -5,7 +5,6 @@ package state
 import (
 	"encoding/binary"
 	"math/rand"
-	"path/filepath"
 	"slices"
 	"testing"
 
@@ -13,11 +12,10 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/geth/stateconf"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/triedb"
 	// "github.com/luxfi/evm/triedb/firewood"
-	"github.com/luxfi/evm/triedb/hashdb"
+	"github.com/luxfi/geth/triedb/hashdb"
 	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 )
@@ -71,7 +69,9 @@ func newFuzzState(t *testing.T) *fuzzState {
 	hashState := NewDatabaseWithConfig(
 		rawdb.NewMemoryDatabase(),
 		&triedb.Config{
-			DBOverride: hashdb.Defaults.BackendConstructor,
+			HashDB: &hashdb.Config{
+				CleanCacheSize: 256 * 1024 * 1024,
+			},
 		})
 	ethRoot := types.EmptyRootHash
 	hashTr, err := hashState.OpenTrie(ethRoot)
@@ -124,8 +124,7 @@ func (fs *fuzzState) commit() {
 	for _, tr := range fs.merkleTries {
 		mergedNodeSet := trienode.NewMergedNodeSet()
 		for addr, str := range tr.openStorageTries {
-			accountStateRoot, set, err := str.Commit(false)
-			fs.require.NoError(err, "failed to commit storage trie for account %s in %s", addr.Hex(), tr.name)
+			accountStateRoot, set := str.Commit(false)
 			// A no-op change returns a nil set, which will cause merge to panic.
 			if set != nil {
 				fs.require.NoError(mergedNodeSet.Merge(set), "failed to merge storage trie nodeset for account %s in %s", addr.Hex(), tr.name)
@@ -138,11 +137,10 @@ func (fs *fuzzState) commit() {
 			fs.require.NotNil(acc, "account %s is nil in %s", addr.Hex(), tr.name)
 
 			acc.Root = accountStateRoot
-			fs.require.NoError(tr.accountTrie.UpdateAccount(addr, acc), "failed to update account %s in %s", addr.Hex(), tr.name)
+			fs.require.NoError(tr.accountTrie.UpdateAccount(addr, acc, 0), "failed to update account %s in %s", addr.Hex(), tr.name)
 		}
 
-		updatedRoot, set, err := tr.accountTrie.Commit(true)
-		fs.require.NoError(err, "failed to commit account trie in %s", tr.name)
+		updatedRoot, set := tr.accountTrie.Commit(true)
 
 		// A no-op change returns a nil set, which will cause merge to panic.
 		if set != nil {
@@ -163,6 +161,7 @@ func (fs *fuzzState) commit() {
 		tr.openStorageTries = make(map[common.Address]Trie)
 		fs.require.NoError(tr.ethDatabase.TrieDB().Commit(updatedRoot, true),
 			"failed to commit %s: expected hashdb root %s", tr.name, fs.merkleTries[0].lastRoot.Hex())
+		var err error
 		tr.accountTrie, err = tr.ethDatabase.OpenTrie(tr.lastRoot)
 		fs.require.NoError(err, "failed to reopen account trie for %s", tr.name)
 	}
@@ -192,7 +191,7 @@ func (fs *fuzzState) createAccount() {
 	fs.currentAddrs = append(fs.currentAddrs, addr)
 
 	for _, tr := range fs.merkleTries {
-		fs.require.NoError(tr.accountTrie.UpdateAccount(addr, acc), "failed to create account %s in %s", addr.Hex(), tr.name)
+		fs.require.NoError(tr.accountTrie.UpdateAccount(addr, acc, 0), "failed to create account %s in %s", addr.Hex(), tr.name)
 	}
 }
 
@@ -214,7 +213,7 @@ func (fs *fuzzState) updateAccount(addrIndex int) {
 		acc.Nonce++
 		acc.CodeHash = crypto.Keccak256Hash(acc.CodeHash[:]).Bytes()
 		acc.Balance.Add(acc.Balance, uint256.NewInt(3))
-		fs.require.NoError(tr.accountTrie.UpdateAccount(addr, acc), "failed to update account %s in %s", addr.Hex(), tr.name)
+		fs.require.NoError(tr.accountTrie.UpdateAccount(addr, acc, 0), "failed to update account %s in %s", addr.Hex(), tr.name)
 	}
 }
 

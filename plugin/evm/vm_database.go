@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/plugin/evm/config"
 	"github.com/luxfi/evm/plugin/evm/database"
 )

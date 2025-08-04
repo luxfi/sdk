@@ -43,7 +43,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/davecgh/go-spew/spew"
 )
 

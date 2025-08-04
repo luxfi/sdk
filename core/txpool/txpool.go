@@ -37,8 +37,8 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
-	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/log"
+	// "github.com/luxfi/metrics" // TODO: Add metrics support
 	"github.com/luxfi/evm/core"
 )
 
@@ -156,10 +156,11 @@ func (p *TxPool) reserver(id int, subpool SubPool) AddressReserver {
 				return ErrAlreadyReserved
 			}
 			p.reservations[addr] = subpool
-			if metrics.Enabled {
-				m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
-				metrics.GetOrRegisterGauge(m, nil).Inc(1)
-			}
+			// TODO: Add metrics support for luxfi/metrics
+			// if metrics.Enabled {
+			// 	m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
+			// 	metrics.GetOrRegisterGauge(m, nil).Inc(1)
+			// }
 			return nil
 		}
 		// Ensure subpools only attempt to unreserve their own owned addresses,
@@ -173,10 +174,11 @@ func (p *TxPool) reserver(id int, subpool SubPool) AddressReserver {
 			return errors.New("address not owned")
 		}
 		delete(p.reservations, addr)
-		if metrics.Enabled {
-			m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
-			metrics.GetOrRegisterGauge(m, nil).Dec(1)
-		}
+		// TODO: Add metrics support for luxfi/metrics
+		// if metrics.Enabled {
+		// 	m := fmt.Sprintf("%s/%d", reservationsGaugeName, id)
+		// 	metrics.GetOrRegisterGauge(m, nil).Dec(1)
+		// }
 		return nil
 	}
 }

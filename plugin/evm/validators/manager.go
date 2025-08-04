@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 )
 
 const (

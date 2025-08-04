@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 
 	"github.com/luxfi/evm/sync/client/stats"
 
@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/network"
@@ -271,7 +271,8 @@ func parseCode(codec codec.Manager, req message.Request, data []byte) (interface
 		}
 
 		hash := crypto.Keccak256Hash(code)
-		if hash != codeRequest.Hashes[i] {
+		expectedHash := common.BytesToHash(codeRequest.Hashes[i][:])
+		if hash != crypto.Hash(expectedHash) {
 			return nil, 0, fmt.Errorf("%w for code at index %d: (got %v) (expected %v)", errHashMismatch, i, hash, codeRequest.Hashes[i])
 		}
 		totalBytes += len(code)

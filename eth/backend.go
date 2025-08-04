@@ -43,7 +43,7 @@ import (
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
@@ -96,8 +96,8 @@ type Ethereum struct {
 	engine         consensus.Engine
 	accountManager *accounts.Manager
 
-	bloomRequests     chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
-	bloomIndexer      *core.ChainIndexer             // Bloom indexer operating during block imports
+	// bloomRequests     chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests - Deprecated
+	// bloomIndexer      *core.ChainIndexer             // Bloom indexer operating during block imports - Deprecated
 	closeBloomHandler chan struct{}
 
 	APIBackend *EthAPIBackend
@@ -182,8 +182,8 @@ func New(
 		closeBloomHandler: make(chan struct{}),
 		networkID:         networkID,
 		etherbase:         config.Miner.Etherbase,
-		bloomRequests:     make(chan chan *bloombits.Retrieval),
-		bloomIndexer:      core.NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
+		// bloomRequests:     make(chan chan *bloombits.Retrieval), // Deprecated
+		// bloomIndexer:      core.NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms), // Deprecated
 		settings:          settings,
 		shutdownTracker:   shutdowncheck.NewShutdownTracker(chainDb),
 	}
@@ -256,7 +256,7 @@ func New(
 		return nil, err
 	}
 
-	eth.bloomIndexer.Start(eth.blockchain)
+	// eth.bloomIndexer.Start(eth.blockchain) // Deprecated
 
 	// config.BlobPool.Datadir = ""
 	// blobPool := blobpool.New(config.BlobPool, &chainWithFinalBlock{eth.blockchain})
@@ -380,7 +380,7 @@ func (s *Ethereum) ChainDb() ethdb.Database           { return s.chainDb }
 
 func (s *Ethereum) NetVersion() uint64               { return s.networkID }
 func (s *Ethereum) ArchiveMode() bool                { return !s.config.Pruning }
-func (s *Ethereum) BloomIndexer() *core.ChainIndexer { return s.bloomIndexer }
+// func (s *Ethereum) BloomIndexer() *core.ChainIndexer { return s.bloomIndexer } // Deprecated
 
 // Start implements node.Lifecycle, starting all internal goroutines needed by the
 // Ethereum protocol implementation.
@@ -396,7 +396,7 @@ func (s *Ethereum) Start() {
 // Ethereum protocol.
 // FIXME remove error from type if this will never return an error
 func (s *Ethereum) Stop() error {
-	s.bloomIndexer.Close()
+	// s.bloomIndexer.Close() // Deprecated
 	close(s.closeBloomHandler)
 	s.txPool.Close()
 	s.blockchain.Stop()

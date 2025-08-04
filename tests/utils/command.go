@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/api/health"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/go-cmd/cmd"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/require"

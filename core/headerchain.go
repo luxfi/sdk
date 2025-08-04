@@ -122,11 +122,12 @@ func (hc *HeaderChain) GetBlockNumber(hash common.Hash) *uint64 {
 	if cached, ok := hc.numberCache.Get(hash); ok {
 		return &cached
 	}
-	number := rawdb.ReadHeaderNumber(hc.chainDb, hash)
-	if number != nil {
-		hc.numberCache.Add(hash, *number)
+	number, found := rawdb.ReadHeaderNumber(hc.chainDb, hash)
+	if found {
+		hc.numberCache.Add(hash, number)
+		return &number
 	}
-	return number
+	return nil
 }
 
 // GetHeader retrieves a block header from the database by hash and number,

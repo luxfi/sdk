@@ -8,6 +8,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	ethcrypto "github.com/luxfi/crypto"
 	"github.com/luxfi/evm/ethclient"
@@ -53,7 +54,8 @@ func GenerateTxSequences(ctx context.Context, generator CreateTx, client ethclie
 }
 
 func addTxs(ctx context.Context, txSequence *txSequence, generator CreateTx, client ethclient.Client, key *ecdsa.PrivateKey, numTxs uint64) error {
-	address := ethcrypto.PubkeyToAddress(key.PublicKey)
+	cryptoAddr := ethcrypto.PubkeyToAddress(key.PublicKey)
+	address := common.BytesToAddress(cryptoAddr[:])
 	startingNonce, err := client.NonceAt(ctx, address, nil)
 	if err != nil {
 		return err

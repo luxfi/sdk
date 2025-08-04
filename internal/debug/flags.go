@@ -37,12 +37,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/exp/slog"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -186,7 +185,6 @@ func init() {
 // It should be called as early as possible in the program.
 func Setup(ctx *cli.Context) error {
 	var (
-		handler        slog.Handler
 		terminalOutput = io.Writer(os.Stderr)
 		output         io.Writer
 		logFmtFlag     = ctx.String(logFormatFlag.Name)
@@ -233,32 +231,24 @@ func Setup(ctx *cli.Context) error {
 		output = terminalOutput
 	}
 
-	switch {
-	case ctx.Bool(logjsonFlag.Name):
-		// Retain backwards compatibility with `--log.json` flag if `--log.format` not set
-		defer log.Warn("The flag '--log.json' is deprecated, please use '--log.format=json' instead")
-		handler = log.JSONHandler(output)
-	case logFmtFlag == "json":
-		handler = log.JSONHandler(output)
-	case logFmtFlag == "logfmt":
-		handler = log.LogfmtHandler(output)
-	case logFmtFlag == "", logFmtFlag == "terminal":
-		useColor := (isatty.IsTerminal(os.Stderr.Fd()) || isatty.IsCygwinTerminal(os.Stderr.Fd())) && os.Getenv("TERM") != "dumb"
-		if useColor {
-			terminalOutput = colorable.NewColorableStderr()
-			if logOutputFile != nil {
-				output = io.MultiWriter(logOutputFile, terminalOutput)
-			} else {
-				output = terminalOutput
-			}
+	// For now, just use terminal handler with the configured output
+	// TODO: Add support for different log formats when the logging library is updated
+	useColor := (isatty.IsTerminal(os.Stderr.Fd()) || isatty.IsCygwinTerminal(os.Stderr.Fd())) && os.Getenv("TERM") != "dumb"
+	if useColor {
+		terminalOutput = colorable.NewColorableStderr()
+		if logOutputFile != nil {
+			output = io.MultiWriter(logOutputFile, terminalOutput)
+		} else {
+			output = terminalOutput
 		}
-		handler = log.NewTerminalHandler(output, useColor)
-	default:
-		// Unknown log format specified
-		return fmt.Errorf("unknown log format: %v", ctx.String(logFormatFlag.Name))
 	}
-
-	glogger = log.NewGlogHandler(handler)
+	
+	// Use terminal handler for now
+	glogger = log.NewGlogHandler(log.NewTerminalHandler(output, useColor))
+	
+	if ctx.Bool(logjsonFlag.Name) {
+		log.Warn("The flag '--log.json' is deprecated, please use '--log.format=json' instead")
+	}
 
 	// logging
 	verbosity := log.FromLegacyLevel(ctx.Int(verbosityFlag.Name))
@@ -273,7 +263,8 @@ func Setup(ctx *cli.Context) error {
 	}
 	glogger.Vmodule(vmodule)
 
-	log.SetDefault(log.NewLogger(glogger))
+	// Set the default logger with glog handler
+	log.SetDefault(log.Root())
 
 	// profiling, tracing
 	runtime.MemProfileRate = memprofilerateFlag.Value

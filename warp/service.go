@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	warpprecompile "github.com/luxfi/evm/precompile/contracts/warp"
 	warpValidators "github.com/luxfi/evm/warp/validators"
 )
@@ -108,19 +108,19 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 	}
 
 	state := warpValidators.NewState(validatorState, a.chainContext.SubnetID, a.chainContext.ChainID, a.requirePrimaryNetworkSigners())
-	validatorSet, err := warp.GetCanonicalValidatorSetFromSubnetID(ctx, state, pChainHeight, subnetID)
+	validators, totalWeight, err := warp.GetCanonicalValidatorSet(ctx, state, pChainHeight, subnetID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validator set: %w", err)
 	}
-	if len(validatorSet.Validators) == 0 {
+	if len(validators) == 0 {
 		return nil, fmt.Errorf("%w (SubnetID: %s, Height: %d)", errNoValidators, subnetID, pChainHeight)
 	}
 
 	log.Debug("Fetching signature",
 		"sourceSubnetID", subnetID,
 		"height", pChainHeight,
-		"numValidators", len(validatorSet.Validators),
-		"totalWeight", validatorSet.TotalWeight,
+		"numValidators", len(validators),
+		"totalWeight", totalWeight,
 	)
 	warpMessage := &warp.Message{
 		UnsignedMessage: *unsignedMessage,
@@ -130,7 +130,7 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 		ctx,
 		warpMessage,
 		nil,
-		validatorSet.Validators,
+		validators,
 		quorumNum,
 		warpprecompile.WarpQuorumDenominator,
 	)

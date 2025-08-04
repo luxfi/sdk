@@ -40,7 +40,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/geth/log"
+	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/params"
