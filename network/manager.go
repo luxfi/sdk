@@ -19,7 +19,7 @@ type NetworkManager struct {
 	networks  map[string]*Network
 	// netrunner integration
 	netrunnerPath string
-	tmpnetConfig  *tmpnet.Config
+	// tmpnetConfig will be added when netrunner is available
 }
 
 // Network represents a managed Lux network
