@@ -20,7 +20,7 @@ const (
 )
 
 // var _ block.StateSummary = (*SyncSummary)(nil)
-// Note: StateSummary interface seems to be removed from node/snow/engine/snowman/block
+// Note: StateSummary interface seems to be removed from node/consensus/engine/snowman/block
 
 // SyncSummary provides the information necessary to sync a node starting
 // at the given block.

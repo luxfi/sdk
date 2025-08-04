@@ -38,13 +38,13 @@ done
 git clean -df -- "${upstream_dirs}"
 make_commit "${commit_msg_remove_upstream}"
 
-sed_command='s!\([^/]\)github.com/ethereum/go-ethereum!\1github.com/luxfi/evm!g'
+sed_command='s!\([^/]\)github.com/luxfi/geth!\1github.com/luxfi/evm!g'
 find . \( -name '*.go' -o -name 'go.mod' -o -name 'build_test.sh' \) -exec sed -i '' -e "${sed_command}" {} \;
 for dir in ${upstream_dirs}; do
-    sed_command="s!\"github.com/luxfi/evm/${dir}\"!\"github.com/ethereum/go-ethereum/${dir}\"!g"
+    sed_command="s!\"github.com/luxfi/evm/${dir}\"!\"github.com/luxfi/geth/${dir}\"!g"
     find . -name '*.go' -exec sed -i '' -e "${sed_command}" {} \;
 done
-go get github.com/ethereum/go-ethereum@"$1"
+go get github.com/luxfi/geth@"$1"
 gofmt -w .
 go mod tidy
 git add -u .

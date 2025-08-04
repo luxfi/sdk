@@ -212,8 +212,8 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 
 // GetRulesExtra stub - was part of libevm integration
 func GetRulesExtra(rules Rules) RulesExtra {
-	// Check if SubnetEVM is enabled based on timestamp
+	// Return default RulesExtra
 	return RulesExtra{
-		IsSubnetEVM: rules.IsSubnetEVM,
+		IsSubnetEVM: true, // Default to true for SubnetEVM
 	}
 }

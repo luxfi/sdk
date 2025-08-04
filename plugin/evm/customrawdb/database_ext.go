@@ -61,7 +61,11 @@ func InspectDatabase(db ethdb.Database, keyPrefix, keyStart []byte) error {
 		}),
 	}
 
-	return rawdb.InspectDatabase(db, keyPrefix, keyStart, options...)
+	// Use InspectDatabaseExt if available, otherwise fallback to InspectDatabase
+	if len(options) > 0 {
+		return rawdb.InspectDatabaseExt(db, keyPrefix, keyStart, options...)
+	}
+	return rawdb.InspectDatabase(db, keyPrefix, keyStart)
 }
 
 // ParseStateSchemeExt parses the state scheme from the provided string.

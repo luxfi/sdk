@@ -8,8 +8,8 @@
 # Example: `scripts/diff_against.sh b20b4a71598481443d60b261d3e5dcb37f8a0d82` to compare with v1.13.8.
 # 
 # *NOTE* Before running this script:
-# 1. Run `scripts/format_as_upstream.sh` to reformat this repo as `ethereum/go-ethereum`.
-# 2. Add geth as a remote: `git remote add -f geth git@github.com:ethereum/go-ethereum.git`.
+# 1. Run `scripts/format_as_upstream.sh` to reformat this repo as `luxfi/geth`.
+# 2. Add geth as a remote: `git remote add -f geth git@github.com:luxfi/geth.git`.
 # 3. Find the geth commit for the latest version merged into this repo.
 #
 
