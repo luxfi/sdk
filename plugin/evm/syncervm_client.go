@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/database/versiondb"
+	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"

@@ -6,7 +6,7 @@ package validators
 import (
 	"testing"
 
-	"github.com/luxfi/node/database/memdb"
+	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/node/ids"
 	"github.com/luxfi/evm/plugin/evm/validators/state"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"

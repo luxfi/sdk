@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/geth/common"
-	ethcrypto "github.com/luxfi/crypto"
+	"github.com/luxfi/crypto"
 )
 
 type Key struct {
@@ -20,12 +20,13 @@ type Key struct {
 }
 
 func CreateKey(pk *ecdsa.PrivateKey) *Key {
-	return &Key{pk, ethcrypto.PubkeyToAddress(pk.PublicKey)}
+	addr := crypto.PubkeyToAddress(pk.PublicKey)
+	return &Key{pk, common.Address(addr)}
 }
 
 // Load attempts to open a [Key] stored at [file].
 func Load(file string) (*Key, error) {
-	pk, err := ethcrypto.LoadECDSA(file)
+	pk, err := crypto.LoadECDSA(file)
 	if err != nil {
 		return nil, fmt.Errorf("problem loading private key from %s: %w", file, err)
 	}
@@ -72,12 +73,12 @@ func LoadAll(ctx context.Context, dir string) ([]*Key, error) {
 // address).
 func (k *Key) Save(dir string) error {
 	fp := filepath.Join(dir, k.Address.Hex())
-	return ethcrypto.SaveECDSA(fp, k.PrivKey)
+	return crypto.SaveECDSA(fp, k.PrivKey)
 }
 
 // Generate creates a new [Key] and returns it.
 func Generate() (*Key, error) {
-	pk, err := ethcrypto.GenerateKey()
+	pk, err := crypto.GenerateKey()
 	if err != nil {
 		return nil, fmt.Errorf("%w: cannot generate key", err)
 	}

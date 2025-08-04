@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/database"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/database"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus"
 	luxuptime "github.com/luxfi/node/consensus/uptime"
 	luxvalidators "github.com/luxfi/node/consensus/validators"

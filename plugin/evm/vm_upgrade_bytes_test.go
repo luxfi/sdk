@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/api/metrics"
+	"github.com/luxfi/metrics"
 	"github.com/luxfi/node/consensus"
 	commonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/consensus/engine/enginetest"
