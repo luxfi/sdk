@@ -188,7 +188,7 @@ func TestDiskLayerExternalInvalidationPartialFlatten(t *testing.T) {
 // layer to check the usual mode of operation where the accumulator is retained.
 func TestDiffLayerExternalInvalidationPartialFlatten(t *testing.T) {
 	// Un-commenting this triggers the bloom set to be deterministic. The values below
-	// were used to trigger the flaw described in https://github.com/ethereum/go-ethereum/issues/27254.
+	// were used to trigger the flaw described in https://github.com/luxfi/geth/issues/27254.
 	// bloomDestructHasherOffset, bloomAccountHasherOffset, bloomStorageHasherOffset = 14, 24, 5
 
 	// Create an empty base layer and a snapshot tree out of it

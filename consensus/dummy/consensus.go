@@ -405,8 +405,12 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 
 	// Header seems complete, assemble into a block and return
+	body := &types.Body{
+		Transactions: txs,
+		Uncles:       uncles,
+	}
 	return types.NewBlock(
-		header, txs, uncles, receipts, trie.NewStackTrie(nil),
+		header, body, receipts, trie.NewStackTrie(nil),
 	), nil
 }
 

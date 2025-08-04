@@ -38,7 +38,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/geth/stateconf"
+	"github.com/luxfi/geth/stateconf"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/rlp"
@@ -761,4 +761,16 @@ type reader struct {
 func (reader *reader) Node(owner common.Hash, path []byte, hash common.Hash) ([]byte, error) {
 	blob, _ := reader.db.node(hash)
 	return blob, nil
+}
+
+// Account directly retrieves the account associated with a particular hash.
+func (reader *reader) Account(hash common.Hash) (*types.SlimAccount, error) {
+	// HashDB doesn't store accounts directly, return nil
+	return nil, nil
+}
+
+// Storage directly retrieves the storage data associated with a particular hash.
+func (reader *reader) Storage(accountHash, storageHash common.Hash) ([]byte, error) {
+	// HashDB doesn't store storage directly, return nil
+	return nil, nil
 }

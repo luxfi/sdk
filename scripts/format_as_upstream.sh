@@ -29,7 +29,7 @@ find . -name '*.go' -exec sed -i '' -e "${sed_command}" {} \;
 git add -u .
 make_commit "${commit_msg_remove_header}"
 
-upstream_tag=$(grep -o 'github.com/ethereum/go-ethereum v.*' go.mod | cut -f2 -d' ')
+upstream_tag=$(grep -o 'github.com/luxfi/geth v.*' go.mod | cut -f2 -d' ')
 upstream_dirs=$(sed -e 's/"github.com\/ethereum\/go-ethereum\/\(.*\)"/\1/' "${script_dir}"/geth-allowed-packages.txt  | xargs)
 upstream_dirs_array=()
 IFS=" " read -r -a upstream_dirs_array <<< "$upstream_dirs"
@@ -39,7 +39,7 @@ git checkout "${upstream_tag}" -- "${upstream_dirs_array[@]}"
 git add "${upstream_dirs_array[@]}"
 make_commit "${commit_msg_add_upstream}"
 
-sed_command='s!\([^/]\)github.com/luxfi/evm!\1github.com/ethereum/go-ethereum!g'
+sed_command='s!\([^/]\)github.com/luxfi/evm!\1github.com/luxfi/geth!g'
 find . \( -name '*.go' -o -name 'go.mod' -o -name 'build_test.sh' \) -exec sed -i '' -e "${sed_command}" {} \;
 gofmt -w .
 go mod tidy
