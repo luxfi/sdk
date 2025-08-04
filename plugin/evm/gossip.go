@@ -10,16 +10,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	ethcommon "github.com/luxfi/geth/common"
-	"github.com/luxfi/log"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/log"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/utils/logging"
+	enginecore "github.com/luxfi/node/consensus/engine/core"
 
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
@@ -40,7 +39,7 @@ var (
 )
 
 func newTxGossipHandler[T gossip.Gossipable](
-	log logging.Logger,
+	log log.Logger,
 	marshaller gossip.Marshaller[T],
 	mempool gossip.Set[T],
 	metrics gossip.Metrics,
@@ -85,8 +84,13 @@ func (t txGossipHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, gossi
 	t.appGossipHandler.AppGossip(ctx, nodeID, gossipBytes)
 }
 
-func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *common.AppError) {
+func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *enginecore.AppError) {
 	return t.appRequestHandler.AppRequest(ctx, nodeID, deadline, requestBytes)
+}
+
+func (t txGossipHandler) CrossChainAppRequest(ctx context.Context, chainID ids.ID, deadline time.Time, requestBytes []byte) ([]byte, error) {
+	// Cross-chain requests not supported for tx gossip
+	return nil, fmt.Errorf("cross-chain requests not supported")
 }
 
 func NewGossipEthTxPool(mempool *txpool.TxPool, registerer prometheus.Registerer) (*GossipEthTxPool, error) {
@@ -171,7 +175,7 @@ func (g *GossipEthTxPool) Add(tx *GossipEthTx) error {
 // Has should just return whether or not the [txID] is still in the mempool,
 // not whether it is in the mempool AND pending.
 func (g *GossipEthTxPool) Has(txID ids.ID) bool {
-	return g.mempool.Has(ethcommon.Hash(txID))
+	return g.mempool.Has(common.Hash(txID))
 }
 
 func (g *GossipEthTxPool) Iterate(f func(tx *GossipEthTx) bool) {

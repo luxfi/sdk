@@ -13,6 +13,7 @@ import (
 
 	"github.com/luxfi/metrics"
 	luxdatabase "github.com/luxfi/node/database"
+	"github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
 	"github.com/luxfi/database/pebbledb"
 	"github.com/luxfi/database/prefixdb"
@@ -23,7 +24,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/plugin/evm/config"
-	"github.com/luxfi/evm/plugin/evm/database"
+	evmdatabase "github.com/luxfi/evm/plugin/evm/database"
 )
 
 const (
@@ -67,7 +68,9 @@ func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 				return err
 			}
 			log.Info("Using standalone database for the chain state", "DatabaseConfig", dbConfig)
-			db, err = newStandaloneDatabase(dbConfig, vm.ctx.Metrics, vm.ctx.Log)
+			// Create a logger adapter for newStandaloneDatabase
+			logger := logging.NoLog{}
+			db, err = newStandaloneDatabase(dbConfig, vm.ctx.Metrics, logger)
 			if err != nil {
 				return err
 			}
@@ -76,7 +79,7 @@ func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 	}
 	// Use NewNested rather than New so that the structure of the database
 	// remains the same regardless of the provided baseDB type.
-	vm.chaindb = rawdb.NewDatabase(database.WrapDatabase(prefixdb.NewNested(ethDBPrefix, db)))
+	vm.chaindb = rawdb.NewDatabase(evmdatabase.WrapDatabase(prefixdb.NewNested(ethDBPrefix, db)))
 	vm.versiondb = versiondb.New(db)
 	vm.acceptedBlockDB = prefixdb.New(acceptedPrefix, vm.versiondb)
 	vm.metadataDB = prefixdb.New(metadataPrefix, vm.versiondb)
@@ -126,7 +129,7 @@ func (vm *VM) useStandaloneDatabase(acceptedDB luxdatabase.Database) (bool, erro
 
 	// check if the chain can use a standalone database
 	_, err := acceptedDB.Get(lastAcceptedKey)
-	if err == luxdatabase.ErrNotFound {
+	if err == database.ErrNotFound {
 		// If there is nothing in the database, we can use the standalone database
 		return true, nil
 	}
@@ -199,19 +202,27 @@ func inspectDB(db luxdatabase.Database, label string) error {
 
 func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger logging.Logger) (luxdatabase.Database, error) {
 	dbPath := filepath.Join(dbConfig.Path, dbConfig.Name)
+	
+	// Use log.Root() instead of trying to adapt the logger
+	logAdapter := log.Root()
 
 	dbConfigBytes := dbConfig.Config
 	// If the database is pebble, we need to set the config
 	// to use no sync. Sync mode in pebble has an issue with OSs like MacOS.
 	if dbConfig.Name == pebbledb.Name {
-		cfg := pebbledb.DefaultConfig
-		// Default to "no sync" for pebble db
-		cfg.Sync = false
+		// Create a default config with no sync
+		cfg := map[string]interface{}{
+			"sync": false,
+		}
+		// If config bytes provided, unmarshal and update
 		if len(dbConfigBytes) > 0 {
 			if err := json.Unmarshal(dbConfigBytes, &cfg); err != nil {
 				return nil, err
 			}
 		}
+		// Ensure sync is false
+		cfg["sync"] = false
+		
 		var err error
 		// Marshal the config back to bytes to ensure that new defaults are applied
 		dbConfigBytes, err = json.Marshal(cfg)
@@ -226,7 +237,7 @@ func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGather
 		dbConfig.ReadOnly,
 		dbConfigBytes,
 		gatherer,
-		logger,
+		logAdapter,
 		dbMetricsPrefix,
 		meterDBGatherer,
 	)

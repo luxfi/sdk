@@ -236,7 +236,7 @@ func (b *Block) verifyPredicates(predicateContext *precompileconfig.PredicateCon
 	rulesExtra := params.GetRulesExtra(rules)
 
 	switch {
-	case !rulesExtra.IsDurango && rulesExtra.PredicatersExist():
+	case !rulesExtra.IsDurango && rulesExtra.PredicatersExist:
 		return errors.New("cannot enable predicates before Durango activation")
 	case !rulesExtra.IsDurango:
 		return nil

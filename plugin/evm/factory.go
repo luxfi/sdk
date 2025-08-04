@@ -5,7 +5,7 @@ package evm
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/log"
 	"github.com/luxfi/node/vms"
 )
 
@@ -19,6 +19,6 @@ var (
 
 type Factory struct{}
 
-func (*Factory) New(logging.Logger) (interface{}, error) {
+func (*Factory) New(log.Logger) (interface{}, error) {
 	return &VM{}, nil
 }
