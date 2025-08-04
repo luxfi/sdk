@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/vms/platformvm/warp"
 
 	"github.com/luxfi/sdk/requester"

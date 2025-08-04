@@ -30,8 +30,7 @@ build:
 	@echo "Building SDK..."
 	$(GOBUILD) -v $(LDFLAGS) -o $(BINARY_NAME) $(SRC_DIR)
 	@echo "Building examples..."
-	cd $(EXAMPLES_DIR)/complete && $(GOBUILD) -v ./...
-	cd $(EXAMPLES_DIR)/tokenvm && $(GOBUILD) -v ./...
+	cd $(EXAMPLES_DIR)/boot-mainnet && $(GOBUILD) -v ./...
 
 test:
 	@echo "Running unit tests..."

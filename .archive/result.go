@@ -4,9 +4,9 @@
 package chain
 
 import (
-	"github.com/luxfi/vms/platformvm/warp"
 	"github.com/luxfi/sdk/codec"
 	"github.com/luxfi/sdk/consts"
+	"github.com/luxfi/vms/platformvm/warp"
 )
 
 type Result struct {

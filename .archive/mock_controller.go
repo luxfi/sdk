@@ -12,13 +12,13 @@ import (
 	context "context"
 	reflect "reflect"
 
+	gomock "github.com/golang/mock/gomock"
 	metrics "github.com/luxfi/api/metrics"
 	database "github.com/luxfi/database"
-	snow "github.com/luxfi/snow"
 	builder "github.com/luxfi/sdk/builder"
 	chain "github.com/luxfi/sdk/chain"
 	gossiper "github.com/luxfi/sdk/gossiper"
-	gomock "github.com/golang/mock/gomock"
+	snow "github.com/luxfi/snow"
 )
 
 // MockController is a mock of Controller interface.

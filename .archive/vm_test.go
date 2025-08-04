@@ -7,12 +7,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	ametrics "github.com/luxfi/api/metrics"
 	"github.com/luxfi/cache"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/snow"
 	"github.com/luxfi/log"
-	"github.com/golang/mock/gomock"
+	"github.com/luxfi/snow"
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/sdk/chain"

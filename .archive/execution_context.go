@@ -7,10 +7,10 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/trace"
 	"github.com/luxfi/math"
 	"github.com/luxfi/sdk/consts"
 	"github.com/luxfi/sdk/window"
+	"github.com/luxfi/trace"
 )
 
 type ExecutionContext struct {

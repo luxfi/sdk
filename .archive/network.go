@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/snow/engine/common"
 	"github.com/luxfi/set"
+	"github.com/luxfi/snow/engine/common"
 	"github.com/luxfi/version"
 	"go.uber.org/zap"
 )

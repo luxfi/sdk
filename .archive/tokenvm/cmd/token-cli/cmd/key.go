@@ -6,10 +6,10 @@ package cmd
 import (
 	"context"
 
+	"github.com/fatih/color"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/crypto"
 	hutils "github.com/luxfi/sdk/utils"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
 	"github.com/luxfi/sdk/examples/tokenvm/client"

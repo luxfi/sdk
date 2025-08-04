@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/netrunner-sdk/rpcpb"
-	netrunner "github.com/luxfi/netrunner-sdk"
 	"github.com/luxfi/log"
+	netrunner "github.com/luxfi/netrunner-sdk"
+	"github.com/luxfi/netrunner-sdk/rpcpb"
 )
 
 // Client wraps the netrunner-sdk client with additional functionality
@@ -44,7 +44,7 @@ func NewClient(config *Config, logger log.Logger) (*Client, error) {
 	if config == nil {
 		config = DefaultConfig()
 	}
-	
+
 	if logger == nil {
 		logger = log.NewNoOpLogger()
 	}
@@ -164,7 +164,7 @@ func (c *Client) RestartNode(ctx context.Context, name string, opts ...netrunner
 // WaitForHealthy waits for all nodes in the network to be healthy
 func (c *Client) WaitForHealthy(ctx context.Context, timeout time.Duration) error {
 	c.logger.Info("waiting for network to be healthy", "timeout", timeout)
-	
+
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 

@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/snow/engine/common"
 	"github.com/luxfi/crypto/bls"
-	"github.com/luxfi/set"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/codec"
 	"github.com/luxfi/sdk/consts"
 	"github.com/luxfi/sdk/heap"
 	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/set"
+	"github.com/luxfi/snow/engine/common"
 	"go.uber.org/zap"
 )
 

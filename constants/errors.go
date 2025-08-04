@@ -8,11 +8,11 @@ import "errors"
 var (
 	// Network errors
 	ErrInvalidNetworkID = errors.New("invalid network ID")
-	
+
 	// Chain errors
-	ErrUnknownChain = errors.New("unknown chain")
+	ErrUnknownChain   = errors.New("unknown chain")
 	ErrInvalidChainID = errors.New("invalid chain ID")
-	
+
 	// Configuration errors
 	ErrInvalidConfiguration = errors.New("invalid configuration")
 	ErrMissingConfiguration = errors.New("missing configuration")

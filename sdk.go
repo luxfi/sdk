@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 )
 
@@ -18,8 +18,8 @@ import (
 type LuxSDK struct {
 	networkManager    *network.NetworkManager
 	blockchainBuilder *blockchain.Builder
-	config           *config.Config
-	logger           log.Logger
+	config            *config.Config
+	logger            log.Logger
 }
 
 // New creates a new instance of the Lux SDK
@@ -44,8 +44,8 @@ func New(cfg *config.Config) (*LuxSDK, error) {
 	return &LuxSDK{
 		networkManager:    networkManager,
 		blockchainBuilder: blockchainBuilder,
-		config:           cfg,
-		logger:           logger,
+		config:            cfg,
+		logger:            logger,
 	}, nil
 }
 
