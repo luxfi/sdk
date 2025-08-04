@@ -75,7 +75,7 @@ func stressTestTrieDb(t *testing.B, numContracts int, callsPerBlock int, element
 		}), signer, testKey)
 		sender, _ := types.Sender(signer, tx)
 		contractTxs[i] = tx
-		contractAddr[i] = crypto.CreateAddress(sender, nonce)
+		contractAddr[i] = crypto.CreateAddress(crypto.Address(sender), nonce)
 	}
 
 	stressABI := contract.ParseABI(stressABIStr)
