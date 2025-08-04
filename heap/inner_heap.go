@@ -7,7 +7,7 @@ import (
 	"container/heap"
 	"fmt"
 
-	"github.com/luxdefi/node/ids"
+	"github.com/luxfi/ids"
 	"golang.org/x/exp/constraints"
 )
 

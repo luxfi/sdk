@@ -11,7 +11,7 @@ import (
 	"encoding/hex"
 	"os"
 
-	"github.com/luxdefi/node/utils/formatting/address"
+	"github.com/luxfi/sdk/internal/address"
 )
 
 type (

@@ -1,5 +1,5 @@
-github.com/luxdefi/vmsdk/chain=Action=chain/mock_action.go
-github.com/luxdefi/vmsdk/chain=Auth=chain/mock_auth.go
-github.com/luxdefi/vmsdk/chain=AuthFactory=chain/mock_auth_factory.go
-github.com/luxdefi/vmsdk/chain=Rules=chain/mock_rules.go
-github.com/luxdefi/vmsdk/vm=Controller=vm/mock_controller.go
+github.com/luxfi/sdk/chain=Action=chain/mock_action.go
+github.com/luxfi/sdk/chain=Auth=chain/mock_auth.go
+github.com/luxfi/sdk/chain=AuthFactory=chain/mock_auth_factory.go
+github.com/luxfi/sdk/chain=Rules=chain/mock_rules.go
+github.com/luxfi/sdk/vm=Controller=vm/mock_controller.go

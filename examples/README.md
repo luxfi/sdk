@@ -20,7 +20,7 @@ To ensure the `vmsdk` stays reliable as we optimize and evolve the codebase,
 we also run E2E tests in the `tokenvm` on each PR to the `vmsdk` core modules.
 
 ## Expert: `indexvm`
-The [`indexvm`](https://github.com/luxdefi/indexvm) is much more complex than
+The [`indexvm`](https://github.com/luxfi/indexvm) is much more complex than
 the `tokenvm` (more elaborate mechanisms and a new use case you may not be
 familiar with). It was built during the design of the `vmsdk` to test out the
 limits of the abstractions for building complex on-chain mechanisms. We recommend

@@ -1,0 +1,439 @@
+// Copyright (C) 2024, Lux Partners Limited. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package blockchain
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/luxfi/ids"
+	"github.com/luxfi/snow"
+	"github.com/luxfi/consensus/snowman"
+	"github.com/luxfi/vms"
+
+	"github.com/luxfi/sdk/chain"
+	"github.com/luxfi/sdk/vm"
+)
+
+// Type represents the blockchain type
+type Type string
+
+const (
+	// Sovereign L1 blockchain
+	TypeSovereignL1 Type = "sovereign-l1"
+	// Based rollup L2
+	TypeBasedRollupL2 Type = "based-rollup-l2"
+	// App-specific L3
+	TypeAppChainL3 Type = "app-chain-l3"
+)
+
+// Config represents blockchain configuration
+type Config struct {
+	// Basic info
+	Name        string            `json:"name"`
+	ID          ids.ID            `json:"id"`
+	Type        Type              `json:"type"`
+	NetworkID   uint32            `json:"networkId"`
+	
+	// Genesis configuration
+	Genesis     chain.Genesis     `json:"genesis"`
+	
+	// VM configuration
+	VMType      string            `json:"vmType"` // "evm", "wasm", "custom"
+	VMConfig    interface{}       `json:"vmConfig"`
+	
+	// Consensus parameters
+	Consensus   ConsensusConfig   `json:"consensus"`
+	
+	// L2/L3 specific
+	SequencerURL string           `json:"sequencerUrl,omitempty"`
+	ParentChainID ids.ID          `json:"parentChainId,omitempty"`
+	
+	// Validators (for L1)
+	Validators  []Validator       `json:"validators,omitempty"`
+	
+	// Features
+	Features    map[string]bool   `json:"features"`
+}
+
+// ConsensusConfig represents consensus parameters
+type ConsensusConfig struct {
+	// Snowman consensus parameters
+	K                     int           `json:"k"`
+	AlphaPreference       int           `json:"alphaPreference"`
+	AlphaConfidence       int           `json:"alphaConfidence"`
+	Beta                  int           `json:"beta"`
+	MaxItemProcessingTime time.Duration `json:"maxItemProcessingTime"`
+	
+	// Block production
+	MinBlockTime          time.Duration `json:"minBlockTime"`
+	MaxBlockTime          time.Duration `json:"maxBlockTime"`
+	MaxBlockSize          uint64        `json:"maxBlockSize"`
+}
+
+// Validator represents a blockchain validator
+type Validator struct {
+	NodeID    ids.NodeID   `json:"nodeId"`
+	PublicKey string       `json:"publicKey"`
+	Weight    uint64       `json:"weight"`
+	StartTime time.Time    `json:"startTime"`
+	EndTime   time.Time    `json:"endTime"`
+}
+
+// Blockchain represents a Lux blockchain instance
+type Blockchain struct {
+	config    Config
+	vm        vm.VM
+	ctx       *snow.Context
+	running   bool
+	
+	// Metrics
+	metrics   *Metrics
+}
+
+// New creates a new blockchain instance
+func New(config Config) (*Blockchain, error) {
+	if config.Name == "" {
+		return nil, errors.New("blockchain name is required")
+	}
+	
+	if config.Type == "" {
+		config.Type = TypeSovereignL1
+	}
+	
+	// Set default consensus parameters if not provided
+	if config.Consensus.K == 0 {
+		switch config.Type {
+		case TypeSovereignL1:
+			config.Consensus = DefaultL1Consensus()
+		case TypeBasedRollupL2:
+			config.Consensus = DefaultL2Consensus()
+		case TypeAppChainL3:
+			config.Consensus = DefaultL3Consensus()
+		}
+	}
+	
+	return &Blockchain{
+		config:  config,
+		metrics: NewMetrics(),
+	}, nil
+}
+
+// Create creates the blockchain on the network
+func (b *Blockchain) Create(ctx context.Context) error {
+	// Validate configuration
+	if err := b.validateConfig(); err != nil {
+		return fmt.Errorf("invalid configuration: %w", err)
+	}
+	
+	// Initialize VM based on type
+	switch b.config.VMType {
+	case "evm":
+		// Initialize EVM
+		// b.vm = evm.New(b.config.VMConfig)
+	case "wasm":
+		// Initialize WASM VM
+		// b.vm = wasm.New(b.config.VMConfig)
+	case "custom":
+		// Initialize custom VM
+		// b.vm = custom.New(b.config.VMConfig)
+	default:
+		return fmt.Errorf("unsupported VM type: %s", b.config.VMType)
+	}
+	
+	// Deploy based on type
+	switch b.config.Type {
+	case TypeSovereignL1:
+		return b.createSovereignL1(ctx)
+	case TypeBasedRollupL2:
+		return b.createBasedRollupL2(ctx)
+	case TypeAppChainL3:
+		return b.createAppChainL3(ctx)
+	default:
+		return fmt.Errorf("unsupported blockchain type: %s", b.config.Type)
+	}
+}
+
+// Start starts the blockchain
+func (b *Blockchain) Start(ctx context.Context) error {
+	if b.running {
+		return errors.New("blockchain already running")
+	}
+	
+	// Initialize snow context
+	b.ctx = &snow.Context{
+		NetworkID: b.config.NetworkID,
+		ChainID:   b.config.ID,
+	}
+	
+	// Start VM
+	if err := b.vm.Initialize(ctx, b.ctx, nil, nil, nil, nil, nil, nil, nil); err != nil {
+		return fmt.Errorf("failed to initialize VM: %w", err)
+	}
+	
+	b.running = true
+	return nil
+}
+
+// Stop stops the blockchain
+func (b *Blockchain) Stop(ctx context.Context) error {
+	if !b.running {
+		return errors.New("blockchain not running")
+	}
+	
+	if err := b.vm.Shutdown(ctx); err != nil {
+		return fmt.Errorf("failed to shutdown VM: %w", err)
+	}
+	
+	b.running = false
+	return nil
+}
+
+// Upgrade upgrades the blockchain (e.g., L2 to L1)
+func (b *Blockchain) Upgrade(ctx context.Context, newType Type) error {
+	if b.running {
+		return errors.New("stop blockchain before upgrading")
+	}
+	
+	// Validate upgrade path
+	if err := b.validateUpgrade(newType); err != nil {
+		return fmt.Errorf("invalid upgrade: %w", err)
+	}
+	
+	// Perform upgrade
+	switch {
+	case b.config.Type == TypeBasedRollupL2 && newType == TypeSovereignL1:
+		return b.upgradeL2ToL1(ctx)
+	case b.config.Type == TypeAppChainL3 && newType == TypeBasedRollupL2:
+		return b.upgradeL3ToL2(ctx)
+	default:
+		return fmt.Errorf("unsupported upgrade path: %s to %s", b.config.Type, newType)
+	}
+}
+
+// AddValidator adds a validator to the blockchain (L1 only)
+func (b *Blockchain) AddValidator(ctx context.Context, validator Validator) error {
+	if b.config.Type != TypeSovereignL1 {
+		return errors.New("validators only supported on sovereign L1")
+	}
+	
+	// Validate validator
+	if validator.Weight == 0 {
+		return errors.New("validator weight must be greater than 0")
+	}
+	
+	if validator.EndTime.Before(validator.StartTime) {
+		return errors.New("validator end time must be after start time")
+	}
+	
+	b.config.Validators = append(b.config.Validators, validator)
+	
+	// TODO: Submit validator transaction
+	
+	return nil
+}
+
+// RemoveValidator removes a validator from the blockchain
+func (b *Blockchain) RemoveValidator(ctx context.Context, nodeID ids.NodeID) error {
+	if b.config.Type != TypeSovereignL1 {
+		return errors.New("validators only supported on sovereign L1")
+	}
+	
+	found := false
+	validators := make([]Validator, 0, len(b.config.Validators))
+	for _, v := range b.config.Validators {
+		if v.NodeID != nodeID {
+			validators = append(validators, v)
+		} else {
+			found = true
+		}
+	}
+	
+	if !found {
+		return errors.New("validator not found")
+	}
+	
+	b.config.Validators = validators
+	
+	// TODO: Submit remove validator transaction
+	
+	return nil
+}
+
+// GetInfo returns blockchain information
+func (b *Blockchain) GetInfo() Info {
+	return Info{
+		Name:        b.config.Name,
+		ID:          b.config.ID,
+		Type:        b.config.Type,
+		NetworkID:   b.config.NetworkID,
+		Running:     b.running,
+		Validators:  len(b.config.Validators),
+		Features:    b.config.Features,
+		Metrics:     b.metrics.GetSnapshot(),
+	}
+}
+
+// createSovereignL1 creates a sovereign L1 blockchain
+func (b *Blockchain) createSovereignL1(ctx context.Context) error {
+	// Validate validators
+	if len(b.config.Validators) == 0 {
+		return errors.New("at least one validator required for L1")
+	}
+	
+	// Deploy genesis
+	// TODO: Deploy genesis to network
+	
+	// Register validators
+	// TODO: Register validators
+	
+	return nil
+}
+
+// createBasedRollupL2 creates a based rollup L2
+func (b *Blockchain) createBasedRollupL2(ctx context.Context) error {
+	if b.config.SequencerURL == "" {
+		b.config.SequencerURL = "lux" // Default Lux sequencer
+	}
+	
+	// Deploy L2 contract on parent chain
+	// TODO: Deploy rollup contract
+	
+	// Initialize sequencer connection
+	// TODO: Connect to sequencer
+	
+	return nil
+}
+
+// createAppChainL3 creates an app-specific L3
+func (b *Blockchain) createAppChainL3(ctx context.Context) error {
+	if b.config.ParentChainID == ids.Empty {
+		return errors.New("parent chain ID required for L3")
+	}
+	
+	// Deploy on parent L2
+	// TODO: Deploy L3 on parent chain
+	
+	return nil
+}
+
+// validateConfig validates blockchain configuration
+func (b *Blockchain) validateConfig() error {
+	if b.config.NetworkID == 0 {
+		return errors.New("network ID required")
+	}
+	
+	if b.config.ID == ids.Empty {
+		b.config.ID = ids.GenerateID()
+	}
+	
+	return nil
+}
+
+// validateUpgrade validates upgrade path
+func (b *Blockchain) validateUpgrade(newType Type) error {
+	// Define valid upgrade paths
+	validUpgrades := map[Type][]Type{
+		TypeAppChainL3:    {TypeBasedRollupL2},
+		TypeBasedRollupL2: {TypeSovereignL1},
+	}
+	
+	allowed, exists := validUpgrades[b.config.Type]
+	if !exists {
+		return fmt.Errorf("no upgrades available from %s", b.config.Type)
+	}
+	
+	for _, t := range allowed {
+		if t == newType {
+			return nil
+		}
+	}
+	
+	return fmt.Errorf("cannot upgrade from %s to %s", b.config.Type, newType)
+}
+
+// upgradeL2ToL1 upgrades L2 to sovereign L1
+func (b *Blockchain) upgradeL2ToL1(ctx context.Context) error {
+	// Export state from L2
+	// TODO: Export L2 state
+	
+	// Create genesis for L1
+	// TODO: Create L1 genesis from L2 state
+	
+	// Update configuration
+	b.config.Type = TypeSovereignL1
+	b.config.SequencerURL = ""
+	
+	return nil
+}
+
+// upgradeL3ToL2 upgrades L3 to L2
+func (b *Blockchain) upgradeL3ToL2(ctx context.Context) error {
+	// Export state from L3
+	// TODO: Export L3 state
+	
+	// Deploy as L2
+	// TODO: Deploy as L2 rollup
+	
+	// Update configuration
+	b.config.Type = TypeBasedRollupL2
+	
+	return nil
+}
+
+// DefaultL1Consensus returns default consensus parameters for L1
+func DefaultL1Consensus() ConsensusConfig {
+	return ConsensusConfig{
+		K:                     21,
+		AlphaPreference:       13,
+		AlphaConfidence:       18,
+		Beta:                  8,
+		MaxItemProcessingTime: 10 * time.Second,
+		MinBlockTime:          1 * time.Second,
+		MaxBlockTime:          10 * time.Second,
+		MaxBlockSize:          2 * 1024 * 1024, // 2MB
+	}
+}
+
+// DefaultL2Consensus returns default consensus parameters for L2
+func DefaultL2Consensus() ConsensusConfig {
+	return ConsensusConfig{
+		K:                     11,
+		AlphaPreference:       7,
+		AlphaConfidence:       9,
+		Beta:                  6,
+		MaxItemProcessingTime: 5 * time.Second,
+		MinBlockTime:          500 * time.Millisecond,
+		MaxBlockTime:          5 * time.Second,
+		MaxBlockSize:          1 * 1024 * 1024, // 1MB
+	}
+}
+
+// DefaultL3Consensus returns default consensus parameters for L3
+func DefaultL3Consensus() ConsensusConfig {
+	return ConsensusConfig{
+		K:                     5,
+		AlphaPreference:       3,
+		AlphaConfidence:       4,
+		Beta:                  3,
+		MaxItemProcessingTime: 2 * time.Second,
+		MinBlockTime:          100 * time.Millisecond,
+		MaxBlockTime:          2 * time.Second,
+		MaxBlockSize:          512 * 1024, // 512KB
+	}
+}
+
+// Info represents blockchain information
+type Info struct {
+	Name        string                 `json:"name"`
+	ID          ids.ID                 `json:"id"`
+	Type        Type                   `json:"type"`
+	NetworkID   uint32                 `json:"networkId"`
+	Running     bool                   `json:"running"`
+	Validators  int                    `json:"validators"`
+	Features    map[string]bool        `json:"features"`
+	Metrics     map[string]interface{} `json:"metrics"`
+}
