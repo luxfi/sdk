@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2024, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
@@ -15,6 +15,6 @@ type VM interface {
 	StopChan() chan struct{}
 	EngineChan() chan<- common.Message
 	PreferredBlock(context.Context) (*chain.StatelessBlock, error)
-	Logger() logging.Logger
+	Logger() log.Logger
 	Mempool() chain.Mempool
 }
