@@ -251,8 +251,8 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/crypto v1.2.2 h1:jkaLIUNML8f2I/SNEbZooJRRW43bOnU6E8yEG9x9D3w=
 github.com/luxfi/crypto v1.2.2/go.mod h1:qIfHGq5kzTUqzyTqj6II5/6aEp0OWntfeOdhYy/d7aQ=
-github.com/luxfi/go-bip39 v1.1.0 h1:wU1LmWYXB3gbUV+k0hFImWSUVIK1iYNoQNisbTiVl9M=
-github.com/luxfi/go-bip39 v1.1.0/go.mod h1:OxPL7QXUfnqqk7nOTPWgNfShxqg69OYJ4+ATKCmZWP8=
+github.com/luxfi/go-bip39 v1.1.1 h1:Z/2H3Pc7P1CQXzXxev945ifxHZ9fpuvsJQFTMP1u8Ts=
+github.com/luxfi/go-bip39 v1.1.1/go.mod h1:OxPL7QXUfnqqk7nOTPWgNfShxqg69OYJ4+ATKCmZWP8=
 github.com/luxfi/ids v1.0.2 h1:OnbCWBgdmuBPZat1r1vRikk1FFrdHMfSknpfKmX0KBg=
 github.com/luxfi/ids v1.0.2/go.mod h1:cMbto3Q8N3IaBxdz4Lzaq9wYl33coGXUdlr2+YwXeUw=
 github.com/luxfi/log v0.1.1 h1:KRTOIGqyPTrN3nWcBMVI50B6EXTayYex2+HyGjJ06Ew=
