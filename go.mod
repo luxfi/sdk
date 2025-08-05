@@ -18,12 +18,12 @@ require (
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.2
 	github.com/luxfi/database v1.1.9
-	github.com/luxfi/geth v1.16.26
+	github.com/luxfi/geth v1.16.1-lux
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v0.1.1
 	github.com/luxfi/metrics v1.1.1
-	github.com/luxfi/node v1.13.6
+	github.com/luxfi/node v1.13.4-lux
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/onsi/ginkgo/v2 v2.23.4
@@ -170,10 +170,4 @@ require (
 	google.golang.org/grpc v1.74.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/luxfi/database => ../database
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/node => ../node
 )
