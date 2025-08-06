@@ -68,7 +68,7 @@ func NewDownloader(
 	network network.Network,
 	logger logging.Logger,
 ) (Downloader, error) {
-	tmpFile, err := os.CreateTemp("", "lux-cli-public-archive-*")
+	tmpFile, err := os.CreateTemp("", "luxd-public-archive-*")
 	if err != nil {
 		return Downloader{}, err
 	}

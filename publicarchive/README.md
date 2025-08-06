@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/lux-cli/sdk/network"
+	"github.com/luxfi//sdk/network"
 	"github.com/luxfi/luxd/utils/constants"
 	"github.com/luxfi/luxd/utils/logging"
 	"github.com/your-repo-name/publicarchive"
