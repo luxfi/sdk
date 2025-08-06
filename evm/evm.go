@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/cli/sdk/constants"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient"
