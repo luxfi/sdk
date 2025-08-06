@@ -7,12 +7,12 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/luxfi/crypto v1.2.8
 	github.com/luxfi/evm v0.7.9-lux
-	github.com/luxfi/geth v1.16.27
+	github.com/luxfi/geth v1.16.1-lux
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v1.0.2
-	github.com/luxfi/netrunner-sdk v1.0.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/netrunner-sdk v0.3.0
+	github.com/luxfi/node v1.13.4-lux
 	github.com/luxfi/warp v0.1.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.2
