@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/ethereum/go-ethereum v1.16.1 // indirect
+	github.com/luxfi/geth v1.16.1 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/luxfi/netrunner-sdk v1.0.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.23.4 // indirect
