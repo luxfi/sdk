@@ -6,7 +6,7 @@ package evm
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // Genesis represents an EVM genesis block

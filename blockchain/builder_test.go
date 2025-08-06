@@ -9,7 +9,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 	"github.com/stretchr/testify/assert"
