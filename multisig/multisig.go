@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/node/vms/platformvm"
 
-	"github.com/luxfi/cli/sdk/network"
+	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/secp256k1fx"
