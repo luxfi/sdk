@@ -5,8 +5,8 @@ package ledger
 import (
 	"fmt"
 
-	"github.com/luxfi/cli/sdk/network"
-	"github.com/luxfi/cli/sdk/utils"
+	"github.com/luxfi/sdk/network"
+	"github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/node/utils/crypto/keychain"
 	"github.com/luxfi/node/utils/formatting/address"

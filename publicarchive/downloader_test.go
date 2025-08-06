@@ -17,7 +17,7 @@ import (
 	"github.com/cavaliergopher/grab/v3"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/cli/sdk/network"
+	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 )
