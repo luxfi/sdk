@@ -6,7 +6,7 @@ package blockchain
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 )
 
 // GenesisAccount defines an account in genesis
