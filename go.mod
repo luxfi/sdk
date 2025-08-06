@@ -17,11 +17,11 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.2
-	github.com/luxfi/database v1.1.9
+	github.com/luxfi/database v1.1.8
 	github.com/luxfi/geth v1.16.1-lux
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/log v0.1.1
+	github.com/luxfi/log v0.1.2
 	github.com/luxfi/metrics v1.1.1
 	github.com/luxfi/node v1.13.4-lux
 	github.com/mattn/go-colorable v0.1.14
