@@ -1,4 +1,4 @@
-# Signature-aggregator SDK 
+# Signature-aggregator SDK
 
 ## Usage example
 
@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi/lux-cli/sdk/network"
-	"github.com/luxfi/lux-cli/sdk/interchain"
+	"github.com/luxfi//sdk/network"
+	"github.com/luxfi//sdk/warp"
 	"github.com/luxfi/luxd/ids"
 	"github.com/luxfi/luxd/utils/logging"
 	"go.uber.org/zap"
@@ -22,7 +22,7 @@ import (
 
 func main() {
 	network := network.TestnetNetwork()
-	aggregator, err := interchain.NewSignatureAggregator(
+	aggregator, err := warp.NewSignatureAggregator(
 		network,
 		logging.NewLogger(
 			"aggregator_test",
@@ -36,7 +36,7 @@ func main() {
 		),
 		logging.Error,
 		ids.Empty,
-		interchain.DefaultQuorumPercentage,
+		warp.DefaultQuorumPercentage,
 	)
 	if err != nil {
 		panic(err)
