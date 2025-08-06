@@ -10,7 +10,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/log"
 	"github.com/luxfi/sdk/internal/evm"
 	"github.com/luxfi/sdk/internal/types"

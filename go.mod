@@ -7,7 +7,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/luxfi/crypto v1.2.8
 	github.com/luxfi/evm v0.7.9-lux
-	github.com/luxfi/geth v1.16.1-lux
+	github.com/luxfi/geth v1.16.2-lux
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger-lux-go v0.0.3
 	github.com/luxfi/log v1.0.2
