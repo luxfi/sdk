@@ -12,33 +12,33 @@ import (
 
 func TestGetFeeConfigForThroughput(t *testing.T) {
 	tests := []struct {
-		name       string
-		throughput string
-		expectedGasLimit *big.Int
+		name              string
+		throughput        string
+		expectedGasLimit  *big.Int
 		expectedTargetGas *big.Int
 	}{
 		{
-			name:       "high throughput",
-			throughput: "high",
-			expectedGasLimit: big.NewInt(15_000_000),
+			name:              "high throughput",
+			throughput:        "high",
+			expectedGasLimit:  big.NewInt(15_000_000),
 			expectedTargetGas: big.NewInt(50_000_000),
 		},
 		{
-			name:       "medium throughput",
-			throughput: "medium",
-			expectedGasLimit: big.NewInt(10_000_000),
+			name:              "medium throughput",
+			throughput:        "medium",
+			expectedGasLimit:  big.NewInt(10_000_000),
 			expectedTargetGas: big.NewInt(20_000_000),
 		},
 		{
-			name:       "low throughput",
-			throughput: "low",
-			expectedGasLimit: big.NewInt(8_000_000),
+			name:              "low throughput",
+			throughput:        "low",
+			expectedGasLimit:  big.NewInt(8_000_000),
 			expectedTargetGas: big.NewInt(15_000_000),
 		},
 		{
-			name:       "unknown throughput defaults to low",
-			throughput: "unknown",
-			expectedGasLimit: big.NewInt(8_000_000),
+			name:              "unknown throughput defaults to low",
+			throughput:        "unknown",
+			expectedGasLimit:  big.NewInt(8_000_000),
 			expectedTargetGas: big.NewInt(15_000_000),
 		},
 	}
@@ -56,7 +56,7 @@ func TestFeeConfigBuilder(t *testing.T) {
 	t.Run("default builder", func(t *testing.T) {
 		builder := NewFeeConfigBuilder()
 		config := builder.Build()
-		
+
 		// Should have default values
 		require.Equal(t, DefaultFeeConfig.GasLimit, config.GasLimit)
 		require.Equal(t, DefaultFeeConfig.MinBaseFee, config.MinBaseFee)
@@ -106,7 +106,7 @@ func TestFeeConfigBuilder(t *testing.T) {
 		// Custom values should be set
 		require.Equal(t, customGasLimit, config.GasLimit)
 		require.Equal(t, customTargetGas, config.TargetGas)
-		
+
 		// Other values should remain default
 		require.Equal(t, DefaultFeeConfig.MinBaseFee, config.MinBaseFee)
 		require.Equal(t, DefaultFeeConfig.BaseFeeChangeDenominator, config.BaseFeeChangeDenominator)

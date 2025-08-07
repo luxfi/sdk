@@ -113,11 +113,11 @@ func CreateAirdropGenesis(
 	airdropAmount *big.Int,
 ) *core.Genesis {
 	builder := NewGenesisBuilder().WithChainConfig(chainConfig)
-	
+
 	for _, address := range airdropAddresses {
 		builder.WithAllocation(address, airdropAmount)
 	}
-	
+
 	return builder.Build()
 }
 
@@ -126,7 +126,7 @@ func CreateDevGenesis(chainID *big.Int) *core.Genesis {
 	// Pre-funded development account
 	devAddress := common.HexToAddress("0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC")
 	devBalance := math.MustParseBig256("100000000000000000000000000") // 100M tokens
-	
+
 	return NewGenesisBuilder().
 		WithChainConfig(LocalChainConfig(chainID)).
 		WithGasLimit(15_000_000).

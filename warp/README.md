@@ -1,4 +1,4 @@
-# Signature-aggregator SDK
+# Signature-aggregator SDK 
 
 ## Usage example
 
@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/luxfi//sdk/network"
-	"github.com/luxfi//sdk/warp"
+	"github.com/luxfi/lux-cli/sdk/network"
+	"github.com/luxfi/lux-cli/sdk/warp"
 	"github.com/luxfi/luxd/ids"
 	"github.com/luxfi/luxd/utils/logging"
 	"go.uber.org/zap"
