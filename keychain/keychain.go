@@ -96,7 +96,7 @@ func NewKeychain(
 }
 
 func (kc *Keychain) LedgerEnabled() bool {
-	return kc.Ledger.LedgerDevice != nil
+	return kc.Ledger != nil && kc.Ledger.LedgerDevice != nil
 }
 
 func (kc *Keychain) AddLedgerIndices(indices []uint32) error {

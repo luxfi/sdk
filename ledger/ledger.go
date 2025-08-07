@@ -8,8 +8,8 @@ import (
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
 
-	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/utils/formatting/address"
+	luxledger "github.com/luxfi/ledger/go"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm"
 )
 
@@ -19,20 +19,22 @@ const (
 )
 
 type LedgerDevice struct {
-	keychain.Ledger
+	device *luxledger.LedgerLux
 }
 
 func New() (*LedgerDevice, error) {
-	// Ledger support is currently disabled in the node package
-	// Return an error until ledger support is re-enabled
-	return nil, fmt.Errorf("ledger support is currently disabled")
+	// Open connection to Ledger device
+	luxDevice, err := luxledger.FindLedgerLuxApp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to find Ledger device: %w", err)
+	}
+	
+	return &LedgerDevice{
+		device: luxDevice,
+	}, nil
 }
 
 func (dev *LedgerDevice) FindAddresses(addresses []string, maxIndex uint32) (map[string]uint32, error) {
-	addressesIDs, err := address.ParseToIDs(addresses)
-	if err != nil {
-		return nil, fmt.Errorf("failure parsing ledger addresses: %w", err)
-	}
 	// for all ledger indices to search for, find if the ledger address belongs to the input
 	// addresses and, if so, add an index association to indexMap.
 	// breaks the loop if all addresses were found
@@ -41,15 +43,20 @@ func (dev *LedgerDevice) FindAddresses(addresses []string, maxIndex uint32) (map
 	}
 	indices := map[string]uint32{}
 	for index := uint32(0); index < maxIndex; index++ {
-		ledgerAddress, err := dev.Addresses([]uint32{index})
+		// Get the address from ledger at this index
+		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		resp, err := dev.device.GetPubKey(path, false, "lux", "P")
 		if err != nil {
 			return nil, err
 		}
-		for addressIndex, addr := range addressesIDs {
-			if addr == ledgerAddress[0] {
-				indices[addresses[addressIndex]] = index
+		
+		// Check if this address matches any of our target addresses
+		for i, targetAddr := range addresses {
+			if resp.Address == targetAddr {
+				indices[addresses[i]] = index
 			}
 		}
+		
 		if len(indices) == len(addresses) {
 			break
 		}
@@ -75,18 +82,27 @@ func (dev *LedgerDevice) FindFunds(
 		maxIndex = maxIndexToSearchForBalance
 	}
 	for index := uint32(0); index < maxIndex; index++ {
-		ledgerAddress, err := dev.Addresses([]uint32{index})
+		// Get the address from ledger at this index
+		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		resp, err := dev.device.GetPubKey(path, false, "lux", "P")
 		if err != nil {
 			return []uint32{}, err
 		}
+		
+		// Parse address to ID for balance check
+		addrID, err := ids.ShortFromString(resp.Address)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse address: %w", err)
+		}
+		
 		ctx, cancel := utils.GetAPIContext()
-		resp, err := pClient.GetBalance(ctx, ledgerAddress)
+		balanceResp, err := pClient.GetBalance(ctx, []ids.ShortID{addrID})
 		cancel()
 		if err != nil {
 			return nil, err
 		}
-		if resp.Balance > 0 {
-			totalBalance += uint64(resp.Balance)
+		if balanceResp.Balance > 0 {
+			totalBalance += uint64(balanceResp.Balance)
 			indices = append(indices, index)
 		}
 		if totalBalance >= amount {
@@ -97,4 +113,52 @@ func (dev *LedgerDevice) FindFunds(
 		return nil, fmt.Errorf("not enough funds on ledger")
 	}
 	return indices, nil
+}
+
+// GetAddresses returns Lux addresses for the given indices
+func (dev *LedgerDevice) GetAddresses(indices []uint32, hrp string, chainID string) ([]string, error) {
+	addresses := make([]string, len(indices))
+	for i, index := range indices {
+		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		resp, err := dev.device.GetPubKey(path, false, hrp, chainID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get address at index %d: %w", index, err)
+		}
+		addresses[i] = resp.Address
+	}
+	return addresses, nil
+}
+
+// Sign signs a transaction with the ledger device
+func (dev *LedgerDevice) Sign(hash []byte, index uint32) ([]byte, error) {
+	path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+	// For Lux ledger, we need signing paths and change paths
+	signingPaths := []string{path}
+	changePaths := []string{} // No change paths for simple signature
+	
+	resp, err := dev.device.Sign(path, signingPaths, hash, changePaths)
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign with ledger: %w", err)
+	}
+	
+	// Extract the signature from response map
+	if len(resp.Signature) == 0 {
+		return nil, fmt.Errorf("no signature returned from ledger")
+	}
+	
+	// Get the signature for the requested path
+	sig, ok := resp.Signature[path]
+	if !ok {
+		return nil, fmt.Errorf("signature not found for path %s", path)
+	}
+	
+	return sig, nil
+}
+
+// Close closes the connection to the ledger device
+func (dev *LedgerDevice) Close() error {
+	if dev.device != nil {
+		return dev.device.Close()
+	}
+	return nil
 }

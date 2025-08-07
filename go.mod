@@ -2,6 +2,8 @@ module github.com/luxfi/sdk
 
 go 1.24.5
 
+replace github.com/luxfi/ledger/go => ../ledger/go
+
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.5
@@ -9,6 +11,7 @@ require (
 	github.com/luxfi/evm v0.7.8-lux.1
 	github.com/luxfi/geth v1.16.27
 	github.com/luxfi/ids v1.0.2
+	github.com/luxfi/ledger/go v0.0.0-00010101000000-000000000000
 	github.com/luxfi/log v1.0.2
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
@@ -18,6 +21,7 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
+	github.com/zondax/ledger-go v1.0.0 // indirect
 	go.uber.org/mock v0.5.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.40.0
@@ -57,6 +61,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.12.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.0 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
@@ -91,6 +96,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/renameio/v2 v2.0.0 // indirect
@@ -147,6 +153,7 @@ require (
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
+	github.com/zondax/hid v0.9.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.37.0 // indirect
