@@ -1,326 +1,335 @@
-// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
-
 package constants
 
 import (
-	"errors"
-	"os"
 	"time"
-
-	"github.com/luxfi/ids"
 )
 
-// Errors
-var (
-	ErrUnknownNetwork = errors.New("unknown network")
-)
-
-// Network IDs
 const (
-	MainnetID uint32 = 1
-	TestnetID uint32 = 5
-	LocalID   uint32 = 12345
+	DefaultPerms755    = 0o755
+	WriteReadReadPerms = 0o644
 
-	// Network names
-	MainnetName = "mainnet"
-	TestnetName = "testnet"
-	LocalName   = "local"
-)
+	BaseDirName = ".cli"
+	LogDir      = "logs"
 
-// Network HRP (Human Readable Part) for addresses
-const (
-	MainnetHRP  = "lux"
-	TestnetHRP  = "test"
-	LocalHRP    = "local"
-	FallbackHRP = "custom"
-)
+	ServerRunFile = "gRPCserver.run"
+	LuxCliBinDir  = "bin"
+	RunDir        = "runs"
 
-// GetHRP returns the HRP for a network ID
-func GetHRP(networkID uint32) string {
-	switch networkID {
-	case MainnetID:
-		return MainnetHRP
-	case TestnetID:
-		return TestnetHRP
-	case LocalID:
-		return LocalHRP
-	default:
-		return FallbackHRP
-	}
-}
+	SuffixSeparator             = "_"
+	SidecarFileName             = "sidecar.json"
+	GenesisFileName             = "genesis.json"
+	ElasticSubnetConfigFileName = "elastic_subnet_config.json"
+	NodeConfigJSONFile          = "node-config.json"
+	SidecarSuffix               = SuffixSeparator + SidecarFileName
+	GenesisSuffix               = SuffixSeparator + GenesisFileName
+	NodeFileName                = "node.json"
 
-// Chain IDs
-var (
-	PlatformChainID = ids.ID{'p', 'l', 'a', 't', 'f', 'o', 'r', 'm'}
-	XChainID        = ids.ID{'x', 'c', 'h', 'a', 'i', 'n'}
-	CChainID        = ids.ID{'c', 'c', 'h', 'a', 'i', 'n'}
-)
+	SidecarVersion = "1.4.0"
 
-// Chain aliases
-const (
-	PChainAlias = "P"
-	XChainAlias = "X"
-	CChainAlias = "C"
-)
+	MaxLogFileSize   = 4
+	MaxNumOfLogFiles = 5
+	RetainOldFiles   = 0 // retain all old log files
 
-// Asset IDs
-var (
-	LuxAssetID = ids.ID{
-		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
-		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
-		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
-		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
-	}
-)
-
-// Denominations
-const (
-	Wei  uint64 = 1
-	GWei uint64 = 1e9
-	LUX  uint64 = 1e18
-
-	// Legacy compatibility
-	NanoLux  = Wei
-	MicroLux = GWei
-)
-
-// Staking parameters
-const (
-	// Minimum stake amounts
-	MinValidatorStake = 2_000 * GWei // 2,000 LUX worth of GWei
-	MinDelegatorStake = 25 * GWei    // 25 LUX worth of GWei
-
-	// Maximum stake amounts
-	MaxValidatorStake = 3_000_000 * GWei // 3M LUX worth of GWei
-	MaxDelegatorStake = 3_000_000 * GWei // 3M LUX worth of GWei
-
-	// Weight factors
-	MaxValidatorWeightFactor = 5
-
-	// Time parameters
-	MinStakeDuration = 2 * 7 * 24 * time.Hour // 2 weeks
-	MaxStakeDuration = 365 * 24 * time.Hour   // 1 year
-
-	// Reward parameters
-	MaxDelegationFee = 100 // 100% (in basis points / 100)
-)
-
-// Supply and economics
-const (
-	// Total supply
-	TotalSupply = 720_000_000 * GWei // 720M LUX worth of GWei
-
-	// Initial supply distribution
-	InitialSupply = 360_000_000 * GWei // 360M LUX worth of GWei
-
-	// Reward config
-	RewardPercentDenominator = 1_000_000
-	InflationRate            = 0.05 // 5% annual
-)
-
-// Transaction fees
-const (
-	// Base fees
-	TxFee             = 1_000_000 * GWei  // 0.001 LUX
-	CreateAssetTxFee  = 10_000_000 * GWei // 0.01 LUX
-	CreateChainTxFee  = 1 * LUX
-	CreateSubnetTxFee = 1 * LUX
-
-	// Gas parameters
-	GasPrice    = 25 * GWei
-	MaxGasPrice = 1000 * GWei
-	MinGasPrice = 1 * GWei
-)
-
-// Block parameters
-const (
-	// Block size limits
-	MaxBlockSize    = 2 * 1024 * 1024 // 2 MiB
-	MaxBlockGas     = 15_000_000
-	TargetBlockRate = 2 * time.Second
-
-	// Genesis block
-	GenesisHeight    = 0
-	GenesisTimestamp = 1640995200 // Jan 1, 2022 00:00:00 UTC
-)
-
-// VM parameters
-const (
-	// VM types
-	EVMID      = "evm"
-	WasmVMID   = "wasm"
-	CustomVMID = "custom"
-	TokenVMID  = "tokenvm"
-
-	// VM versions
-	EVMVersion    = "v0.13.0"
-	WasmVMVersion = "v0.1.0"
-)
-
-// Consensus parameters
-const (
-	// Snow consensus
-	SnowmanK                 = 20
-	SnowmanAlphaPreference   = 15
-	SnowmanAlphaConfidence   = 15
-	SnowmanBeta              = 20
-	SnowmanConcurrentRepolls = 4
-	SnowmanOptimalProcessing = 10
-	SnowmanMaxProcessing     = 1000
-	SnowmanMaxTimeProcessing = 2 * time.Minute
-
-	// For different network types
-	TestnetSnowmanK               = 11
-	TestnetSnowmanAlphaPreference = 7
-	LocalSnowmanK                 = 5
-	LocalSnowmanAlphaPreference   = 3
-)
-
-// Network timeouts
-const (
-	// Request timeouts
-	RequestTimeout         = 30 * time.Second
-	RequestRetryTimeout    = 1 * time.Second
+	RequestTimeout         = 3 * time.Minute
+	E2ERequestTimeout      = 30 * time.Second
+	ANRRequestTimeout      = 3 * time.Minute
 	APIRequestTimeout      = 30 * time.Second
 	APIRequestLargeTimeout = 2 * time.Minute
 
-	// Gossip parameters
-	GossipFrequency = 10 * time.Second
-	GossipBatchSize = 30
-	GossipPollSize  = 10
+	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
+	TestnetAPIEndpoint    = "https://api.lux-test.network"
+	MainnetAPIEndpoint    = "https://api.lux.network"
 
-	// Health check
-	HealthCheckFrequency   = 30 * time.Second
-	MaxOutstandingRequests = 1024
+	// WebSocket endpoints
+	MainnetWSEndpoint = "wss://api.lux.network/ext/bc/C/ws"
+	TestnetWSEndpoint = "wss://api.lux-test.network/ext/bc/C/ws"
+	LocalWSEndpoint   = "ws://127.0.0.1:9630/ext/bc/C/ws"
+	DevnetWSEndpoint  = "wss://api.lux-dev.network/ext/bc/C/ws"
 
-	// Network limits
-	MaxMessageSize     = 2 * 1024 * 1024 // 2 MiB
-	MaxClockDifference = 10 * time.Second
+	// Cloud service constants
+	GCPCloudService            = "gcp"
+	AWSCloudService            = "aws"
+	E2EDocker                  = "e2e-docker"
+	GCPNodeAnsiblePrefix       = "gcp_node"
+	AWSNodeAnsiblePrefix       = "aws_node"
+	E2EDockerLoopbackHost      = "127.0.0.1"
+	GCPDefaultImageProvider    = "canonical"
+	GCPImageFilter             = "ubuntu-os-cloud"
+	CloudNodeCLIConfigBasePath = "/home/ubuntu/.cli"
+	CodespaceNameEnvVar        = "CODESPACE_NAME"
+	AnsibleSSHShellParams      = "-o StrictHostKeyChecking=no"
+	RemoteSSHUser              = "ubuntu"
+	StakerCertFileName         = "staker.crt"
+	StakerKeyFileName          = "staker.key"
+	BLSKeyFileName             = "bls.key"
+	ValidatorUptimeDeductible  = 5 * time.Minute
+
+	// SSH constants
+	SSHSleepBetweenChecks = 1 * time.Second
+	SSHFileOpsTimeout     = 10 * time.Second
+	SSHScriptTimeout      = 120 * time.Second
+	SSHPOSTTimeout        = 30 * time.Second
+	SSHDirOpsTimeout      = 30 * time.Second
+	
+	// Docker constants
+	DockerNodeConfigPath   = "/data/.luxgo/configs"
+	WriteReadUserOnlyPerms = 0o600
+	
+	// AWS constants  
+	AWSCloudServerRunningState = "running"
+
+	// this depends on bootstrap snapshot
+	LocalAPIEndpoint = "http://127.0.0.1:9630"
+	DevnetAPIEndpoint = "https://api.lux-dev.network"
+	LocalNetworkID   = 1337
+
+	DefaultTokenName = "TEST"
+	
+	// Default versions
+	DefaultLuxdVersion = "v1.13.4"
+	
+	// Staking constants
+	BootstrapValidatorBalanceNanoLUX = 1_000_000_000_000 // 1000 LUX
+	PoSL1MinimumStakeDurationSeconds = 86400             // 24 hours
+	
+	// Logging
+	DefaultAggregatorLogLevel = "INFO"
+	
+	// Git
+	GitExtension = ".git"
+	
+	// Ansible
+	AnsibleHostInventoryFileName = "hosts"
+	AnsibleSSHUseAgentParams     = "-o ForwardAgent=yes"
+	
+	// Cloud node
+	CloudNodeConfigPath = "/home/ubuntu/.luxgo/configs"
+	CloudNodePrometheusConfigPath = "/home/ubuntu/.luxgo/configs/prometheus"
+	CloudNodeStakingPath = "/home/ubuntu/.luxgo/staking"
+	UpgradeFileName     = "upgrade.json"
+	NodePrometheusConfigFileName = "prometheus.yml"
+	ServicesDir = "services"
+	WarpRelayerInstallDir = "warp-relayer"
+	WarpRelayerConfigFilename = "warp-relayer.yml"
+	
+	// Config keys
+	ConfigSnapshotsAutoSaveKey   = "SnapshotsAutoSaveEnabled"
+	ConfigUpdatesDisabledKey     = "UpdatesDisabled"
+	
+	// Build environment
+	BuildEnvGolangVersion = "1.24.5"
+	
+	// Docker images and repos
+	LuxdDockerImage = "luxfi/luxd"
+	LuxdGitRepo     = "https://github.com/luxfi/node"
+	LuxdRepoName    = "luxfi/node"
+	
+	// Organizations
+	LuxOrg = "luxfi"
+	
+	// Repo names
+	LuxRepoName = "node"
+	EVMRepoName = "evm"
+	
+	// Install directories
+	LuxInstallDir   = "lux"
+	LuxGoInstallDir = "luxgo"
+	EVMInstallDir   = "evm"
+	
+	// Directories
+	SubnetDir    = "subnets"
+	ReposDir     = "repos"
+	SnapshotsDirName = "snapshots"
+	CustomVMDir  = "customvms"
+	PluginDir    = "plugins"
+	ConfigDir    = "config"
+	KeyDir       = "keys"
+	LPMPluginDir = "lpm-plugins"
+	
+	// Cloud node paths
+	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.cli/bin/subnet-evm"
+	
+	// File names
+	UpgradeBytesFileName = "upgrade.json"
+	LPMLogName          = "lpm.log"
+	OldConfigFileName   = ".cli-config.json"
+	OldMetricsConfigFileName = ".cli-metrics.json"
+	ConfigLPMAdminAPIEndpointKey = "lpm-admin-api-endpoint"
+	ConfigLPMCredentialsFileKey  = "lpm-credentials-file"
+	
+	// Devnet flags
+	DevnetFlagsProposerVMUseCurrentHeight = true // This is a boolean flag
+	
+	// File names
+	AliasesFileName = "aliases.json"
+	
+	// Directories
+	DashboardsDir = "dashboards"
+	
+	// Grafana
+	CustomGrafanaDashboardJSON = "custom_dashboard.json"
+	
+	// Config metrics keys
+	ConfigMetricsUserIDKey         = "metrics-user-id"
+	ConfigMetricsEnabledKey        = "metrics-enabled"
+	ConfigAuthorizeCloudAccessKey  = "authorize-cloud-access"
+	
+	// Duplicate constants removed - these are already defined above
+	
+	// Environment variables
+	MetricsAPITokenEnvVarName = "METRICS_API_TOKEN"
+
+	HealthCheckInterval = 100 * time.Millisecond
+
+	// it's unlikely anyone would want to name a snapshot `default`
+	// but let's add some more entropy
+	DefaultSnapshotName          = "default-1654102509"
+	BootstrapSnapshotArchiveName = "bootstrapSnapshot.tar.gz"
+	BootstrapSnapshotLocalPath   = "assets/" + BootstrapSnapshotArchiveName
+	BootstrapSnapshotURL         = "https://github.com/luxfi/cli/raw/main/" + BootstrapSnapshotLocalPath
+	BootstrapSnapshotSHA256URL   = "https://github.com/luxfi/cli/raw/main/assets/sha256sum.txt"
+
+	CliInstallationURL    = "https://raw.githubusercontent.com/luxfi/cli/main/scripts/install.sh"
+	ExpectedCliInstallErr = "resource temporarily unavailable"
+
+	KeySuffix  = ".pk"
+	YAMLSuffix = ".yml"
+
+	Enable = "enable"
+
+	Disable = "disable"
+
+	TimeParseLayout    = "2006-01-02 15:04:05"
+	MinStakeDuration   = 24 * 14 * time.Hour
+	MaxStakeDuration   = 24 * 365 * time.Hour
+	MaxStakeWeight     = 100
+	MinStakeWeight     = 1
+	DefaultStakeWeight = 20
+	// The absolute minimum is 25 seconds, but set to 1 minute to allow for
+	// time to go through the command
+	StakingStartLeadTime   = 1 * time.Minute
+	StakingMinimumLeadTime = 25 * time.Second
+
+	DefaultConfigFileName = ".cli"
+	DefaultConfigFileType = "json"
+
+	CliRepoName = "cli"
+
+	EVMBin = "evm"
+
+	DefaultNodeRunURL = "http://127.0.0.1:9630"
+
+	// Latest EVM version
+	LatestEVMVersion = "v0.7.7"
+
+	LPMDir = ".lpm"
+
+	// Network ports
+	SSHTCPPort      = 22
+	LuxdAPIPort     = 9650
+	LuxdGrafanaPort = 3000
+
+	// Node roles
+	APIRole         = "api"
+	ValidatorRole   = "validator"
+	
+	// Cluster config
+	ClustersConfigFileName = "clusters.json"
+	MonitorRole     = "monitor"
+	WarpRelayerRole = "warp-relayer"
+	
+	// Warp constants
+	WarpDir     = "warp"
+	WarpBranch  = "main"
+	WarpURL     = "https://github.com/luxfi/warp.git"
+	WarpKeyName = "warp"
+	WarpVersion = "v1.0.0"
+	
+	// Relayer constants
+	DefaultRelayerVersion = "v1.0.0"
+	
+	// Payment messages
+	PayTxsFeesMsg = "pay transaction fees"
+	
+	// Units
+	OneLux = 1_000_000_000 // 1 LUX = 1e9 nLUX
 )
 
-// API endpoints
+// HTTPAccess represents HTTP access configuration
+type HTTPAccess string
+
 const (
-	// RPC endpoints
-	PublicAPIEndpoint   = "/ext/bc"
-	AdminAPIEndpoint    = "/ext/admin"
-	HealthAPIEndpoint   = "/ext/health"
-	InfoAPIEndpoint     = "/ext/info"
-	KeystoreAPIEndpoint = "/ext/keystore"
-	MetricsAPIEndpoint  = "/ext/metrics"
+	// HTTPAccess values
+	HTTPAccessPublic  HTTPAccess = "public"
+	HTTPAccessPrivate HTTPAccess = "private"
 
-	// Chain endpoints
-	PChainEndpoint = "/ext/P"
-	XChainEndpoint = "/ext/X"
-	CChainEndpoint = "/ext/C"
+	// SSH timeouts
+	SSHLongRunningScriptTimeout = 10 * time.Minute
+	DefaultLuxPackage           = "luxfi/plugins-core"
+
+	// #nosec G101
+	GithubAPITokenEnvVarName = "LUX_CLI_GITHUB_TOKEN"
+
+	VMDir          = "vms"
+	ChainConfigDir = "chains"
+
+	SubnetType                 = "subnet type"
+	SubnetConfigFileName       = "subnet.json"
+	ChainConfigFileName        = "chain.json"
+	PerNodeChainConfigFileName = "per-node-chain.json"
+
+	GitRepoCommitName  = "Lux CLI"
+	GitRepoCommitEmail = "info@lux.network"
+
+	LuxMaintainers = "luxfi"
+
+	UpgradeBytesLockExtension = ".lock"
+	NotAvailableLabel         = "Not available"
+	BackendCmd                = "cli-backend"
+
+	LuxCompatibilityVersionAdded = "v1.9.2"
+	LuxCompatibilityURL          = "https://raw.githubusercontent.com/luxfi/node/master/version/compatibility.json"
+	LuxdCompatibilityURL         = LuxCompatibilityURL // Alias for backward compatibility
+	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
+	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
+	CLILatestDependencyURL       = CLIMinVersionURL // Alias for backward compatibility
+	SubnetEVMRepoName            = EVMRepoName       // Alias for backward compatibility
+
+	YesLabel = "Yes"
+	NoLabel  = "No"
+
+	// Default Warp Messenger Address
+	DefaultWarpMessengerAddress = "0x0000000000000000000000000000000000000005"
+	
+	// C-Chain Warp Registry Addresses
+	MainnetCChainWarpRegistryAddress = "0x0000000000000000000000000000000000000006"
+
+	SubnetIDLabel     = "SubnetID: "
+	BlockchainIDLabel = "BlockchainID: "
+
+	Network        = "network"
+	SkipUpdateFlag = "skip-update-check"
+	LastFileName   = ".last_actions.json"
+
+	DefaultWalletCreationTimeout = 5 * time.Second
+
+	DefaultConfirmTxTimeout = 20 * time.Second
+
+	// Cloud and network constants
+	CloudOperationTimeout            = 5 * time.Minute
+	LuxdP2PPort                      = 9651
+	LuxdMonitoringPort               = 9090
+	LuxdLokiPort                     = 23101
+	GCPStaticIPPrefix                = "lux-"
+	CloudServerStorageSize           = 100 // GB
+	MonitoringCloudServerStorageSize = 200 // GB
+	ErrReleasingGCPStaticIP          = "error releasing GCP static IP"
+	IPAddressSuffix                  = "-ip"
+
+	// Local network constants
+	ExtraLocalNetworkDataFilename = "extra_local_network_data.json"
+	LocalNetworkMetaFile           = "local_network_meta.json"
+	FastGRPCDialTimeout            = 3 * time.Second
 )
-
-// Database paths
-const (
-	// Default data directory
-	DefaultDataDir = "~/.luxd"
-
-	// Database names
-	ChainDataDir = "chainData"
-	StateDir     = "state"
-	LogDir       = "logs"
-	KeystoreDir  = "keystore"
-
-	// Database prefixes
-	ChainDBPrefix = "chain"
-	StateDBPrefix = "state"
-)
-
-// Bootstrapping
-const (
-	// Bootstrap retry parameters
-	BootstrapRetryAttempts = 50
-	BootstrapRetryDelay    = 1 * time.Second
-
-	// Bootstrap timeouts
-	BootstrapTimeout  = 1 * time.Hour
-	MinBootstrapPeers = 1
-)
-
-// Validator set parameters
-const (
-	// Validator limits
-	MaxValidators        = 10_000
-	MaxPendingValidators = 4_096
-
-	// Subnet limits
-	MaxSubnetValidators     = 100
-	MinSubnetValidatorStake = 1 * GWei // 1 LUX worth of GWei
-)
-
-// Cross-chain (Warp) messaging
-const (
-	// Warp message size limits
-	MaxWarpMessageSize    = 256 * 1024 // 256 KiB
-	MaxWarpMessagePayload = 200 * 1024 // 200 KiB
-
-	// Warp signature parameters
-	WarpQuorumNumerator   = 67
-	WarpQuorumDenominator = 100
-)
-
-// Platform limits
-const (
-	// Transaction limits
-	MaxTxSize   = 64 * 1024 // 64 KiB
-	MaxMemoSize = 256
-
-	// UTXO limits
-	MaxUTXOsToFetch = 1024
-
-	// Import/Export limits
-	MaxImportSize = 1024
-)
-
-// File permissions
-const (
-	UserOnlyWriteReadExecPerms = os.FileMode(0700)
-)
-
-// GetNetworkID returns the network ID from name
-func GetNetworkID(name string) (uint32, error) {
-	switch name {
-	case MainnetName:
-		return MainnetID, nil
-	case TestnetName:
-		return TestnetID, nil
-	case LocalName:
-		return LocalID, nil
-	default:
-		return 0, ErrUnknownNetwork
-	}
-}
-
-// GetNetworkName returns the network name from ID
-func GetNetworkName(networkID uint32) string {
-	switch networkID {
-	case MainnetID:
-		return MainnetName
-	case TestnetID:
-		return TestnetName
-	case LocalID:
-		return LocalName
-	default:
-		return "unknown"
-	}
-}
-
-// IsMainnet returns true if the network ID is mainnet
-func IsMainnet(networkID uint32) bool {
-	return networkID == MainnetID
-}
-
-// IsTestnet returns true if the network ID is testnet
-func IsTestnet(networkID uint32) bool {
-	return networkID == TestnetID
-}
-
-// IsLocal returns true if the network ID is local
-func IsLocal(networkID uint32) bool {
-	return networkID == LocalID
-}
