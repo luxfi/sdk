@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus"
 	commonEng "github.com/luxfi/node/consensus/engine/core"

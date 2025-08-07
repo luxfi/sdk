@@ -27,7 +27,7 @@ import (
 
 	"github.com/luxfi/metrics"
 	"github.com/luxfi/node/chains/atomic"
-	"github.com/luxfi/node/database"
+	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"

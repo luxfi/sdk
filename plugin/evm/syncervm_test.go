@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/metrics"
-	luxdatabase "github.com/luxfi/node/database"
+	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus"
