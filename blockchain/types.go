@@ -21,3 +21,28 @@ type Validator struct {
 	NodeID string `json:"nodeId"`
 	Weight uint64 `json:"weight"`
 }
+
+// Subnet represents a blockchain subnet with validator management capabilities
+type Subnet interface {
+	// InitializeProofOfAuthority initializes a PoA validator manager
+	InitializeProofOfAuthority(
+		log interface{}, // logging.Logger
+		network interface{}, // models.Network
+		privateKey string,
+		aggregatorLogger interface{}, // logging.Logger
+		validatorManagerAddress string,
+		v2_0_0 bool,
+		signatureAggregatorEndpoint string,
+	) error
+
+	// InitializeProofOfStake initializes a PoS validator manager
+	InitializeProofOfStake(
+		log interface{}, // logging.Logger
+		network interface{}, // models.Network
+		privateKey string,
+		aggregatorLogger interface{}, // logging.Logger
+		posParams interface{}, // PoSParams
+		managerAddress string,
+		signatureAggregatorEndpoint string,
+	) error
+}

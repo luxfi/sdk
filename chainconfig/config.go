@@ -37,7 +37,7 @@ func NewChainConfigBuilder() *ChainConfigBuilder {
 		BerlinBlock:         big.NewInt(0),
 		LondonBlock:         big.NewInt(0),
 	}
-	
+
 	return &ChainConfigBuilder{
 		config:          config,
 		precompiles:     make(map[string]interface{}),
