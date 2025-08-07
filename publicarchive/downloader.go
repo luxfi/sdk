@@ -14,10 +14,9 @@ import (
 	"time"
 
 	"github.com/cavaliergopher/grab/v3"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/network"
-	luxdConstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
 	"go.uber.org/zap"
 )
 
@@ -65,7 +64,7 @@ func newGetter(endpoint string, target string) (Getter, error) {
 // target: the path to download to
 // logLevel: the log level
 func NewDownloader(
-	network network.Network,
+	net *network.Network,
 	logger logging.Logger,
 ) (Downloader, error) {
 	tmpFile, err := os.CreateTemp("", "luxd-public-archive-*")
@@ -73,8 +72,8 @@ func NewDownloader(
 		return Downloader{}, err
 	}
 
-	switch network.ID {
-	case luxdConstants.TestnetID:
+	// Convert network type to check if it's testnet
+	if net.Type == network.NetworkTypeTestnet {
 		getter, err := newGetter(PChainArchiveTestnet, tmpFile.Name())
 		if err != nil {
 			return Downloader{}, err
@@ -84,9 +83,8 @@ func NewDownloader(
 			logger:    logger,
 			currentOp: &sync.Mutex{},
 		}, nil
-	default:
-		return Downloader{}, fmt.Errorf("unsupported network ID: %d. Testnet only supported", network.ID)
 	}
+	return Downloader{}, fmt.Errorf("unsupported network: %s. Testnet only supported", net.Name)
 }
 
 func (d Downloader) Download() error {
@@ -101,8 +99,10 @@ func (d Downloader) Download() error {
 
 	resp := d.getter.client.Do(d.getter.request)
 	d.setDownloadSize(resp.Size())
-	d.logger.Debug("Download response received",
-		zap.String("status", resp.HTTPResponse.Status))
+	if resp.HTTPResponse != nil {
+		d.logger.Debug("Download response received",
+			zap.String("status", resp.HTTPResponse.Status))
+	}
 	t := time.NewTicker(updateInterval)
 	defer t.Stop()
 

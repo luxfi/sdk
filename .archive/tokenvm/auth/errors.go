@@ -1,8 +1,0 @@
-// Copyright (C) 2020-2025, Lux Industries Inc. All rights reserved.
-// See the file LICENSE for licensing terms.
-
-package auth
-
-import "errors"
-
-var ErrInvalidSignature = errors.New("invalid signature")
