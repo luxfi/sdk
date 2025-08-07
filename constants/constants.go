@@ -5,6 +5,7 @@ package constants
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/luxfi/ids"
@@ -179,8 +180,10 @@ const (
 // Network timeouts
 const (
 	// Request timeouts
-	RequestTimeout      = 30 * time.Second
-	RequestRetryTimeout = 1 * time.Second
+	RequestTimeout         = 30 * time.Second
+	RequestRetryTimeout    = 1 * time.Second
+	APIRequestTimeout      = 30 * time.Second
+	APIRequestLargeTimeout = 2 * time.Minute
 
 	// Gossip parameters
 	GossipFrequency = 10 * time.Second
@@ -272,6 +275,11 @@ const (
 
 	// Import/Export limits
 	MaxImportSize = 1024
+)
+
+// File permissions
+const (
+	UserOnlyWriteReadExecPerms = os.FileMode(0700)
 )
 
 // GetNetworkID returns the network ID from name

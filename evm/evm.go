@@ -13,21 +13,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient"
 	evmParams "github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
-	"github.com/luxfi/evm/precompile/contracts/warp"
+	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/evm/predicate"
 	subnetEvmUtils "github.com/luxfi/evm/utils"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/params"
-	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/sdk/utils"
 )
 
 const (
@@ -518,7 +518,7 @@ func (client Client) WaitForEVMBootstrapped(timeout time.Duration) error {
 func (client Client) TransactWithWarpMessage(
 	from crypto.Address,
 	privateKeyStr string,
-	warpMessage *luxWarp.Message,
+	warpMessage *warp.Message,
 	contract crypto.Address,
 	callData []byte,
 	value *big.Int,
@@ -554,7 +554,7 @@ func (client Client) TransactWithWarpMessage(
 	}
 	accessList := types.AccessList{
 		types.AccessTuple{
-			Address:     warp.ContractAddress,
+			Address:     evmWarp.ContractAddress,
 			StorageKeys: subnetEvmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessage.Bytes())),
 		},
 	}
