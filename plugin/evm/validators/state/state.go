@@ -7,8 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	luxdb "github.com/luxfi/node/database"
-	"github.com/luxfi/database"
+	luxdb "github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/consensus/uptime"
 	"github.com/luxfi/node/utils/set"

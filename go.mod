@@ -171,3 +171,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace (
+	github.com/luxfi/geth v1.16.27 => ../geth
+	github.com/luxfi/node v1.16.15 => ../node
+)

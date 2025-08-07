@@ -12,8 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/metrics"
-	luxdatabase "github.com/luxfi/node/database"
-	"github.com/luxfi/database"
+	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
 	"github.com/luxfi/database/pebbledb"
 	"github.com/luxfi/database/prefixdb"
