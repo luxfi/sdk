@@ -1,6 +1,6 @@
 module github.com/luxfi/sdk
 
-go 1.24.5
+go 1.23.0
 
 replace github.com/luxfi/ledger/go => ../ledger/go
 
