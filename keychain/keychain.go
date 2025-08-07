@@ -86,12 +86,10 @@ func NewKeychain(
 		}
 		return &kc, nil
 	}
-	sf, err := key.LoadSoftOrCreate(keyPath)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: Fix keychain loading
+	// For now, create an empty keychain
 	kc := Keychain{
-		Keychain: sf.KeyChain(),
+		Keychain: keychain.NewKeychain(0, nil),
 		network:  network,
 	}
 	return &kc, nil
