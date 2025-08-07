@@ -25,7 +25,8 @@ import (
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/warp"
-	warpPayload "github.com/luxfi/warp/payload"
+	platformwarp "github.com/luxfi/node/vms/platformvm/warp"
+	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
 	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 
 	"github.com/luxfi/crypto"
@@ -196,7 +197,8 @@ func CompleteValidatorWeightChange(
 	pchainL1ValidatorRegistrationSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
 	// Convert standalone warp to node warp for contract
-	nodeWarpMsg := convertStandaloneToNodeWarpMsg(pchainL1ValidatorRegistrationSignedMessage)
+	nodeWarpMsgInterface, _ := localWarpMessage.ConvertStandaloneToNodeWarpMessage(pchainL1ValidatorRegistrationSignedMessage)
+	nodeWarpMsg := nodeWarpMsgInterface.(*platformwarp.Message)
 	
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
