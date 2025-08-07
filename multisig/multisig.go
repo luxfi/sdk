@@ -8,10 +8,10 @@ import (
 
 	"github.com/luxfi/node/vms/platformvm"
 
-	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/network"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/platformvm/txs"
@@ -247,7 +247,7 @@ func (ms *Multisig) GetNetworkID() (uint32, error) {
 }
 
 // get network model associated to tx
-func (ms *Multisig) GetNetwork() (network.Network, error) {
+func (ms *Multisig) GetNetwork() (network.LegacyNetwork, error) {
 	if ms.Undefined() {
 		return network.UndefinedNetwork, ErrUndefinedTx
 	}
@@ -337,7 +337,7 @@ func (ms *Multisig) GetSubnetOwners() ([]ids.ShortID, uint32, error) {
 	return ms.controlKeys, ms.threshold, nil
 }
 
-func GetOwners(network network.Network, subnetID ids.ID) ([]ids.ShortID, uint32, error) {
+func GetOwners(network network.LegacyNetwork, subnetID ids.ID) ([]ids.ShortID, uint32, error) {
 	pClient := platformvm.NewClient(network.Endpoint)
 	ctx := context.Background()
 	subnetResponse, err := pClient.GetSubnet(ctx, subnetID)

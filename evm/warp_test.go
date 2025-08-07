@@ -9,9 +9,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/warp"
-
-	"github.com/luxfi/crypto"
+	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,14 +27,15 @@ func TestGetWarpMessagesFromLogs(t *testing.T) {
 	messages = GetWarpMessagesFromLogs(logs)
 	require.Empty(t, messages)
 	// Test case 3: Log with valid warp message
+	chainID := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		ids.ID{},
+		chainID,
 		[]byte{},
 	)
 	require.NoError(t, err)
 	_, validPayload, err := subnetevmwarp.PackSendWarpMessageEvent(
-		crypto.Address{},
+		common.Address{},
 		common.Hash{},
 		unsignedWarpMessage.Bytes(),
 	)
@@ -71,14 +70,15 @@ func TestExtractWarpMessageFromLogs(t *testing.T) {
 	require.Nil(t, msg)
 	require.Contains(t, err.Error(), "no warp message is present in evm logs")
 	// Test case 3: Log with valid warp message
+	chainID := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		ids.ID{},
+		chainID,
 		[]byte{},
 	)
 	require.NoError(t, err)
 	_, validPayload, err := subnetevmwarp.PackSendWarpMessageEvent(
-		crypto.Address{},
+		common.Address{},
 		common.Hash{},
 		unsignedWarpMessage.Bytes(),
 	)
@@ -124,14 +124,15 @@ func TestExtractWarpMessageFromReceipt(t *testing.T) {
 	require.Nil(t, msg)
 	require.Contains(t, err.Error(), "no warp message is present in evm logs")
 	// Test case 4: Receipt with valid warp message
+	chainID2 := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		ids.ID{},
+		chainID2,
 		[]byte{},
 	)
 	require.NoError(t, err)
 	_, validPayload, err := subnetevmwarp.PackSendWarpMessageEvent(
-		crypto.Address{},
+		common.Address{},
 		common.Hash{},
 		unsignedWarpMessage.Bytes(),
 	)

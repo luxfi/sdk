@@ -4,7 +4,7 @@
 package chain
 
 import (
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 )
 
 // Transaction represents a blockchain transaction
