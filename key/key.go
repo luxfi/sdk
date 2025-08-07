@@ -11,6 +11,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
@@ -422,4 +423,89 @@ func ExportKey(key *Key, format string, writer io.Writer) error {
 	default:
 		return fmt.Errorf("unsupported export format: %s", format)
 	}
+}
+
+// LoadSoft loads a soft key from a file path
+func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
+	keyBytes, err := os.ReadFile(keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read key file: %w", err)
+	}
+
+	// Try to parse as hex-encoded private key (64 chars)
+	keyStr := strings.TrimSpace(string(keyBytes))
+	
+	// Check if it's a prefixed key (like "PrivateKey-...")
+	const privKeyPrefix = "PrivateKey-"
+	if strings.HasPrefix(keyStr, privKeyPrefix) {
+		keyStr = strings.TrimPrefix(keyStr, privKeyPrefix)
+		// TODO: decode CB58 format if needed
+	}
+	
+	// Try hex decoding
+	privateKeyBytes, err := hex.DecodeString(keyStr)
+	if err == nil && len(privateKeyBytes) == 32 {
+		// This is a valid 32-byte private key
+		var privateKey crypto.PrivateKey
+		copy(privateKey[:], privateKeyBytes)
+		
+		// For compatibility, pad to 64 bytes if needed (seed + public key format)
+		if len(privateKey) == 32 {
+			// Generate public key from private key seed
+			publicKey := privateKey.PublicKey()
+			fullKey := append(privateKeyBytes, publicKey[:]...)
+			copy(privateKey[:], fullKey[:crypto.PrivateKeyLen])
+		}
+		
+		return &Key{
+			Type:       "ed25519",
+			PrivateKey: privateKey,
+			PublicKey:  privateKey.PublicKey(),
+			Address:    generateAddress(privateKey.PublicKey()),
+		}, nil
+	}
+	
+	// Try JSON format
+	var keyData struct {
+		PrivateKey string `json:"privateKey"`
+		Type       string `json:"type"`
+	}
+	if err := json.Unmarshal(keyBytes, &keyData); err == nil {
+		privateKeyBytes, err := hex.DecodeString(keyData.PrivateKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode private key from JSON: %w", err)
+		}
+		
+		var privateKey crypto.PrivateKey
+		if len(privateKeyBytes) == 32 {
+			// Seed only, need to expand
+			copy(privateKey[:32], privateKeyBytes)
+			publicKey := privateKey.PublicKey()
+			copy(privateKey[32:], publicKey[:])
+		} else if len(privateKeyBytes) == crypto.PrivateKeyLen {
+			copy(privateKey[:], privateKeyBytes)
+		} else {
+			return nil, fmt.Errorf("invalid private key length: %d", len(privateKeyBytes))
+		}
+		
+		return &Key{
+			Type:       keyData.Type,
+			PrivateKey: privateKey,
+			PublicKey:  privateKey.PublicKey(),
+			Address:    generateAddress(privateKey.PublicKey()),
+		}, nil
+	}
+	
+	return nil, fmt.Errorf("unable to parse key file")
+}
+
+// C returns the Ethereum-style address (0x prefixed hex string)
+func (k *Key) C() string {
+	// Convert the address to hex format
+	return fmt.Sprintf("0x%x", k.Address[:])
+}
+
+// PrivKeyHex returns the private key as a hex string
+func (k *Key) PrivKeyHex() string {
+	return hex.EncodeToString(k.PrivateKey[:32]) // Only return the seed part
 }

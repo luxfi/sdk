@@ -44,13 +44,18 @@ func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, e
 
 // L1ValidatorRegistration represents an L1 validator registration
 type L1ValidatorRegistration struct {
-	ValidationID     ids.ID      `serialize:"true" json:"validationID"`
+	validationID     ids.ID      // private field
 	NodeID           ids.NodeID  `serialize:"true" json:"nodeID"`
 	BLSPublicKey     []byte      `serialize:"true" json:"blsPublicKey"`
 	Weight           uint64      `serialize:"true" json:"weight"`
 	Expiry           uint64      `serialize:"true" json:"expiry"`
 	RemainingBalance uint64      `serialize:"true" json:"remainingBalance"`
 	DisableOwner     PChainOwner `serialize:"true" json:"disableOwner"`
+}
+
+// ValidationID returns the validation ID of the registration
+func (r *L1ValidatorRegistration) ValidationID() ids.ID {
+	return r.validationID
 }
 
 // L1ValidatorWeight represents an L1 validator weight update
@@ -72,10 +77,28 @@ func ParseRegisterL1Validator(payload []byte) (*L1ValidatorRegistration, error) 
 	return &L1ValidatorRegistration{}, nil
 }
 
+// L1ValidatorRegistrationPayload wraps AddressedCall with ValidationID
+type L1ValidatorRegistrationPayload struct {
+	*warpPayload.AddressedCall
+	validationID ids.ID
+}
+
+// ValidationID returns the validation ID
+func (p *L1ValidatorRegistrationPayload) ValidationID() ids.ID {
+	return p.validationID
+}
+
 // NewRegisterL1Validator creates a new L1 validator registration payload
-func NewRegisterL1Validator(subnetID ids.ID, nodeID ids.NodeID, weight uint64, blsPublicKey []byte, expiry uint64) (*warpPayload.AddressedCall, error) {
+func NewRegisterL1Validator(subnetID ids.ID, nodeID ids.NodeID, blsPublicKey []byte, expiry uint64, balanceOwners PChainOwner, disableOwners PChainOwner, weight uint64) (*L1ValidatorRegistrationPayload, error) {
 	// TODO: Implement proper message creation
-	return &warpPayload.AddressedCall{}, nil
+	// Generate a validation ID based on the parameters
+	validationID := ids.GenerateTestID()
+	
+	addressedCall := &warpPayload.AddressedCall{}
+	return &L1ValidatorRegistrationPayload{
+		AddressedCall: addressedCall,
+		validationID:  validationID,
+	}, nil
 }
 
 // NewL1ValidatorRegistration creates a new L1 validator registration message
@@ -87,5 +110,17 @@ func NewL1ValidatorRegistration(validationID ids.ID, valid bool) (*warpPayload.A
 // ParseAddressedCall parses an addressed call from payload
 func ParseAddressedCall(payload []byte) (*warpPayload.AddressedCall, error) {
 	// TODO: Implement proper parsing
+	return &warpPayload.AddressedCall{}, nil
+}
+
+// ConvertStandaloneToNodeWarpMessage converts a standalone warp message to a node warp message
+func ConvertStandaloneToNodeWarpMessage(standaloneMessage interface{}) (interface{}, error) {
+	// TODO: Implement proper conversion
+	return standaloneMessage, nil
+}
+
+// NewL1ValidatorWeight creates a new L1 validator weight message
+func NewL1ValidatorWeight(validationID ids.ID, nonce uint64, weight uint64) (*warpPayload.AddressedCall, error) {
+	// TODO: Implement proper message creation
 	return &warpPayload.AddressedCall{}, nil
 }
