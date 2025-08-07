@@ -63,7 +63,12 @@ func (dev *LedgerDevice) FindFunds(
 	amount uint64,
 	maxIndex uint32,
 ) ([]uint32, error) {
-	pClient := platformvm.NewClient(network.Endpoint)
+	// Use the first node's endpoint
+	endpoint := ""
+	if len(network.Nodes) > 0 && network.Nodes[0] != nil {
+		endpoint = network.Nodes[0].Endpoint
+	}
+	pClient := platformvm.NewClient(endpoint)
 	totalBalance := uint64(0)
 	indices := []uint32{}
 	if maxIndex == 0 {
