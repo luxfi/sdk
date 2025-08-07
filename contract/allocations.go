@@ -3,7 +3,6 @@
 package contract
 
 import (
-	"bytes"
 	"fmt"
 	"math/big"
 
@@ -57,7 +56,7 @@ func GetBlockchainAirdropKeyInfo(
 			return "", "", "", err
 		}
 		for address := range genesis.Alloc {
-			if address.Hex() == airdropAddress {
+			if address == airdropAddress {
 				return airdropKeyName, airdropAddress, airdropPrivKey, nil
 			}
 		}
@@ -68,7 +67,7 @@ func GetBlockchainAirdropKeyInfo(
 		ewoq, err := key.LoadSoft(network.ID(), ewoqPath)
 		if err == nil {
 			for address := range genesis.Alloc {
-				if address.Hex() == ewoq.C() {
+				if address == ewoq.C() {
 					return "ewoq", ewoq.C(), ewoq.PrivKeyHex(), nil
 				}
 			}
@@ -82,9 +81,8 @@ func GetBlockchainAirdropKeyInfo(
 		if alloc.Balance == nil {
 			continue
 		}
-		// Convert geth common.Address to crypto.Address
-		cryptoAddr := crypto.Address(address.Bytes())
-		found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr, false)
+		// address is already a string
+		found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, address, false)
 		if err != nil {
 			return "", "", "", err
 		}
@@ -101,7 +99,7 @@ func GetBlockchainAirdropKeyInfo(
 func SearchForManagedKey(
 	app *application.Lux,
 	network models.Network,
-	address crypto.Address,
+	address string,
 	includeEwoq bool,
 ) (bool, string, string, string, error) {
 	keyNames, err := utils.GetKeyNames(app.GetKeyDir(), includeEwoq)
@@ -112,7 +110,7 @@ func SearchForManagedKey(
 		keyPath := app.GetKeyPath(keyName)
 		if k, err := key.LoadSoft(network.ID(), keyPath); err != nil {
 			return false, "", "", "", err
-		} else if address.Hex() == k.C() {
+		} else if address == k.C() {
 			return true, keyName, k.C(), k.PrivKeyHex(), nil
 		}
 	}
@@ -156,15 +154,13 @@ func GetBlockchainGenesis(
 	network models.Network,
 	chainSpec ChainSpec,
 ) ([]byte, error) {
-	blockchainID, err := GetBlockchainID(app, network, chainSpec)
+	_, err := GetBlockchainID(app, network, chainSpec)
 	if err != nil {
 		return nil, err
 	}
-	createChainTx, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
-	if err != nil {
-		return nil, err
-	}
-	return createChainTx.GenesisData, err
+	// GetBlockchainTx is not implemented, return error for now
+	// TODO: Implement GetBlockchainTx to retrieve genesis data from network
+	return nil, fmt.Errorf("GetBlockchainTx not yet implemented")
 }
 
 func sumGenesisSupply(
@@ -218,9 +214,9 @@ func getGenesisNativeMinterAdmin(
 			return false, false, "", "", "", nil
 		}
 		for _, admin := range allowListCfg.AllowListConfig.AdminAddresses {
-			// Convert geth address to crypto.Address
-			cryptoAddr := crypto.Address(admin.Bytes())
-			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr, true)
+			// Convert address to string
+			adminStr := fmt.Sprintf("0x%x", admin.Bytes())
+			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, adminStr, true)
 			if err != nil {
 				return false, false, "", "", "", err
 			}
@@ -251,9 +247,9 @@ func getGenesisNativeMinterManager(
 			return false, false, "", "", "", nil
 		}
 		for _, admin := range allowListCfg.AllowListConfig.ManagerAddresses {
-			// Convert geth address to crypto.Address
-			cryptoAddr := crypto.Address(admin.Bytes())
-			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, cryptoAddr, true)
+			// Convert address to string
+			adminStr := fmt.Sprintf("0x%x", admin.Bytes())
+			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, adminStr, true)
 			if err != nil {
 				return false, false, "", "", "", err
 			}
@@ -312,9 +308,10 @@ func ContractAddressIsInGenesisData(
 	if err != nil {
 		return false, err
 	}
+	// Convert contractAddress to string for comparison
+	contractAddrStr := fmt.Sprintf("0x%x", contractAddress.Bytes())
 	for address, allocation := range genesis.Alloc {
-		// Compare by converting to the same type
-		if bytes.Equal(address.Bytes(), contractAddress.Bytes()) {
+		if address == contractAddrStr {
 			return len(allocation.Code) > 0, nil
 		}
 	}

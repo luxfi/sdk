@@ -45,6 +45,7 @@ type ElasticSubnet struct {
 type Sidecar struct {
 	Name            string
 	VM              VMType
+	VMID            string
 	VMVersion       string
 	RPCVersion      int
 	Subnet          string
@@ -81,6 +82,9 @@ type Sidecar struct {
 
 	// Validator Management
 	ValidatorManagement string `json:"validatorManagement"` // proof-of-authority, proof-of-stake
+	ValidatorManagerOwner string `json:"validatorManagerOwner,omitempty"` // Owner address for POA
+	PoS bool `json:"pos,omitempty"` // Whether using Proof of Stake
+	UseACP99 bool `json:"useACP99,omitempty"` // Whether to use ACP-99
 
 	// Migration info
 	MigratedAt int64 `json:"migratedAt"` // When subnet became L1

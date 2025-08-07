@@ -266,7 +266,7 @@ func GetRegisterL1ValidatorMessage(
 			validationID = addressedCallPayload.ValidationID()
 			registerSubnetValidatorAddressedCall, err := warpPayload.NewAddressedCall(
 				managerAddress.Bytes(),
-				addressedCallPayload.Bytes(),
+				addressedCallPayload.AddressedCall.Bytes(),
 			)
 			if err != nil {
 				return nil, ids.Empty, err
@@ -302,7 +302,7 @@ func GetRegisterL1ValidatorMessage(
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("failed to convert warp message: %w", err)
 	}
-	return signedMessage, validationID, nil
+	return signedMessage.(*warp.Message), validationID, nil
 }
 
 
@@ -349,7 +349,11 @@ func GetPChainL1ValidatorRegistrationMessage(
 	if err != nil {
 		return nil, err
 	}
-	return warpMessage.ConvertStandaloneToNodeWarpMessage(standaloneSignedMessage)
+	nodeWarpMsg, err := warpMessage.ConvertStandaloneToNodeWarpMessage(standaloneSignedMessage)
+	if err != nil {
+		return nil, err
+	}
+	return nodeWarpMsg.(*warp.Message), nil
 }
 
 // last step of flow for adding a new validator

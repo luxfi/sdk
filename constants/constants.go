@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	DefaultPerms755    = 0o755
-	WriteReadReadPerms = 0o644
+	DefaultPerms755             = 0o755
+	WriteReadReadPerms          = 0o644
+	UserOnlyWriteReadExecPerms  = 0o700
 
 	BaseDirName = ".cli"
 	LogDir      = "logs"
@@ -48,6 +49,16 @@ const (
 	LocalWSEndpoint   = "ws://127.0.0.1:9630/ext/bc/C/ws"
 	DevnetWSEndpoint  = "wss://api.lux-dev.network/ext/bc/C/ws"
 
+	// Network IDs
+	MainnetID uint32 = 1
+	TestnetID uint32 = 5
+	LocalID   uint32 = 12345
+
+	// Network Names
+	MainnetName = "mainnet"
+	TestnetName = "testnet"
+	LocalName   = "local"
+
 	// Cloud service constants
 	GCPCloudService            = "gcp"
 	AWSCloudService            = "aws"
@@ -59,7 +70,7 @@ const (
 	GCPImageFilter             = "ubuntu-os-cloud"
 	CloudNodeCLIConfigBasePath = "/home/ubuntu/.cli"
 	CodespaceNameEnvVar        = "CODESPACE_NAME"
-	AnsibleSSHShellParams      = "-o StrictHostKeyChecking=no"
+	AnsibleSSHShellParams      = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 	RemoteSSHUser              = "ubuntu"
 	StakerCertFileName         = "staker.crt"
 	StakerKeyFileName          = "staker.key"

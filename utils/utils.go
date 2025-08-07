@@ -60,3 +60,12 @@ func GetTimedContext(timeout time.Duration) (context.Context, context.CancelFunc
 		timeCancel()
 	}
 }
+
+// PointersSlice converts a slice of values to a slice of pointers
+func PointersSlice[T any](values []T) []*T {
+	pointers := make([]*T, len(values))
+	for i := range values {
+		pointers[i] = &values[i]
+	}
+	return pointers
+}

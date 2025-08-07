@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"strings"
 
-	cmdflags "github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/sdk/flags"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/localnet"
+	// "github.com/luxfi/sdk/localnet" // TODO: Add localnet package
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/utils"
@@ -45,7 +45,7 @@ const (
 )
 
 func (cs *ChainSpec) CheckMutuallyExclusiveFields() error {
-	if !cmdflags.EnsureMutuallyExclusive([]bool{
+	if !flags.EnsureMutuallyExclusive([]bool{
 		cs.BlockchainName != "",
 		cs.BlockchainID != "",
 		cs.CChain,
@@ -241,17 +241,17 @@ func GetBlockchainID(
 		blockchainID, err = ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			// it should be an alias at this point
-			blockchainID, err = utils.GetChainID(network.Endpoint(), chainSpec.BlockchainID)
+			blockchainID, err = utils.GetBlockchainIDFromAlias(network.Endpoint(), chainSpec.BlockchainID)
 			if err != nil {
 				return ids.Empty, err
 			}
 		}
 	case chainSpec.CChain:
-		chainID, err := utils.GetChainID(network.Endpoint(), "C")
+		var err error
+		blockchainID, err = utils.GetBlockchainIDFromAlias(network.Endpoint(), "C")
 		if err != nil {
 			return ids.Empty, err
 		}
-		blockchainID = chainID
 	case chainSpec.BlockchainName != "":
 		sc, err := app.LoadSidecar(chainSpec.BlockchainName)
 		if err != nil {
@@ -286,15 +286,13 @@ func GetSubnetID(
 		}
 		subnetID = sc.Networks[network.Name()].SubnetID
 	case chainSpec.BlockchainID != "":
-		blockchainID, err := ids.FromString(chainSpec.BlockchainID)
+		_, err := ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failure parsing %s as id: %w", chainSpec.BlockchainID, err)
 		}
-		tx, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
-		if err != nil {
-			return ids.Empty, err
-		}
-		subnetID = tx.SubnetID
+		// GetBlockchainTx is not implemented
+		// TODO: Implement GetBlockchainTx to retrieve subnet ID from network
+		return ids.Empty, fmt.Errorf("GetBlockchainTx not yet implemented")
 	default:
 		return ids.Empty, fmt.Errorf("blockchain is not defined")
 	}
@@ -412,10 +410,10 @@ func PromptChain(
 		chainID, err := ids.FromString(blockchainID)
 		if err != nil {
 			// map from alias to blockchain ID (or identity)
-			chainID, err = utils.GetChainID(network.Endpoint(), blockchainID)
-			if err != nil {
-				return cancel, err
-			}
+			// For L1 blockchains, we don't have a chain ID in the traditional sense
+			// This would need to be retrieved from the blockchain's configuration
+			// For now, return an error
+			return false, fmt.Errorf("getting chain ID for blockchain %s not yet implemented", blockchainID)
 		}
 		blockchainID = chainID.String()
 	}
@@ -435,15 +433,21 @@ func GetCChainWarpInfo(
 	registryAddress := ""
 	switch {
 	case network.Kind() == models.Local:
-		b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, "")
+		// TODO: Add localnet support
+		// b, extraLocalNetworkData, err := localnet.GetExtraLocalNetworkData(app, "")
+		b := false
+		var extraLocalNetworkData interface{} = nil
+		var err error = nil
 		if err != nil {
 			return "", "", err
 		}
-		if !b {
+		if !b || extraLocalNetworkData == nil {
 			return "", "", fmt.Errorf("no extra local network data available")
 		}
-		messengerAddress = extraLocalNetworkData.CChainTeleporterMessengerAddress
-		registryAddress = extraLocalNetworkData.CChainTeleporterRegistryAddress
+		// TODO: Implement extraction of teleporter addresses from extraLocalNetworkData
+		// For now, return empty addresses
+		messengerAddress = ""
+		registryAddress = ""
 	case network.ClusterName() != "":
 		clusterConfig, err := app.GetClusterConfig(network.ClusterName())
 		if err != nil {

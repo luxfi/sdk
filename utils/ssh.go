@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/utils"
 
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/exp/slices"
@@ -109,7 +108,7 @@ func ListSSHAgentIdentities() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	identityList := utils.Map(sshIDs, func(id *agent.Key) string { return id.Comment })
+	identityList := Map(sshIDs, func(id *agent.Key) string { return id.Comment })
 	return identityList, nil
 }
 
