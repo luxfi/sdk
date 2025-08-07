@@ -20,6 +20,9 @@ import (
 	luxlog "github.com/luxfi/log"
 )
 
+// Prompter is an alias for the prompts.Prompter interface
+type Prompter = prompts.Prompter
+
 const (
 	WriteReadReadPerms = 0o644
 )
@@ -28,7 +31,7 @@ type Lux struct {
 	Log        luxlog.Logger
 	baseDir    string
 	Conf       *config.Config
-	Prompt     prompts.Prompter
+	Prompt     Prompter
 	Lpm        *lpm.Client
 	LpmDir     string
 	Apm        *lpm.Client // APM is similar to LPM
@@ -41,7 +44,7 @@ func New() *Lux {
 	return &Lux{}
 }
 
-func (app *Lux) Setup(baseDir string, log luxlog.Logger, conf *config.Config, prompt prompts.Prompter, downloader Downloader) {
+func (app *Lux) Setup(baseDir string, log luxlog.Logger, conf *config.Config, prompt Prompter, downloader Downloader) {
 	app.baseDir = baseDir
 	app.Log = log
 	app.Conf = conf

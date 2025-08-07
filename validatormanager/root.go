@@ -8,8 +8,8 @@ import (
 	"math/big"
 
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/sdk/network"
-	warpPayload "github.com/luxfi/warp/payload"
+	"github.com/luxfi/sdk/models"
+	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
 
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
@@ -19,6 +19,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/warp"
+	platformwarp "github.com/luxfi/node/vms/platformvm/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -196,7 +197,7 @@ func (p PoSParams) Verify() error {
 }
 
 func GetPChainSubnetToL1ConversionUnsignedMessage(
-	network network.Network,
+	net models.Network,
 	subnetID ids.ID,
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
@@ -232,7 +233,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 		return nil, err
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
-		network.ID,
+		net.ID(),
 		luxdconstants.PlatformChainID[:],
 		subnetConversionAddressedCall.Bytes(),
 	)
@@ -280,13 +281,20 @@ func InitializeValidatorsSet(
 		ValidatorManagerAddress:      managerAddress,
 		InitialValidators:            validators,
 	}
+	// Convert standalone warp to node warp for contract
+	nodeWarpMsgInterface, err := warpMessage.ConvertStandaloneToNodeWarpMessage(subnetConversionSignedMessage)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to convert warp message: %w", err)
+	}
+	nodeWarpMsg := nodeWarpMsgInterface.(*platformwarp.Message)
+	
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		false,
 		crypto.Address{},
 		privateKey,
 		managerAddress,
-		subnetConversionSignedMessage,
+		nodeWarpMsg,
 		big.NewInt(0),
 		"initialize validator set",
 		ErrorSignatureToError,
