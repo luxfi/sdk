@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 
 	"github.com/luxfi/crypto/bls"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/crypto"
 )
 
