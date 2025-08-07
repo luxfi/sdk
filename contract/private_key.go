@@ -5,7 +5,7 @@ package contract
 import (
 	"fmt"
 
-	cmdflags "github.com/luxfi/cli/cmd/flags"
+	"github.com/luxfi/sdk/flags"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
@@ -80,7 +80,7 @@ func (pkf *PrivateKeyFlags) GetPrivateKey(
 	genesisPrivateKey string,
 ) (string, error) {
 	pkf.fillDefaultFlagNames()
-	if !cmdflags.EnsureMutuallyExclusive([]bool{
+	if !flags.EnsureMutuallyExclusive([]bool{
 		pkf.PrivateKey != "",
 		pkf.KeyName != "",
 		pkf.GenesisKey,
