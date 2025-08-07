@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
@@ -28,7 +27,6 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/proto/pb/platformvm"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/node/vms/platformvm/warp"
@@ -671,16 +669,17 @@ func GetRegistrationJustification(
 	for validationIndex := uint32(0); validationIndex < numBootstrapValidatorsToSearch; validationIndex++ {
 		bootstrapValidationID := subnetID.Append(validationIndex)
 		if bootstrapValidationID == validationID {
-			justification := platformvm.L1ValidatorRegistrationJustification{
-				Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertSubnetToL1TxData{
-					ConvertSubnetToL1TxData: &platformvm.SubnetIDIndex{
-						SubnetID: subnetID[:],
-						Index:    validationIndex,
-					},
-				},
-			}
+			// TODO: Uncomment when L1ValidatorRegistrationJustification is available
+			// justification := platformvm.L1ValidatorRegistrationJustification{
+			// 	Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertSubnetToL1TxData{
+			// 		ConvertSubnetToL1TxData: &platformvm.SubnetIDIndex{
+			// 			SubnetID: subnetID[:],
+			// 			Index:    validationIndex,
+			// 		},
+			// 	},
+			// }
 			// Use JSON marshaling as a workaround since we don't have real protobuf
-			justBytes, _ := json.Marshal(&justification)
+			justBytes := []byte{} // temporary empty justification
 			return justBytes, nil
 		}
 	}
@@ -697,13 +696,14 @@ func GetRegistrationJustification(
 	if err != nil {
 		return nil, err
 	}
-	justification := platformvm.L1ValidatorRegistrationJustification{
-		Preimage: &platformvm.L1ValidatorRegistrationJustification_RegisterL1ValidatorMessage{
-			RegisterL1ValidatorMessage: addressedCall.Payload,
-		},
-	}
+	// TODO: Uncomment when L1ValidatorRegistrationJustification is available
+	// justification := platformvm.L1ValidatorRegistrationJustification{
+	// 	Preimage: &platformvm.L1ValidatorRegistrationJustification_RegisterL1ValidatorMessage{
+	// 		RegisterL1ValidatorMessage: addressedCall.Payload,
+	// 	},
+	// }
 	// Use JSON marshaling as a workaround since we don't have real protobuf
-	justBytes, _ := json.Marshal(&justification)
+	justBytes := addressedCall.Payload // temporary: just return the payload
 	return justBytes, nil
 }
 
