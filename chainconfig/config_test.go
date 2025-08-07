@@ -16,7 +16,7 @@ func TestChainConfigBuilder(t *testing.T) {
 	t.Run("default builder", func(t *testing.T) {
 		builder := NewChainConfigBuilder()
 		config := builder.Build()
-		
+
 		require.NotNil(t, config)
 		require.NotNil(t, config.ChainID)
 		require.Equal(t, big.NewInt(99999), config.ChainID)
@@ -29,7 +29,7 @@ func TestChainConfigBuilder(t *testing.T) {
 		config := NewChainConfigBuilder().
 			WithChainID(chainID).
 			Build()
-		
+
 		require.Equal(t, chainID, config.ChainID)
 	})
 
@@ -37,7 +37,7 @@ func TestChainConfigBuilder(t *testing.T) {
 		builder := NewChainConfigBuilder().
 			WithFeeConfig(fees.HighThroughputConfig)
 		builder.Build()
-		
+
 		require.Equal(t, fees.HighThroughputConfig, builder.GetFeeConfig())
 	})
 
@@ -45,7 +45,7 @@ func TestChainConfigBuilder(t *testing.T) {
 		builder := NewChainConfigBuilder().
 			WithAllowFeeRecipients(true)
 		builder.Build()
-		
+
 		require.True(t, builder.GetAllowFeeRecipients())
 	})
 
@@ -54,11 +54,11 @@ func TestChainConfigBuilder(t *testing.T) {
 		precompileConfig := map[string]interface{}{
 			"enabled": true,
 		}
-		
+
 		builder := NewChainConfigBuilder().
 			WithPrecompile(address, precompileConfig)
 		builder.Build()
-		
+
 		precompiles := builder.GetPrecompiles()
 		require.NotNil(t, precompiles)
 		require.Contains(t, precompiles, address.Hex())
@@ -68,11 +68,11 @@ func TestChainConfigBuilder(t *testing.T) {
 	t.Run("with network upgrade", func(t *testing.T) {
 		upgradeName := "testUpgrade"
 		upgradeTime := big.NewInt(1000000)
-		
+
 		builder := NewChainConfigBuilder().
 			WithNetworkUpgrade(upgradeName, upgradeTime)
 		builder.Build()
-		
+
 		upgrades := builder.GetNetworkUpgrades()
 		require.NotNil(t, upgrades)
 		require.Contains(t, upgrades, upgradeName)
@@ -85,19 +85,19 @@ func TestPresetConfigurations(t *testing.T) {
 
 	t.Run("mainnet config", func(t *testing.T) {
 		config := MainnetChainConfig(chainID)
-		
+
 		require.Equal(t, chainID, config.ChainID)
 	})
 
 	t.Run("testnet config", func(t *testing.T) {
 		config := TestnetChainConfig(chainID)
-		
+
 		require.Equal(t, chainID, config.ChainID)
 	})
 
 	t.Run("local config", func(t *testing.T) {
 		config := LocalChainConfig(chainID)
-		
+
 		require.Equal(t, chainID, config.ChainID)
 	})
 }

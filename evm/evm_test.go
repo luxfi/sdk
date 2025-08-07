@@ -2078,21 +2078,21 @@ func TestSetupProposerVM(t *testing.T) {
 				// Allow flexible calls since the implementation does retries and checks
 				mockClient.EXPECT().ChainID(gomock.Any()).
 					Return(chainID, nil).AnyTimes()
-				
+
 				// Track block progression
 				blockNum := uint64(1000)
 				mockClient.EXPECT().BlockNumber(gomock.Any()).
 					DoAndReturn(func(_ interface{}) (uint64, error) {
 						return blockNum, nil
 					}).AnyTimes()
-				
+
 				// Track nonce
 				nonce := uint64(0)
 				mockClient.EXPECT().NonceAt(gomock.Any(), address, gomock.Any()).
 					DoAndReturn(func(_ interface{}, _ interface{}, _ interface{}) (uint64, error) {
 						return nonce, nil
 					}).AnyTimes()
-				
+
 				// Accept transactions and increment state
 				mockClient.EXPECT().SendTransaction(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(_ interface{}, _ interface{}) error {
