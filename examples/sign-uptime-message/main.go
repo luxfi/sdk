@@ -9,12 +9,13 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p"
+	logging "github.com/luxfi/log"
+	"github.com/luxfi/metrics"
+	// "github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/peer"
 	"github.com/luxfi/node/proto/pb/sdk"
 	"github.com/luxfi/node/consensus/networking/router"
@@ -81,8 +82,11 @@ func main() {
 		log.Fatalf("failed to start peer: %s\n", err)
 	}
 
+	logger := logging.NoLog{}
+	metricsInstance := metrics.NewNoOpMetrics("sign-uptime")
 	messageBuilder, err := p2pmessage.NewCreator(
-		prometheus.NewRegistry(),
+		logger,
+		metricsInstance,
 		compression.TypeZstd,
 		time.Hour,
 	)
@@ -101,10 +105,12 @@ func main() {
 		sourceChainID,
 		0,
 		time.Hour,
-		p2p.PrefixMessage(
-			p2p.ProtocolPrefix(p2p.SignatureRequestHandlerID),
-			appRequestPayload,
-		),
+		// TODO: Fix SignatureRequestHandlerID - API has changed
+		// p2p.PrefixMessage(
+		//	p2p.ProtocolPrefix(p2p.SignatureRequestHandlerID),
+		//	appRequestPayload,
+		// ),
+		appRequestPayload,
 	)
 	if err != nil {
 		log.Fatalf("failed to create AppRequest: %s\n", err)

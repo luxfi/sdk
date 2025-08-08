@@ -117,7 +117,12 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 
 	// MakeWallet fetches the available UTXOs owned by [kc] on the network
 	// that [LocalAPIURI] is hosting.
-	wallet, err := wallet.MakeWallet(ctx, DefaultLocalNodeURI, kc, kc, wallet.WalletConfig{})
+	walletConfig := &wallet.WalletConfig{
+		URI: DefaultLocalNodeURI,
+		LUXKeychain: kc,
+		EthKeychain: kc,
+	}
+	wallet, err := wallet.MakeWallet(ctx, walletConfig)
 	require.NoError(err)
 
 	pWallet := wallet.P()

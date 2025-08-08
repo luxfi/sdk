@@ -128,7 +128,7 @@ func (vm *VM) useStandaloneDatabase(acceptedDB luxdatabase.Database) (bool, erro
 
 	// check if the chain can use a standalone database
 	_, err := acceptedDB.Get(lastAcceptedKey)
-	if err == database.ErrNotFound {
+	if err == luxdatabase.ErrNotFound {
 		// If there is nothing in the database, we can use the standalone database
 		return true, nil
 	}

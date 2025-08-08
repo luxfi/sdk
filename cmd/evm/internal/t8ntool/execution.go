@@ -34,6 +34,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
@@ -129,7 +130,7 @@ type rejectedTx struct {
 // Apply applies a set of transactions to a pre-state
 func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 	txIt txIterator, miningReward int64,
-	getTracerFn func(txIndex int, txHash common.Hash) (vm.EVMLogger, error)) (*state.StateDB, *ExecutionResult, []byte, error) {
+	getTracerFn func(txIndex int, txHash common.Hash) (*tracing.Hooks, error)) (*state.StateDB, *ExecutionResult, []byte, error) {
 	// Capture errors for BLOCKHASH operation, if we haven't been supplied the
 	// required blockhashes
 	var hashError error
@@ -199,7 +200,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 	// 	misc.ApplyDAOHardFork(statedb)
 	// }
 	if beaconRoot := pre.Env.ParentBeaconBlockRoot; beaconRoot != nil {
-		evm := vm.NewEVM(vmContext, vm.TxContext{}, statedb, chainConfig, vmConfig)
+		evm := vm.NewEVM(vmContext, statedb, chainConfig, vmConfig)
 		core.ProcessBeaconBlockRoot(*beaconRoot, evm, statedb)
 	}
 
@@ -225,7 +226,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 		txBlobGas := uint64(0)
 		if tx.Type() == types.BlobTxType {
 			txBlobGas = uint64(ethparams.BlobTxBlobGasPerBlob * len(tx.BlobHashes()))
-			if used, max := blobGasUsed+txBlobGas, uint64(ethparams.MaxBlobGasPerBlock); used > max {
+			if used, max := blobGasUsed+txBlobGas, uint64(eip4844.MaxBlobGasPerBlock); used > max {
 				err := fmt.Errorf("blob gas (%d) would exceed maximum allowance %d", used, max)
 				log.Warn("rejected tx", "index", i, "err", err)
 				rejectedTxs = append(rejectedTxs, &rejectedTx{i, err.Error()})
@@ -244,7 +245,8 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			snapshot  = statedb.Snapshot()
 			prevGas   = gaspool.Gas()
 		)
-		evm := vm.NewEVM(vmContext, txContext, statedb, chainConfig, vmConfig)
+		evm := vm.NewEVM(vmContext, statedb, chainConfig, vmConfig)
+		evm.SetTxContext(txContext)
 
 		// (ret []byte, usedGas uint64, failed bool, err error)
 		msgResult, err := core.ApplyMessage(evm, msg, gaspool)
@@ -284,12 +286,15 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 
 			// If the transaction created a contract, store the creation address in the receipt.
 			if msg.To == nil {
-				receipt.ContractAddress = crypto.CreateAddress(evm.TxContext.Origin, tx.Nonce())
+				var cryptoAddr crypto.Address
+				copy(cryptoAddr[:], evm.TxContext.Origin[:])
+				createdAddr := crypto.CreateAddress(cryptoAddr, tx.Nonce())
+				receipt.ContractAddress = common.BytesToAddress(createdAddr[:])
 			}
 
 			// Set the receipt logs and create the bloom filter.
-			receipt.Logs = statedb.GetLogs(tx.Hash(), vmContext.BlockNumber.Uint64(), blockHash)
-			receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+			receipt.Logs = statedb.GetLogs(tx.Hash(), vmContext.BlockNumber.Uint64(), blockHash, vmContext.Time)
+			receipt.Bloom = types.CreateBloom(receipt)
 			// These three are non-consensus fields:
 			//receipt.BlockHash
 			//receipt.BlockNumber
@@ -320,12 +325,12 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			reward.Sub(reward, new(big.Int).SetUint64(ommer.Delta))
 			reward.Mul(reward, blockReward)
 			reward.Div(reward, big.NewInt(8))
-			statedb.AddBalance(ommer.Address, uint256.MustFromBig(reward))
+			statedb.AddBalance(ommer.Address, uint256.MustFromBig(reward), tracing.BalanceIncreaseRewardMineUncle)
 		}
-		statedb.AddBalance(pre.Env.Coinbase, uint256.MustFromBig(minerReward))
+		statedb.AddBalance(pre.Env.Coinbase, uint256.MustFromBig(minerReward), tracing.BalanceIncreaseRewardMineBlock)
 	}
 	// Commit block
-	root, err := statedb.Commit(vmContext.BlockNumber.Uint64(), chainConfig.IsEIP158(vmContext.BlockNumber))
+	root, err := statedb.Commit(vmContext.BlockNumber.Uint64(), chainConfig.IsEIP158(vmContext.BlockNumber), false)
 	if err != nil {
 		return nil, nil, nil, NewError(ErrorEVM, fmt.Errorf("could not commit state: %v", err))
 	}
@@ -333,7 +338,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 		StateRoot:   root,
 		TxRoot:      types.DeriveSha(includedTxs, trie.NewStackTrie(nil)),
 		ReceiptRoot: types.DeriveSha(receipts, trie.NewStackTrie(nil)),
-		Bloom:       types.CreateBloom(receipts),
+		Bloom:       types.MergeBloom(receipts),
 		LogsHash:    rlpHash(statedb.Logs()),
 		Receipts:    receipts,
 		Rejected:    rejectedTxs,
@@ -360,14 +365,14 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc) *state.StateDB
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
 		statedb.SetCode(addr, a.Code)
-		statedb.SetNonce(addr, a.Nonce)
-		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance))
+		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeGenesis)
+		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceIncreaseGenesisBalance)
 		for k, v := range a.Storage {
 			statedb.SetState(addr, k, v)
 		}
 	}
 	// Commit and re-open to start with a clean state.
-	root, _ := statedb.Commit(0, false)
+	root, _ := statedb.Commit(0, false, false)
 	statedb, _ = state.New(root, sdb, nil)
 	return statedb
 }

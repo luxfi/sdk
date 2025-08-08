@@ -131,7 +131,7 @@ func (s *state) AddValidator(vdr interfaces.Validator) error {
 func (s *state) UpdateValidator(vdr interfaces.Validator) error {
 	data, exists := s.data[vdr.ValidationID]
 	if !exists {
-		return database.ErrNotFound
+		return luxdb.ErrNotFound
 	}
 	// check immutable fields
 	if !data.constantsAreUnmodified(vdr) {
@@ -163,7 +163,7 @@ func (s *state) UpdateValidator(vdr interfaces.Validator) error {
 func (s *state) DeleteValidator(vID ids.ID) error {
 	data, exists := s.data[vID]
 	if !exists {
-		return database.ErrNotFound
+		return luxdb.ErrNotFound
 	}
 	delete(s.data, data.validationID)
 	delete(s.index, data.NodeID)
@@ -211,7 +211,7 @@ func (s *state) WriteState() error {
 func (s *state) SetStatus(vID ids.ID, isActive bool) error {
 	data, exists := s.data[vID]
 	if !exists {
-		return database.ErrNotFound
+		return luxdb.ErrNotFound
 	}
 	data.IsActive = isActive
 	s.updatedData[vID] = updatedStatus
@@ -244,7 +244,7 @@ func (s *state) GetNodeIDs() set.Set[ids.NodeID] {
 func (s *state) GetValidationID(nodeID ids.NodeID) (ids.ID, error) {
 	vID, exists := s.index[nodeID]
 	if !exists {
-		return ids.ID{}, database.ErrNotFound
+		return ids.ID{}, luxdb.ErrNotFound
 	}
 	return vID, nil
 }
@@ -253,7 +253,7 @@ func (s *state) GetValidationID(nodeID ids.NodeID) (ids.ID, error) {
 func (s *state) GetValidator(vID ids.ID) (interfaces.Validator, error) {
 	data, ok := s.data[vID]
 	if !ok {
-		return interfaces.Validator{}, database.ErrNotFound
+		return interfaces.Validator{}, luxdb.ErrNotFound
 	}
 	return interfaces.Validator{
 		ValidationID:   data.validationID,
@@ -325,15 +325,15 @@ func (s *state) addData(vID ids.ID, data *validatorData) error {
 }
 
 // getData returns the data for the validator with the given nodeID
-// returns database.ErrNotFound if the data does not exist
+// returns luxdb.ErrNotFound if the data does not exist
 func (s *state) getData(nodeID ids.NodeID) (*validatorData, error) {
 	vID, exists := s.index[nodeID]
 	if !exists {
-		return nil, database.ErrNotFound
+		return nil, luxdb.ErrNotFound
 	}
 	data, exists := s.data[vID]
 	if !exists {
-		return nil, database.ErrNotFound
+		return nil, luxdb.ErrNotFound
 	}
 	return data, nil
 }
