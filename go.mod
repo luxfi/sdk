@@ -18,10 +18,10 @@ require (
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/database v1.1.10
-	github.com/luxfi/geth v1.16.27
+	github.com/luxfi/geth v1.16.24
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/log v1.0.2
+	github.com/luxfi/log v1.0.3
 	github.com/luxfi/metrics v1.1.1
 	github.com/luxfi/node v1.16.15
 	github.com/mattn/go-colorable v0.1.14
@@ -44,7 +44,7 @@ require (
 	golang.org/x/sync v0.16.0
 	golang.org/x/time v0.12.0
 	golang.org/x/tools v0.35.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.7
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -111,7 +111,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/trace v0.1.1 // indirect
+	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
@@ -161,7 +161,7 @@ require (
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/term v0.33.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
 	gonum.org/v1/gonum v0.14.0 // indirect
@@ -173,6 +173,6 @@ require (
 )
 
 replace (
-	github.com/luxfi/geth v1.16.27 => ../geth
+	github.com/luxfi/geth => ../geth
 	github.com/luxfi/node v1.16.15 => ../node
 )

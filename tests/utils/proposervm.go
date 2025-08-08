@@ -29,7 +29,8 @@ func IssueTxsToActivateProposerVMFork(
 	ctx context.Context, chainID *big.Int, fundedKey *ecdsa.PrivateKey,
 	client ethclient.Client,
 ) error {
-	addr := crypto.PubkeyToAddress(fundedKey.PublicKey)
+	cryptoAddr := crypto.PubkeyToAddress(fundedKey.PublicKey)
+	addr := common.BytesToAddress(cryptoAddr[:])
 	nonce, err := client.NonceAt(ctx, addr, nil)
 	if err != nil {
 		return err
