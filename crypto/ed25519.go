@@ -38,9 +38,14 @@ var (
 
 // Address returns a Bech32 address from hrp and p.
 // This function uses node's FormatBech32 function.
+// Returns empty string if formatting fails.
 func Address(hrp string, p PublicKey) string {
-	// TODO: handle error
-	addrString, _ := address.FormatBech32(hrp, p[:])
+	addrString, err := address.FormatBech32(hrp, p[:])
+	if err != nil {
+		// Return empty string on error to maintain backward compatibility
+		// Callers should validate the returned address
+		return ""
+	}
 	return addrString
 }
 

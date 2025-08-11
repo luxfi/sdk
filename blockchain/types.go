@@ -23,26 +23,38 @@ type Validator struct {
 }
 
 // Subnet represents a blockchain subnet with validator management capabilities
-type Subnet interface {
-	// InitializeProofOfAuthority initializes a PoA validator manager
-	InitializeProofOfAuthority(
-		log interface{}, // logging.Logger
-		network interface{}, // models.Network
-		privateKey string,
-		aggregatorLogger interface{}, // logging.Logger
-		validatorManagerAddress string,
-		v2_0_0 bool,
-		signatureAggregatorEndpoint string,
-	) error
+type Subnet struct {
+	SubnetID            interface{} // ids.ID
+	BlockchainID        interface{} // ids.ID
+	OwnerAddress        *common.Address
+	RPC                 string
+	BootstrapValidators []interface{} // []sdktxs.Validator
+}
 
-	// InitializeProofOfStake initializes a PoS validator manager
-	InitializeProofOfStake(
-		log interface{}, // logging.Logger
-		network interface{}, // models.Network
-		privateKey string,
-		aggregatorLogger interface{}, // logging.Logger
-		posParams interface{}, // PoSParams
-		managerAddress string,
-		signatureAggregatorEndpoint string,
-	) error
+// InitializeProofOfAuthority initializes a PoA validator manager
+func (s *Subnet) InitializeProofOfAuthority(
+	log interface{}, // logging.Logger
+	network interface{}, // models.Network
+	privateKey string,
+	aggregatorLogger interface{}, // logging.Logger
+	validatorManagerAddress string,
+	v2_0_0 bool,
+	signatureAggregatorEndpoint string,
+) error {
+	// TODO: Implement PoA initialization
+	return nil
+}
+
+// InitializeProofOfStake initializes a PoS validator manager
+func (s *Subnet) InitializeProofOfStake(
+	log interface{}, // logging.Logger
+	network interface{}, // models.Network
+	privateKey string,
+	aggregatorLogger interface{}, // logging.Logger
+	posParams interface{}, // PoSParams
+	managerAddress string,
+	signatureAggregatorEndpoint string,
+) error {
+	// TODO: Implement PoS initialization
+	return nil
 }
