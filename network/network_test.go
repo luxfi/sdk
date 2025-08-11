@@ -29,6 +29,7 @@ import (
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/version"
+	"github.com/luxfi/metrics"
 )
 
 var (
@@ -54,7 +55,7 @@ var (
 
 func TestNetworkDoesNotConnectToItself(t *testing.T) {
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	n, err := NewNetwork(ctx, nil, nil, 1, prometheus.NewRegistry())
+	n, err := NewNetwork(ctx, nil, nil, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	assert.NoError(t, n.Connected(context.Background(), ctx.NodeID, defaultPeerVersion))
 	assert.EqualValues(t, 0, n.Size())
@@ -91,7 +92,7 @@ func TestRequestAnyRequestsRoutingAndResponse(t *testing.T) {
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(ctx, sender, codecManager, 16, prometheus.NewRegistry())
+	net, err := NewNetwork(ctx, sender, codecManager, 16, metrics.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
 	nodeID := ids.GenerateTestNodeID()
@@ -142,7 +143,7 @@ func TestAppRequestOnCtxCancellation(t *testing.T) {
 	}
 
 	consensusCtx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(consensusCtx, sender, codecManager, 1, prometheus.NewRegistry())
+	net, err := NewNetwork(consensusCtx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	handler := &HelloGreetingRequestHandler{codec: codecManager}
 	net.SetRequestHandler(handler)
@@ -195,7 +196,7 @@ func TestRequestRequestsRoutingAndResponse(t *testing.T) {
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(ctx, sender, codecManager, 16, prometheus.NewRegistry())
+	net, err := NewNetwork(ctx, sender, codecManager, 16, metrics.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
 
@@ -276,7 +277,7 @@ func TestAppRequestOnShutdown(t *testing.T) {
 
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
+	net, err := NewNetwork(ctx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	nodeID := ids.GenerateTestNodeID()
 	require.NoError(t, net.Connected(context.Background(), nodeID, defaultPeerVersion))
@@ -324,7 +325,7 @@ func TestSyncedAppRequestAnyOnCtxCancellation(t *testing.T) {
 	}
 
 	consensusCtx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(consensusCtx, sender, codecManager, 1, prometheus.NewRegistry())
+	net, err := NewNetwork(consensusCtx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(&HelloGreetingRequestHandler{codec: codecManager})
 	assert.NoError(t,
@@ -399,7 +400,7 @@ func TestRequestMinVersion(t *testing.T) {
 
 	// passing nil as codec works because the net.AppRequest is never called
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
+	net, err := NewNetwork(ctx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	requestMessage := TestMessage{Message: "this is a request"}
 	requestBytes, err := message.RequestToBytes(codecManager, requestMessage)
@@ -464,7 +465,7 @@ func TestOnRequestHonoursDeadline(t *testing.T) {
 	}
 
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	net, err = NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
+	net, err = NewNetwork(ctx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	net.SetRequestHandler(requestHandler)
 	nodeID := ids.GenerateTestNodeID()
@@ -492,7 +493,7 @@ func TestHandleInvalidMessages(t *testing.T) {
 		},
 	}
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	clientNetwork, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
+	clientNetwork, err := NewNetwork(ctx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	clientNetwork.SetRequestHandler(&testRequestHandler{})
 
@@ -541,7 +542,7 @@ func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
 	sender := testAppSender{}
 
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	clientNetwork, err := NewNetwork(ctx, sender, codecManager, 1, prometheus.NewRegistry())
+	clientNetwork, err := NewNetwork(ctx, sender, codecManager, 1, metrics.NewRegistry())
 	require.NoError(t, err)
 	clientNetwork.SetRequestHandler(&testRequestHandler{err: errors.New("fail")}) // Return an error from the request handler
 
@@ -561,7 +562,7 @@ func TestNetworkAppRequestAfterShutdown(t *testing.T) {
 	require := require.New(t)
 
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	net, err := NewNetwork(ctx, nil, nil, 16, prometheus.NewRegistry())
+	net, err := NewNetwork(ctx, nil, nil, 16, metrics.NewRegistry())
 	require.NoError(err)
 	net.Shutdown()
 
@@ -585,7 +586,7 @@ func TestNetworkRouting(t *testing.T) {
 
 	networkCodec := codec.NewManager(0)
 	ctx := consensustest.Context(t, consensustest.CChainID)
-	network, err := NewNetwork(ctx, sender, networkCodec, 1, prometheus.NewRegistry())
+	network, err := NewNetwork(ctx, sender, networkCodec, 1, metrics.NewRegistry())
 	require.NoError(err)
 	require.NoError(network.AddHandler(uint64(protocol), handler))
 

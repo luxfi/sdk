@@ -21,6 +21,7 @@ import (
 	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,11 +54,11 @@ func TestGossipSubscribe(t *testing.T) {
 	txPool.SetGasTip(common.Big1)
 	txPool.SetMinFee(common.Big0)
 
-	gossipTxPool, err := NewGossipEthTxPool(txPool, prometheus.NewRegistry())
+	gossipTxPool, err := NewGossipEthTxPool(txPool, metrics.NewRegistry())
 	require.NoError(err)
 
 	// use a custom bloom filter to test the bloom filter reset
-	gossipTxPool.bloom, err = gossip.NewBloomFilter(prometheus.NewRegistry(), "", 1, 0.01, 0.0000000000000001) // maxCount =1
+	gossipTxPool.bloom, err = gossip.NewBloomFilter(metrics.NewRegistry(), "", 1, 0.01, 0.0000000000000001) // maxCount =1
 	require.NoError(err)
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()

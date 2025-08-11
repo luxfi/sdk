@@ -31,6 +31,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/plugin/evm/config"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/metrics"
 )
 
 func TestEthTxGossip(t *testing.T) {
@@ -66,7 +67,7 @@ func TestEthTxGossip(t *testing.T) {
 		SentAppRequest: make(chan []byte, 1),
 	}
 
-	network, err := p2p.NewNetwork(logging.NoLog{}, peerSender, prometheus.NewRegistry(), "")
+	network, err := p2p.NewNetwork(logging.NoLog{}, peerSender, metrics.NewRegistry(), "")
 	require.NoError(err)
 	client := network.NewClient(p2p.TxGossipHandlerID)
 
@@ -86,7 +87,7 @@ func TestEthTxGossip(t *testing.T) {
 	}
 
 	// Ask the VM for any new transactions. We should get nothing at first.
-	emptyBloomFilter, err := gossip.NewBloomFilter(prometheus.NewRegistry(), "", config.TxGossipBloomMinTargetElements, config.TxGossipBloomTargetFalsePositiveRate, config.TxGossipBloomResetFalsePositiveRate)
+	emptyBloomFilter, err := gossip.NewBloomFilter(metrics.NewRegistry(), "", config.TxGossipBloomMinTargetElements, config.TxGossipBloomTargetFalsePositiveRate, config.TxGossipBloomResetFalsePositiveRate)
 	require.NoError(err)
 	emptyBloomFilterBytes, _ := emptyBloomFilter.Marshal()
 	request := &sdk.PullGossipRequest{

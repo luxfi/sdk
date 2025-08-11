@@ -37,12 +37,12 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/params"
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
@@ -101,14 +101,14 @@ func Transition(ctx *cli.Context) error {
 
 	if ctx.Bool(TraceFlag.Name) { // JSON opcode tracing
 		// Configure the EVM logger
-		logConfig := &logger.Config{
+		_ = &logger.Config{
 			DisableStack:     ctx.Bool(TraceDisableStackFlag.Name),
 			EnableMemory:     ctx.Bool(TraceEnableMemoryFlag.Name),
 			EnableReturnData: ctx.Bool(TraceEnableReturnDataFlag.Name),
 			// Debug field removed in new version
 		}
 		getTracer = func(txIndex int, txHash common.Hash) (*tracing.Hooks, error) {
-			traceFile, err := os.Create(path.Join(baseDir, fmt.Sprintf("trace-%d-%v.jsonl", txIndex, txHash.String())))
+			_, err := os.Create(path.Join(baseDir, fmt.Sprintf("trace-%d-%v.jsonl", txIndex, txHash.String())))
 			if err != nil {
 				return nil, NewError(ErrorIO, fmt.Errorf("failed creating trace-file: %v", err))
 			}
@@ -117,18 +117,19 @@ func Transition(ctx *cli.Context) error {
 			return nil, fmt.Errorf("JSON logger temporarily disabled - API changed")
 		}
 	} else if ctx.IsSet(TraceTracerFlag.Name) {
-		var config json.RawMessage
+		// TODO: config was previously used for tracer configuration
+		// var config json.RawMessage
 		if ctx.IsSet(TraceTracerConfigFlag.Name) {
-			config = []byte(ctx.String(TraceTracerConfigFlag.Name))
+			_ = ctx.String(TraceTracerConfigFlag.Name) // config would be set here
 		}
 		getTracer = func(txIndex int, txHash common.Hash) (*tracing.Hooks, error) {
-			traceFile, err := os.Create(path.Join(baseDir, fmt.Sprintf("trace-%d-%v.json", txIndex, txHash.String())))
+			_, err := os.Create(path.Join(baseDir, fmt.Sprintf("trace-%d-%v.json", txIndex, txHash.String())))
 			if err != nil {
 				return nil, NewError(ErrorIO, fmt.Errorf("failed creating trace-file: %v", err))
 			}
 			// TODO: Fix tracer creation - API changed, needs context and chainConfig
 			// tracer, err := tracers.DefaultDirectory.New(ctx.String(TraceTracerFlag.Name), nil, config, nil)
-			tracer := (*tracing.Hooks)(nil)
+			_ = (*tracing.Hooks)(nil)
 			err = fmt.Errorf("tracer creation temporarily disabled - API changed")
 			if err != nil {
 				return nil, NewError(ErrorConfig, fmt.Errorf("failed instantiating tracer: %w", err))
