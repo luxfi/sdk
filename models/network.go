@@ -100,6 +100,16 @@ func NetworkFromNetworkID(networkID uint32) Network {
 	return Undefined
 }
 
+// ConvertClusterToNetwork converts a local cluster network to appropriate network type
+func ConvertClusterToNetwork(network Network) Network {
+	// If it's already a specific network type, return it
+	if network == Testnet || network == Mainnet {
+		return network
+	}
+	// Local networks remain local
+	return Local
+}
+
 // NewLocalNetwork creates a new Local network instance
 func NewLocalNetwork() Network {
 	return Local
@@ -118,6 +128,14 @@ func NewMainnetNetwork() Network {
 // NewDevnetNetwork creates a new Devnet network instance
 func NewDevnetNetwork() Network {
 	return Devnet
+}
+
+// NewNetworkFromCluster creates a network instance associated with a cluster
+func NewNetworkFromCluster(network Network, clusterName string) Network {
+	// For now, the cluster name doesn't change the network type
+	// but it could be used to associate the network with a specific cluster
+	// This function exists primarily for API consistency and future extensibility
+	return network
 }
 
 // BootstrappingContext returns a context for bootstrapping operations

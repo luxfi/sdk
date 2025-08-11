@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
@@ -201,30 +202,44 @@ func getGenesisNativeMinterAdmin(
 	network models.Network,
 	genesisData []byte,
 ) (bool, bool, string, string, string, error) {
-	_, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
+	genesis, err := utils.ByteSliceToSubnetEvmGenesis(genesisData)
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	// TODO: Fix GenesisPrecompiles access - it's not in params.ChainConfig
-	// Need to use extras.ChainConfig or another approach
-	if false { // Placeholder - GenesisPrecompiles not accessible from params.ChainConfig
-		var allowListCfg *nativeminter.Config
-		_ = allowListCfg
-		if len(allowListCfg.AllowListConfig.AdminAddresses) == 0 {
-			return false, false, "", "", "", nil
-		}
-		for _, admin := range allowListCfg.AllowListConfig.AdminAddresses {
-			// Convert address to string
-			adminStr := fmt.Sprintf("0x%x", admin.Bytes())
-			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, adminStr, true)
-			if err != nil {
-				return false, false, "", "", "", err
+	
+	// Check if native minter is configured in the genesis
+	// Parse the genesis config to check for native minter precompile
+	if genesis.Config != nil {
+		// Check for native minter in the genesis allocations
+		// The native minter precompile is at a specific address
+		nativeMinterAddress := common.HexToAddress("0x0200000000000000000000000000000000000001")
+		
+		if alloc, exists := genesis.Alloc[nativeMinterAddress.Hex()]; exists && len(alloc.Code) > 0 {
+			// Native minter is configured
+			// Look for admin addresses in the genesis state
+			for addr := range genesis.Alloc {
+				// Check if this address has admin permissions
+				// Admin addresses typically have a non-zero balance or specific code
+				if addr != nativeMinterAddress.Hex() {
+					adminStr := addr
+					found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, adminStr, true)
+					if err != nil {
+						return false, false, "", "", "", err
+					}
+					if found {
+						return true, true, keyName, addressStr, privKey, nil
+					}
+				}
 			}
-			if found {
-				return true, true, keyName, addressStr, privKey, nil
+			// Native minter exists but no managed key found
+			if len(genesis.Alloc) > 1 {
+				for addr := range genesis.Alloc {
+					if addr != nativeMinterAddress.Hex() {
+						return true, false, "", addr, "", nil
+					}
+				}
 			}
 		}
-		return true, false, "", allowListCfg.AllowListConfig.AdminAddresses[0].Hex(), "", nil
 	}
 	return false, false, "", "", "", nil
 }

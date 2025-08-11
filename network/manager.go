@@ -86,18 +86,21 @@ const (
 
 // NewNetworkManager creates a new network manager
 func NewNetworkManager(config *config.NetworkConfig, logger log.Logger) (*NetworkManager, error) {
-	// TODO: Implement netrunner client
-	// client, err := netrunner.NewClient(config.NetrunnerEndpoint)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to create netrunner client: %w", err)
-	// }
-
-	return &NetworkManager{
-		// client:   client,
+	// Initialize network manager without netrunner client for now
+	// Netrunner integration will be added when the API is stabilized
+	manager := &NetworkManager{
 		config:   config,
 		logger:   logger,
 		networks: make(map[string]*Network),
-	}, nil
+	}
+
+	// If netrunner endpoint is configured, log that it will be used in future
+	if config != nil && config.NetrunnerEndpoint != "" {
+		logger.Info("netrunner endpoint configured but not yet integrated", 
+			"endpoint", config.NetrunnerEndpoint)
+	}
+
+	return manager, nil
 }
 
 // CreateNetwork creates a new network

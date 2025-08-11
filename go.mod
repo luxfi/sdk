@@ -2,21 +2,19 @@ module github.com/luxfi/sdk
 
 go 1.24.5
 
-replace github.com/luxfi/ledger/go => ../ledger/go
-
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/luxfi/crypto v1.2.9
-	github.com/luxfi/evm v0.7.8-lux.1
-	github.com/luxfi/geth v1.16.27
+	github.com/luxfi/evm v0.7.8-lux
+	github.com/luxfi/geth v1.16.26
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/ledger/go v0.0.0-00010101000000-000000000000
-	github.com/luxfi/log v1.0.2
+	github.com/luxfi/log v1.0.6
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/netrunner-sdk v0.3.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.13.6
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
@@ -24,11 +22,11 @@ require (
 	github.com/zondax/ledger-go v1.0.0 // indirect
 	go.uber.org/mock v0.5.2
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.40.0
+	golang.org/x/crypto v0.41.0
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
 	golang.org/x/net v0.42.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -40,6 +38,7 @@ exclude (
 require (
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/chelnak/ysmrr v0.6.0
+	github.com/ethereum/go-ethereum v1.16.2
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/melbahja/goph v1.4.0
@@ -48,7 +47,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/afero v1.14.0
 	golang.org/x/mod v0.26.0
-	golang.org/x/text v0.27.0
+	golang.org/x/text v0.28.0
 )
 
 require (
@@ -120,7 +119,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/database v1.1.10 // indirect
 	github.com/luxfi/metrics v1.1.1 // indirect
-	github.com/luxfi/trace v0.1.1 // indirect
+	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
@@ -165,18 +164,12 @@ require (
 	go.opentelemetry.io/proto/otlp v1.7.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/term v0.33.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	gonum.org/v1/gonum v0.14.0 // indirect
 	google.golang.org/grpc v1.74.2 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-)
-
-replace (
-	github.com/luxfi/evm v0.7.8-lux.1 => ../evm
-	github.com/luxfi/geth v1.16.2-lux.2 => ../geth
-	github.com/luxfi/node v1.16.15 => ../node
 )
