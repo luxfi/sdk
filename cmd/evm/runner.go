@@ -40,6 +40,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/geth/triedb"
@@ -50,7 +51,6 @@ import (
 	"github.com/luxfi/evm/core/vm/runtime"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/triedb/hashdb"
 	"github.com/urfave/cli/v2"
 )
 
@@ -123,11 +123,10 @@ func runCmd(ctx *cli.Context) error {
 		DisableStack:     ctx.Bool(DisableStackFlag.Name),
 		DisableStorage:   ctx.Bool(DisableStorageFlag.Name),
 		EnableReturnData: !ctx.Bool(DisableReturnDataFlag.Name),
-		Debug:            ctx.Bool(DebugFlag.Name),
 	}
 
 	var (
-		tracer      vm.EVMLogger
+		tracer      *tracing.Hooks
 		debugLogger *logger.StructLogger
 		statedb     *state.StateDB
 		chainConfig *params.ChainConfig
@@ -141,7 +140,7 @@ func runCmd(ctx *cli.Context) error {
 		tracer = logger.NewJSONLogger(logconfig, os.Stdout)
 	} else if ctx.Bool(DebugFlag.Name) {
 		debugLogger = logger.NewStructLogger(logconfig)
-		tracer = debugLogger
+		tracer = debugLogger.Hooks()
 	} else {
 		debugLogger = logger.NewStructLogger(logconfig)
 	}
@@ -160,8 +159,7 @@ func runCmd(ctx *cli.Context) error {
 
 	db := rawdb.NewMemoryDatabase()
 	triedb := triedb.NewDatabase(db, &triedb.Config{
-		Preimages:  preimages,
-		DBOverride: hashdb.Defaults.BackendConstructor,
+		Preimages: preimages,
 	})
 	defer triedb.Close()
 	genesis := genesisConfig.MustCommit(db, triedb)
@@ -282,17 +280,24 @@ func runCmd(ctx *cli.Context) error {
 	output, leftOverGas, stats, err := timedExec(bench, execFunc)
 
 	if ctx.Bool(DumpFlag.Name) {
-		statedb.Commit(genesisConfig.Number, true)
+		statedb.Commit(genesisConfig.Number, true, false)
 		fmt.Println(string(statedb.Dump(nil)))
 	}
 
 	if ctx.Bool(DebugFlag.Name) {
 		if debugLogger != nil {
 			fmt.Fprintln(os.Stderr, "#### TRACE ####")
-			logger.WriteTrace(os.Stderr, debugLogger.StructLogs())
+			result, err := debugLogger.GetResult()
+			if err == nil {
+				fmt.Fprintln(os.Stderr, string(result))
+			}
 		}
 		fmt.Fprintln(os.Stderr, "#### LOGS ####")
-		logger.WriteLogs(os.Stderr, statedb.Logs())
+		// WriteLogs no longer exists, print logs directly
+		for _, log := range statedb.Logs() {
+			logJSON, _ := json.Marshal(log)
+			fmt.Fprintln(os.Stderr, string(logJSON))
+		}
 	}
 
 	if bench || ctx.Bool(StatDumpFlag.Name) {

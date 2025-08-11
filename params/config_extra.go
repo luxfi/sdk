@@ -157,6 +157,13 @@ func WithExtra(c *ChainConfig, extra *extras.ChainConfig) *ChainConfig {
 	return c
 }
 
+// SetExtra updates the ChainConfig extra payload
+func SetExtra(c *ChainConfig, extra *extras.ChainConfig) {
+	chainConfigMutex.Lock()
+	chainConfigExtras[c] = extra
+	chainConfigMutex.Unlock()
+}
+
 type ChainConfigWithUpgradesJSON struct {
 	ChainConfig
 	UpgradeConfig extras.UpgradeConfig `json:"upgrades,omitempty"`
