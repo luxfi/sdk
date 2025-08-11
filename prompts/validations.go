@@ -3,6 +3,7 @@
 package prompts
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
@@ -10,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/luxfi/sdk/constants"
@@ -192,4 +194,30 @@ func validateNewFilepath(input string) error {
 		return nil
 	}
 	return errors.New("file already exists")
+}
+
+// ValidateHexa validates hexadecimal string format
+func ValidateHexa(input string) error {
+	if input == "" {
+		return errors.New("string cannot be empty")
+	}
+	if len(input) < 2 || strings.ToLower(input[:2]) != "0x" {
+		return errors.New("hexa string has not 0x prefix")
+	}
+	if len(input) == 2 {
+		return errors.New("no hexa digits in string")
+	}
+	_, err := hex.DecodeString(input[2:])
+	if err != nil {
+		return errors.New("string not in hexa format")
+	}
+	return nil
+}
+
+// ValidatePositiveInt validates that an integer is positive
+func ValidatePositiveInt(val int) error {
+	if val <= 0 {
+		return fmt.Errorf("value must be greater than zero")
+	}
+	return nil
 }

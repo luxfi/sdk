@@ -3,7 +3,7 @@ module github.com/luxfi/sdk/examples/boot-mainnet
 go 1.24.5
 
 require (
-	github.com/luxfi/log v1.0.1
+	github.com/luxfi/log v1.0.4
 	github.com/luxfi/sdk v0.0.0
 )
 

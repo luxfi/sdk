@@ -13,6 +13,7 @@ const (
 	LessThanEq = "Less Than Or Eq"
 	MoreThanEq = "More Than Or Eq"
 	MoreThan   = "More Than"
+	NotEq      = "Not Equal"
 )
 
 // Comparator struct for value comparisons
@@ -36,6 +37,10 @@ func (c *Comparator) Validate(val uint64) error {
 	case MoreThan:
 		if val <= c.Value {
 			return fmt.Errorf("%s must be more than %d", c.Label, c.Value)
+		}
+	case NotEq:
+		if val == c.Value {
+			return fmt.Errorf("%s must not be equal to %d", c.Label, c.Value)
 		}
 	default:
 		return errors.New("invalid comparator type")
