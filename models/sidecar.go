@@ -22,6 +22,7 @@ type NetworkData struct {
 	TeleporterRegistryAddress  string   // Teleporter registry address
 	TeleporterMessengerAddress string   // Teleporter messenger address
 	ValidatorManagerAddress    string   // Validator manager contract address
+	ValidatorIDs               []string // Validator IDs for the network
 }
 
 type MultisigTxInfo struct {
@@ -83,6 +84,7 @@ type Sidecar struct {
 	// Validator Management
 	ValidatorManagement string `json:"validatorManagement"` // proof-of-authority, proof-of-stake
 	ValidatorManagerOwner string `json:"validatorManagerOwner,omitempty"` // Owner address for POA
+	ProxyContractOwner string `json:"proxyContractOwner,omitempty"` // Owner address for proxy contract
 	PoS bool `json:"pos,omitempty"` // Whether using Proof of Stake
 	UseACP99 bool `json:"useACP99,omitempty"` // Whether to use ACP-99
 
@@ -91,6 +93,35 @@ type Sidecar struct {
 
 	// Chain layer (1=L1, 2=L2, 3=L3)
 	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
+	
+	// SubnetEVM specific fields
+	SubnetEVMMainnetChainID uint32 `json:"subnetEVMMainnetChainID,omitempty"`
+	
+	// Teleporter
+	TeleporterReady bool `json:"teleporterReady,omitempty"` // Whether teleporter is deployed
+	TeleporterVersion           string `json:"teleporterVersion,omitempty"`
+	TeleporterMessengerAddress  string `json:"teleporterMessengerAddress,omitempty"`
+	TeleporterRegistryAddress   string `json:"teleporterRegistryAddress,omitempty"`
+	
+	// Extra network-specific data (for L3 support etc)
+	ExtraNetworkData map[string]interface{} `json:"extraNetworkData,omitempty"`
+	
+	// Validator Manager address for L1 deployments (legacy)
+	ValidatorManagerAddress string `json:"validatorManagerAddress,omitempty"`
+	
+	// Protocol compatibility version
+	ProtocolCompatibility string `json:"protocolCompatibility,omitempty"`
+	
+	// Validator staking configuration
+	MinStake          uint64  `json:"minStake,omitempty"`
+	RewardRate        float64 `json:"rewardRate,omitempty"`
+	DelegationEnabled bool    `json:"delegationEnabled,omitempty"`
+	
+	// Protocol compatibility flags
+	LuxCompatible  bool `json:"luxCompatible,omitempty"`
+	WarpEnabled    bool `json:"warpEnabled,omitempty"`
+	OPStackEnabled bool `json:"opStackEnabled,omitempty"`
+	RollupSupport  bool `json:"rollupSupport,omitempty"`
 }
 
 func (sc Sidecar) GetVMID() (string, error) {
