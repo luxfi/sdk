@@ -9,15 +9,15 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
-	blockchainSDK "github.com/luxfi/sdk/blockchain"
-	"github.com/luxfi/evm/core"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
+	blockchainSDK "github.com/luxfi/sdk/blockchain"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 
 	luxcrypto "github.com/luxfi/crypto"
 )
@@ -339,26 +339,26 @@ func SetupPoS(
 ) error {
 	// Initialize Proof of Stake validator manager
 	log.Info("Initializing Proof of Stake validator manager")
-	
+
 	// Connect to the blockchain RPC
 	client, err := ethclient.Dial(subnet.RPC)
 	if err != nil {
 		return fmt.Errorf("failed to connect to RPC: %w", err)
 	}
 	defer client.Close()
-	
+
 	// Parse the private key
 	pk, err := crypto.HexToECDSA(strings.TrimPrefix(privateKey, "0x"))
 	if err != nil {
 		return fmt.Errorf("failed to parse private key: %w", err)
 	}
-	
+
 	// Get the chain ID
 	chainID, err := client.ChainID(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to get chain ID: %w", err)
 	}
-	
+
 	// Create transaction options
 	auth, err := bind.NewKeyedTransactorWithChainID(pk, chainID)
 	if err != nil {
@@ -366,10 +366,10 @@ func SetupPoS(
 	}
 	_ = auth // Will be used for contract calls
 	_ = managerAddress
-	_ = specializedManagerAddress  
+	_ = specializedManagerAddress
 	_ = managerOwnerPrivateKey
 	_ = v2_0_0
-	
+
 	// Initialize the PoS parameters on the validator manager contract
 	// This would typically involve calling initialization methods on the contract
 	log.Info("Setting PoS parameters",
@@ -381,12 +381,12 @@ func SetupPoS(
 		logging.UserString("weightToValueFactor", posParams.WeightToValueFactor.String()),
 		logging.UserString("rewardCalculatorAddress", fmt.Sprintf("%x", posParams.RewardCalculatorAddress)),
 	)
-	
+
 	// Set up signature aggregation if endpoint is provided
 	if signatureAggregatorEndpoint != "" {
 		log.Info("Configuring signature aggregator", logging.UserString("endpoint", signatureAggregatorEndpoint))
 	}
-	
+
 	log.Info("Proof of Stake validator manager initialized successfully")
 	return nil
 }

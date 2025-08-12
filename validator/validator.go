@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
 	luxdjson "github.com/luxfi/node/utils/json"
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/crypto"
@@ -68,18 +68,18 @@ func GetValidatorBalance(net models.Network, validationID ids.ID) (uint64, error
 func GetValidatorInfo(net models.Network, validationID ids.ID) (platformvm.ClientPermissionlessValidator, error) {
 	// Connect to the platform chain
 	pClient := platformvm.NewClient(net.Endpoint())
-	
+
 	// Get current validators for the subnet
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
-	
+
 	// Query the validator by validation ID
 	// Since GetL1Validator is not available, we'll query all validators and find the matching one
 	validators, err := pClient.GetCurrentValidators(ctx, ids.Empty, nil)
 	if err != nil {
 		return platformvm.ClientPermissionlessValidator{}, fmt.Errorf("failed to get validators: %w", err)
 	}
-	
+
 	// Search for the validator with matching validation ID
 	for _, validator := range validators {
 		// Check if this validator matches our validation ID
@@ -98,7 +98,7 @@ func GetValidatorInfo(net models.Network, validationID ids.ID) (platformvm.Clien
 			}, nil
 		}
 	}
-	
+
 	return platformvm.ClientPermissionlessValidator{}, fmt.Errorf("validator with ID %s not found", validationID)
 }
 
