@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/metrics"
+	"github.com/luxfi/metric"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
 	"github.com/luxfi/database/pebbledb"
