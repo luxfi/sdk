@@ -33,7 +33,7 @@ replace (
 	github.com/luxfi/crypto => ../../../crypto
 	github.com/luxfi/ids => ../../../ids
 	github.com/luxfi/log => ../../../log
-	github.com/luxfi/metrics => ../../../metrics
+	github.com/luxfi/metric => ../../../metrics
 	github.com/luxfi/netrunner-sdk => ../../../netrunner-sdk
 	github.com/luxfi/node => ../../../node
 	github.com/luxfi/sdk => ../../
