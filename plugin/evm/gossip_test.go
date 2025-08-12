@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/metrics"
+	"github.com/luxfi/metric"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

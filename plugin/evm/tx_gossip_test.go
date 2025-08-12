@@ -31,7 +31,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/plugin/evm/config"
 	"github.com/luxfi/evm/utils/utilstest"
-	"github.com/luxfi/metrics"
+	"github.com/luxfi/metric"
 )
 
 func TestEthTxGossip(t *testing.T) {
