@@ -18,7 +18,7 @@ require (
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/database v1.1.9
-	github.com/luxfi/geth v1.16.3-lux.3
+	github.com/luxfi/geth v1.16.3-lux.4
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.0.7
