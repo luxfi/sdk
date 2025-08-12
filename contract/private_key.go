@@ -5,8 +5,8 @@ package contract
 import (
 	"fmt"
 
-	"github.com/luxfi/sdk/flags"
 	"github.com/luxfi/sdk/application"
+	"github.com/luxfi/sdk/flags"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
 

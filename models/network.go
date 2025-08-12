@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
 	lux_constants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/sdk/constants"
 )
 
 type Network int64
@@ -239,4 +239,53 @@ func GetRPCEndpoint(baseEndpoint string, blockchainID string) string {
 // GetWSEndpoint returns the WebSocket endpoint for a given base endpoint and blockchain ID
 func GetWSEndpoint(baseEndpoint string, blockchainID string) string {
 	return fmt.Sprintf("%s/ext/bc/%s/ws", baseEndpoint, blockchainID)
+}
+
+// GenesisParams represents network genesis parameters
+type GenesisParams struct {
+	MinDelegationFee  uint32
+	MinValidatorStake uint64
+	MinDelegatorStake uint64
+	MinStakeDuration  time.Duration
+	MaxStakeDuration  time.Duration
+}
+
+// GenesisParams returns the genesis parameters for the network
+func (s Network) GenesisParams() *GenesisParams {
+	// Default values based on Avalanche mainnet
+	switch s {
+	case Mainnet, Testnet:
+		return &GenesisParams{
+			MinDelegationFee:  20000,                  // 2%
+			MinValidatorStake: 2000 * 1_000_000_000,   // 2000 LUX
+			MinDelegatorStake: 25 * 1_000_000_000,     // 25 LUX
+			MinStakeDuration:  2 * 7 * 24 * time.Hour, // 2 weeks
+			MaxStakeDuration:  365 * 24 * time.Hour,   // 1 year
+		}
+	case Local, Devnet:
+		return &GenesisParams{
+			MinDelegationFee:  10000,                // 1%
+			MinValidatorStake: 1 * 1_000_000_000,    // 1 LUX
+			MinDelegatorStake: 1 * 1_000_000_000,    // 1 LUX
+			MinStakeDuration:  24 * time.Hour,       // 1 day
+			MaxStakeDuration:  365 * 24 * time.Hour, // 1 year
+		}
+	default:
+		return &GenesisParams{
+			MinDelegationFee:  10000,                // 1%
+			MinValidatorStake: 1 * 1_000_000_000,    // 1 LUX
+			MinDelegatorStake: 1 * 1_000_000_000,    // 1 LUX
+			MinStakeDuration:  24 * time.Hour,       // 1 day
+			MaxStakeDuration:  365 * 24 * time.Hour, // 1 year
+		}
+	}
+}
+
+// BlockchainEndpoint returns the blockchain RPC endpoint for a given blockchain ID
+func (s Network) BlockchainEndpoint(blockchainID string) string {
+	baseEndpoint := s.Endpoint()
+	if blockchainID == "" {
+		return fmt.Sprintf("%s/ext/bc/C/rpc", baseEndpoint)
+	}
+	return fmt.Sprintf("%s/ext/bc/%s/rpc", baseEndpoint, blockchainID)
 }

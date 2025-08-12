@@ -8,8 +8,9 @@ import (
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
 
-	luxledger "github.com/luxfi/ledger/go"
 	"github.com/luxfi/ids"
+	luxledger "github.com/luxfi/ledger/go"
+	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/platformvm"
 )
 
@@ -28,10 +29,58 @@ func New() (*LedgerDevice, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to find Ledger device: %w", err)
 	}
-	
+
 	return &LedgerDevice{
 		device: luxDevice,
 	}, nil
+}
+
+// Version returns the version of the ledger device
+func (dev *LedgerDevice) Version() (v *version.Semantic, err error) {
+	if dev.device != nil {
+		info, err := dev.device.GetVersion()
+		if err != nil {
+			return nil, err
+		}
+		// Convert ledger version info to semantic version
+		return &version.Semantic{
+			Major: int(info.Major),
+			Minor: int(info.Minor),
+			Patch: int(info.Patch),
+		}, nil
+	}
+	return nil, fmt.Errorf("device not connected")
+}
+
+// Address returns the address at the given index
+func (dev *LedgerDevice) Address(hrp string, index uint32) (ids.ShortID, error) {
+	path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+	resp, err := dev.device.GetPubKey(path, false, hrp, "P")
+	if err != nil {
+		return ids.ShortEmpty, err
+	}
+	
+	// Parse address to ID
+	addrID, err := ids.ShortFromString(resp.Address)
+	if err != nil {
+		return ids.ShortEmpty, fmt.Errorf("failed to parse address: %w", err)
+	}
+	
+	return addrID, nil
+}
+
+// Addresses returns addresses for the given indices
+func (dev *LedgerDevice) Addresses(indices []uint32) ([]ids.ShortID, error) {
+	addresses := make([]ids.ShortID, len(indices))
+	for i, index := range indices {
+		// Use default hrp "lux" for platform chain
+		addr, err := dev.Address("lux", index)
+		if err != nil {
+			return nil, err
+		}
+		addresses[i] = addr
+	}
+	return addresses, nil
 }
 
 func (dev *LedgerDevice) FindAddresses(addresses []string, maxIndex uint32) (map[string]uint32, error) {
@@ -49,14 +98,14 @@ func (dev *LedgerDevice) FindAddresses(addresses []string, maxIndex uint32) (map
 		if err != nil {
 			return nil, err
 		}
-		
+
 		// Check if this address matches any of our target addresses
 		for i, targetAddr := range addresses {
 			if resp.Address == targetAddr {
 				indices[addresses[i]] = index
 			}
 		}
-		
+
 		if len(indices) == len(addresses) {
 			break
 		}
@@ -88,13 +137,13 @@ func (dev *LedgerDevice) FindFunds(
 		if err != nil {
 			return []uint32{}, err
 		}
-		
+
 		// Parse address to ID for balance check
 		addrID, err := ids.ShortFromString(resp.Address)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse address: %w", err)
 		}
-		
+
 		ctx, cancel := utils.GetAPIContext()
 		balanceResp, err := pClient.GetBalance(ctx, []ids.ShortID{addrID})
 		cancel()
@@ -129,30 +178,47 @@ func (dev *LedgerDevice) GetAddresses(indices []uint32, hrp string, chainID stri
 	return addresses, nil
 }
 
-// Sign signs a transaction with the ledger device
-func (dev *LedgerDevice) Sign(hash []byte, index uint32) ([]byte, error) {
-	path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
-	// For Lux ledger, we need signing paths and change paths
-	signingPaths := []string{path}
-	changePaths := []string{} // No change paths for simple signature
-	
-	resp, err := dev.device.Sign(path, signingPaths, hash, changePaths)
-	if err != nil {
-		return nil, fmt.Errorf("failed to sign with ledger: %w", err)
+// Disconnect closes the connection to the ledger device
+func (dev *LedgerDevice) Disconnect() error {
+	if dev.device != nil {
+		return dev.device.Close()
 	}
-	
-	// Extract the signature from response map
-	if len(resp.Signature) == 0 {
-		return nil, fmt.Errorf("no signature returned from ledger")
+	return nil
+}
+
+// SignHash signs a hash with the ledger device for multiple indices
+func (dev *LedgerDevice) SignHash(hash []byte, indices []uint32) ([][]byte, error) {
+	return dev.Sign(hash, indices)
+}
+
+// Sign signs a transaction with the ledger device for multiple indices
+func (dev *LedgerDevice) Sign(hash []byte, indices []uint32) ([][]byte, error) {
+	signatures := make([][]byte, len(indices))
+	for i, index := range indices {
+		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		// For Lux ledger, we need signing paths and change paths
+		signingPaths := []string{path}
+		changePaths := []string{} // No change paths for simple signature
+
+		resp, err := dev.device.Sign(path, signingPaths, hash, changePaths)
+		if err != nil {
+			return nil, fmt.Errorf("failed to sign with ledger at index %d: %w", index, err)
+		}
+
+		// Extract the signature from response map
+		if len(resp.Signature) == 0 {
+			return nil, fmt.Errorf("no signature returned from ledger for index %d", index)
+		}
+
+		// Get the signature for the requested path
+		sig, ok := resp.Signature[path]
+		if !ok {
+			return nil, fmt.Errorf("signature not found for path %s", path)
+		}
+		signatures[i] = sig
 	}
-	
-	// Get the signature for the requested path
-	sig, ok := resp.Signature[path]
-	if !ok {
-		return nil, fmt.Errorf("signature not found for path %s", path)
-	}
-	
-	return sig, nil
+
+	return signatures, nil
 }
 
 // Close closes the connection to the ledger device

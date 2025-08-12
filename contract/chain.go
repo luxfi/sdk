@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/sdk/flags"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/sdk/flags"
 	// "github.com/luxfi/sdk/localnet" // TODO: Add localnet package
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/ids"
 	"github.com/spf13/cobra"
 )
 

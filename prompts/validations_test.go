@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/genesis"
+	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/sdk/models"
 	"github.com/stretchr/testify/require"
 )
 

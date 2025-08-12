@@ -82,41 +82,43 @@ type Sidecar struct {
 	RentalPlan string    `json:"rentalPlan"` // For L1s: monthly, annual, perpetual
 
 	// Validator Management
-	ValidatorManagement string `json:"validatorManagement"` // proof-of-authority, proof-of-stake
+	ValidatorManagement   string `json:"validatorManagement"`             // proof-of-authority, proof-of-stake
 	ValidatorManagerOwner string `json:"validatorManagerOwner,omitempty"` // Owner address for POA
-	ProxyContractOwner string `json:"proxyContractOwner,omitempty"` // Owner address for proxy contract
-	PoS bool `json:"pos,omitempty"` // Whether using Proof of Stake
-	UseACP99 bool `json:"useACP99,omitempty"` // Whether to use ACP-99
+	ProxyContractOwner    string `json:"proxyContractOwner,omitempty"`    // Owner address for proxy contract
+	PoS                   bool   `json:"pos,omitempty"`                   // Whether using Proof of Stake
+	UseACP99              bool   `json:"useACP99,omitempty"`              // Whether to use ACP-99
 
 	// Migration info
 	MigratedAt int64 `json:"migratedAt"` // When subnet became L1
 
 	// Chain layer (1=L1, 2=L2, 3=L3)
 	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
-	
+
 	// SubnetEVM specific fields
 	SubnetEVMMainnetChainID uint32 `json:"subnetEVMMainnetChainID,omitempty"`
-	
+
 	// Teleporter
-	TeleporterReady bool `json:"teleporterReady,omitempty"` // Whether teleporter is deployed
-	TeleporterVersion           string `json:"teleporterVersion,omitempty"`
-	TeleporterMessengerAddress  string `json:"teleporterMessengerAddress,omitempty"`
-	TeleporterRegistryAddress   string `json:"teleporterRegistryAddress,omitempty"`
-	
+	TeleporterReady            bool   `json:"teleporterReady,omitempty"` // Whether teleporter is deployed
+	RunRelayer                 bool   `json:"runRelayer,omitempty"`      // Whether to run relayer
+	TeleporterKey              string `json:"teleporterKey,omitempty"`   // Teleporter key
+	TeleporterVersion          string `json:"teleporterVersion,omitempty"`
+	TeleporterMessengerAddress string `json:"teleporterMessengerAddress,omitempty"`
+	TeleporterRegistryAddress  string `json:"teleporterRegistryAddress,omitempty"`
+
 	// Extra network-specific data (for L3 support etc)
 	ExtraNetworkData map[string]interface{} `json:"extraNetworkData,omitempty"`
-	
+
 	// Validator Manager address for L1 deployments (legacy)
 	ValidatorManagerAddress string `json:"validatorManagerAddress,omitempty"`
-	
+
 	// Protocol compatibility version
 	ProtocolCompatibility string `json:"protocolCompatibility,omitempty"`
-	
+
 	// Validator staking configuration
 	MinStake          uint64  `json:"minStake,omitempty"`
 	RewardRate        float64 `json:"rewardRate,omitempty"`
 	DelegationEnabled bool    `json:"delegationEnabled,omitempty"`
-	
+
 	// Protocol compatibility flags
 	LuxCompatible  bool `json:"luxCompatible,omitempty"`
 	WarpEnabled    bool `json:"warpEnabled,omitempty"`

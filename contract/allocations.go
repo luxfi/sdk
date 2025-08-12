@@ -7,12 +7,12 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/crypto"
-	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 )
 
 // returns information for the blockchain default allocation key
@@ -206,14 +206,14 @@ func getGenesisNativeMinterAdmin(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	
+
 	// Check if native minter is configured in the genesis
 	// Parse the genesis config to check for native minter precompile
 	if genesis.Config != nil {
 		// Check for native minter in the genesis allocations
 		// The native minter precompile is at a specific address
 		nativeMinterAddress := common.HexToAddress("0x0200000000000000000000000000000000000001")
-		
+
 		if alloc, exists := genesis.Alloc[nativeMinterAddress.Hex()]; exists && len(alloc.Code) > 0 {
 			// Native minter is configured
 			// Look for admin addresses in the genesis state

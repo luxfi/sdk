@@ -93,7 +93,7 @@ func NewRegisterL1Validator(subnetID ids.ID, nodeID ids.NodeID, blsPublicKey []b
 	// TODO: Implement proper message creation
 	// Generate a validation ID based on the parameters
 	validationID := ids.GenerateTestID()
-	
+
 	addressedCall := &warpPayload.AddressedCall{}
 	return &L1ValidatorRegistrationPayload{
 		AddressedCall: addressedCall,

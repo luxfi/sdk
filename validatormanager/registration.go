@@ -11,16 +11,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/sdk/application"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/ux"
-	"github.com/luxfi/sdk/evm"
-	sdkwarp "github.com/luxfi/sdk/warp"
-	sdkutils "github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/validator"
-	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	"github.com/luxfi/crypto"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
@@ -31,7 +21,17 @@ import (
 	"github.com/luxfi/node/utils/logging"
 	warp "github.com/luxfi/node/vms/platformvm/warp"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/sdk/application"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/utils"
+	sdkutils "github.com/luxfi/sdk/utils"
+	"github.com/luxfi/sdk/ux"
+	"github.com/luxfi/sdk/validator"
+	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
+	sdkwarp "github.com/luxfi/sdk/warp"
 )
 
 func InitializeValidatorRegistrationPoSNative(
@@ -303,7 +303,6 @@ func GetRegisterL1ValidatorMessage(
 	return signedMessage.(*warp.Message), validationID, nil
 }
 
-
 func GetPChainL1ValidatorRegistrationMessage(
 	ctx context.Context,
 	network models.Network,
@@ -469,12 +468,12 @@ func InitValidatorRegistration(
 				if !errors.Is(err, ErrNodeAlreadyRegistered) {
 					return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator registration")
 				}
-				ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
+				ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 				alreadyInitialized = true
 			} else {
 				ux.Logger.PrintToUser("Validator registration initialized. InitiateTxHash: %s", tx.Hash())
 			}
-			ux.Logger.PrintToUser(fmt.Sprintf("Validator staked amount: %d", stakeAmount))
+			ux.Logger.PrintToUser("Validator staked amount: %d", stakeAmount)
 		} else {
 			managerAddress = crypto.HexToAddress(validatorManagerAddressStr)
 			tx, receipt, err = InitializeValidatorRegistrationPoA(
@@ -495,7 +494,7 @@ func InitValidatorRegistration(
 				if !errors.Is(err, ErrNodeAlreadyRegistered) {
 					return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator registration")
 				}
-				ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
+				ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 				alreadyInitialized = true
 			} else if generateRawTxOnly {
 				return nil, ids.Empty, tx, nil
@@ -503,7 +502,7 @@ func InitValidatorRegistration(
 			ux.Logger.PrintToUser(fmt.Sprintf("Validator weight: %d", weight))
 		}
 	} else {
-		ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
+		ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 	}
 
 	var unsignedMessage *warp.UnsignedMessage
@@ -577,10 +576,10 @@ func FinishValidatorRegistration(
 	}
 	if privateKey != "" {
 		if client, err := evm.GetClient(rpcURL); err != nil {
-			ux.Logger.RedXToUser("failure connecting to L1 to setup proposer VM: %w", err)
+			ux.Logger.RedXToUser("failure connecting to L1 to setup proposer VM: %v", err)
 		} else {
 			if err := client.SetupProposerVM(privateKey); err != nil {
-				ux.Logger.RedXToUser("failure setting proposer VM on L1: %w", err)
+				ux.Logger.RedXToUser("failure setting proposer VM on L1: %v", err)
 			}
 			client.Close()
 		}

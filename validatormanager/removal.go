@@ -12,20 +12,20 @@ import (
 
 	sdkwarp "github.com/luxfi/sdk/warp"
 
-	"github.com/luxfi/sdk/application"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/ux"
-	"github.com/luxfi/sdk/evm"
-	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
+	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/sdk/application"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/sdk/ux"
+	"github.com/luxfi/sdk/validator"
 	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -35,16 +35,16 @@ func convertStandaloneToNodeWarp(msg *standaloneWarp.Message) (*nodeWarp.Message
 	if msg == nil {
 		return nil, errors.New("nil message")
 	}
-	
+
 	// Extract network ID and source chain ID from the standalone message
 	networkID := msg.UnsignedMessage.NetworkID
 	sourceChainID := msg.UnsignedMessage.SourceChainID
 	payload := msg.UnsignedMessage.Payload
-	
+
 	// Convert source chain ID to ids.ID
 	var chainID ids.ID
 	copy(chainID[:], sourceChainID)
-	
+
 	unsignedMsg, err := nodeWarp.NewUnsignedMessage(
 		networkID,
 		chainID,
@@ -53,11 +53,11 @@ func convertStandaloneToNodeWarp(msg *standaloneWarp.Message) (*nodeWarp.Message
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Convert signature - for now just use an empty signature
 	// since we don't have access to the actual signature bytes
 	sig := &nodeWarp.BitSetSignature{}
-	
+
 	return &nodeWarp.Message{
 		UnsignedMessage: *unsignedMsg,
 		Signature:       sig,
@@ -328,14 +328,14 @@ func InitValidatorRemoval(
 			if !errors.Is(err, ErrInvalidValidatorStatus) {
 				return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator removal")
 			}
-			ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
+			ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
 		case generateRawTxOnly:
 			return nil, ids.Empty, tx, nil
 		default:
 			ux.Logger.PrintToUser("Validator removal initialized. InitiateTxHash: %s", tx.Hash())
 		}
 	} else {
-		ux.Logger.PrintToUser(logging.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
+		ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator removal process was already initialized. Proceeding to the next step"))
 	}
 
 	if receipt != nil {
@@ -365,7 +365,7 @@ func InitValidatorRemoval(
 			return nil, ids.Empty, nil, err
 		}
 	}
-	
+
 	signedMsg, err := GetL1ValidatorWeightMessage(
 		network,
 		aggregatorLogger,
@@ -463,7 +463,7 @@ func FinishValidatorRemoval(
 			ux.Logger.RedXToUser("failure connecting to L1 to setup proposer VM: %s", err)
 		} else {
 			if err := client.SetupProposerVM(privateKey); err != nil {
-				ux.Logger.RedXToUser("failure setting proposer VM on L1: %w", err)
+				ux.Logger.RedXToUser("failure setting proposer VM on L1: %v", err)
 			}
 			client.Close()
 		}

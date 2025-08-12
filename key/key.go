@@ -434,21 +434,21 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 
 	// Try to parse as hex-encoded private key (64 chars)
 	keyStr := strings.TrimSpace(string(keyBytes))
-	
+
 	// Check if it's a prefixed key (like "PrivateKey-...")
 	const privKeyPrefix = "PrivateKey-"
 	if strings.HasPrefix(keyStr, privKeyPrefix) {
 		keyStr = strings.TrimPrefix(keyStr, privKeyPrefix)
 		// TODO: decode CB58 format if needed
 	}
-	
+
 	// Try hex decoding
 	privateKeyBytes, err := hex.DecodeString(keyStr)
 	if err == nil && len(privateKeyBytes) == 32 {
 		// This is a valid 32-byte private key
 		var privateKey crypto.PrivateKey
 		copy(privateKey[:], privateKeyBytes)
-		
+
 		// For compatibility, pad to 64 bytes if needed (seed + public key format)
 		if len(privateKey) == 32 {
 			// Generate public key from private key seed
@@ -456,7 +456,7 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 			fullKey := append(privateKeyBytes, publicKey[:]...)
 			copy(privateKey[:], fullKey[:crypto.PrivateKeyLen])
 		}
-		
+
 		return &Key{
 			Type:       "ed25519",
 			PrivateKey: privateKey,
@@ -464,7 +464,7 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 			Address:    generateAddress(privateKey.PublicKey()),
 		}, nil
 	}
-	
+
 	// Try JSON format
 	var keyData struct {
 		PrivateKey string `json:"privateKey"`
@@ -475,7 +475,7 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode private key from JSON: %w", err)
 		}
-		
+
 		var privateKey crypto.PrivateKey
 		if len(privateKeyBytes) == 32 {
 			// Seed only, need to expand
@@ -487,7 +487,7 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 		} else {
 			return nil, fmt.Errorf("invalid private key length: %d", len(privateKeyBytes))
 		}
-		
+
 		return &Key{
 			Type:       keyData.Type,
 			PrivateKey: privateKey,
@@ -495,7 +495,7 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 			Address:    generateAddress(privateKey.PublicKey()),
 		}, nil
 	}
-	
+
 	return nil, fmt.Errorf("unable to parse key file")
 }
 

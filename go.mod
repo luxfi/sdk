@@ -7,14 +7,13 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/evm v0.7.8-lux
-	github.com/luxfi/geth v1.16.26
+	github.com/luxfi/geth v1.16.27
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/ledger/go v0.0.0-00010101000000-000000000000
 	github.com/luxfi/log v1.0.6
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/netrunner-sdk v0.3.0
-	github.com/luxfi/node v1.13.6
+	github.com/luxfi/node v1.16.15
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
@@ -41,6 +40,7 @@ require (
 	github.com/ethereum/go-ethereum v1.16.2
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
+	github.com/luxfi/ledger/go v0.7.1
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/posthog/posthog-go v1.6.1
@@ -118,7 +118,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/database v1.1.10 // indirect
-	github.com/luxfi/metrics v1.1.1 // indirect
+	github.com/luxfi/metrics v1.1.5 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -173,3 +173,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/luxfi/ledger/go => ../ledger/go
