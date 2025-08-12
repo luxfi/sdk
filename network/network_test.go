@@ -29,7 +29,7 @@ import (
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/metrics"
+	"github.com/luxfi/metric"
 )
 
 var (

@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/ids"
 	logging "github.com/luxfi/log"
-	"github.com/luxfi/metrics"
+	"github.com/luxfi/metric"
 	// "github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/peer"
 	"github.com/luxfi/node/proto/pb/sdk"
