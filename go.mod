@@ -21,7 +21,7 @@ require (
 	github.com/luxfi/geth v1.16.27
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/log v1.0.4
+	github.com/luxfi/log v1.0.7
 	github.com/luxfi/metrics v1.1.1
 	github.com/luxfi/node v1.16.15
 	github.com/mattn/go-colorable v0.1.14
