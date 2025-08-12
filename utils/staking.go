@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/staking"
 	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/sdk/constants"
 )
 
 func NewBlsSecretKeyBytes() ([]byte, error) {

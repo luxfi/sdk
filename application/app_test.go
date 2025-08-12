@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
+	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/sdk/models"
 	"github.com/stretchr/testify/require"
 )
 

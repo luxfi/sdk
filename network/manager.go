@@ -96,7 +96,7 @@ func NewNetworkManager(config *config.NetworkConfig, logger log.Logger) (*Networ
 
 	// If netrunner endpoint is configured, log that it will be used in future
 	if config != nil && config.NetrunnerEndpoint != "" {
-		logger.Info("netrunner endpoint configured but not yet integrated", 
+		logger.Info("netrunner endpoint configured but not yet integrated",
 			"endpoint", config.NetrunnerEndpoint)
 	}
 

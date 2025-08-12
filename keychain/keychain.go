@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
@@ -86,10 +85,10 @@ func NewKeychain(
 		}
 		return &kc, nil
 	}
-	// TODO: Fix keychain loading
-	// For now, create an empty keychain
+	// Create nil keychain for now
+	// TODO: Implement proper keychain loading from key path
 	kc := Keychain{
-		Keychain: keychain.NewKeychain(0, nil),
+		Keychain: nil,
 		network:  network,
 	}
 	return &kc, nil

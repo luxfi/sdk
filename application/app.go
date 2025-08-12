@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/lpm"
@@ -15,9 +18,6 @@ import (
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/types"
 	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/ids"
-	luxlog "github.com/luxfi/log"
 )
 
 // Prompter is an alias for the prompts.Prompter interface
@@ -499,7 +499,6 @@ func (app *Lux) CaptureYesNo(prompt string) (bool, error) {
 	return app.Prompt.CaptureYesNo(prompt)
 }
 
-
 func (app *Lux) CreateElasticSubnetConfig(subnetName string, es *models.ElasticSubnetConfig) error {
 	elasticSubetConfigPath := app.GetElasticSubnetConfigPath(subnetName)
 	if err := os.MkdirAll(filepath.Dir(elasticSubetConfigPath), constants.DefaultPerms755); err != nil {
@@ -645,7 +644,7 @@ func (app *Lux) GetPerNodeBlockchainConfig(subnetName string) map[string]interfa
 	return make(map[string]interface{})
 }
 
-// LuxdNodeConfigExists checks if luxd node config exists  
+// LuxdNodeConfigExists checks if luxd node config exists
 func (app *Lux) LuxdNodeConfigExists(subnetName string) bool {
 	configPath := app.GetLuxdNodeConfigPath(subnetName)
 	_, err := os.Stat(configPath)
@@ -654,7 +653,7 @@ func (app *Lux) LuxdNodeConfigExists(subnetName string) bool {
 
 // AddDefaultBlockchainRPCsToSidecar adds default RPC endpoints to sidecar
 func (app *Lux) AddDefaultBlockchainRPCsToSidecar(
-	blockchainName string, 
+	blockchainName string,
 	network models.Network,
 	nodeURIs []string,
 ) (bool, error) {
@@ -673,7 +672,7 @@ func (app *Lux) ListClusterNames() ([]string, error) {
 		}
 		return nil, err
 	}
-	
+
 	var clusterNames []string
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -698,7 +697,7 @@ func (app *Lux) LoadClustersConfig() (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var config map[string]interface{}
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, err
@@ -713,7 +712,7 @@ func (app *Lux) LoadClusterNodeConfig(clusterName string, nodeID string) (map[st
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var config map[string]interface{}
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, err
@@ -728,7 +727,7 @@ func (app *Lux) GetClusterConfig(clusterName string) (map[string]interface{}, er
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var config map[string]interface{}
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, err
@@ -787,13 +786,13 @@ func (app *Lux) GetNetworkFromSidecarNetworkName(name string) (models.Network, e
 func (app *Lux) GetBlockchainNamesOnNetwork(network models.Network, onlySOV bool) ([]string, error) {
 	// Get all blockchain names from sidecar files
 	blockchainNames := []string{}
-	
+
 	subnetDir := app.GetSubnetDir()
 	entries, err := os.ReadDir(subnetDir)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			// Check if sidecar exists for this blockchain
@@ -804,7 +803,7 @@ func (app *Lux) GetBlockchainNamesOnNetwork(network models.Network, onlySOV bool
 				if err != nil {
 					continue
 				}
-				
+
 				// Check if blockchain is deployed on the specified network
 				if _, ok := sc.Networks[network.Name()]; ok {
 					// If onlySOV is true, only include sovereign chains
@@ -815,6 +814,6 @@ func (app *Lux) GetBlockchainNamesOnNetwork(network models.Network, onlySOV bool
 			}
 		}
 	}
-	
+
 	return blockchainNames, nil
 }

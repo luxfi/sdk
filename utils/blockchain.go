@@ -17,10 +17,10 @@ func GetDefaultBlockchainAirdropKeyName(blockchainName string) string {
 
 // Account represents an account in the genesis allocation
 type Account struct {
-	Balance *big.Int `json:"balance"`
-	Code    []byte   `json:"code,omitempty"`
+	Balance *big.Int          `json:"balance"`
+	Code    []byte            `json:"code,omitempty"`
 	Storage map[string]string `json:"storage,omitempty"`
-	Nonce   uint64   `json:"nonce,omitempty"`
+	Nonce   uint64            `json:"nonce,omitempty"`
 }
 
 // SubnetEvmGenesis represents a subnet EVM genesis configuration
