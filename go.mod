@@ -9,7 +9,7 @@ require (
 	github.com/luxfi/evm v0.7.8-lux
 	github.com/luxfi/geth v1.16.27
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/log v1.0.6
+	github.com/luxfi/log v1.0.7
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/netrunner-sdk v0.3.0
@@ -174,4 +174,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/luxfi/ledger/go => ../ledger/go
