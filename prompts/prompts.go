@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/ux"
-	"github.com/luxfi/crypto"
-	"github.com/luxfi/ids"
 	"github.com/manifoldco/promptui"
 	"golang.org/x/mod/semver"
 )
@@ -752,7 +752,7 @@ func PromptChain(
 ) (bool, bool, bool, bool, string, string, error) {
 	// Build options
 	options := []string{}
-	
+
 	if pChainEnabled {
 		options = append(options, "P-Chain")
 	}
@@ -762,37 +762,37 @@ func PromptChain(
 	if cChainEnabled {
 		options = append(options, "C-Chain")
 	}
-	
+
 	// Add blockchain names
 	for _, name := range blockchainNames {
 		if name != blockchainNameToAvoid {
 			options = append(options, name)
 		}
 	}
-	
+
 	if blockchainIDEnabled {
 		options = append(options, "Enter blockchain ID")
 	}
-	
+
 	options = append(options, Cancel)
-	
+
 	choice, err := prompt.CaptureList(message, options)
 	if err != nil {
 		return false, false, false, false, "", "", err
 	}
-	
+
 	if choice == Cancel {
 		return true, false, false, false, "", "", nil
 	}
-	
+
 	// Return flags based on choice
 	pChain := choice == "P-Chain"
 	xChain := choice == "X-Chain"
 	cChain := choice == "C-Chain"
-	
+
 	blockchainName := ""
 	blockchainID := ""
-	
+
 	if choice == "Enter blockchain ID" {
 		blockchainID, err = prompt.CaptureString("Enter blockchain ID")
 		if err != nil {
@@ -802,7 +802,7 @@ func PromptChain(
 		// It's a blockchain name
 		blockchainName = choice
 	}
-	
+
 	return false, pChain, xChain, cChain, blockchainName, blockchainID, nil
 }
 
@@ -820,7 +820,7 @@ func CaptureKeyAddress(
 	if err != nil {
 		return "", err
 	}
-	
+
 	keys := []string{}
 	for _, entry := range entries {
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".pk") {
@@ -828,21 +828,21 @@ func CaptureKeyAddress(
 			keys = append(keys, keyName)
 		}
 	}
-	
+
 	if len(keys) == 0 {
 		return "", errNoKeys
 	}
-	
+
 	keyName, err := prompt.CaptureList(fmt.Sprintf("Which key should %s?", goal), keys)
 	if err != nil {
 		return "", err
 	}
-	
+
 	keyPath, err := getKey(keyName)
 	if err != nil {
 		return "", err
 	}
-	
+
 	// For now, return the key path
 	// In a real implementation, this would convert the key to the appropriate address format
 	return keyPath, nil
@@ -853,25 +853,25 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 	if len(options) == 0 {
 		return nil, errors.New("no options provided")
 	}
-	
+
 	selected := []string{}
 	remaining := make([]string, len(options))
 	copy(remaining, options)
-	
+
 	for i := 0; i < size && len(remaining) > 0; i++ {
 		if i > 0 {
 			prompt = fmt.Sprintf("Select item %d of %d", i+1, size)
 		}
-		
+
 		choice, err := p.CaptureList(prompt, append(remaining, Done))
 		if err != nil {
 			return nil, err
 		}
-		
+
 		if choice == Done {
 			break
 		}
-		
+
 		selected = append(selected, choice)
 		// Remove selected item from remaining options
 		newRemaining := []string{}
@@ -882,7 +882,7 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 		}
 		remaining = newRemaining
 	}
-	
+
 	return selected, nil
 }
 
@@ -898,12 +898,12 @@ func (*realPrompter) CaptureFloat(promptStr string) (float64, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := prompt.Run()
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return strconv.ParseFloat(result, 64)
 }
 
@@ -921,12 +921,12 @@ func (*realPrompter) CaptureUint16(promptStr string) (uint16, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := prompt.Run()
 	if err != nil {
 		return 0, err
 	}
-	
+
 	val, _ := strconv.ParseUint(result, 10, 16)
 	return uint16(val), nil
 }
@@ -942,12 +942,12 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 			return nil
 		},
 	}
-	
+
 	result, err := prompt.Run()
 	if err != nil {
 		return 0, err
 	}
-	
+
 	val, _ := strconv.ParseUint(result, 10, 32)
 	return uint32(val), nil
 }
