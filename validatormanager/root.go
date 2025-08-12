@@ -8,18 +8,18 @@ import (
 	"math/big"
 
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/sdk/models"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/sdk/models"
 
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/ids"
+	platformwarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/sdk/validatormanager/txs"
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/warp"
-	platformwarp "github.com/luxfi/node/vms/platformvm/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -287,7 +287,7 @@ func InitializeValidatorsSet(
 		return nil, nil, fmt.Errorf("failed to convert warp message: %w", err)
 	}
 	nodeWarpMsg := nodeWarpMsgInterface.(*platformwarp.Message)
-	
+
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		false,

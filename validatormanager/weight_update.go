@@ -9,25 +9,25 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/sdk/application"
-	"github.com/luxfi/sdk/contract"
-	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/ux"
-	"github.com/luxfi/sdk/evm"
-	sdkwarp "github.com/luxfi/sdk/warp"
-	"github.com/luxfi/sdk/validator"
-	ethereum "github.com/luxfi/geth"
 	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/logging"
-	warp "github.com/luxfi/warp"
 	platformwarp "github.com/luxfi/node/vms/platformvm/warp"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/sdk/application"
+	"github.com/luxfi/sdk/contract"
+	"github.com/luxfi/sdk/evm"
+	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/sdk/ux"
+	"github.com/luxfi/sdk/validator"
 	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
+	sdkwarp "github.com/luxfi/sdk/warp"
+	warp "github.com/luxfi/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -199,7 +199,7 @@ func CompleteValidatorWeightChange(
 	// Convert standalone warp to node warp for contract
 	nodeWarpMsgInterface, _ := localWarpMessage.ConvertStandaloneToNodeWarpMessage(pchainL1ValidatorRegistrationSignedMessage)
 	nodeWarpMsg := nodeWarpMsgInterface.(*platformwarp.Message)
-	
+
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
 		generateRawTxOnly,
@@ -266,7 +266,7 @@ func FinishValidatorWeightChange(
 			ux.Logger.RedXToUser("failure connecting to L1 to setup proposer VM: %s", err)
 		} else {
 			if err := client.SetupProposerVM(privateKey); err != nil {
-				ux.Logger.RedXToUser("failure setting proposer VM on L1: %w", err)
+				ux.Logger.RedXToUser("failure setting proposer VM on L1: %v", err)
 			}
 			client.Close()
 		}
@@ -487,4 +487,3 @@ func SearchForL1ValidatorWeightMessage(
 	}
 	return nil, nil
 }
-
