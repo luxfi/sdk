@@ -29,7 +29,14 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/luxfi/ledger/go => ../ledger/go
+// Replace directives removed for CI compatibility
+// For local development, uncomment the replace block below:
+// replace (
+//     github.com/luxfi/ledger/go => ../ledger/go
+//     github.com/luxfi/node => ../node
+//     github.com/luxfi/database => ../database
+//     github.com/luxfi/coreth => ../geth
+// )
 
 exclude (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074
