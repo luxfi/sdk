@@ -499,7 +499,7 @@ func InitValidatorRegistration(
 			} else if generateRawTxOnly {
 				return nil, ids.Empty, tx, nil
 			}
-			ux.Logger.PrintToUser(fmt.Sprintf("Validator weight: %d", weight))
+			ux.Logger.PrintToUser("Validator weight: %d", weight)
 		}
 	} else {
 		ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
