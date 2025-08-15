@@ -48,6 +48,11 @@ var promptUIRunner = func(prompt promptui.Prompt) (string, error) {
 	return prompt.Run()
 }
 
+// promptUISelectRunner allows mocking promptui.Select.Run in tests
+var promptUISelectRunner = func(prompt promptui.Select) (int, string, error) {
+	return prompt.Run()
+}
+
 type Comparator struct {
 	Label string // Label that identifies reference value
 	Type  string // Less Than Eq or More than Eq
@@ -400,7 +405,7 @@ func yesNoBase(promptStr string, orderedOptions []string) (bool, error) {
 		Items: orderedOptions,
 	}
 
-	_, decision, err := prompt.Run()
+	_, decision, err := promptUISelectRunner(prompt)
 	if err != nil {
 		return false, err
 	}
@@ -420,7 +425,7 @@ func (*realPrompter) CaptureList(promptStr string, options []string) (string, er
 		Label: promptStr,
 		Items: options,
 	}
-	_, listDecision, err := prompt.Run()
+	_, listDecision, err := promptUISelectRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -531,7 +536,7 @@ func (*realPrompter) CaptureIndex(promptStr string, options []any) (int, error) 
 		Items: options,
 	}
 
-	listIndex, _, err := prompt.Run()
+	listIndex, _, err := promptUISelectRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
