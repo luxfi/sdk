@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	luxdvalidators "github.com/luxfi/node/consensus/validators"
+	luxdvalidators "github.com/luxfi/consensus/validators"
 )
 
 func TestLoadNewValidators(t *testing.T) {

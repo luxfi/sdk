@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/engine/chain/block"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/consensus/validators/validatorstest"
+	"github.com/luxfi/consensus"
+	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validators/validatorstest"
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/crypto/bls"
@@ -169,8 +169,8 @@ type validatorRange struct {
 	publicKey bool
 }
 
-// createConsensusCtx creates a consensus.Context instance with a validator state specified by the given validatorRanges
-func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) *consensus.Context {
+// createConsensusCtx creates a context.Context instance with a validator state specified by the given validatorRanges
+func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context.Context {
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
 
 	for _, validatorRange := range validatorRanges {
@@ -199,7 +199,7 @@ func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) *consen
 	return consensusCtx
 }
 
-func createValidPredicateTest(consensusCtx *consensus.Context, numKeys uint64, predicateBytes []byte) precompiletest.PredicateTest {
+func createValidPredicateTest(consensusCtx context.Context, numKeys uint64, predicateBytes []byte) precompiletest.PredicateTest {
 	return precompiletest.PredicateTest{
 		Config: NewDefaultConfig(utils.NewUint64(0)),
 		PredicateContext: &precompileconfig.PredicateContext{

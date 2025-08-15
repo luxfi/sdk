@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/database"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/engine/chain/block"
 
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"

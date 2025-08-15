@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/consensus"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/consensus"
+	commonEng "github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
@@ -23,7 +23,7 @@ const (
 )
 
 type blockBuilder struct {
-	ctx *consensus.Context
+	ctx context.Context
 
 	txPool *txpool.TxPool
 

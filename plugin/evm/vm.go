@@ -76,9 +76,9 @@ import (
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus"
-	consensuschain "github.com/luxfi/node/consensus/chain"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus"
+	consensuschain "github.com/luxfi/consensus/chain"
+	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/node/utils/timer/mockable"
@@ -86,7 +86,7 @@ import (
 	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/components/chain"
 
-	commonEng "github.com/luxfi/node/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/engine/core"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -172,9 +172,9 @@ var legacyApiNames = map[string]string{
 
 // VM implements the chain.ChainVM interface
 type VM struct {
-	ctx *consensus.Context
+	ctx context.Context
 	// contextLock is used to coordinate global VM operations.
-	// This can be used safely instead of consensus.Context.Lock which is deprecated and should not be used in rpcchainvm.
+	// This can be used safely instead of context.Context.Lock which is deprecated and should not be used in rpcchainvm.
 	vmLock sync.RWMutex
 	// [cancel] may be nil until [consensus.NormalOp] starts
 	cancel context.CancelFunc
@@ -267,7 +267,7 @@ type VM struct {
 // Initialize implements the chain.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
-	chainCtx *consensus.Context,
+	chainCtx context.Context,
 	db database.Database,
 	genesisBytes []byte,
 	upgradeBytes []byte,
@@ -519,7 +519,7 @@ func (vm *VM) Initialize(
 	return vm.initializeStateSyncClient(lastAcceptedHeight)
 }
 
-func parseGenesis(ctx *consensus.Context, genesisBytes []byte, upgradeBytes []byte, airdropFile string) (*core.Genesis, error) {
+func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte, airdropFile string) (*core.Genesis, error) {
 	// First check if this is a database replay genesis
 	var genesisMap map[string]interface{}
 	if err := json.Unmarshal(genesisBytes, &genesisMap); err == nil {

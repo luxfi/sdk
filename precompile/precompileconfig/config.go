@@ -5,8 +5,8 @@
 package precompileconfig
 
 import (
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus"
+	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
@@ -33,7 +33,7 @@ type Config interface {
 // PredicateContext is the context passed in to the Predicater interface to verify
 // a precompile predicate within a specific ProposerVM wrapper.
 type PredicateContext struct {
-	ConsensusCtx *consensus.Context
+	ConsensusCtx context.Context
 	// ProposerVMBlockCtx defines the ProposerVM context the predicate is verified within
 	ProposerVMBlockCtx *block.Context
 }
@@ -58,7 +58,7 @@ type WarpMessageWriter interface {
 
 // AcceptContext defines the context passed in to a precompileconfig's Accepter
 type AcceptContext struct {
-	ConsensusCtx *consensus.Context
+	ConsensusCtx context.Context
 	Warp    WarpMessageWriter
 }
 

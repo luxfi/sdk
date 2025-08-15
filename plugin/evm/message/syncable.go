@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
 )

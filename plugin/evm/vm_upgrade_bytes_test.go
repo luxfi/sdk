@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/luxfi/metric"
-	"github.com/luxfi/node/consensus"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/engine/enginetest"
+	"github.com/luxfi/consensus"
+	commonEng "github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/vms/components/chain"

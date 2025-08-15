@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/consensustest"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/consensus/validators/validatorstest"
+	"github.com/luxfi/consensus"
+	"github.com/luxfi/consensus/consensustest"
+	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validators/validatorstest"
 	"github.com/luxfi/node/utils/constants"
 )
 
@@ -47,7 +47,7 @@ func NewTestValidatorState() *validatorstest.State {
 	}
 }
 
-// NewTestConsensusContext returns a consensus.Context with validator state properly configured for testing.
+// NewTestConsensusContext returns a context.Context with validator state properly configured for testing.
 // This wraps consensustest.Context and sets the validator state to avoid the missing GetValidatorSetF issue.
 //
 // Usage example:
@@ -62,15 +62,15 @@ func NewTestValidatorState() *validatorstest.State {
 //
 // This function ensures that the consensus context has a properly configured validator state
 // that includes the GetValidatorSetF function, which is required by many tests.
-func NewTestConsensusContext(t testing.TB) *consensus.Context {
+func NewTestConsensusContext(t testing.TB) context.Context {
 	consensusCtx := consensustest.Context(t, SubnetEVMTestChainID)
 	consensusCtx.ValidatorState = NewTestValidatorState()
 	return consensusCtx
 }
 
-// NewTestConsensusContextWithChainID returns a consensus.Context with validator state properly configured for testing
+// NewTestConsensusContextWithChainID returns a context.Context with validator state properly configured for testing
 // with a specific chain ID. This is provided for backward compatibility when a specific chain ID is needed.
-func NewTestConsensusContextWithChainID(t testing.TB, chainID ids.ID) *consensus.Context {
+func NewTestConsensusContextWithChainID(t testing.TB, chainID ids.ID) context.Context {
 	consensusCtx := consensustest.Context(t, chainID)
 	consensusCtx.ValidatorState = NewTestValidatorState()
 	return consensusCtx

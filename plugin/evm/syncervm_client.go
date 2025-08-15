@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
