@@ -23,8 +23,8 @@ import (
 	"github.com/luxfi/evm/predicate"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/chain"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/chain"
+	"github.com/luxfi/consensus/engine/chain/block"
 )
 
 var (

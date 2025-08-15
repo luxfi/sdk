@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/consensus/validators/validatorsmock"
+	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validators/validatorsmock"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/stretchr/testify/require"

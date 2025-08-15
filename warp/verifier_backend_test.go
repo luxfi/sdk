@@ -13,9 +13,9 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/node/utils/timer/mockable"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
@@ -114,7 +114,7 @@ func TestAddressedCallSignatures(t *testing.T) {
 					[][]byte{offchainMessage.Bytes()},
 				)
 				require.NoError(t, err)
-				handler := acp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
+				handler := lp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
 
 				requestBytes, expectedResponse := test.setup(warpBackend)
 				protoMsg := &sdk.SignatureRequest{Message: requestBytes}
@@ -232,7 +232,7 @@ func TestBlockSignatures(t *testing.T) {
 					nil,
 				)
 				require.NoError(t, err)
-				handler := acp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
+				handler := lp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
 
 				requestBytes, expectedResponse := test.setup()
 				protoMsg := &sdk.SignatureRequest{Message: requestBytes}
@@ -311,7 +311,7 @@ func TestUptimeSignatures(t *testing.T) {
 			nil,
 		)
 		require.NoError(t, err)
-		handler := acp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
+		handler := lp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
 
 		// sourceAddress nonZero
 		protoBytes, _ := getUptimeMessageBytes([]byte{1, 2, 3}, ids.GenerateTestID(), 80)

@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/evm/warp/messages"
 
 	"github.com/luxfi/database"
-	"github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/core"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 )

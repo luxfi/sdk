@@ -10,9 +10,9 @@ import (
 	"slices"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/chain"
-	"github.com/luxfi/node/consensus/chain/chaintest"
-	"github.com/luxfi/node/consensus/consensustest"
+	"github.com/luxfi/consensus/chain"
+	"github.com/luxfi/consensus/chain/chaintest"
+	"github.com/luxfi/consensus/consensustest"
 )
 
 var ErrNotFound = errors.New("not found")

@@ -13,7 +13,7 @@ import (
 	big "math/big"
 	reflect "reflect"
 
-	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/consensus"
 	common "github.com/luxfi/geth/common"
 	types "github.com/luxfi/geth/core/types"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
@@ -140,10 +140,10 @@ func (mr *MockAccessibleStateMockRecorder) GetChainConfig() *gomock.Call {
 }
 
 // GetConsensusContext mocks base method.
-func (m *MockAccessibleState) GetConsensusContext() *consensus.Context {
+func (m *MockAccessibleState) GetConsensusContext() context.Context {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetConsensusContext")
-	ret0, _ := ret[0].(*consensus.Context)
+	ret0, _ := ret[0].(context.Context)
 	return ret0
 }
 

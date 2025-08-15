@@ -15,13 +15,13 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/proto/pb/sdk"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/engine/enginetest"
-	"github.com/luxfi/node/consensus/engine/chain/block"
-	"github.com/luxfi/node/consensus/validators"
-	"github.com/luxfi/node/consensus/validators/validatorstest"
+	commonEng "github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/enginetest"
+	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validators/validatorstest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	luxdUtils "github.com/luxfi/node/utils"
@@ -916,7 +916,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 			protoMsg := &sdk.SignatureRequest{Message: test.message.Bytes()}
 			requestBytes, err := proto.Marshal(protoMsg)
 			require.NoError(t, err)
-			msg := p2p.PrefixMessage(p2p.ProtocolPrefix(acp118.HandlerID), requestBytes)
+			msg := p2p.PrefixMessage(p2p.ProtocolPrefix(lp118.HandlerID), requestBytes)
 
 			// Send the app request and verify the response
 			deadline := time.Now().Add(60 * time.Second)

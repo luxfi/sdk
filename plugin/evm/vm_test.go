@@ -31,10 +31,10 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus"
-	"github.com/luxfi/node/consensus/chain"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/engine/enginetest"
+	"github.com/luxfi/consensus"
+	"github.com/luxfi/consensus/chain"
+	commonEng "github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/crypto/secp256k1"
@@ -213,7 +213,7 @@ func getConfig(scheme, otherConfig string) string {
 func setupGenesis(
 	t *testing.T,
 	fork upgradetest.Fork,
-) (*consensus.Context,
+) (context.Context,
 	*prefixdb.Database,
 	[]byte,
 	*atomic.Memory,

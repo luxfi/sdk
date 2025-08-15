@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/consensus/engine/enginetest"
-	"github.com/luxfi/node/consensus/consensustest"
+	"github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/enginetest"
+	"github.com/luxfi/consensus/consensustest"
 	"github.com/luxfi/node/utils/set"
 	"github.com/prometheus/client_golang/prometheus"
 

@@ -9,7 +9,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/node/consensus"
+	"github.com/luxfi/consensus"
 	"github.com/luxfi/geth/common"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
@@ -124,7 +124,7 @@ type UpgradeConfig struct {
 
 // LuxContext provides Lux specific context directly into the EVM.
 type LuxContext struct {
-	ConsensusCtx *consensus.Context
+	ConsensusCtx context.Context
 }
 
 type ChainConfig struct {
