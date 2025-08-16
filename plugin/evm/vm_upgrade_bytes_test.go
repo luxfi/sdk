@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxfi/metric"
 	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"

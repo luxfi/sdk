@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/core"
 	"github.com/luxfi/node/utils/timer/mockable"
 	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"

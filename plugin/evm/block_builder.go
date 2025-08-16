@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"

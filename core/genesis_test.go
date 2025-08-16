@@ -32,7 +32,6 @@ import (
 	_ "embed"
 	"fmt"
 	"math/big"
-	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -371,9 +370,7 @@ func newDbConfig(t *testing.T, scheme string) *triedb.Config {
 		return triedb.HashDefaults
 	case rawdb.PathScheme:
 		return &triedb.Config{PathDB: &gethpathdb.Config{
-			CleanCacheSize: pathdb.Defaults.CleanCacheSize,
-			DirtyCacheSize: pathdb.Defaults.DirtyCacheSize,
-			ReadOnly:       pathdb.Defaults.ReadOnly,
+			ReadOnly: pathdb.Defaults.ReadOnly,
 		}}
 	case customrawdb.FirewoodScheme:
 		// Firewood disabled - use HashScheme instead
@@ -426,9 +423,7 @@ func TestVerkleGenesisCommit(t *testing.T) {
 
 	db := rawdb.NewMemoryDatabase()
 	triedb := triedb.NewDatabase(db, &triedb.Config{IsVerkle: true, PathDB: &gethpathdb.Config{
-		CleanCacheSize: pathdb.Defaults.CleanCacheSize,
-		DirtyCacheSize: pathdb.Defaults.DirtyCacheSize,
-		ReadOnly:       pathdb.Defaults.ReadOnly,
+		ReadOnly: pathdb.Defaults.ReadOnly,
 	}})
 	block := genesis.MustCommit(db, triedb)
 	if !bytes.Equal(block.Root().Bytes(), expected) {

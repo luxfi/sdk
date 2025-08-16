@@ -57,7 +57,7 @@ func stressTestTrieDb(t *testing.B, numContracts int, callsPerBlock int, element
 	signer := types.LatestSigner(config)
 	testKey, _ := crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 
-	contractAddr := make([]common.Address, numContracts)
+	contractAddr := make([]crypto.Address, numContracts)
 	contractTxs := make([]*types.Transaction, numContracts)
 
 	gasPrice := big.NewInt(225000000000)
@@ -106,8 +106,8 @@ func stressTestTrieDb(t *testing.B, numContracts int, callsPerBlock int, element
 		for e := 0; e < callsPerBlock; e++ {
 			contractId := (i + e) % deployedContracts
 			tx, err := types.SignTx(types.NewTx(&types.LegacyTx{
-				Nonce:    gen.TxNonce(benchRootAddr),
-				To:       &contractAddr[contractId],
+				Nonce:    gen.TxNonce(common.Address(benchRootAddr)),
+				To:       (*common.Address)(&contractAddr[contractId]),
 				Value:    big.NewInt(0),
 				Gas:      gasTxLimit,
 				GasPrice: gasPrice,

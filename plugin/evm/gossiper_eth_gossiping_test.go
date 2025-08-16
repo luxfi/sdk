@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/set"
 
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"

@@ -10,10 +10,10 @@
 package contract
 
 import (
+	"context"
 	big "math/big"
 	reflect "reflect"
 
-	"github.com/luxfi/consensus"
 	common "github.com/luxfi/geth/common"
 	types "github.com/luxfi/geth/core/types"
 	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"

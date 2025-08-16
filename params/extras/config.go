@@ -4,12 +4,12 @@
 package extras
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/big"
 	"time"
 
-	"github.com/luxfi/consensus"
 	"github.com/luxfi/geth/common"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
