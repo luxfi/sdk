@@ -5,7 +5,7 @@ go 1.24.5
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.5
-	github.com/luxfi/crypto v1.2.9
+	github.com/luxfi/crypto v1.3.2
 	github.com/luxfi/evm v0.8.7
 	github.com/luxfi/geth v1.16.34
 	github.com/luxfi/ids v1.0.2
@@ -181,7 +181,7 @@ require (
 )
 
 require (
-	github.com/luxfi/consensus v1.1.2 // indirect
+	github.com/luxfi/consensus v1.1.3 // indirect
 	github.com/luxfi/metric v1.3.0 // indirect
 	github.com/luxfi/metrics v1.1.1 // indirect
 )
