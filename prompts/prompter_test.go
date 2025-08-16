@@ -426,7 +426,7 @@ func TestCaptureDurationEdgeCases(t *testing.T) {
 	})
 }
 
-func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
+func TestCaptureDurationWithMonkeyPatch(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -564,7 +564,7 @@ func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			duration, err := prompter.CaptureTestnetDuration("Enter Testnet staking duration:")
+			duration, err := prompter.CaptureDuration("Enter Testnet staking duration:")
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -580,7 +580,7 @@ func TestCaptureTestnetDurationWithMonkeyPatch(t *testing.T) {
 	}
 }
 
-func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
+func TestCaptureDurationEdgeCases(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -598,7 +598,7 @@ func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureTestnetDuration("Test Testnet prompt")
+		duration, err := prompter.CaptureDuration("Test Testnet prompt")
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
@@ -613,7 +613,7 @@ func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureTestnetDuration(expectedLabel)
+		duration, err := prompter.CaptureDuration(expectedLabel)
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
@@ -634,14 +634,14 @@ func TestCaptureTestnetDurationEdgeCases(t *testing.T) {
 		}
 
 		prompter := &realPrompter{}
-		duration, err := prompter.CaptureTestnetDuration("Enter Testnet duration:")
+		duration, err := prompter.CaptureDuration("Enter Testnet duration:")
 
 		require.NoError(t, err)
 		require.Equal(t, 720*time.Hour, duration)
 	})
 }
 
-func TestCaptureMainnetDurationWithMonkeyPatch(t *testing.T) {
+func TestCaptureDurationWithMonkeyPatch(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -748,7 +748,7 @@ func TestCaptureMainnetDurationWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			duration, err := prompter.CaptureMainnetDuration("Enter Mainnet staking duration:")
+			duration, err := prompter.CaptureDuration("Enter Mainnet staking duration:")
 
 			if tt.expectError {
 				require.Error(t, err)
