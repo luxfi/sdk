@@ -181,7 +181,7 @@ require (
 )
 
 require (
-	github.com/luxfi/consensus v1.1.1-0.20250816042749-e64270d6bd1e // indirect
+	github.com/luxfi/consensus v1.1.2 // indirect
 	github.com/luxfi/metric v1.3.0 // indirect
 	github.com/luxfi/metrics v1.1.1 // indirect
 )
