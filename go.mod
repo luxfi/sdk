@@ -13,7 +13,7 @@ require (
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/netrunner-sdk v0.3.0
-	github.com/luxfi/node v1.13.5-lux.3.0.20250815021439-7d72a878f005
+	github.com/luxfi/node v1.16.15
 	github.com/luxfi/warp v0.1.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
@@ -48,7 +48,7 @@ require (
 	github.com/ethereum/go-ethereum v1.16.2
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
-	github.com/luxfi/ledger-lux-go v0.0.3
+	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/posthog/posthog-go v1.6.1
