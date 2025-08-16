@@ -7,9 +7,9 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/evm v0.8.7
-	github.com/luxfi/geth v1.16.24
+	github.com/luxfi/geth v1.16.34
 	github.com/luxfi/ids v1.0.2
-	github.com/luxfi/log v1.0.7
+	github.com/luxfi/log v1.1.1
 	github.com/luxfi/lpm v1.7.12
 	github.com/luxfi/netrunner v1.13.5-lux.2
 	github.com/luxfi/netrunner-sdk v0.3.0
@@ -22,8 +22,8 @@ require (
 	go.uber.org/mock v0.5.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.41.0
-	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
-	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/exp v0.0.0-20250813145105-42675adae3e6
+	golang.org/x/net v0.43.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/protobuf v1.36.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -31,8 +31,10 @@ require (
 
 replace (
 	github.com/ethereum/go-ethereum => github.com/ethereum/go-ethereum v1.16.2
+	github.com/luxfi/consensus => ../consensus
+	github.com/luxfi/crypto => ../crypto
 	github.com/luxfi/geth => github.com/luxfi/geth v1.16.2-lux.4
-	github.com/luxfi/node => github.com/luxfi/node v1.13.4-lux.15
+	github.com/luxfi/node => ../node
 )
 
 exclude (
@@ -52,7 +54,7 @@ require (
 	github.com/posthog/posthog-go v1.6.1
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/afero v1.14.0
-	golang.org/x/mod v0.26.0
+	golang.org/x/mod v0.27.0
 	golang.org/x/text v0.28.0
 )
 
@@ -62,7 +64,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.3 // indirect
-	github.com/StephenButtolph/canoto v0.17.2 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.0 // indirect
@@ -108,7 +109,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/rpc v1.2.1 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
@@ -119,11 +120,11 @@ require (
 	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
+	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/database v1.1.10 // indirect
+	github.com/luxfi/database v1.1.11 // indirect
 	github.com/luxfi/trace v0.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -156,7 +157,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	github.com/yusufpapurcu/wmi v1.2.3 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/otel v1.37.0 // indirect
@@ -179,4 +180,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-require github.com/luxfi/metric v1.3.0 // indirect
+require (
+	github.com/luxfi/consensus v1.1.1-0.20250816042749-e64270d6bd1e // indirect
+	github.com/luxfi/metric v1.3.0 // indirect
+	github.com/luxfi/metrics v1.1.1 // indirect
+)
