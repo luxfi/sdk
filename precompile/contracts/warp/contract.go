@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/luxfi/consensus"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common"
@@ -95,7 +96,9 @@ func getBlockchainID(accessibleState contract.AccessibleState, caller common.Add
 	if remainingGas, err = contract.DeductGas(suppliedGas, GetBlockchainIDGasCost); err != nil {
 		return nil, 0, err
 	}
-	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(accessibleState.GetConsensusContext().ChainID))
+	ctx := accessibleState.GetConsensusContext()
+	chainID := consensus.GetChainID(ctx)
+	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(chainID))
 	if err != nil {
 		return nil, remainingGas, err
 	}
@@ -249,8 +252,9 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 		return nil, remainingGas, fmt.Errorf("%w: %s", errInvalidSendInput, err)
 	}
 
+	ctx := accessibleState.GetConsensusContext()
 	var (
-		sourceChainID = accessibleState.GetConsensusContext().ChainID
+		sourceChainID = consensus.GetChainID(ctx)
 		sourceAddress = caller
 	)
 
@@ -262,7 +266,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 		return nil, remainingGas, err
 	}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
-		accessibleState.GetConsensusContext().NetworkID,
+		consensus.GetNetworkID(ctx),
 		sourceChainID,
 		addressedPayload.Bytes(),
 	)

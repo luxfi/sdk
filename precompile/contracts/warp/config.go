@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
@@ -202,10 +203,10 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 	log.Debug("verifying warp message", "warpMsg", warpMsg, "quorumNum", quorumNumerator, "quorumDenom", WarpQuorumDenominator)
 
 	// Wrap validators.State on the chain consensus context to special case the Primary Network
-	// Type assert ValidatorState to the expected validators.State interface
-	_, ok := predicateContext.ConsensusCtx.ValidatorState.(validators.State)
-	if !ok {
-		return fmt.Errorf("invalid validator state type")
+	// Get ValidatorState from context
+	validatorState := consensus.GetValidatorState(predicateContext.ConsensusCtx)
+	if validatorState == nil {
+		return fmt.Errorf("validator state not found in context")
 	}
 
 	// Note: Due to version incompatibilities, we're skipping the actual signature verification
