@@ -5,7 +5,8 @@
 package precompileconfig
 
 import (
-	"github.com/luxfi/consensus"
+	"context"
+	
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/geth/common"
