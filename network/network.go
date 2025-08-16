@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/utils"
@@ -129,21 +129,26 @@ func NewNetwork(
 	maxActiveAppRequests int64,
 	registerer prometheus.Registerer,
 ) (Network, error) {
-	p2pNetwork, err := p2p.NewNetwork(ctx.Log, appSender, registerer, "p2p")
+	logger := consensus.GetLogger(ctx)
+	p2pNetwork, err := p2p.NewNetwork(logger, appSender, registerer, "p2p")
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize p2p network: %w", err)
 	}
+	nodeID := consensus.GetNodeID(ctx)
+	subnetID := consensus.GetSubnetID(ctx)
+	validatorState := consensus.GetValidatorState(ctx)
+	
 	return &network{
 		appSender:                  appSender,
 		codec:                      codec,
-		self:                       ctx.NodeID,
+		self:                       nodeID,
 		outstandingRequestHandlers: make(map[uint32]message.ResponseHandler),
 		activeAppRequests:          semaphore.NewWeighted(maxActiveAppRequests),
 		sdkNetwork:                 p2pNetwork,
 		appRequestHandler:          message.NoopRequestHandler{},
 		peers:                      NewPeerTracker(),
 		appStats:                   stats.NewRequestHandlerStats(),
-		p2pValidators:              p2p.NewValidators(p2pNetwork.Peers, ctx.Log, ctx.SubnetID, ctx.ValidatorState, maxValidatorSetStaleness),
+		p2pValidators:              p2p.NewValidators(p2pNetwork.Peers, logger, subnetID, validatorState, maxValidatorSetStaleness),
 	}, nil
 }
 
@@ -384,7 +389,7 @@ func (n *network) AppGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes 
 }
 
 // Connected adds the given nodeID to the peer list so that it can receive messages
-func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion *version.Application) error {
+func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion interface{}) error {
 	log.Debug("adding new peer", "nodeID", nodeID)
 
 	n.lock.Lock()

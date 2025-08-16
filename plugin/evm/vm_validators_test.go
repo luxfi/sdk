@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/enginetest"
 	luxdvalidators "github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"

@@ -33,7 +33,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/chain"
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"

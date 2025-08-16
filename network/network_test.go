@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/consensus/consensustest"
 	"github.com/luxfi/node/utils/set"

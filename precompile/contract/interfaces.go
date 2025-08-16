@@ -5,9 +5,9 @@
 package contract
 
 import (
+	"context"
 	"math/big"
 
-	"github.com/luxfi/consensus"
 	"github.com/luxfi/geth/common"
 	ethtypes "github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/precompile/precompileconfig"

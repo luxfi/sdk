@@ -86,7 +86,7 @@ import (
 	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/components/chain"
 
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"

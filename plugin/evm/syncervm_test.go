@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/upgrade/upgradetest"
