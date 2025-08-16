@@ -16,7 +16,7 @@ require (
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/consensus v1.1.1-0.20250816042749-e64270d6bd1e
+	github.com/luxfi/consensus v1.1.2
 	github.com/luxfi/crypto v1.2.9
 	github.com/luxfi/database v1.1.11
 	github.com/luxfi/geth v1.16.34
