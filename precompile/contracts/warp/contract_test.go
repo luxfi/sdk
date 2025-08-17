@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/luxfi/consensus"
 	"github.com/luxfi/ids"
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
@@ -27,7 +28,7 @@ func TestGetBlockchainID(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
 
 	defaultConsensusCtx := utilstest.NewTestConsensusContext(t)
-	blockchainID := defaultConsensusCtx.ChainID
+	blockchainID := consensus.GetChainID(defaultConsensusCtx)
 
 	tests := map[string]precompiletest.PrecompileTest{
 		"getBlockchainID success": {
@@ -85,7 +86,7 @@ func TestSendWarpMessage(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
 
 	defaultConsensusCtx := utilstest.NewTestConsensusContext(t)
-	blockchainID := defaultConsensusCtx.ChainID
+	blockchainID := consensus.GetChainID(defaultConsensusCtx)
 	sendWarpMessagePayload := agoUtils.RandomBytes(100)
 
 	sendWarpMessageInput, err := PackSendWarpMessage(sendWarpMessagePayload)
@@ -96,7 +97,7 @@ func TestSendWarpMessage(t *testing.T) {
 	)
 	require.NoError(t, err)
 	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
-		defaultConsensusCtx.NetworkID,
+		consensus.GetNetworkID(defaultConsensusCtx),
 		blockchainID,
 		sendWarpMessageAddressedPayload.Bytes(),
 	)

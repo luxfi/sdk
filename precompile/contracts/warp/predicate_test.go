@@ -123,7 +123,7 @@ func newTestValidator() *testValidator {
 		sk:     sk,
 		vdr: &luxWarp.Validator{
 			PublicKey:      pk,
-			PublicKeyBytes: pk.Serialize(),
+			PublicKeyBytes: bls.PublicKeyToCompressedBytes(pk),
 			Weight:         3,
 			NodeIDs:        []ids.NodeID{nodeID},
 		},
@@ -169,6 +169,35 @@ type validatorRange struct {
 	publicKey bool
 }
 
+// testValidatorStateWrapper wraps validatorstest.State to implement consensus.ValidatorState
+type testValidatorStateWrapper struct {
+	*validatorstest.State
+}
+
+func (t *testValidatorStateWrapper) GetCurrentHeight() (uint64, error) {
+	return t.State.GetCurrentHeight(context.Background())
+}
+
+func (t *testValidatorStateWrapper) GetMinimumHeight(ctx context.Context) (uint64, error) {
+	return t.State.GetMinimumHeight(ctx)
+}
+
+func (t *testValidatorStateWrapper) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.NodeID]uint64, error) {
+	validators, err := t.State.GetValidatorSet(context.Background(), height, subnetID)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[ids.NodeID]uint64, len(validators))
+	for nodeID, output := range validators {
+		result[nodeID] = output.Weight
+	}
+	return result, nil
+}
+
+func (t *testValidatorStateWrapper) GetSubnetID(chainID ids.ID) (ids.ID, error) {
+	return t.State.GetSubnetID(context.Background(), chainID)
+}
+
 // createConsensusCtx creates a context.Context instance with a validator state specified by the given validatorRanges
 func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context.Context {
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
@@ -195,7 +224,9 @@ func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context
 			return getValidatorsOutput, nil
 		},
 	}
-	consensusCtx.ValidatorState = state
+	// Use consensus.WithValidatorState to add validator state to context
+	wrappedState := &testValidatorStateWrapper{State: state}
+	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
 	return consensusCtx
 }
 
@@ -260,23 +291,30 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	predicateBytes := predicate.PackPredicate(warpMsg.Bytes())
 
 	consensusCtx := utilstest.NewTestConsensusContext(t)
-	consensusCtx.SubnetID = ids.GenerateTestID()
-	consensusCtx.ChainID = ids.GenerateTestID()
-	consensusCtx.CChainID = cChainID
-	consensusCtx.ValidatorState = &validatorstest.State{
+	subnetID := ids.GenerateTestID()
+	chainID := ids.GenerateTestID()
+	// Use consensus helper functions to add values to context
+	consensusCtx = consensus.WithSubnetID(consensusCtx, subnetID)
+	consensusCtx = consensus.WithChainID(consensusCtx, chainID)
+	
+	state := &validatorstest.State{
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			require.Equal(chainID, cChainID)
 			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
 		},
-		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
-			expectedSubnetID := consensusCtx.SubnetID
+		GetValidatorSetF: func(ctx context.Context, height uint64, requestedSubnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+			expectedSubnetID := subnetID
 			if requirePrimaryNetworkSigners {
 				expectedSubnetID = constants.PrimaryNetworkID
 			}
-			require.Equal(expectedSubnetID, subnetID)
+			require.Equal(expectedSubnetID, requestedSubnetID)
 			return getValidatorsOutput, nil
 		},
 	}
+	
+	// Add validator state to context (wrap it first)
+	wrappedState := &testValidatorStateWrapper{State: state}
+	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
 
 	test := precompiletest.PredicateTest{
 		Config: NewConfig(utils.NewUint64(0), 0, requirePrimaryNetworkSigners),
@@ -676,7 +714,9 @@ func makeWarpPredicateTests(tb testing.TB) map[string]precompiletest.PredicateTe
 				return getValidatorsOutput, nil
 			},
 		}
-		consensusCtx.ValidatorState = state
+		// Wrap state and add to context
+		wrappedState := &testValidatorStateWrapper{State: state}
+		consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
 
 		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(numSigners), predicateBytes)
 	}
