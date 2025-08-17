@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/geth/common"
