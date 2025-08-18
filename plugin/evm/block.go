@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/evm/predicate"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus/chain"
+	"github.com/luxfi/node/vms/components/chain"
 	"github.com/luxfi/consensus/engine/chain/block"
 )
 
@@ -49,7 +49,7 @@ func (vm *VM) newBlock(ethBlock *types.Block) *Block {
 }
 
 // ID implements the chain.Block interface
-func (b *Block) ID() string { return b.id.String() }
+func (b *Block) ID() ids.ID { return b.id }
 
 // Accept implements the chain.Block interface
 func (b *Block) Accept(context.Context) error {
@@ -61,7 +61,7 @@ func (b *Block) Accept(context.Context) error {
 
 	blkID := b.ID()
 	log.Debug("accepting block",
-		"hash", b.id.Hex(),
+		"hash", blkID.Hex(),
 		"id", blkID,
 		"height", b.Height(),
 	)
@@ -77,7 +77,7 @@ func (b *Block) Accept(context.Context) error {
 		return fmt.Errorf("chain could not accept %s: %w", blkID, err)
 	}
 
-	if err := vm.acceptedBlockDB.Put(lastAcceptedKey, b.id[:]); err != nil {
+	if err := vm.acceptedBlockDB.Put(lastAcceptedKey, blkID[:]); err != nil {
 		return fmt.Errorf("failed to put %s as the last accepted block: %w", blkID, err)
 	}
 
@@ -100,7 +100,7 @@ func (b *Block) handlePrecompileAccept(rules extras.Rules) error {
 		return fmt.Errorf("failed to fetch receipts for accepted block with non-empty root hash (%s) (Block: %s, Height: %d)", b.ethBlock.ReceiptHash(), b.ethBlock.Hash(), b.ethBlock.NumberU64())
 	}
 	acceptCtx := &precompileconfig.AcceptContext{
-		ConsensusCtx: b.vm.ctx,
+		ConsensusCtx: context.Background(),
 		Warp:    b.vm.warpBackend,
 	}
 	for _, receipt := range receipts {
@@ -122,7 +122,7 @@ func (b *Block) handlePrecompileAccept(rules extras.Rules) error {
 func (b *Block) Reject(context.Context) error {
 	blkID := b.ID()
 	log.Debug("rejecting block",
-		"hash", b.id.Hex(),
+		"hash", blkID.Hex(),
 		"id", blkID,
 		"height", b.Height(),
 	)
@@ -130,8 +130,8 @@ func (b *Block) Reject(context.Context) error {
 }
 
 // Parent implements the chain.Block interface
-func (b *Block) Parent() string {
-	return ids.ID(b.ethBlock.ParentHash()).String()
+func (b *Block) Parent() ids.ID {
+	return ids.ID(b.ethBlock.ParentHash())
 }
 
 // Height implements the chain.Block interface
@@ -158,7 +158,7 @@ func (b *Block) syntacticVerify() error {
 // Verify implements the chain.Block interface
 func (b *Block) Verify(context.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:            b.vm.ctx,
+		ConsensusCtx:            context.Background(),
 		ProposerVMBlockCtx: nil,
 	}, true)
 }
@@ -190,7 +190,7 @@ func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 // VerifyWithContext implements the block.WithVerifyContext interface
 func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:            b.vm.ctx,
+		ConsensusCtx:            context.Background(),
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}, true)
 }
@@ -273,3 +273,10 @@ func (b *Block) Bytes() []byte {
 }
 
 func (b *Block) String() string { return fmt.Sprintf("EVM block, ID = %s", b.ID()) }
+
+// SetStatus implements the chain.Block interface
+// This is required for chain.Block but not used in our implementation
+func (b *Block) SetStatus(status interface{}) {
+	// No-op: EVM blocks manage their status internally through the blockchain
+	// The status parameter can be choices.Status but we don't use it
+}

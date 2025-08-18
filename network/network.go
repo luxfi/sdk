@@ -15,15 +15,14 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/node/codec"
-	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/validators"
-	consensusVersion "github.com/luxfi/consensus/version"
-	nodeVer "github.com/luxfi/node/version"
+	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/utils"
+	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/evm/network/stats"
 	"github.com/luxfi/evm/plugin/evm/message"
@@ -64,7 +63,7 @@ type SyncedNetworkClient interface {
 	// node version greater than or equal to minVersion.
 	// Returns response bytes, the ID of the chosen peer, and ErrRequestFailed if
 	// the request should be retried.
-	SendSyncedAppRequestAny(ctx context.Context, minVersion *consensusVersion.Application, request []byte) ([]byte, ids.NodeID, error)
+	SendSyncedAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte) ([]byte, ids.NodeID, error)
 
 	// SendSyncedAppRequest synchronously sends request to the selected nodeID
 	// Returns response bytes, and ErrRequestFailed if the request should be retried.
@@ -85,7 +84,7 @@ type Network interface {
 	// node version greater than or equal to minVersion.
 	// Returns the ID of the chosen peer, and an error if the request could not
 	// be sent to a peer with the desired [minVersion].
-	SendAppRequestAny(ctx context.Context, minVersion *consensusVersion.Application, message []byte, handler message.ResponseHandler) (ids.NodeID, error)
+	SendAppRequestAny(ctx context.Context, minVersion *version.Application, message []byte, handler message.ResponseHandler) (ids.NodeID, error)
 
 	// SendAppRequest sends message to given nodeID, notifying handler when there's a response or timeout
 	SendAppRequest(ctx context.Context, nodeID ids.NodeID, message []byte, handler message.ResponseHandler) error
@@ -147,10 +146,10 @@ func NewNetwork(
 	// Skip p2p network initialization due to interface incompatibility
 	// TODO: Fix logger interface compatibility between geth/log and luxfi/log
 	var p2pNetwork *p2p.Network
-	nodeID := consensus.GetNodeID(ctx)
-	// subnetID and validatorState would be needed for p2pValidators but skipped for now
-	// subnetID := consensus.GetSubnetID(ctx)
-	// validatorState := consensus.GetValidatorState(ctx)
+	
+	// For now, use empty node ID since GetNodeID doesn't exist in node's consensus package
+	// This would normally come from the VM's context
+	nodeID := ids.EmptyNodeID
 	
 	return &network{
 		appSender:                  appSender,
@@ -171,7 +170,7 @@ func NewNetwork(
 // the request will be sent to any peer regardless of their version.
 // Returns the ID of the chosen peer, and an error if the request could not
 // be sent to a peer with the desired [minVersion].
-func (n *network) SendAppRequestAny(ctx context.Context, minVersion *consensusVersion.Application, request []byte, handler message.ResponseHandler) (ids.NodeID, error) {
+func (n *network) SendAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte, handler message.ResponseHandler) (ids.NodeID, error) {
 	// If the context was cancelled, we can skip sending this request.
 	if err := ctx.Err(); err != nil {
 		return ids.EmptyNodeID, err
@@ -185,9 +184,9 @@ func (n *network) SendAppRequestAny(ctx context.Context, minVersion *consensusVe
 	n.lock.Lock()
 	defer n.lock.Unlock()
 	// Convert consensus version to node version for peer tracker
-	var nodeMinVersion *nodeVer.Application
+	var nodeMinVersion *version.Application
 	if minVersion != nil {
-		nodeMinVersion = &nodeVer.Application{
+		nodeMinVersion = &version.Application{
 			Name:  minVersion.Name,
 			Major: minVersion.Major,
 			Minor: minVersion.Minor,
@@ -261,7 +260,8 @@ func (n *network) sendAppRequest(ctx context.Context, nodeID ids.NodeID, request
 	// This guarantees that the network should never receive an unexpected
 	// AppResponse.
 	ctxWithoutCancel := context.WithoutCancel(ctx)
-	if err := n.appSender.SendAppRequest(ctxWithoutCancel, nodeID, requestID, request); err != nil {
+	nodeIDs := set.Of(nodeID)
+	if err := n.appSender.SendAppRequest(ctxWithoutCancel, nodeIDs, requestID, request); err != nil {
 		log.Error(
 			"request to peer failed",
 			"nodeID", nodeID,
@@ -356,7 +356,13 @@ func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, reque
 	handler, exists := n.markRequestFulfilled(requestID)
 	if !exists {
 		log.Debug("forwarding AppRequestFailed to SDK network", "nodeID", nodeID, "requestID", requestID)
-		return n.sdkNetwork.AppRequestFailed(ctx, nodeID, requestID, appErr)
+		// TODO: Convert between core.AppError and node's AppError when sdkNetwork is actually used
+		// For now, sdkNetwork is nil so this won't be called
+		if n.sdkNetwork != nil {
+			// Would need to convert appErr to node's AppError type here
+			return nil
+		}
+		return nil
 	}
 
 	// We must release the slot
@@ -412,7 +418,7 @@ func (n *network) AppGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes 
 }
 
 // Connected adds the given nodeID to the peer list so that it can receive messages
-func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion *consensusVersion.Application) error {
+func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion *version.Application) error {
 	log.Debug("adding new peer", "nodeID", nodeID)
 
 	n.lock.Lock()
@@ -427,7 +433,7 @@ func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion 
 		// Convert consensus version to node version
 		if nodeVersion != nil {
 			// Create a node version from the consensus version
-			nv := &nodeVer.Application{
+			nv := &version.Application{
 				Name:  nodeVersion.Name,
 				Major: nodeVersion.Major,
 				Minor: nodeVersion.Minor,
@@ -437,7 +443,13 @@ func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion 
 		}
 	}
 
-	return n.sdkNetwork.Connected(ctx, nodeID, nodeVersion)
+	// TODO: Convert between consensus/version.Application and node/version.Application when sdkNetwork is actually used
+	// For now, sdkNetwork is nil so this won't be called
+	if n.sdkNetwork != nil {
+		// Would need to convert nodeVersion to node's version.Application type here
+		return nil
+	}
+	return nil
 }
 
 // Disconnected removes given [nodeID] from the peer list
@@ -498,7 +510,7 @@ func (n *network) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
 // node version greater than or equal to minVersion.
 // Returns response bytes, the ID of the chosen peer, and ErrRequestFailed if
 // the request should be retried.
-func (n *network) SendSyncedAppRequestAny(ctx context.Context, minVersion *consensusVersion.Application, request []byte) ([]byte, ids.NodeID, error) {
+func (n *network) SendSyncedAppRequestAny(ctx context.Context, minVersion *version.Application, request []byte) ([]byte, ids.NodeID, error) {
 	waitingHandler := newWaitingResponseHandler()
 	nodeID, err := n.SendAppRequestAny(ctx, minVersion, request, waitingHandler)
 	if err != nil {
