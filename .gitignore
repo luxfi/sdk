@@ -58,3 +58,7 @@ dist/
 tmp-storage-testing
 .token-cli*
 *.html
+LLM.md
+CLAUDE.md
+AGENTS.md
+GEMINI.md

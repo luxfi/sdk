@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/logging"
-	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/warp"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
@@ -30,39 +30,6 @@ import (
 	"github.com/luxfi/crypto"
 )
 
-// convertStandaloneToNodeWarp converts a standalone warp message to node warp message
-func convertStandaloneToNodeWarp(msg *standaloneWarp.Message) (*nodeWarp.Message, error) {
-	if msg == nil {
-		return nil, errors.New("nil message")
-	}
-
-	// Extract network ID and source chain ID from the standalone message
-	networkID := msg.UnsignedMessage.NetworkID
-	sourceChainID := msg.UnsignedMessage.SourceChainID
-	payload := msg.UnsignedMessage.Payload
-
-	// Convert source chain ID to ids.ID
-	var chainID ids.ID
-	copy(chainID[:], sourceChainID)
-
-	unsignedMsg, err := nodeWarp.NewUnsignedMessage(
-		networkID,
-		chainID,
-		payload,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert signature - for now just use an empty signature
-	// since we don't have access to the actual signature bytes
-	sig := &nodeWarp.BitSetSignature{}
-
-	return &nodeWarp.Message{
-		UnsignedMessage: *unsignedMsg,
-		Signature:       sig,
-	}, nil
-}
 
 func InitializeValidatorRemoval(
 	rpcURL string,
@@ -95,17 +62,14 @@ func InitializeValidatorRemoval(
 				)
 			}
 			// remove PoS validator with uptime proof
-			nodeWarpMsg, err := convertStandaloneToNodeWarp(uptimeProofSignedMessage)
-			if err != nil {
-				return nil, nil, err
-			}
+			warpMsg := uptimeProofSignedMessage
 			return contract.TxToMethodWithWarpMessage(
 				rpcURL,
 				false,
 				crypto.Address{},
 				privateKey,
 				managerAddress,
-				nodeWarpMsg,
+				warpMsg,
 				big.NewInt(0),
 				"POS validator removal with uptime proof",
 				ErrorSignatureToError,
@@ -132,17 +96,14 @@ func InitializeValidatorRemoval(
 			)
 		}
 		// remove PoS validator with uptime proof
-		nodeWarpMsg, err := convertStandaloneToNodeWarp(uptimeProofSignedMessage)
-		if err != nil {
-			return nil, nil, err
-		}
+		warpMsg := uptimeProofSignedMessage
 		return contract.TxToMethodWithWarpMessage(
 			rpcURL,
 			false,
 			crypto.Address{},
 			privateKey,
 			managerAddress,
-			nodeWarpMsg,
+			warpMsg,
 			big.NewInt(0),
 			"POS validator removal with uptime proof",
 			ErrorSignatureToError,
@@ -261,24 +222,13 @@ func InitValidatorRemoval(
 		return nil, ids.Empty, nil, fmt.Errorf("node %s is not a L1 validator", nodeID)
 	}
 
-	var unsignedMessage *nodeWarp.UnsignedMessage
+	var unsignedMessage *warp.UnsignedMessage
 	if initiateTxHash != "" {
-		standaloneUnsignedMsg, err := GetL1ValidatorWeightMessageFromTx(
+		unsignedMessage, err = GetL1ValidatorWeightMessageFromTx(
 			rpcURL,
 			validationID,
 			0,
 			initiateTxHash,
-		)
-		if err != nil {
-			return nil, ids.Empty, nil, err
-		}
-		// Convert standalone to node warp unsigned message
-		var chainID ids.ID
-		copy(chainID[:], standaloneUnsignedMsg.SourceChainID)
-		unsignedMessage, err = nodeWarp.NewUnsignedMessage(
-			standaloneUnsignedMsg.NetworkID,
-			chainID,
-			standaloneUnsignedMsg.Payload,
 		)
 		if err != nil {
 			return nil, ids.Empty, nil, err
@@ -387,7 +337,7 @@ func CompleteValidatorRemoval(
 	generateRawTxOnly bool,
 	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
-	subnetValidatorRegistrationSignedMessage *nodeWarp.Message,
+	subnetValidatorRegistrationSignedMessage *warp.Message,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
 	if useACP99 {

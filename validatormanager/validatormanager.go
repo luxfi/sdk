@@ -9,9 +9,8 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/luxfi/geth/accounts/abi/bind"
+	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/utils/logging"
@@ -348,7 +347,7 @@ func SetupPoS(
 	defer client.Close()
 
 	// Parse the private key
-	pk, err := crypto.HexToECDSA(strings.TrimPrefix(privateKey, "0x"))
+	pk, err := luxcrypto.HexToECDSA(strings.TrimPrefix(privateKey, "0x"))
 	if err != nil {
 		return fmt.Errorf("failed to parse private key: %w", err)
 	}

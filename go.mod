@@ -4,7 +4,7 @@ go 1.24.5
 
 require (
 	// Core dependencies for working packages
-	github.com/btcsuite/btcd/btcutil v1.1.5
+	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.3.2
 	github.com/luxfi/evm v0.8.7
 	github.com/luxfi/geth v1.16.34
@@ -45,7 +45,6 @@ exclude (
 require (
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/chelnak/ysmrr v0.6.0
-	github.com/ethereum/go-ethereum v1.16.2
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/ledger-lux-go v1.0.0
@@ -67,7 +66,7 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.12.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.0 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.3.5 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
