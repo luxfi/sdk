@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/luxfi/ids"
+	nodeids "github.com/luxfi/node/ids"
 	utils_math "github.com/luxfi/node/utils/math"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/consensus/version"
@@ -42,11 +42,11 @@ type peerInfo struct {
 // to new peers with an exponentially decaying probability.
 // Note: is not thread safe, caller must handle synchronization.
 type peerTracker struct {
-	peers                  map[ids.NodeID]*peerInfo // all peers we are connected to
+	peers                  map[nodeids.NodeID]*peerInfo // all peers we are connected to
 	numTrackedPeers        *metrics.Gauge
-	trackedPeers           set.Set[ids.NodeID] // peers that we have sent a request to
+	trackedPeers           set.Set[nodeids.NodeID] // peers that we have sent a request to
 	numResponsivePeers     *metrics.Gauge
-	responsivePeers        set.Set[ids.NodeID]     // peers that responded to the last request they were sent
+	responsivePeers        set.Set[nodeids.NodeID]     // peers that responded to the last request they were sent
 	bandwidthHeap          utils_math.AveragerHeap // tracks bandwidth peers are responding with
 	averageBandwidthMetric *metrics.GaugeFloat64
 	averageBandwidth       utils_math.Averager
@@ -54,11 +54,11 @@ type peerTracker struct {
 
 func NewPeerTracker() *peerTracker {
 	return &peerTracker{
-		peers:                  make(map[ids.NodeID]*peerInfo),
+		peers:                  make(map[nodeids.NodeID]*peerInfo),
 		numTrackedPeers:        metrics.GetOrRegisterGauge("net_tracked_peers", nil),
-		trackedPeers:           make(set.Set[ids.NodeID]),
+		trackedPeers:           make(set.Set[nodeids.NodeID]),
 		numResponsivePeers:     metrics.GetOrRegisterGauge("net_responsive_peers", nil),
-		responsivePeers:        make(set.Set[ids.NodeID]),
+		responsivePeers:        make(set.Set[nodeids.NodeID]),
 		bandwidthHeap:          utils_math.NewMaxAveragerHeap(),
 		averageBandwidthMetric: metrics.GetOrRegisterGaugeFloat64("net_average_bandwidth", nil),
 		averageBandwidth:       utils_math.NewAverager(0, bandwidthHalflife, time.Now()),
@@ -80,14 +80,18 @@ func (p *peerTracker) shouldTrackNewPeer() bool {
 	return rand.Float64() < newPeerProbability
 }
 
-// getResponsivePeer returns a random [ids.NodeID] of a peer that has responded
+// getResponsivePeer returns a random [nodeids.NodeID] of a peer that has responded
 // to a request.
-func (p *peerTracker) getResponsivePeer() (ids.NodeID, utils_math.Averager, bool) {
+func (p *peerTracker) getResponsivePeer() (nodeids.NodeID, utils_math.Averager, bool) {
 	nodeID, ok := p.responsivePeers.Peek()
 	if !ok {
-		return ids.NodeID{}, nil, false
+		return nodeids.NodeID{}, nil, false
 	}
-	averager, ok := p.bandwidthHeap.Remove(nodeID)
+	// Convert our ids.NodeID to node's ids.NodeID for heap operations
+	// Both are [20]byte arrays so this is safe
+	var nodeNodeID [20]byte
+	copy(nodeNodeID[:], nodeID[:])
+	averager, ok := p.bandwidthHeap.Remove(nodeNodeID)
 	if ok {
 		return nodeID, averager, true
 	}
@@ -95,7 +99,7 @@ func (p *peerTracker) getResponsivePeer() (ids.NodeID, utils_math.Averager, bool
 	return nodeID, peer.bandwidth, true
 }
 
-func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, bool) {
+func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (nodeids.NodeID, bool) {
 	if p.shouldTrackNewPeer() {
 		for nodeID := range p.peers {
 			// if minVersion is specified and peer's version is less, skip
@@ -111,7 +115,7 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 		}
 	}
 	var (
-		nodeID   ids.NodeID
+		nodeID   nodeids.NodeID
 		ok       bool
 		random   bool
 		averager utils_math.Averager
@@ -120,7 +124,10 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 		random = true
 		nodeID, averager, ok = p.getResponsivePeer()
 	} else {
-		nodeID, averager, ok = p.bandwidthHeap.Pop()
+		// Pop returns node's ids.NodeID, convert to our ids.NodeID
+		var nodeNodeID [20]byte
+		nodeNodeID, averager, ok = p.bandwidthHeap.Pop()
+		copy(nodeID[:], nodeNodeID[:])
 	}
 	if ok {
 		log.Debug("peer tracking: popping peer", "nodeID", nodeID, "bandwidth", averager.Read(), "random", random)
@@ -130,12 +137,12 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 	return p.trackedPeers.Peek()
 }
 
-func (p *peerTracker) TrackPeer(nodeID ids.NodeID) {
+func (p *peerTracker) TrackPeer(nodeID nodeids.NodeID) {
 	p.trackedPeers.Add(nodeID)
 	p.numTrackedPeers.Update(int64(p.trackedPeers.Len()))
 }
 
-func (p *peerTracker) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
+func (p *peerTracker) TrackBandwidth(nodeID nodeids.NodeID, bandwidth float64) {
 	peer := p.peers[nodeID]
 	if peer == nil {
 		// we're not connected to this peer, nothing to do here
@@ -149,7 +156,10 @@ func (p *peerTracker) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
 	} else {
 		peer.bandwidth.Observe(bandwidth, now)
 	}
-	p.bandwidthHeap.Add(nodeID, peer.bandwidth)
+	// Convert our ids.NodeID to node's ids.NodeID for heap operations
+	var nodeNodeID [20]byte
+	copy(nodeNodeID[:], nodeID[:])
+	p.bandwidthHeap.Add(nodeNodeID, peer.bandwidth)
 
 	if bandwidth == 0 {
 		p.responsivePeers.Remove(nodeID)
@@ -162,7 +172,7 @@ func (p *peerTracker) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
 }
 
 // Connected should be called when [nodeID] connects to this node
-func (p *peerTracker) Connected(nodeID ids.NodeID, nodeVersion *version.Application) {
+func (p *peerTracker) Connected(nodeID nodeids.NodeID, nodeVersion *version.Application) {
 	if peer := p.peers[nodeID]; peer != nil {
 		// Peer is already connected, update the version if it has changed.
 		// Log a warning message since the consensus engine should never call Connected on a peer
@@ -185,8 +195,11 @@ func (p *peerTracker) Connected(nodeID ids.NodeID, nodeVersion *version.Applicat
 }
 
 // Disconnected should be called when [nodeID] disconnects from this node
-func (p *peerTracker) Disconnected(nodeID ids.NodeID) {
-	p.bandwidthHeap.Remove(nodeID)
+func (p *peerTracker) Disconnected(nodeID nodeids.NodeID) {
+	// Convert our ids.NodeID to node's ids.NodeID for heap operations
+	var nodeNodeID [20]byte
+	copy(nodeNodeID[:], nodeID[:])
+	p.bandwidthHeap.Remove(nodeNodeID)
 	p.trackedPeers.Remove(nodeID)
 	p.numTrackedPeers.Update(int64(p.trackedPeers.Len()))
 	p.responsivePeers.Remove(nodeID)

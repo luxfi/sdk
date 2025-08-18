@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/metric v1.3.0
-	github.com/luxfi/node v1.13.4
+	github.com/luxfi/node v1.16.15
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -180,11 +180,8 @@ replace (
 	// Use local packages for development
 	github.com/luxfi/consensus => ../consensus
 	github.com/luxfi/crypto => ../crypto
+	github.com/luxfi/warp => ../warp
 
 	// Use lux-branded geth
 	github.com/luxfi/geth => github.com/luxfi/geth v1.16.2-lux.4
-
-	// Override to use compatible versions
-	github.com/luxfi/node => github.com/luxfi/node v1.13.4
-	github.com/luxfi/warp => ../warp
 )
