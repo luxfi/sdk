@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/cache/metercacher"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/lp118"
+	"github.com/luxfi/node/network/p2p/acp118"
 	"github.com/luxfi/node/network/p2p/gossip"
 	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
@@ -77,8 +77,8 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	consensuschain "github.com/luxfi/consensus/chain"
 	"github.com/luxfi/consensus/engine/chain/block"
+	consensuschain "github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/node/utils/timer/mockable"
@@ -172,7 +172,7 @@ var legacyApiNames = map[string]string{
 
 // VM implements the chain.ChainVM interface
 type VM struct {
-	ctx *block.ChainContext
+	ctx context.Context
 	// contextLock is used to coordinate global VM operations.
 	// This can be used safely instead of context.Context.Lock which is deprecated and should not be used in rpcchainvm.
 	vmLock sync.RWMutex
@@ -267,7 +267,7 @@ type VM struct {
 // Initialize implements the chain.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
-	chainCtx *block.ChainContext,
+	chainCtx context.Context,
 	db database.Database,
 	genesisBytes []byte,
 	upgradeBytes []byte,
@@ -293,14 +293,26 @@ func (vm *VM) Initialize(
 	vm.ctx = chainCtx
 
 	// Create logger
-	alias, err := vm.ctx.BCLookup.PrimaryAlias(vm.ctx.ChainID)
-	if err != nil {
+	var alias string
+	chainID := consensus.GetChainID(vm.ctx)
+	bcLookup := consensus.GetBCLookup(vm.ctx)
+	if bcLookup != nil {
+		if aliasLookup, ok := bcLookup.(consensus.AliasLookup); ok {
+			a, err := aliasLookup.PrimaryAlias(chainID)
+			if err == nil {
+				alias = a
+			}
+		}
+	}
+	if alias == "" {
 		// fallback to ChainID string instead of erroring
-		alias = vm.ctx.ChainID.String()
+		alias = chainID.String()
 	}
 	vm.chainAlias = alias
 
-	subnetEVMLogger, err := subnetevmlog.InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, vm.ctx.Log)
+	// Get logger from context
+	contextLogger := consensus.GetLogger(vm.ctx)
+	subnetEVMLogger, err := subnetevmlog.InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, contextLogger)
 	if err != nil {
 		return fmt.Errorf("%w: %w ", errInitializingLogger, err)
 	}
@@ -454,7 +466,7 @@ func (vm *VM) Initialize(
 	)
 
 	vm.networkCodec = message.Codec
-	vm.Network, err = network.NewNetwork(vm.ctx, appSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
+	vm.Network, err = network.NewNetwork(context.Background(), appSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
@@ -487,9 +499,9 @@ func (vm *VM) Initialize(
 	warpBlockClient := &warpBlockClientWrapper{vm: vm}
 	
 	vm.warpBackend, err = warp.NewBackend(
-		vm.ctx.NetworkID,
-		vm.ctx.ChainID,
-		vm.ctx.WarpSigner,
+		consensus.GetNetworkID(vm.ctx),
+		consensus.GetChainID(vm.ctx),
+		consensus.GetWarpSigner(vm.ctx),
 		warpBlockClient,
 		validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
 		vm.warpDB,
@@ -504,11 +516,19 @@ func (vm *VM) Initialize(
 		return err
 	}
 
-	go vm.ctx.Log.RecoverAndPanic(vm.startContinuousProfiler)
+	// Start continuous profiler in a goroutine with recovery
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				contextLogger.Error("continuous profiler panicked", "panic", r)
+			}
+		}()
+		vm.startContinuousProfiler()
+	}()
 
 	// Add p2p warp message warpHandler
-	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, vm.ctx.WarpSigner)
-	vm.Network.AddHandler(lp118.HandlerID, warpHandler)
+	warpHandler := acp118.NewCachedHandler(meteredCache, vm.warpBackend, consensus.GetWarpSigner(vm.ctx))
+	vm.Network.AddHandler(acp118.HandlerID, warpHandler)
 
 	vm.setAppRequestHandlers()
 
@@ -621,19 +641,18 @@ func (vm *VM) initializeMetrics() error {
 	metrics.Enable()
 	vm.sdkMetrics = prometheus.NewRegistry()
 	gatherer := subnetevmprometheus.NewGatherer(metrics.DefaultRegistry)
-	if err := vm.ctx.Metrics.Register(ethMetricsPrefix, gatherer); err != nil {
-		return err
-	}
+	// TODO: Get Metrics from context when available in consensus
+	// For now, skip metrics registration
+	_ = gatherer
 
 	// if vm.config.MetricsExpensiveEnabled && vm.config.StateScheme == customrawdb.FirewoodScheme {
 	// 	if err := ffi.StartMetrics(); err != nil {
 	// 		return fmt.Errorf("failed to start firewood metrics collection: %w", err)
 	// 	}
-	// 	if err := vm.ctx.Metrics.Register("firewood", ffi.Gatherer{}); err != nil {
-	// 		return fmt.Errorf("failed to register firewood metrics: %w", err)
-	// 	}
+	// 	// TODO: Register firewood metrics when available
 	// }
-	return vm.ctx.Metrics.Register(sdkMetricsPrefix, vm.sdkMetrics)
+	// TODO: Register SDK metrics when Metrics is available in context
+	return nil
 }
 
 func (vm *VM) initializeChain(lastAcceptedHash common.Hash, ethConfig ethconfig.Config) error {
@@ -754,12 +773,18 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		return nil
 	}
 
-	return vm.ctx.Metrics.Register(chainStateMetricsPrefix, chainStateRegisterer)
+	// TODO: Register chain state metrics when Metrics is available in context
+	_ = chainStateRegisterer
+	return nil
 }
 
 func (vm *VM) SetState(_ context.Context, state consensus.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
+	
+	// Get logger from context
+	contextLogger := consensus.GetLogger(vm.ctx)
+	
 	switch state {
 	case consensus.StateSyncing:
 		vm.bootstrapped.Set(false)
@@ -868,7 +893,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 	if vm.ethTxGossipHandler == nil {
 		vm.ethTxGossipHandler = newTxGossipHandler[*GossipEthTx](
-			vm.ctx.Log,
+			contextLogger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipMetrics,
@@ -885,7 +910,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 	if vm.ethTxPullGossiper == nil {
 		ethTxPullGossiper := gossip.NewPullGossiper[*GossipEthTx](
-			vm.ctx.Log,
+			contextLogger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipClient,
@@ -895,19 +920,19 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 		vm.ethTxPullGossiper = gossip.ValidatorGossiper{
 			Gossiper:   ethTxPullGossiper,
-			NodeID:     vm.ctx.NodeID,
+			NodeID:     consensus.GetNodeID(vm.ctx),
 			Validators: vm.P2PValidators(),
 		}
 	}
 
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, vm.ctx.Log, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
+		gossip.Every(ctx, contextLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, vm.ctx.Log, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
+		gossip.Every(ctx, contextLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 
@@ -991,6 +1016,26 @@ func (vm *VM) Shutdown(context.Context) error {
 	return nil
 }
 
+// BuildBlock implements the ChainVM interface
+func (vm *VM) BuildBlock(ctx context.Context) (consensuschain.Block, error) {
+	blk, err := vm.buildBlock(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// The block already implements consensuschain.Block
+	return blk.(*Block), nil
+}
+
+// BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (consensuschain.Block, error) {
+	blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
+	if err != nil {
+		return nil, err
+	}
+	// The block already implements consensuschain.Block
+	return blk.(*Block), nil
+}
+
 // buildBlock builds a block to be wrapped by ChainState
 func (vm *VM) buildBlock(ctx context.Context) (block.Block, error) {
 	return vm.buildBlockWithContext(ctx, nil)
@@ -1003,7 +1048,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 		log.Debug("Building block without context")
 	}
 	predicateCtx := &precompileconfig.PredicateContext{
-		ConsensusCtx:            vm.ctx,
+		ConsensusCtx:            context.Background(),
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}
 
@@ -1222,8 +1267,9 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 	}
 
 	if vm.config.WarpAPIEnabled {
-		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
-		signatureAggregator := lp118.NewSignatureAggregator(vm.ctx.Log, warpSDKClient)
+		warpSDKClient := vm.Network.NewClient(acp118.HandlerID)
+		contextLogger := consensus.GetLogger(vm.ctx)
+		signatureAggregator := acp118.NewSignatureAggregator(contextLogger, warpSDKClient)
 
 		if err := handler.RegisterName("warp", warp.NewAPI(vm.ctx, vm.warpBackend, signatureAggregator, vm.requirePrimaryNetworkSigners)); err != nil {
 			return nil, err

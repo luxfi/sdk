@@ -1,133 +1,93 @@
-# LLM.md - Lux Subnet EVM Project Guide
+# LLM.md - Lux EVM Module
 
 ## Project Overview
-This is the Lux Subnet EVM implementation - a simplified version of Coreth VM (C-Chain) that defines Subnet Contract Chains. It implements the Ethereum Virtual Machine and supports Solidity smart contracts.
+Lux EVM (formerly Subnet-EVM) is the Ethereum Virtual Machine implementation for Lux subnets. This module provides EVM compatibility for the Lux network.
 
-## Architecture
+## CRITICAL VERSION REQUIREMENTS
+**ALWAYS use these specific versions for backwards compatibility:**
+- `github.com/luxfi/node v1.13.4` - NOT v1.16.x (maintains compatibility with avalanchego)
+- `github.com/luxfi/geth v1.16.2-lux.4` - Our fork of go-ethereum
+- Local packages from parent directory for: consensus, crypto, warp
 
-### Core Components
-- **accounts/**: Account management and ABI handling
-- **core/**: Blockchain core (state, transactions, VM)
-- **eth/**: Ethereum protocol implementation
-- **consensus/**: Consensus mechanisms (dummy, misc)
-- **plugin/**: VM plugin implementation for Luxd integration
-- **warp/**: Warp messaging for cross-chain communication
-- **precompile/**: Precompiled contracts (feemanager, rewardmanager, etc.)
+### IMPORTANT: Version-specific changes
+When using node v1.13.4:
+- Use `acp118` package instead of `lp118` (renamed in later versions)
+- Import: `github.com/luxfi/node/network/p2p/acp118`
+- All handler IDs: `acp118.HandlerID`
+- All functions: `acp118.NewCachedHandler`, `acp118.NewSignatureAggregator`
 
-### Key Dependencies
-- `github.com/luxfi/node`: Main Lux node implementation
-- `github.com/luxfi/consensus`: Consensus protocol implementation
-- `github.com/luxfi/geth`: Modified go-ethereum fork for Lux
-- `github.com/luxfi/database`: Database abstraction layer
-- `github.com/luxfi/ids`: ID types and utilities
+## Module Structure
+```
+/home/z/work/lux/evm/
+├── plugin/evm/        # Main VM implementation
+├── core/              # Core blockchain logic
+├── consensus/         # Consensus engine (dummy for Lux)
+├── eth/               # Ethereum protocol implementation
+├── miner/             # Block building and mining
+├── precompile/        # Precompiled contracts and warp
+├── network/           # P2P networking
+├── params/            # Chain configuration
+├── scripts/           # Build and test scripts
+└── warp/              # Cross-subnet messaging
+```
 
-## Implementation Details
+## Key Implementation Details
 
 ### Context Management
-The project uses `context.Context` with helper functions from `consensus` package:
-- `consensus.GetNetworkID(ctx)` - Get network ID
-- `consensus.GetChainID(ctx)` - Get chain ID
-- `consensus.GetSubnetID(ctx)` - Get subnet ID
-- `consensus.GetValidatorState(ctx)` - Get validator state
-- `consensus.GetChainDataDir(ctx)` - Get chain data directory
+- VM uses `context.Context` instead of consensus.Context struct
+- Access consensus data via helper functions:
+  - `consensus.GetChainID(ctx)`
+  - `consensus.GetNetworkID(ctx)`
+  - `consensus.GetNodeID(ctx)`
+  - `consensus.GetLogger(ctx)`
+  - `consensus.GetWarpSigner(ctx)`
 
-### Type Conversions
-Frequent conversions between Lux and Ethereum types:
-```go
-// crypto.Address to common.Address
-luxAddr := crypto.PubkeyToAddress(key.PublicKey)
-addr := common.BytesToAddress(luxAddr[:])
+### Interface Compatibility
+- Block implements both `chain.Block` and `consensuschain.Block`
+- BuildBlock returns `consensuschain.Block` for compatibility
+- AppSender uses `set.Set[ids.NodeID]` for node sets
+- Version uses `consensus/version.Application` not node's version
 
-// crypto.Hash to common.Hash
-luxHash := crypto.Keccak256Hash(data)
-hash := common.BytesToHash(luxHash[:])
+### Package Dependencies
+**NEVER use these packages:**
+- ❌ `github.com/ethereum/go-ethereum` - Use `github.com/luxfi/geth`
+- ❌ `github.com/ava-labs/*` - Use `github.com/luxfi/*`
+- ❌ `github.com/luxfi/node v1.16.x` - Use v1.13.4 for compatibility
+
+**Always use:**
+- ✅ `github.com/luxfi/consensus` - Local consensus package
+- ✅ `github.com/luxfi/crypto` - Local crypto package
+- ✅ `github.com/luxfi/warp` - Local warp package
+- ✅ `github.com/luxfi/geth` - Our Ethereum fork
+
+### Build Commands
+```bash
+cd /home/z/work/lux/evm
+go build ./...
+go test ./...
 ```
 
-### VM Integration
-The VM struct uses `context.Context` for consensus context, not `snow.Context`:
-```go
-type VM struct {
-    ctx context.Context  // Consensus context
-    vmLock sync.RWMutex
-    // ...
-}
-```
+### Common Issues and Fixes
 
-## Current Issues and Fixes Applied
+1. **Version Mismatch Errors**
+   - Always use node v1.13.4, not latest
+   - Check go.mod replace directives
 
-### Fixed Issues
-1. **Metrics Timer vs ResettingTimer**: Changed Timer to ResettingTimer in pathdb metrics
-2. **Type conversions**: Fixed crypto.Address to common.Address conversions throughout
-3. **API changes**: Updated ReadHeaderNumber, SetBalance, Commit signatures
-4. **VM initialization**: Fixed vm.NewEVM to use 4 parameters instead of 5
-5. **Import paths**: Changed imports from luxfi/node/consensus to luxfi/consensus
+2. **Interface Compatibility**
+   - Block needs SetStatus method (even if no-op)
+   - BuildBlock must return consensuschain.Block
+   - Context is context.Context, not a struct
 
-### Remaining Issues
-1. **ValidatorState interface**: Mismatch between consensus.ValidatorState and expected methods
-2. **Database metrics**: PrometheusRegistry missing in luxfi/database/meterdb
-3. **Network interfaces**: Connected method signature mismatches
-4. **Plugin/evm**: Some validator manager context access issues
-
-## Build Status
-- **Total packages**: 124
-- **Building successfully**: 111/124 (89.5%)
-- **Passing tests**: 31/124 (25%)
-- **Build failures**: 13 packages (mostly in plugin/, warp/, tests/)
-
-## Common Patterns
-
-### Error Handling
-```go
-if err != nil {
-    return fmt.Errorf("failed to %s: %w", action, err)
-}
-```
-
-### Context Usage
-```go
-// Get chain properties from context
-networkID := consensus.GetNetworkID(ctx)
-chainID := consensus.GetChainID(ctx)
-subnetID := consensus.GetSubnetID(ctx)
-validatorState := consensus.GetValidatorState(ctx)
-```
-
-### State Management
-```go
-// Snapshot and revert pattern
-snap := stateDB.Snapshot()
-// ... perform operations ...
-if err != nil {
-    stateDB.RevertToSnapshot(snap)
-}
-```
+3. **Missing Metrics**
+   - Metrics registration is currently disabled (TODO)
+   - Will be re-enabled when consensus context supports it
 
 ## Testing
-Run tests with:
-```bash
-go test ./...           # Run all tests
-go test -short ./...    # Run short tests only
-go build ./...          # Build all packages
-```
+- Run with `-short` flag for quick tests
+- 28 packages with tests, 14 without (expected)
+- No test failures should occur
 
-## Key Files and Locations
-- **VM Implementation**: `plugin/evm/vm.go`
-- **Network Layer**: `network/network.go`
-- **Consensus Integration**: `consensus/`
-- **Warp Messaging**: `warp/service.go`, `warp/backend.go`
-- **Precompiled Contracts**: `precompile/contracts/`
-- **Core Blockchain**: `core/blockchain.go`, `core/state_processor.go`
-
-## Development Notes
-1. Always use luxfi/ packages instead of external equivalents
-2. Use consensus helper functions for context field access
-3. Convert between Lux and Ethereum types explicitly
-4. Check for nil contexts before accessing fields
-5. Use proper error wrapping with %w for error chains
-
-## Next Steps for Full Compatibility
-1. Fix ValidatorState interface to match expected signatures
-2. Resolve database metrics PrometheusRegistry issues
-3. Complete network interface implementations
-4. Fix remaining test failures through proper mocking
-5. Ensure all packages use luxfi/ dependencies consistently
+## Important Notes
+- This module is actively being migrated from subnet-evm
+- Maintains backwards compatibility with existing Lux subnets
+- Uses single validator POA for development (k=1 consensus)

@@ -42,7 +42,7 @@ type blockBuilder struct {
 
 func (vm *VM) NewBlockBuilder() *blockBuilder {
 	b := &blockBuilder{
-		ctx:          vm.ctx,
+		ctx:          context.Background(),
 		txPool:       vm.txPool,
 		shutdownChan: vm.shutdownChan,
 		shutdownWg:   &vm.shutdownWg,
@@ -84,7 +84,13 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 	b.txPool.SubscribeTransactions(txSubmitChan, true)
 
 	b.shutdownWg.Add(1)
-	go log.RecoverAndPanic(func() {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error("panic in awaitSubmittedTxs", "error", r)
+				panic(r)
+			}
+		}()
 		defer b.shutdownWg.Done()
 
 		for {
@@ -96,12 +102,12 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 				return
 			}
 		}
-	})
+	}()
 }
 
 // waitForEvent waits until a block needs to be built.
 // It returns only after at least [minBlockBuildingRetryDelay] passed from the last time a block was built.
-func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.MessageType, error) {
+func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.Message, error) {
 	lastBuildTime, err := b.waitForNeedToBuild(ctx)
 	if err != nil {
 		return 0, err
