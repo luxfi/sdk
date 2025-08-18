@@ -32,7 +32,7 @@ import (
 	"math/big"
 	"testing"
 
-	ethparams "github.com/luxfi/geth/params"
+	ethparams "github.com/luxfi/evm/params"
 )
 
 func TestCalcExcessBlobGas(t *testing.T) {

@@ -49,7 +49,12 @@ var _ bind.ContractBackend = (Client)(nil)
 
 var (
 	testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-	testAddr   = crypto.PubkeyToAddress(testKey.PublicKey)
+	testAddr   = func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 )
 
 func simTestBackend(testAddr common.Address) *Backend {
@@ -66,7 +71,12 @@ func newTx(sim *Backend, key *ecdsa.PrivateKey) (*types.Transaction, error) {
 	// create a signed transaction to send
 	head, _ := client.HeaderByNumber(context.Background(), nil) // Should be child's, good enough
 	gasPrice := new(big.Int).Add(head.BaseFee, big.NewInt(params.GWei))
-	addr := crypto.PubkeyToAddress(key.PublicKey)
+	addr := func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	chainid, _ := client.ChainID(context.Background())
 	nonce, err := client.NonceAt(context.Background(), addr, nil)
 	if err != nil {
@@ -164,7 +174,7 @@ func TestSendTransaction(t *testing.T) {
 //     having a chain length of just n+1 means that a reorg occurred.
 func TestFork(t *testing.T) {
 	t.Parallel()
-	testAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
@@ -212,7 +222,7 @@ func TestFork(t *testing.T) {
 //  6. Check that the TX is now included in block 2.
 func TestForkResendTx(t *testing.T) {
 	t.Parallel()
-	testAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
@@ -260,7 +270,7 @@ func TestForkResendTx(t *testing.T) {
 
 func TestCommitReturnValue(t *testing.T) {
 	t.Parallel()
-	testAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
@@ -308,7 +318,7 @@ func TestCommitReturnValue(t *testing.T) {
 // block's parent rather than the canonical head's parent.
 func TestAdjustTimeAfterFork(t *testing.T) {
 	t.Parallel()
-	testAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 

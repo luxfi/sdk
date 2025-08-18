@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/evm/sync/client/stats"
 
 	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/consensus/version"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"

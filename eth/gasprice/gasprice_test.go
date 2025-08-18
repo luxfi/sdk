@@ -55,7 +55,12 @@ import (
 
 var (
 	key, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-	addr   = crypto.PubkeyToAddress(key.PublicKey)
+	addr   = func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	bal, _ = new(big.Int).SetString("100000000000000000000000", 10)
 )
 
@@ -424,7 +429,9 @@ func TestSuggestGasPriceAfterFeeConfigUpdate(t *testing.T) {
 	// issue the block with tx that changes the fee
 	genesis := backend.chain.Genesis()
 	engine := backend.chain.Engine()
-	db := rawdb.NewDatabase(backend.chain.StateCache().DiskDB())
+	// StateCache().DiskDB() is not available in current version
+	// db := rawdb.NewDatabase(backend.chain.StateCache().DiskDB())
+	db := rawdb.NewMemoryDatabase()
 	blocks, _, err := core.GenerateChain(&chainConfig, genesis, engine, db, 1, 0, func(i int, b *core.BlockGen) {
 		b.SetCoinbase(common.Address{1})
 

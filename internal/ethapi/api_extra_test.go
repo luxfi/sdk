@@ -10,6 +10,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/rpc"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -27,7 +28,9 @@ func TestBlockChainAPI_stateQueryBlockNumberAllowed(t *testing.T) {
 		header := &types.Header{
 			Number: big.NewInt(int64(number)),
 		}
-		return types.NewBlock(header, nil, nil, nil, nil)
+		// NewBlock signature changed - now takes Body and Receipts
+		body := &types.Body{}
+		return types.NewBlock(header, body, nil, trie.NewStackTrie(nil))
 	}
 
 	testCases := map[string]struct {

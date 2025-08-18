@@ -37,9 +37,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/crypto"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -1064,7 +1064,8 @@ func TestABI_EventById(t *testing.T) {
 		}
 
 		topic := test.event
-		topicID := crypto.Keccak256Hash([]byte(topic))
+		topicIDBytes := crypto.Keccak256Hash([]byte(topic))
+		topicID := common.BytesToHash(topicIDBytes[:])
 
 		event, err := abi.EventByID(topicID)
 		if err != nil {
@@ -1076,7 +1077,8 @@ func TestABI_EventById(t *testing.T) {
 			t.Errorf("Event id %s does not match topic %s, test #%d", event.ID.Hex(), topicID.Hex(), testnum)
 		}
 
-		unknowntopicID := crypto.Keccak256Hash([]byte("unknownEvent"))
+		unknowntopicIDBytes := crypto.Keccak256Hash([]byte("unknownEvent"))
+		unknowntopicID := common.BytesToHash(unknowntopicIDBytes[:])
 		unknownEvent, err := abi.EventByID(unknowntopicID)
 		if err == nil {
 			t.Errorf("EventByID should return an error if a topic is not found, test #%d", testnum)

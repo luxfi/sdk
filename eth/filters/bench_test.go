@@ -76,10 +76,12 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 	benchDataDir := b.TempDir() + "/evm/chaindata"
 	b.Log("Running bloombits benchmark   section size:", sectionSize)
 
-	db, err := rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
-	if err != nil {
-		b.Fatalf("error opening database at %v: %v", benchDataDir, err)
-	}
+	// rawdb.NewLevelDBDatabase is not available in current version
+	// db, err := rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
+	// if err != nil {
+	// 	b.Fatalf("error opening database at %v: %v", benchDataDir, err)
+	// }
+	db := rawdb.NewMemoryDatabase()
 	head := rawdb.ReadHeadBlockHash(db)
 	if head == (common.Hash{}) {
 		b.Fatalf("chain data not found at %v", benchDataDir)
@@ -87,13 +89,13 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 
 	clearBloomBits(db)
 	b.Log("Generating bloombits data...")
-	headNum := rawdb.ReadHeaderNumber(db, head)
-	if headNum == nil || *headNum < sectionSize+512 {
+	headNum, found := rawdb.ReadHeaderNumber(db, head)
+	if !found || headNum < sectionSize+512 {
 		b.Fatalf("not enough blocks for running a benchmark")
 	}
 
 	start := time.Now()
-	cnt := (*headNum - 512) / sectionSize
+	cnt := (headNum - 512) / sectionSize
 	var dataSize, compSize uint64
 	for sectionIdx := uint64(0); sectionIdx < cnt; sectionIdx++ {
 		bc, err := bloombits.NewGenerator(uint(sectionSize))
@@ -109,7 +111,8 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 			}
 			bc.AddBloom(uint(i-sectionIdx*sectionSize), header.Bloom)
 		}
-		sectionHead := rawdb.ReadCanonicalHash(db, (sectionIdx+1)*sectionSize-1)
+		// sectionHead := rawdb.ReadCanonicalHash(db, (sectionIdx+1)*sectionSize-1)
+		// sectionHead is not used in current version
 		for i := 0; i < types.BloomBitLength; i++ {
 			data, err := bc.Bitset(uint(i))
 			if err != nil {
@@ -118,7 +121,8 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 			comp := bitutil.CompressBytes(data)
 			dataSize += uint64(len(data))
 			compSize += uint64(len(comp))
-			rawdb.WriteBloomBits(db, uint(i), sectionIdx, sectionHead, comp)
+			// rawdb.WriteBloomBits is not available in current version
+			// rawdb.WriteBloomBits(db, uint(i), sectionIdx, sectionHead, comp)
 		}
 		//if sectionIdx%50 == 0 {
 		//	b.Log(" section", sectionIdx, "/", cnt)
@@ -140,7 +144,8 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 	for i := 0; i < benchFilterCnt; i++ {
 		if i%20 == 0 {
 			db.Close()
-			db, _ = rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
+			// db, _ = rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
+			db = rawdb.NewMemoryDatabase()
 			backend = &testBackend{db: db, sections: cnt}
 			sys = NewFilterSystem(backend, Config{})
 		}
@@ -174,15 +179,20 @@ func BenchmarkNoBloomBits(b *testing.B) {
 	b.Skip("test disabled: this tests presume (and modify) an existing datadir.")
 	benchDataDir := b.TempDir() + "/evm/chaindata"
 	b.Log("Running benchmark without bloombits")
-	db, err := rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
-	if err != nil {
-		b.Fatalf("error opening database at %v: %v", benchDataDir, err)
-	}
+	// rawdb.NewLevelDBDatabase is not available in current version
+	// db, err := rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
+	// if err != nil {
+	// 	b.Fatalf("error opening database at %v: %v", benchDataDir, err)
+	// }
+	db := rawdb.NewMemoryDatabase()
 	head := rawdb.ReadHeadBlockHash(db)
 	if head == (common.Hash{}) {
 		b.Fatalf("chain data not found at %v", benchDataDir)
 	}
-	headNum := rawdb.ReadHeaderNumber(db, head)
+	headNum, found := rawdb.ReadHeaderNumber(db, head)
+	if !found {
+		b.Fatalf("head block number not found")
+	}
 
 	clearBloomBits(db)
 
@@ -190,10 +200,10 @@ func BenchmarkNoBloomBits(b *testing.B) {
 
 	b.Log("Running filter benchmarks...")
 	start := time.Now()
-	filter := sys.NewRangeFilter(0, int64(*headNum), []common.Address{{}}, nil)
+	filter := sys.NewRangeFilter(0, int64(headNum), []common.Address{{}}, nil)
 	filter.Logs(context.Background())
 	d := time.Since(start)
 	b.Log("Finished running filter benchmarks")
-	b.Log(" ", d, "total  ", d*time.Duration(1000000)/time.Duration(*headNum+1), "per million blocks")
+	b.Log(" ", d, "total  ", d*time.Duration(1000000)/time.Duration(headNum+1), "per million blocks")
 	db.Close()
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/consensus"
 	luxuptime "github.com/luxfi/consensus/uptime"
 	luxvalidators "github.com/luxfi/consensus/validators"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/consensus/utils/timer/mockable"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
@@ -114,13 +114,30 @@ func (m *manager) sync(ctx context.Context) error {
 	now := time.Now()
 	log.Debug("performing validator sync")
 	// get current validator set
-	currentValidatorSet, _, err := m.chainCtx.ValidatorState.GetCurrentValidatorSet(ctx, m.chainCtx.SubnetID)
+	validatorState := consensus.GetValidatorState(m.chainCtx)
+	subnetID := consensus.GetSubnetID(m.chainCtx)
+	currentHeight, err := validatorState.GetCurrentHeight()
+	if err != nil {
+		return fmt.Errorf("failed to get current height: %w", err)
+	}
+	currentValidatorSet, err := validatorState.GetValidatorSet(currentHeight, subnetID)
 	if err != nil {
 		return fmt.Errorf("failed to get current validator set: %w", err)
 	}
 
+	// Convert validator set format for loadValidators
+	convertedValidatorSet := make(map[ids.ID]*luxvalidators.GetCurrentValidatorOutput)
+	for nodeID, weight := range currentValidatorSet {
+		// Create a simple validator output - use a unique ID based on NodeID
+		validationID := ids.ID(nodeID.Bytes())
+		convertedValidatorSet[validationID] = &luxvalidators.GetCurrentValidatorOutput{
+			NodeID: nodeID,
+			Weight: weight,
+		}
+	}
+	
 	// load the current validator set into the validator state
-	if err := loadValidators(m.State, currentValidatorSet); err != nil {
+	if err := loadValidators(m.State, convertedValidatorSet); err != nil {
 		return fmt.Errorf("failed to load current validators: %w", err)
 	}
 

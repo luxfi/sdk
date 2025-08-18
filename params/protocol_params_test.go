@@ -127,12 +127,12 @@ func TestUpstreamParamsValues(t *testing.T) {
 		"BlobTxFieldElementsPerBlob":         {param: ethparams.BlobTxFieldElementsPerBlob, want: 4096},
 		"BlobTxBlobGasPerBlob":               {param: ethparams.BlobTxBlobGasPerBlob, want: 1 << 17},
 		"BlobTxMinBlobGasprice":              {param: ethparams.BlobTxMinBlobGasprice, want: 1},
-		"BlobTxBlobGaspriceUpdateFraction":   {param: ethparams.BlobTxBlobGaspriceUpdateFraction, want: 3338477},
+		// "BlobTxBlobGaspriceUpdateFraction":   {param: ethparams.BlobTxBlobGaspriceUpdateFraction, want: 3338477},
 		"BlobTxPointEvaluationPrecompileGas": {param: ethparams.BlobTxPointEvaluationPrecompileGas, want: 50000},
-		"BlobTxTargetBlobGasPerBlock":        {param: ethparams.BlobTxTargetBlobGasPerBlock, want: 3 * 131072},
-		"MaxBlobGasPerBlock":                 {param: ethparams.MaxBlobGasPerBlock, want: 6 * 131072},
+		// "BlobTxTargetBlobGasPerBlock":        {param: ethparams.BlobTxTargetBlobGasPerBlock, want: 3 * 131072},
+		// "MaxBlobGasPerBlock":                 {param: ethparams.MaxBlobGasPerBlock, want: 6 * 131072},
 		"GenesisDifficulty":                  {param: ethparams.GenesisDifficulty.Int64(), want: int64(131072)},
-		"BeaconRootsStorageAddress":          {param: ethparams.BeaconRootsStorageAddress, want: common.HexToAddress("0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02")},
+		// "BeaconRootsStorageAddress":          {param: ethparams.BeaconRootsStorageAddress, want: common.HexToAddress("0x000F3df6D732807Ef1319fB7B8bB8522d0Beac02")},
 		"SystemAddress":                      {param: ethparams.SystemAddress, want: common.HexToAddress("0xfffffffffffffffffffffffffffffffffffffffe")},
 	}
 

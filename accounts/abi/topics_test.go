@@ -33,8 +33,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 )
 
 func TestMakeTopics(t *testing.T) {
@@ -137,13 +137,13 @@ func TestMakeTopics(t *testing.T) {
 		{
 			"support string types in topics",
 			args{[][]interface{}{{"hello world"}}},
-			[][]common.Hash{{crypto.Keccak256Hash([]byte("hello world"))}},
+			[][]common.Hash{{func() common.Hash { h := crypto.Keccak256Hash([]byte("hello world")); return common.BytesToHash(h[:]) }()}},
 			false,
 		},
 		{
 			"support byte slice types in topics",
 			args{[][]interface{}{{[]byte{1, 2, 3}}}},
-			[][]common.Hash{{crypto.Keccak256Hash([]byte{1, 2, 3})}},
+			[][]common.Hash{{func() common.Hash { h := crypto.Keccak256Hash([]byte{1, 2, 3}); return common.BytesToHash(h[:]) }()}},
 			false,
 		},
 	}
@@ -266,9 +266,10 @@ func setupTopicsTests() []topicTest {
 			name: "hash type",
 			args: args{
 				createObj: func() interface{} { return &hashStruct{} },
-				resultObj: func() interface{} { return &hashStruct{crypto.Keccak256Hash([]byte("stringtopic"))} },
+				resultObj: func() interface{} { h := crypto.Keccak256Hash([]byte("stringtopic")); return &hashStruct{common.BytesToHash(h[:])} },
 				resultMap: func() map[string]interface{} {
-					return map[string]interface{}{"hashValue": crypto.Keccak256Hash([]byte("stringtopic"))}
+					h := crypto.Keccak256Hash([]byte("stringtopic"))
+					return map[string]interface{}{"hashValue": common.BytesToHash(h[:])}
 				},
 				fields: Arguments{Argument{
 					Name:    "hashValue",
@@ -276,7 +277,7 @@ func setupTopicsTests() []topicTest {
 					Indexed: true,
 				}},
 				topics: []common.Hash{
-					crypto.Keccak256Hash([]byte("stringtopic")),
+					func() common.Hash { h := crypto.Keccak256Hash([]byte("stringtopic")); return common.BytesToHash(h[:]) }(),
 				},
 			},
 			wantErr: false,

@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/network"
 
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/consensus/version"
 )
 
 var _ network.SyncedNetworkClient = (*mockNetwork)(nil)
