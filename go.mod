@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/metric v1.3.0
-	github.com/luxfi/node v1.13.4-lux.1
+	github.com/luxfi/node v1.16.15
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -84,7 +84,6 @@ require (
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.1 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
-	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/ferranbt/fastssz v0.1.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect

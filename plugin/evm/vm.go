@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/cache/metercacher"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/acp118"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/network/p2p/gossip"
 	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
@@ -526,8 +526,8 @@ func (vm *VM) Initialize(
 	}()
 
 	// Add p2p warp message warpHandler
-	warpHandler := acp118.NewCachedHandler(meteredCache, vm.warpBackend, consensus.GetWarpSigner(vm.ctx))
-	vm.Network.AddHandler(acp118.HandlerID, warpHandler)
+	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, consensus.GetWarpSigner(vm.ctx))
+	vm.Network.AddHandler(lp118.HandlerID, warpHandler)
 
 	vm.setAppRequestHandlers()
 
@@ -1256,9 +1256,9 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 	}
 
 	if vm.config.WarpAPIEnabled {
-		warpSDKClient := vm.Network.NewClient(acp118.HandlerID)
+		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
 		contextLogger := consensus.GetLogger(vm.ctx)
-		signatureAggregator := acp118.NewSignatureAggregator(contextLogger, warpSDKClient)
+		signatureAggregator := lp118.NewSignatureAggregator(contextLogger, warpSDKClient)
 
 		if err := handler.RegisterName("warp", warp.NewAPI(vm.ctx, vm.warpBackend, signatureAggregator, vm.requirePrimaryNetworkSigners)); err != nil {
 			return nil, err
