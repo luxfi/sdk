@@ -53,6 +53,7 @@ import (
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/warp"
+	"github.com/luxfi/warp/signer"
 
 	// Force-load tracer engine to trigger registration
 	//
@@ -80,7 +81,8 @@ import (
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
-	"github.com/luxfi/node/utils/timer/mockable"
+	nodemockable "github.com/luxfi/node/utils/timer/mockable"
+	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/components/chain"
@@ -93,9 +95,10 @@ import (
 )
 
 var (
-	_ block.ChainVM                      = (*VM)(nil)
-	_ block.BuildBlockWithContextChainVM = (*VM)(nil)
-	_ block.StateSyncableVM              = (*VM)(nil)
+	// TODO: Fix interface compatibility with consensus package
+	// _ block.ChainVM                      = (*VM)(nil)
+	// _ block.BuildBlockWithContextChainVM = (*VM)(nil)
+	// _ block.StateSyncableVM              = (*VM)(nil)
 	_ statesyncclient.EthBlockParser     = (*VM)(nil)
 )
 
@@ -223,7 +226,8 @@ type VM struct {
 	builderLock sync.Mutex
 	builder     *blockBuilder
 
-	clock mockable.Clock
+	clock nodemockable.Clock
+	consensusClock consensusmockable.Clock
 
 	shutdownChan chan struct{}
 	shutdownWg   sync.WaitGroup
@@ -309,9 +313,10 @@ func (vm *VM) Initialize(
 	}
 	vm.chainAlias = alias
 
-	// Get logger from context
+	// Get logger from context and adapt it to io.Writer
 	contextLogger := consensus.GetLogger(vm.ctx)
-	subnetEVMLogger, err := subnetevmlog.InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, contextLogger)
+	logWriter := newLoggerWriter(contextLogger)
+	subnetEVMLogger, err := subnetevmlog.InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, logWriter)
 	if err != nil {
 		return fmt.Errorf("%w: %w ", errInitializingLogger, err)
 	}
@@ -469,9 +474,9 @@ func (vm *VM) Initialize(
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
-	vm.p2pValidators = vm.Network.P2PValidators()
+	vm.p2pValidators = vm.Network.P2PValidators().(*p2p.Validators)
 
-	vm.validatorsManager, err = validators.NewManager(vm.ctx, vm.validatorsDB, &vm.clock)
+	vm.validatorsManager, err = validators.NewManager(vm.ctx, vm.validatorsDB, &vm.consensusClock)
 	if err != nil {
 		return fmt.Errorf("failed to initialize validators manager: %w", err)
 	}
@@ -497,10 +502,17 @@ func (vm *VM) Initialize(
 	// Create a wrapper that implements warp.BlockClient
 	warpBlockClient := &warpBlockClientWrapper{vm: vm}
 	
+	// Get warp signer from context
+	warpSignerInterface := consensus.GetWarpSigner(vm.ctx)
+	warpSigner, ok := warpSignerInterface.(signer.Signer)
+	if !ok {
+		return fmt.Errorf("invalid warp signer type: %T", warpSignerInterface)
+	}
+	
 	vm.warpBackend, err = warp.NewBackend(
 		consensus.GetNetworkID(vm.ctx),
 		consensus.GetChainID(vm.ctx),
-		consensus.GetWarpSigner(vm.ctx),
+		warpSigner,
 		warpBlockClient,
 		validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
 		vm.warpDB,
