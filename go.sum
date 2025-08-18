@@ -121,8 +121,6 @@ github.com/ethereum/c-kzg-4844/v2 v2.1.1 h1:KhzBVjmURsfr1+S3k/VE35T02+AW2qU9t9gr
 github.com/ethereum/c-kzg-4844/v2 v2.1.1/go.mod h1:TC48kOKjJKPbN7C++qIgt0TJzZ70QznYR7Ob+WXl57E=
 github.com/ethereum/go-verkle v0.2.2 h1:I2W0WjnrFUIzzVPwm8ykY+7pL2d4VhlsePn4j7cnFk8=
 github.com/ethereum/go-verkle v0.2.2/go.mod h1:M3b90YRnzqKyyzBEWJGqj8Qff4IDeXnzFw0P9bFw3uk=
-github.com/fatih/structtag v1.2.0 h1:/OdNE99OxoI/PqaW/SuSK9uxxT3f/tcSZgon/ssNSx4=
-github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4/aAZl94=
 github.com/ferranbt/fastssz v0.1.4 h1:OCDB+dYDEQDvAgtAGnTSidK1Pe2tW3nFV40XyMkTeDY=
 github.com/ferranbt/fastssz v0.1.4/go.mod h1:Ea3+oeoRGGLGm5shYAeDgu6PGUlcvQhE2fILyD9+tGg=
 github.com/fjl/gencodec v0.1.1 h1:DhQY29Q6JLXB/GgMqE86NbOEuvckiYcJCbXFu02toms=
@@ -269,8 +267,6 @@ github.com/luxfi/metric v1.3.0 h1:l5T6sTRHR2/FBLdxZJpEPV+WxtQSqL2BfDX5OEj/pFE=
 github.com/luxfi/metric v1.3.0/go.mod h1:4emefSEkjDieChAET/gpYWk9wZcOSFrxTvcMQ9dNAi0=
 github.com/luxfi/metrics v1.1.1 h1:aKVEtytAl3TqSvInRpDc6ZdSJsCbTmCCl0UAl2YNXWU=
 github.com/luxfi/metrics v1.1.1/go.mod h1:ynSRcRjG+t1snUvFUbQFEu0UGibyw8gsitltQ9H1YDA=
-github.com/luxfi/node v1.13.4-lux.1 h1:09NiP1sOpzdS4JweipJq68BK5yna6q8VZUeXDpz2HHE=
-github.com/luxfi/node v1.13.4-lux.1/go.mod h1:8J645MurgBfVApuoLNHGiKL6KClGqIGrM8ASqMGDYCo=
 github.com/luxfi/node v1.16.15 h1:ZRsteUu6ObB7Or3E6ZliNY2w/cL4tByGaSm7J37sVU8=
 github.com/luxfi/node v1.16.15/go.mod h1:05FhncqqiDSp5XfSPjoPvTBBUVokCdKpHL72aRCxs4Y=
 github.com/luxfi/trace v0.1.1 h1:T/ReB1MvwAJpgQaPWGsBLUx96rr5OMlJocWRo5JSvkU=
@@ -318,7 +314,6 @@ github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7J
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/onsi/gomega v1.19.0/go.mod h1:LY+I3pBVzYsTBU1AnDwOSxaYi9WoWiqgwooUqq9yPro=
-github.com/onsi/gomega v1.36.3 h1:hID7cr8t3Wp26+cYnfcjR6HpJ00fdogN6dqZ1t6IylU=
 github.com/onsi/gomega v1.37.0 h1:CdEG8g0S133B4OswTDC/5XPSzE1OeP29QOioj2PID2Y=
 github.com/onsi/gomega v1.37.0/go.mod h1:8D9+Txp43QWKhM24yyOBEdpkzN8FvJyAwecBgsU4KU0=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
