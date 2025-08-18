@@ -22,14 +22,13 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/consensus/chain"
-	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/vms/components/chain"
 )
 
 var (
-	_ chain.Block           = (*Block)(nil)
-	_ block.WithVerifyContext = (*Block)(nil)
+	// Block implements the chain.Block interface
+	_ chain.Block = (*Block)(nil)
 )
 
 // Block implements the chain.Block interface

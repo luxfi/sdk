@@ -16,7 +16,7 @@ require (
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/consensus v1.1.3
+	github.com/luxfi/consensus v0.0.0-00010101000000-000000000000
 	github.com/luxfi/crypto v1.3.2
 	github.com/luxfi/database v1.1.13
 	github.com/luxfi/geth v1.16.34
@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/metric v1.3.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.13.4-lux.1
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -180,8 +180,8 @@ replace (
 	// Use local packages for development
 	github.com/luxfi/consensus => ../consensus
 	github.com/luxfi/crypto => ../crypto
-	github.com/luxfi/warp => ../warp
 
 	// Use lux-branded geth
 	github.com/luxfi/geth => github.com/luxfi/geth v1.16.2-lux.4
+	github.com/luxfi/warp => ../warp
 )

@@ -12,11 +12,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	commonEngine "github.com/luxfi/node/snow/engine/common"
+	commonEngine "github.com/luxfi/node/consensus/engine/common"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"

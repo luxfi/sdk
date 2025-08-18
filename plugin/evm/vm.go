@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/cache/metercacher"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/lp118"
+	"github.com/luxfi/node/network/p2p/acp118"
 	"github.com/luxfi/node/network/p2p/gossip"
 	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
@@ -75,10 +75,9 @@ import (
 
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/database/versiondb"
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/engine/chain/block"
-	consensuschain "github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	"github.com/luxfi/node/utils/timer/mockable"
@@ -527,8 +526,8 @@ func (vm *VM) Initialize(
 	}()
 
 	// Add p2p warp message warpHandler
-	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, consensus.GetWarpSigner(vm.ctx))
-	vm.Network.AddHandler(lp118.HandlerID, warpHandler)
+	warpHandler := acp118.NewCachedHandler(meteredCache, vm.warpBackend, consensus.GetWarpSigner(vm.ctx))
+	vm.Network.AddHandler(acp118.HandlerID, warpHandler)
 
 	vm.setAppRequestHandlers()
 
@@ -1017,22 +1016,20 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (consensuschain.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (chain.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// The block already implements consensuschain.Block
 	return blk.(*Block), nil
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (consensuschain.Block, error) {
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
 	blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
 	if err != nil {
 		return nil, err
 	}
-	// The block already implements consensuschain.Block
 	return blk.(*Block), nil
 }
 
@@ -1139,7 +1136,7 @@ func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (chain.Block, 
 
 // GetAcceptedBlockForWarp implements the warp.BlockClient interface by returning
 // a block that implements the consensus chain.Block interface
-func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (consensuschain.Block, error) {
+func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (chain.Block, error) {
 	// First verify the block is accepted
 	ethBlock := vm.blockChain.GetBlockByHash(common.BytesToHash(blkID[:]))
 	if ethBlock == nil {
@@ -1172,22 +1169,14 @@ func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (consen
 	}
 }
 
-// consensusBlockWrapper wraps our Block to implement consensus/chain.Block interface
-type consensusBlockWrapper struct {
-	*Block
-}
-
-// Verify that consensusBlockWrapper implements consensuschain.Block
-var _ consensuschain.Block = (*consensusBlockWrapper)(nil)
-
 // warpBlockClientWrapper wraps VM to implement warp.BlockClient interface
 type warpBlockClientWrapper struct {
 	vm *VM
 }
 
 // GetAcceptedBlock implements warp.BlockClient
-func (w *warpBlockClientWrapper) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (consensuschain.Block, error) {
-	return w.vm.GetAcceptedBlockForWarp(ctx, blockID)
+func (w *warpBlockClientWrapper) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (chain.Block, error) {
+	return w.vm.GetAcceptedBlock(ctx, blockID)
 }
 
 // SetPreference sets what the current tail of the chain is
@@ -1208,8 +1197,8 @@ func (vm *VM) SetPreference(ctx context.Context, blkID ids.ID) error {
 // [database.ErrNotFound] will be returned. This indicates that the VM has state
 // synced and does not have all historical blocks available.
 func (vm *VM) GetBlockIDAtHeight(_ context.Context, height uint64) (ids.ID, error) {
-	lastAcceptedBlock := vm.LastAcceptedBlock()
-	if lastAcceptedBlock.Height() < height {
+	lastAcceptedBlock := vm.blockChain.LastAcceptedBlock()
+	if lastAcceptedBlock.NumberU64() < height {
 		return ids.ID{}, database.ErrNotFound
 	}
 
@@ -1267,9 +1256,9 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 	}
 
 	if vm.config.WarpAPIEnabled {
-		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
+		warpSDKClient := vm.Network.NewClient(acp118.HandlerID)
 		contextLogger := consensus.GetLogger(vm.ctx)
-		signatureAggregator := lp118.NewSignatureAggregator(contextLogger, warpSDKClient)
+		signatureAggregator := acp118.NewSignatureAggregator(contextLogger, warpSDKClient)
 
 		if err := handler.RegisterName("warp", warp.NewAPI(vm.ctx, vm.warpBackend, signatureAggregator, vm.requirePrimaryNetworkSigners)); err != nil {
 			return nil, err
