@@ -4,7 +4,8 @@
 package evm
 
 import (
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/node/utils/logging"
 	"github.com/luxfi/node/vms"
 )
@@ -20,5 +21,17 @@ var (
 type Factory struct{}
 
 func (*Factory) New(logging.Logger) (interface{}, error) {
+	return &VM{}, nil
+}
+
+// ConsensusFactory wraps Factory to work with consensus package expectations
+type ConsensusFactory struct {
+	*Factory
+}
+
+// New creates a new VM instance with luxfi/log.Logger
+func (f *ConsensusFactory) New(logger luxlog.Logger) (interface{}, error) {
+	// Create a VM without initializing the logger
+	// The logger will be set during Initialize
 	return &VM{}, nil
 }
