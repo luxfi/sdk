@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/sdk/application"
