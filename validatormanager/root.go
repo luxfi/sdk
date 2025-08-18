@@ -13,13 +13,12 @@ import (
 
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	platformwarp "github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/warp"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/sdk/validatormanager/txs"
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
-	"github.com/luxfi/warp"
 
 	"github.com/luxfi/crypto"
 )
@@ -281,12 +280,8 @@ func InitializeValidatorsSet(
 		ValidatorManagerAddress:      managerAddress,
 		InitialValidators:            validators,
 	}
-	// Convert standalone warp to node warp for contract
-	nodeWarpMsgInterface, err := warpMessage.ConvertStandaloneToNodeWarpMessage(subnetConversionSignedMessage)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to convert warp message: %w", err)
-	}
-	nodeWarpMsg := nodeWarpMsgInterface.(*platformwarp.Message)
+	// No conversion needed - already using the right warp type
+	nodeWarpMsg := subnetConversionSignedMessage
 
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
