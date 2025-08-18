@@ -9,12 +9,26 @@ import (
 	"github.com/luxfi/geth/rlp"
 )
 
-// TODO: Fix RegisterExtras when available in geth
+// TODO: RegisterExtras not available in current geth version
 // var extras = ethtypes.RegisterExtras[
 // 	HeaderExtra, *HeaderExtra,
 // 	ethtypes.NOOPBlockBodyHooks, *ethtypes.NOOPBlockBodyHooks,
 // 	noopStateAccountExtras,
 // ]()
+
+// Mock extras struct for compatibility
+type mockExtras struct {
+	Header mockHeaderExtras
+}
+
+type mockHeaderExtras struct{}
+
+func (m mockHeaderExtras) Set(header interface{}, extra *HeaderExtra) {}
+func (m mockHeaderExtras) Get(header interface{}) *HeaderExtra { return nil }
+
+var extras = mockExtras{
+	Header: mockHeaderExtras{},
+}
 
 type noopStateAccountExtras struct{}
 

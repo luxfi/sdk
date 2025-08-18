@@ -8,14 +8,64 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"time"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/chain"
-	"github.com/luxfi/consensus/chain/chaintest"
-	"github.com/luxfi/consensus/consensustest"
+	"github.com/luxfi/consensus/choices"
 )
 
 var ErrNotFound = errors.New("not found")
+
+// mockBlock implements chain.Block for testing
+type mockBlock struct {
+	id ids.ID
+}
+
+// ID returns the block ID as a string
+func (b *mockBlock) ID() string {
+	return b.id.String()
+}
+
+// Accept marks the block as accepted
+func (b *mockBlock) Accept(context.Context) error {
+	return nil
+}
+
+// Reject marks the block as rejected  
+func (b *mockBlock) Reject(context.Context) error {
+	return nil
+}
+
+// Status returns the block status
+func (b *mockBlock) Status() choices.Status {
+	return choices.Accepted
+}
+
+// Parent returns the parent block ID as a string
+func (b *mockBlock) Parent() string {
+	return ids.Empty.String()
+}
+
+// Verify verifies the block
+func (b *mockBlock) Verify(context.Context) error {
+	return nil
+}
+
+// Bytes returns the block bytes
+func (b *mockBlock) Bytes() []byte {
+	return nil
+}
+
+// Height returns the block height
+func (b *mockBlock) Height() uint64 {
+	return 0
+}
+
+// Timestamp returns the block timestamp
+func (b *mockBlock) Timestamp() time.Time {
+	return time.Time{}
+}
 
 // EmptyBlockClient returns an error if a block is requested
 var EmptyBlockClient BlockClient = MakeBlockClient()
@@ -35,11 +85,9 @@ func MakeBlockClient(blkIDs ...ids.ID) BlockClient {
 			return nil, ErrNotFound
 		}
 
-		return &chaintest.Block{
-			Decidable: consensustest.Decidable{
-				IDV:    blkID,
-				Status: consensustest.Accepted,
-			},
+		// Create a mock block with the requested ID
+		return &mockBlock{
+			id: blkID,
 		}, nil
 	}
 }

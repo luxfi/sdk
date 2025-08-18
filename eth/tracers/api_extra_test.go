@@ -208,8 +208,8 @@ func testTraceTransactionPrecompileActivation(t *testing.T, scheme string) {
 			expected := &logger.ExecutionResult{
 				Gas:         ethparams.TxGas,
 				Failed:      false,
-				ReturnValue: "",
-				StructLogs:  []logger.StructLogRes{},
+				ReturnValue: hexutil.Bytes{},
+				StructLogs:  []json.RawMessage{},
 			}
 			eq := reflect.DeepEqual(have, expected)
 			require.True(eq, "have %v, want %v", have, expected)

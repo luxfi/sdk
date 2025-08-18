@@ -44,6 +44,7 @@ import (
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/log"
+	luxconsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
@@ -206,7 +207,7 @@ func New(
 	// If the context is not set, avoid a panic. Only necessary during firewood use.
 	chainDataDir := ""
 	if ctx := params.GetExtra(config.Genesis.Config).ConsensusCtx; ctx != nil {
-		chainDataDir = ctx.ChainDataDir
+		chainDataDir = luxconsensus.GetChainDataDir(ctx)
 	}
 
 	var (

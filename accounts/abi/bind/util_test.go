@@ -67,9 +67,14 @@ func TestWaitDeployed(t *testing.T) {
 	t.Parallel()
 	for name, test := range waitDeployedTests {
 		backend := simulated.NewBackend(
-			types.GenesisAlloc{
-				crypto.PubkeyToAddress(testKey.PublicKey): {Balance: new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(1000))},
-			},
+			func() types.GenesisAlloc {
+				cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+				var addr common.Address
+				copy(addr[:], cryptoAddr[:])
+				return types.GenesisAlloc{
+					addr: {Balance: new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(1000))},
+				}
+			}(),
 		)
 		defer backend.Close()
 
@@ -114,9 +119,14 @@ func TestWaitDeployed(t *testing.T) {
 
 func TestWaitDeployedCornerCases(t *testing.T) {
 	backend := simulated.NewBackend(
-		types.GenesisAlloc{
-			crypto.PubkeyToAddress(testKey.PublicKey): {Balance: big.NewInt(1000000000000000000)},
-		},
+		func() types.GenesisAlloc {
+			cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+			var addr common.Address
+			copy(addr[:], cryptoAddr[:])
+			return types.GenesisAlloc{
+				addr: {Balance: big.NewInt(1000000000000000000)},
+			}
+		}(),
 	)
 	defer backend.Close()
 

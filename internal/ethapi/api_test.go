@@ -571,7 +571,10 @@ func (b testBackend) GetEVM(ctx context.Context, msg *core.Message, state *state
 	if blockContext != nil {
 		context = *blockContext
 	}
-	return vm.NewEVM(context, txContext, state, b.chain.Config(), *vmConfig)
+	// vm.NewEVM signature changed - no longer takes txContext separately
+	evm := vm.NewEVM(context, state, b.chain.Config(), *vmConfig)
+	evm.SetTxContext(txContext)
+	return evm
 }
 func (b testBackend) SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription {
 	panic("implement me")
@@ -589,7 +592,28 @@ func (b testBackend) SendTx(ctx context.Context, signedTx *types.Transaction) er
 	panic("implement me")
 }
 func (b testBackend) GetTransaction(ctx context.Context, txHash common.Hash) (bool, *types.Transaction, common.Hash, uint64, uint64, error) {
-	tx, blockHash, blockNumber, index := rawdb.ReadTransaction(b.db, txHash)
+	// rawdb.ReadTransaction is not available, search for the transaction
+	var tx *types.Transaction
+	var blockHash common.Hash
+	var blockNumber, index uint64
+	// Try to find the transaction in recent blocks
+	for i := uint64(0); i < uint64(b.chain.CurrentBlock().Number.Uint64()); i++ {
+		block := b.chain.GetBlockByNumber(i)
+		if block != nil {
+			for j, btx := range block.Transactions() {
+				if btx.Hash() == txHash {
+					tx = btx
+					blockHash = block.Hash()
+					blockNumber = i
+					index = uint64(j)
+					break
+				}
+			}
+			if tx != nil {
+				break
+			}
+		}
+	}
 	return true, tx, blockHash, blockNumber, index, nil
 }
 func (b testBackend) GetPoolTransactions() (types.Transactions, error)         { panic("implement me") }
@@ -1002,7 +1026,7 @@ func TestSignTransaction(t *testing.T) {
 	// Initialize test accounts
 	var (
 		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = crypto.PubkeyToAddress(key.PublicKey)
+		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1040,7 +1064,7 @@ func TestSignBlobTransaction(t *testing.T) {
 	// Initialize test accounts
 	var (
 		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = crypto.PubkeyToAddress(key.PublicKey)
+		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1074,7 +1098,7 @@ func TestSendBlobTransaction(t *testing.T) {
 	// Initialize test accounts
 	var (
 		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = crypto.PubkeyToAddress(key.PublicKey)
+		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1107,14 +1131,14 @@ func TestFillBlobTransaction(t *testing.T) {
 	// Initialize test accounts
 	var (
 		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = crypto.PubkeyToAddress(key.PublicKey)
+		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
 		}
 		emptyBlob                      = kzg4844.Blob{}
-		emptyBlobCommit, _             = kzg4844.BlobToCommitment(emptyBlob)
-		emptyBlobProof, _              = kzg4844.ComputeBlobProof(emptyBlob, emptyBlobCommit)
+		emptyBlobCommit, _             = kzg4844.BlobToCommitment(&emptyBlob)
+		emptyBlobProof, _              = kzg4844.ComputeBlobProof(&emptyBlob, emptyBlobCommit)
 		emptyBlobHash      common.Hash = kzg4844.CalcBlobHashV1(sha256.New(), &emptyBlobCommit)
 	)
 	b := newTestBackend(t, 1, genesis, dummy.NewCoinbaseFaker(), func(i int, b *core.BlockGen) {
@@ -1322,7 +1346,12 @@ type account struct {
 func newAccounts(n int) (accounts []account) {
 	for i := 0; i < n; i++ {
 		key, _ := crypto.GenerateKey()
-		addr := crypto.PubkeyToAddress(key.PublicKey)
+		addr := func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		accounts = append(accounts, account{key: key, addr: addr})
 	}
 	slices.SortFunc(accounts, func(a, b account) int { return a.addr.Cmp(b.addr) })
@@ -1369,7 +1398,9 @@ func TestRPCMarshalBlock(t *testing.T) {
 		}
 		txs = append(txs, tx)
 	}
-	block := types.NewBlock(&types.Header{Number: big.NewInt(100)}, txs, nil, nil, blocktest.NewHasher())
+	// NewBlock signature changed - now takes Body and Receipts
+	body := &types.Body{Transactions: txs}
+	block := types.NewBlock(&types.Header{Number: big.NewInt(100)}, body, nil, blocktest.NewHasher())
 
 	var testSuite = []struct {
 		inclTx bool
@@ -1555,8 +1586,18 @@ func TestRPCGetBlockOrHeader(t *testing.T) {
 	var (
 		acc1Key, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		acc2Key, _ = crypto.HexToECDSA("49a7b37aa6f6645917e7b807e9d1c00d4fa71f18343b0d4122a4d2df64dd6fee")
-		acc1Addr   = crypto.PubkeyToAddress(acc1Key.PublicKey)
-		acc2Addr   = crypto.PubkeyToAddress(acc2Key.PublicKey)
+		acc1Addr   = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(acc1Key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
+		acc2Addr   = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(acc2Key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		genesis    = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc: types.GenesisAlloc{
@@ -1574,7 +1615,9 @@ func TestRPCGetBlockOrHeader(t *testing.T) {
 			Value:    big.NewInt(111),
 			Data:     []byte{0x11, 0x11, 0x11},
 		})
-		pending = types.NewBlock(&types.Header{Number: big.NewInt(11), Time: 42}, []*types.Transaction{tx}, nil, nil, blocktest.NewHasher())
+		// NewBlock signature changed - now takes Body and Receipts
+		pendingBody = &types.Body{Transactions: []*types.Transaction{tx}}
+		pending = types.NewBlock(&types.Header{Number: big.NewInt(11), Time: 42}, pendingBody, nil, blocktest.NewHasher())
 	)
 	backend := newTestBackend(t, genBlocks, genesis, dummy.NewCoinbaseFaker(), func(i int, b *core.BlockGen) {
 		// Transfer from account[0] to account[1]
@@ -1802,8 +1845,18 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 	var (
 		acc1Key, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		acc2Key, _ = crypto.HexToECDSA("49a7b37aa6f6645917e7b807e9d1c00d4fa71f18343b0d4122a4d2df64dd6fee")
-		acc1Addr   = crypto.PubkeyToAddress(acc1Key.PublicKey)
-		acc2Addr   = crypto.PubkeyToAddress(acc2Key.PublicKey)
+		acc1Addr   = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(acc1Key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
+		acc2Addr   = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(acc2Key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		contract   = common.HexToAddress("0000000000000000000000000000000000031ec7")
 		genesis    = &core.Genesis{
 			Config:        &config,

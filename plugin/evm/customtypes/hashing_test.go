@@ -35,11 +35,11 @@ import (
 	mrand "math/rand"
 	"testing"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
@@ -160,7 +160,9 @@ func genTxs(num uint64) (types.Transactions, error) {
 	if err != nil {
 		return nil, err
 	}
-	var addr = crypto.PubkeyToAddress(key.PublicKey)
+	cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+	var addr common.Address
+	copy(addr[:], cryptoAddr[:])
 	newTx := func(i uint64) (*types.Transaction, error) {
 		signer := types.NewEIP155Signer(big.NewInt(18))
 		utx := types.NewTransaction(i, addr, new(big.Int), 0, new(big.Int).SetUint64(10000000), nil)

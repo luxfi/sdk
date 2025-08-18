@@ -9,14 +9,11 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/log"
-	warpprecompile "github.com/luxfi/evm/precompile/contracts/warp"
-	warpValidators "github.com/luxfi/evm/warp/validators"
+	"github.com/luxfi/geth/log"
 )
 
 var errNoValidators = errors.New("cannot aggregate signatures from subnet with no validators")
@@ -25,11 +22,11 @@ var errNoValidators = errors.New("cannot aggregate signatures from subnet with n
 type API struct {
 	chainContext                 context.Context
 	backend                      Backend
-	signatureAggregator          *lp118.SignatureAggregator
+	signatureAggregator          interface{} // TODO: implement signature aggregator
 	requirePrimaryNetworkSigners func() bool
 }
 
-func NewAPI(chainCtx context.Context, backend Backend, signatureAggregator *lp118.SignatureAggregator, requirePrimaryNetworkSigners func() bool) *API {
+func NewAPI(chainCtx context.Context, backend Backend, signatureAggregator interface{}, requirePrimaryNetworkSigners func() bool) *API {
 	return &API{
 		backend:                      backend,
 		chainContext:                 chainCtx,
@@ -80,11 +77,12 @@ func (a *API) GetMessageAggregateSignature(ctx context.Context, messageID ids.ID
 
 // GetBlockAggregateSignature fetches the aggregate signature for the requested [blockID]
 func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, quorumNum uint64, subnetIDStr string) (signedMessageBytes hexutil.Bytes, err error) {
-	blockHashPayload, err := payload.NewHash(blockID)
+	blockHashPayload, err := payload.NewHash(blockID[:])
 	if err != nil {
 		return nil, err
 	}
-	unsignedMessage, err := warp.NewUnsignedMessage(a.chainContext.NetworkID, a.chainContext.ChainID, blockHashPayload.Bytes())
+	chainID := consensus.GetChainID(a.chainContext)
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(a.chainContext), chainID[:], blockHashPayload.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +90,8 @@ func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, qu
 	return a.aggregateSignatures(ctx, unsignedMessage, quorumNum, subnetIDStr)
 }
 
-func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.UnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
-	subnetID := a.chainContext.SubnetID
+func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
+	subnetID := consensus.GetSubnetID(a.chainContext)
 	if len(subnetIDStr) > 0 {
 		sid, err := ids.FromString(subnetIDStr)
 		if err != nil {
@@ -101,14 +99,18 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 		}
 		subnetID = sid
 	}
-	validatorState := a.chainContext.ValidatorState
-	pChainHeight, err := validatorState.GetCurrentHeight(ctx)
+	validatorState := consensus.GetValidatorState(a.chainContext)
+	pChainHeight, err := validatorState.GetCurrentHeight()
 	if err != nil {
 		return nil, err
 	}
 
-	state := warpValidators.NewState(validatorState, a.chainContext.SubnetID, a.chainContext.ChainID, a.requirePrimaryNetworkSigners())
-	validators, totalWeight, err := warp.GetCanonicalValidatorSet(ctx, state, pChainHeight, subnetID)
+	// TODO: implement validator state wrapper with luxfi/warp
+	_ = validatorState
+	// TODO: implement GetCanonicalValidatorSet with luxfi/warp
+	validators := make(map[ids.NodeID]uint64)
+	totalWeight := uint64(0)
+	err = nil // errors.New("GetCanonicalValidatorSet not yet implemented")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get validator set: %w", err)
 	}
@@ -122,23 +124,7 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *warp.Uns
 		"numValidators", len(validators),
 		"totalWeight", totalWeight,
 	)
-	warpMessage := &warp.Message{
-		UnsignedMessage: *unsignedMessage,
-		Signature:       &warp.BitSetSignature{},
-	}
-	signedMessage, _, _, err := a.signatureAggregator.AggregateSignatures(
-		ctx,
-		warpMessage,
-		nil,
-		validators,
-		quorumNum,
-		warpprecompile.WarpQuorumDenominator,
-	)
-	if err != nil {
-		return nil, err
-	}
-	// TODO: return the signature and total weight as well to the caller for more complete details
-	// Need to decide on the best UI for this and write up documentation with the potential
-	// gotchas that could impact signed messages becoming invalid.
-	return hexutil.Bytes(signedMessage.Bytes()), nil
+	// TODO: implement signature aggregation with luxfi/warp
+	// For now, return an error
+	return nil, errors.New("signature aggregation not yet implemented with luxfi/warp")
 }

@@ -55,16 +55,23 @@ func makeReceipt(addr common.Address) *types.Receipt {
 	receipt.Logs = []*types.Log{
 		{Address: addr},
 	}
-	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+	// CreateBloom now expects a single receipt pointer, not a slice
+	receipt.Bloom = types.CreateBloom(receipt)
 	return receipt
 }
 
 func BenchmarkFilters(b *testing.B) {
 	var (
-		db, _   = rawdb.NewLevelDBDatabase(b.TempDir(), 0, 0, "", false)
+		// rawdb.NewLevelDBDatabase is not available, use memory database
+		db      = rawdb.NewMemoryDatabase()
 		_, sys  = newTestFilterSystem(b, db, Config{})
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
+		addr1   = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key1.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		addr2   = common.BytesToAddress([]byte("jeff"))
 		addr3   = common.BytesToAddress([]byte("ethereum"))
 		addr4   = common.BytesToAddress([]byte("random addresses please"))
@@ -127,7 +134,12 @@ func TestFilters(t *testing.T) {
 		_, sys = newTestFilterSystem(t, db, Config{})
 		// Sender account
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		addr    = crypto.PubkeyToAddress(key1.PublicKey)
+		addr    = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key1.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		signer  = types.NewLondonSigner(big.NewInt(1))
 		// Logging contract
 		contract  = common.Address{0xfe}

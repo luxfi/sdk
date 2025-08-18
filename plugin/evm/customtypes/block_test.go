@@ -282,7 +282,11 @@ func makeBenchBlock() *types.Block {
 			Extra:      []byte("benchmark uncle"),
 		}
 	}
-	return types.NewBlock(header, txs, uncles, receipts, blocktest.NewHasher())
+	body := &types.Body{
+		Transactions: txs,
+		Uncles:       uncles,
+	}
+	return types.NewBlock(header, body, receipts, blocktest.NewHasher())
 }
 
 func TestSubnetEVMBlockEncoding(t *testing.T) {

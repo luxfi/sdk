@@ -29,11 +29,12 @@ package rpc
 
 import (
 	"encoding/json"
+	"math"
 	"reflect"
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
+	gethmath "github.com/luxfi/geth/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

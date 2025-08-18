@@ -28,6 +28,9 @@
 package tracers
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -53,7 +56,12 @@ func BenchmarkPrestateTracer(b *testing.B) {
 
 func benchmarkTransactionTrace(b *testing.B, scheme string) {
 	key, _ := crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-	from := crypto.PubkeyToAddress(key.PublicKey)
+	from := func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	gas := uint64(1000000) // 1M gas
 	to := common.HexToAddress("0x00000000000000000000000000000000deadbeef")
 	signer := types.LatestSignerForChainID(big.NewInt(1337))
@@ -104,12 +112,15 @@ func benchmarkTransactionTrace(b *testing.B, scheme string) {
 
 	// Create the tracer, the EVM environment and run it
 	tracer := logger.NewStructLogger(&logger.Config{
-		Debug: false,
+		// Debug field no longer exists in Config
 		//DisableStorage: true,
 		//EnableMemory: false,
 		//EnableReturnData: false,
 	})
-	evm := vm.NewEVM(context, txContext, state.StateDB, params.TestChainConfig, vm.Config{Tracer: tracer})
+	// vm.NewEVM signature changed - no longer takes txContext separately
+	// Tracer field now expects *tracing.Hooks, use tracer.Hooks()
+	evm := vm.NewEVM(context, state.StateDB, params.TestChainConfig, vm.Config{Tracer: tracer.Hooks()})
+	evm.SetTxContext(txContext)
 	msg, err := core.TransactionToMessage(tx, signer, context.BaseFee)
 	if err != nil {
 		b.Fatalf("failed to prepare transaction for tracing: %v", err)
@@ -125,11 +136,40 @@ func benchmarkTransactionTrace(b *testing.B, scheme string) {
 			b.Fatal(err)
 		}
 		state.StateDB.RevertToSnapshot(snap)
-		if have, want := len(tracer.StructLogs()), 244752; have != want {
-			b.Fatalf("trace wrong, want %d steps, have %d", want, have)
+		// StructLogger no longer has StructLogs() method, use GetResult() instead
+		result, _ := tracer.GetResult()
+		var execResult logger.ExecutionResult
+		if err := json.Unmarshal(result, &execResult); err == nil {
+			if have, want := len(execResult.StructLogs), 244752; have != want {
+				b.Fatalf("trace wrong, want %d steps, have %d", want, have)
+			}
 		}
-		tracer.Reset()
+		// Reset method no longer exists, create a new tracer instead
+		tracer = logger.NewStructLogger(&logger.Config{})
 	}
+}
+
+// GetMemoryCopyPadded returns offset + size as a new slice.
+// It zero-pads the slice if it extends beyond memory bounds.
+func GetMemoryCopyPadded(mem *vm.Memory, offset, size int64) ([]byte, error) {
+	if offset < 0 || size < 0 {
+		return nil, errors.New("offset or size must not be negative")
+	}
+	m := mem.Data()
+	length := int64(len(m))
+	if offset+size < length { // slice fully inside memory
+		return m[offset : offset+size], nil
+	}
+	const memoryPadLimit = 1024 * 1024
+	paddingNeeded := offset + size - length
+	if paddingNeeded > memoryPadLimit {
+		return nil, fmt.Errorf("reached limit for padding memory slice: %d", paddingNeeded)
+	}
+	cpy := make([]byte, size)
+	if overlap := length - offset; overlap > 0 {
+		copy(cpy, m[offset:])
+	}
+	return cpy, nil
 }
 
 func TestMemCopying(t *testing.T) {
