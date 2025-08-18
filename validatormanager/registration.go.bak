@@ -414,7 +414,7 @@ func InitValidatorRegistration(
 	if err != nil {
 		return nil, ids.Empty, nil, err
 	}
-	blockchainID, err := contract.GetBlockchainID(
+	blockchainID[:], err := contract.GetBlockchainID(
 		app,
 		network,
 		chainSpec,
@@ -524,7 +524,7 @@ func InitValidatorRegistration(
 		aggregatorLogger,
 		0,
 		subnetID,
-		blockchainID,
+		blockchainID[:],
 		managerAddress,
 		nodeID,
 		[48]byte(blsPublicKey),
