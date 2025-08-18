@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/log"
@@ -160,15 +160,17 @@ func (c *Config) PredicateGas(predicateBytes []byte) (uint64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidWarpMsg, err)
 	}
-	_, err = payload.Parse(warpMessage.Payload)
+	_, err = payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", errInvalidWarpMsgPayload, err)
 	}
 
-	numSigners, err := warpMessage.Signature.NumSigners()
-	if err != nil {
-		return 0, fmt.Errorf("%w: %s", errCannotGetNumSigners, err)
+	// Type assert to BitSetSignature to get number of signers
+	bitSetSig, ok := warpMessage.Signature.(*warp.BitSetSignature)
+	if !ok {
+		return 0, fmt.Errorf("%w: signature is not a BitSetSignature", errCannotGetNumSigners)
 	}
+	numSigners := uint64(bitSetSig.Signers.Len())
 	signerGas, overflow := math.SafeMul(uint64(numSigners), GasCostPerWarpSigner)
 	if overflow {
 		return 0, errOverflowSignersGasCost

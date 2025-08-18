@@ -49,7 +49,7 @@ func (vm *VM) newBlock(ethBlock *types.Block) *Block {
 }
 
 // ID implements the chain.Block interface
-func (b *Block) ID() ids.ID { return b.id }
+func (b *Block) ID() string { return b.id.String() }
 
 // Accept implements the chain.Block interface
 func (b *Block) Accept(context.Context) error {
@@ -61,7 +61,7 @@ func (b *Block) Accept(context.Context) error {
 
 	blkID := b.ID()
 	log.Debug("accepting block",
-		"hash", blkID.Hex(),
+		"hash", b.id.Hex(),
 		"id", blkID,
 		"height", b.Height(),
 	)
@@ -77,7 +77,7 @@ func (b *Block) Accept(context.Context) error {
 		return fmt.Errorf("chain could not accept %s: %w", blkID, err)
 	}
 
-	if err := vm.acceptedBlockDB.Put(lastAcceptedKey, blkID[:]); err != nil {
+	if err := vm.acceptedBlockDB.Put(lastAcceptedKey, b.id[:]); err != nil {
 		return fmt.Errorf("failed to put %s as the last accepted block: %w", blkID, err)
 	}
 
@@ -122,7 +122,7 @@ func (b *Block) handlePrecompileAccept(rules extras.Rules) error {
 func (b *Block) Reject(context.Context) error {
 	blkID := b.ID()
 	log.Debug("rejecting block",
-		"hash", blkID.Hex(),
+		"hash", b.id.Hex(),
 		"id", blkID,
 		"height", b.Height(),
 	)
@@ -130,8 +130,8 @@ func (b *Block) Reject(context.Context) error {
 }
 
 // Parent implements the chain.Block interface
-func (b *Block) Parent() ids.ID {
-	return ids.ID(b.ethBlock.ParentHash())
+func (b *Block) Parent() string {
+	return ids.ID(b.ethBlock.ParentHash()).String()
 }
 
 // Height implements the chain.Block interface

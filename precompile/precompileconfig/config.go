@@ -8,7 +8,7 @@ import (
 	"context"
 	
 	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 )
@@ -54,7 +54,7 @@ type Predicater interface {
 }
 
 type WarpMessageWriter interface {
-	AddMessage(unsignedMessage *warp.UnsignedMessage) error
+	AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error
 }
 
 // AcceptContext defines the context passed in to a precompileconfig's Accepter

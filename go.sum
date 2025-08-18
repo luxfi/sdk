@@ -279,6 +279,8 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/database v1.1.11 h1:AAg3GzsgHkx8tviVkgnnXPbqX97z747+IMZ9VgtjSig=
 github.com/luxfi/database v1.1.11/go.mod h1:ElL1tjotNNQfA4NRAqjRklLUVhdBcGqzBhsZYy5UDGY=
+github.com/luxfi/database v1.1.13 h1:J0iNaejPDFfvevvX/TDr61pcfEciPRSKK1czoDbg+n0=
+github.com/luxfi/database v1.1.13/go.mod h1:EgiZIOrM9gCqGBy6d9IrnIESOW+/y4MdXRfFUan6BTY=
 github.com/luxfi/geth v1.16.2-lux.4 h1:bTZquLOqOyQmevkvKZxT4c+z6HK6dP8DUrjGRiM3x+Y=
 github.com/luxfi/geth v1.16.2-lux.4/go.mod h1:kjF/Vwzd9Iz6+9PpHyF7ZtfVJYsJdBYGhnoXLDxx7b8=
 github.com/luxfi/go-bip39 v1.1.1 h1:Z/2H3Pc7P1CQXzXxev945ifxHZ9fpuvsJQFTMP1u8Ts=
@@ -289,6 +291,8 @@ github.com/luxfi/ledger-lux-go v1.0.0 h1:u5L6hrJU10tOd3+N6tMkq0ba1uWh/rLXvQiKlJo
 github.com/luxfi/ledger-lux-go v1.0.0/go.mod h1:bJgOxgG1jE5uz8upWrwoDuCS/gfEQEQkL3TMYjwe5VA=
 github.com/luxfi/log v1.1.1 h1:/0ksn/fghqe8nTsasQJqsmnwFdkVNZakR6RJUU48cyQ=
 github.com/luxfi/log v1.1.1/go.mod h1:Q2eeOT4alCF+/B6+k/eWtVZQ2HncDlpd9vUvkTF0Suc=
+github.com/luxfi/log v1.1.22 h1:E+jX+ZZS4JX2HjuGdDTpLfrgFKEDD8byNYTa0m6HT1o=
+github.com/luxfi/log v1.1.22/go.mod h1:Q2eeOT4alCF+/B6+k/eWtVZQ2HncDlpd9vUvkTF0Suc=
 github.com/luxfi/metric v1.3.0 h1:l5T6sTRHR2/FBLdxZJpEPV+WxtQSqL2BfDX5OEj/pFE=
 github.com/luxfi/metric v1.3.0/go.mod h1:4emefSEkjDieChAET/gpYWk9wZcOSFrxTvcMQ9dNAi0=
 github.com/luxfi/metrics v1.1.1 h1:aKVEtytAl3TqSvInRpDc6ZdSJsCbTmCCl0UAl2YNXWU=

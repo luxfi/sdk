@@ -84,7 +84,7 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 	b.txPool.SubscribeTransactions(txSubmitChan, true)
 
 	b.shutdownWg.Add(1)
-	go b.ctx.Log.RecoverAndPanic(func() {
+	go log.RecoverAndPanic(func() {
 		defer b.shutdownWg.Done()
 
 		for {
@@ -101,7 +101,7 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 
 // waitForEvent waits until a block needs to be built.
 // It returns only after at least [minBlockBuildingRetryDelay] passed from the last time a block was built.
-func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.Message, error) {
+func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.MessageType, error) {
 	lastBuildTime, err := b.waitForNeedToBuild(ctx)
 	if err != nil {
 		return 0, err

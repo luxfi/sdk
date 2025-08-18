@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/types"
@@ -267,7 +267,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 	}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		consensus.GetNetworkID(ctx),
-		sourceChainID,
+		sourceChainID[:],
 		addressedPayload.Bytes(),
 	)
 	if err != nil {
