@@ -8,8 +8,8 @@ import (
 	"math"
 
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common"
 	commonmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/vm"
@@ -101,15 +101,20 @@ func (addressedPayloadHandler) packFailed() []byte {
 }
 
 func (addressedPayloadHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
-	addressedPayload, err := payload.ParseAddressedCall(warpMessage.UnsignedMessage.Payload)
+	addressedPayload, err := payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidAddressedPayload, err)
 	}
+	// Type assert to AddressedCall
+	addressedCall, ok := addressedPayload.(*payload.AddressedCall)
+	if !ok {
+		return nil, fmt.Errorf("%w: payload is not AddressedCall", errInvalidAddressedPayload)
+	}
 	return PackGetVerifiedWarpMessageOutput(GetVerifiedWarpMessageOutput{
 		Message: WarpMessage{
-			SourceChainID:       common.Hash(warpMessage.SourceChainID),
-			OriginSenderAddress: common.BytesToAddress(addressedPayload.SourceAddress),
-			Payload:             addressedPayload.Payload,
+			SourceChainID:       common.BytesToHash(warpMessage.UnsignedMessage.SourceChainID),
+			OriginSenderAddress: common.BytesToAddress(addressedCall.SourceAddress),
+			Payload:             addressedCall.Payload,
 		},
 		Valid: true,
 	})
@@ -122,13 +127,18 @@ func (blockHashHandler) packFailed() []byte {
 }
 
 func (blockHashHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
-	blockHashPayload, err := payload.ParseHash(warpMessage.UnsignedMessage.Payload)
+	parsedPayload, err := payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidBlockHashPayload, err)
 	}
+	// Type assert to Hash
+	blockHashPayload, ok := parsedPayload.(*payload.Hash)
+	if !ok {
+		return nil, fmt.Errorf("%w: payload is not Hash", errInvalidBlockHashPayload)
+	}
 	return PackGetVerifiedWarpBlockHashOutput(GetVerifiedWarpBlockHashOutput{
 		WarpBlockHash: WarpBlockHash{
-			SourceChainID: common.Hash(warpMessage.SourceChainID),
+			SourceChainID: common.BytesToHash(warpMessage.UnsignedMessage.SourceChainID),
 			BlockHash:     common.BytesToHash(blockHashPayload.Hash[:]),
 		},
 		Valid: true,

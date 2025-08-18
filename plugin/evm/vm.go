@@ -172,7 +172,7 @@ var legacyApiNames = map[string]string{
 
 // VM implements the chain.ChainVM interface
 type VM struct {
-	ctx context.Context
+	ctx *block.ChainContext
 	// contextLock is used to coordinate global VM operations.
 	// This can be used safely instead of context.Context.Lock which is deprecated and should not be used in rpcchainvm.
 	vmLock sync.RWMutex
@@ -267,7 +267,7 @@ type VM struct {
 // Initialize implements the chain.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
-	chainCtx context.Context,
+	chainCtx *block.ChainContext,
 	db database.Database,
 	genesisBytes []byte,
 	upgradeBytes []byte,
@@ -337,7 +337,7 @@ func (vm *VM) Initialize(
 		}
 	}
 
-	g, err := parseGenesis(chainCtx, genesisBytes, upgradeBytes, vm.config.AirdropFile)
+	g, err := parseGenesis(context.Background(), genesisBytes, upgradeBytes, vm.config.AirdropFile)
 	if err != nil {
 		return err
 	}
@@ -992,11 +992,11 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // buildBlock builds a block to be wrapped by ChainState
-func (vm *VM) buildBlock(ctx context.Context) (consensuschain.Block, error) {
+func (vm *VM) buildBlock(ctx context.Context) (block.Block, error) {
 	return vm.buildBlockWithContext(ctx, nil)
 }
 
-func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (consensuschain.Block, error) {
+func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (block.Block, error) {
 	if proposerVMBlockCtx != nil {
 		log.Debug("Building block with context", "pChainBlockHeight", proposerVMBlockCtx.PChainHeight)
 	} else {
@@ -1041,7 +1041,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 }
 
 // parseBlock parses [b] into a block to be wrapped by ChainState.
-func (vm *VM) parseBlock(_ context.Context, b []byte) (consensuschain.Block, error) {
+func (vm *VM) parseBlock(_ context.Context, b []byte) (block.Block, error) {
 	ethBlock := new(types.Block)
 	if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 		return nil, err
@@ -1068,7 +1068,7 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
-func (vm *VM) getBlock(_ context.Context, id ids.ID) (consensuschain.Block, error) {
+func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
 	ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 	// If [ethBlock] is nil, return [database.ErrNotFound] here
 	// so that the miss is considered cacheable.
