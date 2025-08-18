@@ -212,13 +212,13 @@ func (n *NetworkUpgrades) GetLuxRules(time uint64) LuxRules {
 // GetNetworkUpgrades returns the network upgrades for the specified luxd upgrades.
 // Nil values are used to indicate optional upgrades.
 func GetNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
-	// TODO: DurangoTime and EtnaTime seem to be removed from upgrade.Config
+	// Map upgrade times from node v1.13.4's upgrade.Config
 	return NetworkUpgrades{
 		SubnetEVMTimestamp: utils.NewUint64(0),
-		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.ActivationTime),
-		EtnaTimestamp:      nil, // TODO: EtnaTime not available in upgrade.Config
-		FortunaTimestamp:   nil, // Fortuna is optional and has no effect on Subnet-EVM
-		GraniteTimestamp:   nil, // Granite is optional and has no effect on Subnet-EVM
+		DurangoTimestamp:   utils.TimeToNewUint64(agoUpgrade.DurangoTime),
+		EtnaTimestamp:      utils.TimeToNewUint64(agoUpgrade.EtnaTime),
+		FortunaTimestamp:   utils.TimeToNewUint64(agoUpgrade.FortunaTime),
+		GraniteTimestamp:   utils.TimeToNewUint64(agoUpgrade.GraniteTime),
 	}
 }
 

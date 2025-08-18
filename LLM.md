@@ -4,17 +4,18 @@
 Lux EVM (formerly Subnet-EVM) is the Ethereum Virtual Machine implementation for Lux subnets. This module provides EVM compatibility for the Lux network.
 
 ## CRITICAL VERSION REQUIREMENTS
-**ALWAYS use these specific versions for backwards compatibility:**
-- `github.com/luxfi/node v1.13.4` - NOT v1.16.x (maintains compatibility with avalanchego)
+**ALWAYS use these Lux-specific versions:**
+- `github.com/luxfi/node v1.16.15` - Latest Lux node version
 - `github.com/luxfi/geth v1.16.2-lux.4` - Our fork of go-ethereum
-- Local packages from parent directory for: consensus, crypto, warp
+- Local packages from parent directory: consensus, crypto, warp (tagged v1.16.15-lux)
 
-### IMPORTANT: Version-specific changes
-When using node v1.13.4:
-- Use `acp118` package instead of `lp118` (renamed in later versions)
-- Import: `github.com/luxfi/node/network/p2p/acp118`
-- All handler IDs: `acp118.HandlerID`
-- All functions: `acp118.NewCachedHandler`, `acp118.NewSignatureAggregator`
+### IMPORTANT: Package Usage
+- Use `lp118` package for p2p handlers
+- Import: `github.com/luxfi/node/network/p2p/lp118`
+- All handler IDs: `lp118.HandlerID`
+- All functions: `lp118.NewCachedHandler`, `lp118.NewSignatureAggregator`
+- NEVER import from ava-labs packages
+- NEVER use go-ethereum directly, always use luxfi/geth
 
 ## Module Structure
 ```
@@ -30,6 +31,34 @@ When using node v1.13.4:
 ├── scripts/           # Build and test scripts
 └── warp/              # Cross-subnet messaging
 ```
+
+## Current Build Status
+**🔄 IN PROGRESS - Updating to Latest Lux Versions**
+
+The module is being updated to use:
+1. **node v1.16.15** - Latest Lux node version with lp118 support
+2. **consensus v1.16.15-lux** - Tagged to match node version
+3. **crypto v1.16.15-lux** - Tagged to match node version
+4. **warp v1.16.15-lux** - Tagged to match node version
+
+### Main Compatibility Issues
+1. **ID Types**: Node expects `node/ids.NodeID` but consensus uses `luxfi/ids.NodeID`
+2. **Block Interface**: Mismatch between `consensus/chain.Block` and `node/consensus/chain.Block`
+3. **Logger Interface**: luxfi/log.Logger vs node/utils/logging.Logger incompatibility
+4. **AppError Types**: consensus/core.AppError vs node/snow/engine/common.AppError
+
+### Fixes Applied
+- Updated to latest Lux node v1.16.15
+- Using lp118 package for p2p handlers
+- Context changed from struct to context.Context
+- Network module uses ID conversion functions
+- All local modules tagged with v1.16.15-lux for consistency
+
+### Remaining Work
+1. **Create adapter layer** between node and consensus ID types
+2. **Implement logger wrapper** for luxfi/log to node/utils/logging
+3. **Fix Block interface** to satisfy both consensus and node requirements
+4. **Update all ID conversions** throughout the codebase
 
 ## Key Implementation Details
 
@@ -63,14 +92,15 @@ When using node v1.13.4:
 ### Build Commands
 ```bash
 cd /home/z/work/lux/evm
-go build ./...
-go test ./...
+go build ./...  # Currently fails due to interface issues
+go test ./...   # Will work after build issues are resolved
 ```
 
 ### Common Issues and Fixes
 
-1. **Version Mismatch Errors**
-   - Always use node v1.13.4, not latest
+1. **Version Requirements**
+   - Always use node v1.16.15 or later Lux versions
+   - Never use ava-labs packages
    - Check go.mod replace directives
 
 2. **Interface Compatibility**
@@ -82,12 +112,23 @@ go test ./...
    - Metrics registration is currently disabled (TODO)
    - Will be re-enabled when consensus context supports it
 
+4. **ID Type Conversions**
+   ```go
+   // Convert between node's IDs and consensus IDs
+   func nodeIDToConsensus(id nodeids.NodeID) ids.NodeID {
+       var consensusID ids.NodeID
+       copy(consensusID[:], id[:])
+       return consensusID
+   }
+   ```
+
 ## Testing
 - Run with `-short` flag for quick tests
 - 28 packages with tests, 14 without (expected)
-- No test failures should occur
+- Tests will pass after build issues are resolved
 
 ## Important Notes
 - This module is actively being migrated from subnet-evm
 - Maintains backwards compatibility with existing Lux subnets
 - Uses single validator POA for development (k=1 consensus)
+- Major refactoring needed to reconcile ID type differences between packages

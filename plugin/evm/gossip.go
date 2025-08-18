@@ -12,11 +12,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/ids"
+	"github.com/luxfi/node/ids"
 	"github.com/luxfi/log"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	enginecore "github.com/luxfi/consensus/core"
+	commonEngine "github.com/luxfi/node/snow/engine/common"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
@@ -84,7 +84,7 @@ func (t txGossipHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, gossi
 	t.appGossipHandler.AppGossip(ctx, nodeID, gossipBytes)
 }
 
-func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *enginecore.AppError) {
+func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *commonEngine.AppError) {
 	return t.appRequestHandler.AppRequest(ctx, nodeID, deadline, requestBytes)
 }
 
