@@ -107,10 +107,10 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 
 // waitForEvent waits until a block needs to be built.
 // It returns only after at least [minBlockBuildingRetryDelay] passed from the last time a block was built.
-func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.Message, error) {
+func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.MessageType, error) {
 	lastBuildTime, err := b.waitForNeedToBuild(ctx)
 	if err != nil {
-		return 0, err
+		return commonEng.MessageType(0), err
 	}
 	timeSinceLastBuildTime := time.Since(lastBuildTime)
 	if b.lastBuildTime.IsZero() || timeSinceLastBuildTime >= minBlockBuildingRetryDelay {
@@ -121,7 +121,7 @@ func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.Message, err
 	log.Debug("Last time we built a block was too recent, waiting", "timeUntilNextBuild", timeUntilNextBuild)
 	select {
 	case <-ctx.Done():
-		return 0, ctx.Err()
+		return commonEng.MessageType(0), ctx.Err()
 	case <-time.After(timeUntilNextBuild):
 		return commonEng.PendingTxs, nil
 	}

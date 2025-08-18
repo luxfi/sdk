@@ -23,6 +23,8 @@ import (
 	"github.com/luxfi/evm/predicate"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/consensus/choices"
+	"github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"
 )
 
@@ -275,7 +277,6 @@ func (b *Block) String() string { return fmt.Sprintf("EVM block, ID = %s", b.ID(
 
 // SetStatus implements the chain.Block interface
 // This is required for chain.Block but not used in our implementation
-func (b *Block) SetStatus(status interface{}) {
+func (b *Block) SetStatus(status choices.Status) {
 	// No-op: EVM blocks manage their status internally through the blockchain
-	// The status parameter can be choices.Status but we don't use it
 }
