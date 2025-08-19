@@ -16,8 +16,7 @@ import (
 	"github.com/luxfi/log"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	commonEngine "github.com/luxfi/consensus/core"
-	nodecore "github.com/luxfi/node/consensus/engine/core"
+	nodeCore "github.com/luxfi/node/consensus/engine/core"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
@@ -85,7 +84,7 @@ func (t txGossipHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, gossi
 	t.appGossipHandler.AppGossip(ctx, nodeID, gossipBytes)
 }
 
-func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *nodecore.AppError) {
+func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *nodeCore.AppError) {
 	return t.appRequestHandler.AppRequest(ctx, nodeID, deadline, requestBytes)
 }
 
