@@ -78,6 +78,7 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
+	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
@@ -795,9 +796,12 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			if err != nil {
 				return nil, err
 			}
-			// Get the block ID and convert it
+			// Get the block ID - consensus block returns string, convert to ids.ID
 			blkIDStr := blk.ID()
-			blkID, _ := ids.FromString(blkIDStr)
+			blkID, err := ids.FromString(blkIDStr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse block ID: %w", err)
+			}
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(blkID))
 			if ethBlock == nil {
 				return nil, fmt.Errorf("built block not found")
@@ -810,9 +814,12 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			if err != nil {
 				return nil, err
 			}
-			// Get the block ID and convert it
+			// Get the block ID - consensus block returns string, convert to ids.ID
 			blkIDStr := blk.ID()
-			blkID, _ := ids.FromString(blkIDStr)
+			blkID, err := ids.FromString(blkIDStr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse block ID: %w", err)
+			}
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(blkID))
 			if ethBlock == nil {
 				return nil, fmt.Errorf("built block not found")
@@ -839,17 +846,17 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state consensus.State) error {
+func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 	
 	switch state {
-	case consensus.StateSyncing:
+	case nodeConsensus.StateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case consensus.Bootstrapping:
+	case nodeConsensus.Bootstrapping:
 		return vm.onBootstrapStarted()
-	case consensus.NormalOp:
+	case nodeConsensus.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
 		return fmt.Errorf("unknown state: %v", state)
@@ -954,8 +961,10 @@ func (vm *VM) onNormalOperationsStarted() error {
 	vm.builderLock.Unlock()
 
 	if vm.ethTxGossipHandler == nil {
+		// Get logger from context for gossip handler
+		gossipLogger := consensus.GetLogger(vm.ctx)
 		vm.ethTxGossipHandler = newTxGossipHandler[*GossipEthTx](
-			contextLogger,
+			gossipLogger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipMetrics,
@@ -971,8 +980,10 @@ func (vm *VM) onNormalOperationsStarted() error {
 	}
 
 	if vm.ethTxPullGossiper == nil {
+		// Get logger from context for pull gossiper
+		pullGossipLogger := consensus.GetLogger(vm.ctx)
 		ethTxPullGossiper := gossip.NewPullGossiper[*GossipEthTx](
-			contextLogger,
+			pullGossipLogger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipClient,
@@ -987,14 +998,17 @@ func (vm *VM) onNormalOperationsStarted() error {
 		}
 	}
 
+	// Get logger for gossip routines
+	gossipRoutineLogger := consensus.GetLogger(vm.ctx)
+	
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, contextLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
+		gossip.Every(ctx, gossipRoutineLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, contextLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
+		gossip.Every(ctx, gossipRoutineLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 
