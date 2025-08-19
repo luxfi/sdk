@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
