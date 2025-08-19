@@ -70,7 +70,8 @@ func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 			log.Info("Using standalone database for the chain state", "DatabaseConfig", dbConfig)
 			// Create a logger adapter for newStandaloneDatabase
 			logger := logging.NoLog{}
-			db, err = newStandaloneDatabase(dbConfig, consensus.GetMetrics(vm.ctx), logger)
+			// Pass nil for metrics as it's optional
+			db, err = newStandaloneDatabase(dbConfig, nil, logger)
 			if err != nil {
 				return err
 			}
