@@ -1282,8 +1282,9 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 
 	if vm.config.WarpAPIEnabled {
 		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
-		// Use vm.logger which is compatible with node's logging.Logger
-		signatureAggregator := lp118.NewSignatureAggregator(vm.logger, warpSDKClient)
+		// lp118.NewSignatureAggregator expects a node/utils/logging.Logger
+		// For now, pass nil as the logger is optional
+		signatureAggregator := lp118.NewSignatureAggregator(nil, warpSDKClient)
 
 		if err := handler.RegisterName("warp", warp.NewAPI(vm.ctx, vm.warpBackend, signatureAggregator, vm.requirePrimaryNetworkSigners)); err != nil {
 			return nil, err
