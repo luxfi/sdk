@@ -1,4 +1,4 @@
-# EVM v1.13.4-lux.27 Release Notes
+# EVM v0.8.7-lux.16 Release Notes
 
 ## 🎉 100% Working Release
 
@@ -15,7 +15,7 @@ This release represents a complete refactoring of the EVM module to achieve full
 
 #### ✅ Version Alignment
 All modules now use consistent v1.13.4-lux.N versioning:
-- EVM: v1.13.4-lux.27
+- EVM: v0.8.7-lux.16
 - Node: v1.13.4-lux.25
 - Consensus: v1.13.4-lux.24
 - Geth: v1.16.34-lux.3
@@ -33,7 +33,7 @@ $ go build ./plugin/evm
 
 ### Compatibility Matrix
 ```
-EVM v1.13.4-lux.27 ←→ Node v1.13.4-lux.25
+EVM v0.8.7-lux.16 ←→ Node v1.13.4-lux.25
          ↓                    ↓
    Geth v1.16.34-lux.3 ← Consensus v1.13.4-lux.24
 ```
@@ -54,7 +54,7 @@ EVM v1.13.4-lux.27 ←→ Node v1.13.4-lux.25
 
 ### Installation
 ```bash
-go get github.com/luxfi/evm@v1.13.4-lux.27
+go get github.com/luxfi/evm@v0.8.7-lux.16
 ```
 
 ### Migration Guide
