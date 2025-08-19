@@ -78,7 +78,7 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	nodeConsensus "github.com/luxfi/node/consensus"
+	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
@@ -87,7 +87,8 @@ import (
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/node/vms/components/chain"
+	nodeChain "github.com/luxfi/node/vms/components/chain"
+	protocolChain "github.com/luxfi/consensus/protocol/chain"
 
 	commonEng "github.com/luxfi/consensus/core"
 
@@ -182,9 +183,9 @@ type VM struct {
 	vmLock sync.RWMutex
 	// [cancel] may be nil until [consensus.NormalOp] starts
 	cancel context.CancelFunc
-	// *chain.State helps to implement the VM interface by wrapping blocks
+	// *nodeChain.State helps to implement the VM interface by wrapping blocks
 	// with an efficient caching layer.
-	*chain.State
+	*nodeChain.State
 
 	config config.Config
 
@@ -501,10 +502,7 @@ func (vm *VM) Initialize(
 		}
 	}
 
-	// Create a wrapper that implements warp.BlockClient
-	warpBlockClient := &warpBlockClientWrapper{
-		getBlock: vm.getBlock,
-	}
+	// VM implements warp.BlockClient directly
 	
 	// Get warp signer from context
 	warpSignerInterface := consensus.GetWarpSigner(vm.ctx)
@@ -517,7 +515,7 @@ func (vm *VM) Initialize(
 		consensus.GetNetworkID(vm.ctx),
 		consensus.GetChainID(vm.ctx),
 		warpSigner,
-		warpBlockClient,
+		&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
 		validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
 		vm.warpDB,
 		meteredCache,
@@ -542,11 +540,12 @@ func (vm *VM) Initialize(
 	}()
 
 	// Add p2p warp message warpHandler
-	// Use warpVerifierAdapter to adapt warp.Backend to lp118.Verifier
-	warpVerifier := &warpVerifierAdapter{backend: vm.warpBackend}
-	// TODO: Properly handle warp signer interface conversion
-	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, nil)
-	vm.Network.AddHandler(lp118.HandlerID, warpHandler)
+	// Pass warp backend directly to lp118 handler
+	// Pass nil for signer since lp118 doesn't use it the same way
+	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, nil)
+	// Use adapter to convert lp118.Handler to p2p.Handler
+	p2pHandler := newLP118HandlerAdapter(warpHandler)
+	vm.Network.AddHandler(lp118.HandlerID, p2pHandler)
 
 	vm.setAppRequestHandlers()
 
@@ -768,13 +767,13 @@ func (vm *VM) initializeStateSyncClient(lastAcceptedHeight uint64) error {
 func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	block := vm.newBlock(lastAcceptedBlock)
 
-	config := &chain.Config{
+	config := &nodeChain.Config{
 		DecidedCacheSize:      decidedCacheSize,
 		MissingCacheSize:      missingCacheSize,
 		UnverifiedCacheSize:   unverifiedCacheSize,
 		BytesToIDCacheSize:    bytesToIDCacheSize,
-		// Our vm methods return *Block which implements chain.Block from node
-		GetBlock: func(ctx context.Context, id ids.ID) (chain.Block, error) {
+		// Our vm methods return *Block which implements protocolChain.Block
+		GetBlock: func(ctx context.Context, id ids.ID) (protocolChain.Block, error) {
 			// getBlock returns consensus block, we need to return node block
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 			if ethBlock == nil {
@@ -782,7 +781,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		UnmarshalBlock: func(ctx context.Context, b []byte) (chain.Block, error) {
+		UnmarshalBlock: func(ctx context.Context, b []byte) (protocolChain.Block, error) {
 			// parseBlock returns consensus block, we need to return node block
 			ethBlock := &types.Block{}
 			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
@@ -790,48 +789,20 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		BuildBlock: func(ctx context.Context) (chain.Block, error) {
-			// buildBlock returns consensus block, we need to return node block
-			blk, err := vm.buildBlock(ctx)
-			if err != nil {
-				return nil, err
-			}
-			// Get the block ID - consensus block returns string, convert to ids.ID
-			blkIDStr := blk.ID()
-			blkID, err := ids.FromString(blkIDStr)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse block ID: %w", err)
-			}
-			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(blkID))
-			if ethBlock == nil {
-				return nil, fmt.Errorf("built block not found")
-			}
-			return vm.newBlock(ethBlock), nil
+		BuildBlock: func(ctx context.Context) (protocolChain.Block, error) {
+			// Call VM's BuildBlock directly which returns the right type
+			return vm.BuildBlock(ctx)
 		},
-		BuildBlockWithContext: func(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
-			// buildBlockWithContext returns consensus block, we need to return node block
-			blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
-			if err != nil {
-				return nil, err
-			}
-			// Get the block ID - consensus block returns string, convert to ids.ID
-			blkIDStr := blk.ID()
-			blkID, err := ids.FromString(blkIDStr)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse block ID: %w", err)
-			}
-			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(blkID))
-			if ethBlock == nil {
-				return nil, fmt.Errorf("built block not found")
-			}
-			return vm.newBlock(ethBlock), nil
-		},
+		// BuildBlockWithContext: func(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
+		// 	// Call VM's BuildBlockWithContext directly which returns the right type
+		// 	return vm.BuildBlockWithContext(ctx, proposerVMBlockCtx)
+		// },
 		LastAcceptedBlock:     block,
 	}
 
 	// Register chain state metrics
 	chainStateRegisterer := prometheus.NewRegistry()
-	state, err := chain.NewMeteredState(chainStateRegisterer, config)
+	state, err := nodeChain.NewMeteredState(chainStateRegisterer, config)
 	if err != nil {
 		return fmt.Errorf("could not create metered state: %w", err)
 	}
@@ -846,17 +817,17 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
+func (vm *VM) SetState(_ context.Context, state consensusInterfaces.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 	
 	switch state {
-	case nodeConsensus.StateSyncing:
+	case consensusInterfaces.StateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case nodeConsensus.Bootstrapping:
+	case consensusInterfaces.Bootstrapping:
 		return vm.onBootstrapStarted()
-	case nodeConsensus.NormalOp:
+	case consensusInterfaces.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
 		return fmt.Errorf("unknown state: %v", state)
@@ -962,9 +933,9 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 	if vm.ethTxGossipHandler == nil {
 		// Get logger from context for gossip handler
-		gossipLogger := consensus.GetLogger(vm.ctx)
+		// Use VM's logger instead of consensus logger
 		vm.ethTxGossipHandler = newTxGossipHandler[*GossipEthTx](
-			gossipLogger,
+			vm.logger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipMetrics,
@@ -980,10 +951,9 @@ func (vm *VM) onNormalOperationsStarted() error {
 	}
 
 	if vm.ethTxPullGossiper == nil {
-		// Get logger from context for pull gossiper
-		pullGossipLogger := consensus.GetLogger(vm.ctx)
+		// Use VM's logger instead of consensus logger
 		ethTxPullGossiper := gossip.NewPullGossiper[*GossipEthTx](
-			pullGossipLogger,
+			vm.logger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipClient,
@@ -999,16 +969,16 @@ func (vm *VM) onNormalOperationsStarted() error {
 	}
 
 	// Get logger for gossip routines
-	gossipRoutineLogger := consensus.GetLogger(vm.ctx)
+	// Use VM's logger for gossip routines
 	
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, gossipRoutineLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
+		gossip.Every(ctx, vm.logger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, gossipRoutineLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
+		gossip.Every(ctx, vm.logger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 
@@ -1034,7 +1004,7 @@ func (vm *VM) setAppRequestHandlers() {
 	vm.Network.SetRequestHandler(networkHandler)
 }
 
-func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
+func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.MessageType, error) {
 	vm.builderLock.Lock()
 	builder := vm.builder
 	vm.builderLock.Unlock()
@@ -1043,11 +1013,11 @@ func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
 	if builder == nil {
 		select {
 		case <-ctx.Done():
-			return 0, ctx.Err()
+			return commonEng.MessageType(0), ctx.Err()
 		case <-vm.stateSyncDone:
 			return commonEng.StateSyncDone, nil
 		case <-vm.shutdownChan:
-			return commonEng.Message(0), errShuttingDownVM
+			return commonEng.MessageType(0), errShuttingDownVM
 		}
 	}
 
@@ -1093,7 +1063,7 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (chain.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (nodeChain.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
@@ -1102,7 +1072,7 @@ func (vm *VM) BuildBlock(ctx context.Context) (chain.Block, error) {
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (nodeChain.Block, error) {
 	blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
 	if err != nil {
 		return nil, err
@@ -1200,20 +1170,7 @@ func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
 
 // GetAcceptedBlock attempts to retrieve block [blkID] from the VM. This method
 // only returns accepted blocks.
-// 
-// Note: This method is not used in our implementation since we don't use
-// the chain.State's block management. We implement it to satisfy interfaces
-// but it's not called in practice.
-func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (chain.Block, error) {
-	// This method expects to return a vms/components/chain.Block
-	// but our blocks implement consensus/chain.Block
-	// Since this method is not used in our flow, we return an error
-	return nil, fmt.Errorf("GetAcceptedBlock not implemented - use GetAcceptedBlockForWarp instead")
-}
-
-// GetAcceptedBlockForWarp implements the warp.BlockClient interface by returning
-// a block that implements the consensus chain.Block interface
-func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (chain.Block, error) {
+func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeChain.Block, error) {
 	// First verify the block is accepted
 	ethBlock := vm.blockChain.GetBlockByHash(common.BytesToHash(blkID[:]))
 	if ethBlock == nil {
@@ -1232,15 +1189,15 @@ func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (chain.
 		return nil, err
 	}
 	
-	// Extract the actual Block from the chain.BlockWrapper
+	// Extract the actual Block from the nodeChain.BlockWrapper
 	switch b := blk.(type) {
-	case *chain.BlockWrapper:
+	case *nodeChain.BlockWrapper:
 		if evmBlock, ok := b.Block.(*Block); ok {
-			return &consensusBlockWrapper{Block: evmBlock}, nil
+			return &consensusBlockWrapper{block: evmBlock}, nil
 		}
 		return nil, fmt.Errorf("unexpected block type in wrapper: %T", b.Block)
 	case *Block:
-		return &consensusBlockWrapper{Block: b}, nil
+		return &consensusBlockWrapper{block: b}, nil
 	default:
 		return nil, fmt.Errorf("unexpected block type: %T", blk)
 	}
