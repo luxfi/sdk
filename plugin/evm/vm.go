@@ -1193,11 +1193,11 @@ func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeChain.Blo
 	switch b := blk.(type) {
 	case *nodeChain.BlockWrapper:
 		if evmBlock, ok := b.Block.(*Block); ok {
-			return &consensusBlockWrapper{block: evmBlock}, nil
+			return evmBlock, nil
 		}
 		return nil, fmt.Errorf("unexpected block type in wrapper: %T", b.Block)
 	case *Block:
-		return &consensusBlockWrapper{block: b}, nil
+		return b, nil
 	default:
 		return nil, fmt.Errorf("unexpected block type: %T", blk)
 	}
@@ -1282,8 +1282,8 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 
 	if vm.config.WarpAPIEnabled {
 		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
-		contextLogger := consensus.GetLogger(vm.ctx)
-		signatureAggregator := lp118.NewSignatureAggregator(contextLogger, warpSDKClient)
+		// Use vm.logger which is compatible with node's logging.Logger
+		signatureAggregator := lp118.NewSignatureAggregator(vm.logger, warpSDKClient)
 
 		if err := handler.RegisterName("warp", warp.NewAPI(vm.ctx, vm.warpBackend, signatureAggregator, vm.requirePrimaryNetworkSigners)); err != nil {
 			return nil, err
@@ -1468,7 +1468,8 @@ func (vm *VM) Connected(ctx context.Context, nodeID ids.NodeID, version *version
 	if err := vm.validatorsManager.Connect(nodeID); err != nil {
 		return fmt.Errorf("uptime manager failed to connect node %s: %w", nodeID, err)
 	}
-	return vm.Network.Connected(ctx, nodeID, version)
+	// Network.Connected doesn't use version parameter in this implementation
+	return vm.Network.Connected(ctx, nodeID, nil)
 }
 
 func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {

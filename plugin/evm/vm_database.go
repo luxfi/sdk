@@ -63,14 +63,14 @@ func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 		if useStandAloneDB {
 			// If we are using a standalone database, we need to create a new database
 			// for the chain state.
-			dbConfig, err := getDatabaseConfig(vm.config, vm.ctx.ChainDataDir)
+			dbConfig, err := getDatabaseConfig(vm.config, consensus.GetChainDataDir(vm.ctx))
 			if err != nil {
 				return err
 			}
 			log.Info("Using standalone database for the chain state", "DatabaseConfig", dbConfig)
 			// Create a logger adapter for newStandaloneDatabase
 			logger := logging.NoLog{}
-			db, err = newStandaloneDatabase(dbConfig, vm.ctx.Metrics, logger)
+			db, err = newStandaloneDatabase(dbConfig, consensus.GetMetrics(vm.ctx), logger)
 			if err != nil {
 				return err
 			}

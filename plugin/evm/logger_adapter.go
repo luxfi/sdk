@@ -6,7 +6,6 @@ package evm
 import (
 	"io"
 	
-	"github.com/luxfi/consensus"
 )
 
 // loggerWriter wraps a consensus.Logger to implement io.Writer

@@ -5,11 +5,9 @@ package evm
 
 import (
 	"context"
-	"time"
 
 	"github.com/luxfi/ids"
 	consensusChain "github.com/luxfi/consensus/chain"
-	"github.com/luxfi/consensus/choices"
 	"github.com/luxfi/database"
 	"github.com/luxfi/geth/common"
 )
