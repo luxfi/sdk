@@ -52,7 +52,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.5.7 // indirect
-	github.com/Masterminds/semver/v3 v3.3.1 // indirect
+	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/NYTimes/gziphandler v1.1.1 // indirect
 	github.com/StephenButtolph/canoto v0.17.2 // indirect
@@ -85,7 +85,7 @@ require (
 	github.com/emicklei/dot v1.9.0 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.1 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
-	github.com/fatih/color v1.16.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/ferranbt/fastssz v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
@@ -181,4 +181,4 @@ require (
 )
 
 // Use lux-branded geth
-replace github.com/luxfi/geth => github.com/luxfi/geth v1.16.2-lux.4
+replace github.com/luxfi/geth => github.com/luxfi/geth v1.16.34-lux.3

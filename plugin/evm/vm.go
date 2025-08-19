@@ -78,6 +78,7 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
@@ -353,7 +354,7 @@ func (vm *VM) Initialize(
 		}
 	}
 
-	g, err := parseGenesis(context.Background(), genesisBytes, upgradeBytes, vm.config.AirdropFile)
+	g, err := parseGenesis(vm.ctx, genesisBytes, upgradeBytes, vm.config.AirdropFile)
 	if err != nil {
 		return err
 	}
@@ -500,7 +501,9 @@ func (vm *VM) Initialize(
 	}
 
 	// Create a wrapper that implements warp.BlockClient
-	warpBlockClient := &warpBlockClientWrapper{vm: vm}
+	warpBlockClient := &warpBlockClientWrapper{
+		getBlock: vm.getBlock,
+	}
 	
 	// Get warp signer from context
 	warpSignerInterface := consensus.GetWarpSigner(vm.ctx)
@@ -538,7 +541,10 @@ func (vm *VM) Initialize(
 	}()
 
 	// Add p2p warp message warpHandler
-	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, consensus.GetWarpSigner(vm.ctx))
+	// Use warpVerifierAdapter to adapt warp.Backend to lp118.Verifier
+	warpVerifier := &warpVerifierAdapter{backend: vm.warpBackend}
+	// TODO: Properly handle warp signer interface conversion
+	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, nil)
 	vm.Network.AddHandler(lp118.HandlerID, warpHandler)
 
 	vm.setAppRequestHandlers()
@@ -612,7 +618,8 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 	}
 
 	// Set network upgrade defaults
-	configExtra.SetDefaults(ctx.NetworkUpgrades)
+	// TODO: Get network upgrades from consensus context if available
+	configExtra.SetDefaults(upgrade.Config{})
 
 	// Apply upgradeBytes (if any) by unmarshalling them into [chainConfig.UpgradeConfig].
 	// Initializing the chain will verify upgradeBytes are compatible with existing values.
@@ -765,10 +772,53 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		MissingCacheSize:      missingCacheSize,
 		UnverifiedCacheSize:   unverifiedCacheSize,
 		BytesToIDCacheSize:    bytesToIDCacheSize,
-		GetBlock:              vm.getBlock,
-		UnmarshalBlock:        vm.parseBlock,
-		BuildBlock:            vm.buildBlock,
-		BuildBlockWithContext: vm.buildBlockWithContext,
+		// Our vm methods return *Block which implements chain.Block from node
+		GetBlock: func(ctx context.Context, id ids.ID) (chain.Block, error) {
+			// getBlock returns consensus block, we need to return node block
+			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
+			if ethBlock == nil {
+				return nil, database.ErrNotFound
+			}
+			return vm.newBlock(ethBlock), nil
+		},
+		UnmarshalBlock: func(ctx context.Context, b []byte) (chain.Block, error) {
+			// parseBlock returns consensus block, we need to return node block
+			ethBlock := &types.Block{}
+			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
+				return nil, err
+			}
+			return vm.newBlock(ethBlock), nil
+		},
+		BuildBlock: func(ctx context.Context) (chain.Block, error) {
+			// buildBlock returns consensus block, we need to return node block
+			blk, err := vm.buildBlock(ctx)
+			if err != nil {
+				return nil, err
+			}
+			// Get the block ID and convert it
+			blkIDStr := blk.ID()
+			blkID, _ := ids.FromString(blkIDStr)
+			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(blkID))
+			if ethBlock == nil {
+				return nil, fmt.Errorf("built block not found")
+			}
+			return vm.newBlock(ethBlock), nil
+		},
+		BuildBlockWithContext: func(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
+			// buildBlockWithContext returns consensus block, we need to return node block
+			blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
+			if err != nil {
+				return nil, err
+			}
+			// Get the block ID and convert it
+			blkIDStr := blk.ID()
+			blkID, _ := ids.FromString(blkIDStr)
+			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(blkID))
+			if ethBlock == nil {
+				return nil, fmt.Errorf("built block not found")
+			}
+			return vm.newBlock(ethBlock), nil
+		},
 		LastAcceptedBlock:     block,
 	}
 
@@ -793,9 +843,6 @@ func (vm *VM) SetState(_ context.Context, state consensus.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 	
-	// Get logger from context
-	contextLogger := consensus.GetLogger(vm.ctx)
-	
 	switch state {
 	case consensus.StateSyncing:
 		vm.bootstrapped.Set(false)
@@ -805,7 +852,7 @@ func (vm *VM) SetState(_ context.Context, state consensus.State) error {
 	case consensus.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
-		return consensus.ErrUnknownState
+		return fmt.Errorf("unknown state: %v", state)
 	}
 }
 
@@ -851,7 +898,11 @@ func (vm *VM) onNormalOperationsStarted() error {
 	// Initialize goroutines related to block building
 	// once we enter normal operation as there is no need to handle mempool gossip before this point.
 	ethTxGossipMarshaller := GossipEthTxMarshaller{}
-	ethTxGossipClient := vm.Network.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(vm.P2PValidators()))
+	p2pValidators, ok := vm.P2PValidators().(*p2p.Validators)
+	if !ok {
+		return fmt.Errorf("failed to get P2P validators")
+	}
+	ethTxGossipClient := vm.Network.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(p2pValidators))
 	ethTxGossipMetrics, err := gossip.NewMetrics(vm.sdkMetrics, ethTxGossipNamespace)
 	if err != nil {
 		return fmt.Errorf("failed to initialize eth tx gossip metrics: %w", err)
@@ -881,7 +932,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 		ethTxPushGossiper, err = gossip.NewPushGossiper[*GossipEthTx](
 			ethTxGossipMarshaller,
 			ethTxPool,
-			vm.P2PValidators(),
+			p2pValidators,
 			ethTxGossipClient,
 			ethTxGossipMetrics,
 			pushGossipParams,
@@ -911,7 +962,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 			config.TxGossipTargetMessageSize,
 			config.TxGossipThrottlingPeriod,
 			config.TxGossipThrottlingLimit,
-			vm.P2PValidators(),
+			p2pValidators,
 		)
 	}
 
@@ -932,7 +983,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 		vm.ethTxPullGossiper = gossip.ValidatorGossiper{
 			Gossiper:   ethTxPullGossiper,
 			NodeID:     consensus.GetNodeID(vm.ctx),
-			Validators: vm.P2PValidators(),
+			Validators: p2pValidators,
 		}
 	}
 
@@ -1181,15 +1232,6 @@ func (vm *VM) GetAcceptedBlockForWarp(ctx context.Context, blkID ids.ID) (chain.
 	}
 }
 
-// warpBlockClientWrapper wraps VM to implement warp.BlockClient interface
-type warpBlockClientWrapper struct {
-	vm *VM
-}
-
-// GetAcceptedBlock implements warp.BlockClient
-func (w *warpBlockClientWrapper) GetAcceptedBlock(ctx context.Context, blockID ids.ID) (chain.Block, error) {
-	return w.vm.GetAcceptedBlock(ctx, blockID)
-}
 
 // SetPreference sets what the current tail of the chain is
 func (vm *VM) SetPreference(ctx context.Context, blkID ids.ID) error {
