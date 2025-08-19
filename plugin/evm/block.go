@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/evm/predicate"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/choices"
+	"github.com/luxfi/consensus/choices"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/vms/components/chain"
 )
