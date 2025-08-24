@@ -28,6 +28,7 @@
 package params
 
 import (
+	"encoding/json"
 	"math/big"
 	"time"
 
@@ -215,6 +216,15 @@ var (
 	TestRules = TestChainConfig.Rules(new(big.Int), IsMergeTODO, 0)
 )
 
+// RulesAt returns the Rules for the given ChainConfig at the specified timestamp
+// This is a helper that properly sets up the RulesExtra with precompile information
+func RulesAt(c *ChainConfig, blockNum *big.Int, isMerge bool, timestamp uint64) Rules {
+	rules := c.Rules(blockNum, isMerge, timestamp)
+	// Store the context for GetRulesExtra to use
+	SetRulesContext(&rules, c, timestamp)
+	return rules
+}
+
 // ChainConfig is the core config which determines the blockchain settings.
 //
 // ChainConfig is stored in the database on a per block basis. This means
@@ -228,3 +238,65 @@ type ChainConfig = ethparams.ChainConfig
 // Rules is a one time interface meaning that it shouldn't be used in between transition
 // phases.
 type Rules = ethparams.Rules
+
+// ChainConfigJSON is a wrapper for ChainConfig that handles JSON marshaling/unmarshaling
+// with extras fields. This is used when we need to unmarshal JSON that contains both
+// standard ChainConfig fields and extras fields.
+type ChainConfigJSON struct {
+	*ChainConfig
+}
+
+// UnmarshalJSON unmarshals the JSON into the ChainConfig and handles extras fields
+func (c *ChainConfigJSON) UnmarshalJSON(data []byte) error {
+	// First unmarshal the standard ChainConfig fields
+	c.ChainConfig = &ChainConfig{}
+	if err := json.Unmarshal(data, c.ChainConfig); err != nil {
+		return err
+	}
+	
+	// Now unmarshal the extras fields
+	extraFields := &extras.ChainConfig{}
+	if err := json.Unmarshal(data, extraFields); err != nil {
+		return err
+	}
+	
+	// Set the extras using WithExtra
+	WithExtra(c.ChainConfig, extraFields)
+	return nil
+}
+
+// MarshalJSON marshals the ChainConfig with extras fields
+func (c *ChainConfigJSON) MarshalJSON() ([]byte, error) {
+	// Get the extras
+	extra := GetExtra(c.ChainConfig)
+	
+	// Marshal the standard config
+	configJSON, err := json.Marshal(c.ChainConfig)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Marshal the extras
+	extraJSON, err := extra.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	
+	// Merge the two JSON objects
+	var configMap map[string]json.RawMessage
+	if err := json.Unmarshal(configJSON, &configMap); err != nil {
+		return nil, err
+	}
+	
+	var extraMap map[string]json.RawMessage
+	if err := json.Unmarshal(extraJSON, &extraMap); err != nil {
+		return nil, err
+	}
+	
+	// Merge extras into config
+	for k, v := range extraMap {
+		configMap[k] = v
+	}
+	
+	return json.Marshal(configMap)
+}
