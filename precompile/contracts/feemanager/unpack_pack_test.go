@@ -25,7 +25,7 @@ var (
 func FuzzPackGetFeeConfigOutputEqualTest(f *testing.F) {
 	f.Add([]byte{}, uint64(0))
 	f.Add(big.NewInt(0).Bytes(), uint64(0))
-	f.Add(big.NewInt(1).Bytes(), uint64(math.MaxUint64))
+	f.Add(big.NewInt(1).Bytes(), uint64(^uint64(0)))
 	f.Add(math.MaxBig256.Bytes(), uint64(0))
 	f.Add(math.MaxBig256.Sub(math.MaxBig256, common.Big1).Bytes(), uint64(0))
 	f.Add(math.MaxBig256.Add(math.MaxBig256, common.Big1).Bytes(), uint64(0))
@@ -185,7 +185,7 @@ func FuzzPackGetLastChangedAtOutput(f *testing.F) {
 func FuzzPackSetFeeConfigEqualTest(f *testing.F) {
 	f.Add([]byte{}, uint64(0))
 	f.Add(big.NewInt(0).Bytes(), uint64(0))
-	f.Add(big.NewInt(1).Bytes(), uint64(math.MaxUint64))
+	f.Add(big.NewInt(1).Bytes(), uint64(^uint64(0)))
 	f.Add(math.MaxBig256.Bytes(), uint64(0))
 	f.Add(math.MaxBig256.Sub(math.MaxBig256, common.Big1).Bytes(), uint64(0))
 	f.Add(math.MaxBig256.Add(math.MaxBig256, common.Big1).Bytes(), uint64(0))

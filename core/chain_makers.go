@@ -123,14 +123,27 @@ func (b *BlockGen) SetParentBeaconRoot(root common.Hash) {
 // customized rules.
 // - bc:       enables the ability to query historical block hashes for BLOCKHASH
 // - vmConfig: extends the flexibility for customizing evm rules, e.g. enable extra EIPs
-func (b *BlockGen) addTx(bc *BlockChain, vmConfig vm.Config, tx *types.Transaction) {
+func (b *BlockGen) addTx(bc ChainContext, vmConfig vm.Config, tx *types.Transaction) {
 	if b.gasPool == nil {
 		b.SetCoinbase(common.Address{})
 	}
 	b.statedb.SetTxContext(tx.Hash(), len(b.txs))
 	blockContext := NewEVMBlockContext(b.header, bc, &b.header.Coinbase)
+	// If BaseFee is still nil, set it from the chain config
+	if blockContext.BaseFee == nil && b.cm.config != nil {
+		if params.GetExtra(b.cm.config).IsSubnetEVM(b.header.Time) {
+			blockContext.BaseFee = new(big.Int).Set(params.GetExtra(b.cm.config).FeeConfig.MinBaseFee)
+		}
+	}
 	receipt, err := ApplyTransaction(b.cm.config, bc, blockContext, b.gasPool, b.statedb, b.header, tx, &b.header.GasUsed, vmConfig)
 	if err != nil {
+		// Debug logging for BaseFee issue
+		if b.header.BaseFee == nil {
+			panic(fmt.Errorf("header.BaseFee is nil when applying tx: %v", err))
+		}
+		if blockContext.BaseFee == nil {
+			panic(fmt.Errorf("blockContext.BaseFee is nil when applying tx: %v", err))
+		}
 		panic(err)
 	}
 	b.txs = append(b.txs, tx)
@@ -149,7 +162,7 @@ func (b *BlockGen) addTx(bc *BlockChain, vmConfig vm.Config, tx *types.Transacti
 // instruction will panic during execution if it attempts to access a block number outside
 // of the range created by GenerateChain.
 func (b *BlockGen) AddTx(tx *types.Transaction) {
-	b.addTx(nil, vm.Config{}, tx)
+	b.addTx(b.cm, vm.Config{}, tx)
 }
 
 // AddTxWithChain adds a transaction to the generated block. If no coinbase has
@@ -389,6 +402,15 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 	if err != nil {
 		panic(err)
 	}
+	// If BaseFee is still nil after header.BaseFee, set a default
+	if baseFee == nil {
+		// For test environments, always set a base fee
+		if feeConfig.MinBaseFee != nil {
+			baseFee = new(big.Int).Set(feeConfig.MinBaseFee)
+		} else {
+			baseFee = big.NewInt(1) // Fallback to 1 wei
+		}
+	}
 
 	header := &types.Header{
 		Root:       state.IntermediateRoot(cm.config.IsEIP158(parent.Number())),
@@ -428,6 +450,22 @@ type chainMaker struct {
 	receipts    []types.Receipts
 }
 
+// Config returns the chain configuration
+func (cm *chainMaker) Config() *params.ChainConfig {
+	if cm == nil {
+		return nil
+	}
+	return cm.config
+}
+
+// Engine returns the consensus engine
+func (cm *chainMaker) Engine() consensus.Engine {
+	if cm == nil {
+		return nil
+	}
+	return cm.engine
+}
+
 func newChainMaker(bottom *types.Block, config *params.ChainConfig, engine consensus.Engine) *chainMaker {
 	return &chainMaker{
 		bottom:      bottom,
@@ -457,15 +495,6 @@ func (cm *chainMaker) blockByNumber(number uint64) *types.Block {
 
 // ChainReader/ChainContext implementation
 
-// Config returns the chain configuration (for consensus.ChainReader).
-func (cm *chainMaker) Config() *params.ChainConfig {
-	return cm.config
-}
-
-// Engine returns the consensus engine (for ChainContext).
-func (cm *chainMaker) Engine() consensus.Engine {
-	return cm.engine
-}
 
 func (cm *chainMaker) CurrentHeader() *types.Header {
 	if len(cm.chain) == 0 {

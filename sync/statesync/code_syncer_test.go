@@ -36,8 +36,8 @@ func testCodeSyncer(t *testing.T, test codeSyncerTest) {
 	codeHashes := make([]common.Hash, 0, len(test.codeByteSlices))
 	for _, codeBytes := range test.codeByteSlices {
 		codeHash := crypto.Keccak256Hash(codeBytes)
-		rawdb.WriteCode(serverDB, codeHash, codeBytes)
-		codeHashes = append(codeHashes, codeHash)
+		rawdb.WriteCode(serverDB, common.Hash(codeHash), codeBytes)
+		codeHashes = append(codeHashes, common.Hash(codeHash))
 	}
 
 	// Set up mockClient
@@ -91,7 +91,7 @@ func TestCodeSyncerSingleCodeHash(t *testing.T) {
 	codeBytes := utils.RandomBytes(100)
 	codeHash := crypto.Keccak256Hash(codeBytes)
 	testCodeSyncer(t, codeSyncerTest{
-		codeRequestHashes: [][]common.Hash{{codeHash}},
+		codeRequestHashes: [][]common.Hash{{common.Hash(codeHash)}},
 		codeByteSlices:    [][]byte{codeBytes},
 	})
 }
@@ -103,7 +103,7 @@ func TestCodeSyncerManyCodeHashes(t *testing.T) {
 	for i := 0; i < numCodeSlices; i++ {
 		codeBytes := utils.RandomBytes(100)
 		codeHash := crypto.Keccak256Hash(codeBytes)
-		codeHashes = append(codeHashes, codeHash)
+		codeHashes = append(codeHashes, common.Hash(codeHash))
 		codeByteSlices = append(codeByteSlices, codeBytes)
 	}
 
@@ -121,7 +121,7 @@ func TestCodeSyncerRequestErrors(t *testing.T) {
 	codeHash := crypto.Keccak256Hash(codeBytes)
 	err := errors.New("dummy error")
 	testCodeSyncer(t, codeSyncerTest{
-		codeRequestHashes: [][]common.Hash{{codeHash}},
+		codeRequestHashes: [][]common.Hash{{common.Hash(codeHash)}},
 		codeByteSlices:    [][]byte{codeBytes},
 		getCodeIntercept: func(hashes []common.Hash, codeBytes [][]byte) ([][]byte, error) {
 			return nil, err
@@ -135,7 +135,7 @@ func TestCodeSyncerAddsInProgressCodeHashes(t *testing.T) {
 	codeHash := crypto.Keccak256Hash(codeBytes)
 	testCodeSyncer(t, codeSyncerTest{
 		setupCodeSyncer: func(c *codeSyncer) {
-			customrawdb.AddCodeToFetch(c.DB, codeHash)
+			customrawdb.AddCodeToFetch(c.DB, common.Hash(codeHash))
 		},
 		codeRequestHashes: nil,
 		codeByteSlices:    [][]byte{codeBytes},
@@ -149,7 +149,7 @@ func TestCodeSyncerAddsMoreInProgressThanQueueSize(t *testing.T) {
 	for i := 0; i < numCodeSlices; i++ {
 		codeBytes := utils.RandomBytes(100)
 		codeHash := crypto.Keccak256Hash(codeBytes)
-		codeHashes = append(codeHashes, codeHash)
+		codeHashes = append(codeHashes, common.Hash(codeHash))
 		codeByteSlices = append(codeByteSlices, codeBytes)
 	}
 

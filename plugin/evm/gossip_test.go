@@ -9,11 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
@@ -21,7 +16,11 @@ import (
 	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/metric"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,16 +48,16 @@ func TestGossipSubscribe(t *testing.T) {
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
 	require.NoError(err)
-	txPool := setupPoolWithConfig(t, params.TestChainConfig, addr)
+	txPool := setupPoolWithConfig(t, params.TestChainConfig, common.Address(addr))
 	defer txPool.Close()
 	txPool.SetGasTip(common.Big1)
 	txPool.SetMinFee(common.Big0)
 
-	gossipTxPool, err := NewGossipEthTxPool(txPool, metrics.NewRegistry())
+	gossipTxPool, err := NewGossipEthTxPool(txPool, prometheus.NewRegistry())
 	require.NoError(err)
 
 	// use a custom bloom filter to test the bloom filter reset
-	gossipTxPool.bloom, err = gossip.NewBloomFilter(metrics.NewRegistry(), "", 1, 0.01, 0.0000000000000001) // maxCount =1
+	gossipTxPool.bloom, err = gossip.NewBloomFilter(prometheus.NewRegistry(), "", 1, 0.01, 0.0000000000000001) // maxCount =1
 	require.NoError(err)
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()

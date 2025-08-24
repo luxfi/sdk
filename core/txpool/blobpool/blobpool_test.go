@@ -77,7 +77,14 @@ var testChainConfig *params.ChainConfig
 func init() {
 	testChainConfig = new(params.ChainConfig)
 	*testChainConfig = params.Copy(params.TestChainConfig)
+	
+	// Use a valid test fee configuration
+	params.GetExtra(testChainConfig).FeeConfig = commontype.ValidTestFeeConfig
 	params.GetExtra(testChainConfig).FeeConfig.MinBaseFee = new(big.Int).SetUint64(1)
+	
+	// Set SubnetEVMTimestamp to enable base fee calculation
+	params.GetExtra(testChainConfig).NetworkUpgrades.SubnetEVMTimestamp = new(uint64)
+	*params.GetExtra(testChainConfig).NetworkUpgrades.SubnetEVMTimestamp = 0
 
 	testChainConfig.CancunTime = new(uint64)
 	*testChainConfig.CancunTime = uint64(time.Now().Unix())
@@ -98,6 +105,20 @@ func (bc *testBlockChain) Config() *params.ChainConfig {
 func (bc *testBlockChain) CurrentBlock() *types.Header {
 	// Yolo, life is too short to invert mist.CalcBaseFee and misc.CalcBlobFee,
 	// just binary search it them.
+
+	// Ensure basefee and blobfee are initialized
+	if bc.basefee == nil {
+		bc.basefee = uint256.NewInt(uint64(legacy.BaseFee))
+	}
+	if bc.blobfee == nil {
+		bc.blobfee = uint256.NewInt(ethparams.BlobTxMinBlobGasprice)
+	}
+	
+	// Ensure CancunTime is initialized
+	if bc.config.CancunTime == nil {
+		bc.config.CancunTime = new(uint64)
+		*bc.config.CancunTime = uint64(time.Now().Unix())
+	}
 
 	// The base fee at 5714 ETH translates into the 21000 base gas higher than
 	// mainnet ether existence, use that as a cap for the tests.
@@ -126,6 +147,9 @@ func (bc *testBlockChain) CurrentBlock() *types.Header {
 		)
 		if err != nil {
 			panic(err)
+		}
+		if baseFee == nil {
+			baseFee = new(big.Int).SetUint64(uint64(legacy.BaseFee))
 		}
 		if baseFee.Cmp(bc.basefee.ToBig()) > 0 {
 			hi = mid

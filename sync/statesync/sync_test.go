@@ -129,7 +129,7 @@ func TestSimpleSyncCases(t *testing.T) {
 						require.NoError(t, err, "error reading random code bytes")
 
 						codeHash := crypto.Keccak256Hash(codeBytes)
-						rawdb.WriteCode(serverDB, codeHash, codeBytes)
+						rawdb.WriteCode(serverDB, common.Hash(codeHash), codeBytes)
 						account.CodeHash = codeHash[:]
 					}
 					return account

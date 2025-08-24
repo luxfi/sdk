@@ -14,8 +14,6 @@ import (
 
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/consensus/core"
-	"github.com/luxfi/consensus/core/common"
-	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
@@ -28,6 +26,7 @@ import (
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/version"
+	"github.com/luxfi/consensus/utils/set"
 	consensusVersion "github.com/luxfi/consensus/version"
 )
 
@@ -610,7 +609,7 @@ func TestNetworkRouting(t *testing.T) {
 	err = network.AppResponse(context.Background(), ids.GenerateTestNodeID(), requestID, foobar)
 	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
 
-	err = network.AppRequestFailed(context.Background(), nodeID, requestID, context.DeadlineExceeded)
+	err = network.AppRequestFailed(context.Background(), nodeID, requestID, &core.AppError{Code: -1, Message: context.DeadlineExceeded.Error()})
 	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
 }
 
@@ -634,11 +633,17 @@ func marshalStruct(codec codec.Manager, obj interface{}) ([]byte, error) {
 type testAppSender struct {
 	sendAppRequestFn  func(context.Context, ids.NodeID, uint32, []byte) error
 	sendAppResponseFn func(ids.NodeID, uint32, []byte) error
+	sendAppErrorF     func(context.Context, ids.NodeID, uint32, int32, string) error
 }
 
-func (t testAppSender) SendAppRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, message []byte) error {
+func (t testAppSender) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, message []byte) error {
+	// For test compatibility, call the test function for each node in the set
 	if t.sendAppRequestFn != nil {
-		return t.sendAppRequestFn(ctx, nodeID, requestID, message)
+		for nodeID := range nodeIDs {
+			if err := t.sendAppRequestFn(ctx, nodeID, requestID, message); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -651,10 +656,17 @@ func (t testAppSender) SendAppResponse(_ context.Context, nodeID ids.NodeID, req
 }
 
 func (t testAppSender) SendAppError(ctx context.Context, nodeID ids.NodeID, requestID uint32, errorCode int32, errorMessage string) error {
+	if t.sendAppErrorF != nil {
+		return t.sendAppErrorF(ctx, nodeID, requestID, errorCode, errorMessage)
+	}
 	return nil
 }
 
-func (t testAppSender) SendAppGossip(_ context.Context, _ []byte) error {
+func (t testAppSender) SendAppGossip(_ context.Context, _ set.Set[ids.NodeID], _ []byte) error {
+	return nil
+}
+
+func (t testAppSender) SendAppGossipSpecific(_ context.Context, _ set.Set[ids.NodeID], _ []byte) error {
 	return nil
 }
 

@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
+	"github.com/luxfi/evm/precompile/testutils"
 )
 
 var (
@@ -265,7 +266,7 @@ var (
 			Caller: allowlisttest.TestNoRoleAddr,
 			BeforeHook: func(t testing.TB, state *extstate.StateDB) {
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
-				StoreRewardAddress(state, rewardAddress)
+				StoreRewardAddress(testutils.WrapStateDB(state), rewardAddress)
 			},
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackCurrentRewardAddress()
@@ -287,7 +288,7 @@ var (
 			Caller: allowlisttest.TestNoRoleAddr,
 			BeforeHook: func(t testing.TB, state *extstate.StateDB) {
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
-				EnableAllowFeeRecipients(state)
+				EnableAllowFeeRecipients(testutils.WrapStateDB(state))
 			},
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackAreFeeRecipientsAllowed()

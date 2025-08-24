@@ -6,6 +6,7 @@ package customtypes
 import (
 	"io"
 	"math/big"
+	"sync"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
@@ -14,17 +15,36 @@ import (
 	"github.com/luxfi/geth/rlp"
 )
 
+// Map-based storage for header extras until extras package is available
+var (
+	headerExtras      = make(map[*ethtypes.Header]*HeaderExtra)
+	headerExtrasMutex sync.RWMutex
+)
+
 // GetHeaderExtra returns the [HeaderExtra] from the given [Header].
 func GetHeaderExtra(h *ethtypes.Header) *HeaderExtra {
-	// TODO: Fix when extras is available
-	// return extras.Header.Get(h)
-	return nil
+	if h == nil {
+		return nil
+	}
+	headerExtrasMutex.RLock()
+	defer headerExtrasMutex.RUnlock()
+	extra := headerExtras[h]
+	if extra == nil {
+		// Return a default HeaderExtra with BlockGasCost set to nil
+		// This matches the expected behavior for blocks without gas cost set
+		return &HeaderExtra{BlockGasCost: nil}
+	}
+	return extra
 }
 
 // SetHeaderExtra sets the given [HeaderExtra] on the [Header].
 func SetHeaderExtra(h *ethtypes.Header, extra *HeaderExtra) {
-	// TODO: Fix when extras is available
-	// extras.Header.Set(h, extra)
+	if h == nil {
+		return
+	}
+	headerExtrasMutex.Lock()
+	defer headerExtrasMutex.Unlock()
+	headerExtras[h] = extra
 }
 
 // WithHeaderExtra sets the given [HeaderExtra] on the [Header]

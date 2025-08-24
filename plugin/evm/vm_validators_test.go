@@ -8,16 +8,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/database"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
-	"github.com/luxfi/consensus/engine/enginetest"
 	luxdvalidators "github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
-	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/database"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/node/utils/set"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +28,7 @@ func TestValidatorState(t *testing.T) {
 
 	vm := &VM{}
 
-	appSender := &enginetest.Sender{T: t}
+	appSender := &TestSender{T: t}
 	appSender.CantSendAppGossip = true
 	testNodeIDs := []ids.NodeID{
 		ids.GenerateTestNodeID(),
@@ -40,7 +40,7 @@ func TestValidatorState(t *testing.T) {
 		ids.GenerateTestID(),
 		ids.GenerateTestID(),
 	}
-	ctx.ValidatorState = &validatorstest.State{
+	validatorState := &validatorstest.State{
 		GetCurrentValidatorSetF: func(ctx context.Context, subnetID ids.ID) (map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput, uint64, error) {
 			return map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
 				testValidationIDs[0]: {
@@ -60,8 +60,23 @@ func TestValidatorState(t *testing.T) {
 				},
 			}, 0, nil
 		},
+		GetCurrentHeightF: func(context.Context) (uint64, error) {
+			return 0, nil
+		},
+		GetMinimumHeightF: func(context.Context) (uint64, error) {
+			return 0, nil
+		},
+		GetValidatorSetF: func(context.Context, uint64, ids.ID) (map[ids.NodeID]*luxdvalidators.GetValidatorOutput, error) {
+			return map[ids.NodeID]*luxdvalidators.GetValidatorOutput{}, nil
+		},
+		GetSubnetIDF: func(context.Context, ids.ID) (ids.ID, error) {
+			return ids.Empty, nil
+		},
 	}
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	// Create a wrapper that implements consensus.ValidatorState interface
+	wrappedValidatorState := utilstest.NewTestValidatorStateFromBase(validatorState)
+	ctx = consensus.WithValidatorState(ctx, wrappedValidatorState)
+	appSender.SendAppGossipF = func(context.Context, set.Set[ids.NodeID], []byte) error { return nil }
 	err := vm.Initialize(
 		context.Background(),
 		ctx,
@@ -143,7 +158,9 @@ func TestValidatorState(t *testing.T) {
 	require.NoError(vm.SetState(context.Background(), consensus.Bootstrapping))
 	require.NoError(vm.SetState(context.Background(), consensus.NormalOp))
 
-	vm.ctx.ValidatorState = testState
+	// Update the VM's context with the new validator state
+	wrappedTestState := utilstest.NewTestValidatorStateFromBase(testState)
+	vm.ctx = consensus.WithValidatorState(vm.ctx, wrappedTestState)
 
 	// new validator should be added to the state eventually after SyncFrequency
 	require.EventuallyWithT(func(c *assert.CollectT) {

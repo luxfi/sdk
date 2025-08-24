@@ -92,6 +92,10 @@ func (p *StateProcessor) Process(block *types.Block, parent *types.Header, state
 		vmenv   = vm.NewEVM(context, statedb, p.config, cfg)
 		signer  = types.MakeSigner(p.config, header.Number, header.Time)
 	)
+	// Debug: Check if statedb is nil
+	if statedb == nil {
+		log.Error("StateDB is nil in Process!")
+	}
 	if beaconRoot := block.BeaconRoot(); beaconRoot != nil {
 		ProcessBeaconBlockRoot(*beaconRoot, vmenv, statedb)
 	}

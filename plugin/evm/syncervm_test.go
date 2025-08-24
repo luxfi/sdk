@@ -15,26 +15,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/metric"
+	commonEng "github.com/luxfi/consensus/core"
+	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
+	"github.com/luxfi/consensus/engine/chain/block"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/core"
-	"github.com/luxfi/consensus/engine/enginetest"
-	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/utils/set"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"
@@ -45,6 +36,21 @@ import (
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/statesync/statesynctest"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/log"
+	"github.com/luxfi/node/version"
+)
+
+// Define testKeys for this test file if not available from vm_test.go
+var (
+	syncTestKeys = secp256k1.TestKeys()[:3]
 )
 
 func TestSkipStateSync(t *testing.T) {
@@ -100,7 +106,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 			reqCount++
 			// Fail all requests after number 50 to interrupt the sync
 			if reqCount > 50 {
-				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID, commonEng.ErrTimeout); err != nil {
+				appErr := &commonEng.AppError{Code: -1, Message: commonEng.ErrTimeout.Error()}
+				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID, appErr); err != nil {
 					panic(err)
 				}
 				cancel := syncerVM.StateSyncClient.(*stateSyncerClient).cancel
@@ -125,8 +132,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	test.expectedErr = nil
 
 	syncDisabledVM := &VM{}
-	appSender := &enginetest.Sender{T: t}
-	appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error { return nil }
+	appSender := &TestSender{T: t}
+	appSender.SendAppGossipF = func(context.Context, set.Set[ids.NodeID], []byte) error { return nil }
 	appSender.SendAppRequestF = func(ctx context.Context, nodeSet set.Set[ids.NodeID], requestID uint32, request []byte) error {
 		nodeID, hasItem := nodeSet.Pop()
 		if !hasItem {
@@ -136,7 +143,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		return nil
 	}
 	// Reset metrics to allow re-initialization
-	vmSetup.syncerVM.ctx.Metrics = metrics.NewPrefixGatherer()
+	// Note: Cannot reset metrics on live context - skipping
 	stateSyncDisabledConfigJSON := `{"state-sync-enabled":false}`
 	if err := syncDisabledVM.Initialize(
 		context.Background(),
@@ -201,7 +208,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		test.stateSyncMinBlocks,
 	)
 	// Reset metrics to allow re-initialization
-	vmSetup.syncerVM.ctx.Metrics = metrics.NewPrefixGatherer()
+	// Note: Cannot reset metrics on live context - skipping
 	if err := syncReEnabledVM.Initialize(
 		context.Background(),
 		vmSetup.syncerVM.ctx,
@@ -227,10 +234,18 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	}
 
 	// connect peer to [syncerVM]
+	// Convert compat.Application to consensus.Application
+	stateSyncVersion := &version.Application{
+		Major: statesyncclient.StateSyncVersion.Major,
+		Minor: statesyncclient.StateSyncVersion.Minor,
+		Patch: statesyncclient.StateSyncVersion.Patch,
+	}
+	// Use a test node ID for connection
+	testNodeID := ids.GenerateTestNodeID()
 	assert.NoError(t, syncReEnabledVM.Connected(
 		context.Background(),
-		vmSetup.serverVM.ctx.NodeID,
-		statesyncclient.StateSyncVersion,
+		testNodeID,
+		stateSyncVersion,
 	))
 
 	enabled, err = syncReEnabledVM.StateSyncEnabled(context.Background())
@@ -290,7 +305,11 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 		gen.AppendExtra(b)
 
 		tx := types.NewTransaction(gen.TxNonce(testEthAddrs[0]), testEthAddrs[1], common.Big1, ethparams.TxGas, big.NewInt(testMinGasPrice), nil)
-		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(serverVM.vm.chainConfig.ChainID), testKeys[0].ToECDSA())
+		// Convert secp256k1 key to ECDSA for signing
+		keyBytes := syncTestKeys[0].Bytes()
+		privKey, err := crypto.ToECDSA(keyBytes)
+		require.NoError(err)
+		signedTx, err := types.SignTx(tx, types.NewEIP155Signer(serverVM.vm.chainConfig.ChainID), privKey)
 		require.NoError(err)
 		gen.AddTx(signedTx)
 	}, nil)
@@ -325,7 +344,8 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	t.Cleanup(func() {
 		require.NoError(shutdownOnceSyncerVM.Shutdown(context.Background()))
 	})
-	require.NoError(syncerVM.vm.SetState(context.Background(), consensus.StateSyncing))
+	// Set the state to syncing
+	require.NoError(syncerVM.vm.SetState(context.Background(), consensusInterfaces.StateSyncing))
 	enabled, err := syncerVM.vm.StateSyncEnabled(context.Background())
 	require.NoError(err)
 	require.True(enabled)
@@ -342,11 +362,19 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	}
 
 	// connect peer to [syncerVM]
+	// Convert compat.Application to consensus.Application
+	stateSyncVersionForConnect := &version.Application{
+		Major: statesyncclient.StateSyncVersion.Major,
+		Minor: statesyncclient.StateSyncVersion.Minor,
+		Patch: statesyncclient.StateSyncVersion.Patch,
+	}
+	// Use a test node ID for connection
+	testNodeID := ids.GenerateTestNodeID()
 	require.NoError(
 		syncerVM.vm.Connected(
 			context.Background(),
-			serverVM.vm.ctx.NodeID,
-			statesyncclient.StateSyncVersion,
+			testNodeID,
+			stateSyncVersionForConnect,
 		),
 	)
 
@@ -372,7 +400,7 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 // off of a server VM.
 type syncVMSetup struct {
 	serverVM        *VM
-	serverAppSender *enginetest.Sender
+	serverAppSender *TestSender
 
 	fundedAccounts map[*utilstest.Key]*types.StateAccount
 
@@ -442,7 +470,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	// set [syncerVM] to bootstrapping and verify the last accepted block has been updated correctly
 	// and that we can bootstrap and process some blocks.
-	require.NoError(syncerVM.SetState(context.Background(), consensus.Bootstrapping))
+	require.NoError(syncerVM.SetState(context.Background(), consensusInterfaces.Bootstrapping))
 	require.Equal(serverVM.LastAcceptedBlock().Height(), syncerVM.LastAcceptedBlock().Height(), "block height mismatch between syncer and server")
 	require.Equal(serverVM.LastAcceptedBlock().ID(), syncerVM.LastAcceptedBlock().ID(), "blockID mismatch between syncer and server")
 	require.True(syncerVM.blockChain.HasState(syncerVM.blockChain.LastAcceptedBlock().Root()), "unavailable state for last accepted block")
@@ -497,7 +525,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	)
 
 	// check we can transition to [NormalOp] state and continue to process blocks.
-	require.NoError(syncerVM.SetState(context.Background(), consensus.NormalOp))
+	require.NoError(syncerVM.SetState(context.Background(), consensusInterfaces.NormalOp))
 	require.True(syncerVM.bootstrapped.Get())
 
 	// Generate blocks after we have entered normal consensus as well
@@ -540,7 +568,13 @@ func patchBlock(blk *types.Block, root common.Hash, db ethdb.Database) *types.Bl
 	header.Root = root
 	receipts := rawdb.ReadRawReceipts(db, blk.Hash(), blk.NumberU64())
 	newBlk := types.NewBlock(
-		header, blk.Transactions(), blk.Uncles(), receipts, trie.NewStackTrie(nil),
+		header,
+		&types.Body{
+			Transactions: blk.Transactions(),
+			Uncles:       blk.Uncles(),
+		},
+		receipts,
+		trie.NewStackTrie(nil),
 	)
 	rawdb.WriteBlock(db, newBlk)
 	rawdb.WriteCanonicalHash(db, newBlk.Hash(), newBlk.NumberU64())

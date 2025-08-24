@@ -125,10 +125,13 @@ func TestStateProcessorErrors(t *testing.T) {
 				},
 				GasLimit: params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
 			}
-			// FullFaker used to skip header verification that enforces no blobs.
-			blockchain, _  = NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewFullFaker(), vm.Config{}, common.Hash{}, false)
 			tooBigInitCode = [ethparams.MaxInitCodeSize + 1]byte{}
 		)
+		// FullFaker used to skip header verification that enforces no blobs.
+		blockchain, err := NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewFullFaker(), vm.Config{}, common.Hash{}, false)
+		if err != nil {
+			t.Fatal("Failed to create blockchain:", err)
+		}
 
 		defer blockchain.Stop()
 		bigNumber := new(big.Int).SetBytes(common.MaxHash.Bytes())
@@ -284,8 +287,11 @@ func TestStateProcessorErrors(t *testing.T) {
 				},
 				GasLimit: params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
 			}
-			blockchain, _ = NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
 		)
+		blockchain, err := NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
+		if err != nil {
+			t.Fatal("Failed to create blockchain:", err)
+		}
 		defer blockchain.Stop()
 		for i, tt := range []struct {
 			txs  []*types.Transaction
@@ -324,8 +330,11 @@ func TestStateProcessorErrors(t *testing.T) {
 				},
 				GasLimit: params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
 			}
-			blockchain, _ = NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
 		)
+		blockchain, err := NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
+		if err != nil {
+			t.Fatal("Failed to create blockchain:", err)
+		}
 		defer blockchain.Stop()
 		for i, tt := range []struct {
 			txs  []*types.Transaction

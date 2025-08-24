@@ -76,6 +76,13 @@ func NewTestValidatorState() consensus.ValidatorState {
 	return &testValidatorState{State: state}
 }
 
+// NewTestValidatorStateFromBase creates a testValidatorState that wraps an existing validatorstest.State
+// This is useful when you need to use a specific validatorstest.State with custom functions 
+// but still implement the consensus.ValidatorState interface.
+func NewTestValidatorStateFromBase(baseState *validatorstest.State) consensus.ValidatorState {
+	return &testValidatorState{State: baseState}
+}
+
 // NewTestConsensusContext returns a context.Context with validator state properly configured for testing.
 // This wraps consensustest.Context and sets the validator state to avoid the missing GetValidatorSetF issue.
 //

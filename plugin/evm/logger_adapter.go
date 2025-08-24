@@ -5,7 +5,6 @@ package evm
 
 import (
 	"io"
-	
 )
 
 // loggerWriter wraps a consensus.Logger to implement io.Writer

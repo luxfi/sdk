@@ -1,0 +1,82 @@
+ok  	github.com/luxfi/evm/accounts/abi	(cached)
+FAIL	github.com/luxfi/evm/accounts/abi/bind	0.041s
+FAIL
+FAIL	github.com/luxfi/evm/accounts/abi/bind/precompilebind	0.656s
+ok  	github.com/luxfi/evm/cmd/abigen	(cached)
+ok  	github.com/luxfi/evm/cmd/evm	(cached)
+ok  	github.com/luxfi/evm/commontype	(cached)
+ok  	github.com/luxfi/evm/consensus/dummy	(cached)
+ok  	github.com/luxfi/evm/consensus/misc/eip4844	(cached)
+FAIL	github.com/luxfi/evm/core	0.845s
+ok  	github.com/luxfi/evm/core/bloombits	(cached)
+ok  	github.com/luxfi/evm/core/state	(cached)
+FAIL	github.com/luxfi/evm/core/state/snapshot	0.590s
+ok  	github.com/luxfi/evm/core/txpool/blobpool	(cached)
+ok  	github.com/luxfi/evm/core/txpool/legacypool	(cached)
+ok  	github.com/luxfi/evm/core/vm/runtime	(cached)
+ok  	github.com/luxfi/evm/eth	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/eth/filters	1.232s
+FAIL	github.com/luxfi/evm/eth/gasprice	4.371s
+FAIL	github.com/luxfi/evm/eth/tracers	0.046s
+ok  	github.com/luxfi/evm/ethclient	(cached)
+FAIL	github.com/luxfi/evm/ethclient/simulated	0.038s
+FAIL	github.com/luxfi/evm/internal/ethapi	0.034s
+ok  	github.com/luxfi/evm/internal/flags	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/metrics/prometheus	0.007s
+ok  	github.com/luxfi/evm/miner	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/network	0.420s
+FAIL
+FAIL	github.com/luxfi/evm/params	0.021s
+FAIL
+FAIL	github.com/luxfi/evm/params/extras	0.022s
+FAIL	github.com/luxfi/evm/plugin [build failed]
+FAIL	github.com/luxfi/evm/plugin/evm [build failed]
+ok  	github.com/luxfi/evm/plugin/evm/blockgascost	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/config	(cached)
+FAIL	github.com/luxfi/evm/plugin/evm/customrawdb	0.018s
+FAIL	github.com/luxfi/evm/plugin/evm/customtypes	1.311s
+FAIL	github.com/luxfi/evm/plugin/evm/header	0.016s
+ok  	github.com/luxfi/evm/plugin/evm/log	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/plugin/evm/message	0.009s
+ok  	github.com/luxfi/evm/plugin/evm/upgrade/subnetevm	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/validators	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/validators/state	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/validators/state/interfaces	(cached) [no tests to run]
+ok  	github.com/luxfi/evm/plugin/evm/validators/uptime	(cached)
+FAIL	github.com/luxfi/evm/plugin/runner [build failed]
+ok  	github.com/luxfi/evm/precompile/allowlist	(cached)
+ok  	github.com/luxfi/evm/precompile/allowlist/allowlisttest	(cached)
+ok  	github.com/luxfi/evm/precompile/contract	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/deployerallowlist/deployerallowlisttest	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/feemanager	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/nativeminter	(cached)
+FAIL	github.com/luxfi/evm/precompile/contracts/pqcrypto [build failed]
+FAIL	github.com/luxfi/evm/precompile/contracts/quasar [build failed]
+ok  	github.com/luxfi/evm/precompile/contracts/rewardmanager	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/txallowlist	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/precompile/contracts/warp	44.184s
+ok  	github.com/luxfi/evm/precompile/modules	(cached)
+ok  	github.com/luxfi/evm/precompile/precompileconfig	(cached) [no tests to run]
+ok  	github.com/luxfi/evm/predicate	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/rpc	9.787s
+FAIL	github.com/luxfi/evm/sync/client [build failed]
+FAIL	github.com/luxfi/evm/sync/handlers [build failed]
+FAIL	github.com/luxfi/evm/sync/statesync [build failed]
+FAIL	github.com/luxfi/evm/tests/load [build failed]
+FAIL	github.com/luxfi/evm/tests/precompile [build failed]
+FAIL	github.com/luxfi/evm/tests/precompile/solidity [build failed]
+FAIL	github.com/luxfi/evm/tests/utils [build failed]
+FAIL	github.com/luxfi/evm/tests/warp [build failed]
+ok  	github.com/luxfi/evm/tests/warp/aggregator	(cached)
+FAIL	github.com/luxfi/evm/triedb/pathdb [build failed]
+ok  	github.com/luxfi/evm/utils	(cached)
+FAIL	github.com/luxfi/evm/utils/utilstest [build failed]
+ok  	github.com/luxfi/evm/warp	(cached)
+FAIL	github.com/luxfi/evm/warp/validators [build failed]
+FAIL

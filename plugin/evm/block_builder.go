@@ -8,11 +8,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/holiman/uint256"
 	commonEng "github.com/luxfi/consensus/core"
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/log"
 )
 
 const (

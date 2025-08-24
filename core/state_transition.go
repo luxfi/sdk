@@ -285,11 +285,15 @@ type StateTransition struct {
 
 // NewStateTransition initialises and returns a new state transition object.
 func NewStateTransition(evm *vm.EVM, msg *Message, gp *GasPool) *StateTransition {
+	var stateDB vm.StateDB
+	if evm != nil {
+		stateDB = evm.StateDB
+	}
 	return &StateTransition{
 		gp:    gp,
 		evm:   evm,
 		msg:   msg,
-		state: evm.StateDB,
+		state: stateDB,
 	}
 }
 
@@ -344,6 +348,10 @@ func (st *StateTransition) preCheck() error {
 	// Only check transactions that are not fake
 	msg := st.msg
 	if !msg.SkipAccountChecks {
+		// Check if state is nil
+		if st.state == nil {
+			return fmt.Errorf("state is nil in preCheck")
+		}
 		// Make sure this transaction's nonce is correct.
 		stNonce := st.state.GetNonce(msg.From)
 		if msgNonce := msg.Nonce; stNonce < msgNonce {
@@ -390,9 +398,26 @@ func (st *StateTransition) preCheck() error {
 			}
 			// This will panic if baseFee is nil, but basefee presence is verified
 			// as part of header validation.
-			if msg.GasFeeCap.Cmp(st.evm.Context.BaseFee) < 0 {
-				return fmt.Errorf("%w: address %v, maxFeePerGas: %s, baseFee: %s", ErrFeeCapTooLow,
-					msg.From.Hex(), msg.GasFeeCap, st.evm.Context.BaseFee)
+			if st.evm.Context.BaseFee == nil {
+				// For test environments, set a default base fee
+				if st.evm.Config.NoBaseFee {
+					// If NoBaseFee is set, skip this check
+					skipCheck = true
+				} else if st.evm.ChainConfig() != nil && params.GetExtra(st.evm.ChainConfig()).IsSubnetEVM(st.evm.Context.Time) {
+					// Set default BaseFee for SubnetEVM
+					st.evm.Context.BaseFee = new(big.Int).Set(params.GetExtra(st.evm.ChainConfig()).FeeConfig.MinBaseFee)
+				} else {
+					return fmt.Errorf("BaseFee is nil in EVM context")
+				}
+			}
+			if !skipCheck {
+				if msg.GasFeeCap == nil {
+					return fmt.Errorf("GasFeeCap is nil in message")
+				}
+				if msg.GasFeeCap.Cmp(st.evm.Context.BaseFee) < 0 {
+					return fmt.Errorf("%w: address %v, maxFeePerGas: %s, baseFee: %s", ErrFeeCapTooLow,
+						msg.From.Hex(), msg.GasFeeCap, st.evm.Context.BaseFee)
+				}
 			}
 		}
 	}

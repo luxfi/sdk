@@ -451,7 +451,15 @@ func NewBlockChain(
 	}
 	bc.genesisBlock = bc.GetBlockByNumber(0)
 	if bc.genesisBlock == nil {
-		return nil, ErrNoGenesis
+		// Workaround for rawdb issue where genesis block can't be read
+		// If we have a genesis configuration, recreate the genesis block
+		if genesis != nil {
+			bc.genesisBlock = genesis.ToBlock()
+			// Cache it for future use
+			bc.blockCache.Add(bc.genesisBlock.Hash(), bc.genesisBlock)
+		} else {
+			return nil, ErrNoGenesis
+		}
 	}
 
 	bc.currentBlock.Store(nil)

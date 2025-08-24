@@ -43,7 +43,7 @@ func TestGetCode(t *testing.T) {
 				code := []byte("this is the code")
 				codeHash := crypto.Keccak256Hash(code)
 				codeSlices := [][]byte{code}
-				return []common.Hash{codeHash}, message.CodeResponse{
+				return []common.Hash{common.Hash(codeHash)}, message.CodeResponse{
 					Data: codeSlices,
 				}, codeSlices
 			},
@@ -77,7 +77,7 @@ func TestGetCode(t *testing.T) {
 			setupRequest: func() (requestHashes []common.Hash, mockResponse message.CodeResponse, expectedCode [][]byte) {
 				oversizedCode := make([]byte, ethparams.MaxCodeSize+1)
 				codeHash := crypto.Keccak256Hash(oversizedCode)
-				return []common.Hash{codeHash}, message.CodeResponse{
+				return []common.Hash{common.Hash(codeHash)}, message.CodeResponse{
 					Data: [][]byte{oversizedCode},
 				}, nil
 			},

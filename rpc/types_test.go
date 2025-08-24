@@ -34,7 +34,6 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	gethmath "github.com/luxfi/geth/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

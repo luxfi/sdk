@@ -7,13 +7,13 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/params/extras"
-	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -54,8 +54,10 @@ func TestHandlePrecompileAccept(t *testing.T) {
 	}
 	ethBlock := types.NewBlock(
 		&types.Header{Number: big.NewInt(1)},
-		[]*types.Transaction{types.NewTx(&types.LegacyTx{})},
-		nil,
+		&types.Body{
+			Transactions: []*types.Transaction{types.NewTx(&types.LegacyTx{})},
+			Uncles:       nil,
+		},
 		[]*types.Receipt{receipt},
 		trie.NewStackTrie(nil),
 	)

@@ -6,13 +6,11 @@ package extras
 import (
 	"math/big"
 	"testing"
-	"time"
 
-	"github.com/luxfi/consensus"
-	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,7 +28,7 @@ func TestChainConfigDescription(t *testing.T) {
 		"empty": {
 			config: &ChainConfig{},
 			wantRegex: `Lux Upgrades \(timestamp based\)\:
- - SubnetEVM Timestamp: ( )+@nil( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
+ - SubnetEVM Timestamp: ( )+@nil( )+\(https:\/\/github\.com\/luxfi\/node\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
 Upgrade Config: {}
 Fee Config: {}
@@ -73,7 +71,7 @@ $`,
 				},
 			},
 			wantRegex: `Lux Upgrades \(timestamp based\)\:
- - SubnetEVM Timestamp: ( )+@1( )+\(https:\/\/github\.com\/luxfi\/luxd\/releases\/tag\/v1\.10\.0\)
+ - SubnetEVM Timestamp: ( )+@1( )+\(https:\/\/github\.com\/luxfi\/node\/releases\/tag\/v1\.10\.0\)
 ( - .+Timestamp: .+\n)+
 Upgrade Config: {"networkUpgradeOverrides":{"subnetEVMTimestamp":13},"stateUpgrades":\[{"blockTimestamp":14,"accounts":{"0x0f00000000000000000000000000000000000000":{"code":"0x10"}}}\]}
 Fee Config: {"gasLimit":5,"targetBlockRate":6,"minBaseFee":7,"targetGas":8,"baseFeeChangeDenominator":9,"minBlockGasCost":10,"maxBlockGasCost":11,"blockGasCostStep":12}
@@ -147,7 +145,7 @@ func TestChainConfigVerify(t *testing.T) {
 				NetworkUpgrades: NetworkUpgrades{
 					SubnetEVMTimestamp: nil,
 				},
-				LuxContext: LuxContext{ConsensusCtx: &context.Context{}},
+				LuxContext: LuxContext{ConsensusCtx: utilstest.NewTestConsensusContext(t)},
 			},
 			errRegex: "^invalid network upgrades: ",
 		},
@@ -155,18 +153,12 @@ func TestChainConfigVerify(t *testing.T) {
 			config: ChainConfig{
 				FeeConfig: validFeeConfig,
 				NetworkUpgrades: NetworkUpgrades{
-					SubnetEVMTimestamp: pointer(uint64(1)),
-					DurangoTimestamp:   pointer(uint64(2)),
-					EtnaTimestamp:      pointer(uint64(3)),
-					FortunaTimestamp:   pointer(uint64(4)),
+					SubnetEVMTimestamp: pointer(uint64(0)), // Must be 0 (genesis activation)
+					DurangoTimestamp:   pointer(uint64(0)), // Must be 0 for default
+					EtnaTimestamp:      nil, // Optional
+					FortunaTimestamp:   nil, // Optional
 				},
-				LuxContext: LuxContext{ConsensusCtx: &context.Context{
-					NetworkUpgrades: upgrade.Config{
-						DurangoTime: time.Unix(2, 0),
-						EtnaTime:    time.Unix(3, 0),
-						FortunaTime: time.Unix(4, 0),
-					},
-				}},
+				LuxContext: LuxContext{ConsensusCtx: utilstest.NewTestConsensusContext(t)},
 			},
 		},
 	}

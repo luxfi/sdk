@@ -47,9 +47,15 @@ func ExampleGenerateChain() {
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		key3, _ = crypto.HexToECDSA("49a7b37aa6f6645917e7b807e9d1c00d4fa71f18343b0d4122a4d2df64dd6fee")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
-		addr3   = crypto.PubkeyToAddress(key3.PublicKey)
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+
+		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
+
+		addr2 = common.BytesToAddress(cryptoAddr2[:])
+		cryptoAddr3 = crypto.PubkeyToAddress(key3.PublicKey)
+
+		addr3 = common.BytesToAddress(cryptoAddr3[:])
 		db      = rawdb.NewMemoryDatabase()
 		genDb   = rawdb.NewMemoryDatabase()
 	)
@@ -57,7 +63,7 @@ func ExampleGenerateChain() {
 	// Ensure that key1 has some funds in the genesis block.
 	gspec := &Genesis{
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-		Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: big.NewInt(1000000)}},
+		Alloc:  types.GenesisAlloc{addr1: {Balance: big.NewInt(1000000)}},
 	}
 	genesis := gspec.MustCommit(genDb, triedb.NewDatabase(genDb, triedb.HashDefaults))
 
@@ -69,15 +75,15 @@ func ExampleGenerateChain() {
 		switch i {
 		case 0:
 			// In block 1, addr1 sends addr2 some ether.
-			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+			tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx)
 		case 1:
 			// In block 2, addr1 sends some more ether to addr2.
 			// addr2 passes it on to addr3.
-			tx1, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(1000), ethparams.TxGas, nil, nil), signer, key1)
+			tx1, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(1000), ethparams.TxGas, nil, nil), signer, key1)
 			gen.AddTx(tx1)
 		case 2:
-			tx2, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr2)), common.Address(addr3), big.NewInt(1000), ethparams.TxGas, nil, nil), signer, key2)
+			tx2, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr2), addr3, big.NewInt(1000), ethparams.TxGas, nil, nil), signer, key2)
 			gen.AddTx(tx2)
 		}
 	})
@@ -96,9 +102,9 @@ func ExampleGenerateChain() {
 
 	state, _ := blockchain.State()
 	fmt.Printf("last block: #%d\n", blockchain.CurrentBlock().Number)
-	fmt.Println("balance of addr1:", state.GetBalance(common.Address(addr1)))
-	fmt.Println("balance of addr2:", state.GetBalance(common.Address(addr2)))
-	fmt.Println("balance of addr3:", state.GetBalance(common.Address(addr3)))
+	fmt.Println("balance of addr1:", state.GetBalance(addr1))
+	fmt.Println("balance of addr2:", state.GetBalance(addr2))
+	fmt.Println("balance of addr3:", state.GetBalance(addr3))
 	// Expected output has been modified since uncle blocks and block rewards have
 	// been removed from the original test.
 

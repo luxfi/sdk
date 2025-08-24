@@ -20,6 +20,7 @@ import (
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	"github.com/luxfi/node/utils/set"
 	luxWarp "github.com/luxfi/warp"
+	warpBls "github.com/luxfi/warp/bls"
 	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
@@ -30,6 +31,26 @@ import (
 )
 
 const pChainHeight uint64 = 1337
+
+// convertWarpToCryptoPublicKey converts a warp/bls.PublicKey to crypto/bls.PublicKey
+func convertWarpToCryptoPublicKey(warpPK *warpBls.PublicKey) (*bls.PublicKey, error) {
+	if warpPK == nil {
+		return nil, nil
+	}
+	// Convert the warp public key bytes to crypto public key
+	warpBytes := warpBls.PublicKeyToBytes(warpPK)
+	return bls.PublicKeyFromCompressedBytes(warpBytes)
+}
+
+// convertCryptoToWarpPublicKey converts a crypto/bls.PublicKey to warp/bls.PublicKey
+func convertCryptoToWarpPublicKey(cryptoPK *bls.PublicKey) (*warpBls.PublicKey, error) {
+	if cryptoPK == nil {
+		return nil, nil
+	}
+	// Convert the crypto public key bytes to warp public key
+	cryptoBytes := bls.PublicKeyToCompressedBytes(cryptoPK)
+	return warpBls.PublicKeyFromBytes(cryptoBytes)
+}
 
 var (
 	_ agoUtils.Sortable[*testValidator] = (*testValidator)(nil)
@@ -101,13 +122,21 @@ func init() {
 }
 
 type testValidator struct {
-	nodeID ids.NodeID
-	sk     bls.Signer
-	vdr    *luxWarp.Validator
+	nodeID   ids.NodeID
+	sk       bls.Signer
+	vdr      *luxWarp.Validator
+	cryptoPK *bls.PublicKey // Cached crypto/bls public key for consensus validation
 }
 
 func (v *testValidator) Compare(o *testValidator) int {
-	return v.vdr.Compare(o.vdr)
+	// Compare by public key bytes since warp.Validator doesn't have Compare method
+	if v.vdr.Less(o.vdr) {
+		return -1
+	}
+	if o.vdr.Less(v.vdr) {
+		return 1
+	}
+	return 0
 }
 
 func newTestValidator() *testValidator {
@@ -117,15 +146,24 @@ func newTestValidator() *testValidator {
 	}
 
 	nodeID := ids.GenerateTestNodeID()
-	pk := sk.PublicKey()
+	cryptoPK := sk.PublicKey()
+	cryptoPKBytes := bls.PublicKeyToCompressedBytes(cryptoPK)
+	
+	// Convert crypto public key to warp public key
+	warpPK, err := convertCryptoToWarpPublicKey(cryptoPK)
+	if err != nil {
+		panic(err)
+	}
+
 	return &testValidator{
-		nodeID: nodeID,
-		sk:     sk,
+		nodeID:   nodeID,
+		sk:       sk,
+		cryptoPK: cryptoPK,
 		vdr: &luxWarp.Validator{
-			PublicKey:      pk,
-			PublicKeyBytes: bls.PublicKeyToCompressedBytes(pk),
+			PublicKey:      warpPK,
+			PublicKeyBytes: cryptoPKBytes, // Use the same bytes from crypto
 			Weight:         3,
-			NodeIDs:        []ids.NodeID{nodeID},
+			NodeID:         nodeID[:],
 		},
 	}
 }

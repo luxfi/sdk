@@ -16,6 +16,7 @@ import (
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
+	"github.com/luxfi/evm/precompile/testutils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -163,7 +164,7 @@ var (
 				blockContext := contract.NewMockBlockContext(gomock.NewController(t))
 				blockContext.EXPECT().Number().Return(big.NewInt(6)).Times(1)
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
-				require.NoError(t, StoreFeeConfig(state, testFeeConfig, blockContext))
+				require.NoError(t, StoreFeeConfig(testutils.WrapStateDB(state), testFeeConfig, blockContext))
 			},
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackGetFeeConfig()
@@ -224,7 +225,7 @@ var (
 				blockContext := contract.NewMockBlockContext(gomock.NewController(t))
 				blockContext.EXPECT().Number().Return(testBlockNumber).Times(1)
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
-				require.NoError(t, StoreFeeConfig(state, testFeeConfig, blockContext))
+				require.NoError(t, StoreFeeConfig(testutils.WrapStateDB(state), testFeeConfig, blockContext))
 			},
 			InputFn: func(t testing.TB) []byte {
 				input, err := PackGetFeeConfigLastChangedAt()

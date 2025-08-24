@@ -5,6 +5,7 @@ package evm
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"encoding/json"
 	"errors"
 	"math/big"
@@ -13,29 +14,14 @@ import (
 
 	_ "embed"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/lp118"
-	"github.com/luxfi/node/proto/pb/sdk"
+	"github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
-	"github.com/luxfi/consensus/engine/enginetest"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
-	"github.com/luxfi/node/upgrade"
-	"github.com/luxfi/node/upgrade/upgradetest"
-	luxdUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/node/vms/components/chain"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/params"
@@ -45,7 +31,22 @@ import (
 	warpcontract "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/evm/warp"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/network/p2p/lp118"
+	"github.com/luxfi/node/proto/pb/sdk"
+	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/node/upgrade/upgradetest"
+	luxdUtils "github.com/luxfi/node/utils"
+	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/utils/set"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
@@ -111,16 +112,19 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
+	chainID := consensus.GetChainID(tvm.vm.ctx)
 	expectedUnsignedMessage, err := luxWarp.NewUnsignedMessage(
-		tvm.vm.ctx.NetworkID,
-		tvm.vm.ctx.ChainID,
+		consensus.GetNetworkID(tvm.vm.ctx),
+		chainID[:],
 		addressedPayload.Bytes(),
 	)
 	require.NoError(err)
 
 	// Submit a transaction to trigger sending a warp message
 	tx0 := types.NewTransaction(uint64(0), warpcontract.ContractAddress, big.NewInt(1), 100_000, big.NewInt(testMinGasPrice), warpSendMessageInput)
-	signedTx0, err := types.SignTx(tx0, types.LatestSignerForChainID(tvm.vm.chainConfig.ChainID), testKeys[0].ToECDSA())
+	key0ECDSA, err := crypto.ToECDSA(testKeys[0].Bytes())
+	require.NoError(err)
+	signedTx0, err := types.SignTx(tx0, types.LatestSignerForChainID(tvm.vm.chainConfig.ChainID), key0ECDSA)
 	require.NoError(err)
 
 	errs := tvm.vm.txPool.AddRemotesSync([]*types.Transaction{signedTx0})
@@ -136,7 +140,13 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	require.NoError(blk.Verify(context.Background()))
 
 	// Verify that the constructed block contains the expected log with an unsigned warp message in the log data
-	ethBlock1 := blk.(*chain.BlockWrapper).Block.(*Block).ethBlock
+	// Get internal block safely
+	var ethBlock1 *types.Block
+	if internalBlock, ok := blk.(*Block); ok {
+		ethBlock1 = internalBlock.ethBlock
+	} else {
+		t.Fatal("Block type assertion failed")
+	}
 	require.Len(ethBlock1.Transactions(), 1)
 	receipts := rawdb.ReadReceipts(tvm.vm.chaindb, ethBlock1.Hash(), ethBlock1.NumberU64(), ethBlock1.Time(), tvm.vm.chainConfig)
 	require.Len(receipts, 1)
@@ -177,7 +187,10 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	}
 
 	// Verify the produced message signature is valid
-	require.True(bls.Verify(tvm.vm.ctx.PublicKey, blsSignature, unsignedMessage.Bytes()))
+	warpSignerInterface := consensus.GetWarpSigner(tvm.vm.ctx)
+	warpSigner := warpSignerInterface.(bls.Signer)
+	publicKey := warpSigner.PublicKey()
+	require.True(bls.Verify(publicKey, blsSignature, unsignedMessage.Bytes()))
 
 	// Verify the blockID will now be signed by the backend and produces a valid signature.
 	rawSignatureBytes, err = tvm.vm.warpBackend.GetBlockSignature(context.TODO(), blk.ID())
@@ -185,13 +198,16 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	blsSignature, err = bls.SignatureFromBytes(rawSignatureBytes[:])
 	require.NoError(err)
 
-	blockHashPayload, err := payload.NewHash(blk.ID())
+	blockID := blk.ID()
+	blockHashPayload, err := payload.NewHash(blockID[:])
 	require.NoError(err)
-	unsignedMessage, err = luxWarp.NewUnsignedMessage(tvm.vm.ctx.NetworkID, tvm.vm.ctx.ChainID, blockHashPayload.Bytes())
+	chainID = consensus.GetChainID(tvm.vm.ctx)
+	blockUnsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 
 	// Verify the produced message signature is valid
-	require.True(bls.Verify(tvm.vm.ctx.PublicKey, blsSignature, unsignedMessage.Bytes()))
+	publicKey = warpSigner.PublicKey()
+	require.True(bls.Verify(publicKey, blsSignature, blockUnsignedMessage.Bytes()))
 }
 
 func TestValidateWarpMessage(t *testing.T) {
@@ -212,7 +228,7 @@ func testValidateWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -246,7 +262,7 @@ func testValidateInvalidWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -271,9 +287,9 @@ func testValidateWarpBlockHash(t *testing.T, scheme string) {
 	require := require.New(t)
 	sourceChainID := ids.GenerateTestID()
 	blockHash := ids.GenerateTestID()
-	blockHashPayload, err := payload.NewHash(blockHash)
+	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -300,9 +316,9 @@ func testValidateInvalidWarpBlockHash(t *testing.T, scheme string) {
 	require := require.New(t)
 	sourceChainID := ids.GenerateTestID()
 	blockHash := ids.GenerateTestID()
-	blockHashPayload, err := payload.NewHash(blockHash)
+	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -357,7 +373,7 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 	minimumValidPChainHeight := uint64(10)
 	getValidatorSetTestErr := errors.New("can't get validator set test error")
 
-	tvm.vm.ctx.ValidatorState = &validatorstest.State{
+	testValidatorState := &validatorstest.State{
 		// TODO: test both Primary Network / C-Chain and non-Primary Network
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			return ids.Empty, nil
@@ -380,6 +396,8 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 			}, nil
 		},
 	}
+	wrappedValidatorState := utilstest.NewTestValidatorStateFromBase(testValidatorState)
+	tvm.vm.ctx = consensus.WithValidatorState(tvm.vm.ctx, wrappedValidatorState)
 
 	signersBitSet := set.NewBits()
 	signersBitSet.Add(0)
@@ -401,10 +419,15 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 	createTx, err := types.SignTx(
 		types.NewContractCreation(0, common.Big0, 7_000_000, big.NewInt(225*utils.GWei), common.Hex2Bytes(exampleWarpBin)),
 		types.LatestSignerForChainID(tvm.vm.chainConfig.ChainID),
-		testKeys[0].ToECDSA(),
+		func() *ecdsa.PrivateKey {
+			key, err := crypto.ToECDSA(testKeys[0].Bytes())
+			require.NoError(err)
+			return key
+		}(),
 	)
 	require.NoError(err)
-	exampleWarpAddress := crypto.CreateAddress(testEthAddrs[0], 0)
+	cryptoAddr := crypto.Address(testEthAddrs[0])
+	exampleWarpAddress := common.Address(crypto.CreateAddress(cryptoAddr, 0))
 
 	tx, err := types.SignTx(
 		predicate.NewPredicateTx(
@@ -421,7 +444,11 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 			signedMessage.Bytes(),
 		),
 		types.LatestSignerForChainID(tvm.vm.chainConfig.ChainID),
-		testKeys[0].ToECDSA(),
+		func() *ecdsa.PrivateKey {
+			key, err := crypto.ToECDSA(testKeys[0].Bytes())
+			require.NoError(err)
+			return key
+		}(),
 	)
 	require.NoError(err)
 	errs := tvm.vm.txPool.AddRemotesSync([]*types.Transaction{createTx, tx})
@@ -455,7 +482,12 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 	require.NoError(warpBlock.Accept(context.Background()))
 	tvm.vm.blockChain.DrainAcceptorQueue()
 
-	ethBlock := warpBlock.(*chain.BlockWrapper).Block.(*Block).ethBlock
+	var ethBlock *types.Block
+	if internalBlock, ok := warpBlock.(*Block); ok {
+		ethBlock = internalBlock.ethBlock
+	} else {
+		t.Fatal("warpBlock type assertion failed")
+	}
 	verifiedMessageReceipts := tvm.vm.blockChain.GetReceiptsByHash(ethBlock.Hash())
 	require.Len(verifiedMessageReceipts, 2)
 	for i, receipt := range verifiedMessageReceipts {
@@ -534,7 +566,7 @@ func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 	tests := []test{
 		{
 			name:          "subnet message should be signed by subnet without RequirePrimaryNetworkSigners",
-			sourceChainID: tvm.vm.ctx.ChainID,
+			sourceChainID: consensus.GetChainID(tvm.vm.ctx),
 			msgFrom:       fromSubnet,
 			useSigners:    signersSubnet,
 			blockTime:     upgrade.InitiallyActiveTime,
@@ -548,7 +580,7 @@ func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 		},
 		{
 			name:          "C-Chain message should be signed by subnet without RequirePrimaryNetworkSigners",
-			sourceChainID: tvm.vm.ctx.CChainID,
+			sourceChainID: consensus.GetChainID(tvm.vm.ctx),
 			msgFrom:       fromPrimary,
 			useSigners:    signersSubnet,
 			blockTime:     upgrade.InitiallyActiveTime.Add(2 * blockGap),
@@ -557,7 +589,7 @@ func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 		// by using reEnableTime.
 		{
 			name:          "subnet message should be signed by subnet with RequirePrimaryNetworkSigners (unimpacted)",
-			sourceChainID: tvm.vm.ctx.ChainID,
+			sourceChainID: consensus.GetChainID(tvm.vm.ctx),
 			msgFrom:       fromSubnet,
 			useSigners:    signersSubnet,
 			blockTime:     reEnableTime,
@@ -571,7 +603,7 @@ func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 		},
 		{
 			name:          "C-Chain message should be signed by primary with RequirePrimaryNetworkSigners (impacted)",
-			sourceChainID: tvm.vm.ctx.CChainID,
+			sourceChainID: consensus.GetChainID(tvm.vm.ctx),
 			msgFrom:       fromPrimary,
 			useSigners:    signersPrimary,
 			blockTime:     reEnableTime.Add(2 * blockGap),
@@ -602,11 +634,12 @@ func testReceiveWarpMessage(
 	)
 	require.NoError(err)
 
-	vm.ctx.SubnetID = ids.GenerateTestID()
-	vm.ctx.NetworkID = testNetworkID
+	subnetID := ids.GenerateTestID()
+	vm.ctx = consensus.WithSubnetID(vm.ctx, subnetID)
+	vm.ctx = consensus.WithNetworkID(vm.ctx, testNetworkID)
 	unsignedMessage, err := luxWarp.NewUnsignedMessage(
-		vm.ctx.NetworkID,
-		sourceChainID,
+		consensus.GetNetworkID(vm.ctx),
+		sourceChainID[:],
 		addressedPayload.Bytes(),
 	)
 	require.NoError(err)
@@ -654,12 +687,12 @@ func testReceiveWarpMessage(
 	minimumValidPChainHeight := uint64(10)
 	getValidatorSetTestErr := errors.New("can't get validator set test error")
 
-	vm.ctx.ValidatorState = &validatorstest.State{
+	testValidatorState2 := &validatorstest.State{
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			if msgFrom == fromPrimary {
 				return constants.PrimaryNetworkID, nil
 			}
-			return vm.ctx.SubnetID, nil
+			return consensus.GetSubnetID(vm.ctx), nil
 		},
 		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			if height < minimumValidPChainHeight {
@@ -681,6 +714,8 @@ func testReceiveWarpMessage(
 			return vdrOutput, nil
 		},
 	}
+	wrappedValidatorState2 := utilstest.NewTestValidatorStateFromBase(testValidatorState2)
+	vm.ctx = consensus.WithValidatorState(vm.ctx, wrappedValidatorState2)
 
 	signersBitSet := set.NewBits()
 	for i := range signers {
@@ -717,7 +752,11 @@ func testReceiveWarpMessage(
 			signedMessage.Bytes(),
 		),
 		types.LatestSignerForChainID(vm.chainConfig.ChainID),
-		testKeys[0].ToECDSA(),
+		func() *ecdsa.PrivateKey {
+			key, err := crypto.ToECDSA(testKeys[0].Bytes())
+			require.NoError(err)
+			return key
+		}(),
 	)
 	require.NoError(err)
 	errs := vm.txPool.AddRemotesSync([]*types.Transaction{getVerifiedWarpMessageTx})
@@ -739,7 +778,12 @@ func testReceiveWarpMessage(
 	require.NoError(err)
 
 	// Require the block was built with a successful predicate result
-	ethBlock := block2.(*chain.BlockWrapper).Block.(*Block).ethBlock
+	var ethBlock *types.Block
+	if internalBlock, ok := block2.(*Block); ok {
+		ethBlock = internalBlock.ethBlock
+	} else {
+		t.Fatal("block2 type assertion failed")
+	}
 	headerPredicateResultsBytes := customheader.PredicateBytesFromExtra(ethBlock.Extra())
 	results, err := predicate.ParseResults(headerPredicateResultsBytes)
 	require.NoError(err)
@@ -830,7 +874,8 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 	// Setup known message
 	knownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("test"))
 	require.NoError(t, err)
-	knownWarpMessage, err := luxWarp.NewUnsignedMessage(tvm.vm.ctx.NetworkID, tvm.vm.ctx.ChainID, knownPayload.Bytes())
+	chainID := consensus.GetChainID(tvm.vm.ctx)
+	knownWarpMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], knownPayload.Bytes())
 	require.NoError(t, err)
 
 	// Add the known message and get its signature to confirm
@@ -862,7 +907,8 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 			message: func() *luxWarp.UnsignedMessage {
 				unknownPayload, err := payload.NewAddressedCall([]byte{1, 1, 1}, []byte("unknown"))
 				require.NoError(t, err)
-				msg, err := luxWarp.NewUnsignedMessage(tvm.vm.ctx.NetworkID, tvm.vm.ctx.ChainID, unknownPayload.Bytes())
+				chainID := consensus.GetChainID(tvm.vm.ctx)
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], unknownPayload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -871,9 +917,10 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 		{
 			name: "known block",
 			message: func() *luxWarp.UnsignedMessage {
-				payload, err := payload.NewHash(lastAcceptedID)
+				payload, err := payload.NewHash(lastAcceptedID[:])
 				require.NoError(t, err)
-				msg, err := luxWarp.NewUnsignedMessage(tvm.vm.ctx.NetworkID, tvm.vm.ctx.ChainID, payload.Bytes())
+				chainID := consensus.GetChainID(tvm.vm.ctx)
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], payload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -882,9 +929,11 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 		{
 			name: "unknown block",
 			message: func() *luxWarp.UnsignedMessage {
-				payload, err := payload.NewHash(ids.GenerateTestID())
+				testID := ids.GenerateTestID()
+				payload, err := payload.NewHash(testID[:])
 				require.NoError(t, err)
-				msg, err := luxWarp.NewUnsignedMessage(tvm.vm.ctx.NetworkID, tvm.vm.ctx.ChainID, payload.Bytes())
+				chainID := consensus.GetChainID(tvm.vm.ctx)
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], payload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -934,7 +983,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 func TestClearWarpDB(t *testing.T) {
 	ctx, db, genesisBytes, _ := setupGenesis(t, upgradetest.Latest)
 	vm := &VM{}
-	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, []*commonEng.Fx{}, &enginetest.Sender{}))
+	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, []*commonEng.Fx{}, &TestSender{}))
 
 	// use multiple messages to test that all messages get cleared
 	payloads := [][]byte{[]byte("test1"), []byte("test2"), []byte("test3"), []byte("test4"), []byte("test5")}
@@ -942,7 +991,8 @@ func TestClearWarpDB(t *testing.T) {
 
 	// add all messages
 	for _, payload := range payloads {
-		unsignedMsg, err := luxWarp.NewUnsignedMessage(vm.ctx.NetworkID, vm.ctx.ChainID, payload)
+		chainID := consensus.GetChainID(vm.ctx)
+		unsignedMsg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(vm.ctx), chainID[:], payload)
 		require.NoError(t, err)
 		require.NoError(t, vm.warpBackend.AddMessage(unsignedMsg))
 		// ensure that the message was added
@@ -957,7 +1007,7 @@ func TestClearWarpDB(t *testing.T) {
 	vm = &VM{}
 	// we need new context since the previous one has registered metrics.
 	ctx, _, _, _ = setupGenesis(t, upgradetest.Latest)
-	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, []*commonEng.Fx{}, &enginetest.Sender{}))
+	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, []*commonEng.Fx{}, &TestSender{}))
 
 	// check messages are still present
 	for _, message := range messages {
@@ -972,7 +1022,7 @@ func TestClearWarpDB(t *testing.T) {
 	vm = &VM{}
 	config := `{"prune-warp-db-enabled": true}`
 	ctx, _, _, _ = setupGenesis(t, upgradetest.Latest)
-	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte(config), []*commonEng.Fx{}, &enginetest.Sender{}))
+	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte(config), []*commonEng.Fx{}, &TestSender{}))
 
 	it := vm.warpDB.NewIterator()
 	require.False(t, it.Next())
