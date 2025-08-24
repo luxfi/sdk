@@ -1,0 +1,62 @@
+ok  	github.com/luxfi/evm/accounts/abi	(cached)
+FAIL	github.com/luxfi/evm/accounts/abi/bind	0.053s
+FAIL
+FAIL	github.com/luxfi/evm/accounts/abi/bind/precompilebind	0.765s
+ok  	github.com/luxfi/evm/cmd/abigen	(cached)
+ok  	github.com/luxfi/evm/cmd/evm	(cached)
+ok  	github.com/luxfi/evm/commontype	(cached)
+ok  	github.com/luxfi/evm/consensus/dummy	(cached)
+ok  	github.com/luxfi/evm/consensus/misc/eip4844	(cached)
+FAIL	github.com/luxfi/evm/core	0.183s
+ok  	github.com/luxfi/evm/core/bloombits	(cached)
+ok  	github.com/luxfi/evm/core/state	(cached)
+FAIL	github.com/luxfi/evm/core/state/snapshot	0.621s
+ok  	github.com/luxfi/evm/core/txpool/blobpool	(cached)
+ok  	github.com/luxfi/evm/core/txpool/legacypool	(cached)
+ok  	github.com/luxfi/evm/core/vm/runtime	(cached)
+ok  	github.com/luxfi/evm/eth	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/eth/filters	1.221s
+FAIL	github.com/luxfi/evm/eth/gasprice	4.323s
+FAIL
+FAIL	github.com/luxfi/evm/eth/tracers	1.525s
+ok  	github.com/luxfi/evm/ethclient	(cached)
+FAIL	github.com/luxfi/evm/ethclient/simulated	0.044s
+FAIL	github.com/luxfi/evm/examples/sign-uptime-message [build failed]
+FAIL
+FAIL	github.com/luxfi/evm/internal/ethapi	3.935s
+ok  	github.com/luxfi/evm/internal/flags	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/metrics/prometheus	0.008s
+ok  	github.com/luxfi/evm/miner	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/network	0.449s
+FAIL
+FAIL	github.com/luxfi/evm/params	0.024s
+ok  	github.com/luxfi/evm/params/extras	(cached)
+FAIL	github.com/luxfi/evm/plugin [build failed]
+FAIL	github.com/luxfi/evm/plugin/evm	1.703s
+ok  	github.com/luxfi/evm/plugin/evm/blockgascost	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/config	(cached)
+FAIL	github.com/luxfi/evm/plugin/evm/customrawdb	0.015s
+FAIL
+FAIL	github.com/luxfi/evm/plugin/evm/customtypes	1.514s
+ok  	github.com/luxfi/evm/plugin/evm/header	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/log	(cached)
+FAIL
+FAIL	github.com/luxfi/evm/plugin/evm/message	0.009s
+ok  	github.com/luxfi/evm/plugin/evm/upgrade/subnetevm	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/validators	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/validators/state	(cached)
+ok  	github.com/luxfi/evm/plugin/evm/validators/state/interfaces	(cached) [no tests to run]
+ok  	github.com/luxfi/evm/plugin/evm/validators/uptime	(cached)
+FAIL	github.com/luxfi/evm/plugin/runner [build failed]
+ok  	github.com/luxfi/evm/precompile/allowlist	(cached)
+ok  	github.com/luxfi/evm/precompile/allowlist/allowlisttest	(cached)
+ok  	github.com/luxfi/evm/precompile/contract	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/deployerallowlist/deployerallowlisttest	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/feemanager	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/nativeminter	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/pqcrypto	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/rewardmanager	(cached)
+ok  	github.com/luxfi/evm/precompile/contracts/txallowlist	(cached)

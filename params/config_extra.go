@@ -36,6 +36,14 @@ var (
 	// Simple map-based replacement for libevm payloads system
 	chainConfigExtras = make(map[*ChainConfig]*extras.ChainConfig)
 	chainConfigMutex  sync.RWMutex
+	
+	// Last Rules context - workaround since Rules is passed by value
+	// This assumes single-threaded test execution
+	lastRulesContext struct {
+		chainConfig *ChainConfig
+		timestamp   uint64
+	}
+	lastRulesContextMutex sync.RWMutex
 )
 
 // getPrecompileAddress returns the address for a precompile config
@@ -64,12 +72,17 @@ type RulesExtra struct {
 	
 	// LuxRules for header verification
 	LuxRules extras.LuxRules
+	
+	// Active precompiles for this rule set
+	activePrecompiles map[common.Address]bool
 }
 
 // IsPrecompileEnabled checks if a precompile is enabled
 func (r RulesExtra) IsPrecompileEnabled(addr common.Address) bool {
-	// TODO: Implement proper precompile checking
-	return false
+	if r.activePrecompiles == nil {
+		return false
+	}
+	return r.activePrecompiles[addr]
 }
 
 // SetEthUpgrades enables Ethereum network upgrades using the same time as
@@ -175,8 +188,39 @@ type ChainConfigWithUpgradesJSON struct {
 // TODO: consider removing this method by allowing external tag for the embedded
 // ChainConfig struct.
 func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
-	// embed the ChainConfig struct into the response
-	chainConfigJSON, err := json.Marshal(&cu.ChainConfig)
+	// First get the extras
+	extra := GetExtra(&cu.ChainConfig)
+	
+	// Marshal the base ChainConfig
+	baseJSON, err := json.Marshal(&cu.ChainConfig)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Marshal the extras
+	extraJSON, err := extra.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	
+	// Parse both as maps to merge
+	var baseMap map[string]json.RawMessage
+	if err := json.Unmarshal(baseJSON, &baseMap); err != nil {
+		return nil, err
+	}
+	
+	var extraMap map[string]json.RawMessage
+	if err := json.Unmarshal(extraJSON, &extraMap); err != nil {
+		return nil, err
+	}
+	
+	// Merge extras into base
+	for k, v := range extraMap {
+		baseMap[k] = v
+	}
+	
+	// Now marshal the merged config
+	chainConfigJSON, err := json.Marshal(baseMap)
 	if err != nil {
 		return nil, err
 	}
@@ -241,27 +285,67 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 	GetExtra(c).NetworkUpgrades.SetDefaults(emptyUpgradeConfig)
 }
 
-// GetRulesExtra returns genesis rules with all upgrades activated as of August 2025
+// SetRulesContext associates a Rules instance with its ChainConfig and timestamp
+func SetRulesContext(r *Rules, c *ChainConfig, timestamp uint64) {
+	lastRulesContextMutex.Lock()
+	lastRulesContext.chainConfig = c
+	lastRulesContext.timestamp = timestamp
+	lastRulesContextMutex.Unlock()
+}
+
+// GetRulesExtra returns the RulesExtra for the given Rules
 func GetRulesExtra(rules Rules) RulesExtra {
-	// All upgrades are activated by default as of August 2025
-	// Keep the infrastructure upgradeable for future changes
+	// Use the last stored context - this is a workaround since Rules is passed by value
+	lastRulesContextMutex.RLock()
+	chainConfig := lastRulesContext.chainConfig
+	timestamp := lastRulesContext.timestamp
+	lastRulesContextMutex.RUnlock()
+	
+	if chainConfig == nil {
+		// No context found, return default RulesExtra
+		rulesExtra := RulesExtra{
+			IsSubnetEVM: true,
+			IsDurango:   true,
+			IsEtna:      true,
+			IsFortuna:   true,
+			IsGranite:   true,
+			PredicatersExist: false,
+			Predicaters:      make(map[common.Address]precompileconfig.Predicater),
+		}
+		rulesExtra.LuxRules = extras.LuxRules{
+			IsSubnetEVM: true,
+			IsDurango:   true,
+			IsEtna:      true,
+			IsFortuna:   true,
+			IsGranite:   true,
+		}
+		rulesExtra.activePrecompiles = make(map[common.Address]bool)
+		return rulesExtra
+	}
+	
+	// Get the extras rules for the chain config and timestamp
+	extrasRules := GetExtrasRules(rules, chainConfig, timestamp)
+	
+	// Build RulesExtra from extras.Rules
 	rulesExtra := RulesExtra{
-		IsSubnetEVM: true,
-		IsDurango:   true,
-		IsEtna:      true,
-		IsFortuna:   true,
-		IsGranite:   true,
-		PredicatersExist: false,
-		Predicaters:      make(map[common.Address]precompileconfig.Predicater),
+		IsSubnetEVM: extrasRules.LuxRules.IsSubnetEVM,
+		IsDurango:   extrasRules.LuxRules.IsDurango,
+		IsEtna:      extrasRules.LuxRules.IsEtna,
+		IsFortuna:   extrasRules.LuxRules.IsFortuna,
+		IsGranite:   extrasRules.LuxRules.IsGranite,
+		PredicatersExist: len(extrasRules.Predicaters) > 0,
+		Predicaters:      extrasRules.Predicaters,
+		LuxRules:         extrasRules.LuxRules,
+		activePrecompiles: make(map[common.Address]bool),
 	}
-	// Set LuxRules - all activated as genesis rules
-	rulesExtra.LuxRules = extras.LuxRules{
-		IsSubnetEVM: true,
-		IsDurango:   true,
-		IsEtna:      true,
-		IsFortuna:   true,
-		IsGranite:   true,
+	
+	// Populate active precompiles
+	for addr, config := range extrasRules.Precompiles {
+		if !config.IsDisabled() {
+			rulesExtra.activePrecompiles[addr] = true
+		}
 	}
+	
 	return rulesExtra
 }
 
