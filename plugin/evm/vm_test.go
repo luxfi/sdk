@@ -58,7 +58,6 @@ import (
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/node/vms/components/chain"
 
 	protocolchain "github.com/luxfi/consensus/protocol/chain"
 	luxdconstants "github.com/luxfi/node/utils/constants"
