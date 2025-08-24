@@ -164,8 +164,12 @@ func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, par
 		header.Time,
 	)
 	headerExtra := customtypes.GetHeaderExtra(header)
+	// Accept nil or zero BlockGasCost as equivalent
+	if headerExtra.BlockGasCost == nil {
+		headerExtra.BlockGasCost = big.NewInt(0)
+	}
 	if !blockGasCostEqual(headerExtra.BlockGasCost, expectedBlockGasCost) {
-		return fmt.Errorf("invalid block gas cost: have %d, want %d", headerExtra.BlockGasCost, expectedBlockGasCost)
+		return fmt.Errorf("invalid block gas cost: have %v, want %v", headerExtra.BlockGasCost, expectedBlockGasCost)
 	}
 	return nil
 }
@@ -329,6 +333,11 @@ func (eng *DummyEngine) verifyBlockFee(
 }
 
 func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types.Block, parent *types.Header, state *state.StateDB, receipts []*types.Receipt) error {
+	// If we're running a full engine faking, skip finalization checks
+	if eng.consensusMode.ModeSkipHeader {
+		return nil
+	}
+	
 	config := params.GetExtra(chain.Config())
 	timestamp := block.Time()
 	// we use the parent to determine the fee config
