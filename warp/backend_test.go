@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils"
-	"github.com/luxfi/crypto/bls/signer/localsigner"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/crypto/bls"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/warp/warptest"
 	"github.com/stretchr/testify/require"
 )
@@ -32,7 +32,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	testUnsignedMessage, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID, testAddressedCallPayload.Bytes())
+	testUnsignedMessage, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], testAddressedCallPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -41,11 +41,13 @@ func init() {
 func TestAddAndGetValidMessage(t *testing.T) {
 	db := memdb.New()
 
-	sk, err := localsigner.New()
+	// Create a BLS private key for signing
+	blsKey, err := bls.NewSecretKey()
 	require.NoError(t, err)
-	warpSigner := luxWarp.NewSigner(sk, networkID, sourceChainID)
+	// Create a LocalSigner from the BLS key
+	localSigner := NewLocalSigner(blsKey)
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](500)
-	backend, err := NewBackend(networkID, sourceChainID, warpSigner, nil, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
+	backend, err := NewBackend(networkID, sourceChainID, localSigner, nil, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
 	require.NoError(t, err)
 
 	// Add testUnsignedMessage to the warp backend
@@ -55,19 +57,21 @@ func TestAddAndGetValidMessage(t *testing.T) {
 	signature, err := backend.GetMessageSignature(context.TODO(), testUnsignedMessage)
 	require.NoError(t, err)
 
-	expectedSig, err := warpSigner.Sign(testUnsignedMessage)
+	expectedSigBytes, err := localSigner.Sign(testUnsignedMessage.Bytes())
 	require.NoError(t, err)
-	require.Equal(t, expectedSig, signature[:])
+	require.Equal(t, expectedSigBytes, signature[:])
 }
 
 func TestAddAndGetUnknownMessage(t *testing.T) {
 	db := memdb.New()
 
-	sk, err := localsigner.New()
+	// Create a BLS private key for signing
+	blsKey, err := bls.NewSecretKey()
 	require.NoError(t, err)
-	warpSigner := luxWarp.NewSigner(sk, networkID, sourceChainID)
+	// Create a LocalSigner from the BLS key
+	localSigner := NewLocalSigner(blsKey)
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](500)
-	backend, err := NewBackend(networkID, sourceChainID, warpSigner, nil, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
+	backend, err := NewBackend(networkID, sourceChainID, localSigner, nil, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
 	require.NoError(t, err)
 
 	// Try getting a signature for a message that was not added.
@@ -82,23 +86,26 @@ func TestGetBlockSignature(t *testing.T) {
 	blockClient := warptest.MakeBlockClient(blkID)
 	db := memdb.New()
 
-	sk, err := localsigner.New()
+	// Create a BLS private key for signing
+	blsKey, err := bls.NewSecretKey()
 	require.NoError(err)
-	warpSigner := luxWarp.NewSigner(sk, networkID, sourceChainID)
+	// Create a LocalSigner from the BLS key
+	localSigner := NewLocalSigner(blsKey)
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](500)
-	backend, err := NewBackend(networkID, sourceChainID, warpSigner, blockClient, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
+	backend, err := NewBackend(networkID, sourceChainID, localSigner, blockClient, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
 	require.NoError(err)
 
-	blockHashPayload, err := payload.NewHash(blkID)
+	blockHashPayload, err := payload.NewHash(blkID[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
-	expectedSig, err := warpSigner.Sign(unsignedMessage)
+	msgBytes := unsignedMessage.Bytes()
+	expectedSigBytes, err := localSigner.Sign(msgBytes)
 	require.NoError(err)
 
 	signature, err := backend.GetBlockSignature(context.TODO(), blkID)
 	require.NoError(err)
-	require.Equal(expectedSig, signature[:])
+	require.Equal(expectedSigBytes, signature[:])
 
 	_, err = backend.GetBlockSignature(context.TODO(), ids.GenerateTestID())
 	require.Error(err)
@@ -107,13 +114,15 @@ func TestGetBlockSignature(t *testing.T) {
 func TestZeroSizedCache(t *testing.T) {
 	db := memdb.New()
 
-	sk, err := localsigner.New()
+	// Create a BLS private key for signing
+	blsKey, err := bls.NewSecretKey()
 	require.NoError(t, err)
-	warpSigner := luxWarp.NewSigner(sk, networkID, sourceChainID)
+	// Create a LocalSigner from the BLS key
+	localSigner := NewLocalSigner(blsKey)
 
 	// Verify zero sized cache works normally, because the lru cache will be initialized to size 1 for any size parameter <= 0.
 	messageSignatureCache := lru.NewCache[ids.ID, []byte](0)
-	backend, err := NewBackend(networkID, sourceChainID, warpSigner, nil, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
+	backend, err := NewBackend(networkID, sourceChainID, localSigner, nil, warptest.NoOpValidatorReader{}, db, messageSignatureCache, nil)
 	require.NoError(t, err)
 
 	// Add testUnsignedMessage to the warp backend
@@ -123,9 +132,9 @@ func TestZeroSizedCache(t *testing.T) {
 	signature, err := backend.GetMessageSignature(context.TODO(), testUnsignedMessage)
 	require.NoError(t, err)
 
-	expectedSig, err := warpSigner.Sign(testUnsignedMessage)
+	expectedSigBytes, err := localSigner.Sign(testUnsignedMessage.Bytes())
 	require.NoError(t, err)
-	require.Equal(t, expectedSig, signature[:])
+	require.Equal(t, expectedSigBytes, signature[:])
 }
 
 func TestOffChainMessages(t *testing.T) {
@@ -134,9 +143,9 @@ func TestOffChainMessages(t *testing.T) {
 		check            func(require *require.Assertions, b Backend)
 		err              error
 	}
-	sk, err := localsigner.New()
+	sk, err := bls.NewSecretKey()
 	require.NoError(t, err)
-	warpSigner := luxWarp.NewSigner(sk, networkID, sourceChainID)
+	warpSigner := NewLocalSigner(sk)
 
 	for name, test := range map[string]test{
 		"no offchain messages": {},
@@ -145,20 +154,22 @@ func TestOffChainMessages(t *testing.T) {
 				testUnsignedMessage.Bytes(),
 			},
 			check: func(require *require.Assertions, b Backend) {
-				msg, err := b.GetMessage(testUnsignedMessage.ID())
+				msgID, _ := ids.ToID(testUnsignedMessage.ID())
+				msg, err := b.GetMessage(msgID)
 				require.NoError(err)
 				require.Equal(testUnsignedMessage.Bytes(), msg.Bytes())
 
 				signature, err := b.GetMessageSignature(context.TODO(), testUnsignedMessage)
 				require.NoError(err)
-				expectedSignatureBytes, err := warpSigner.Sign(msg)
+				expectedSignatureBytes, err := warpSigner.Sign(testUnsignedMessage.Bytes())
 				require.NoError(err)
 				require.Equal(expectedSignatureBytes, signature[:])
 			},
 		},
 		"unknown message": {
 			check: func(require *require.Assertions, b Backend) {
-				_, err := b.GetMessage(testUnsignedMessage.ID())
+				msgID, _ := ids.ToID(testUnsignedMessage.ID())
+				_, err := b.GetMessage(msgID)
 				require.ErrorIs(err, database.ErrNotFound)
 			},
 		},

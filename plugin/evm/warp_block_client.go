@@ -6,10 +6,10 @@ package evm
 import (
 	"context"
 
-	"github.com/luxfi/ids"
 	consensusChain "github.com/luxfi/consensus/chain"
 	"github.com/luxfi/database"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/ids"
 )
 
 // warpBlockClient wraps VM to provide the warp.BlockClient interface
@@ -24,13 +24,13 @@ func (w *warpBlockClient) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (c
 	if ethBlock == nil {
 		return nil, database.ErrNotFound
 	}
-	
+
 	// Check if this block is accepted by comparing with canonical chain
 	acceptedHash := w.vm.blockChain.GetCanonicalHash(ethBlock.NumberU64())
 	if acceptedHash != ethBlock.Hash() {
 		return nil, database.ErrNotFound
 	}
-	
+
 	// Create a wrapper that implements consensus/chain.Block
 	return &warpConsensusBlockWrapper{
 		block: w.vm.newBlock(ethBlock),

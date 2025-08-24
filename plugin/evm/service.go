@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/set"
-	"github.com/luxfi/evm/plugin/evm/client"
 )
 
 type ValidatorsAPI struct {

@@ -1412,6 +1412,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 			inclTx: false,
 			fullTx: false,
 			want: `{
+				"blockGasCost": "0x0",
 				"difficulty": "0x0",
 				"extraData": "0x",
 				"gasLimit": "0x0",
@@ -1437,6 +1438,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 			inclTx: true,
 			fullTx: false,
 			want: `{
+				"blockGasCost": "0x0",
 				"difficulty": "0x0",
 				"extraData": "0x",
 				"gasLimit": "0x0",
@@ -1468,6 +1470,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 			inclTx: true,
 			fullTx: true,
 			want: `{
+				"blockGasCost": "0x0",
 				"difficulty": "0x0",
 				"extraData": "0x",
 				"gasLimit": "0x0",

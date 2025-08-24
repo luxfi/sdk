@@ -10,21 +10,21 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/log"
 
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/choices"
 	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/components/chain"
 )
 
@@ -102,7 +102,7 @@ func (b *Block) handlePrecompileAccept(rules extras.Rules) error {
 	}
 	acceptCtx := &precompileconfig.AcceptContext{
 		ConsensusCtx: context.Background(),
-		Warp:    b.vm.warpBackend,
+		Warp:         b.vm.warpBackend,
 	}
 	for _, receipt := range receipts {
 		for logIdx, log := range receipt.Logs {
@@ -159,7 +159,7 @@ func (b *Block) syntacticVerify() error {
 // Verify implements the chain.Block interface
 func (b *Block) Verify(context.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:            context.Background(),
+		ConsensusCtx:       context.Background(),
 		ProposerVMBlockCtx: nil,
 	}, true)
 }
@@ -191,7 +191,7 @@ func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 // VerifyWithContext implements the block.WithVerifyContext interface
 func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) error {
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:            context.Background(),
+		ConsensusCtx:       context.Background(),
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}, true)
 }

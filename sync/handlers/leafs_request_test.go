@@ -63,10 +63,10 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 	)
 	for key, account := range accounts {
 		if account.Root == largeTrieRoot {
-			largeStorageAccount = crypto.Keccak256Hash(key.Address[:])
+			largeStorageAccount = common.Hash(crypto.Keccak256Hash(key.Address[:]))
 		}
 		if account.Root == smallTrieRoot {
-			smallStorageAccount = crypto.Keccak256Hash(key.Address[:])
+			smallStorageAccount = common.Hash(crypto.Keccak256Hash(key.Address[:]))
 		}
 		if (largeStorageAccount != common.Hash{}) && (smallStorageAccount != common.Hash{}) {
 			// we can break if we found both accounts of interest to the test

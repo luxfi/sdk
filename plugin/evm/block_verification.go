@@ -10,12 +10,12 @@ import (
 
 	"github.com/luxfi/geth/common"
 
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/trie"
 )
 
 var legacyMinGasPrice = big.NewInt(legacy.BaseFee)

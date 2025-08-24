@@ -24,14 +24,14 @@ func TestCodeRequestHandler(t *testing.T) {
 
 	codeBytes := []byte("some code goes here")
 	codeHash := crypto.Keccak256Hash(codeBytes)
-	rawdb.WriteCode(database, codeHash, codeBytes)
+	rawdb.WriteCode(database, common.Hash(codeHash), codeBytes)
 
 	maxSizeCodeBytes := make([]byte, ethparams.MaxCodeSize)
 	n, err := rand.Read(maxSizeCodeBytes)
 	assert.NoError(t, err)
 	assert.Equal(t, ethparams.MaxCodeSize, n)
 	maxSizeCodeHash := crypto.Keccak256Hash(maxSizeCodeBytes)
-	rawdb.WriteCode(database, maxSizeCodeHash, maxSizeCodeBytes)
+	rawdb.WriteCode(database, common.Hash(maxSizeCodeHash), maxSizeCodeBytes)
 
 	mockHandlerStats := &stats.MockHandlerStats{}
 	codeRequestHandler := NewCodeRequestHandler(database, message.Codec, mockHandlerStats)
@@ -43,7 +43,7 @@ func TestCodeRequestHandler(t *testing.T) {
 		"normal": {
 			setup: func() (request message.CodeRequest, expectedCodeResponse [][]byte) {
 				return message.CodeRequest{
-					Hashes: []common.Hash{codeHash},
+					Hashes: []common.Hash{common.Hash(codeHash)},
 				}, [][]byte{codeBytes}
 			},
 			verifyStats: func(t *testing.T, stats *stats.MockHandlerStats) {
@@ -54,7 +54,7 @@ func TestCodeRequestHandler(t *testing.T) {
 		"duplicate hashes": {
 			setup: func() (request message.CodeRequest, expectedCodeResponse [][]byte) {
 				return message.CodeRequest{
-					Hashes: []common.Hash{codeHash, codeHash},
+					Hashes: []common.Hash{common.Hash(codeHash), common.Hash(codeHash)},
 				}, nil
 			},
 			verifyStats: func(t *testing.T, stats *stats.MockHandlerStats) {
@@ -74,7 +74,7 @@ func TestCodeRequestHandler(t *testing.T) {
 		"max size code handled": {
 			setup: func() (request message.CodeRequest, expectedCodeResponse [][]byte) {
 				return message.CodeRequest{
-					Hashes: []common.Hash{maxSizeCodeHash},
+					Hashes: []common.Hash{common.Hash(maxSizeCodeHash)},
 				}, [][]byte{maxSizeCodeBytes}
 			},
 			verifyStats: func(t *testing.T, stats *stats.MockHandlerStats) {

@@ -19,15 +19,12 @@ import (
 	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/cache/metercacher"
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/network/p2p/gossip"
+	"github.com/luxfi/node/network/p2p/lp118"
+
 	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/metrics"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
@@ -46,6 +43,10 @@ import (
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/geth/triedb/hashdb"
 
 	warpcontract "github.com/luxfi/evm/precompile/contracts/warp"
@@ -53,6 +54,7 @@ import (
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/signer"
 
 	// Force-load tracer engine to trigger registration
@@ -69,26 +71,26 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/log"
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/database/versiondb"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
-	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/consensus/engine/chain/block"
+	protocolChain "github.com/luxfi/consensus/protocol/chain"
+	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
+	"github.com/luxfi/database/versiondb"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
 	nodemockable "github.com/luxfi/node/utils/timer/mockable"
-	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/version"
 	nodeChain "github.com/luxfi/node/vms/components/chain"
-	protocolChain "github.com/luxfi/consensus/protocol/chain"
 
 	commonEng "github.com/luxfi/consensus/core"
 
@@ -102,7 +104,7 @@ var (
 	// _ block.ChainVM                      = (*VM)(nil)
 	// _ block.BuildBlockWithContextChainVM = (*VM)(nil)
 	// _ block.StateSyncableVM              = (*VM)(nil)
-	_ statesyncclient.EthBlockParser     = (*VM)(nil)
+	_ statesyncclient.EthBlockParser = (*VM)(nil)
 )
 
 const (
@@ -119,7 +121,7 @@ const (
 	ethMetricsPrefix        = "eth"
 	sdkMetricsPrefix        = "sdk"
 	chainStateMetricsPrefix = "chain_state"
-	
+
 	// TxGossipHandlerID is the handler ID for transaction gossip
 	TxGossipHandlerID = uint64(0x1)
 )
@@ -176,6 +178,41 @@ var legacyApiNames = map[string]string{
 }
 
 // VM implements the chain.ChainVM interface
+// warpSignerAdapter adapts a signer.Signer to warp.WarpSigner
+type warpSignerAdapter struct {
+	signer signer.Signer
+	nodeID ids.NodeID
+}
+
+func (w *warpSignerAdapter) Sign(msg []byte) ([]byte, error) {
+	// Parse the message as an unsigned warp message
+	unsignedMsg, err := luxWarp.ParseUnsignedMessage(msg)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Sign using the signer
+	sig, err := w.signer.Sign(unsignedMsg)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Return the signature bytes
+	return sig.Bytes(), nil
+}
+
+func (w *warpSignerAdapter) PublicKey() []byte {
+	pk := w.signer.GetPublicKey()
+	if pk == nil {
+		return nil
+	}
+	return pk.Bytes()
+}
+
+func (w *warpSignerAdapter) NodeID() ids.NodeID {
+	return w.nodeID
+}
+
 type VM struct {
 	ctx context.Context
 	// contextLock is used to coordinate global VM operations.
@@ -229,7 +266,7 @@ type VM struct {
 	builderLock sync.Mutex
 	builder     *blockBuilder
 
-	clock nodemockable.Clock
+	clock          nodemockable.Clock
 	consensusClock consensusmockable.Clock
 
 	shutdownChan chan struct{}
@@ -503,18 +540,24 @@ func (vm *VM) Initialize(
 	}
 
 	// VM implements warp.BlockClient directly
-	
+
 	// Get warp signer from context
 	warpSignerInterface := consensus.GetWarpSigner(vm.ctx)
 	warpSigner, ok := warpSignerInterface.(signer.Signer)
 	if !ok {
 		return fmt.Errorf("invalid warp signer type: %T", warpSignerInterface)
 	}
-	
+
+	// Create a wrapper that implements WarpSigner
+	warpSignerAdapter := &warpSignerAdapter{
+		signer: warpSigner,
+		nodeID: consensus.GetNodeID(vm.ctx),
+	}
+
 	vm.warpBackend, err = warp.NewBackend(
 		consensus.GetNetworkID(vm.ctx),
 		consensus.GetChainID(vm.ctx),
-		warpSigner,
+		warpSignerAdapter,
 		&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
 		validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
 		vm.warpDB,
@@ -565,12 +608,12 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 			dbPath, _ := genesisMap["dbPath"].(string)
 			dbType, _ := genesisMap["dbType"].(string)
 			log.Info("Database replay genesis detected", "dbPath", dbPath, "dbType", dbType)
-			
+
 			// Return a special genesis that signals database replay
 			g := &core.Genesis{
 				Config: &params.ChainConfig{},
 			}
-			
+
 			// Extract the chain config from the genesis map
 			if configData, ok := genesisMap["config"].(map[string]interface{}); ok {
 				configBytes, _ := json.Marshal(configData)
@@ -578,14 +621,14 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 					return nil, fmt.Errorf("failed to parse chain config: %w", err)
 				}
 			}
-			
+
 			// Note: Database replay fields are not present in our ChainConfig
 			// These would need to be added if database replay functionality is needed
-			
+
 			return g, nil
 		}
 	}
-	
+
 	// Normal genesis parsing
 	g := new(core.Genesis)
 	if err := json.Unmarshal(genesisBytes, g); err != nil {
@@ -768,10 +811,10 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	block := vm.newBlock(lastAcceptedBlock)
 
 	config := &nodeChain.Config{
-		DecidedCacheSize:      decidedCacheSize,
-		MissingCacheSize:      missingCacheSize,
-		UnverifiedCacheSize:   unverifiedCacheSize,
-		BytesToIDCacheSize:    bytesToIDCacheSize,
+		DecidedCacheSize:    decidedCacheSize,
+		MissingCacheSize:    missingCacheSize,
+		UnverifiedCacheSize: unverifiedCacheSize,
+		BytesToIDCacheSize:  bytesToIDCacheSize,
 		// Our vm methods return *Block which implements protocolChain.Block
 		GetBlock: func(ctx context.Context, id ids.ID) (protocolChain.Block, error) {
 			// getBlock returns consensus block, we need to return node block
@@ -797,7 +840,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		// 	// Call VM's BuildBlockWithContext directly which returns the right type
 		// 	return vm.BuildBlockWithContext(ctx, proposerVMBlockCtx)
 		// },
-		LastAcceptedBlock:     block,
+		LastAcceptedBlock: block,
 	}
 
 	// Register chain state metrics
@@ -820,7 +863,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 func (vm *VM) SetState(_ context.Context, state consensusInterfaces.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
-	
+
 	switch state {
 	case consensusInterfaces.StateSyncing:
 		vm.bootstrapped.Set(false)
@@ -970,7 +1013,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 	// Get logger for gossip routines
 	// Use VM's logger for gossip routines
-	
+
 	vm.shutdownWg.Add(1)
 	go func() {
 		gossip.Every(ctx, vm.logger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
@@ -1063,7 +1106,7 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (nodeChain.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (block.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
@@ -1072,7 +1115,7 @@ func (vm *VM) BuildBlock(ctx context.Context) (nodeChain.Block, error) {
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (nodeChain.Block, error) {
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (block.Block, error) {
 	blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
 	if err != nil {
 		return nil, err
@@ -1092,7 +1135,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 		log.Debug("Building block without context")
 	}
 	predicateCtx := &precompileconfig.PredicateContext{
-		ConsensusCtx:            context.Background(),
+		ConsensusCtx:       context.Background(),
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}
 
@@ -1157,6 +1200,11 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
+// GetBlock implements the ChainVM interface
+func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (block.Block, error) {
+	return vm.getBlock(ctx, id)
+}
+
 func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
 	ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 	// If [ethBlock] is nil, return [database.ErrNotFound] here
@@ -1176,19 +1224,19 @@ func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeChain.Blo
 	if ethBlock == nil {
 		return nil, database.ErrNotFound
 	}
-	
+
 	// Check if this block is accepted by comparing with canonical chain
 	acceptedHash := vm.blockChain.GetCanonicalHash(ethBlock.NumberU64())
 	if acceptedHash != ethBlock.Hash() {
 		return nil, database.ErrNotFound
 	}
-	
+
 	// Get the block from our State
 	blk, err := vm.State.GetBlock(ctx, blkID)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Extract the actual Block from the nodeChain.BlockWrapper
 	switch b := blk.(type) {
 	case *nodeChain.BlockWrapper:
@@ -1202,7 +1250,6 @@ func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeChain.Blo
 		return nil, fmt.Errorf("unexpected block type: %T", blk)
 	}
 }
-
 
 // SetPreference sets what the current tail of the chain is
 func (vm *VM) SetPreference(ctx context.Context, blkID ids.ID) error {

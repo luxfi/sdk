@@ -46,6 +46,16 @@ var Hooks = &hooks{}
 
 // NewEVMBlockContext creates a new context for use in the EVM.
 func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common.Address) vm.BlockContext {
+	// Ensure BaseFee is not nil for EIP-1559 transactions
+	baseFee := header.BaseFee
+	if baseFee == nil && chain != nil && chain.Config() != nil {
+		// If BaseFee is nil, check if EIP-1559 is enabled and set a default
+		if params.GetExtra(chain.Config()).IsSubnetEVM(header.Time) {
+			// SubnetEVM requires base fee
+			baseFee = new(big.Int).Set(params.GetExtra(chain.Config()).FeeConfig.MinBaseFee)
+		}
+	}
+	
 	blockContext := vm.BlockContext{
 		CanTransfer: CanTransfer,
 		Transfer:    Transfer,
@@ -54,10 +64,15 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		BlockNumber: new(big.Int).Set(header.Number),
 		Time:        header.Time,
 		Difficulty:  new(big.Int).Set(header.Difficulty),
-		BaseFee:     header.BaseFee,
+		BaseFee:     baseFee,
 		GasLimit:    header.GasLimit,
 		Random:      nil,
-		BlobBaseFee: eip4844.CalcBlobFee(chain.Config(), header),
+		BlobBaseFee: func() *big.Int {
+			if chain.Config() != nil {
+				return eip4844.CalcBlobFee(chain.Config(), header)
+			}
+			return nil
+		}(),
 	}
 
 	// Shangai rules - set Random to Difficulty value

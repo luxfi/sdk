@@ -20,7 +20,7 @@ func TestETAShouldNotOverflow(t *testing.T) {
 		triesStartTime: start,
 		triesSynced:    100_000,
 		triesRemaining: 450_000,
-		leafsRateGauge: metrics.NilGauge{},
+		leafsRateGauge: metrics.NewGauge(),
 	}
 	require.Positive(stats.updateETA(time.Minute, now))
 }

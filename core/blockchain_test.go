@@ -332,8 +332,12 @@ func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 	var (
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+
+		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
+
+		addr2 = common.BytesToAddress(cryptoAddr2[:])
 		chainDB = rawdb.NewMemoryDatabase()
 	)
 
@@ -344,7 +348,7 @@ func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 			&params.ChainConfig{HomesteadBlock: new(big.Int)},
 			&extras.ChainConfig{FeeConfig: params.DefaultFeeConfig},
 		),
-		Alloc: types.GenesisAlloc{common.Address(addr1): {Balance: big.NewInt(1000000)}},
+		Alloc: types.GenesisAlloc{addr1: {Balance: big.NewInt(1000000)}},
 	}
 
 	blockchain, err := createBlockChain(chainDB, pruningConfig, gspec, common.Hash{})
@@ -356,7 +360,7 @@ func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 	// This call generates a chain of 3 blocks.
 	signer := types.HomesteadSigner{}
 	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 10, 10, func(i int, gen *BlockGen) {
-		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
@@ -671,8 +675,10 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 		engine = dummy.NewFaker()
 		// A sender who makes transactions, has some funds
 		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		address     = crypto.PubkeyToAddress(key.PublicKey)
-		destAddress = crypto.CreateAddress(address, 0)
+		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
+
+		address = common.BytesToAddress(cryptoAddress[:])
+		destAddress = crypto.CreateAddress(cryptoAddress, 0)
 		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 	)
 
@@ -745,8 +751,10 @@ func TestDeleteThenCreate(t *testing.T) {
 	var (
 		engine      = dummy.NewFaker()
 		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		address     = crypto.PubkeyToAddress(key.PublicKey)
-		factoryAddr = crypto.CreateAddress(address, 0)
+		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
+
+		address = common.BytesToAddress(cryptoAddress[:])
+		factoryAddr = crypto.CreateAddress(cryptoAddress, 0)
 		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 	)
 	/*
@@ -861,8 +869,10 @@ func TestTransientStorageReset(t *testing.T) {
 	var (
 		engine      = dummy.NewFaker()
 		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		address     = crypto.PubkeyToAddress(key.PublicKey)
-		destAddress = crypto.CreateAddress(address, 0)
+		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
+
+		address = common.BytesToAddress(cryptoAddress[:])
+		destAddress = crypto.CreateAddress(cryptoAddress, 0)
 		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 		vmConfig    = vm.Config{
 			ExtraEips: []int{1153}, // Enable transient storage EIP
@@ -944,7 +954,7 @@ func TestTransientStorageReset(t *testing.T) {
 		t.Fatalf("Failed to load state %v", err)
 	}
 	loc := common.BytesToHash([]byte{1})
-	slot := state.GetState(common.Address(destAddress), loc)
+	slot := state.GetState(common.BytesToAddress(destAddress[:]), loc)
 	if slot != (common.Hash{}) {
 		t.Fatalf("Unexpected dirty storage slot")
 	}
@@ -959,15 +969,19 @@ func TestEIP3651(t *testing.T) {
 		// A sender who makes transactions, has some funds
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+
+		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
+
+		addr2 = common.BytesToAddress(cryptoAddr2[:])
 		funds   = new(big.Int).Mul(common.Big1, big.NewInt(params.Ether))
 		gspec   = &Genesis{
 			Config:    params.TestChainConfig,
 			Timestamp: uint64(params.InitiallyActiveTime.Unix()),
 			Alloc: types.GenesisAlloc{
-				common.Address(addr1): {Balance: funds},
-				common.Address(addr2): {Balance: funds},
+				addr1: {Balance: funds},
+				addr2: {Balance: funds},
 				// The address 0xAAAA sloads 0x00 and 0x01
 				aa: {
 					Code: []byte{
@@ -1055,7 +1069,7 @@ func TestEIP3651(t *testing.T) {
 	// 4: Ensure the tx sender paid for the gasUsed * (block baseFee + effectiveGasTip).
 	// Note this differs from go-ethereum where the miner receives the gasUsed * block baseFee,
 	// as our handling of the coinbase payment is different.
-	actual = new(big.Int).Sub(funds, state.GetBalance(common.Address(addr1)).ToBig())
+	actual = new(big.Int).Sub(funds, state.GetBalance(addr1).ToBig())
 	if actual.Cmp(expected) != 0 {
 		t.Fatalf("sender balance incorrect: expected %d, got %d", expected, actual)
 	}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/utils"
 )
@@ -346,12 +347,11 @@ func (c *ChainConfig) Verify() error {
 	}
 
 	// Verify the network upgrades are internally consistent given the existing chainConfig.
-	// Note: verifyNetworkUpgrades expects upgrade.Config, but we have NetworkUpgrades
-	// TODO: This needs proper implementation or the method signature needs to be updated
-	// For now, skip this validation
-	// if err := c.verifyNetworkUpgrades(&c.NetworkUpgrades); err != nil {
-	// 	return fmt.Errorf("invalid network upgrades: %w", err)
-	// }
+	// Use default mainnet config for validation
+	agoUpgrades := upgrade.Mainnet
+	if err := c.NetworkUpgrades.verifyNetworkUpgrades(agoUpgrades); err != nil {
+		return fmt.Errorf("invalid network upgrades: %w", err)
+	}
 
 	return nil
 }

@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/consensus/chain"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
-	"github.com/luxfi/warp/signer"
 
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
@@ -58,7 +57,7 @@ type backend struct {
 	networkID                 uint32
 	sourceChainID             ids.ID
 	db                        database.Database
-	warpSigner                interface{} // luxWarp.Signer not yet implemented
+	warpSigner                WarpSigner
 	blockClient               BlockClient
 	validatorReader           interfaces.ValidatorReader
 	signatureCache            cache.Cacher[ids.ID, []byte]
@@ -71,7 +70,7 @@ type backend struct {
 func NewBackend(
 	networkID uint32,
 	sourceChainID ids.ID,
-	warpSigner signer.Signer,
+	warpSigner WarpSigner,
 	blockClient BlockClient,
 	validatorReader interfaces.ValidatorReader,
 	db database.Database,

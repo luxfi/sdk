@@ -46,6 +46,7 @@ import (
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/node"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/rpc"
 )
 
@@ -101,9 +102,16 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 	nodeConf := node.DefaultConfig
 
 	ethConf := ethconfig.DefaultConfig
+	
+	// Get the extra config and ensure FeeConfig is initialized
+	extra := params.GetExtra(&chainConfig)
+	if extra.FeeConfig.GasLimit == nil {
+		extra.FeeConfig = extras.DefaultFeeConfig
+	}
+	
 	ethConf.Genesis = &core.Genesis{
 		Config:   &chainConfig,
-		GasLimit: params.GetExtra(&chainConfig).FeeConfig.GasLimit.Uint64(),
+		GasLimit: extra.FeeConfig.GasLimit.Uint64(),
 		Alloc:    alloc,
 	}
 	ethConf.AllowUnfinalizedQueries = true

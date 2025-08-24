@@ -8,21 +8,21 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/versiondb"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/node/vms/components/chain"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/eth"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	syncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/statesync"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/log"
+	"github.com/luxfi/node/vms/components/chain"
 )
 
 const (

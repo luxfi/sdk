@@ -139,8 +139,21 @@ func (e *GenesisMismatchError) Error() string {
 func SetupGenesisBlock(
 	db ethdb.Database, triedb *triedb.Database, genesis *Genesis, lastAcceptedHash common.Hash, skipChainConfigCheckCompatible bool,
 ) (*params.ChainConfig, common.Hash, error) {
+	// If no genesis is provided, try to use existing chain data
 	if genesis == nil {
-		return nil, common.Hash{}, ErrNoGenesis
+		// Check if we have a stored genesis block
+		stored := rawdb.ReadCanonicalHash(db, 0)
+		if stored == (common.Hash{}) {
+			// No genesis provided and no stored genesis - this is an error
+			return nil, common.Hash{}, ErrNoGenesis
+		}
+		// We have a stored genesis, use it
+		storedcfg := customrawdb.ReadChainConfig(db, stored)
+		if storedcfg == nil {
+			// We have a genesis block but no config - this shouldn't happen
+			return nil, common.Hash{}, errGenesisNoConfig
+		}
+		return storedcfg, stored, nil
 	}
 	if genesis.Config == nil {
 		return nil, common.Hash{}, errGenesisNoConfig
@@ -160,7 +173,7 @@ func SetupGenesisBlock(
 	// is initialized with an external ancient store. Commit genesis state
 	// in this case.
 	header := rawdb.ReadHeader(db, stored, 0)
-	if header.Root != types.EmptyRootHash {
+	if header != nil && header.Root != types.EmptyRootHash {
 		// Check if the root exists in the database
 		if _, err := triedb.NodeReader(header.Root); err != nil {
 			// Ensure the stored genesis matches with the given one.
@@ -204,12 +217,23 @@ func SetupGenesisBlock(
 	// we use last accepted block for cfg compatibility check. Note this allows
 	// the node to continue if it previously halted due to attempting to process blocks with
 	// an incorrect chain config.
-	lastBlock := ReadBlockByHash(db, lastAcceptedHash)
-	// this should never happen, but we check anyway
-	// when we start syncing from scratch, the last accepted block
-	// will be genesis block
-	if lastBlock == nil {
-		return newcfg, common.Hash{}, errors.New("missing last accepted block")
+	var lastBlock *types.Block
+	if lastAcceptedHash == (common.Hash{}) {
+		// If no last accepted hash provided, use genesis
+		lastBlock = genesis.ToBlock()
+	} else {
+		lastBlock = ReadBlockByHash(db, lastAcceptedHash)
+		// this should never happen, but we check anyway
+		// when we start syncing from scratch, the last accepted block
+		// will be genesis block
+		if lastBlock == nil {
+			// If the lastAcceptedHash is the genesis hash, use the genesis block
+			if lastAcceptedHash == stored {
+				lastBlock = genesis.ToBlock()
+			} else {
+				return newcfg, common.Hash{}, errors.New("missing last accepted block")
+			}
+		}
 	}
 	height := lastBlock.NumberU64()
 	timestamp := lastBlock.Time()
@@ -375,16 +399,30 @@ func (g *Genesis) Commit(db ethdb.Database, triedb *triedb.Database) (*types.Blo
 	if err := config.CheckConfigForkOrder(); err != nil {
 		return nil, err
 	}
-	batch := db.NewBatch()
-	rawdb.WriteBlock(batch, block)
-	rawdb.WriteReceipts(batch, block.Hash(), block.NumberU64(), nil)
-	rawdb.WriteCanonicalHash(batch, block.Hash(), block.NumberU64())
-	rawdb.WriteHeadBlockHash(batch, block.Hash())
-	rawdb.WriteHeadHeaderHash(batch, block.Hash())
-	customrawdb.WriteChainConfig(batch, block.Hash(), config)
-	if err := batch.Write(); err != nil {
-		return nil, fmt.Errorf("failed to write genesis block: %w", err)
-	}
+	// Write all necessary database entries for genesis
+	hash := block.Hash()
+	number := block.NumberU64()
+	
+	// Critical: Write header number mapping first
+	rawdb.WriteHeaderNumber(db, hash, number)
+	
+	// Write the actual block data
+	rawdb.WriteHeader(db, block.Header())
+	rawdb.WriteBody(db, hash, number, block.Body())
+	rawdb.WriteReceipts(db, hash, number, nil)
+	
+	// Write canonical mappings
+	rawdb.WriteCanonicalHash(db, hash, number)
+	rawdb.WriteHeadBlockHash(db, hash)
+	rawdb.WriteHeadHeaderHash(db, hash)
+	
+	// Write chain config
+	customrawdb.WriteChainConfig(db, hash, config)
+	
+	// Verify the block can be read back - remove debug code later
+	// canonHash := rawdb.ReadCanonicalHash(db, 0)
+	// log.Info("After write check", "canonical_hash", canonHash, "block_hash", block.Hash(), "match", canonHash == block.Hash())
+	
 	return block, nil
 }
 

@@ -22,4 +22,3 @@ type Factory struct{}
 func (*Factory) New(log.Logger) (interface{}, error) {
 	return &VM{}, nil
 }
-

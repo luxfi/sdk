@@ -159,7 +159,7 @@ func TestBlockRequestHandlerLargeBlocks(t *testing.T) {
 		funds   = big.NewInt(1000000000000000000)
 		gspec   = &core.Genesis{
 			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-			Alloc:  types.GenesisAlloc{addr1: {Balance: funds}},
+			Alloc:  types.GenesisAlloc{common.Address(addr1): {Balance: funds}},
 		}
 		signer = types.LatestSigner(gspec.Config)
 	)
@@ -175,7 +175,7 @@ func TestBlockRequestHandlerLargeBlocks(t *testing.T) {
 		default:
 			data = make([]byte, units.MiB/16)
 		}
-		tx, err := types.SignTx(types.NewTransaction(b.TxNonce(addr1), addr1, big.NewInt(10000), 4_215_304, nil, data), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(b.TxNonce(common.Address(addr1)), common.Address(addr1), big.NewInt(10000), 4_215_304, nil, data), signer, key1)
 		if err != nil {
 			t.Fatal(err)
 		}

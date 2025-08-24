@@ -16,16 +16,14 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/set"
 
-	commonEng "github.com/luxfi/consensus/core"
-
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/core/types"
 )
 
 func fundAddressByGenesis(addrs []common.Address) (string, error) {
@@ -80,7 +78,7 @@ func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
 
 	addr := crypto.PubkeyToAddress(key.PublicKey)
 
-	genesisJSON, err := fundAddressByGenesis([]common.Address{addr})
+	genesisJSON, err := fundAddressByGenesis([]common.Address{common.Address(addr)})
 	assert.NoError(err)
 
 	tvm := newVM(t, testVMConfig{
@@ -104,7 +102,7 @@ func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
 		return nil
 	}
 	wg.Add(1)
-	tvm.appSender.SendAppGossipF = func(context.Context, commonEng.SendConfig, []byte) error {
+	tvm.appSender.SendAppGossipF = func(context.Context, set.Set[ids.NodeID], []byte) error {
 		wg.Done()
 		return nil
 	}

@@ -90,6 +90,7 @@ func setDefaults(cfg *Config) {
 				NetworkUpgrades: extras.NetworkUpgrades{
 					SubnetEVMTimestamp: new(uint64),
 				},
+				FeeConfig: extras.DefaultFeeConfig,
 			},
 		)
 	}

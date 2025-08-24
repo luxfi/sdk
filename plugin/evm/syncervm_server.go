@@ -7,12 +7,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/database"
 	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/database"
 
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/log"
 )
 
 type stateSyncServerConfig struct {

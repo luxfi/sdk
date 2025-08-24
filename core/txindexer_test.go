@@ -52,24 +52,28 @@ func TestTransactionIndices(t *testing.T) {
 	var (
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+
+		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
+
+		addr2 = common.BytesToAddress(cryptoAddr2[:])
 		funds   = big.NewInt(10000000000000)
 		gspec   = &Genesis{
 			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-			Alloc:  GenesisAlloc{common.Address(addr1): {Balance: funds}},
+			Alloc:  GenesisAlloc{addr1: {Balance: funds}},
 		}
 		signer = types.LatestSigner(gspec.Config)
 	)
 	genDb, blocks, _, err := GenerateChainWithGenesis(gspec, dummy.NewFaker(), 128, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
 	require.NoError(err)
 
 	blocks2, _, err := GenerateChain(gspec.Config, blocks[len(blocks)-1], dummy.NewFaker(), genDb, 10, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
@@ -172,24 +176,28 @@ func TestTransactionSkipIndexing(t *testing.T) {
 	var (
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		addr2   = crypto.PubkeyToAddress(key2.PublicKey)
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+
+		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
+
+		addr2 = common.BytesToAddress(cryptoAddr2[:])
 		funds   = big.NewInt(10000000000000)
 		gspec   = &Genesis{
 			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
-			Alloc:  GenesisAlloc{common.Address(addr1): {Balance: funds}},
+			Alloc:  GenesisAlloc{addr1: {Balance: funds}},
 		}
 		signer = types.LatestSigner(gspec.Config)
 	)
 	genDb, blocks, _, err := GenerateChainWithGenesis(gspec, dummy.NewCoinbaseFaker(), 5, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
 	require.NoError(err)
 
 	blocks2, _, err := GenerateChain(gspec.Config, blocks[len(blocks)-1], dummy.NewCoinbaseFaker(), genDb, 5, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(common.Address(addr1)), common.Address(addr2), big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})

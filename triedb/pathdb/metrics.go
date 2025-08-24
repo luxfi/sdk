@@ -58,7 +58,7 @@ var (
 	dirtyFalseMeter = metrics.GetOrRegisterMeter("pathdb/dirty/false", nil)
 	diskFalseMeter  = metrics.GetOrRegisterMeter("pathdb/disk/false", nil)
 
-	commitTimeTimer  = metrics.GetOrRegisterTimer("pathdb/commit/time", nil)
+	commitTimeTimer  = metrics.GetOrRegisterResettingTimer("pathdb/commit/time", nil)
 	commitNodesMeter = metrics.GetOrRegisterMeter("pathdb/commit/nodes", nil)
 	commitBytesMeter = metrics.GetOrRegisterMeter("pathdb/commit/bytes", nil)
 
@@ -68,7 +68,7 @@ var (
 	diffLayerBytesMeter = metrics.GetOrRegisterMeter("pathdb/diff/bytes", nil)
 	diffLayerNodesMeter = metrics.GetOrRegisterMeter("pathdb/diff/nodes", nil)
 
-	historyBuildTimeMeter  = metrics.GetOrRegisterTimer("pathdb/history/time", nil)
+	historyBuildTimeMeter  = metrics.GetOrRegisterResettingTimer("pathdb/history/time", nil)
 	historyDataBytesMeter  = metrics.GetOrRegisterMeter("pathdb/history/bytes/data", nil)
 	historyIndexBytesMeter = metrics.GetOrRegisterMeter("pathdb/history/bytes/index", nil)
 )

@@ -12,19 +12,19 @@ import (
 	"time"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/metric"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
 	"github.com/luxfi/database/pebbledb"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/database/versiondb"
-	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/evm/plugin/evm/config"
+	evmdatabase "github.com/luxfi/evm/plugin/evm/database"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/log"
-	"github.com/luxfi/evm/plugin/evm/config"
-	evmdatabase "github.com/luxfi/evm/plugin/evm/database"
+	metrics "github.com/luxfi/metric"
+	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/utils/logging"
 )
 
 const (
@@ -203,7 +203,7 @@ func inspectDB(db luxdatabase.Database, label string) error {
 
 func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger logging.Logger) (luxdatabase.Database, error) {
 	dbPath := filepath.Join(dbConfig.Path, dbConfig.Name)
-	
+
 	// Use log.Root() instead of trying to adapt the logger
 	logAdapter := log.Root()
 
@@ -223,7 +223,7 @@ func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGather
 		}
 		// Ensure sync is false
 		cfg["sync"] = false
-		
+
 		var err error
 		// Marshal the config back to bytes to ensure that new defaults are applied
 		dbConfigBytes, err = json.Marshal(cfg)
