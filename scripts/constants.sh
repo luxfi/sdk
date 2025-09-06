@@ -12,12 +12,12 @@ DEFAULT_VM_NAME="evm"
 DEFAULT_VM_ID="srEXiWaHuhNyGwPUi444Tu47ZEDwxTWrbQiuD7FmgSAQ6X7Dy"
 
 # Lux docker hub
-# avaplatform/luxd - defaults to local as to avoid unintentional pushes
-# You should probably set it - export IMAGE_NAME='avaplatform/evm_luxd'
+# luxfi/node - defaults to local as to avoid unintentional pushes
+# You should probably set it - export IMAGE_NAME='luxfi/evm'
 IMAGE_NAME=${IMAGE_NAME:-"evm_luxd"}
 
 # Shared between ./scripts/build_docker_image.sh and ./scripts/tests.build_docker_image.sh
-LUXD_IMAGE_NAME="${LUXD_IMAGE_NAME:-avaplatform/luxd}"
+LUXD_IMAGE_NAME="${LUXD_IMAGE_NAME:-luxfi/node}"
 
 # if this isn't a git repository (say building from a release), don't set our git constants.
 if [ ! -d .git ]; then
