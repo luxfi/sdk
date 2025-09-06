@@ -61,6 +61,10 @@ const (
 	defaultStateSyncRequestSize = 1024 // the number of key/values to ask peers for per request
 	defaultDBType               = pebbledb.Name
 	defaultValidatorAPIEnabled  = true
+	
+	// RPC batch limits
+	defaultBatchRequestLimit    = 1000
+	defaultBatchResponseMaxSize = 25 * 1000 * 1000 // 25MB
 
 	estimatedBlockAcceptPeriod        = 2 * time.Second
 	defaultHistoricalProofQueryWindow = uint64(24 * time.Hour / estimatedBlockAcceptPeriod)
@@ -237,7 +241,9 @@ type Config struct {
 	WarpOffChainMessages []hexutil.Bytes `json:"warp-off-chain-messages"`
 
 	// RPC settings
-	HttpBodyLimit uint64 `json:"http-body-limit"`
+	HttpBodyLimit        uint64 `json:"http-body-limit"`
+	BatchRequestLimit    uint64 `json:"batch-request-limit"`
+	BatchResponseMaxSize uint64 `json:"batch-response-max-size"`
 
 	// Database settings
 	UseStandaloneDatabase *PBool `json:"use-standalone-database"`
@@ -321,6 +327,10 @@ func (c *Config) SetDefaults(txPoolConfig TxPoolConfig) {
 	c.ValidatorsAPIEnabled = defaultValidatorAPIEnabled
 	c.HistoricalProofQueryWindow = defaultHistoricalProofQueryWindow
 	c.StateHistory = defaultStateHistory
+	
+	// RPC batch limits
+	c.BatchRequestLimit = defaultBatchRequestLimit
+	c.BatchResponseMaxSize = defaultBatchResponseMaxSize
 }
 
 func (d *Duration) UnmarshalJSON(data []byte) (err error) {
