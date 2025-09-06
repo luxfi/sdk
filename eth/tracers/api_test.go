@@ -269,12 +269,15 @@ func TestTraceCall(t *testing.T) {
 func testTraceCall(t *testing.T, scheme string) {
 	// Initialize test accounts
 	accounts := newAccounts(3)
+	// Increase balance to handle Lux's higher base fee (25 Gwei)
+	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
+		GasLimit: 8000000, // Set Lux gas limit
 		Alloc: types.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: balance},
+			accounts[1].addr: {Balance: balance},
+			accounts[2].addr: {Balance: balance},
 		},
 	}
 	genBlocks := 10
@@ -289,7 +292,13 @@ func testTraceCall(t *testing.T, scheme string) {
 			To:       &accounts[1].addr,
 			Value:    big.NewInt(1000),
 			Gas:      ethparams.TxGas,
-			GasPrice: b.BaseFee(),
+			GasPrice: func() *big.Int {
+				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+				if b.BaseFee().Cmp(minGasPrice) < 0 {
+					return minGasPrice
+				}
+				return b.BaseFee()
+			}(),
 			Data:     nil}),
 			signer, accounts[0].key)
 		b.AddTx(tx)
@@ -302,7 +311,13 @@ func testTraceCall(t *testing.T, scheme string) {
 				To:       &accounts[2].addr,
 				Value:    big.NewInt(1000),
 				Gas:      ethparams.TxGas,
-				GasPrice: b.BaseFee(),
+				GasPrice: func() *big.Int {
+				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+				if b.BaseFee().Cmp(minGasPrice) < 0 {
+					return minGasPrice
+				}
+				return b.BaseFee()
+			}(),
 				Data:     nil}),
 				signer, accounts[0].key)
 			b.AddTx(tx)
@@ -314,7 +329,13 @@ func testTraceCall(t *testing.T, scheme string) {
 				To:       &accounts[1].addr,
 				Value:    big.NewInt(1000),
 				Gas:      ethparams.TxGas,
-				GasPrice: b.BaseFee(),
+				GasPrice: func() *big.Int {
+				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+				if b.BaseFee().Cmp(minGasPrice) < 0 {
+					return minGasPrice
+				}
+				return b.BaseFee()
+			}(),
 				Data:     nil}),
 				signer, accounts[0].key)
 			b.AddTx(tx)
@@ -494,11 +515,14 @@ func TestTraceTransaction(t *testing.T) {
 func testTraceTransaction(t *testing.T, scheme string) {
 	// Initialize test accounts
 	accounts := newAccounts(2)
+	// Increase balance to handle Lux's higher base fee (25 Gwei)
+	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
+		GasLimit: 8000000, // Set Lux gas limit
 		Alloc: types.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: balance},
+			accounts[1].addr: {Balance: balance},
 		},
 	}
 	target := common.Hash{}
@@ -557,12 +581,15 @@ func TestTraceBlock(t *testing.T) {
 func testTraceBlock(t *testing.T, scheme string) {
 	// Initialize test accounts
 	accounts := newAccounts(3)
+	// Increase balance to handle Lux's higher base fee (25 Gwei)
+	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
 		Config: params.TestChainConfig,
+		GasLimit: 8000000, // Set Lux gas limit
 		Alloc: types.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: balance},
+			accounts[1].addr: {Balance: balance},
+			accounts[2].addr: {Balance: balance},
 		},
 	}
 	genBlocks := 10
@@ -577,7 +604,13 @@ func testTraceBlock(t *testing.T, scheme string) {
 			To:       &accounts[1].addr,
 			Value:    big.NewInt(1000),
 			Gas:      ethparams.TxGas,
-			GasPrice: b.BaseFee(),
+			GasPrice: func() *big.Int {
+				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+				if b.BaseFee().Cmp(minGasPrice) < 0 {
+					return minGasPrice
+				}
+				return b.BaseFee()
+			}(),
 			Data:     nil}),
 			signer, accounts[0].key)
 		b.AddTx(tx)
@@ -682,7 +715,13 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 			To:       &accounts[1].addr,
 			Value:    big.NewInt(1000),
 			Gas:      ethparams.TxGas,
-			GasPrice: b.BaseFee(),
+			GasPrice: func() *big.Int {
+				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+				if b.BaseFee().Cmp(minGasPrice) < 0 {
+					return minGasPrice
+				}
+				return b.BaseFee()
+			}(),
 			Data:     nil}),
 			signer, accounts[0].key)
 		b.AddTx(tx)

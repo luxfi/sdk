@@ -6,6 +6,7 @@ package warp
 import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 )
 
 // LocalSigner implements signing with luxfi/crypto/bls
@@ -26,6 +27,12 @@ func NewLocalSigner(sk *bls.SecretKey) *LocalSigner {
 func (s *LocalSigner) Sign(msg []byte) ([]byte, error) {
 	sig := bls.Sign(s.sk, msg)
 	return bls.SignatureToBytes(sig), nil
+}
+
+// SignUnsignedMessage signs an unsigned warp message
+func (s *LocalSigner) SignUnsignedMessage(unsignedMsg *luxWarp.UnsignedMessage) ([]byte, error) {
+	msgBytes := unsignedMsg.Bytes()
+	return s.Sign(msgBytes)
 }
 
 // GetPublicKey returns the public key

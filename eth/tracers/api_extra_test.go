@@ -45,12 +45,20 @@ func testTraceBlockPrecompileActivation(t *testing.T, scheme string) {
 	// Initialize test accounts
 	accounts := newAccounts(3)
 	copyConfig := params.Copy(params.TestChainConfig)
+	// Get the gas limit from FeeConfig, defaulting to 8000000 if not set
+	gasLimit := uint64(8000000)
+	if feeConfig := params.GetExtra(&copyConfig).FeeConfig; feeConfig.GasLimit != nil {
+		gasLimit = feeConfig.GasLimit.Uint64()
+	}
+	// Increase balance to handle Lux's higher base fee (25 Gwei)
+	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
-		Config: &copyConfig,
+		Config:   &copyConfig,
+		GasLimit: gasLimit,
 		Alloc: types.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: balance},
+			accounts[1].addr: {Balance: balance},
+			accounts[2].addr: {Balance: balance},
 		},
 	}
 	activateAllowlistBlock := 3
@@ -76,8 +84,9 @@ func testTraceBlockPrecompileActivation(t *testing.T, scheme string) {
 	backend := newTestBackend(t, genBlocks, genesis, scheme, func(i int, b *core.BlockGen) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
-		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
+		//    gasPrice: 25 Gwei (Lux minimum)
+		gasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, gasPrice, nil), signer, accounts[0].key)
 		b.AddTx(tx)
 		txHashes[i] = tx.Hash()
 	})
@@ -159,12 +168,20 @@ func testTraceTransactionPrecompileActivation(t *testing.T, scheme string) {
 	// Initialize test accounts
 	accounts := newAccounts(3)
 	copyConfig := params.Copy(params.TestChainConfig)
+	// Get the gas limit from FeeConfig, defaulting to 8000000 if not set
+	gasLimit := uint64(8000000)
+	if feeConfig := params.GetExtra(&copyConfig).FeeConfig; feeConfig.GasLimit != nil {
+		gasLimit = feeConfig.GasLimit.Uint64()
+	}
+	// Increase balance to handle Lux's higher base fee (25 Gwei)
+	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
-		Config: &copyConfig,
+		Config:   &copyConfig,
+		GasLimit: gasLimit,
 		Alloc: types.GenesisAlloc{
-			accounts[0].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[1].addr: {Balance: big.NewInt(params.Ether)},
-			accounts[2].addr: {Balance: big.NewInt(params.Ether)},
+			accounts[0].addr: {Balance: balance},
+			accounts[1].addr: {Balance: balance},
+			accounts[2].addr: {Balance: balance},
 		},
 	}
 	activateAllowlistBlock := uint64(2)
@@ -268,7 +285,13 @@ func testTraceChainPrecompileActivation(t *testing.T, scheme string) {
 		//    value: 1000 wei
 		//    fee:   0 wei
 		for j := 0; j < i+1; j++ {
-			tx, _ := types.SignTx(types.NewTransaction(nonce, accounts[1].addr, big.NewInt(1000), ethparams.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
+			// Use at least 25 Gwei or base fee, whichever is higher
+			gasPrice := b.BaseFee()
+			minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+			if gasPrice.Cmp(minGasPrice) < 0 {
+				gasPrice = minGasPrice
+			}
+			tx, _ := types.SignTx(types.NewTransaction(nonce, accounts[1].addr, big.NewInt(1000), ethparams.TxGas, gasPrice, nil), signer, accounts[0].key)
 			b.AddTx(tx)
 			nonce += 1
 		}
@@ -367,7 +390,8 @@ func testTraceCallWithOverridesStateUpgrade(t *testing.T, scheme string) {
 		// Transfer from account[0] to account[1]
 		//    value: 1000 wei
 		//    fee:   0 wei
-		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, b.BaseFee(), nil), signer, accounts[0].key)
+		gasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+		tx, _ := types.SignTx(types.NewTransaction(uint64(i), accounts[1].addr, big.NewInt(1000), ethparams.TxGas, gasPrice, nil), signer, accounts[0].key)
 		b.AddTx(tx)
 	})
 	defer backend.teardown()

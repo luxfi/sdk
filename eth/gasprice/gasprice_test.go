@@ -57,9 +57,7 @@ var (
 	key, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 	addr   = func() common.Address {
 		cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
-		var commonAddr common.Address
-		copy(commonAddr[:], cryptoAddr[:])
-		return commonAddr
+		return common.BytesToAddress(cryptoAddr[:])
 	}()
 	bal, _ = new(big.Int).SetString("100000000000000000000000", 10)
 )
@@ -410,7 +408,8 @@ func TestSuggestGasPriceAfterFeeConfigUpdate(t *testing.T) {
 
 	// create a fee config with higher MinBaseFee and prepare it for inclusion in a tx
 	signer := types.LatestSigner(params.TestChainConfig)
-	highFeeConfig := chainConfigExtra.FeeConfig
+	// Make a copy of the default fee config and modify it
+	highFeeConfig := extras.DefaultFeeConfig
 	highFeeConfig.MinBaseFee = big.NewInt(28_000_000_000)
 	data, err := feemanager.PackSetFeeConfig(highFeeConfig)
 	require.NoError(err)

@@ -83,24 +83,81 @@ var (
 
 		// Use chainId: 43111, so that it does not overlap with any Lux ChainIDs, which may have their
 		// config overridden in vm.Initialize.
+		// Copy the config and its extras
 		cpy := *cfg
 		cpy.ChainID = big.NewInt(43111)
+		
+		// Copy the extras to the new config
+		if extra := params.GetExtra(cfg); extra != nil {
+			extraCpy := *extra
+			params.SetExtra(&cpy, &extraCpy)
+		}
+		
 		g.Config = &cpy
 
 		// Create allocation for the test addresses
 		g.Alloc = make(types.GenesisAlloc)
 		for _, addr := range testEthAddrs {
-			balance := new(big.Int)
-			balance.SetString("0x4192927743b88000", 0)
+			// Set balance to be enough for gas cost plus some extra for value transfers
+			// Previous: 0x4192927743b88000 = 4725000000000000000 wei (exactly 21000 * testMinGasPrice)
+			// New: 0x4192927743b88001 = 4725000000000000001 wei (includes 1 wei for value)
+			// Actually, let's give them 10 ETH to avoid any issues
+			balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10))
 			g.Alloc[addr] = types.Account{
 				Balance: balance,
 			}
 		}
 
+		// Marshal the genesis normally
 		b, err := json.Marshal(g)
 		if err != nil {
 			panic(err)
 		}
+		
+		// Now we need to add the network upgrades to the JSON
+		// Parse the JSON into a map to add the extras
+		var jsonMap map[string]interface{}
+		if err := json.Unmarshal(b, &jsonMap); err != nil {
+			panic(err)
+		}
+		
+		// Add the network upgrades to the config
+		if configMap, ok := jsonMap["config"].(map[string]interface{}); ok {
+			if extra := params.GetExtra(&cpy); extra != nil {
+				// Add the network upgrade timestamps
+				if extra.SubnetEVMTimestamp != nil {
+					configMap["subnetEVMTimestamp"] = *extra.SubnetEVMTimestamp
+				}
+				if extra.DurangoTimestamp != nil {
+					configMap["durangoTimestamp"] = *extra.DurangoTimestamp
+				}
+				if extra.EtnaTimestamp != nil {
+					configMap["etnaTimestamp"] = *extra.EtnaTimestamp
+				}
+				if extra.FortunaTimestamp != nil {
+					configMap["fortunaTimestamp"] = *extra.FortunaTimestamp
+				}
+				if extra.GraniteTimestamp != nil {
+					configMap["graniteTimestamp"] = *extra.GraniteTimestamp
+				}
+			}
+		}
+		
+		// Marshal the modified map back to JSON
+		b, err = json.Marshal(jsonMap)
+		if err != nil {
+			panic(err)
+		}
+		
+		// Debug: Print the config to verify it includes timestamps
+		if configMap, ok := jsonMap["config"].(map[string]interface{}); ok {
+			if durangoTs, ok := configMap["durangoTimestamp"]; ok {
+				fmt.Printf("DEBUG: Genesis includes durangoTimestamp: %v\n", durangoTs)
+			} else {
+				fmt.Println("DEBUG: Genesis missing durangoTimestamp")
+			}
+		}
+		
 		return string(b)
 	}
 
@@ -108,8 +165,8 @@ var (
 	forkToChainConfig = map[upgradetest.Fork]*params.ChainConfig{
 		upgradetest.Durango: params.TestDurangoChainConfig,
 		upgradetest.Etna:    params.TestEtnaChainConfig,
-		// upgradetest.Fortuna: params.TestFortunaChainConfig,
 		upgradetest.Granite: params.TestGraniteChainConfig,
+		// upgradetest.Latest equals Granite, so it maps to the same config
 	}
 
 	// These will be initialized after init() runs
@@ -119,17 +176,17 @@ var (
 
 func init() {
 	for _, key := range testKeys {
-		// Convert secp256k1 key to Ethereum address
-		pubKey := key.PublicKey()
-		// Ethereum address is the last 20 bytes of Keccak256(publicKey)
-		// Skip the first byte (format byte) from the secp256k1 public key
-		pubKeyBytes := pubKey.Bytes()
-		if len(pubKeyBytes) > 0 {
-			hash := crypto.Keccak256(pubKeyBytes[1:])
-			var addr common.Address
-			copy(addr[:], hash[12:])
-			testEthAddrs = append(testEthAddrs, addr)
+		// Convert secp256k1 key to Ethereum address using proper ECDSA conversion
+		ecdsaKey, err := toECDSA(key)
+		if err != nil {
+			panic(fmt.Sprintf("failed to convert test key: %v", err))
 		}
+		// Use geth's crypto to get proper Ethereum address
+		pubKeyBytes := crypto.FromECDSAPub(&ecdsaKey.PublicKey)
+		hash := crypto.Keccak256(pubKeyBytes[1:])
+		var addr common.Address
+		copy(addr[:], hash[12:])
+		testEthAddrs = append(testEthAddrs, addr)
 	}
 
 	genesisJSONPreSubnetEVM = toGenesisJSON(params.TestPreSubnetEVMChainConfig)
@@ -3686,6 +3743,18 @@ func TestStandaloneDB(t *testing.T) {
 		return key
 	}())
 	require.NoError(t, err)
+	
+	// Debug: Check sender address
+	sender, err := types.Sender(types.NewEIP155Signer(vm.chainConfig.ChainID), signedTx0)
+	require.NoError(t, err)
+	t.Logf("Transaction sender: %s, expected: %s", sender.Hex(), testEthAddrs[0].Hex())
+	
+	// Check balance using state DB
+	stateDB, err := vm.blockChain.State()
+	require.NoError(t, err)
+	balance := stateDB.GetBalance(sender)
+	t.Logf("Sender balance: %s", balance.String())
+	
 	errs := vm.txPool.AddRemotesSync([]*types.Transaction{signedTx0})
 	require.NoError(t, errs[0])
 

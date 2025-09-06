@@ -169,6 +169,13 @@ var (
 			LondonBlock:         big.NewInt(0),
 			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
 			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
+			BlobScheduleConfig: &ethparams.BlobScheduleConfig{
+				Cancun: &ethparams.BlobConfig{
+					Target:         3,
+					Max:            6,
+					UpdateFraction: 3338477,
+				},
+			},
 		},
 		extras.TestEtnaChainConfig,
 	)
@@ -189,6 +196,13 @@ var (
 			LondonBlock:         big.NewInt(0),
 			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
 			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
+			BlobScheduleConfig: &ethparams.BlobScheduleConfig{
+				Cancun: &ethparams.BlobConfig{
+					Target:         3,
+					Max:            6,
+					UpdateFraction: 3338477,
+				},
+			},
 		},
 		extras.TestFortunaChainConfig,
 	)
@@ -209,6 +223,13 @@ var (
 			LondonBlock:         big.NewInt(0),
 			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
 			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
+			BlobScheduleConfig: &ethparams.BlobScheduleConfig{
+				Cancun: &ethparams.BlobConfig{
+					Target:         3,
+					Max:            6,
+					UpdateFraction: 3338477,
+				},
+			},
 		},
 		extras.TestGraniteChainConfig,
 	)

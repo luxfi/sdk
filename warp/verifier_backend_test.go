@@ -15,11 +15,13 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/proto/pb/sdk"
+	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/core"
 	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/consensus/compat"
-	luxWarp "github.com/luxfi/warp"
+	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/metrics/metricstest"
 	"github.com/luxfi/evm/plugin/evm/validators"
@@ -40,7 +42,7 @@ func TestAddressedCallSignatures(t *testing.T) {
 	require.NoError(t, err)
 	networkID := uint32(1337) // Use a test network ID
 	chainID := ids.GenerateTestID()
-	offchainMessage, err := luxWarp.NewUnsignedMessage(networkID, chainID[:], offChainPayload.Bytes())
+	offchainMessage, err := luxWarp.NewUnsignedMessage(networkID, chainID, offChainPayload.Bytes())
 	require.NoError(t, err)
 	// Create a BLS key for signing
 	blsKey, err := bls.NewSecretKey()
@@ -58,7 +60,7 @@ func TestAddressedCallSignatures(t *testing.T) {
 			setup: func(backend Backend) (request []byte, expectedResponse []byte) {
 				knownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("test"))
 				require.NoError(t, err)
-				msg, err := luxWarp.NewUnsignedMessage(networkID, chainID[:], knownPayload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(networkID, chainID, knownPayload.Bytes())
 				require.NoError(t, err)
 				signature, err := localSigner.Sign(msg.Bytes())
 				require.NoError(t, err)
@@ -84,7 +86,7 @@ func TestAddressedCallSignatures(t *testing.T) {
 			setup: func(_ Backend) (request []byte, expectedResponse []byte) {
 				unknownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("unknown message"))
 				require.NoError(t, err)
-				unknownMessage, err := luxWarp.NewUnsignedMessage(networkID, chainID[:], unknownPayload.Bytes())
+				unknownMessage, err := luxWarp.NewUnsignedMessage(networkID, chainID, unknownPayload.Bytes())
 				require.NoError(t, err)
 				return unknownMessage.Bytes(), nil
 			},
@@ -121,7 +123,8 @@ func TestAddressedCallSignatures(t *testing.T) {
 					[][]byte{offchainMessage.Bytes()},
 				)
 				require.NoError(t, err)
-				handler := lp118.NewCachedHandler(sigCache, warpBackend, localSigner)
+				lp118Signer := NewLP118SignerAdapter(localSigner)
+				handler := lp118.NewCachedHandler(sigCache, warpBackend, lp118Signer)
 
 				requestBytes, expectedResponse := test.setup(warpBackend)
 				protoMsg := &sdk.SignatureRequest{Message: requestBytes}
@@ -163,17 +166,24 @@ func TestBlockSignatures(t *testing.T) {
 
 	database := memdb.New()
 	consensusCtx := utilstest.NewTestConsensusContext(t)
+	networkID := consensus.GetNetworkID(consensusCtx)
+	chainID := consensus.GetChainID(consensusCtx)
+	
+	// Create a local signer for testing
+	sk, err := bls.NewSecretKey()
+	require.NoError(t, err)
+	localSigner := NewLocalSigner(sk)
 
 	knownBlkID := ids.GenerateTestID()
 	blockClient := warptest.MakeBlockClient(knownBlkID)
 
 	toMessageBytes := func(id ids.ID) []byte {
-		idPayload, err := payload.NewHash(id)
+		idPayload, err := payload.NewHash(id[:])
 		if err != nil {
 			panic(err)
 		}
 
-		msg, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, idPayload.Bytes())
+		msg, err := luxWarp.NewUnsignedMessage(networkID, chainID, idPayload.Bytes())
 		if err != nil {
 			panic(err)
 		}
@@ -188,11 +198,13 @@ func TestBlockSignatures(t *testing.T) {
 	}{
 		"known block": {
 			setup: func() (request []byte, expectedResponse []byte) {
-				hashPayload, err := payload.NewHash(knownBlkID)
+				hashPayload, err := payload.NewHash(knownBlkID[:])
 				require.NoError(t, err)
-				unsignedMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, hashPayload.Bytes())
+				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, chainID, hashPayload.Bytes())
 				require.NoError(t, err)
-				signature, err := consensusCtx.WarpSigner.Sign(unsignedMessage)
+				warpSignerInterface := consensus.GetWarpSigner(consensusCtx)
+				warpSigner := warpSignerInterface.(luxWarp.Signer)
+				signature, err := warpSigner.Sign(unsignedMessage)
 				require.NoError(t, err)
 				return toMessageBytes(knownBlkID), signature[:]
 			},
@@ -210,7 +222,7 @@ func TestBlockSignatures(t *testing.T) {
 				require.EqualValues(t, 1, stats.blockValidationFail.Snapshot().Count())
 				require.EqualValues(t, 0, stats.messageParseFail.Snapshot().Count())
 			},
-			err: &common.AppError{Code: VerifyErrCode},
+			err: &AppError{Code: VerifyErrCode},
 		},
 	}
 
@@ -239,7 +251,8 @@ func TestBlockSignatures(t *testing.T) {
 					nil,
 				)
 				require.NoError(t, err)
-				handler := lp118.NewCachedHandler(sigCache, warpBackend, localSigner)
+				lp118Signer := NewLP118SignerAdapter(localSigner)
+				handler := lp118.NewCachedHandler(sigCache, warpBackend, lp118Signer)
 
 				requestBytes, expectedResponse := test.setup()
 				protoMsg := &sdk.SignatureRequest{Message: requestBytes}
@@ -278,13 +291,15 @@ func TestBlockSignatures(t *testing.T) {
 func TestUptimeSignatures(t *testing.T) {
 	database := memdb.New()
 	consensusCtx := utilstest.NewTestConsensusContext(t)
+	networkID := consensus.GetNetworkID(consensusCtx)
+	chainID := consensus.GetChainID(consensusCtx)
 
 	getUptimeMessageBytes := func(sourceAddress []byte, vID ids.ID, totalUptime uint64) ([]byte, *luxWarp.UnsignedMessage) {
 		uptimePayload, err := messages.NewValidatorUptime(vID, 80)
 		require.NoError(t, err)
 		addressedCall, err := payload.NewAddressedCall(sourceAddress, uptimePayload.Bytes())
 		require.NoError(t, err)
-		unsignedMessage, err := luxWarp.NewUnsignedMessage(consensusCtx.NetworkID, consensusCtx.ChainID, addressedCall.Bytes())
+		unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, chainID, addressedCall.Bytes())
 		require.NoError(t, err)
 
 		protoMsg := &sdk.SignatureRequest{Message: unsignedMessage.Bytes()}
@@ -307,10 +322,12 @@ func TestUptimeSignatures(t *testing.T) {
 		lock := &sync.RWMutex{}
 		newLockedValidatorManager := validators.NewLockedValidatorReader(validatorsManager, lock)
 		validatorsManager.StartTracking([]ids.NodeID{})
+		warpSignerInterface := consensus.GetWarpSigner(consensusCtx)
+		localWarpSigner := warpSignerInterface.(WarpSigner)
 		warpBackend, err := NewBackend(
-			consensusCtx.NetworkID,
-			consensusCtx.ChainID,
-			consensusCtx.WarpSigner,
+			networkID,
+			chainID,
+			localWarpSigner,
 			warptest.EmptyBlockClient,
 			newLockedValidatorManager,
 			database,
@@ -318,19 +335,20 @@ func TestUptimeSignatures(t *testing.T) {
 			nil,
 		)
 		require.NoError(t, err)
-		handler := lp118.NewCachedHandler(sigCache, warpBackend, consensusCtx.WarpSigner)
+		warpSigner := consensus.GetWarpSigner(consensusCtx)
+		handler := lp118.NewCachedHandler(sigCache, warpBackend, warpSigner)
 
 		// sourceAddress nonZero
 		protoBytes, _ := getUptimeMessageBytes([]byte{1, 2, 3}, ids.GenerateTestID(), 80)
 		_, appErr := handler.AppRequest(context.Background(), ids.GenerateTestNodeID(), time.Time{}, protoBytes)
-		require.ErrorIs(t, appErr, &common.AppError{Code: VerifyErrCode})
+		require.ErrorIs(t, appErr, &AppError{Code: VerifyErrCode})
 		require.Contains(t, appErr.Error(), "source address should be empty")
 
 		// not existing validationID
 		vID := ids.GenerateTestID()
 		protoBytes, _ = getUptimeMessageBytes([]byte{}, vID, 80)
 		_, appErr = handler.AppRequest(context.Background(), ids.GenerateTestNodeID(), time.Time{}, protoBytes)
-		require.ErrorIs(t, appErr, &common.AppError{Code: VerifyErrCode})
+		require.ErrorIs(t, appErr, &AppError{Code: VerifyErrCode})
 		require.Contains(t, appErr.Error(), "failed to get validator")
 
 		// uptime is less than requested (not connected)
@@ -346,7 +364,7 @@ func TestUptimeSignatures(t *testing.T) {
 		}))
 		protoBytes, _ = getUptimeMessageBytes([]byte{}, validationID, 80)
 		_, appErr = handler.AppRequest(context.Background(), nodeID, time.Time{}, protoBytes)
-		require.ErrorIs(t, appErr, &common.AppError{Code: VerifyErrCode})
+		require.ErrorIs(t, appErr, &AppError{Code: VerifyErrCode})
 		require.Contains(t, appErr.Error(), "current uptime 0 is less than queried uptime 80")
 
 		// uptime is less than requested (not enough)
@@ -354,7 +372,7 @@ func TestUptimeSignatures(t *testing.T) {
 		clk.Set(clk.Time().Add(40 * time.Second))
 		protoBytes, _ = getUptimeMessageBytes([]byte{}, validationID, 80)
 		_, appErr = handler.AppRequest(context.Background(), nodeID, time.Time{}, protoBytes)
-		require.ErrorIs(t, appErr, &common.AppError{Code: VerifyErrCode})
+		require.ErrorIs(t, appErr, &AppError{Code: VerifyErrCode})
 		require.Contains(t, appErr.Error(), "current uptime 40 is less than queried uptime 80")
 
 		// valid uptime

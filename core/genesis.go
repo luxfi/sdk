@@ -50,6 +50,7 @@ import (
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/holiman/uint256"
 )
@@ -321,6 +322,11 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		MixDigest:  g.Mixhash,
 		Coinbase:   g.Coinbase,
 	}
+	
+	// Set blockGasCost for genesis block (always 0)
+	customtypes.SetHeaderExtra(head, &customtypes.HeaderExtra{
+		BlockGasCost: big.NewInt(0),
+	})
 
 	// Configure any stateful precompiles that should be enabled in the genesis.
 	blockContext := NewBlockContext(head.Number, head.Time)

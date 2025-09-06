@@ -283,31 +283,65 @@ func TestActivePrecompiles(t *testing.T) {
 	require.False(t, GetRulesExtra(rules1).IsPrecompileEnabled(nativeminter.Module.Address))
 }
 
+func TestExtrasMarshaling(t *testing.T) {
+	// Test that extras.ChainConfig marshals correctly
+	extra := &extras.ChainConfig{
+		FeeConfig:          DefaultFeeConfig,
+		AllowFeeRecipients: false,
+		NetworkUpgrades: extras.NetworkUpgrades{
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.NewUint64(0),
+		},
+		GenesisPrecompiles: extras.Precompiles{},
+	}
+	
+	result, err := json.Marshal(extra)
+	require.NoError(t, err)
+	t.Logf("Extras marshaled: %s", string(result))
+	
+	// Check that it contains expected fields
+	var decoded map[string]interface{}
+	err = json.Unmarshal(result, &decoded)
+	require.NoError(t, err)
+	
+	require.Contains(t, decoded, "feeConfig")
+	require.Contains(t, decoded, "subnetEVMTimestamp")
+	require.Contains(t, decoded, "durangoTimestamp")
+	
+	feeConfig := decoded["feeConfig"].(map[string]interface{})
+	require.Equal(t, float64(8000000), feeConfig["gasLimit"])
+}
+
 func TestChainConfigMarshalWithUpgrades(t *testing.T) {
+	// Create ChainConfig with extras
+	chainConfig := &ChainConfig{
+		ChainID:             big.NewInt(1),
+		HomesteadBlock:      big.NewInt(0),
+		EIP150Block:         big.NewInt(0),
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		ByzantiumBlock:      big.NewInt(0),
+		ConstantinopleBlock: big.NewInt(0),
+		PetersburgBlock:     big.NewInt(0),
+		IstanbulBlock:       big.NewInt(0),
+		MuirGlacierBlock:    big.NewInt(0),
+	}
+	
+	extraConfig := &extras.ChainConfig{
+		FeeConfig:          DefaultFeeConfig,
+		AllowFeeRecipients: false,
+		NetworkUpgrades: extras.NetworkUpgrades{
+			SubnetEVMTimestamp: utils.NewUint64(0),
+			DurangoTimestamp:   utils.NewUint64(0),
+		},
+		GenesisPrecompiles: extras.Precompiles{},
+	}
+	
+	// Set the extras
+	WithExtra(chainConfig, extraConfig)
+	
 	config := ChainConfigWithUpgradesJSON{
-		ChainConfig: *WithExtra(
-			&ChainConfig{
-				ChainID:             big.NewInt(1),
-				HomesteadBlock:      big.NewInt(0),
-				EIP150Block:         big.NewInt(0),
-				EIP155Block:         big.NewInt(0),
-				EIP158Block:         big.NewInt(0),
-				ByzantiumBlock:      big.NewInt(0),
-				ConstantinopleBlock: big.NewInt(0),
-				PetersburgBlock:     big.NewInt(0),
-				IstanbulBlock:       big.NewInt(0),
-				MuirGlacierBlock:    big.NewInt(0),
-			},
-			&extras.ChainConfig{
-				FeeConfig:          DefaultFeeConfig,
-				AllowFeeRecipients: false,
-				NetworkUpgrades: extras.NetworkUpgrades{
-					SubnetEVMTimestamp: utils.NewUint64(0),
-					DurangoTimestamp:   utils.NewUint64(0),
-				},
-				GenesisPrecompiles: extras.Precompiles{},
-			},
-		),
+		ChainConfig: *chainConfig,
 		UpgradeConfig: extras.UpgradeConfig{
 			PrecompileUpgrades: []extras.PrecompileUpgrade{
 				{
@@ -316,6 +350,10 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 			},
 		},
 	}
+	
+	// Need to re-set the extras for the copied ChainConfig
+	WithExtra(&config.ChainConfig, extraConfig)
+	
 	result, err := json.Marshal(&config)
 	require.NoError(t, err)
 	expectedJSON := `{
@@ -339,6 +377,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 		"petersburgBlock": 0,
 		"istanbulBlock": 0,
 		"muirGlacierBlock": 0,
+		"depositContractAddress": "0x0000000000000000000000000000000000000000",
 		"subnetEVMTimestamp": 0,
 		"durangoTimestamp": 0,
 		"upgrades": {

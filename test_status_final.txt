@@ -1,0 +1,60 @@
+accounts/abi: ok  	github.com/luxfi/evm/accounts/abi	(cached)
+accounts/abi/bind: accounts/abi/bind/precompilebind: FAIL
+cmd/abigen: ok  	github.com/luxfi/evm/cmd/abigen	(cached)
+cmd/evm: ok  	github.com/luxfi/evm/cmd/evm	(cached)
+commontype: ok  	github.com/luxfi/evm/commontype	(cached)
+consensus/dummy: ok  	github.com/luxfi/evm/consensus/dummy	(cached)
+consensus/misc/eip4844: ok  	github.com/luxfi/evm/consensus/misc/eip4844	(cached)
+core: core/bloombits: ok  	github.com/luxfi/evm/core/bloombits	(cached)
+core/state: ok  	github.com/luxfi/evm/core/state	(cached)
+core/state/snapshot: FAIL	github.com/luxfi/evm/core/state/snapshot	0.740s
+core/txpool/blobpool: ok  	github.com/luxfi/evm/core/txpool/blobpool	(cached)
+core/txpool/legacypool: ok  	github.com/luxfi/evm/core/txpool/legacypool	(cached)
+core/vm/runtime: ok  	github.com/luxfi/evm/core/vm/runtime	(cached)
+eth: ok  	github.com/luxfi/evm/eth	(cached)
+ethclient: ok  	github.com/luxfi/evm/ethclient	(cached)
+ethclient/simulated: FAIL	github.com/luxfi/evm/ethclient/simulated	0.030s
+eth/filters: ok  	github.com/luxfi/evm/eth/filters	1.129s
+eth/gasprice: eth/tracers: FAIL
+internal/ethapi: FAIL
+internal/flags: ok  	github.com/luxfi/evm/internal/flags	(cached)
+metrics/prometheus: FAIL
+miner: ok  	github.com/luxfi/evm/miner	(cached)
+network: FAIL
+params: FAIL
+params/extras: ok  	github.com/luxfi/evm/params/extras	(cached)
+plugin/evm: plugin/evm/blockgascost: ok  	github.com/luxfi/evm/plugin/evm/blockgascost	(cached)
+plugin/evm/config: ok  	github.com/luxfi/evm/plugin/evm/config	(cached)
+plugin/evm/customrawdb: FAIL	github.com/luxfi/evm/plugin/evm/customrawdb	0.012s
+plugin/evm/customtypes: FAIL
+plugin/evm/header: ok  	github.com/luxfi/evm/plugin/evm/header	(cached)
+plugin/evm/log: ok  	github.com/luxfi/evm/plugin/evm/log	(cached)
+plugin/evm/message: FAIL
+plugin/evm/upgrade/subnetevm: ok  	github.com/luxfi/evm/plugin/evm/upgrade/subnetevm	(cached)
+plugin/evm/validators: ok  	github.com/luxfi/evm/plugin/evm/validators	(cached)
+plugin/evm/validators/state: ok  	github.com/luxfi/evm/plugin/evm/validators/state	(cached)
+plugin/evm/validators/state/interfaces: ok  	github.com/luxfi/evm/plugin/evm/validators/state/interfaces	(cached) [no tests to run]
+plugin/evm/validators/uptime: ok  	github.com/luxfi/evm/plugin/evm/validators/uptime	(cached)
+precompile/allowlist: ok  	github.com/luxfi/evm/precompile/allowlist	(cached)
+precompile/allowlist/allowlisttest: ok  	github.com/luxfi/evm/precompile/allowlist/allowlisttest	(cached)
+precompile/contract: ok  	github.com/luxfi/evm/precompile/contract	(cached)
+precompile/contracts/deployerallowlist/deployerallowlisttest: ok  	github.com/luxfi/evm/precompile/contracts/deployerallowlist/deployerallowlisttest	(cached)
+precompile/contracts/feemanager: ok  	github.com/luxfi/evm/precompile/contracts/feemanager	(cached)
+precompile/contracts/nativeminter: ok  	github.com/luxfi/evm/precompile/contracts/nativeminter	(cached)
+precompile/contracts/pqcrypto: ok  	github.com/luxfi/evm/precompile/contracts/pqcrypto	(cached)
+precompile/contracts/rewardmanager: ok  	github.com/luxfi/evm/precompile/contracts/rewardmanager	(cached)
+precompile/contracts/txallowlist: ok  	github.com/luxfi/evm/precompile/contracts/txallowlist	(cached)
+precompile/contracts/warp: precompile/modules: ok  	github.com/luxfi/evm/precompile/modules	(cached)
+precompile/precompileconfig: ok  	github.com/luxfi/evm/precompile/precompileconfig	(cached) [no tests to run]
+predicate: ok  	github.com/luxfi/evm/predicate	(cached)
+rpc: sync/client: FAIL	github.com/luxfi/evm/sync/client [build failed]
+sync/handlers: sync/statesync: ok  	github.com/luxfi/evm/sync/statesync	(cached)
+tests/load: FAIL	github.com/luxfi/evm/tests/load [build failed]
+tests/precompile: FAIL	github.com/luxfi/evm/tests/precompile [build failed]
+tests/warp: FAIL	github.com/luxfi/evm/tests/warp [build failed]
+tests/warp/aggregator: ok  	github.com/luxfi/evm/tests/warp/aggregator	(cached)
+triedb/pathdb: FAIL	github.com/luxfi/evm/triedb/pathdb [build failed]
+utils: ok  	github.com/luxfi/evm/utils	(cached)
+utils/utilstest: FAIL	github.com/luxfi/evm/utils/utilstest [build failed]
+warp: FAIL	github.com/luxfi/evm/warp [build failed]
+warp/validators: FAIL	github.com/luxfi/evm/warp/validators [build failed]

@@ -68,7 +68,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		GasLimit:    header.GasLimit,
 		Random:      nil,
 		BlobBaseFee: func() *big.Int {
-			if chain.Config() != nil {
+			if chain.Config() != nil && header.ExcessBlobGas != nil {
 				return eip4844.CalcBlobFee(chain.Config(), header)
 			}
 			return nil
