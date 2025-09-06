@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	ids "github.com/luxfi/ids"
 	bls "github.com/luxfi/crypto/bls"
+	ids "github.com/luxfi/ids"
 	warp "github.com/luxfi/node/vms/platformvm/warp"
 	gomock "go.uber.org/mock/gomock"
 )

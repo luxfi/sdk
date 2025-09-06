@@ -10,14 +10,14 @@
 package contract
 
 import (
-	"context"
+	context "context"
 	big "math/big"
 	reflect "reflect"
 
+	uint256 "github.com/holiman/uint256"
+	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
 	common "github.com/luxfi/geth/common"
 	types "github.com/luxfi/geth/core/types"
-	precompileconfig "github.com/luxfi/evm/precompile/precompileconfig"
-	uint256 "github.com/holiman/uint256"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -15,12 +15,6 @@ import (
 	reflect "reflect"
 	time "time"
 
-	accounts "github.com/luxfi/geth/accounts"
-	common "github.com/luxfi/geth/common"
-	types "github.com/luxfi/geth/core/types"
-	vm "github.com/luxfi/geth/core/vm"
-	ethdb "github.com/luxfi/geth/ethdb"
-	event "github.com/luxfi/geth/event"
 	commontype "github.com/luxfi/evm/commontype"
 	consensus "github.com/luxfi/evm/consensus"
 	core "github.com/luxfi/evm/core"
@@ -28,6 +22,12 @@ import (
 	state "github.com/luxfi/evm/core/state"
 	params "github.com/luxfi/evm/params"
 	rpc "github.com/luxfi/evm/rpc"
+	accounts "github.com/luxfi/geth/accounts"
+	common "github.com/luxfi/geth/common"
+	types "github.com/luxfi/geth/core/types"
+	vm "github.com/luxfi/geth/core/vm"
+	ethdb "github.com/luxfi/geth/ethdb"
+	event "github.com/luxfi/geth/event"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -277,17 +277,17 @@ func (mr *MockBackendMockRecorder) GetBody(ctx, hash, number any) *gomock.Call {
 }
 
 // GetEVM mocks base method.
-func (m *MockBackend) GetEVM(ctx context.Context, msg *core.Message, state *state.StateDB, header *types.Header, vmConfig *vm.Config, blockCtx *vm.BlockContext) *vm.EVM {
+func (m *MockBackend) GetEVM(ctx context.Context, msg *core.Message, arg2 *state.StateDB, header *types.Header, vmConfig *vm.Config, blockCtx *vm.BlockContext) *vm.EVM {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetEVM", ctx, msg, state, header, vmConfig, blockCtx)
+	ret := m.ctrl.Call(m, "GetEVM", ctx, msg, arg2, header, vmConfig, blockCtx)
 	ret0, _ := ret[0].(*vm.EVM)
 	return ret0
 }
 
 // GetEVM indicates an expected call of GetEVM.
-func (mr *MockBackendMockRecorder) GetEVM(ctx, msg, state, header, vmConfig, blockCtx any) *gomock.Call {
+func (mr *MockBackendMockRecorder) GetEVM(ctx, msg, arg2, header, vmConfig, blockCtx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEVM", reflect.TypeOf((*MockBackend)(nil).GetEVM), ctx, msg, state, header, vmConfig, blockCtx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEVM", reflect.TypeOf((*MockBackend)(nil).GetEVM), ctx, msg, arg2, header, vmConfig, blockCtx)
 }
 
 // GetFeeConfigAt mocks base method.
