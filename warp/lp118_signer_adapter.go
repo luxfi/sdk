@@ -4,7 +4,7 @@
 package warp
 
 import (
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 )
 
 // LP118SignerAdapter adapts a LocalSigner to the lp118.Signer interface

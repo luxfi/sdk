@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 
-	"github.com/luxfi/consensus/choices"
+	"github.com/luxfi/node/consensus/choices"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/components/chain"

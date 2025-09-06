@@ -5,7 +5,7 @@ package interfaces
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus/uptime"
+	"github.com/luxfi/node/consensus/uptime"
 	validatorsstateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 

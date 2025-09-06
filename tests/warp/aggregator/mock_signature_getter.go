@@ -15,7 +15,7 @@ import (
 
 	bls "github.com/luxfi/crypto/bls"
 	ids "github.com/luxfi/ids"
-	warp "github.com/luxfi/node/vms/platformvm/warp"
+	warp "github.com/luxfi/warp"
 	gomock "go.uber.org/mock/gomock"
 )
 

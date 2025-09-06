@@ -6,7 +6,7 @@ package evm
 import (
 	"context"
 
-	consensusChain "github.com/luxfi/consensus/chain"
+	consensusChain "github.com/luxfi/consensus/protocol/chain"
 	"github.com/luxfi/database"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"

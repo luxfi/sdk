@@ -18,10 +18,10 @@ import (
 	// "github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/peer"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/consensus/networking/router"
+	"github.com/luxfi/node/consensus/networking/router"
 	"github.com/luxfi/node/utils/compression"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/node/wallet/subnet/primary"
 	"github.com/luxfi/evm/warp/messages"
 
