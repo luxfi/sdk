@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/protocol/chain"
-	"github.com/luxfi/node/consensus/choices"
+	"github.com/luxfi/consensus/choices"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -22,9 +22,9 @@ type mockBlock struct {
 	id ids.ID
 }
 
-// ID returns the block ID as a string
-func (b *mockBlock) ID() string {
-	return b.id.String()
+// ID returns the block ID
+func (b *mockBlock) ID() ids.ID {
+	return b.id
 }
 
 // Accept marks the block as accepted
@@ -38,13 +38,18 @@ func (b *mockBlock) Reject(context.Context) error {
 }
 
 // Status returns the block status
-func (b *mockBlock) Status() choices.Status {
-	return choices.Accepted
+func (b *mockBlock) Status() uint8 {
+	return uint8(choices.Accepted)
 }
 
-// Parent returns the parent block ID as a string
-func (b *mockBlock) Parent() string {
-	return ids.Empty.String()
+// Parent returns the parent block ID
+func (b *mockBlock) Parent() ids.ID {
+	return ids.Empty
+}
+
+// ParentID returns the parent block ID
+func (b *mockBlock) ParentID() ids.ID {
+	return ids.Empty
 }
 
 // Verify verifies the block

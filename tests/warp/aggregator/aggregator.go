@@ -8,8 +8,9 @@ import (
 	"fmt"
 
 	"github.com/luxfi/log"
+	"github.com/luxfi/ids"
 
-	"github.com/luxfi/crypto/bls"
+	cryptoBLS "github.com/luxfi/crypto/bls"
 	"github.com/luxfi/node/utils/set"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/precompile/contracts/warp"
@@ -25,7 +26,7 @@ type AggregateSignatureResult struct {
 }
 
 type signatureFetchResult struct {
-	sig    *bls.Signature
+	sig    *cryptoBLS.Signature
 	index  int
 	weight uint64
 }
@@ -60,9 +61,11 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 		var (
 			i         = i
 			validator = validator
-			// TODO: update from a single nodeID to the original slice and use extra nodeIDs as backup.
-			nodeID = validator.NodeIDs[0]
 		)
+		
+		// Convert byte slice to NodeID
+		var nodeID ids.NodeID
+		copy(nodeID[:], validator.NodeID)
 		go func() {
 			log.Debug("Fetching warp signature",
 				"nodeID", nodeID,
@@ -88,7 +91,20 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 				"index", i,
 			)
 
-			if !bls.Verify(validator.PublicKey, signature, unsignedMessage.Bytes()) {
+			// Convert warp BLS public key to crypto BLS public key
+			cryptoPublicKey, err := cryptoBLS.PublicKeyFromCompressedBytes(validator.PublicKeyBytes)
+			if err != nil {
+				log.Debug("Failed to parse validator public key",
+					"nodeID", nodeID,
+					"index", i,
+					"err", err,
+					"msgID", unsignedMessage.ID(),
+				)
+				signatureFetchResultChan <- nil
+				return
+			}
+
+			if !cryptoBLS.Verify(cryptoPublicKey, signature, unsignedMessage.Bytes()) {
 				log.Debug("Failed to verify warp signature",
 					"nodeID", nodeID,
 					"index", i,
@@ -107,7 +123,7 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 	}
 
 	var (
-		signatures                = make([]*bls.Signature, 0, len(a.validators))
+		signatures                = make([]*cryptoBLS.Signature, 0, len(a.validators))
 		signersBitset             = set.NewBits()
 		signaturesWeight          = uint64(0)
 		signaturesPassedThreshold = false
@@ -148,7 +164,7 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 	}
 
 	// Otherwise, return the aggregate signature
-	aggregateSignature, err := bls.AggregateSignatures(signatures)
+	aggregateSignature, err := cryptoBLS.AggregateSignatures(signatures)
 	if err != nil {
 		return nil, fmt.Errorf("failed to aggregate BLS signatures: %w", err)
 	}
@@ -156,7 +172,7 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 	warpSignature := &luxWarp.BitSetSignature{
 		Signers: signersBitset.Bytes(),
 	}
-	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
+	copy(warpSignature.Signature[:], cryptoBLS.SignatureToBytes(aggregateSignature))
 
 	msg, err := luxWarp.NewMessage(unsignedMessage, warpSignature)
 	if err != nil {

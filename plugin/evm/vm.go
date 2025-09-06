@@ -32,6 +32,7 @@ import (
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/eth"
 	"github.com/luxfi/evm/eth/ethconfig"
+	"github.com/luxfi/evm/plugin/evm/message"
 	subnetevmprometheus "github.com/luxfi/evm/metrics/prometheus"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/network"
@@ -56,6 +57,7 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/warp"
 	luxWarp "github.com/luxfi/warp"
+	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
 	"github.com/luxfi/warp/signer"
 
 	// Force-load tracer engine to trigger registration
@@ -80,7 +82,8 @@ import (
 	"github.com/luxfi/consensus"
 	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/consensus/engine/chain/block"
-	protocolChain "github.com/luxfi/consensus/protocol/chain"
+	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
+	nodechain "github.com/luxfi/consensus/protocol/chain"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
@@ -103,9 +106,9 @@ import (
 
 var (
 	// TODO: Fix interface compatibility with consensus package
-	// _ block.ChainVM                      = (*VM)(nil)
-	// _ block.BuildBlockWithContextChainVM = (*VM)(nil)
-	// _ block.StateSyncableVM              = (*VM)(nil)
+	_ nodeblock.ChainVM                      = (*VM)(nil)
+	_ nodeblock.BuildBlockWithContextChainVM = (*VM)(nil)
+	_ nodeblock.StateSyncableVM              = (*VM)(nil)
 	_ statesyncclient.EthBlockParser = (*VM)(nil)
 )
 
@@ -312,15 +315,15 @@ type VM struct {
 	rpcHandlers []interface{ Stop() }
 }
 
-// ParseBlock implements block.ChainVM interface
-func (vm *VM) ParseBlock(ctx context.Context, b []byte) (block.Block, error) {
+// ParseBlock implements nodeblock.ChainVM interface
+func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodechain.Block, error) {
 	// Call the embedded State's ParseBlock and convert the result
 	blk, err := vm.State.ParseBlock(ctx, b)
 	if err != nil {
 		return nil, err
 	}
-	// The returned block should already implement block.Block interface
-	return blk.(block.Block), nil
+	// Cast to the node's Block interface
+	return blk.(nodechain.Block), nil
 }
 
 // Initialize implements the chain.ChainVM interface
@@ -549,7 +552,7 @@ func (vm *VM) Initialize(
 		vm.p2pValidators = p2pValidatorsInterface.(*p2p.Validators)
 	}
 
-	vm.validatorsManager, err = validators.NewManager(vm.ctx, vm.validatorsDB, &vm.consensusClock)
+	vm.validatorsManager, err = validators.NewManager(vm.ctx, vm.validatorsDB, &vm.clock)
 	if err != nil {
 		return fmt.Errorf("failed to initialize validators manager: %w", err)
 	}
@@ -621,9 +624,10 @@ func (vm *VM) Initialize(
 	}()
 
 	// Add p2p warp message warpHandler
-	// Pass warp backend directly to lp118 handler
+	// Create adapter to convert our warp backend to lp118.Verifier
+	warpVerifier := &warpVerifierAdapter{backend: vm.warpBackend}
 	// Pass nil for signer since lp118 doesn't use it the same way
-	warpHandler := lp118.NewCachedHandler(meteredCache, vm.warpBackend, nil)
+	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, nil)
 	// Use adapter to convert lp118.Handler to p2p.Handler
 	p2pHandler := newLP118HandlerAdapter(warpHandler)
 	vm.Network.AddHandler(lp118.HandlerID, p2pHandler)
@@ -1193,7 +1197,7 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (block.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (nodechain.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
@@ -1202,8 +1206,15 @@ func (vm *VM) BuildBlock(ctx context.Context) (block.Block, error) {
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (block.Block, error) {
-	blk, err := vm.buildBlockWithContext(ctx, proposerVMBlockCtx)
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodechain.Block, error) {
+	// Convert node context to consensus context
+	var consensusCtx *block.Context
+	if proposerVMBlockCtx != nil {
+		consensusCtx = &block.Context{
+			PChainHeight: proposerVMBlockCtx.PChainHeight,
+		}
+	}
+	blk, err := vm.buildBlockWithContext(ctx, consensusCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -1288,8 +1299,13 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
 // GetBlock implements the ChainVM interface
-func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (block.Block, error) {
-	return vm.getBlock(ctx, id)
+func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodechain.Block, error) {
+	blk, err := vm.getBlock(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	// Cast to node's Block interface
+	return blk.(nodechain.Block), nil
 }
 
 func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
@@ -1619,4 +1635,85 @@ func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 	}
 
 	return vm.Network.Disconnected(ctx, nodeID)
+}
+
+// AppRequestFailed implements the VM interface
+func (vm *VM) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *commonEng.AppError) error {
+	// Convert to commonEng.AppError for internal handling
+	internalErr := &commonEng.AppError{
+		Code:    appErr.Code,
+		Message: appErr.Message,
+	}
+	return vm.Network.AppRequestFailed(ctx, nodeID, requestID, internalErr)
+}
+
+// CrossChainAppRequestFailed implements the VM interface
+func (vm *VM) CrossChainAppRequestFailed(ctx context.Context, chainID ids.ID, requestID uint32, appErr *commonEng.AppError) error {
+	// Cross-chain app requests are not currently supported
+	// Just log and return nil to satisfy the interface
+	log.Debug("CrossChainAppRequestFailed called", "chainID", chainID, "requestID", requestID, "error", appErr.Message)
+	return nil
+}
+
+// StateSyncEnabled implements the StateSyncableVM interface
+func (vm *VM) StateSyncEnabled(ctx context.Context) (bool, error) {
+	return vm.config.StateSyncEnabled, nil
+}
+
+// GetOngoingSyncStateSummary implements the StateSyncableVM interface
+func (vm *VM) GetOngoingSyncStateSummary(ctx context.Context) (nodeblock.StateSummary, error) {
+	// TODO: Implement ongoing sync support
+	return nil, database.ErrNotFound
+}
+
+// GetLastStateSummary implements the StateSyncableVM interface
+func (vm *VM) GetLastStateSummary(ctx context.Context) (nodeblock.StateSummary, error) {
+	summary, err := vm.StateSyncServer.GetLastStateSummary(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Cast to node's StateSummary interface
+	return summary.(nodeblock.StateSummary), nil
+}
+
+// ParseStateSummary implements the StateSyncableVM interface
+func (vm *VM) ParseStateSummary(ctx context.Context, summaryBytes []byte) (nodeblock.StateSummary, error) {
+	// Parse the summary bytes
+	summary, err := message.ParseSyncSummary(summaryBytes)
+	if err != nil {
+		return nil, err
+	}
+	return summary, nil
+}
+
+// GetStateSummary implements the StateSyncableVM interface
+func (vm *VM) GetStateSummary(ctx context.Context, height uint64) (nodeblock.StateSummary, error) {
+	summary, err := vm.StateSyncServer.GetStateSummary(ctx, height)
+	if err != nil {
+		return nil, err
+	}
+	// Cast to node's StateSummary interface
+	return summary.(nodeblock.StateSummary), nil
+}
+
+// warpVerifierAdapter adapts our warp.Backend to lp118.Verifier
+type warpVerifierAdapter struct {
+	backend warp.Backend
+}
+
+func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.UnsignedMessage, justification []byte) *commonEng.AppError {
+	// Convert node warp message to consensus warp message
+	luxMsg := &luxWarp.UnsignedMessage{
+		NetworkID:     msg.NetworkID,
+		SourceChainID: msg.SourceChainID[:],
+		Payload:       msg.Payload,
+	}
+	
+	if err := w.backend.Verify(ctx, luxMsg, justification); err != nil {
+		return &commonEng.AppError{
+			Code:    1,
+			Message: err.Error(),
+		}
+	}
+	return nil
 }
