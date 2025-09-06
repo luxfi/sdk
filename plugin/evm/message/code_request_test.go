@@ -35,10 +35,10 @@ func TestMarshalCodeRequest(t *testing.T) {
 // ensure compatibility with the network.
 func TestMarshalCodeResponse(t *testing.T) {
 	// generate some random code data
-	// set random seed for deterministic random
-	rand.Seed(1)
+	// use deterministic random source for testing
+	r := rand.New(rand.NewSource(1))
 	codeData := make([]byte, 50)
-	_, err := rand.Read(codeData)
+	_, err := r.Read(codeData)
 	assert.NoError(t, err)
 
 	codeResponse := CodeResponse{

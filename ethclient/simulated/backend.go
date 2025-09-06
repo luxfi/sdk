@@ -103,11 +103,12 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 
 	ethConf := ethconfig.DefaultConfig
 	
-	// Get the extra config and ensure FeeConfig is initialized
-	extra := params.GetExtra(&chainConfig)
-	if extra.FeeConfig.GasLimit == nil {
-		extra.FeeConfig = extras.DefaultFeeConfig
+	// Initialize the extras with proper defaults
+	extra := &extras.ChainConfig{
+		FeeConfig:       extras.DefaultFeeConfig,
+		NetworkUpgrades: extras.GetDefaultNetworkUpgrades(),
 	}
+	params.SetExtra(&chainConfig, extra)
 	
 	ethConf.Genesis = &core.Genesis{
 		Config:   &chainConfig,

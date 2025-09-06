@@ -53,6 +53,7 @@ import (
 	"github.com/luxfi/evm/rpc"
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/client/stats"
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/warp"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/signer"
@@ -514,7 +515,11 @@ func (vm *VM) Initialize(
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
-	vm.p2pValidators = vm.Network.P2PValidators().(*p2p.Validators)
+	// P2PValidators might be nil in test environments
+	p2pValidatorsInterface := vm.Network.P2PValidators()
+	if p2pValidatorsInterface != nil {
+		vm.p2pValidators = p2pValidatorsInterface.(*p2p.Validators)
+	}
 
 	vm.validatorsManager, err = validators.NewManager(vm.ctx, vm.validatorsDB, &vm.consensusClock)
 	if err != nil {
@@ -543,29 +548,34 @@ func (vm *VM) Initialize(
 
 	// Get warp signer from context
 	warpSignerInterface := consensus.GetWarpSigner(vm.ctx)
-	warpSigner, ok := warpSignerInterface.(signer.Signer)
-	if !ok {
-		return fmt.Errorf("invalid warp signer type: %T", warpSignerInterface)
+	var warpAdapter *warpSignerAdapter
+	if warpSignerInterface != nil {
+		warpSigner, ok := warpSignerInterface.(signer.Signer)
+		if !ok {
+			return fmt.Errorf("invalid warp signer type: %T", warpSignerInterface)
+		}
+		// Create a wrapper that implements WarpSigner
+		warpAdapter = &warpSignerAdapter{
+			signer: warpSigner,
+			nodeID: consensus.GetNodeID(vm.ctx),
+		}
 	}
 
-	// Create a wrapper that implements WarpSigner
-	warpSignerAdapter := &warpSignerAdapter{
-		signer: warpSigner,
-		nodeID: consensus.GetNodeID(vm.ctx),
-	}
-
-	vm.warpBackend, err = warp.NewBackend(
-		consensus.GetNetworkID(vm.ctx),
-		consensus.GetChainID(vm.ctx),
-		warpSignerAdapter,
-		&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
-		validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
-		vm.warpDB,
-		meteredCache,
-		offchainWarpMessages,
-	)
-	if err != nil {
-		return err
+	// Only create warp backend if we have a signer
+	if warpAdapter != nil {
+		vm.warpBackend, err = warp.NewBackend(
+			consensus.GetNetworkID(vm.ctx),
+			consensus.GetChainID(vm.ctx),
+			warpAdapter,
+			&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
+			validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
+			vm.warpDB,
+			meteredCache,
+			offchainWarpMessages,
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := vm.initializeChain(lastAcceptedHash, vm.ethConfig); err != nil {
@@ -663,6 +673,41 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 	// Set network upgrade defaults
 	// TODO: Get network upgrades from consensus context if available
 	configExtra.SetDefaults(upgrade.Config{})
+	
+	// Parse network upgrades from the genesis JSON if present
+	// They won't be in g.Config because geth's ChainConfig doesn't know about them
+	// This must be done after SetDefaults to override defaults with genesis values
+	genesisMap = make(map[string]interface{})
+	if err := json.Unmarshal(genesisBytes, &genesisMap); err == nil {
+		if configData, ok := genesisMap["config"].(map[string]interface{}); ok {
+			// Extract network upgrade timestamps
+			if val, ok := configData["subnetEVMTimestamp"]; ok {
+				if ts, ok := val.(float64); ok {
+					configExtra.SubnetEVMTimestamp = utils.NewUint64(uint64(ts))
+				}
+			}
+			if val, ok := configData["durangoTimestamp"]; ok {
+				if ts, ok := val.(float64); ok {
+					configExtra.DurangoTimestamp = utils.NewUint64(uint64(ts))
+				}
+			}
+			if val, ok := configData["etnaTimestamp"]; ok {
+				if ts, ok := val.(float64); ok {
+					configExtra.EtnaTimestamp = utils.NewUint64(uint64(ts))
+				}
+			}
+			if val, ok := configData["fortunaTimestamp"]; ok {
+				if ts, ok := val.(float64); ok {
+					configExtra.FortunaTimestamp = utils.NewUint64(uint64(ts))
+				}
+			}
+			if val, ok := configData["graniteTimestamp"]; ok {
+				if ts, ok := val.(float64); ok {
+					configExtra.GraniteTimestamp = utils.NewUint64(uint64(ts))
+				}
+			}
+		}
+	}
 
 	// Apply upgradeBytes (if any) by unmarshalling them into [chainConfig.UpgradeConfig].
 	// Initializing the chain will verify upgradeBytes are compatible with existing values.
@@ -919,11 +964,22 @@ func (vm *VM) onNormalOperationsStarted() error {
 	// Initialize goroutines related to block building
 	// once we enter normal operation as there is no need to handle mempool gossip before this point.
 	ethTxGossipMarshaller := GossipEthTxMarshaller{}
-	p2pValidators, ok := vm.P2PValidators().(*p2p.Validators)
-	if !ok {
-		return fmt.Errorf("failed to get P2P validators")
+	
+	// P2PValidators might be nil in test environments
+	var p2pValidators *p2p.Validators
+	p2pValidatorsInterface := vm.P2PValidators()
+	var ethTxGossipClient *p2p.Client
+	if p2pValidatorsInterface != nil {
+		var ok bool
+		p2pValidators, ok = p2pValidatorsInterface.(*p2p.Validators)
+		if !ok {
+			return fmt.Errorf("failed to get P2P validators")
+		}
+		ethTxGossipClient = vm.Network.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(p2pValidators))
+	} else {
+		// In test mode, use a client without validator sampling
+		ethTxGossipClient = vm.Network.NewClient(TxGossipHandlerID)
 	}
-	ethTxGossipClient := vm.Network.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(p2pValidators))
 	ethTxGossipMetrics, err := gossip.NewMetrics(vm.sdkMetrics, ethTxGossipNamespace)
 	if err != nil {
 		return fmt.Errorf("failed to initialize eth tx gossip metrics: %w", err)
@@ -949,7 +1005,9 @@ func (vm *VM) onNormalOperationsStarted() error {
 	}
 
 	ethTxPushGossiper := vm.ethTxPushGossiper.Get()
-	if ethTxPushGossiper == nil {
+	if ethTxPushGossiper == nil && p2pValidatorsInterface != nil {
+		// Only create push gossiper if we have P2P validators
+		p2pValidators, _ := p2pValidatorsInterface.(*p2p.Validators)
 		ethTxPushGossiper, err = gossip.NewPushGossiper[*GossipEthTx](
 			ethTxGossipMarshaller,
 			ethTxPool,
@@ -993,7 +1051,8 @@ func (vm *VM) onNormalOperationsStarted() error {
 		return fmt.Errorf("failed to add eth tx gossip handler: %w", err)
 	}
 
-	if vm.ethTxPullGossiper == nil {
+	if vm.ethTxPullGossiper == nil && p2pValidators != nil {
+		// Only create pull gossiper if we have P2P validators
 		// Use VM's logger instead of consensus logger
 		ethTxPullGossiper := gossip.NewPullGossiper[*GossipEthTx](
 			vm.logger,

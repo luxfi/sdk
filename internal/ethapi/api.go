@@ -1266,8 +1266,12 @@ func RPCMarshalHeader(head *types.Header) map[string]interface{} {
 	if head.BaseFee != nil {
 		result["baseFeePerGas"] = (*hexutil.Big)(head.BaseFee)
 	}
+	// Always include blockGasCost for Lux blocks (even if nil/zero)
+	// This is required for API compatibility
 	if headExtra.BlockGasCost != nil {
 		result["blockGasCost"] = (*hexutil.Big)(headExtra.BlockGasCost)
+	} else {
+		result["blockGasCost"] = (*hexutil.Big)(big.NewInt(0))
 	}
 	if head.BlobGasUsed != nil {
 		result["blobGasUsed"] = hexutil.Uint64(*head.BlobGasUsed)

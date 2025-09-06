@@ -187,9 +187,11 @@ type ChainConfigWithUpgradesJSON struct {
 // the default JSON marshalling from working for UpgradeConfig.
 // TODO: consider removing this method by allowing external tag for the embedded
 // ChainConfig struct.
-func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
+func (cu *ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 	// First get the extras
 	extra := GetExtra(&cu.ChainConfig)
+	// fmt.Printf("DEBUG ChainConfigWithUpgradesJSON.MarshalJSON: extra=%+v\n", extra)
+	// fmt.Printf("DEBUG extra.FeeConfig: %+v\n", extra.FeeConfig)
 	
 	// Marshal the base ChainConfig
 	baseJSON, err := json.Marshal(&cu.ChainConfig)
@@ -203,6 +205,10 @@ func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 	
+	// Debug
+	// fmt.Printf("DEBUG: Base JSON: %s\n", string(baseJSON))
+	// fmt.Printf("DEBUG: Extra JSON: %s\n", string(extraJSON))
+	
 	// Parse both as maps to merge
 	var baseMap map[string]json.RawMessage
 	if err := json.Unmarshal(baseJSON, &baseMap); err != nil {
@@ -214,7 +220,7 @@ func (cu ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 	
-	// Merge extras into base
+	// Merge extras into base - overwrite any conflicting keys with extras values
 	for k, v := range extraMap {
 		baseMap[k] = v
 	}

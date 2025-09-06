@@ -20,16 +20,16 @@ import (
 // ensure compatibility with the network.
 func TestMarshalLeafsRequest(t *testing.T) {
 	// generate some random code data
-	// set random seed for deterministic random
-	rand.Seed(1)
+	// use deterministic random source for testing
+	r := rand.New(rand.NewSource(1))
 
 	startBytes := make([]byte, common.HashLength)
 	endBytes := make([]byte, common.HashLength)
 
-	_, err := rand.Read(startBytes)
+	_, err := r.Read(startBytes)
 	assert.NoError(t, err)
 
-	_, err = rand.Read(endBytes)
+	_, err = r.Read(endBytes)
 	assert.NoError(t, err)
 
 	leafsRequest := LeafsRequest{
@@ -58,30 +58,30 @@ func TestMarshalLeafsRequest(t *testing.T) {
 // ensure compatibility with the network.
 func TestMarshalLeafsResponse(t *testing.T) {
 	// generate some random code data
-	// set random seed for deterministic random
-	rand.Seed(1)
+	// use deterministic random source for testing
+	r := rand.New(rand.NewSource(1))
 
 	keysBytes := make([][]byte, 16)
 	valsBytes := make([][]byte, 16)
 	for i := range keysBytes {
 		keysBytes[i] = make([]byte, common.HashLength)
-		valsBytes[i] = make([]byte, rand.Intn(8)+8) // min 8 bytes, max 16 bytes
+		valsBytes[i] = make([]byte, r.Intn(8)+8) // min 8 bytes, max 16 bytes
 
-		_, err := rand.Read(keysBytes[i])
+		_, err := r.Read(keysBytes[i])
 		assert.NoError(t, err)
-		_, err = rand.Read(valsBytes[i])
+		_, err = r.Read(valsBytes[i])
 		assert.NoError(t, err)
 	}
 
 	nextKey := make([]byte, common.HashLength)
-	_, err := rand.Read(nextKey)
+	_, err := r.Read(nextKey)
 	assert.NoError(t, err)
 
 	proofVals := make([][]byte, 4)
 	for i := range proofVals {
-		proofVals[i] = make([]byte, rand.Intn(8)+8) // min 8 bytes, max 16 bytes
+		proofVals[i] = make([]byte, r.Intn(8)+8) // min 8 bytes, max 16 bytes
 
-		_, err = rand.Read(proofVals[i])
+		_, err = r.Read(proofVals[i])
 		assert.NoError(t, err)
 	}
 

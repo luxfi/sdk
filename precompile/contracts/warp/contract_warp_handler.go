@@ -112,7 +112,7 @@ func (addressedPayloadHandler) handleMessage(warpMessage *warp.Message) ([]byte,
 	}
 	return PackGetVerifiedWarpMessageOutput(GetVerifiedWarpMessageOutput{
 		Message: WarpMessage{
-			SourceChainID:       common.BytesToHash(warpMessage.UnsignedMessage.SourceChainID),
+			SourceChainID:       common.BytesToHash(warpMessage.UnsignedMessage.SourceChainID[:]),
 			OriginSenderAddress: common.BytesToAddress(addressedCall.SourceAddress),
 			Payload:             addressedCall.Payload,
 		},
@@ -138,7 +138,7 @@ func (blockHashHandler) handleMessage(warpMessage *warp.Message) ([]byte, error)
 	}
 	return PackGetVerifiedWarpBlockHashOutput(GetVerifiedWarpBlockHashOutput{
 		WarpBlockHash: WarpBlockHash{
-			SourceChainID: common.BytesToHash(warpMessage.UnsignedMessage.SourceChainID),
+			SourceChainID: common.BytesToHash(warpMessage.UnsignedMessage.SourceChainID[:]),
 			BlockHash:     common.BytesToHash(blockHashPayload.Hash[:]),
 		},
 		Valid: true,

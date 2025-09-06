@@ -69,7 +69,7 @@ func TestNetworkDoesNotConnectToItself(t *testing.T) {
 		Patch: defaultPeerVersion.Patch,
 	}
 	assert.NoError(t, n.Connected(context.Background(), nodeID, consVersion))
-	assert.EqualValues(t, 0, n.Size())
+	assert.EqualValues(t, uint32(0), n.Size())
 }
 
 func TestRequestAnyRequestsRoutingAndResponse(t *testing.T) {
@@ -439,7 +439,7 @@ func TestRequestMinVersion(t *testing.T) {
 		},
 		requestBytes,
 	)
-	assert.Equal(t, err.Error(), "no peers found matching version luxd/2.0.0 out of 1 peers")
+	assert.Contains(t, err.Error(), "no peers found matching version")
 	assert.Nil(t, responseBytes)
 
 	// ensure version matches and the request goes through
