@@ -9,7 +9,7 @@ import (
 
 	luxdb "github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/consensus/uptime"
+	"github.com/luxfi/consensus/uptime"
 	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
