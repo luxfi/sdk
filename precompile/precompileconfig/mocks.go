@@ -12,8 +12,8 @@ package precompileconfig
 import (
 	reflect "reflect"
 
-	common "github.com/luxfi/geth/common"
 	commontype "github.com/luxfi/evm/commontype"
+	common "github.com/luxfi/geth/common"
 	gomock "go.uber.org/mock/gomock"
 )
 
