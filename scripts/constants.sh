@@ -36,8 +36,8 @@ fi
 
 # Don't export them as they're used in the context of other calls
 if [[ -z ${LUX_VERSION:-} ]]; then
-  # Get module details from go.mod
-  MODULE_DETAILS="$(go list -m "github.com/luxfi/luxd" 2>/dev/null)"
+  # Get module details from go.mod - try node first, then luxd
+  MODULE_DETAILS="$(go list -m "github.com/luxfi/node" 2>/dev/null || go list -m "github.com/luxfi/luxd" 2>/dev/null || echo "")"
 
   LUX_VERSION="$(echo "${MODULE_DETAILS}" | awk '{print $2}')"
 

@@ -94,6 +94,7 @@ import (
 	nodeChain "github.com/luxfi/node/vms/components/chain"
 
 	commonEng "github.com/luxfi/consensus/core"
+	"github.com/luxfi/consensus/core/appsender"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -216,11 +217,14 @@ func (w *warpSignerAdapter) NodeID() ids.NodeID {
 
 type VM struct {
 	ctx context.Context
+	chainCtx *block.ChainContext
 	// contextLock is used to coordinate global VM operations.
 	// This can be used safely instead of context.Context.Lock which is deprecated and should not be used in rpcchainvm.
 	vmLock sync.RWMutex
 	// [cancel] may be nil until [consensus.NormalOp] starts
 	cancel context.CancelFunc
+	// toEngine sends messages to the consensus engine
+	toEngine chan<- block.Message
 	// *nodeChain.State helps to implement the VM interface by wrapping blocks
 	// with an efficient caching layer.
 	*nodeChain.State
@@ -308,18 +312,31 @@ type VM struct {
 	rpcHandlers []interface{ Stop() }
 }
 
+// ParseBlock implements block.ChainVM interface
+func (vm *VM) ParseBlock(ctx context.Context, b []byte) (block.Block, error) {
+	// Call the embedded State's ParseBlock and convert the result
+	blk, err := vm.State.ParseBlock(ctx, b)
+	if err != nil {
+		return nil, err
+	}
+	// The returned block should already implement block.Block interface
+	return blk.(block.Block), nil
+}
+
 // Initialize implements the chain.ChainVM interface
 func (vm *VM) Initialize(
 	_ context.Context,
-	chainCtx context.Context,
-	db database.Database,
+	chainCtx *block.ChainContext,
+	dbManager block.DBManager,
 	genesisBytes []byte,
 	upgradeBytes []byte,
 	configBytes []byte,
-	fxs []*commonEng.Fx,
-	appSender commonEng.AppSender,
+	toEngine chan<- block.Message,
+	fxs []*block.Fx,
+	appSender block.AppSender,
 ) error {
 	vm.stateSyncDone = make(chan struct{})
+	vm.toEngine = toEngine
 	vm.config.SetDefaults(defaultTxPoolConfig)
 	if len(configBytes) > 0 {
 		if err := json.Unmarshal(configBytes, &vm.config); err != nil {
@@ -334,12 +351,17 @@ func (vm *VM) Initialize(
 	// initialized the logger.
 	deprecateMsg := vm.config.Deprecate()
 
-	vm.ctx = chainCtx
+	// Store the chain context as a regular context - ChainContext is an alias for interfaces.Runtime
+	// which contains all the chain-specific information we need
+	vm.chainCtx = chainCtx
+	// Create a regular context for operations
+	vm.ctx = context.Background()
 
 	// Create logger
 	var alias string
-	chainID := consensus.GetChainID(vm.ctx)
-	bcLookup := consensus.GetBCLookup(vm.ctx)
+	// ChainContext is an alias for interfaces.Runtime which has ChainID field
+	chainID := vm.chainCtx.ChainID
+	bcLookup := vm.chainCtx.BCLookup
 	if bcLookup != nil {
 		if aliasLookup, ok := bcLookup.(consensus.AliasLookup); ok {
 			a, err := aliasLookup.PrimaryAlias(chainID)
@@ -384,6 +406,7 @@ func (vm *VM) Initialize(
 	}
 
 	// Initialize the database
+	db := dbManager.Current()
 	if err := vm.initializeDBs(db); err != nil {
 		return fmt.Errorf("failed to initialize databases: %w", err)
 	}
@@ -511,7 +534,12 @@ func (vm *VM) Initialize(
 	)
 
 	vm.networkCodec = message.Codec
-	vm.Network, err = network.NewNetwork(context.Background(), appSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
+	// Convert block.AppSender to appsender.AppSender - they should be compatible
+	coreAppSender, ok := appSender.(appsender.AppSender)
+	if !ok {
+		return fmt.Errorf("appSender does not implement appsender.AppSender")
+	}
+	vm.Network, err = network.NewNetwork(context.Background(), coreAppSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
