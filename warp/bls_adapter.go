@@ -6,7 +6,7 @@ package warp
 import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 )
 
 // LocalSigner implements signing with luxfi/crypto/bls

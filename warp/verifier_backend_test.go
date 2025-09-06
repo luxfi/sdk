@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/consensus/compat"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/metrics/metricstest"
 	"github.com/luxfi/evm/plugin/evm/validators"

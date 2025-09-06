@@ -155,14 +155,14 @@ func (p *pqCryptoPrecompile) mlkemEncapsulate(input []byte) ([]byte, uint64, err
 		return nil, 0, err
 	}
 	
-	// Encapsulate
-	result, err := pubKey.Encapsulate(rand.Reader)
+	// Encapsulate - now returns (ciphertext, sharedSecret, error)
+	ciphertext, sharedSecret, err := pubKey.Encapsulate(rand.Reader)
 	if err != nil {
 		return nil, 0, err
 	}
 	
 	// Return ciphertext + shared secret
-	output := append(result.Ciphertext, result.SharedSecret...)
+	output := append(ciphertext, sharedSecret...)
 	return output, 0, nil
 }
 

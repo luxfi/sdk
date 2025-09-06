@@ -266,17 +266,9 @@ func GetNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
 		SubnetEVMTimestamp: utils.NewUint64(0),
 	}
 	
-	// Set timestamps based on the upgrade config
-	// Always set if not zero time
-	if !agoUpgrade.DurangoTime.IsZero() {
-		nu.DurangoTimestamp = utils.TimeToNewUint64(agoUpgrade.DurangoTime)
-	}
-	if !agoUpgrade.EtnaTime.IsZero() {
-		nu.EtnaTimestamp = utils.TimeToNewUint64(agoUpgrade.EtnaTime)
-	}
-	if !agoUpgrade.FortunaTime.IsZero() {
-		nu.FortunaTimestamp = utils.TimeToNewUint64(agoUpgrade.FortunaTime)
-	}
+	// For now, we don't have specific upgrade times from the Config
+	// These will be set through chain config instead
+	// TODO: Update when upgrade.Config includes specific upgrade times
 	
 	return nu
 }

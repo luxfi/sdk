@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/consensustest"
+	"github.com/luxfi/node/consensus/consensustest"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
 	"github.com/luxfi/node/utils/constants"

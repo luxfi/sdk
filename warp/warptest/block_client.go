@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus/chain"
-	"github.com/luxfi/consensus/choices"
+	"github.com/luxfi/consensus/protocol/chain"
+	"github.com/luxfi/node/consensus/choices"
 )
 
 var ErrNotFound = errors.New("not found")

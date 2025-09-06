@@ -181,5 +181,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// Use lux-branded geth
-replace github.com/luxfi/geth => github.com/luxfi/geth v1.16.34-lux.3
+// Use lux-branded geth with fixed post-quantum crypto
+replace github.com/luxfi/geth => github.com/luxfi/geth v1.16.34-lux.5

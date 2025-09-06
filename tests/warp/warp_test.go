@@ -32,8 +32,8 @@ import (
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/node/vms/platformvm/api"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/core/types"

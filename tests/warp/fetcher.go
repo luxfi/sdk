@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/crypto/bls"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	warpBackend "github.com/luxfi/evm/warp"
 )
 

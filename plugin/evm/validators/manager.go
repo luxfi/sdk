@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	luxuptime "github.com/luxfi/consensus/uptime"
+	luxuptime "github.com/luxfi/node/consensus/uptime"
 	luxvalidators "github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/utils/timer/mockable"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"

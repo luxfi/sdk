@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/proto/pb/sdk"
 	"github.com/luxfi/crypto/bls"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"google.golang.org/protobuf/proto"
 )
 

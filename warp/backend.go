@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 
-	"github.com/luxfi/consensus/chain"
+	"github.com/luxfi/consensus/protocol/chain"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 
