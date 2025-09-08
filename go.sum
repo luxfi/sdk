@@ -234,6 +234,8 @@ github.com/jackpal/go-nat-pmp v1.0.2/go.mod h1:QPH045xvCAeXUZOxsnwmrtiCoxIr9eob+
 github.com/jessevdk/go-flags v0.0.0-20141203071132-1679536dcc89/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jrick/logrotate v1.0.0/go.mod h1:LNinyqDIJnpAur+b8yyulnQw/wDuN1+BYKlTRt3OuAQ=
+github.com/kasperdi/SPHINCSPLUS-golang v0.0.0-20231223193046-84468b93f7e9 h1:G8fshCtNb60L5IM2tuYD81uh6YQFqJ78MAGUCMks7Bg=
+github.com/kasperdi/SPHINCSPLUS-golang v0.0.0-20231223193046-84468b93f7e9/go.mod h1:XWeSWo+UqzMi1uh/Td/gKlVHaPQjUj92s3omn7eccUM=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kkdai/bstream v0.0.0-20161212061736-f391b8402d23/go.mod h1:J+Gs4SYgM6CZQHDETBtE9HaSEkGmuNXF86RwHhHUvq4=
@@ -256,8 +258,6 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/consensus v1.16.16 h1:3MGV84Yp60obKfyjw0N5ycT6nin8ZTb3dMO6puahDwA=
 github.com/luxfi/consensus v1.16.16/go.mod h1:IuFEy6+79LIsiWnrLekKz6D2uIEAoNfk4LwXEl+DLoQ=
-github.com/luxfi/crypto v1.16.16 h1:hRHP4++vXNf4zjody/zNGU5AzPmV+tPldRorhlnVoBU=
-github.com/luxfi/crypto v1.16.16/go.mod h1:dhshhrUIuwlrfgYBgYQS6h55EFD3yZex6vlPT1sXKZ4=
 github.com/luxfi/database v1.1.13 h1:J0iNaejPDFfvevvX/TDr61pcfEciPRSKK1czoDbg+n0=
 github.com/luxfi/database v1.1.13/go.mod h1:EgiZIOrM9gCqGBy6d9IrnIESOW+/y4MdXRfFUan6BTY=
 github.com/luxfi/geth v1.16.34 h1:61IMMZMWfi4bM4SASVBvp3x+wYmpcTpIIHDiKVVPDiQ=

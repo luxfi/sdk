@@ -136,15 +136,15 @@ func (p *pqCryptoPrecompile) mlkemGenKey(input []byte) ([]byte, uint64, error) {
 	
 	mode := mlkem.Mode(input[0])
 	
-	// Generate key pair
-	privKey, err := mlkem.GenerateKeyPair(rand.Reader, mode)
+	// Generate key pair - returns (privKey, pubKey, error)
+	privKey, pubKey, err := mlkem.GenerateKeyPair(rand.Reader, mode)
 	if err != nil {
 		return nil, 0, err
 	}
 	
 	// Serialize keys
 	privBytes := privKey.Bytes()
-	pubBytes := privKey.PublicKey.Bytes()
+	pubBytes := pubKey.Bytes()
 	
 	// Output format: [privkey_len(2)] [privkey] [pubkey]
 	output := make([]byte, 2+len(privBytes)+len(pubBytes))
