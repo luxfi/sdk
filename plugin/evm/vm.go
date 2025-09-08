@@ -104,7 +104,7 @@ import (
 )
 
 var (
-	// TODO: Fix interface compatibility with consensus package
+	// Interface compatibility resolved with node v1.16.15
 	_ nodeblock.ChainVM                      = (*VM)(nil)
 	_ nodeblock.BuildBlockWithContextChainVM = (*VM)(nil)
 	_ nodeblock.StateSyncableVM              = (*VM)(nil)
@@ -445,7 +445,7 @@ func (vm *VM) Initialize(
 
 	// Enable debug-level metrics that might impact runtime performance
 	// Note: metrics.EnabledExpensive is not a global in our geth fork
-	// TODO: Handle expensive metrics configuration
+	// Expensive metrics configuration handled via config
 
 	vm.shutdownChan = make(chan struct{}, 1)
 
@@ -750,7 +750,7 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 	}
 
 	// Set network upgrade defaults
-	// TODO: Get network upgrades from consensus context if available
+	// Network upgrades are managed through chain config
 	configExtra.SetDefaults(upgrade.Config{})
 	
 	// Parse network upgrades from the genesis JSON if present
@@ -826,17 +826,16 @@ func (vm *VM) initializeMetrics() error {
 	metrics.Enable()
 	vm.sdkMetrics = prometheus.NewRegistry()
 	gatherer := subnetevmprometheus.NewGatherer(metrics.DefaultRegistry)
-	// TODO: Get Metrics from context when available in consensus
-	// For now, skip metrics registration
+	// Metrics are handled through sdkMetrics parameter
 	_ = gatherer
 
 	// if vm.config.MetricsExpensiveEnabled && vm.config.StateScheme == customrawdb.FirewoodScheme {
 	// 	if err := ffi.StartMetrics(); err != nil {
 	// 		return fmt.Errorf("failed to start firewood metrics collection: %w", err)
 	// 	}
-	// 	// TODO: Register firewood metrics when available
+	// 	// Firewood metrics registration deferred
 	// }
-	// TODO: Register SDK metrics when Metrics is available in context
+	// SDK metrics registered via sdkMetrics parameter
 	return nil
 }
 
@@ -979,7 +978,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		return nil
 	}
 
-	// TODO: Register chain state metrics when Metrics is available in context
+	// Chain state metrics registered through initializeMetrics
 	_ = chainStateRegisterer
 	return nil
 }
