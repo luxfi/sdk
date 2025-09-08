@@ -16,14 +16,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/luxfi/node/codec"
-	"github.com/luxfi/consensus/core"
+	nodeCore "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/utils"
 	
 	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus/utils/set"
+	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/evm/network/stats"
 	"github.com/luxfi/evm/plugin/evm/message"
@@ -42,7 +42,7 @@ var (
 	errExpiredRequest                          = errors.New("expired request")
 	_                     Network              = (*network)(nil)
 	_                     validators.Connector = (*network)(nil)
-	_                     core.AppHandler    = (*network)(nil)
+	_                     nodeCore.AppHandler    = (*network)(nil)
 )
 
 // loggerWrapper wraps geth/log.Logger to implement luxfi/log.Logger interface
@@ -79,7 +79,7 @@ type SyncedNetworkClient interface {
 
 type Network interface {
 	validators.Connector
-	core.AppHandler
+	nodeCore.AppHandler
 
 	SyncedNetworkClient
 
@@ -120,7 +120,7 @@ type network struct {
 	outstandingRequestHandlers map[uint32]message.ResponseHandler // maps luxd requestID => message.ResponseHandler
 	activeAppRequests          *semaphore.Weighted                // controls maximum number of active outbound requests
 	sdkNetwork                 *p2p.Network                       // SDK network (luxd p2p) for sending messages to peers
-	appSender                  core.AppSender                   // luxd AppSender for sending messages
+	appSender                  nodeCore.AppSender                   // luxd AppSender for sending messages
 	codec                      codec.Manager                      // Codec used for parsing messages
 	appRequestHandler          message.RequestHandler             // maps request type => handler
 	peers                      *peerTracker                       // tracking of peers & bandwidth
@@ -141,7 +141,7 @@ type network struct {
 
 func NewNetwork(
 	ctx context.Context,
-	appSender core.AppSender,
+	appSender nodeCore.AppSender,
 	codec codec.Manager,
 	maxActiveAppRequests int64,
 	registerer prometheus.Registerer,
@@ -363,13 +363,13 @@ func (n *network) AppResponse(ctx context.Context, nodeID ids.NodeID, requestID 
 // - request times out before a response is provided
 // error returned by this function is expected to be treated as fatal by the engine
 // returns error only when the response handler returns an error
-func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *core.AppError) error {
+func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *nodeCore.AppError) error {
 	log.Debug("received AppRequestFailed from peer", "nodeID", nodeID, "requestID", requestID)
 
 	handler, exists := n.markRequestFulfilled(requestID)
 	if !exists {
 		log.Debug("forwarding AppRequestFailed to SDK network", "nodeID", nodeID, "requestID", requestID)
-		// TODO: Convert between core.AppError and node's AppError when sdkNetwork is actually used
+		// TODO: Convert between nodeCore.AppError and node's AppError when sdkNetwork is actually used
 		// For now, sdkNetwork is nil so this won't be called
 		if n.sdkNetwork != nil {
 			// Would need to convert appErr to node's AppError type here

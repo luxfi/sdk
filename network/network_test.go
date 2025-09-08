@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/consensus/core"
+	nodeCore "github.com/luxfi/node/consensus/engine/core"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ import (
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/consensus/utils/set"
+	"github.com/luxfi/node/utils/set"
 	consensusVersion "github.com/luxfi/consensus/version"
 )
 
@@ -609,7 +609,7 @@ func TestNetworkRouting(t *testing.T) {
 	err = network.AppResponse(context.Background(), ids.GenerateTestNodeID(), requestID, foobar)
 	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
 
-	err = network.AppRequestFailed(context.Background(), nodeID, requestID, &core.AppError{Code: -1, Message: context.DeadlineExceeded.Error()})
+	err = network.AppRequestFailed(context.Background(), nodeID, requestID, &nodeCore.AppError{Code: -1, Message: context.DeadlineExceeded.Error()})
 	require.ErrorIs(err, p2p.ErrUnrequestedResponse)
 }
 
@@ -662,7 +662,7 @@ func (t testAppSender) SendAppError(ctx context.Context, nodeID ids.NodeID, requ
 	return nil
 }
 
-func (t testAppSender) SendAppGossip(_ context.Context, _ set.Set[ids.NodeID], _ []byte) error {
+func (t testAppSender) SendAppGossip(_ context.Context, _ nodeCore.SendConfig, _ []byte) error {
 	return nil
 }
 
@@ -796,7 +796,7 @@ func (t *testSDKHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, gossi
 	panic("implement me")
 }
 
-func (t *testSDKHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *core.AppError) {
+func (t *testSDKHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *nodeCore.AppError) {
 	t.appRequested = true
 	return nil, nil
 }

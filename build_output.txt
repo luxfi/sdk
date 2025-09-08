@@ -1,0 +1,5 @@
+# github.com/luxfi/node/consensus/consensustest
+/home/z/go/pkg/mod/github.com/luxfi/node@v1.16.15/consensus/consensustest/context.go:24:2: "github.com/luxfi/log" imported and not used
+# github.com/luxfi/node/chains
+/home/z/go/pkg/mod/github.com/luxfi/node@v1.16.15/chains/manager.go:666:30: cannot use meterDBReg (variable of type *prometheus.Registry) as "github.com/luxfi/metric".Metrics value in argument to meterdb.New: *prometheus.Registry does not implement "github.com/luxfi/metric".Metrics (missing method NewCounter)
+/home/z/go/pkg/mod/github.com/luxfi/node@v1.16.15/chains/manager.go:1133:30: cannot use meterDBReg (variable of type *prometheus.Registry) as "github.com/luxfi/metric".Metrics value in argument to meterdb.New: *prometheus.Registry does not implement "github.com/luxfi/metric".Metrics (missing method NewCounter)

@@ -33,7 +33,6 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/trie/testutil"
 	"github.com/luxfi/geth/trie/trienode"
 )
 
@@ -77,8 +76,8 @@ func benchmarkSearch(b *testing.B, depth int, total int) {
 		nodes[common.Hash{}] = make(map[string]*trienode.Node)
 		for i := 0; i < 3000; i++ {
 			var (
-				path = testutil.RandBytes(32)
-				node = testutil.RandomNode()
+				path = randBytes(32)
+				node = randomNode()
 			)
 			nodes[common.Hash{}][string(path)] = trienode.New(node.Hash, node.Blob)
 			if npath == nil && depth == index {
@@ -123,8 +122,8 @@ func BenchmarkPersist(b *testing.B) {
 		nodes[common.Hash{}] = make(map[string]*trienode.Node)
 		for i := 0; i < 3000; i++ {
 			var (
-				path = testutil.RandBytes(32)
-				node = testutil.RandomNode()
+				path = randBytes(32)
+				node = randomNode()
 			)
 			nodes[common.Hash{}][string(path)] = trienode.New(node.Hash, node.Blob)
 		}
@@ -160,8 +159,8 @@ func BenchmarkJournal(b *testing.B) {
 		nodes[common.Hash{}] = make(map[string]*trienode.Node)
 		for i := 0; i < 3000; i++ {
 			var (
-				path = testutil.RandBytes(32)
-				node = testutil.RandomNode()
+				path = randBytes(32)
+				node = randomNode()
 			)
 			nodes[common.Hash{}][string(path)] = trienode.New(node.Hash, node.Blob)
 		}

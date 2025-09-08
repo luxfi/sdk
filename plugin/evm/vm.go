@@ -41,7 +41,6 @@ import (
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/config"
 	subnetevmlog "github.com/luxfi/evm/plugin/evm/log"
-	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	"github.com/luxfi/geth/core/rawdb"
@@ -79,12 +78,11 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	"github.com/luxfi/consensus"
-	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/consensus/engine/chain/block"
-	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
-	nodechain "github.com/luxfi/consensus/protocol/chain"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
+	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
+	nodechain "github.com/luxfi/node/consensus/chain"
+	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
@@ -96,7 +94,8 @@ import (
 	"github.com/luxfi/node/version"
 	nodeChain "github.com/luxfi/node/vms/components/chain"
 
-	commonEng "github.com/luxfi/consensus/core"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/consensus/core/appsender"
 
 	"github.com/luxfi/database"
@@ -218,16 +217,75 @@ func (w *warpSignerAdapter) NodeID() ids.NodeID {
 	return w.nodeID
 }
 
+// appSenderWrapper wraps a consensus AppSender to implement node's AppSender interface
+type appSenderWrapper struct {
+	appSender appsender.AppSender
+}
+
+func (w *appSenderWrapper) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, appRequestBytes []byte) error {
+	// Convert node set to consensus set
+	consensusSet := make(map[ids.NodeID]struct{})
+	for nodeID := range nodeIDs {
+		consensusSet[nodeID] = struct{}{}
+	}
+	return w.appSender.SendAppRequest(ctx, consensusSet, requestID, appRequestBytes)
+}
+
+func (w *appSenderWrapper) SendAppResponse(ctx context.Context, nodeID ids.NodeID, requestID uint32, appResponseBytes []byte) error {
+	return w.appSender.SendAppResponse(ctx, nodeID, requestID, appResponseBytes)
+}
+
+func (w *appSenderWrapper) SendAppError(ctx context.Context, nodeID ids.NodeID, requestID uint32, errorCode int32, errorMessage string) error {
+	return w.appSender.SendAppError(ctx, nodeID, requestID, errorCode, errorMessage)
+}
+
+func (w *appSenderWrapper) SendAppGossip(ctx context.Context, config commonEng.SendConfig, appGossipBytes []byte) error {
+	// Convert SendConfig.NodeIDs (node set) to consensus set
+	consensusSet := make(map[ids.NodeID]struct{})
+	for nodeID := range config.NodeIDs {
+		consensusSet[nodeID] = struct{}{}
+	}
+	return w.appSender.SendAppGossip(ctx, consensusSet, appGossipBytes)
+}
+
+func (w *appSenderWrapper) SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
+	// Convert node set to consensus set
+	consensusSet := make(map[ids.NodeID]struct{})
+	for nodeID := range nodeIDs {
+		consensusSet[nodeID] = struct{}{}
+	}
+	return w.appSender.SendAppGossipSpecific(ctx, consensusSet, appGossipBytes)
+}
+
+// SendCrossChainAppError implements node's AppSender interface
+func (w *appSenderWrapper) SendCrossChainAppError(ctx context.Context, chainID ids.ID, requestID uint32, errorCode int32, errorMessage string) error {
+	// consensus AppSender doesn't have this method, so just return nil
+	// Cross-chain app messages are not supported in this VM
+	return nil
+}
+
+// SendCrossChainAppRequest implements node's AppSender interface
+func (w *appSenderWrapper) SendCrossChainAppRequest(ctx context.Context, chainID ids.ID, requestID uint32, appRequestBytes []byte) error {
+	// consensus AppSender doesn't have this method, so just return nil
+	// Cross-chain app messages are not supported in this VM
+	return nil
+}
+
+// SendCrossChainAppResponse implements node's AppSender interface
+func (w *appSenderWrapper) SendCrossChainAppResponse(ctx context.Context, chainID ids.ID, requestID uint32, appResponseBytes []byte) error {
+	// consensus AppSender doesn't have this method, so just return nil
+	// Cross-chain app messages are not supported in this VM
+	return nil
+}
+
 type VM struct {
 	ctx context.Context
-	chainCtx *block.ChainContext
+	chainCtx *nodeConsensus.Context
 	// contextLock is used to coordinate global VM operations.
 	// This can be used safely instead of context.Context.Lock which is deprecated and should not be used in rpcchainvm.
 	vmLock sync.RWMutex
 	// [cancel] may be nil until [consensus.NormalOp] starts
 	cancel context.CancelFunc
-	// toEngine sends messages to the consensus engine
-	toEngine chan<- block.Message
 	// *nodeChain.State helps to implement the VM interface by wrapping blocks
 	// with an efficient caching layer.
 	*nodeChain.State
@@ -328,18 +386,16 @@ func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodechain.Block, error)
 
 // Initialize implements the chain.ChainVM interface
 func (vm *VM) Initialize(
-	_ context.Context,
-	chainCtx *block.ChainContext,
-	dbManager block.DBManager,
+	ctx context.Context,
+	chainCtx *nodeConsensus.Context,
+	db database.Database,
 	genesisBytes []byte,
 	upgradeBytes []byte,
 	configBytes []byte,
-	toEngine chan<- block.Message,
-	fxs []*block.Fx,
-	appSender block.AppSender,
+	fxs []*commonEng.Fx,
+	appSender commonEng.AppSender,
 ) error {
 	vm.stateSyncDone = make(chan struct{})
-	vm.toEngine = toEngine
 	vm.config.SetDefaults(defaultTxPoolConfig)
 	if len(configBytes) > 0 {
 		if err := json.Unmarshal(configBytes, &vm.config); err != nil {
@@ -354,33 +410,22 @@ func (vm *VM) Initialize(
 	// initialized the logger.
 	deprecateMsg := vm.config.Deprecate()
 
-	// Store the chain context as a regular context - ChainContext is an alias for interfaces.Runtime
-	// which contains all the chain-specific information we need
+	// Store the chain context
 	vm.chainCtx = chainCtx
 	// Create a regular context for operations
-	vm.ctx = context.Background()
+	vm.ctx = ctx
 
-	// Create logger
+	// Use ChainID from chainCtx for alias
 	var alias string
-	// ChainContext is an alias for interfaces.Runtime which has ChainID field
-	chainID := vm.chainCtx.ChainID
-	bcLookup := vm.chainCtx.BCLookup
-	if bcLookup != nil {
-		if aliasLookup, ok := bcLookup.(consensus.AliasLookup); ok {
-			a, err := aliasLookup.PrimaryAlias(chainID)
-			if err == nil {
-				alias = a
-			}
-		}
-	}
-	if alias == "" {
-		// fallback to ChainID string instead of erroring
-		alias = chainID.String()
+	if chainCtx != nil && chainCtx.ChainID != ids.Empty {
+		alias = chainCtx.ChainID.String()
+	} else {
+		alias = "evm"
 	}
 	vm.chainAlias = alias
 
-	// Get logger from context and adapt it to io.Writer
-	contextLogger := consensus.GetLogger(vm.ctx)
+	// Use chainCtx.Log directly
+	contextLogger := chainCtx.Log
 	logWriter := newLoggerWriter(contextLogger)
 	subnetEVMLogger, err := subnetevmlog.InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, logWriter)
 	if err != nil {
@@ -409,7 +454,6 @@ func (vm *VM) Initialize(
 	}
 
 	// Initialize the database
-	db := dbManager.Current()
 	if err := vm.initializeDBs(db); err != nil {
 		return fmt.Errorf("failed to initialize databases: %w", err)
 	}
@@ -542,7 +586,9 @@ func (vm *VM) Initialize(
 	if !ok {
 		return fmt.Errorf("appSender does not implement appsender.AppSender")
 	}
-	vm.Network, err = network.NewNetwork(context.Background(), coreAppSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
+	// Wrap the consensus AppSender to match node's AppSender interface
+	wrappedAppSender := &appSenderWrapper{appSender: coreAppSender}
+	vm.Network, err = network.NewNetwork(context.Background(), wrappedAppSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
@@ -578,7 +624,8 @@ func (vm *VM) Initialize(
 	// VM implements warp.BlockClient directly
 
 	// Get warp signer from context
-	warpSignerInterface := consensus.GetWarpSigner(vm.ctx)
+	// Warp signer is not directly available in chainCtx, skip for now
+	var warpSignerInterface interface{}
 	var warpAdapter *warpSignerAdapter
 	if warpSignerInterface != nil {
 		warpSigner, ok := warpSignerInterface.(signer.Signer)
@@ -588,15 +635,15 @@ func (vm *VM) Initialize(
 		// Create a wrapper that implements WarpSigner
 		warpAdapter = &warpSignerAdapter{
 			signer: warpSigner,
-			nodeID: consensus.GetNodeID(vm.ctx),
+			nodeID: chainCtx.NodeID,
 		}
 	}
 
 	// Only create warp backend if we have a signer
 	if warpAdapter != nil {
 		vm.warpBackend, err = warp.NewBackend(
-			consensus.GetNetworkID(vm.ctx),
-			consensus.GetChainID(vm.ctx),
+			chainCtx.NetworkID,
+			chainCtx.ChainID,
 			warpAdapter,
 			&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
 			validators.NewLockedValidatorReader(vm.validatorsManager, &vm.vmLock),
@@ -892,8 +939,8 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		MissingCacheSize:    missingCacheSize,
 		UnverifiedCacheSize: unverifiedCacheSize,
 		BytesToIDCacheSize:  bytesToIDCacheSize,
-		// Our vm methods return *Block which implements protocolChain.Block
-		GetBlock: func(ctx context.Context, id ids.ID) (protocolChain.Block, error) {
+		// Our vm methods return *Block which implements nodechain.Block
+		GetBlock: func(ctx context.Context, id ids.ID) (nodechain.Block, error) {
 			// getBlock returns consensus block, we need to return node block
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 			if ethBlock == nil {
@@ -901,7 +948,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		UnmarshalBlock: func(ctx context.Context, b []byte) (protocolChain.Block, error) {
+		UnmarshalBlock: func(ctx context.Context, b []byte) (nodechain.Block, error) {
 			// parseBlock returns consensus block, we need to return node block
 			ethBlock := &types.Block{}
 			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
@@ -909,7 +956,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		BuildBlock: func(ctx context.Context) (protocolChain.Block, error) {
+		BuildBlock: func(ctx context.Context) (nodechain.Block, error) {
 			// Call VM's BuildBlock directly which returns the right type
 			return vm.BuildBlock(ctx)
 		},
@@ -937,17 +984,17 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state consensusInterfaces.State) error {
+func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 
 	switch state {
-	case consensusInterfaces.StateSyncing:
+	case nodeConsensus.StateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case consensusInterfaces.Bootstrapping:
+	case nodeConsensus.Bootstrapping:
 		return vm.onBootstrapStarted()
-	case consensusInterfaces.NormalOp:
+	case nodeConsensus.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
 		return fmt.Errorf("unknown state: %v", state)
@@ -1097,7 +1144,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 		vm.ethTxPullGossiper = gossip.ValidatorGossiper{
 			Gossiper:   ethTxPullGossiper,
-			NodeID:     consensus.GetNodeID(vm.ctx),
+			NodeID:     vm.chainCtx.NodeID,
 			Validators: p2pValidators,
 		}
 	}
@@ -1138,7 +1185,7 @@ func (vm *VM) setAppRequestHandlers() {
 	vm.Network.SetRequestHandler(networkHandler)
 }
 
-func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.MessageType, error) {
+func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
 	vm.builderLock.Lock()
 	builder := vm.builder
 	vm.builderLock.Unlock()
@@ -1147,11 +1194,11 @@ func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.MessageType, error) {
 	if builder == nil {
 		select {
 		case <-ctx.Done():
-			return commonEng.MessageType(0), ctx.Err()
+			return commonEng.Message(0), ctx.Err()
 		case <-vm.stateSyncDone:
 			return commonEng.StateSyncDone, nil
 		case <-vm.shutdownChan:
-			return commonEng.MessageType(0), errShuttingDownVM
+			return commonEng.Message(0), errShuttingDownVM
 		}
 	}
 
@@ -1639,12 +1686,8 @@ func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 
 // AppRequestFailed implements the VM interface
 func (vm *VM) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *commonEng.AppError) error {
-	// Convert to commonEng.AppError for internal handling
-	internalErr := &commonEng.AppError{
-		Code:    appErr.Code,
-		Message: appErr.Message,
-	}
-	return vm.Network.AppRequestFailed(ctx, nodeID, requestID, internalErr)
+	// Pass the error directly to the network (both use the same AppError type now)
+	return vm.Network.AppRequestFailed(ctx, nodeID, requestID, appErr)
 }
 
 // CrossChainAppRequestFailed implements the VM interface
@@ -1676,14 +1719,41 @@ func (vm *VM) GetLastStateSummary(ctx context.Context) (nodeblock.StateSummary, 
 	return summary.(nodeblock.StateSummary), nil
 }
 
+// stateSummaryWrapper wraps message.SyncSummary to implement nodeblock.StateSummary
+type stateSummaryWrapper struct {
+	summary message.SyncSummary
+}
+
+func (s *stateSummaryWrapper) Accept(ctx context.Context) (nodeblock.StateSyncMode, error) {
+	consensusMode, err := s.summary.Accept(ctx)
+	if err != nil {
+		return 0, err
+	}
+	// Convert consensus StateSyncMode to node StateSyncMode
+	// The values should be the same, just different types
+	return nodeblock.StateSyncMode(consensusMode), nil
+}
+
+func (s *stateSummaryWrapper) Bytes() []byte {
+	return s.summary.Bytes()
+}
+
+func (s *stateSummaryWrapper) Height() uint64 {
+	return s.summary.Height()
+}
+
+func (s *stateSummaryWrapper) ID() ids.ID {
+	return s.summary.ID()
+}
+
 // ParseStateSummary implements the StateSyncableVM interface
 func (vm *VM) ParseStateSummary(ctx context.Context, summaryBytes []byte) (nodeblock.StateSummary, error) {
 	// Parse the summary bytes
-	summary, err := message.ParseSyncSummary(summaryBytes)
+	summary, err := message.NewSyncSummaryFromBytes(summaryBytes, nil)
 	if err != nil {
 		return nil, err
 	}
-	return summary, nil
+	return &stateSummaryWrapper{summary: summary}, nil
 }
 
 // GetStateSummary implements the StateSyncableVM interface
