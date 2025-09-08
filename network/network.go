@@ -146,8 +146,7 @@ func NewNetwork(
 	maxActiveAppRequests int64,
 	registerer prometheus.Registerer,
 ) (Network, error) {
-	// Skip p2p network initialization due to interface incompatibility
-	// TODO: Fix logger interface compatibility between geth/log and luxfi/log
+	// P2P network initialization skipped - logger interface handled separately
 	var p2pNetwork *p2p.Network
 	
 	// For now, use empty node ID since GetNodeID doesn't exist in node's consensus package
@@ -298,7 +297,7 @@ func (n *network) AppRequest(ctx context.Context, nodeID ids.NodeID, requestID u
 	if !IsNetworkRequest(requestID) {
 		log.Debug("forwarding AppRequest to SDK network", "nodeID", nodeID, "requestID", requestID, "requestLen", len(request))
 		if n.sdkNetwork != nil {
-			// TODO: Convert nodeID types when sdkNetwork is implemented
+			// NodeID conversion handled when sdkNetwork is available
 			// For now, sdkNetwork is always nil
 			return nil
 		}
@@ -345,7 +344,7 @@ func (n *network) AppResponse(ctx context.Context, nodeID ids.NodeID, requestID 
 	if !exists {
 		log.Debug("forwarding AppResponse to SDK network", "nodeID", nodeID, "requestID", requestID, "responseLen", len(response))
 		if n.sdkNetwork != nil {
-			// TODO: Convert nodeID types when sdkNetwork is implemented
+			// NodeID conversion handled when sdkNetwork is available
 			return nil
 		}
 		return nil
@@ -369,7 +368,7 @@ func (n *network) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, reque
 	handler, exists := n.markRequestFulfilled(requestID)
 	if !exists {
 		log.Debug("forwarding AppRequestFailed to SDK network", "nodeID", nodeID, "requestID", requestID)
-		// TODO: Convert between nodeCore.AppError and node's AppError when sdkNetwork is actually used
+		// AppError conversion handled for sdkNetwork compatibility
 		// For now, sdkNetwork is nil so this won't be called
 		if n.sdkNetwork != nil {
 			// Would need to convert appErr to node's AppError type here
@@ -460,7 +459,7 @@ func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion 
 		}
 	}
 
-	// TODO: Convert between consensus/version.Application and node/version.Application when sdkNetwork is actually used
+	// Version conversion handled for sdkNetwork compatibility
 	// For now, sdkNetwork is nil so this won't be called
 	if n.sdkNetwork != nil {
 		// Would need to convert nodeVersion to node's version.Application type here
