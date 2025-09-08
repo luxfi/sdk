@@ -12,7 +12,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	consensusCore "github.com/luxfi/consensus/core"
+	consensusCore "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 	"github.com/luxfi/node/network/p2p"

@@ -22,8 +22,9 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 
-	"github.com/luxfi/consensus/choices"
-	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/node/consensus/choices"
+	"github.com/luxfi/node/consensus/engine/chain/block"
+	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/components/chain"
 )
@@ -190,9 +191,17 @@ func (b *Block) ShouldVerifyWithContext(context.Context) (bool, error) {
 
 // VerifyWithContext implements the block.WithVerifyContext interface
 func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) error {
+	// Convert from node's block.Context to consensus's block.Context
+	var consensusBlockCtx *consensusBlock.Context
+	if proposerVMBlockCtx != nil {
+		consensusBlockCtx = &consensusBlock.Context{
+			PChainHeight: proposerVMBlockCtx.PChainHeight,
+		}
+	}
+	
 	return b.verify(&precompileconfig.PredicateContext{
 		ConsensusCtx:       context.Background(),
-		ProposerVMBlockCtx: proposerVMBlockCtx,
+		ProposerVMBlockCtx: consensusBlockCtx,
 	}, true)
 }
 
