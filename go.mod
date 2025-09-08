@@ -110,6 +110,7 @@ require (
 	github.com/huin/goupnp v1.3.0 // indirect
 	github.com/jackpal/gateway v1.1.1 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
+	github.com/kasperdi/SPHINCSPLUS-golang v0.0.0-20231223193046-84468b93f7e9 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -180,6 +181,9 @@ require (
 
 // Use stable geth version without broken post-quantum code
 replace github.com/luxfi/geth => github.com/luxfi/geth v1.16.34
+
+// Use local crypto package
+replace github.com/luxfi/crypto => ../crypto
 
 // Force tablewriter version for compatibility
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
