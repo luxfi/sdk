@@ -4,9 +4,9 @@
 package paramstest
 
 import (
-	"github.com/ava-labs/avalanchego/upgrade/upgradetest"
+	"github.com/luxfi/node/upgrade/upgradetest"
 
-	"github.com/ava-labs/subnet-evm/params"
+	"github.com/luxfi/evm/params"
 )
 
 // ForkToChainConfig maps a fork to a chain config
