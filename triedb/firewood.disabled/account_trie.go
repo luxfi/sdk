@@ -6,15 +6,15 @@ package firewood
 import (
 	"errors"
 
-	"github.com/ava-labs/libevm/common"
-	"github.com/ava-labs/libevm/core/types"
-	"github.com/ava-labs/libevm/crypto"
-	"github.com/ava-labs/libevm/ethdb"
-	"github.com/ava-labs/libevm/log"
-	"github.com/ava-labs/libevm/rlp"
-	"github.com/ava-labs/libevm/trie"
-	"github.com/ava-labs/libevm/trie/trienode"
-	"github.com/ava-labs/libevm/triedb/database"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/geth/triedb/database"
 )
 
 // AccountTrie implements state.Trie for managing account states.

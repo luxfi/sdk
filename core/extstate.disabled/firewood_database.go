@@ -6,10 +6,10 @@ package extstate
 import (
 	"fmt"
 
-	"github.com/ava-labs/libevm/common"
-	"github.com/ava-labs/libevm/core/state"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/state"
 
-	"github.com/ava-labs/subnet-evm/triedb/firewood"
+	"github.com/luxfi/evm/triedb/firewood"
 )
 
 var (

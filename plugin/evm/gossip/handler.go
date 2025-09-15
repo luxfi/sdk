@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/network/p2p"
-	"github.com/ava-labs/avalanchego/network/p2p/gossip"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/luxfi/node/ids"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/network/p2p/gossip"
+	"github.com/luxfi/node/snow/engine/common"
+	"github.com/luxfi/node/utils/logging"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

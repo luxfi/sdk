@@ -10,19 +10,19 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/ava-labs/libevm/common"
-	"github.com/ava-labs/libevm/core/rawdb"
-	"github.com/ava-labs/libevm/core/state"
-	"github.com/ava-labs/libevm/core/types"
-	"github.com/ava-labs/libevm/crypto"
-	"github.com/ava-labs/libevm/libevm/stateconf"
-	"github.com/ava-labs/libevm/trie/trienode"
-	"github.com/ava-labs/libevm/triedb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/state"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/geth/libevm/stateconf"
+	"github.com/luxfi/geth/trie/trienode"
+	"github.com/luxfi/geth/triedb"
 	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/subnet-evm/triedb/firewood"
-	"github.com/ava-labs/subnet-evm/triedb/hashdb"
+	"github.com/luxfi/evm/triedb/firewood"
+	"github.com/luxfi/evm/triedb/hashdb"
 )
 
 const (
