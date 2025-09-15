@@ -17,14 +17,14 @@ require (
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
 	github.com/luxfi/consensus v1.16.16
-	github.com/luxfi/crypto v1.16.16
+	github.com/luxfi/crypto v1.16.16-lux.1
 	github.com/luxfi/database v1.1.13
-	github.com/luxfi/geth v1.16.34
+	github.com/luxfi/geth v1.16.34-lux.6
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/metric v1.3.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.16.15-lux.1
 	github.com/luxfi/warp v1.13.4-lux.20
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -207,13 +207,6 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
-)
-
-// Use local packages
-replace (
-	github.com/luxfi/crypto => ../crypto
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/node => ../node
 )
 
 // Force tablewriter version for compatibility
