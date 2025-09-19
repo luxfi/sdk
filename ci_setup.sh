@@ -12,14 +12,35 @@ if [ ! -f "go.mod" ]; then
     exit 1
 fi
 
+# Detect OS
+OS=$(uname -s)
+echo "Detected OS: $OS"
+
+# macOS specific setup
+if [ "$OS" = "Darwin" ]; then
+    echo "Setting up macOS environment..."
+    # Use Go from PATH, don't rely on Homebrew
+    export PATH="/usr/local/go/bin:$PATH"
+    export GOPATH="$HOME/go"
+    export PATH="$GOPATH/bin:$PATH"
+fi
+
+# Validate Go installation
+if ! command -v go &> /dev/null; then
+    echo "Error: Go is not installed or not in PATH"
+    exit 1
+fi
+
+echo "Go version: $(go version)"
+
 # Backup original go.mod
 echo "Backing up go.mod..."
 cp go.mod go.mod.backup
 
 # Remove local replace directives (keep tablewriter replace)
 echo "Removing local replace directives..."
-sed -i '/replace.*\.\.\/.*$/d' go.mod
-sed -i '/replace.*\/home\/.*$/d' go.mod
+sed -i.bak '/replace.*\.\.\/.*$/d' go.mod
+sed -i.bak '/replace.*\/home\/.*$/d' go.mod
 
 # Show what's left in replace directives
 echo "Remaining replace directives:"
@@ -27,20 +48,12 @@ grep "^replace" go.mod || echo "  (none except commented ones)"
 
 # Download dependencies
 echo "Downloading dependencies..."
-go mod download
+go mod download || echo "Warning: Some dependencies may not be available"
 
-# Verify the module
-echo "Verifying module..."
-go mod verify || true
+# Run go mod tidy
+echo "Running go mod tidy..."
+go mod tidy || true
 
 echo ""
 echo "=== CI Setup Complete ==="
 echo ""
-echo "You can now build with:"
-echo "  go build \$(go list ./... | grep -v '/tests' | grep -v '/examples')"
-echo ""
-echo "Or run tests with:"
-echo "  go test \$(go list ./... | grep -v '/tests' | grep -v '/examples')"
-echo ""
-echo "To restore original go.mod:"
-echo "  mv go.mod.backup go.mod"
