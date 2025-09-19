@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2025, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -30,8 +30,8 @@ type signatureTest struct {
 	canonicalErr error
 }
 
-// This test copies the test coverage from https://github.com/ava-labs/avalanchego/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
-// These tests are only expected to fail if there is a breaking change in AvalancheGo that unexpectedly changes behavior.
+// This test copies the test coverage from https://github.com/luxfi/node/blob/0117ab96/vms/platformvm/warp/signature_test.go#L137.
+// These tests are only expected to fail if there is a breaking change in Lux Node that unexpectedly changes behavior.
 func TestSignatureVerification(t *testing.T) {
 	tests := []signatureTest{
 		{
