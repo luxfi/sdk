@@ -15,14 +15,14 @@ extra_imports=$(find . -type f \( -name "*.go" \) ! -name "mocks.go" ! -path "si
   grep -v 'eth\w\+ "' |
   grep -v '_ "' |
   grep -o "${geth_regexp}" |
-  sort -u | comm -23 - ./scripts/eth-allowed-packages.txt)
+  LC_ALL=C sort -u | LC_ALL=C comm -23 - ./scripts/eth-allowed-packages.txt)
 if [ -n "${extra_imports}" ]; then
     echo "new ethereum imports should be added to ./scripts/eth-allowed-packages.txt to prevent accidental imports:"
     echo "${extra_imports}"
     exit 1
 fi
 
-extra_imports=$(grep -r --include='*.go' '"github.com/luxfi/coreth/.*"' -o -h || true | sort -u)
+extra_imports=$(grep -r --include='*.go' '"github.com/luxfi/coreth/.*"' -o -h || true | LC_ALL=C sort -u)
 if [ -n "${extra_imports}" ]; then
     echo "evm should not import packages from coreth:"
     echo "${extra_imports}"

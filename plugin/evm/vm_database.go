@@ -14,7 +14,6 @@ import (
 	"github.com/luxfi/consensus"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
-	"github.com/luxfi/database/pebbledb"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/evm/plugin/evm/config"
@@ -209,7 +208,7 @@ func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGather
 	dbConfigBytes := dbConfig.Config
 	// If the database is pebble, we need to set the config
 	// to use no sync. Sync mode in pebble has an issue with OSs like MacOS.
-	if dbConfig.Name == pebbledb.Name {
+	if dbConfig.Name == "pebbledb" {
 		// Create a default config with no sync
 		cfg := map[string]interface{}{
 			"sync": false,
