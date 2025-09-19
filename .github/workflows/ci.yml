@@ -29,6 +29,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
+    - name: Setup CI environment
+      run: ./ci_setup.sh
+
     - name: Install golangci-lint
       run: |
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.63.0
@@ -75,6 +78,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
+    - name: Setup CI environment
+      run: ./ci_setup.sh
+
     - name: Install dependencies
       run: go mod download
 
@@ -112,6 +118,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
+    - name: Setup CI environment
+      run: ./ci_setup.sh
+
     - name: Build EVM
       run: |
         go build -v -o build/evm ./cmd/evm
@@ -140,6 +149,9 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: ${{ env.GO_VERSION }}
+
+    - name: Setup CI environment
+      run: ./ci_setup.sh
 
     - name: Run gosec
       uses: securego/gosec@master
