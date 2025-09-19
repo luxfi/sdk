@@ -47,7 +47,7 @@ import (
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
@@ -175,10 +175,10 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 	if w.chainConfig.IsCancun(header.Number, header.Time) {
 		var excessBlobGas uint64
 		if w.chainConfig.IsCancun(parent.Number, parent.Time) {
-			excessBlobGas = eip4844.CalcExcessBlobGas(*parent.ExcessBlobGas, *parent.BlobGasUsed)
+			excessBlobGas = eip4844.CalcExcessBlobGas(w.chainConfig, parent, timestamp)
 		} else {
 			// For the first post-fork block, both parent.data_gas_used and parent.excess_data_gas are evaluated as 0
-			excessBlobGas = eip4844.CalcExcessBlobGas(0, 0)
+			excessBlobGas = eip4844.CalcExcessBlobGas(w.chainConfig, parent, timestamp)
 		}
 		header.BlobGasUsed = new(uint64)
 		header.ExcessBlobGas = &excessBlobGas
@@ -239,7 +239,7 @@ func (w *worker) commitNewWork(predicateContext *precompileconfig.PredicateConte
 		filter.BaseFee = uint256.MustFromBig(env.header.BaseFee)
 	}
 	if env.header.ExcessBlobGas != nil {
-		filter.BlobFee = uint256.MustFromBig(eip4844.CalcBlobFee(*env.header.ExcessBlobGas))
+		filter.BlobFee = uint256.MustFromBig(eip4844.CalcBlobFee(w.chainConfig, env.header))
 	}
 	filter.OnlyPlainTxs, filter.OnlyBlobTxs = true, false
 	pendingPlainTxs := w.eth.TxPool().Pending(filter)
@@ -287,7 +287,7 @@ func (w *worker) createCurrentEnvironment(predicateContext *precompileconfig.Pre
 	if err != nil {
 		return nil, fmt.Errorf("calculating gas capacity: %w", err)
 	}
-	currentState.StartPrefetcher("miner", nil)
+	currentState.StartPrefetcher("miner", nil, nil)
 	return &environment{
 		signer:           types.MakeSigner(w.chainConfig, header.Number, header.Time),
 		state:            currentState,

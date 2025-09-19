@@ -16,14 +16,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/luxfi/node/codec"
-	nodeCore "github.com/luxfi/node/consensus/engine/core"
+	nodeCore "github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/utils"
 	
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/evm/network/stats"
 	"github.com/luxfi/evm/plugin/evm/message"

@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/upgrade/upgradetest"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/secp256k1"

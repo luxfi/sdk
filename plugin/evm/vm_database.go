@@ -24,7 +24,6 @@ import (
 	"github.com/luxfi/log"
 	metrics "github.com/luxfi/metric"
 	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
 )
 
 const (
@@ -69,7 +68,7 @@ func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 			}
 			log.Info("Using standalone database for the chain state", "DatabaseConfig", dbConfig)
 			// Create a logger adapter for newStandaloneDatabase
-			logger := logging.NoLog{}
+			logger := log.NoLog{}
 			// Pass nil for metrics as it's optional
 			db, err = newStandaloneDatabase(dbConfig, nil, logger)
 			if err != nil {
@@ -201,7 +200,7 @@ func inspectDB(db luxdatabase.Database, label string) error {
 	return nil
 }
 
-func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger logging.Logger) (luxdatabase.Database, error) {
+func newStandaloneDatabase(dbConfig DatabaseConfig, gatherer metrics.MultiGatherer, logger log.Logger) (luxdatabase.Database, error) {
 	dbPath := filepath.Join(dbConfig.Path, dbConfig.Name)
 
 	// Use log.Root() instead of trying to adapt the logger

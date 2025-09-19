@@ -58,6 +58,16 @@ func (b *warpConsensusBlockWrapper) Parent() ids.ID {
 	return b.block.Parent()
 }
 
+// ParentID returns the parent block's ID (consensus/chain.Block interface)
+func (b *warpConsensusBlockWrapper) ParentID() ids.ID {
+	return b.block.ParentID()
+}
+
+// Status returns the block's status (consensus/chain.Block interface)
+func (b *warpConsensusBlockWrapper) Status() uint8 {
+	return b.block.Status()
+}
+
 // Accept implements consensus/chain.Block interface
 func (b *warpConsensusBlockWrapper) Accept(ctx context.Context) error {
 	// Block is already accepted (we only return accepted blocks)

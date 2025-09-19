@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/ids"
 	utils_math "github.com/luxfi/node/utils/math"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/consensus/version"
 
 	"github.com/luxfi/log"

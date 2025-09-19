@@ -44,7 +44,7 @@ import (
 	"github.com/luxfi/node/upgrade/upgradetest"
 	luxdUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 	"github.com/stretchr/testify/require"

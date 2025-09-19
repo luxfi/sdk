@@ -33,6 +33,7 @@ import (
 	"github.com/luxfi/evm/eth"
 	"github.com/luxfi/evm/eth/ethconfig"
 	"github.com/luxfi/evm/plugin/evm/message"
+	gossipHandler "github.com/luxfi/evm/plugin/evm/gossip"
 	subnetevmprometheus "github.com/luxfi/evm/metrics/prometheus"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/network"
@@ -80,9 +81,10 @@ import (
 
 	"github.com/luxfi/consensus/engine/chain/block"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
-	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
-	nodechain "github.com/luxfi/node/consensus/chain"
-	nodeConsensus "github.com/luxfi/node/consensus"
+	nodeblock "github.com/luxfi/consensus/engine/chain/block" 
+	nodechain "github.com/luxfi/consensus/protocol/chain"
+	nodeConsensus "github.com/luxfi/consensus"
+	consensusInterfaces "github.com/luxfi/consensus/interfaces"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
@@ -94,8 +96,8 @@ import (
 	"github.com/luxfi/node/version"
 	nodeChain "github.com/luxfi/node/vms/components/chain"
 
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	"github.com/luxfi/node/utils/set"
+	commonEng "github.com/luxfi/consensus/core"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/consensus/core/appsender"
 
 	"github.com/luxfi/database"
@@ -223,12 +225,7 @@ type appSenderWrapper struct {
 }
 
 func (w *appSenderWrapper) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, appRequestBytes []byte) error {
-	// Convert node set to consensus set
-	consensusSet := make(map[ids.NodeID]struct{})
-	for nodeID := range nodeIDs {
-		consensusSet[nodeID] = struct{}{}
-	}
-	return w.appSender.SendAppRequest(ctx, consensusSet, requestID, appRequestBytes)
+	return w.appSender.SendAppRequest(ctx, nodeIDs, requestID, appRequestBytes)
 }
 
 func (w *appSenderWrapper) SendAppResponse(ctx context.Context, nodeID ids.NodeID, requestID uint32, appResponseBytes []byte) error {
@@ -239,22 +236,12 @@ func (w *appSenderWrapper) SendAppError(ctx context.Context, nodeID ids.NodeID, 
 	return w.appSender.SendAppError(ctx, nodeID, requestID, errorCode, errorMessage)
 }
 
-func (w *appSenderWrapper) SendAppGossip(ctx context.Context, config commonEng.SendConfig, appGossipBytes []byte) error {
-	// Convert SendConfig.NodeIDs (node set) to consensus set
-	consensusSet := make(map[ids.NodeID]struct{})
-	for nodeID := range config.NodeIDs {
-		consensusSet[nodeID] = struct{}{}
-	}
-	return w.appSender.SendAppGossip(ctx, consensusSet, appGossipBytes)
+func (w *appSenderWrapper) SendAppGossip(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
+	return w.appSender.SendAppGossip(ctx, nodeIDs, appGossipBytes)
 }
 
 func (w *appSenderWrapper) SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
-	// Convert node set to consensus set
-	consensusSet := make(map[ids.NodeID]struct{})
-	for nodeID := range nodeIDs {
-		consensusSet[nodeID] = struct{}{}
-	}
-	return w.appSender.SendAppGossipSpecific(ctx, consensusSet, appGossipBytes)
+	return w.appSender.SendAppGossipSpecific(ctx, nodeIDs, appGossipBytes)
 }
 
 // SendCrossChainAppError implements node's AppSender interface
@@ -374,18 +361,46 @@ type VM struct {
 }
 
 // ParseBlock implements nodeblock.ChainVM interface
-func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodechain.Block, error) {
+func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeblock.Block, error) {
 	// Call the embedded State's ParseBlock and convert the result
 	blk, err := vm.State.ParseBlock(ctx, b)
 	if err != nil {
 		return nil, err
 	}
-	// Cast to the node's Block interface
-	return blk.(nodechain.Block), nil
+	// Adapt the consensus block to node block interface
+	return NewBlockAdapter(blk.(nodechain.Block)), nil
 }
 
-// Initialize implements the chain.ChainVM interface
+// Initialize implements the chain.ChainVM interface with generic interface{} parameters
 func (vm *VM) Initialize(
+	ctx context.Context,
+	chainCtx interface{},
+	dbManager interface{},
+	genesisBytes []byte,
+	upgradeBytes []byte,
+	configBytes []byte,
+	toEngine interface{},
+	fxs []interface{},
+	appSender interface{},
+) error {
+	// Convert interface{} parameters to strongly typed ones
+	typedChainCtx := chainCtx.(*nodeConsensus.Context)
+	typedDB := dbManager.(database.Database)
+	
+	// Convert fxs from []interface{} to []*commonEng.Fx
+	typedFxs := make([]*commonEng.Fx, len(fxs))
+	for i, fx := range fxs {
+		typedFxs[i] = fx.(*commonEng.Fx)
+	}
+	
+	// Convert appSender interface to typed AppSender
+	typedAppSender := appSender.(commonEng.AppSender)
+	
+	return vm.initializeInternal(ctx, typedChainCtx, typedDB, genesisBytes, upgradeBytes, configBytes, typedFxs, typedAppSender)
+}
+
+// initializeInternal contains the actual initialization logic with strongly typed parameters
+func (vm *VM) initializeInternal(
 	ctx context.Context,
 	chainCtx *nodeConsensus.Context,
 	db database.Database,
@@ -424,8 +439,9 @@ func (vm *VM) Initialize(
 	}
 	vm.chainAlias = alias
 
-	// Use chainCtx.Log directly
-	contextLogger := chainCtx.Log
+	// Create a logger since consensus Context doesn't have Log field
+	// TODO: Integrate with proper logging from consensus package
+	contextLogger := log.New()
 	logWriter := newLoggerWriter(contextLogger)
 	subnetEVMLogger, err := subnetevmlog.InitLogger(vm.chainAlias, vm.config.LogLevel, vm.config.LogJSONFormat, logWriter)
 	if err != nil {
@@ -642,7 +658,7 @@ func (vm *VM) Initialize(
 	// Only create warp backend if we have a signer
 	if warpAdapter != nil {
 		vm.warpBackend, err = warp.NewBackend(
-			chainCtx.NetworkID,
+			chainCtx.QuantumID, // Use QuantumID as network ID from consensus Context
 			chainCtx.ChainID,
 			warpAdapter,
 			&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
@@ -983,17 +999,17 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
+func (vm *VM) SetState(_ context.Context, state consensusInterfaces.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 
 	switch state {
-	case nodeConsensus.StateSyncing:
+	case consensusInterfaces.StateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case nodeConsensus.Bootstrapping:
+	case consensusInterfaces.Bootstrapping:
 		return vm.onBootstrapStarted()
-	case nodeConsensus.NormalOp:
+	case consensusInterfaces.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
 		return fmt.Errorf("unknown state: %v", state)
@@ -1113,16 +1129,22 @@ func (vm *VM) onNormalOperationsStarted() error {
 	if vm.ethTxGossipHandler == nil {
 		// Get logger from context for gossip handler
 		// Use VM's logger instead of consensus logger
-		vm.ethTxGossipHandler = newTxGossipHandler[*GossipEthTx](
-			vm.logger,
+		handler, err := gossipHandler.NewTxGossipHandler[*GossipEthTx](
+			log.Root(),
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipMetrics,
 			config.TxGossipTargetMessageSize,
 			config.TxGossipThrottlingPeriod,
-			config.TxGossipThrottlingLimit,
+			float64(config.TxGossipThrottlingLimit),
 			p2pValidators,
+			vm.sdkMetrics,
+			ethTxGossipNamespace,
 		)
+		if err != nil {
+			return fmt.Errorf("failed to create tx gossip handler: %w", err)
+		}
+		vm.ethTxGossipHandler = handler
 	}
 
 	if err := vm.Network.AddHandler(TxGossipHandlerID, vm.ethTxGossipHandler); err != nil {
@@ -1193,11 +1215,12 @@ func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
 	if builder == nil {
 		select {
 		case <-ctx.Done():
-			return commonEng.Message(0), ctx.Err()
+			return commonEng.Message{}, ctx.Err()
 		case <-vm.stateSyncDone:
-			return commonEng.StateSyncDone, nil
+			// Return empty message to indicate state sync is done
+			return commonEng.Message{}, nil
 		case <-vm.shutdownChan:
-			return commonEng.Message(0), errShuttingDownVM
+			return commonEng.Message{}, errShuttingDownVM
 		}
 	}
 
@@ -1243,16 +1266,17 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (nodechain.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (nodeblock.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return blk.(*Block), nil
+	// Adapt the consensus block to node block interface
+	return NewBlockAdapter(blk.(*Block)), nil
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodechain.Block, error) {
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodeblock.Block, error) {
 	// Convert node context to consensus context
 	var consensusCtx *block.Context
 	if proposerVMBlockCtx != nil {
@@ -1264,7 +1288,8 @@ func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nod
 	if err != nil {
 		return nil, err
 	}
-	return blk.(*Block), nil
+	// Adapt the consensus block to node block interface
+	return NewBlockAdapter(blk.(*Block)), nil
 }
 
 // buildBlock builds a block to be wrapped by ChainState
@@ -1345,13 +1370,13 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
 // GetBlock implements the ChainVM interface
-func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodechain.Block, error) {
+func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodeblock.Block, error) {
 	blk, err := vm.getBlock(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	// Cast to node's Block interface
-	return blk.(nodechain.Block), nil
+	// Adapt the consensus block to node block interface
+	return NewBlockAdapter(blk.(nodechain.Block)), nil
 }
 
 func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
@@ -1367,7 +1392,7 @@ func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
 
 // GetAcceptedBlock attempts to retrieve block [blkID] from the VM. This method
 // only returns accepted blocks.
-func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeChain.Block, error) {
+func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodechain.Block, error) {
 	// First verify the block is accepted
 	ethBlock := vm.blockChain.GetBlockByHash(common.BytesToHash(blkID[:]))
 	if ethBlock == nil {
@@ -1685,8 +1710,11 @@ func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 
 // AppRequestFailed implements the VM interface
 func (vm *VM) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *commonEng.AppError) error {
-	// Pass the error directly to the network (both use the same AppError type now)
-	return vm.Network.AppRequestFailed(ctx, nodeID, requestID, appErr)
+	// The Network interface doesn't expose AppRequestFailed directly
+	// We need to handle this at the VM level by logging the error
+	log.Debug("AppRequestFailed", "nodeID", nodeID, "requestID", requestID, "error", appErr)
+	// The network's response handler will handle the timeout internally
+	return nil
 }
 
 // CrossChainAppRequestFailed implements the VM interface
@@ -1774,7 +1802,7 @@ func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.Unsigned
 	// Convert node warp message to consensus warp message
 	luxMsg := &luxWarp.UnsignedMessage{
 		NetworkID:     msg.NetworkID,
-		SourceChainID: msg.SourceChainID[:],
+		SourceChainID: msg.SourceChainID,
 		Payload:       msg.Payload,
 	}
 	

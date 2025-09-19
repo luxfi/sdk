@@ -10,7 +10,7 @@ import (
 	luxdb "github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/uptime"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 )
 
@@ -67,20 +67,29 @@ func NewState(db luxdb.Database) (interfaces.State, error) {
 // GetUptime returns the uptime of the validator with the given nodeID
 func (s *state) GetUptime(
 	nodeID ids.NodeID,
-) (time.Duration, time.Time, error) {
+	subnetID ids.ID,
+) (time.Duration, time.Duration, error) {
+	// Note: For subnet-specific validators, we currently ignore the subnetID
+	// as this state tracks validators per subnet already
 	data, err := s.getData(nodeID)
 	if err != nil {
-		return 0, time.Time{}, err
+		return 0, 0, err
 	}
-	return data.UpDuration, data.getLastUpdated(), nil
+	// Return uptime and time since last update
+	lastUpdated := data.getLastUpdated()
+	timeSinceLastUpdate := time.Since(lastUpdated)
+	return data.UpDuration, timeSinceLastUpdate, nil
 }
 
 // SetUptime sets the uptime of the validator with the given nodeID
 func (s *state) SetUptime(
 	nodeID ids.NodeID,
+	subnetID ids.ID,
 	upDuration time.Duration,
 	lastUpdated time.Time,
 ) error {
+	// Note: For subnet-specific validators, we currently ignore the subnetID
+	// as this state tracks validators per subnet already
 	data, err := s.getData(nodeID)
 	if err != nil {
 		return err
@@ -93,7 +102,9 @@ func (s *state) SetUptime(
 }
 
 // GetStartTime returns the start time of the validator with the given nodeID
-func (s *state) GetStartTime(nodeID ids.NodeID) (time.Time, error) {
+func (s *state) GetStartTime(nodeID ids.NodeID, subnetID ids.ID) (time.Time, error) {
+	// Note: For subnet-specific validators, we currently ignore the subnetID
+	// as this state tracks validators per subnet already
 	data, err := s.getData(nodeID)
 	if err != nil {
 		return time.Time{}, err

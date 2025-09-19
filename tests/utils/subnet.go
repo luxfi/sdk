@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/node/genesis"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	wallet "github.com/luxfi/node/wallet/subnet/primary"
+	"github.com/luxfi/node/wallet/net/primary"
 	"github.com/luxfi/log"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm"
@@ -117,12 +117,12 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 
 	// MakeWallet fetches the available UTXOs owned by [kc] on the network
 	// that [LocalAPIURI] is hosting.
-	walletConfig := &wallet.WalletConfig{
+	walletConfig := &primary.WalletConfig{
 		URI: DefaultLocalNodeURI,
 		LUXKeychain: kc,
 		EthKeychain: kc,
 	}
-	wallet, err := wallet.MakeWallet(ctx, walletConfig)
+	wallet, err := primary.MakeWallet(ctx, walletConfig)
 	require.NoError(err)
 
 	pWallet := wallet.P()
@@ -141,7 +141,7 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 	require.NoError(err)
 
 	log.Info("Creating new subnet")
-	createSubnetTx, err := pWallet.IssueCreateSubnetTx(owner)
+	createNetTx, err := pWallet.IssueCreateNetTx(owner)
 	require.NoError(err)
 
 	genesis := &core.Genesis{}
@@ -149,7 +149,7 @@ func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
 
 	log.Info("Creating new Subnet-EVM blockchain", "genesis", genesis)
 	createChainTx, err := pWallet.IssueCreateChainTx(
-		createSubnetTx.ID(),
+		createNetTx.ID(),
 		genesisBytes,
 		evm.ID,
 		nil,

@@ -61,7 +61,7 @@ import (
 
 	protocolchain "github.com/luxfi/consensus/protocol/chain"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 )
 
 var (

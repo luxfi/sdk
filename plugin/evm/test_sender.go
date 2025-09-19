@@ -7,9 +7,9 @@ import (
 	"context"
 	"testing"
 
-	consensusSet "github.com/luxfi/consensus/utils/set"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
+	consensusSet "github.com/luxfi/consensus/utils/set"
 )
 
 // TestSender is a test implementation of the Sender interface

@@ -49,7 +49,7 @@ import (
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/state/snapshot"
@@ -316,7 +316,7 @@ func (t *StateTest) RunNoVerify(subtest StateSubtest, vmconfig vm.Config, snapsh
 		context.Difficulty = big.NewInt(0)
 	}
 	if config.IsCancun(new(big.Int), block.Time()) && t.json.Env.ExcessBlobGas != nil {
-		context.BlobBaseFee = eip4844.CalcBlobFee(*t.json.Env.ExcessBlobGas)
+		context.BlobBaseFee = eip4844.CalcBlobFee(config, block.Header())
 	}
 	evm := vm.NewEVM(context, state.StateDB, config, vmconfig)
 	evm.SetTxContext(txContext)
@@ -500,7 +500,7 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 	sdb := state.NewDatabaseWithNodeDB(db, triedb)
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
-		statedb.SetCode(addr, a.Code)
+		statedb.SetCode(addr, a.Code, tracing.CodeChangeGenesis)
 		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeGenesis)
 		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceIncreaseGenesisBalance)
 		for k, v := range a.Storage {

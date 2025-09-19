@@ -32,7 +32,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	testUnsignedMessage, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], testAddressedCallPayload.Bytes())
+	testUnsignedMessage, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID, testAddressedCallPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -97,7 +97,7 @@ func TestGetBlockSignature(t *testing.T) {
 
 	blockHashPayload, err := payload.NewHash(blkID[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(err)
 	msgBytes := unsignedMessage.Bytes()
 	expectedSigBytes, err := localSigner.Sign(msgBytes)

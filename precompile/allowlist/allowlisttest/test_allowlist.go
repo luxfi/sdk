@@ -10,6 +10,7 @@ import (
 	ethtypes "github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
@@ -40,7 +41,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost + allowlist.AllowListEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr)
 				require.Equal(t, allowlist.AdminRole, res)
 				// Check logs are stored in state
@@ -60,7 +61,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost + allowlist.AllowListEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr)
 				require.Equal(t, allowlist.EnabledRole, res)
 				// Check logs are stored in state
@@ -80,7 +81,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost + allowlist.AllowListEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestEnabledAddr)
 				require.Equal(t, allowlist.NoRole, res)
 				// Check logs are stored in state
@@ -273,7 +274,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			},
 			SuppliedGas: allowlist.ModifyAllowListGasCost + allowlist.AllowListEventGasCost,
 			ReadOnly:    false,
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr)
 				require.Equal(t, allowlist.ManagerRole, res)
 				// Check logs are stored in state
@@ -294,7 +295,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
 			ExpectedErr: "",
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr)
 				require.Equal(t, allowlist.NoRole, res)
 				// Check logs are stored in state
@@ -315,7 +316,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
 			ExpectedErr: "",
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr)
 				require.Equal(t, allowlist.EnabledRole, res)
 
@@ -398,7 +399,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost + allowlist.AllowListEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				res := allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr)
 				require.Equal(t, allowlist.NoRole, res)
 
@@ -548,7 +549,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			),
 			SuppliedGas: 0,
 			ReadOnly:    false,
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				require.Equal(t, allowlist.AdminRole, allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr))
 				require.Equal(t, allowlist.AdminRole, allowlist.GetAllowListStatus(state, contractAddress, TestEnabledAddr))
 			},
@@ -562,7 +563,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			),
 			SuppliedGas: 0,
 			ReadOnly:    false,
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				require.Equal(t, allowlist.ManagerRole, allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr))
 				require.Equal(t, allowlist.ManagerRole, allowlist.GetAllowListStatus(state, contractAddress, TestEnabledAddr))
 			},
@@ -576,7 +577,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			),
 			SuppliedGas: 0,
 			ReadOnly:    false,
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				require.Equal(t, allowlist.EnabledRole, allowlist.GetAllowListStatus(state, contractAddress, TestAdminAddr))
 				require.Equal(t, allowlist.EnabledRole, allowlist.GetAllowListStatus(state, contractAddress, TestNoRoleAddr))
 			},
@@ -597,7 +598,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check no logs are stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -619,7 +620,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check no logs are stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -641,7 +642,7 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 			SuppliedGas: allowlist.ModifyAllowListGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check no logs are stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -652,9 +653,11 @@ func AllowListTests(t testing.TB, module modules.Module) map[string]precompilete
 
 // SetDefaultRoles returns a BeforeHook that sets roles TestAdminAddr and TestEnabledAddr
 // to have the AdminRole and EnabledRole respectively.
-func SetDefaultRoles(contractAddress common.Address) func(t testing.TB, state *extstate.StateDB) {
-	return func(t testing.TB, state *extstate.StateDB) {
-		adapter := extstate.NewPrecompileAdapter(state)
+func SetDefaultRoles(contractAddress common.Address) func(t testing.TB, stateDB *state.StateDB) {
+	return func(t testing.TB, stateDB *state.StateDB) {
+		// Create an ExtState wrapper and then get the adapter
+		extState := extstate.New(stateDB)
+		adapter := extstate.NewPrecompileAdapter(extState)
 		allowlist.SetAllowListRole(adapter, contractAddress, TestAdminAddr, allowlist.AdminRole)
 		allowlist.SetAllowListRole(adapter, contractAddress, TestManagerAddr, allowlist.ManagerRole)
 		allowlist.SetAllowListRole(adapter, contractAddress, TestEnabledAddr, allowlist.EnabledRole)

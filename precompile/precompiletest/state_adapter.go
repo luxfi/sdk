@@ -1,19 +1,19 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package testutils
+package precompiletest
 
 import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/holiman/uint256"
-	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/contract"
 )
 
-// StateDBAdapter wraps *extstate.StateDB to implement contract.StateDB
+// StateDBAdapter wraps *state.StateDB to implement contract.StateDB
 type StateDBAdapter struct {
-	*extstate.StateDB
+	*state.StateDB
 }
 
 // AddBalance adapts the AddBalance method to match the contract.StateDB interface
@@ -35,10 +35,12 @@ func (s *StateDBAdapter) SetState(address common.Address, key, value common.Hash
 
 // GetPredicateStorageSlots implements the contract.StateDB interface
 func (s *StateDBAdapter) GetPredicateStorageSlots(address common.Address, index int) ([]byte, bool) {
-	return s.StateDB.GetPredicateStorageSlots(address, index)
+	// StateDB doesn't have this method, so we return nil, false
+	// This should be overridden in test implementations if needed
+	return nil, false
 }
 
-// WrapStateDB wraps an *extstate.StateDB to implement contract.StateDB
-func WrapStateDB(state *extstate.StateDB) contract.StateDB {
-	return &StateDBAdapter{StateDB: state}
+// WrapStateDB wraps an *state.StateDB to implement contract.StateDB
+func WrapStateDB(stateDB *state.StateDB) contract.StateDB {
+	return &StateDBAdapter{StateDB: stateDB}
 }

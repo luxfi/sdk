@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/luxfi/node/network/p2p"
-	nodeCore "github.com/luxfi/node/consensus/engine/core"
+	nodeCore "github.com/luxfi/consensus/engine/core"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ import (
 	"github.com/luxfi/node/codec/linearcodec"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	consensusVersion "github.com/luxfi/consensus/version"
 )
 

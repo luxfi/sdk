@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/lp118"
@@ -16,11 +16,11 @@ import (
 
 // lp118HandlerAdapter adapts lp118.Handler to p2p.Handler
 type lp118HandlerAdapter struct {
-	handler *lp118.Handler
+	handler lp118.Handler
 }
 
 // newLP118HandlerAdapter creates a new adapter
-func newLP118HandlerAdapter(handler *lp118.Handler) p2p.Handler {
+func newLP118HandlerAdapter(handler lp118.Handler) p2p.Handler {
 	return &lp118HandlerAdapter{
 		handler: handler,
 	}
@@ -33,8 +33,20 @@ func (a *lp118HandlerAdapter) AppGossip(ctx context.Context, nodeID ids.NodeID, 
 
 // AppRequest handles request messages
 func (a *lp118HandlerAdapter) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *core.AppError) {
-	// Forward to lp118 handler - it already returns *core.AppError
-	return a.handler.AppRequest(ctx, nodeID, deadline, requestBytes)
+	// Forward to lp118 handler
+	resp, err := a.handler.AppRequest(ctx, nodeID, deadline, requestBytes)
+	if err != nil {
+		// Convert error to AppError if it's not already
+		if appErr, ok := err.(*core.AppError); ok {
+			return nil, appErr
+		}
+		// Create a new AppError from the error
+		return nil, &core.AppError{
+			Code:    -1,
+			Message: err.Error(),
+		}
+	}
+	return resp, nil
 }
 
 // CrossChainAppRequest handles cross-chain requests

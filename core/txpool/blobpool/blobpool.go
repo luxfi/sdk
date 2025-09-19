@@ -47,7 +47,7 @@ import (
 	"github.com/luxfi/geth/metrics"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
@@ -433,7 +433,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 		blobfee = uint256.NewInt(ethparams.BlobTxMinBlobGasprice)
 	)
 	if p.head.ExcessBlobGas != nil {
-		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(*p.head.ExcessBlobGas))
+		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(p.chain.Config(), p.head))
 	}
 	p.evict = newPriceHeap(basefee, blobfee, &p.index)
 
@@ -870,7 +870,7 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 		blobfee = uint256.MustFromBig(big.NewInt(ethparams.BlobTxMinBlobGasprice))
 	)
 	if newHead.ExcessBlobGas != nil {
-		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(*newHead.ExcessBlobGas))
+		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(p.chain.Config(), newHead))
 	}
 	p.evict.reinit(basefee, blobfee, false)
 

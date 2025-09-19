@@ -39,7 +39,7 @@ import (
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -356,7 +356,7 @@ func GenerateChain(config *params.ChainConfig, parent *types.Block, engine conse
 		}
 		var blobGasPrice *big.Int
 		if block.ExcessBlobGas() != nil {
-			blobGasPrice = eip4844.CalcBlobFee(*block.ExcessBlobGas())
+			blobGasPrice = eip4844.CalcBlobFee(config, block.Header())
 		}
 		if err := receipts.DeriveFields(config, block.Hash(), block.NumberU64(), block.Time(), block.BaseFee(), blobGasPrice, txs); err != nil {
 			panic(err)
@@ -424,15 +424,7 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 	}
 
 	if cm.config.IsCancun(header.Number, header.Time) {
-		var (
-			parentExcessBlobGas uint64
-			parentBlobGasUsed   uint64
-		)
-		if parent.ExcessBlobGas() != nil {
-			parentExcessBlobGas = *parent.ExcessBlobGas()
-			parentBlobGasUsed = *parent.BlobGasUsed()
-		}
-		excessBlobGas := eip4844.CalcExcessBlobGas(parentExcessBlobGas, parentBlobGasUsed)
+		excessBlobGas := eip4844.CalcExcessBlobGas(cm.config, parent.Header(), header.Time)
 		header.ExcessBlobGas = &excessBlobGas
 		header.BlobGasUsed = new(uint64)
 		header.ParentBeaconRoot = new(common.Hash)

@@ -41,7 +41,7 @@ import (
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/customtypes"

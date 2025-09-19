@@ -13,10 +13,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	consensusCore "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 
 	"github.com/luxfi/evm/core"
@@ -37,65 +35,6 @@ var (
 	_ eth.PushGossiper = (*EthPushGossiper)(nil)
 )
 
-<<<<<<< HEAD:plugin/evm/gossip.go
-func newTxGossipHandler[T gossip.Gossipable](
-	log log.Logger,
-	marshaller gossip.Marshaller[T],
-	mempool gossip.Set[T],
-	metrics gossip.Metrics,
-	maxMessageSize int,
-	throttlingPeriod time.Duration,
-	throttlingLimit int,
-	validators p2p.ValidatorSet,
-) txGossipHandler {
-	// push gossip messages can be handled from any peer
-	handler := gossip.NewHandler(
-		log,
-		marshaller,
-		mempool,
-		metrics,
-		maxMessageSize,
-	)
-
-	// pull gossip requests are filtered by validators and are throttled
-	// to prevent spamming
-	validatorHandler := p2p.NewValidatorHandler(
-		p2p.NewThrottlerHandler(
-			handler,
-			p2p.NewSlidingWindowThrottler(throttlingPeriod, throttlingLimit),
-			log,
-		),
-		validators,
-		log,
-	)
-
-	return txGossipHandler{
-		appGossipHandler:  handler,
-		appRequestHandler: validatorHandler,
-	}
-}
-
-type txGossipHandler struct {
-	appGossipHandler  p2p.Handler
-	appRequestHandler p2p.Handler
-}
-
-func (t txGossipHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte) {
-	t.appGossipHandler.AppGossip(ctx, nodeID, gossipBytes)
-}
-
-func (t txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *consensusCore.AppError) {
-	return t.appRequestHandler.AppRequest(ctx, nodeID, deadline, requestBytes)
-}
-
-func (t txGossipHandler) CrossChainAppRequest(ctx context.Context, chainID ids.ID, deadline time.Time, requestBytes []byte) ([]byte, error) {
-	// Cross-chain requests not supported for tx gossip
-	return nil, fmt.Errorf("cross-chain requests not supported")
-}
-
-func NewGossipEthTxPool(mempool *txpool.TxPool, registerer prometheus.Registerer) (*GossipEthTxPool, error) {
-	bloom, err := gossip.NewBloomFilter(registerer, "eth_tx_bloom_filter", config.TxGossipBloomMinTargetElements, config.TxGossipBloomTargetFalsePositiveRate, config.TxGossipBloomResetFalsePositiveRate)
-=======
 func NewGossipEthTxPool(mempool *txpool.TxPool, registerer prometheus.Registerer) (*GossipEthTxPool, error) {
 	bloom, err := gossip.NewBloomFilter(
 		registerer,
@@ -104,7 +43,6 @@ func NewGossipEthTxPool(mempool *txpool.TxPool, registerer prometheus.Registerer
 		config.TxGossipBloomTargetFalsePositiveRate,
 		config.TxGossipBloomResetFalsePositiveRate,
 	)
->>>>>>> upstream/master:plugin/evm/eth_gossiper.go
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize bloom filter: %w", err)
 	}

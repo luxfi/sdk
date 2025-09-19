@@ -36,7 +36,7 @@ func (f *apiFetcher) GetSignature(ctx context.Context, nodeID ids.NodeID, unsign
 	}
 	switch p := parsedPayload.(type) {
 	case *payload.AddressedCall:
-			msgID, _ := ids.ToID(unsignedWarpMessage.ID())
+			msgID := unsignedWarpMessage.ID()
 		signatureBytes, err = client.GetMessageSignature(ctx, msgID)
 	case *payload.Hash:
 			blockID, _ := ids.ToID(p.Hash)
