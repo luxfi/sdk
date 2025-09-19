@@ -6,8 +6,12 @@ package config
 import (
 	"time"
 
-	"github.com/luxfi/node/database/pebbledb"
 	"github.com/luxfi/geth/common"
+)
+
+const (
+	// pebbledbName is the database type name for PebbleDB
+	pebbledbName = "pebbledb"
 )
 
 // defaultCommitInterval is defined in config.go
@@ -93,7 +97,7 @@ func NewDefaultConfig() Config {
 		// Subnet EVM API settings
 		ValidatorsAPIEnabled: true,
 		// Database settings
-		DatabaseType: pebbledb.Name,
+		DatabaseType: pebbledbName,
 		// Additional settings with sensible defaults
 		AllowUnprotectedTxs: false,
 	}

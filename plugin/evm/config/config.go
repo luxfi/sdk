@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/database/pebbledb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/spf13/cast"
@@ -59,7 +58,7 @@ const (
 	// - state sync time: ~6 hrs.
 	defaultStateSyncMinBlocks   = 300_000
 	defaultStateSyncRequestSize = 1024 // the number of key/values to ask peers for per request
-	defaultDBType               = pebbledb.Name
+	defaultDBType               = "pebbledb"
 	defaultValidatorAPIEnabled  = true
 	
 	// RPC batch limits
