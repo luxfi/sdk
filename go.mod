@@ -203,9 +203,23 @@ require (
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 
 // Use local luxfi packages instead of downloaded versions
-// replace github.com/luxfi/node => ../node
+replace github.com/luxfi/node => ../node
 
-// replace github.com/luxfi/consensus => ../consensus
+replace github.com/luxfi/consensus => ../consensus
+
+replace github.com/luxfi/crypto => ../crypto
+
+replace github.com/luxfi/database => ../database
+
+replace github.com/luxfi/geth => ../geth
+
+replace github.com/luxfi/warp => ../warp
+
+replace github.com/luxfi/metric => ../metric
+
+replace github.com/luxfi/ids => ../ids
+
+replace github.com/luxfi/log => ../log
 
 // replace github.com/luxfi/crypto => ../crypto
 
