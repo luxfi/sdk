@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/contract"
@@ -144,7 +144,7 @@ func InitializeValidatorRemoval(
 
 func GetUptimeProofMessage(
 	network models.Network,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
 	subnetID ids.ID,
 	blockchainID ids.ID,
@@ -183,7 +183,7 @@ func InitValidatorRemoval(
 	ownerAddressStr string,
 	ownerPrivateKey string,
 	nodeID ids.NodeID,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	isPoS bool,
 	uptimeSec uint64,
 	force bool,
@@ -380,7 +380,7 @@ func FinishValidatorRemoval(
 	ownerAddressStr string,
 	privateKey string,
 	validationID ids.ID,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	validatorManagerAddressStr string,
 	useACP99 bool,
 	signatureAggregatorEndpoint string,
