@@ -115,7 +115,7 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	chainID := consensus.GetChainID(tvm.vm.ctx)
 	expectedUnsignedMessage, err := luxWarp.NewUnsignedMessage(
 		consensus.GetNetworkID(tvm.vm.ctx),
-		chainID[:],
+		chainID,
 		addressedPayload.Bytes(),
 	)
 	require.NoError(err)
@@ -202,7 +202,7 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	blockHashPayload, err := payload.NewHash(blockID[:])
 	require.NoError(err)
 	chainID = consensus.GetChainID(tvm.vm.ctx)
-	blockUnsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], blockHashPayload.Bytes())
+	blockUnsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, blockHashPayload.Bytes())
 	require.NoError(err)
 
 	// Verify the produced message signature is valid
@@ -228,7 +228,7 @@ func testValidateWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], addressedPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -262,7 +262,7 @@ func testValidateInvalidWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], addressedPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -289,7 +289,7 @@ func testValidateWarpBlockHash(t *testing.T, scheme string) {
 	blockHash := ids.GenerateTestID()
 	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -318,7 +318,7 @@ func testValidateInvalidWarpBlockHash(t *testing.T, scheme string) {
 	blockHash := ids.GenerateTestID()
 	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -375,7 +375,7 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 
 	testValidatorState := &validatorstest.State{
 		// TODO: test both Primary Network / C-Chain and non-Primary Network
-		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			return ids.Empty, nil
 		},
 		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
@@ -385,12 +385,12 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 			return map[ids.NodeID]*validators.GetValidatorOutput{
 				nodeID1: {
 					NodeID:    nodeID1,
-					PublicKey: blsPublicKey1,
+					PublicKey: bls.PublicKeyToCompressedBytes(blsPublicKey1),
 					Weight:    50,
 				},
 				nodeID2: {
 					NodeID:    nodeID2,
-					PublicKey: blsPublicKey2,
+					PublicKey: bls.PublicKeyToCompressedBytes(blsPublicKey2),
 					Weight:    50,
 				},
 			}, nil
