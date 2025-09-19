@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/holiman/uint256"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
+	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/log"
@@ -109,20 +109,20 @@ func (b *blockBuilder) awaitSubmittedTxs() {
 func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.Message, error) {
 	lastBuildTime, err := b.waitForNeedToBuild(ctx)
 	if err != nil {
-		return commonEng.Message(0), err
+		return commonEng.Message{}, err
 	}
 	timeSinceLastBuildTime := time.Since(lastBuildTime)
 	if b.lastBuildTime.IsZero() || timeSinceLastBuildTime >= minBlockBuildingRetryDelay {
 		log.Debug("Last time we built a block was long enough ago, no need to wait", "timeSinceLastBuildTime", timeSinceLastBuildTime)
-		return commonEng.PendingTxs, nil
+		return commonEng.Message{Type: commonEng.PendingTxs}, nil
 	}
 	timeUntilNextBuild := minBlockBuildingRetryDelay - timeSinceLastBuildTime
 	log.Debug("Last time we built a block was too recent, waiting", "timeUntilNextBuild", timeUntilNextBuild)
 	select {
 	case <-ctx.Done():
-		return commonEng.Message(0), ctx.Err()
+		return commonEng.Message{}, ctx.Err()
 	case <-time.After(timeUntilNextBuild):
-		return commonEng.PendingTxs, nil
+		return commonEng.Message{Type: commonEng.PendingTxs}, nil
 	}
 }
 

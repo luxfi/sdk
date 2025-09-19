@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common"

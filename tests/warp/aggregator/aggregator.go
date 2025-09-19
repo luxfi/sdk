@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/ids"
 
 	cryptoBLS "github.com/luxfi/crypto/bls"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/evm/precompile/contracts/warp"
 )

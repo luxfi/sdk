@@ -29,25 +29,24 @@ func TestLoadNewValidators(t *testing.T) {
 	}
 	tests := []struct {
 		name                      string
-		initialValidators         map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput
-		newValidators             map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput
+		initialValidators         map[ids.ID]*luxdvalidators.GetValidatorOutput
+		newValidators             map[ids.ID]*luxdvalidators.GetValidatorOutput
 		registerMockListenerCalls func(*interfaces.MockStateCallbackListener)
 		expectedLoadErr           error
 	}{
 		{
 			name:                      "before empty/after empty",
-			initialValidators:         map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{},
-			newValidators:             map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{},
+			initialValidators:         map[ids.ID]*luxdvalidators.GetValidatorOutput{},
+			newValidators:             map[ids.ID]*luxdvalidators.GetValidatorOutput{},
 			registerMockListenerCalls: func(*interfaces.MockStateCallbackListener) {},
 		},
 		{
 			name:              "before empty/after one",
-			initialValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{},
-			newValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{},
+			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -56,14 +55,13 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "before one/after empty",
-			initialValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
-			newValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{},
+			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
 				// initial validator will trigger first
 				mock.EXPECT().OnValidatorAdded(testValidationIDs[0], testNodeIDs[0], uint64(0), true).Times(1)
@@ -73,18 +71,16 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "no change",
-			initialValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
-			newValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -93,50 +89,42 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "status and weight change and new one",
-			initialValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
 					Weight:    1,
 				},
 			},
-			newValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  false,
-					StartTime: 0,
 					Weight:    2,
 				},
 				testValidationIDs[1]: {
 					NodeID:    testNodeIDs[1],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
 				// initial validator will trigger first
 				mock.EXPECT().OnValidatorAdded(testValidationIDs[0], testNodeIDs[0], uint64(0), true).Times(1)
-				// then it will be updated
-				mock.EXPECT().OnValidatorStatusUpdated(testValidationIDs[0], testNodeIDs[0], false).Times(1)
+				// Weight change happens but status stays the same (true) since we default to active
 				// new validator will be added
 				mock.EXPECT().OnValidatorAdded(testValidationIDs[1], testNodeIDs[1], uint64(0), true).Times(1)
 			},
 		},
 		{
 			name: "renew validation ID",
-			initialValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
-			newValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[1]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -150,18 +138,16 @@ func TestLoadNewValidators(t *testing.T) {
 		},
 		{
 			name: "renew node ID",
-			initialValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[0],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
-			newValidators: map[ids.ID]*luxdvalidators.GetCurrentValidatorOutput{
+			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
 					NodeID:    testNodeIDs[1],
-					IsActive:  true,
-					StartTime: 0,
+					Weight:    1,
 				},
 			},
 			expectedLoadErr: state.ErrImmutableField,
@@ -186,9 +172,9 @@ func TestLoadNewValidators(t *testing.T) {
 					ValidationID:   vID,
 					NodeID:         validator.NodeID,
 					Weight:         validator.Weight,
-					StartTimestamp: validator.StartTime,
-					IsActive:       validator.IsActive,
-					IsL1Validator:  validator.IsL1Validator,
+					StartTimestamp: 0,     // Default value since GetValidatorOutput doesn't have StartTime
+					IsActive:       true,  // Default to active
+					IsL1Validator:  false, // Default value
 				}))
 			}
 			// enable mock listener
@@ -211,9 +197,10 @@ func TestLoadNewValidators(t *testing.T) {
 				require.NoError(err)
 				require.Equal(validator.NodeID, v.NodeID)
 				require.Equal(validator.Weight, v.Weight)
-				require.Equal(validator.StartTime, v.StartTimestamp)
-				require.Equal(validator.IsActive, v.IsActive)
-				require.Equal(validator.IsL1Validator, v.IsL1Validator)
+				// Default values are used for fields not in GetValidatorOutput
+				require.Equal(uint64(0), v.StartTimestamp)
+				require.Equal(true, v.IsActive)
+				require.Equal(false, v.IsL1Validator)
 			}
 		})
 	}

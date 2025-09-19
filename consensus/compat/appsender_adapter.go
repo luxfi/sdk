@@ -3,11 +3,10 @@ package compat
 import (
 	"context"
 	"errors"
-	
+
+	consensusCore "github.com/luxfi/consensus/core/appsender"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
-	consensusCore "github.com/luxfi/consensus/core"
-	consensusSet "github.com/luxfi/consensus/utils/set"
+	"github.com/luxfi/math/set"
 )
 
 var (
@@ -27,12 +26,8 @@ func NewAppSenderAdapter(sender consensusCore.AppSender) AppSender {
 
 // SendAppRequest sends an application-level request
 func (a *AppSenderAdapter) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, appRequestBytes []byte) error {
-	// Convert node set to consensus set
-	consensusNodeIDs := consensusSet.Set[ids.NodeID]{}
-	for id := range nodeIDs {
-		consensusNodeIDs.Add(id)
-	}
-	return a.wrapped.SendAppRequest(ctx, consensusNodeIDs, requestID, appRequestBytes)
+	// No conversion needed - same underlying type
+	return a.wrapped.SendAppRequest(ctx, nodeIDs, requestID, appRequestBytes)
 }
 
 // SendAppResponse sends an application-level response
@@ -47,22 +42,14 @@ func (a *AppSenderAdapter) SendAppError(ctx context.Context, nodeID ids.NodeID, 
 
 // SendAppGossip sends an application-level gossip message
 func (a *AppSenderAdapter) SendAppGossip(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
-	// Convert node set to consensus set
-	consensusNodeIDs := consensusSet.Set[ids.NodeID]{}
-	for id := range nodeIDs {
-		consensusNodeIDs.Add(id)
-	}
-	return a.wrapped.SendAppGossip(ctx, consensusNodeIDs, appGossipBytes)
+	// No conversion needed - same underlying type
+	return a.wrapped.SendAppGossip(ctx, nodeIDs, appGossipBytes)
 }
 
 // SendAppGossipSpecific sends a gossip message to specific nodes
 func (a *AppSenderAdapter) SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
-	// Convert node set to consensus set
-	consensusNodeIDs := consensusSet.Set[ids.NodeID]{}
-	for id := range nodeIDs {
-		consensusNodeIDs.Add(id)
-	}
-	return a.wrapped.SendAppGossipSpecific(ctx, consensusNodeIDs, appGossipBytes)
+	// No conversion needed - same underlying type
+	return a.wrapped.SendAppGossipSpecific(ctx, nodeIDs, appGossipBytes)
 }
 
 // SendCrossChainAppRequest sends a cross-chain app request

@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

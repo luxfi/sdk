@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/uptime"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 )
 
 var errPausedDisconnect = errors.New("paused node cannot be disconnected")

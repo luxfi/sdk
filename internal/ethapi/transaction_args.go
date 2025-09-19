@@ -42,7 +42,7 @@ import (
 	"github.com/luxfi/crypto/kzg4844"
 	"github.com/luxfi/log"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
@@ -264,12 +264,8 @@ func (args *TransactionArgs) setFeeDefaults(ctx context.Context, b feeBackend) e
 func (args *TransactionArgs) setCancunFeeDefaults(ctx context.Context, head *types.Header, b feeBackend) error {
 	// Set maxFeePerBlobGas if it is missing.
 	if args.BlobHashes != nil && args.BlobFeeCap == nil {
-		var excessBlobGas uint64
-		if head.ExcessBlobGas != nil {
-			excessBlobGas = *head.ExcessBlobGas
-		}
 		// ExcessBlobGas must be set for a Cancun block.
-		blobBaseFee := eip4844.CalcBlobFee(excessBlobGas)
+		blobBaseFee := eip4844.CalcBlobFee(b.ChainConfig(), head)
 		// Set the max fee to be 2 times larger than the previous block's blob base fee.
 		// The additional slack allows the tx to not become invalidated if the base
 		// fee is rising.

@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/node/consensus/consensustest"
+	"github.com/luxfi/consensus/consensustest"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
 	"github.com/luxfi/node/utils/constants"
@@ -24,6 +24,7 @@ type testValidatorState struct {
 }
 
 func (t *testValidatorState) GetCurrentHeight() (uint64, error) {
+	// Call GetCurrentHeight with a background context
 	return t.State.GetCurrentHeight(context.Background())
 }
 
@@ -47,7 +48,7 @@ func (t *testValidatorState) GetValidatorSet(height uint64, subnetID ids.ID) (ma
 }
 
 func (t *testValidatorState) GetSubnetID(chainID ids.ID) (ids.ID, error) {
-	return t.State.GetSubnetID(context.Background(), chainID)
+	return t.State.GetSubnetID(chainID)
 }
 
 // @TODO: This should eventually be replaced by a more robust solution, or alternatively, the presence of nil
@@ -57,7 +58,7 @@ func NewTestValidatorState() consensus.ValidatorState {
 		GetCurrentHeightF: func(context.Context) (uint64, error) {
 			return 0, nil
 		},
-		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			// For testing, all chains belong to the primary network
 			if chainID == constants.PlatformChainID || chainID == SubnetEVMTestChainID {
 				return constants.PrimaryNetworkID, nil
@@ -67,9 +68,6 @@ func NewTestValidatorState() consensus.ValidatorState {
 		},
 		GetValidatorSetF: func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			return map[ids.NodeID]*validators.GetValidatorOutput{}, nil
-		},
-		GetCurrentValidatorSetF: func(context.Context, ids.ID) (map[ids.ID]*validators.GetCurrentValidatorOutput, uint64, error) {
-			return map[ids.ID]*validators.GetCurrentValidatorOutput{}, 0, nil
 		},
 	}
 	
@@ -100,16 +98,20 @@ func NewTestValidatorStateFromBase(baseState *validatorstest.State) consensus.Va
 // that includes the GetValidatorSetF function, which is required by many tests.
 func NewTestConsensusContext(t testing.TB) context.Context {
 	consensusCtx := consensustest.Context(t, SubnetEVMTestChainID)
-	// Use consensus.WithValidatorState to add validator state to context
-	consensusCtx = consensus.WithValidatorState(consensusCtx, NewTestValidatorState())
-	return consensusCtx
+	// Create a standard context and add the consensus context to it
+	ctx := context.Background()
+	ctx = consensus.WithContext(ctx, consensusCtx)
+	// Add validator state to the context
+	return consensus.WithValidatorState(ctx, NewTestValidatorState())
 }
 
 // NewTestConsensusContextWithChainID returns a context.Context with validator state properly configured for testing
 // with a specific chain ID. This is provided for backward compatibility when a specific chain ID is needed.
 func NewTestConsensusContextWithChainID(t testing.TB, chainID ids.ID) context.Context {
 	consensusCtx := consensustest.Context(t, chainID)
-	// Use consensus.WithValidatorState to add validator state to context
-	consensusCtx = consensus.WithValidatorState(consensusCtx, NewTestValidatorState())
-	return consensusCtx
+	// Create a standard context and add the consensus context to it
+	ctx := context.Background()
+	ctx = consensus.WithContext(ctx, consensusCtx)
+	// Add validator state to the context
+	return consensus.WithValidatorState(ctx, NewTestValidatorState())
 }

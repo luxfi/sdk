@@ -5,21 +5,20 @@ package gossip
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"github.com/luxfi/node/ids"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/node/snow/engine/common"
-	"github.com/luxfi/node/utils/logging"
+	"github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 var _ p2p.Handler = (*txGossipHandler)(nil)
 
 func NewTxGossipHandler[T gossip.Gossipable](
-	log logging.Logger,
+	logger log.Logger,
 	marshaller gossip.Marshaller[T],
 	mempool gossip.Set[T],
 	metrics gossip.Metrics,
@@ -32,32 +31,31 @@ func NewTxGossipHandler[T gossip.Gossipable](
 ) (*txGossipHandler, error) {
 	// push gossip messages can be handled from any peer
 	handler := gossip.NewHandler(
-		log,
+		logger,
 		marshaller,
 		mempool,
 		metrics,
 		maxMessageSize,
 	)
 
-	throttledHandler, err := p2p.NewDynamicThrottlerHandler(
-		log,
-		handler,
-		validators,
+	// Create a sliding window throttler for rate limiting
+	throttler := p2p.NewSlidingWindowThrottler(
 		throttlingPeriod,
-		requestsPerPeer,
-		registerer,
-		namespace,
+		int(requestsPerPeer), // Convert float64 to int for limit
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize throttler handler: %w", err)
-	}
+	
+	throttledHandler := p2p.NewThrottlerHandler(
+		handler,
+		throttler,
+		logger,
+	)
 
 	// pull gossip requests are filtered by validators and are throttled
 	// to prevent spamming
 	validatorHandler := p2p.NewValidatorHandler(
 		throttledHandler,
 		validators,
-		log,
+		logger,
 	)
 
 	return &txGossipHandler{
@@ -75,6 +73,11 @@ func (t *txGossipHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, goss
 	t.appGossipHandler.AppGossip(ctx, nodeID, gossipBytes)
 }
 
-func (t *txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *common.AppError) {
+func (t *txGossipHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *core.AppError) {
 	return t.appRequestHandler.AppRequest(ctx, nodeID, deadline, requestBytes)
+}
+
+func (t *txGossipHandler) CrossChainAppRequest(ctx context.Context, chainID ids.ID, deadline time.Time, requestBytes []byte) ([]byte, error) {
+	// Cross-chain requests are not supported for transaction gossip
+	return nil, nil
 }

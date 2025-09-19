@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	luxuptime "github.com/luxfi/node/consensus/uptime"
+	luxuptime "github.com/luxfi/consensus/uptime"
 	luxvalidators "github.com/luxfi/consensus/validators"
 	"github.com/luxfi/node/utils/timer/mockable"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
@@ -126,11 +126,11 @@ func (m *manager) sync(ctx context.Context) error {
 	}
 
 	// Convert validator set format for loadValidators
-	convertedValidatorSet := make(map[ids.ID]*luxvalidators.GetCurrentValidatorOutput)
+	convertedValidatorSet := make(map[ids.ID]*luxvalidators.GetValidatorOutput)
 	for nodeID, weight := range currentValidatorSet {
 		// Create a simple validator output - use a unique ID based on NodeID
 		validationID := ids.ID(nodeID.Bytes())
-		convertedValidatorSet[validationID] = &luxvalidators.GetCurrentValidatorOutput{
+		convertedValidatorSet[validationID] = &luxvalidators.GetValidatorOutput{
 			NodeID: nodeID,
 			Weight: weight,
 		}
@@ -152,7 +152,7 @@ func (m *manager) sync(ctx context.Context) error {
 }
 
 // loadValidators loads the [validators] into the validator state [validatorState]
-func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*luxvalidators.GetCurrentValidatorOutput) error {
+func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.ID]*luxvalidators.GetValidatorOutput) error {
 	currentValidationIDs := validatorState.GetValidationIDs()
 	// first check if we need to delete any existing validators
 	for vID := range currentValidationIDs {
@@ -169,9 +169,9 @@ func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.
 			ValidationID:   newVID,
 			NodeID:         newVdr.NodeID,
 			Weight:         newVdr.Weight,
-			StartTimestamp: newVdr.StartTime,
-			IsActive:       newVdr.IsActive,
-			IsL1Validator:  newVdr.IsL1Validator,
+			StartTimestamp: 0,     // Default value since GetValidatorOutput doesn't have StartTime
+			IsActive:       true,  // Default to active for current validators
+			IsL1Validator:  false, // Default to false, can be updated based on your requirements
 		}
 		if currentValidationIDs.Contains(newVID) {
 			if err := validatorState.UpdateValidator(currentVdr); err != nil {

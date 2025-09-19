@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/tests/fixture/e2e"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/evm/tests/utils"

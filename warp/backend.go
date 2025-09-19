@@ -4,7 +4,6 @@
 package warp
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -103,9 +102,8 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 			return fmt.Errorf("wrong network ID at index %d", i)
 		}
 
-		// Compare source chain IDs as bytes
-		sourceChainIDBytes := b.sourceChainID[:]
-		if !bytes.Equal(unsignedMsg.SourceChainID, sourceChainIDBytes) {
+		// Compare source chain IDs
+		if unsignedMsg.SourceChainID != b.sourceChainID {
 			return fmt.Errorf("wrong source chain ID at index %d", i)
 		}
 
@@ -113,8 +111,7 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 		if err != nil {
 			return fmt.Errorf("%w at index %d as AddressedCall: %w", errParsingOffChainMessage, i, err)
 		}
-		messageIDBytes := unsignedMsg.ID()
-		messageID, _ := ids.ToID(messageIDBytes)
+		messageID := unsignedMsg.ID()
 		b.offchainAddressedCallMsgs[messageID.String()] = unsignedMsg
 	}
 
@@ -122,14 +119,13 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 }
 
 func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
-	messageIDBytes := unsignedMessage.ID()
-	messageID, _ := ids.ToID(messageIDBytes)
+	messageID := unsignedMessage.ID()
 	log.Debug("Adding warp message to backend", "messageID", messageID)
 
 	// In the case when a node restarts, and possibly changes its bls key, the cache gets emptied but the database does not.
 	// So to avoid having incorrect signatures saved in the database after a bls key change, we save the full message in the database.
 	// Whereas for the cache, after the node restart, the cache would be emptied so we can directly save the signatures.
-	if err := b.db.Put(messageIDBytes, unsignedMessage.Bytes()); err != nil {
+	if err := b.db.Put(messageID[:], unsignedMessage.Bytes()); err != nil {
 		return fmt.Errorf("failed to put warp signature in db: %w", err)
 	}
 
@@ -140,8 +136,7 @@ func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 }
 
 func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
-	messageIDBytes := unsignedMessage.ID()
-	messageID, _ := ids.ToID(messageIDBytes)
+	messageID := unsignedMessage.ID()
 
 	log.Debug("Getting warp message from backend", "messageID", messageID)
 	if sig, ok := b.signatureCache.Get(messageID); ok {
@@ -162,14 +157,12 @@ func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte
 		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}
 
-	sourceChainIDBytes := b.sourceChainID[:]
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, sourceChainIDBytes, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new unsigned warp message: %w", err)
 	}
 
-	messageIDBytes := unsignedMessage.ID()
-	messageID, _ := ids.ToID(messageIDBytes)
+	messageID := unsignedMessage.ID()
 	if sig, ok := b.signatureCache.Get(messageID); ok {
 		return sig, nil
 	}
@@ -213,8 +206,7 @@ func (b *backend) signMessage(unsignedMessage *luxWarp.UnsignedMessage) ([]byte,
 	// For now, return empty signature
 	sig := make([]byte, 64)
 
-	messageIDBytes := unsignedMessage.ID()
-	messageID, _ := ids.ToID(messageIDBytes)
+	messageID := unsignedMessage.ID()
 	b.signatureCache.Put(messageID, sig)
 	return sig, nil
 }

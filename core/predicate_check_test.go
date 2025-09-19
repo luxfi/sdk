@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"

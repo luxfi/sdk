@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/ids"
 	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common"

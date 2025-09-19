@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
@@ -231,7 +231,7 @@ func (eng *DummyEngine) verifyHeader(chain consensus.ChainHeaderReader, header *
 		if *header.ParentBeaconRoot != (common.Hash{}) {
 			return fmt.Errorf("invalid parentBeaconRoot, have %#x, expected empty", *header.ParentBeaconRoot)
 		}
-		if err := eip4844.VerifyEIP4844Header(parent, header); err != nil {
+		if err := eip4844.VerifyEIP4844Header(chain.Config(), parent, header); err != nil {
 			return err
 		}
 		if *header.BlobGasUsed > 0 { // VerifyEIP4844Header ensures BlobGasUsed is non-nil

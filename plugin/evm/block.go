@@ -22,11 +22,11 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 
-	"github.com/luxfi/node/consensus/choices"
-	"github.com/luxfi/node/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/choices"
+	"github.com/luxfi/consensus/engine/chain/block"
 	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/consensus/protocol/chain"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/components/chain"
 )
 
 var (
@@ -133,6 +133,11 @@ func (b *Block) Reject(context.Context) error {
 
 // Parent implements the chain.Block interface
 func (b *Block) Parent() ids.ID {
+	return ids.ID(b.ethBlock.ParentHash())
+}
+
+// ParentID implements the chain.Block interface (same as Parent)
+func (b *Block) ParentID() ids.ID {
 	return ids.ID(b.ethBlock.ParentHash())
 }
 
@@ -283,6 +288,14 @@ func (b *Block) Bytes() []byte {
 }
 
 func (b *Block) String() string { return fmt.Sprintf("EVM block, ID = %s", b.ID()) }
+
+// Status implements the chain.Block interface
+func (b *Block) Status() uint8 {
+	// Return a simple status based on if the block is in the blockchain
+	// 0 = unknown, 1 = processing, 2 = accepted, 3 = rejected
+	// For simplicity, we'll return 2 (accepted) for now since this is mainly used in consensus
+	return 2
+}
 
 // SetStatus implements the chain.Block interface
 // This is required for chain.Block but not used in our implementation

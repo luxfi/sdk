@@ -6,7 +6,7 @@ import (
 	"context"
 	
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 )
 
 // AppSender sends application messages

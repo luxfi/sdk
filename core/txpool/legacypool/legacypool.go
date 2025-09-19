@@ -582,18 +582,18 @@ func (pool *LegacyPool) Pending(filter txpool.PendingFilter) map[common.Address]
 
 	// Convert the new uint256.Int types to the old big.Int ones used by the legacy pool
 	var (
-		minTipBig  *big.Int
-		baseFeeBig *big.Int
+		minTip256  *uint256.Int
+		baseFee256 *uint256.Int
 	)
 	if filter.MinTip != nil {
-		minTipBig = filter.MinTip.ToBig()
+		minTip256 = filter.MinTip
 	}
 	if filter.BaseFee != nil {
-		baseFeeBig = filter.BaseFee.ToBig()
+		baseFee256 = filter.BaseFee
 	}
 
-	if baseFeeBig == nil {
-		baseFeeBig = pool.priced.urgent.baseFee
+	if baseFee256 == nil {
+		baseFee256 = uint256.MustFromBig(pool.priced.urgent.baseFee)
 	}
 
 	pending := make(map[common.Address][]*txpool.LazyTransaction, len(pool.pending))
@@ -601,9 +601,9 @@ func (pool *LegacyPool) Pending(filter txpool.PendingFilter) map[common.Address]
 		txs := list.Flatten()
 
 		// If the miner requests tip enforcement, cap the lists now
-		if minTipBig != nil && !pool.locals.contains(addr) {
+		if minTip256 != nil && !pool.locals.contains(addr) {
 			for i, tx := range txs {
-				if tx.EffectiveGasTipIntCmp(minTipBig, baseFeeBig) < 0 {
+				if tx.EffectiveGasTipIntCmp(minTip256, baseFee256) < 0 {
 					txs = txs[:i]
 					break
 				}

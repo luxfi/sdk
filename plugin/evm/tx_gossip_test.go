@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/node/proto/pb/sdk"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 

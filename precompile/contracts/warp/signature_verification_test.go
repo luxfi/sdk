@@ -8,12 +8,12 @@ import (
 	"math"
 	"testing"
 
-	"github.com/luxfi/node/ids"
-	"github.com/luxfi/node/snow/validators"
-	"github.com/luxfi/node/snow/validators/validatorsmock"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validators/validatorsmock"
 	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/crypto/bls"
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/math/set"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 

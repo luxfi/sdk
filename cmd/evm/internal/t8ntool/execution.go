@@ -44,7 +44,7 @@ import (
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/consensus/misc/eip4844"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -180,16 +180,35 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 	// Calculate the BlobBaseFee
 	var excessBlobGas uint64
 	if pre.Env.ExcessBlobGas != nil {
-		excessBlobGas := *pre.Env.ExcessBlobGas
-		vmContext.BlobBaseFee = eip4844.CalcBlobFee(excessBlobGas)
+		excessBlobGas = *pre.Env.ExcessBlobGas
+		// Create a minimal header for CalcBlobFee
+		header := &types.Header{
+			ExcessBlobGas: &excessBlobGas,
+			Time: pre.Env.Timestamp,
+			Number: new(big.Int).SetUint64(pre.Env.Number),
+		}
+		vmContext.BlobBaseFee = eip4844.CalcBlobFee(chainConfig, header)
 	} else {
 		// If it is not explicitly defined, but we have the parent values, we try
 		// to calculate it ourselves.
 		parentExcessBlobGas := pre.Env.ParentExcessBlobGas
 		parentBlobGasUsed := pre.Env.ParentBlobGasUsed
 		if parentExcessBlobGas != nil && parentBlobGasUsed != nil {
-			excessBlobGas = eip4844.CalcExcessBlobGas(*parentExcessBlobGas, *parentBlobGasUsed)
-			vmContext.BlobBaseFee = eip4844.CalcBlobFee(excessBlobGas)
+			// Create a minimal parent header for CalcExcessBlobGas
+			parentHeader := &types.Header{
+				ExcessBlobGas: parentExcessBlobGas,
+				BlobGasUsed: parentBlobGasUsed,
+				Time: pre.Env.Timestamp - 12, // Assume 12 second block time
+				Number: new(big.Int).SetUint64(pre.Env.Number - 1),
+			}
+			excessBlobGas = eip4844.CalcExcessBlobGas(chainConfig, parentHeader, pre.Env.Timestamp)
+			// Create current header for CalcBlobFee
+			header := &types.Header{
+				ExcessBlobGas: &excessBlobGas,
+				Time: pre.Env.Timestamp,
+				Number: new(big.Int).SetUint64(pre.Env.Number),
+			}
+			vmContext.BlobBaseFee = eip4844.CalcBlobFee(chainConfig, header)
 		}
 	}
 	// If DAO is supported/enabled, we need to handle it here. In geth 'proper', it's
@@ -226,7 +245,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 		txBlobGas := uint64(0)
 		if tx.Type() == types.BlobTxType {
 			txBlobGas = uint64(ethparams.BlobTxBlobGasPerBlob * len(tx.BlobHashes()))
-			if used, max := blobGasUsed+txBlobGas, uint64(eip4844.MaxBlobGasPerBlock); used > max {
+			if used, max := blobGasUsed+txBlobGas, eip4844.MaxBlobGasPerBlock(chainConfig, pre.Env.Timestamp); used > max {
 				err := fmt.Errorf("blob gas (%d) would exceed maximum allowance %d", used, max)
 				log.Warn("rejected tx", "index", i, "err", err)
 				rejectedTxs = append(rejectedTxs, &rejectedTx{i, err.Error()})
@@ -364,7 +383,7 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc) *state.StateDB
 	sdb := state.NewDatabaseWithConfig(db, &triedb.Config{Preimages: true})
 	statedb, _ := state.New(types.EmptyRootHash, sdb, nil)
 	for addr, a := range accounts {
-		statedb.SetCode(addr, a.Code)
+		statedb.SetCode(addr, a.Code, tracing.CodeChangeGenesis)
 		statedb.SetNonce(addr, a.Nonce, tracing.NonceChangeGenesis)
 		statedb.SetBalance(addr, uint256.MustFromBig(a.Balance), tracing.BalanceIncreaseGenesisBalance)
 		for k, v := range a.Storage {

@@ -507,7 +507,8 @@ func (h *priceHeap) Less(i, j int) bool {
 func (h *priceHeap) cmp(a, b *types.Transaction) int {
 	if h.baseFee != nil {
 		// Compare effective tips if baseFee is specified
-		if c := a.EffectiveGasTipCmp(b, h.baseFee); c != 0 {
+		baseFee256 := uint256.MustFromBig(h.baseFee)
+		if c := a.EffectiveGasTipCmp(b, baseFee256); c != 0 {
 			return c
 		}
 	}

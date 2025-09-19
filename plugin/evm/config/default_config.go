@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/geth/common"
 )
 
-const defaultCommitInterval = 4096
+// defaultCommitInterval is defined in config.go
 
 func NewDefaultConfig() Config {
 	return Config{
