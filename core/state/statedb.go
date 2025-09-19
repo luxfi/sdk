@@ -29,12 +29,10 @@
 package state
 
 import (
-	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	ethstate "github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/tracing"
 )
 
 // StateDB structs within the ethereum protocol are used to store anything
@@ -122,28 +120,4 @@ func (s *StateDB) Copy() *StateDB {
 		thash:   s.thash,
 		txIndex: s.txIndex,
 	}
-}
-
-// AddBalance adds amount to the account's balance without tracing
-// This is a wrapper for backward compatibility with old EVM code
-func (s *StateDB) AddBalance(addr common.Address, amount *uint256.Int) {
-	s.StateDB.AddBalance(addr, amount, tracing.BalanceChangeUnspecified)
-}
-
-// SetBalance sets the account's balance without tracing
-// This is a wrapper for backward compatibility with old EVM code
-func (s *StateDB) SetBalance(addr common.Address, amount *uint256.Int) {
-	s.StateDB.SetBalance(addr, amount, tracing.BalanceChangeUnspecified)
-}
-
-// SetNonce sets the account's nonce without tracing
-// This is a wrapper for backward compatibility with old EVM code
-func (s *StateDB) SetNonce(addr common.Address, nonce uint64) {
-	s.StateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
-}
-
-// SetCode sets the account's code without tracing
-// This is a wrapper for backward compatibility with old EVM code
-func (s *StateDB) SetCode(addr common.Address, code []byte) {
-	s.StateDB.SetCode(addr, code, tracing.CodeChangeUnspecified)
 }
