@@ -11,17 +11,17 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
+	// "time" // Commented out - used in commented code
 
-	"github.com/luxfi/ids"
+	// "github.com/luxfi/ids" // Commented out - used in commented code
 	"github.com/luxfi/node/api/health"
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	// "github.com/luxfi/node/api/info" // Commented out - used in commented code
+	// "github.com/luxfi/node/genesis" // Commented out - used in commented code
+	// "github.com/luxfi/node/vms/secp256k1fx" // Commented out - used in commented code
 	// "github.com/luxfi/node/wallet/net/primary" // TODO: This package doesn't exist in v1.16.15
 	"github.com/go-cmd/cmd"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/plugin/evm"
+	// "github.com/luxfi/evm/core" // Commented out - used in commented code
+	// "github.com/luxfi/evm/plugin/evm" // Commented out - used in commented code
 	"github.com/luxfi/log"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/require"
