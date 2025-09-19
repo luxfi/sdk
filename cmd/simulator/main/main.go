@@ -38,7 +38,7 @@ func main() {
 
 	// For simulator, we'll set the log level globally
 	logLevelStr := v.GetString(config.LogLevelKey)
-	
+
 	// The luxfi/log package doesn't have the same API as geth's log
 	// For now, we'll just print a message since the logging happens elsewhere
 	_ = logLevelStr

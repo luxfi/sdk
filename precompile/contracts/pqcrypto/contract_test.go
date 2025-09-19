@@ -7,10 +7,10 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto/mldsa"
 	"github.com/luxfi/crypto/mlkem"
 	"github.com/luxfi/crypto/slhdsa"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -92,7 +92,7 @@ func TestMLKEMEncapsulateDecapsulate(t *testing.T) {
 	require.NoError(err)
 	require.NotEmpty(encapResult)
 
-	// Extract ciphertext (first part of result) 
+	// Extract ciphertext (first part of result)
 	// For MLKEM512, ciphertext size is typically 768 bytes
 	const ctLen = 768 // ML-KEM 512 ciphertext size
 	ciphertext := encapResult[:ctLen]
@@ -181,7 +181,7 @@ func BenchmarkPQPrecompile(b *testing.B) {
 		pub := priv.PublicKey
 		message := []byte("benchmark message")
 		signature, _ := priv.Sign(rand.Reader, message, nil)
-		
+
 		pubBytes := pub.Bytes()
 		input := []byte(MLDSAVerifySelector[:4])
 		input = append(input, byte(mldsa.MLDSA44))
@@ -190,9 +190,9 @@ func BenchmarkPQPrecompile(b *testing.B) {
 		input = append(input, byte(len(message)>>8), byte(len(message)))
 		input = append(input, message...)
 		input = append(input, signature...)
-		
+
 		gas := precompile.RequiredGas(input)
-		
+
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			_, _, _ = precompile.Run(nil, common.Address{}, ContractAddress, input, gas, true)
@@ -202,14 +202,14 @@ func BenchmarkPQPrecompile(b *testing.B) {
 	b.Run("ML-KEM-Encapsulate", func(b *testing.B) {
 		priv, _ := mlkem.GenerateKeyPair(rand.Reader, mlkem.MLKEM512)
 		pub := &priv.PublicKey
-		
+
 		pubBytes := pub.Bytes()
 		input := []byte(MLKEMEncapsulateSelector[:4])
 		input = append(input, byte(mlkem.MLKEM512))
 		input = append(input, pubBytes...)
-		
+
 		gas := precompile.RequiredGas(input)
-		
+
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			_, _, _ = precompile.Run(nil, common.Address{}, ContractAddress, input, gas, true)

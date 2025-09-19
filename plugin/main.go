@@ -6,9 +6,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/luxfi/node/version"
 	"github.com/luxfi/evm/plugin/evm"
 	"github.com/luxfi/evm/plugin/runner"
+	"github.com/luxfi/node/version"
 )
 
 func main() {

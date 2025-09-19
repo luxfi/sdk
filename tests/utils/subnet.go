@@ -13,16 +13,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/health"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/genesis"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/net/primary"
-	"github.com/luxfi/log"
+	// "github.com/luxfi/node/wallet/net/primary" // TODO: This package doesn't exist in v1.16.15
+	"github.com/go-cmd/cmd"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/plugin/evm"
-	"github.com/go-cmd/cmd"
+	"github.com/luxfi/log"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -110,62 +110,64 @@ func CreateSubnetsSuite(genesisFiles map[string]string) *SubnetSuite {
 
 // CreateNewSubnet creates a new subnet and Subnet-EVM blockchain with the given genesis file.
 // returns the ID of the new created blockchain.
+// TODO: This function is disabled because wallet/net/primary package doesn't exist in node v1.16.15
 func CreateNewSubnet(ctx context.Context, genesisFilePath string) string {
-	require := require.New(ginkgo.GinkgoT())
+	panic("CreateNewSubnet is currently disabled - wallet/net/primary package not available in node v1.16.15")
+	// require := require.New(ginkgo.GinkgoT())
 
-	kc := secp256k1fx.NewKeychain(genesis.EWOQKey)
+	// kc := secp256k1fx.NewKeychain(genesis.EWOQKey)
 
-	// MakeWallet fetches the available UTXOs owned by [kc] on the network
-	// that [LocalAPIURI] is hosting.
-	walletConfig := &primary.WalletConfig{
-		URI: DefaultLocalNodeURI,
-		LUXKeychain: kc,
-		EthKeychain: kc,
-	}
-	wallet, err := primary.MakeWallet(ctx, walletConfig)
-	require.NoError(err)
+	// // MakeWallet fetches the available UTXOs owned by [kc] on the network
+	// // that [LocalAPIURI] is hosting.
+	// walletConfig := &primary.WalletConfig{
+	// 	URI: DefaultLocalNodeURI,
+	// 	LUXKeychain: kc,
+	// 	EthKeychain: kc,
+	// }
+	// wallet, err := primary.MakeWallet(ctx, walletConfig)
+	// require.NoError(err)
 
-	pWallet := wallet.P()
+	// pWallet := wallet.P()
 
-	owner := &secp256k1fx.OutputOwners{
-		Threshold: 1,
-		Addrs: []ids.ShortID{
-			genesis.EWOQKey.PublicKey().Address(),
-		},
-	}
+	// owner := &secp256k1fx.OutputOwners{
+	// 	Threshold: 1,
+	// 	Addrs: []ids.ShortID{
+	// 		genesis.EWOQKey.PublicKey().Address(),
+	// 	},
+	// }
 
-	wd, err := os.Getwd()
-	require.NoError(err)
-	log.Info("Reading genesis file", "filePath", genesisFilePath, "wd", wd)
-	genesisBytes, err := os.ReadFile(genesisFilePath)
-	require.NoError(err)
+	// wd, err := os.Getwd()
+	// require.NoError(err)
+	// log.Info("Reading genesis file", "filePath", genesisFilePath, "wd", wd)
+	// genesisBytes, err := os.ReadFile(genesisFilePath)
+	// require.NoError(err)
 
-	log.Info("Creating new subnet")
-	createNetTx, err := pWallet.IssueCreateNetTx(owner)
-	require.NoError(err)
+	// log.Info("Creating new subnet")
+	// createNetTx, err := pWallet.IssueCreateNetTx(owner)
+	// require.NoError(err)
 
-	genesis := &core.Genesis{}
-	require.NoError(json.Unmarshal(genesisBytes, genesis))
+	// genesis := &core.Genesis{}
+	// require.NoError(json.Unmarshal(genesisBytes, genesis))
 
-	log.Info("Creating new Subnet-EVM blockchain", "genesis", genesis)
-	createChainTx, err := pWallet.IssueCreateChainTx(
-		createNetTx.ID(),
-		genesisBytes,
-		evm.ID,
-		nil,
-		"testChain",
-	)
-	require.NoError(err)
-	createChainTxID := createChainTx.ID()
+	// log.Info("Creating new Subnet-EVM blockchain", "genesis", genesis)
+	// createChainTx, err := pWallet.IssueCreateChainTx(
+	// 	createNetTx.ID(),
+	// 	genesisBytes,
+	// 	evm.ID,
+	// 	nil,
+	// 	"testChain",
+	// )
+	// require.NoError(err)
+	// createChainTxID := createChainTx.ID()
 
-	// Confirm the new blockchain is ready by waiting for the readiness endpoint
-	infoClient := info.NewClient(DefaultLocalNodeURI)
-	bootstrapped, err := info.AwaitBootstrapped(ctx, infoClient, createChainTxID.String(), 2*time.Second)
-	require.NoError(err)
-	require.True(bootstrapped)
+	// // Confirm the new blockchain is ready by waiting for the readiness endpoint
+	// infoClient := info.NewClient(DefaultLocalNodeURI)
+	// bootstrapped, err := info.AwaitBootstrapped(ctx, infoClient, createChainTxID.String(), 2*time.Second)
+	// require.NoError(err)
+	// require.True(bootstrapped)
 
-	// Return the blockchainID of the newly created blockchain
-	return createChainTxID.String()
+	// // Return the blockchainID of the newly created blockchain
+	// return createChainTxID.String()
 }
 
 // GetDefaultChainURI returns the default chain URI for a given blockchainID

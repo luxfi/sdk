@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"time"
 
-	luxdb "github.com/luxfi/database"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/uptime"
-	"github.com/luxfi/math/set"
+	luxdb "github.com/luxfi/database"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 )
 
 var _ uptime.State = (*state)(nil)

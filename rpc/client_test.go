@@ -43,8 +43,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/log"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/luxfi/log"
 )
 
 func TestClientRequest(t *testing.T) {

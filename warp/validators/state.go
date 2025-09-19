@@ -5,8 +5,8 @@ package validators
 
 import (
 	"context"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/constants"
 )
 

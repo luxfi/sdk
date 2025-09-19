@@ -30,11 +30,11 @@ package blobpool
 import (
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 // BlockChain defines the minimal set of methods needed to back a blob pool with

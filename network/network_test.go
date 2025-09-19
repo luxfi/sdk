@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/network/p2p"
 	nodeCore "github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/node/network/p2p"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
@@ -22,12 +22,12 @@ import (
 	"github.com/luxfi/evm/network/peertest"
 	"github.com/luxfi/evm/plugin/evm/message"
 
+	consensusVersion "github.com/luxfi/consensus/version"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/math/set"
-	consensusVersion "github.com/luxfi/consensus/version"
 )
 
 var (

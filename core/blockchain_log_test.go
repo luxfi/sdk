@@ -8,15 +8,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/stretchr/testify/require"
 )
 

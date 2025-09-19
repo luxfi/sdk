@@ -4,8 +4,8 @@
 package customrawdb
 
 import (
-	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/utils/wrappers"
 )
 
 var (

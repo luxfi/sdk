@@ -31,8 +31,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/tests"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/urfave/cli/v2"
 )
 

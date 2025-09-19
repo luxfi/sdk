@@ -7,11 +7,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

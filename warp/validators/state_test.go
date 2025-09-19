@@ -7,11 +7,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorsmock"
-	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/utils/constants"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

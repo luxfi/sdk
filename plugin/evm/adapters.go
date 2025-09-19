@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	
+
 	// Node interfaces that the VM plugin must implement (from engine/chain/block)
 	nodeblock "github.com/luxfi/consensus/engine/chain/block"
-	
+
 	// Consensus interfaces that our implementation uses (from protocol/chain)
 	consensusblock "github.com/luxfi/consensus/protocol/chain"
-	
+
 	// Network interfaces
 	"github.com/luxfi/consensus/core/appsender"
 	"github.com/luxfi/consensus/utils/set"
@@ -91,7 +91,7 @@ func NewContextAdapter(nodeCtx *nodeblock.Context) *nodeblock.Context {
 	return nodeCtx
 }
 
-// NewNodeContextAdapter creates a node context from consensus context  
+// NewNodeContextAdapter creates a node context from consensus context
 func NewNodeContextAdapter(consensusCtx *nodeblock.Context) *nodeblock.Context {
 	// Both use the same Context type from engine/chain/block package
 	return consensusCtx
@@ -114,7 +114,7 @@ func (a *AppSenderAdapter) SendAppRequest(ctx context.Context, nodeIDs []ids.Nod
 	for _, nodeID := range nodeIDs {
 		nodeIDSet.Add(nodeID)
 	}
-	
+
 	return a.consensus.SendAppRequest(ctx, nodeIDSet, requestID, appRequestBytes)
 }
 
@@ -135,7 +135,7 @@ func (a *AppSenderAdapter) SendAppGossip(ctx context.Context, nodeIDs []ids.Node
 	for _, nodeID := range nodeIDs {
 		nodeIDSet.Add(nodeID)
 	}
-	
+
 	return a.consensus.SendAppGossip(ctx, nodeIDSet, appGossipBytes)
 }
 
@@ -156,7 +156,7 @@ func (a *ReverseAppSenderAdapter) SendAppRequest(ctx context.Context, nodeIDs se
 	for nodeID := range nodeIDs {
 		nodeIDSlice = append(nodeIDSlice, nodeID)
 	}
-	
+
 	return a.node.SendAppRequest(ctx, nodeIDSlice, requestID, appRequestBytes)
 }
 
@@ -177,7 +177,7 @@ func (a *ReverseAppSenderAdapter) SendAppGossip(ctx context.Context, nodeIDs set
 	for nodeID := range nodeIDs {
 		nodeIDSlice = append(nodeIDSlice, nodeID)
 	}
-	
+
 	return a.node.SendAppGossip(ctx, nodeIDSlice, appGossipBytes)
 }
 
@@ -188,6 +188,6 @@ func (a *ReverseAppSenderAdapter) SendAppGossipSpecific(ctx context.Context, nod
 	for nodeID := range nodeIDs {
 		nodeIDSlice = append(nodeIDSlice, nodeID)
 	}
-	
+
 	return a.node.SendAppGossip(ctx, nodeIDSlice, appGossipBytes)
 }

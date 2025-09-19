@@ -32,12 +32,6 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/lru"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
@@ -45,6 +39,12 @@ import (
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/lru"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/log"
+	"github.com/luxfi/node/utils/timer/mockable"
 	"golang.org/x/exp/slices"
 )
 

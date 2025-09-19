@@ -32,12 +32,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/rlp"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -47,10 +47,10 @@ func getBlock(transactions int, uncles int, dataSize int) *types.Block {
 		engine = dummy.NewFaker()
 
 		// A sender who makes transactions, has some funds
-		key, _  = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key, _        = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
-		address = common.BytesToAddress(cryptoAddress[:])
-		gspec   = &Genesis{
+		address       = common.BytesToAddress(cryptoAddress[:])
+		gspec         = &Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{address: {Balance: big.NewInt(50000 * 225000000000 * 200)}},
 		}

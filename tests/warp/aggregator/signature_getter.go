@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/proto/pb/sdk"
 	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/proto/pb/sdk"
 	luxWarp "github.com/luxfi/warp"
 	"google.golang.org/protobuf/proto"
 )

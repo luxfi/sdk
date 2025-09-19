@@ -35,13 +35,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/stretchr/testify/require"
 )
 
@@ -174,7 +174,12 @@ func TestSendTransaction(t *testing.T) {
 //     having a chain length of just n+1 means that a reorg occurred.
 func TestFork(t *testing.T) {
 	t.Parallel()
-	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+	testAddr := func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
@@ -222,7 +227,12 @@ func TestFork(t *testing.T) {
 //  6. Check that the TX is now included in block 2.
 func TestForkResendTx(t *testing.T) {
 	t.Parallel()
-	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+	testAddr := func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
@@ -270,7 +280,12 @@ func TestForkResendTx(t *testing.T) {
 
 func TestCommitReturnValue(t *testing.T) {
 	t.Parallel()
-	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+	testAddr := func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 
@@ -318,7 +333,12 @@ func TestCommitReturnValue(t *testing.T) {
 // block's parent rather than the canonical head's parent.
 func TestAdjustTimeAfterFork(t *testing.T) {
 	t.Parallel()
-	testAddr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+	testAddr := func() common.Address {
+		cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+		var commonAddr common.Address
+		copy(commonAddr[:], cryptoAddr[:])
+		return commonAddr
+	}()
 	sim := simTestBackend(testAddr)
 	defer sim.Close()
 

@@ -32,11 +32,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/node/utils/timer/mockable"
-	ethereum "github.com/luxfi/geth"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/core"
@@ -48,6 +43,11 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/rpc"
+	ethereum "github.com/luxfi/geth"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/node/utils/timer/mockable"
 )
 
 var _ eth.PushGossiper = (*fakePushGossiper)(nil)
@@ -102,14 +102,14 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 	nodeConf := node.DefaultConfig
 
 	ethConf := ethconfig.DefaultConfig
-	
+
 	// Initialize the extras with proper defaults
 	extra := &extras.ChainConfig{
 		FeeConfig:       extras.DefaultFeeConfig,
 		NetworkUpgrades: extras.GetDefaultNetworkUpgrades(),
 	}
 	params.SetExtra(&chainConfig, extra)
-	
+
 	ethConf.Genesis = &core.Genesis{
 		Config:   &chainConfig,
 		GasLimit: extra.FeeConfig.GasLimit.Uint64(),

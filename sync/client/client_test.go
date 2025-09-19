@@ -15,12 +15,7 @@ import (
 
 	"github.com/luxfi/ids"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
@@ -29,6 +24,11 @@ import (
 	"github.com/luxfi/evm/sync/handlers"
 	handlerstats "github.com/luxfi/evm/sync/handlers/stats"
 	"github.com/luxfi/evm/sync/statesync/statesynctest"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/triedb"
 )
 
 func TestGetCode(t *testing.T) {

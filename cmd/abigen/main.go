@@ -35,11 +35,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/luxfi/geth/common/compiler"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/cmd/utils"
 	"github.com/luxfi/evm/internal/flags"
+	"github.com/luxfi/geth/common/compiler"
 	"github.com/urfave/cli/v2"
 )
 

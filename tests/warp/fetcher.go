@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/crypto/bls"
+	warpBackend "github.com/luxfi/evm/warp"
+	"github.com/luxfi/ids"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
-	warpBackend "github.com/luxfi/evm/warp"
 )
 
 type apiFetcher struct {
@@ -36,10 +36,10 @@ func (f *apiFetcher) GetSignature(ctx context.Context, nodeID ids.NodeID, unsign
 	}
 	switch p := parsedPayload.(type) {
 	case *payload.AddressedCall:
-			msgID := unsignedWarpMessage.ID()
+		msgID := unsignedWarpMessage.ID()
 		signatureBytes, err = client.GetMessageSignature(ctx, msgID)
 	case *payload.Hash:
-			blockID, _ := ids.ToID(p.Hash)
+		blockID, _ := ids.ToID(p.Hash)
 		signatureBytes, err = client.GetBlockSignature(ctx, blockID)
 	}
 	if err != nil {

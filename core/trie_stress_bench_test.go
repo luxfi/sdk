@@ -32,11 +32,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/stretchr/testify/require"
 )
 

@@ -103,8 +103,14 @@ func TestEventId(t *testing.T) {
 			{ "type" : "event", "name" : "Check", "inputs": [{ "name" : "t", "type": "address" }, { "name": "b", "type": "uint256" }] }
 			]`,
 			expectations: map[string]common.Hash{
-				"Balance": func() common.Hash { h := crypto.Keccak256Hash([]byte("Balance(uint256)")); return common.BytesToHash(h[:]) }(),
-				"Check":   func() common.Hash { h := crypto.Keccak256Hash([]byte("Check(address,uint256)")); return common.BytesToHash(h[:]) }(),
+				"Balance": func() common.Hash {
+					h := crypto.Keccak256Hash([]byte("Balance(uint256)"))
+					return common.BytesToHash(h[:])
+				}(),
+				"Check": func() common.Hash {
+					h := crypto.Keccak256Hash([]byte("Check(address,uint256)"))
+					return common.BytesToHash(h[:])
+				}(),
 			},
 		},
 	}

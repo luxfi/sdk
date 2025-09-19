@@ -38,15 +38,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/geth/ethdb"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
@@ -55,6 +47,14 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/eth/tracers/logger"
+	"github.com/luxfi/geth/ethdb"
+	ethparams "github.com/luxfi/geth/params"
 	"golang.org/x/exp/slices"
 )
 
@@ -272,7 +272,7 @@ func testTraceCall(t *testing.T, scheme string) {
 	// Increase balance to handle Lux's higher base fee (25 Gwei)
 	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
-		Config: params.TestChainConfig,
+		Config:   params.TestChainConfig,
 		GasLimit: 8000000, // Set Lux gas limit
 		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: balance},
@@ -288,10 +288,10 @@ func testTraceCall(t *testing.T, scheme string) {
 		//    value: 1000 wei
 		//    fee:   0 wei
 		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{
-			Nonce:    nonce,
-			To:       &accounts[1].addr,
-			Value:    big.NewInt(1000),
-			Gas:      ethparams.TxGas,
+			Nonce: nonce,
+			To:    &accounts[1].addr,
+			Value: big.NewInt(1000),
+			Gas:   ethparams.TxGas,
 			GasPrice: func() *big.Int {
 				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
 				if b.BaseFee().Cmp(minGasPrice) < 0 {
@@ -299,7 +299,7 @@ func testTraceCall(t *testing.T, scheme string) {
 				}
 				return b.BaseFee()
 			}(),
-			Data:     nil}),
+			Data: nil}),
 			signer, accounts[0].key)
 		b.AddTx(tx)
 		nonce++
@@ -307,36 +307,36 @@ func testTraceCall(t *testing.T, scheme string) {
 		if i == genBlocks-2 {
 			// Transfer from account[0] to account[2]
 			tx, _ = types.SignTx(types.NewTx(&types.LegacyTx{
-				Nonce:    nonce,
-				To:       &accounts[2].addr,
-				Value:    big.NewInt(1000),
-				Gas:      ethparams.TxGas,
+				Nonce: nonce,
+				To:    &accounts[2].addr,
+				Value: big.NewInt(1000),
+				Gas:   ethparams.TxGas,
 				GasPrice: func() *big.Int {
-				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
-				if b.BaseFee().Cmp(minGasPrice) < 0 {
-					return minGasPrice
-				}
-				return b.BaseFee()
-			}(),
-				Data:     nil}),
+					minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+					if b.BaseFee().Cmp(minGasPrice) < 0 {
+						return minGasPrice
+					}
+					return b.BaseFee()
+				}(),
+				Data: nil}),
 				signer, accounts[0].key)
 			b.AddTx(tx)
 			nonce++
 
 			// Transfer from account[0] to account[1] again
 			tx, _ = types.SignTx(types.NewTx(&types.LegacyTx{
-				Nonce:    nonce,
-				To:       &accounts[1].addr,
-				Value:    big.NewInt(1000),
-				Gas:      ethparams.TxGas,
+				Nonce: nonce,
+				To:    &accounts[1].addr,
+				Value: big.NewInt(1000),
+				Gas:   ethparams.TxGas,
 				GasPrice: func() *big.Int {
-				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
-				if b.BaseFee().Cmp(minGasPrice) < 0 {
-					return minGasPrice
-				}
-				return b.BaseFee()
-			}(),
-				Data:     nil}),
+					minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
+					if b.BaseFee().Cmp(minGasPrice) < 0 {
+						return minGasPrice
+					}
+					return b.BaseFee()
+				}(),
+				Data: nil}),
 				signer, accounts[0].key)
 			b.AddTx(tx)
 			nonce++
@@ -518,7 +518,7 @@ func testTraceTransaction(t *testing.T, scheme string) {
 	// Increase balance to handle Lux's higher base fee (25 Gwei)
 	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
-		Config: params.TestChainConfig,
+		Config:   params.TestChainConfig,
 		GasLimit: 8000000, // Set Lux gas limit
 		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: balance},
@@ -584,7 +584,7 @@ func testTraceBlock(t *testing.T, scheme string) {
 	// Increase balance to handle Lux's higher base fee (25 Gwei)
 	balance := new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(10)) // 10 ETH
 	genesis := &core.Genesis{
-		Config: params.TestChainConfig,
+		Config:   params.TestChainConfig,
 		GasLimit: 8000000, // Set Lux gas limit
 		Alloc: types.GenesisAlloc{
 			accounts[0].addr: {Balance: balance},
@@ -600,10 +600,10 @@ func testTraceBlock(t *testing.T, scheme string) {
 		//    value: 1000 wei
 		//    fee:   0 wei
 		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{
-			Nonce:    uint64(i),
-			To:       &accounts[1].addr,
-			Value:    big.NewInt(1000),
-			Gas:      ethparams.TxGas,
+			Nonce: uint64(i),
+			To:    &accounts[1].addr,
+			Value: big.NewInt(1000),
+			Gas:   ethparams.TxGas,
 			GasPrice: func() *big.Int {
 				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
 				if b.BaseFee().Cmp(minGasPrice) < 0 {
@@ -611,7 +611,7 @@ func testTraceBlock(t *testing.T, scheme string) {
 				}
 				return b.BaseFee()
 			}(),
-			Data:     nil}),
+			Data: nil}),
 			signer, accounts[0].key)
 		b.AddTx(tx)
 		txHash = tx.Hash()
@@ -711,10 +711,10 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 		//    value: 1000 wei
 		//    fee:   0 wei
 		tx, _ := types.SignTx(types.NewTx(&types.LegacyTx{
-			Nonce:    uint64(i),
-			To:       &accounts[1].addr,
-			Value:    big.NewInt(1000),
-			Gas:      ethparams.TxGas,
+			Nonce: uint64(i),
+			To:    &accounts[1].addr,
+			Value: big.NewInt(1000),
+			Gas:   ethparams.TxGas,
 			GasPrice: func() *big.Int {
 				minGasPrice := new(big.Int).Mul(big.NewInt(25), big.NewInt(params.GWei))
 				if b.BaseFee().Cmp(minGasPrice) < 0 {
@@ -722,7 +722,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 				}
 				return b.BaseFee()
 			}(),
-			Data:     nil}),
+			Data: nil}),
 			signer, accounts[0].key)
 		b.AddTx(tx)
 	})

@@ -34,14 +34,14 @@ import (
 	mrand "math/rand"
 	"sync/atomic"
 
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/lru"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/params"
 )
 
 const (
@@ -112,7 +112,7 @@ func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, cacheCon
 				// Still can't read - this is a critical error
 				// For now, create a minimal genesis header to allow progress
 				log.Error("Critical: Genesis header not readable despite canonical hash", "hash", canonicalHash)
-				
+
 				hc.genesisHeader = &types.Header{
 					Number:     big.NewInt(0),
 					ParentHash: common.Hash{},
@@ -120,7 +120,7 @@ func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, cacheCon
 					Difficulty: big.NewInt(0),
 					GasLimit:   8000000, // Default gas limit
 				}
-				
+
 				// Cache it
 				hc.headerCache.Add(canonicalHash, hc.genesisHeader)
 			}

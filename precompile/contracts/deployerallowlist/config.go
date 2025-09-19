@@ -4,9 +4,9 @@
 package deployerallowlist
 
 import (
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/geth/common"
 )
 
 var _ precompileconfig.Config = (*Config)(nil)

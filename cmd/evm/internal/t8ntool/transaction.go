@@ -35,14 +35,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/tests"
 	"github.com/urfave/cli/v2"
 )
 

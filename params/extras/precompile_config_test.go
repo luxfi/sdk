@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
@@ -17,6 +16,7 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 

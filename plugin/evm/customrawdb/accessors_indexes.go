@@ -15,10 +15,10 @@ import (
 func ReadBloomBits(db ethdb.KeyValueReader, bit uint, section uint64, head common.Hash) ([]byte, error) {
 	// Use the same key scheme as go-ethereum
 	key := make([]byte, 10+1+8+32)
-	copy(key, []byte("blt"))                   // Bloom trie key prefix
-	key[3] = byte(bit)                         // Bloom bit index
+	copy(key, []byte("blt"))                       // Bloom trie key prefix
+	key[3] = byte(bit)                             // Bloom bit index
 	binary.BigEndian.PutUint64(key[4:12], section) // Section index
-	copy(key[12:], head[:])                    // Block hash
+	copy(key[12:], head[:])                        // Block hash
 
 	return db.Get(key)
 }
@@ -44,13 +44,13 @@ func DeleteBloombits(db ethdb.Database, start, end uint64) {
 			if head == (common.Hash{}) {
 				continue
 			}
-			
+
 			key := make([]byte, 10+1+8+32)
 			copy(key, []byte("blt"))
 			key[3] = byte(bit)
 			binary.BigEndian.PutUint64(key[4:12], section)
 			copy(key[12:], head[:])
-			
+
 			db.Delete(key)
 		}
 	}

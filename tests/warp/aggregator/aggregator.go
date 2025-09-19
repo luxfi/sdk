@@ -7,13 +7,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/log"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/log"
 
 	cryptoBLS "github.com/luxfi/crypto/bls"
+	"github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/math/set"
 	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/evm/precompile/contracts/warp"
 )
 
 type AggregateSignatureResult struct {
@@ -62,7 +62,7 @@ func (a *Aggregator) AggregateSignatures(ctx context.Context, unsignedMessage *l
 			i         = i
 			validator = validator
 		)
-		
+
 		// Convert byte slice to NodeID
 		var nodeID ids.NodeID
 		copy(nodeID[:], validator.NodeID)

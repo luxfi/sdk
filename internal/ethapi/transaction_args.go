@@ -36,17 +36,17 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/types"
+	"github.com/holiman/uint256"
 	"github.com/luxfi/crypto/kzg4844"
-	"github.com/luxfi/log"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/log"
 )
 
 var (

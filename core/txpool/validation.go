@@ -32,17 +32,17 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto/kzg4844"
-	"github.com/luxfi/log"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/log"
 )
 
 var (

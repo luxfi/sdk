@@ -34,25 +34,25 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/geth/triedb/pathdb"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
-	"github.com/luxfi/evm/plugin/evm/customtypes"
-	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/log"
 )
 
 //go:generate go run github.com/fjl/gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -300,7 +300,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		}
 		airdropAmount := uint256.MustFromBig(g.AirdropAmount)
 		for _, alloc := range airdrop {
-			statedb.SetBalance(alloc.Address, airdropAmount, tracing.BalanceIncreaseGenesisBalance)
+			statedb.SetBalance(alloc.Address, airdropAmount)
 		}
 		log.Debug(
 			"applied airdrop allocation",
@@ -322,7 +322,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		MixDigest:  g.Mixhash,
 		Coinbase:   g.Coinbase,
 	}
-	
+
 	// Set blockGasCost for genesis block (always 0)
 	customtypes.SetHeaderExtra(head, &customtypes.HeaderExtra{
 		BlockGasCost: big.NewInt(0),
@@ -338,9 +338,9 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	// Do custom allocation after airdrop in case an address shows up in standard
 	// allocation
 	for addr, account := range g.Alloc {
-		statedb.SetBalance(addr, uint256.MustFromBig(account.Balance), tracing.BalanceIncreaseGenesisBalance)
-		statedb.SetCode(addr, account.Code, tracing.CodeChangeGenesis)
-		statedb.SetNonce(addr, account.Nonce, tracing.NonceChangeGenesis)
+		statedb.SetBalance(addr, uint256.MustFromBig(account.Balance))
+		statedb.SetCode(addr, account.Code)
+		statedb.SetNonce(addr, account.Nonce)
 		for key, value := range account.Storage {
 			statedb.SetState(addr, key, value)
 		}
@@ -367,7 +367,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 				head.BaseFee = new(big.Int).Set(params.GetExtra(g.Config).FeeConfig.MinBaseFee)
 			}
 		}
-		
+
 		// When Etna/Cancun is active, `BlockGasCost` are decoded to 0 if it's nil.
 		// This is because these fields come before the other optional Cancun fields in RLP order.
 		// This only occurs with a serialized and written genesis block, and then reading it back.
@@ -429,27 +429,27 @@ func (g *Genesis) Commit(db ethdb.Database, triedb *triedb.Database) (*types.Blo
 	// Write all necessary database entries for genesis
 	hash := block.Hash()
 	number := block.NumberU64()
-	
+
 	// Critical: Write header number mapping first
 	rawdb.WriteHeaderNumber(db, hash, number)
-	
+
 	// Write the actual block data
 	rawdb.WriteHeader(db, block.Header())
 	rawdb.WriteBody(db, hash, number, block.Body())
 	rawdb.WriteReceipts(db, hash, number, nil)
-	
+
 	// Write canonical mappings
 	rawdb.WriteCanonicalHash(db, hash, number)
 	rawdb.WriteHeadBlockHash(db, hash)
 	rawdb.WriteHeadHeaderHash(db, hash)
-	
+
 	// Write chain config
 	customrawdb.WriteChainConfig(db, hash, config)
-	
+
 	// Verify the block can be read back - remove debug code later
 	// canonHash := rawdb.ReadCanonicalHash(db, 0)
 	// log.Info("After write check", "canonical_hash", canonHash, "block_hash", block.Hash(), "match", canonHash == block.Hash())
-	
+
 	return block, nil
 }
 

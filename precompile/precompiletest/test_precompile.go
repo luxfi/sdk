@@ -8,8 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/core/state"
@@ -17,6 +15,8 @@ import (
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

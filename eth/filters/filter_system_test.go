@@ -38,12 +38,6 @@ import (
 	"testing"
 	"time"
 
-	ethereum "github.com/luxfi/geth"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
@@ -51,6 +45,12 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/rpc"
+	ethereum "github.com/luxfi/geth"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
 	"github.com/stretchr/testify/require"
 )
 

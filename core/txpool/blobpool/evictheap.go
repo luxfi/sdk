@@ -33,8 +33,8 @@ import (
 	"math"
 	"sort"
 
-	"github.com/luxfi/geth/common"
 	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/common"
 )
 
 // evictHeap is a helper data structure to keep track of the cheapest bottleneck

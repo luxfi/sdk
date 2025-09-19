@@ -31,10 +31,10 @@ import (
 	"container/heap"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/core/txpool"
-	"github.com/holiman/uint256"
 )
 
 // txWithMinerFee wraps a transaction with its gas price or effective miner gasTipCap

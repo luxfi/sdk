@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/luxfi/math/set"
-	"github.com/luxfi/warp"
-	"github.com/luxfi/warp/payload"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/geth/common"
 	commonmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/precompile/contract"
-	"github.com/luxfi/evm/predicate"
+	"github.com/luxfi/math/set"
+	"github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 )
 
 var (

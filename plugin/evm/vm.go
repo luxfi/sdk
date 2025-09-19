@@ -32,8 +32,6 @@ import (
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/eth"
 	"github.com/luxfi/evm/eth/ethconfig"
-	"github.com/luxfi/evm/plugin/evm/message"
-	gossipHandler "github.com/luxfi/evm/plugin/evm/gossip"
 	subnetevmprometheus "github.com/luxfi/evm/metrics/prometheus"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/network"
@@ -41,7 +39,9 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/config"
+	gossipHandler "github.com/luxfi/evm/plugin/evm/gossip"
 	subnetevmlog "github.com/luxfi/evm/plugin/evm/log"
+	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	"github.com/luxfi/geth/core/rawdb"
@@ -56,8 +56,8 @@ import (
 	"github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/warp"
-	luxWarp "github.com/luxfi/warp"
 	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/signer"
 
 	// Force-load tracer engine to trigger registration
@@ -79,12 +79,12 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	"github.com/luxfi/consensus/engine/chain/block"
-	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
-	nodeblock "github.com/luxfi/consensus/engine/chain/block" 
-	nodechain "github.com/luxfi/consensus/protocol/chain"
 	nodeConsensus "github.com/luxfi/consensus"
+	"github.com/luxfi/consensus/engine/chain/block"
+	nodeblock "github.com/luxfi/consensus/engine/chain/block"
 	consensusInterfaces "github.com/luxfi/consensus/interfaces"
+	nodechain "github.com/luxfi/consensus/protocol/chain"
+	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
@@ -97,8 +97,8 @@ import (
 	nodeChain "github.com/luxfi/node/vms/components/chain"
 
 	commonEng "github.com/luxfi/consensus/core"
-	"github.com/luxfi/math/set"
 	"github.com/luxfi/consensus/core/appsender"
+	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -110,7 +110,7 @@ var (
 	_ nodeblock.ChainVM                      = (*VM)(nil)
 	_ nodeblock.BuildBlockWithContextChainVM = (*VM)(nil)
 	_ nodeblock.StateSyncableVM              = (*VM)(nil)
-	_ statesyncclient.EthBlockParser = (*VM)(nil)
+	_ statesyncclient.EthBlockParser         = (*VM)(nil)
 )
 
 const (
@@ -196,13 +196,13 @@ func (w *warpSignerAdapter) Sign(msg []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Sign using the signer
 	sig, err := w.signer.Sign(unsignedMsg)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Return the signature bytes
 	return sig.Bytes(), nil
 }
@@ -266,7 +266,7 @@ func (w *appSenderWrapper) SendCrossChainAppResponse(ctx context.Context, chainI
 }
 
 type VM struct {
-	ctx context.Context
+	ctx      context.Context
 	chainCtx *nodeConsensus.Context
 	// contextLock is used to coordinate global VM operations.
 	// This can be used safely instead of context.Context.Lock which is deprecated and should not be used in rpcchainvm.
@@ -386,16 +386,16 @@ func (vm *VM) Initialize(
 	// Convert interface{} parameters to strongly typed ones
 	typedChainCtx := chainCtx.(*nodeConsensus.Context)
 	typedDB := dbManager.(database.Database)
-	
+
 	// Convert fxs from []interface{} to []*commonEng.Fx
 	typedFxs := make([]*commonEng.Fx, len(fxs))
 	for i, fx := range fxs {
 		typedFxs[i] = fx.(*commonEng.Fx)
 	}
-	
+
 	// Convert appSender interface to typed AppSender
 	typedAppSender := appSender.(commonEng.AppSender)
-	
+
 	return vm.initializeInternal(ctx, typedChainCtx, typedDB, genesisBytes, upgradeBytes, configBytes, typedFxs, typedAppSender)
 }
 
@@ -768,7 +768,7 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 	// Set network upgrade defaults
 	// Network upgrades are managed through chain config
 	configExtra.SetDefaults(upgrade.Config{})
-	
+
 	// Parse network upgrades from the genesis JSON if present
 	// They won't be in g.Config because geth's ChainConfig doesn't know about them
 	// This must be done after SetDefaults to override defaults with genesis values
@@ -1058,7 +1058,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 	// Initialize goroutines related to block building
 	// once we enter normal operation as there is no need to handle mempool gossip before this point.
 	ethTxGossipMarshaller := GossipEthTxMarshaller{}
-	
+
 	// P2PValidators might be nil in test environments
 	var p2pValidators *p2p.Validators
 	p2pValidatorsInterface := vm.P2PValidators()
@@ -1805,7 +1805,7 @@ func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.Unsigned
 		SourceChainID: msg.SourceChainID,
 		Payload:       msg.Payload,
 	}
-	
+
 	if err := w.backend.Verify(ctx, luxMsg, justification); err != nil {
 		return &commonEng.AppError{
 			Code:    1,

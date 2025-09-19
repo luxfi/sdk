@@ -8,10 +8,10 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	ethcrypto "github.com/luxfi/crypto"
 	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 var _ TxSequence[*types.Transaction] = (*txSequence)(nil)

@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/precompile/contract"
 )
 
 // AllowList is an abstraction that allows other precompiles to manage

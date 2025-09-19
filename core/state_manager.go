@@ -32,10 +32,10 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 func init() {

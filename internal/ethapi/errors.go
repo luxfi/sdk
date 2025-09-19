@@ -30,9 +30,9 @@ package ethapi
 import (
 	"fmt"
 
+	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/accounts/abi"
 )
 
 // revertError is an API error that encompasses an EVM revert with JSON error

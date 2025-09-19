@@ -40,19 +40,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/lru"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/log"
-	"github.com/luxfi/geth/metrics"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/internal/version"
@@ -60,13 +49,23 @@ import (
 	"github.com/luxfi/evm/plugin/evm/customlogs"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/lru"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/metrics"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/log"
 	// "github.com/luxfi/evm/triedb/firewood"
 	"github.com/luxfi/geth/triedb/hashdb"
 	"github.com/luxfi/geth/triedb/pathdb"
 
 	// Force geth metrics of the same name to be registered first.
 	_ "github.com/luxfi/geth/core"
-
 	// ffi "github.com/luxfi/firewood-go-ethhash/ffi"
 )
 
@@ -227,9 +226,9 @@ func (c *CacheConfig) triedbConfig() *triedb.Config {
 	}
 	if c.StateScheme == rawdb.PathScheme {
 		config.PathDB = &pathdb.Config{
-			StateHistory:   c.StateHistory,
-			TrieCleanSize:  c.TrieCleanLimit * 1024 * 1024,
-			StateCleanSize: c.SnapshotLimit * 1024 * 1024,
+			StateHistory:    c.StateHistory,
+			TrieCleanSize:   c.TrieCleanLimit * 1024 * 1024,
+			StateCleanSize:  c.SnapshotLimit * 1024 * 1024,
 			WriteBufferSize: c.TrieDirtyLimit * 1024 * 1024,
 		}
 	}
@@ -1449,9 +1448,9 @@ func (bc *BlockChain) insertBlock(block *types.Block, writes bool) error {
 	// trieRead := statedb.SnapshotAccountReads + statedb.AccountReads            // The time spent on account read
 	var triehash, trieUpdate, trieRead time.Duration
 	// trieRead += statedb.SnapshotStorageReads + statedb.StorageReads            // The time spent on storage read
-	blockExecutionTimer.Inc(ptime.Milliseconds())                              // The time spent on EVM processing (approximate)
-	blockValidationTimer.Inc(vtime.Milliseconds())                             // The time spent on block validation (approximate)
-	blockTrieOpsTimer.Inc((triehash + trieUpdate + trieRead).Milliseconds())   // The time spent on trie operations
+	blockExecutionTimer.Inc(ptime.Milliseconds())                            // The time spent on EVM processing (approximate)
+	blockValidationTimer.Inc(vtime.Milliseconds())                           // The time spent on block validation (approximate)
+	blockTrieOpsTimer.Inc((triehash + trieUpdate + trieRead).Milliseconds()) // The time spent on trie operations
 
 	// If [writes] are disabled, skip [writeBlockWithState] so that we do not write the block
 	// or the state trie to disk.

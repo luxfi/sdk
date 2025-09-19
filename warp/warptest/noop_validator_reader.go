@@ -7,9 +7,9 @@ package warptest
 import (
 	"time"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/ids"
 )
 
 var _ interfaces.ValidatorReader = (*NoOpValidatorReader)(nil)

@@ -9,23 +9,23 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
-	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	luxWarp "github.com/luxfi/warp"
-	warpBls "github.com/luxfi/warp/bls"
-	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/ids"
+	agoUtils "github.com/luxfi/node/utils"
+	"github.com/luxfi/node/utils/constants"
+	luxWarp "github.com/luxfi/warp"
+	warpBls "github.com/luxfi/warp/bls"
+	"github.com/luxfi/warp/payload"
 	"github.com/stretchr/testify/require"
 )
 
@@ -147,7 +147,7 @@ func newTestValidator() *testValidator {
 	nodeID := ids.GenerateTestNodeID()
 	cryptoPK := sk.PublicKey()
 	cryptoPKBytes := bls.PublicKeyToCompressedBytes(cryptoPK)
-	
+
 	// Convert crypto public key to warp public key
 	warpPK, err := convertCryptoToWarpPublicKey(cryptoPK)
 	if err != nil {
@@ -182,7 +182,7 @@ func createWarpMessage(numKeys int) *luxWarp.Message {
 		Signers: bitSet,
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
-	
+
 	// Create a simplified Message structure for testing
 	// Since the warp package has interface serialization issues,
 	// we'll create a mock message that contains the necessary data
@@ -339,7 +339,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	// Use consensus helper functions to add values to context
 	consensusCtx = consensus.WithSubnetID(consensusCtx, subnetID)
 	consensusCtx = consensus.WithChainID(consensusCtx, chainID)
-	
+
 	state := &validatorstest.State{
 		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
 			require.Equal(chainID, cChainID)
@@ -354,7 +354,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 			return getValidatorsOutput, nil
 		},
 	}
-	
+
 	// Add validator state to context (wrap it first)
 	wrappedState := &testValidatorStateWrapper{State: state}
 	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)

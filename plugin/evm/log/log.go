@@ -43,7 +43,7 @@ func InitLogger(alias string, level string, jsonFormat bool, writer io.Writer) (
 
 	// Create logger
 	logger := log.Root().With("chain", alias)
-	
+
 	c := Logger{
 		Logger: logger,
 	}
@@ -59,10 +59,10 @@ func (l *Logger) SetLogLevel(level string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Set the level on the logger
 	l.SetLevel(logLevel)
-	
+
 	return nil
 }
 

@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/constants"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 

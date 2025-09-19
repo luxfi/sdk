@@ -32,17 +32,17 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 func BenchmarkInsertChain_empty_memdb(b *testing.B) {
@@ -79,10 +79,10 @@ func BenchmarkInsertChain_ring1000_diskdb(b *testing.B) {
 
 var (
 	// This is the content of the genesis block used by the benchmarks.
-	benchRootKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+	benchRootKey, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 	benchRootCryptoAddr = crypto.PubkeyToAddress(benchRootKey.PublicKey)
-	benchRootAddr   = common.BytesToAddress(benchRootCryptoAddr[:])
-	benchRootFunds  = math.BigPow(2, 100)
+	benchRootAddr       = common.BytesToAddress(benchRootCryptoAddr[:])
+	benchRootFunds      = math.BigPow(2, 100)
 )
 
 // genValueTx returns a block generator that includes a single

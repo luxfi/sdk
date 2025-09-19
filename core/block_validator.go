@@ -31,12 +31,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/core/types"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/trie"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and

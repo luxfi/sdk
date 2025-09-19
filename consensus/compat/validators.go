@@ -3,7 +3,7 @@ package compat
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/luxfi/ids"
 )
 
@@ -45,7 +45,7 @@ func (v *Application) Compare(o *Application) int {
 		}
 		return 1
 	}
-	
+
 	if v.Major != o.Major {
 		if v.Major < o.Major {
 			return -1

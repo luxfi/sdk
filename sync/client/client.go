@@ -15,19 +15,19 @@ import (
 
 	"github.com/luxfi/evm/sync/client/stats"
 
-	"github.com/luxfi/node/codec"
 	"github.com/luxfi/consensus/version"
+	"github.com/luxfi/node/codec"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/network"
+	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/network"
-	"github.com/luxfi/evm/plugin/evm/message"
+	"github.com/luxfi/log"
 )
 
 const (

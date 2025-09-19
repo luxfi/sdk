@@ -33,8 +33,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
 )
 
 func TestUnmarshalJSONNewFilterArgs(t *testing.T) {

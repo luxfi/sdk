@@ -33,13 +33,13 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/internal/blocktest"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/internal/blocktest"
-	"github.com/luxfi/evm/params"
 
 	// This test file has to be in package types_test to avoid a circular
 	// dependency when importing `params`. We dot-import the package to mimic

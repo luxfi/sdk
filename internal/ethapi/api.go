@@ -37,6 +37,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/eth/gasestimator"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
+	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/accounts"
 	"github.com/luxfi/geth/accounts/keystore"
 	"github.com/luxfi/geth/accounts/scwallet"
@@ -46,21 +56,11 @@ import (
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/eth/gasestimator"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/customtypes"
-	"github.com/luxfi/evm/rpc"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/holiman/uint256"
 	"github.com/luxfi/go-bip39"
+	"github.com/luxfi/log"
 )
 
 // estimateGasErrorRatio is the amount of overestimation eth_estimateGas is
@@ -975,16 +975,16 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 	for addr, account := range *diff {
 		// Override account nonce.
 		if account.Nonce != nil {
-			state.SetNonce(addr, uint64(*account.Nonce), tracing.NonceChangeUnspecified)
+			state.SetNonce(addr, uint64(*account.Nonce))
 		}
 		// Override account(contract) code.
 		if account.Code != nil {
-			state.SetCode(addr, *account.Code, tracing.CodeChangeUnspecified)
+			state.SetCode(addr, *account.Code)
 		}
 		// Override account balance.
 		if account.Balance != nil {
 			u256Balance, _ := uint256.FromBig((*big.Int)(*account.Balance))
-			state.SetBalance(addr, u256Balance, tracing.BalanceChangeUnspecified)
+			state.SetBalance(addr, u256Balance)
 		}
 		if account.State != nil && account.StateDiff != nil {
 			return fmt.Errorf("account %s has both 'state' and 'stateDiff'", addr.Hex())

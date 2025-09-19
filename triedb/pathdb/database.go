@@ -33,17 +33,17 @@ import (
 	"io"
 	"sync"
 
+	"github.com/luxfi/evm/core/stateconf"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/core/stateconf"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/trie/triestate"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/geth/triedb/database"
-	"github.com/luxfi/evm/params"
+	"github.com/luxfi/log"
 )
 
 const (

@@ -33,17 +33,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/log"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/geth/triedb"
+	"github.com/luxfi/log"
 )
 
 // noopReleaser is returned in case there is no operation expected

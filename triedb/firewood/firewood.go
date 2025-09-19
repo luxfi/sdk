@@ -4,5 +4,5 @@ package firewood
 type Database interface{}
 
 func New() Database {
-    return nil
+	return nil
 }

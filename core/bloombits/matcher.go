@@ -37,8 +37,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/luxfi/geth/common/bitutil"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common/bitutil"
 )
 
 // bloomIndexes represents the bit indexes inside the bloom filter that belong

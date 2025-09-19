@@ -30,13 +30,13 @@ package ethconfig
 import (
 	"time"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool/blobpool"
 	"github.com/luxfi/evm/core/txpool/legacypool"
 	"github.com/luxfi/evm/eth/gasprice"
 	"github.com/luxfi/evm/miner"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
 )
 
 // DefaultFullGPOConfig contains default gasprice oracle settings for full node.

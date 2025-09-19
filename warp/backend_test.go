@@ -7,15 +7,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/luxfi/node/cache/lru"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
+	"github.com/luxfi/evm/warp/warptest"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/node/utils"
-	"github.com/luxfi/crypto/bls"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
-	"github.com/luxfi/evm/warp/warptest"
 	"github.com/stretchr/testify/require"
 )
 

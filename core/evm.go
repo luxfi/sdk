@@ -31,13 +31,13 @@ import (
 	"math/big"
 
 	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/params"
 )
 
 type hooks struct{}
@@ -55,7 +55,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 			baseFee = new(big.Int).Set(params.GetExtra(chain.Config()).FeeConfig.MinBaseFee)
 		}
 	}
-	
+
 	blockContext := vm.BlockContext{
 		CanTransfer: CanTransfer,
 		Transfer:    Transfer,
@@ -89,9 +89,9 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 // NewEVMTxContext creates a new transaction context for a single transaction.
 func NewEVMTxContext(msg *Message) vm.TxContext {
 	ctx := vm.TxContext{
-		Origin:       msg.From,
-		GasPrice:     new(big.Int).Set(msg.GasPrice),
-		BlobHashes:   msg.BlobHashes,
+		Origin:     msg.From,
+		GasPrice:   new(big.Int).Set(msg.GasPrice),
+		BlobHashes: msg.BlobHashes,
 		// AccessEvents: msg.AccessEvents, // TODO: Add AccessEvents to Message
 	}
 	if msg.BlobGasFeeCap != nil {
@@ -166,7 +166,7 @@ type ChainContext interface {
 
 func wrapStateDB(rules params.Rules, db vm.StateDB) vm.StateDB {
 	// [AP1] was activated at genesis for mainnet
-	// it is only activated on the testnet at block 3,114,811 
+	// it is only activated on the testnet at block 3,114,811
 	// we need to use the correct StateDB wrapper to process historical
 	// blocks correctly.
 	// TODO: Implement StateDB wrapper when needed

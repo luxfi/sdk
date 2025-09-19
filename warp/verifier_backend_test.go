@@ -9,26 +9,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/cache"
-	"github.com/luxfi/node/cache/lru"
-	"github.com/luxfi/database/memdb"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/network/p2p/lp118"
-	"github.com/luxfi/node/proto/pb/sdk"
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/core"
-	"github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/crypto/bls"
-	"github.com/luxfi/geth/common"
+	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/evm/consensus/compat"
-	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/evm/metrics/metricstest"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/evm/warp/warptest"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/cache"
+	"github.com/luxfi/node/cache/lru"
+	"github.com/luxfi/node/network/p2p/lp118"
+	"github.com/luxfi/node/proto/pb/sdk"
+	"github.com/luxfi/node/utils/timer/mockable"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
@@ -168,7 +168,7 @@ func TestBlockSignatures(t *testing.T) {
 	consensusCtx := utilstest.NewTestConsensusContext(t)
 	networkID := consensus.GetNetworkID(consensusCtx)
 	chainID := consensus.GetChainID(consensusCtx)
-	
+
 	// Create a local signer for testing
 	sk, err := bls.NewSecretKey()
 	require.NoError(t, err)

@@ -38,6 +38,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/internal/ethapi"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/tracing"
@@ -45,14 +51,8 @@ import (
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/internal/ethapi"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/log"
 )
 
 const (
@@ -1011,7 +1011,7 @@ func (api *baseAPI) traceTx(ctx context.Context, message *core.Message, txctx *C
 	var hooks *tracing.Hooks
 	structLogger := logger.NewStructLogger(config.Config)
 	hooks = structLogger.Hooks()
-	
+
 	if config.Tracer != nil {
 		// Use the native tracer from the directory
 		t, err := DefaultDirectory.New(*config.Tracer, txctx, config.TracerConfig, api.backend.ChainConfig())
@@ -1023,9 +1023,9 @@ func (api *baseAPI) traceTx(ctx context.Context, message *core.Message, txctx *C
 	} else {
 		// For struct logger, we need to wrap it properly
 		tracer = Tracer{
-			Hooks: hooks,
+			Hooks:     hooks,
 			GetResult: structLogger.GetResult,
-			Stop: structLogger.Stop,
+			Stop:      structLogger.Stop,
 		}
 	}
 	vmenv := vm.NewEVM(vmctx, statedb, api.backend.ChainConfig(), vm.Config{Tracer: hooks, NoBaseFee: true})

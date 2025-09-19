@@ -7,10 +7,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -155,8 +155,8 @@ func TestChainConfigVerify(t *testing.T) {
 				NetworkUpgrades: NetworkUpgrades{
 					SubnetEVMTimestamp: pointer(uint64(0)), // Must be 0 (genesis activation)
 					DurangoTimestamp:   pointer(uint64(0)), // Must be 0 for default
-					EtnaTimestamp:      nil, // Optional
-					FortunaTimestamp:   nil, // Optional
+					EtnaTimestamp:      nil,                // Optional
+					FortunaTimestamp:   nil,                // Optional
 				},
 				LuxContext: LuxContext{ConsensusCtx: utilstest.NewTestConsensusContext(t)},
 			},

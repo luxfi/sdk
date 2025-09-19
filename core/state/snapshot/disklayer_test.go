@@ -31,11 +31,11 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // reverse reverses the contents of a byte slice. It's used to update random accs

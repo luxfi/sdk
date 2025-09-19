@@ -8,15 +8,15 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/triedb"
 	// "github.com/luxfi/evm/triedb/firewood"
-	"github.com/luxfi/geth/triedb/hashdb"
 	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/triedb/hashdb"
 	"github.com/stretchr/testify/require"
 )
 
@@ -153,7 +153,7 @@ func (fs *fuzzState) commit() {
 		// 	triedbopt := stateconf.WithTrieDBUpdatePayload(common.Hash{byte(int64(fs.blockNumber - 1))}, common.Hash{byte(int64(fs.blockNumber))})
 		// 	fs.require.NoError(tr.ethDatabase.TrieDB().Update(updatedRoot, tr.lastRoot, fs.blockNumber, mergedNodeSet, nil, triedbopt), "failed to update triedb in %s", tr.name)
 		// 	tr.lastRoot = updatedRoot
-		// } else 
+		// } else
 		if updatedRoot != tr.lastRoot {
 			fs.require.NoError(tr.ethDatabase.TrieDB().Update(updatedRoot, tr.lastRoot, fs.blockNumber, mergedNodeSet, nil), "failed to update triedb in %s", tr.name)
 			tr.lastRoot = updatedRoot

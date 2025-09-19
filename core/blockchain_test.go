@@ -8,19 +8,19 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/ethdb"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core/state/pruner"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 var (
@@ -339,14 +339,14 @@ func TestBlockChainOfflinePruningUngracefulShutdown(t *testing.T) {
 
 func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 	var (
-		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		key1, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key2, _     = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
 
-		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		addr1       = common.BytesToAddress(cryptoAddr1[:])
 		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
 
-		addr2 = common.BytesToAddress(cryptoAddr2[:])
+		addr2   = common.BytesToAddress(cryptoAddr2[:])
 		chainDB = rawdb.NewMemoryDatabase()
 	)
 
@@ -691,10 +691,10 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 	var (
 		engine = dummy.NewFaker()
 		// A sender who makes transactions, has some funds
-		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key, _        = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
 
-		address = common.BytesToAddress(cryptoAddress[:])
+		address     = common.BytesToAddress(cryptoAddress[:])
 		destAddress = crypto.CreateAddress(cryptoAddress, 0)
 		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 	)
@@ -767,11 +767,11 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 func TestDeleteThenCreate(t *testing.T) {
 	t.Skip("Skipping state processing test - blob fee calculation issue")
 	var (
-		engine      = dummy.NewFaker()
-		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		engine        = dummy.NewFaker()
+		key, _        = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
 
-		address = common.BytesToAddress(cryptoAddress[:])
+		address     = common.BytesToAddress(cryptoAddress[:])
 		factoryAddr = crypto.CreateAddress(cryptoAddress, 0)
 		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
 	)
@@ -886,14 +886,14 @@ func TestDeleteThenCreate(t *testing.T) {
 func TestTransientStorageReset(t *testing.T) {
 	t.Skip("Skipping state processing test - blob fee calculation issue")
 	var (
-		engine      = dummy.NewFaker()
-		key, _      = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		engine        = dummy.NewFaker()
+		key, _        = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		cryptoAddress = crypto.PubkeyToAddress(key.PublicKey)
 
-		address = common.BytesToAddress(cryptoAddress[:])
+		address     = common.BytesToAddress(cryptoAddress[:])
 		destAddress = crypto.CreateAddress(cryptoAddress, 0)
 		// funds       = big.NewInt(params.Ether) // Note: additional funds are provided here compared to go-ethereum so test completes.
-		vmConfig    = vm.Config{
+		vmConfig = vm.Config{
 			ExtraEips: []int{1153}, // Enable transient storage EIP
 		}
 	)
@@ -987,16 +987,16 @@ func TestEIP3651(t *testing.T) {
 		engine = dummy.NewCoinbaseFaker()
 
 		// A sender who makes transactions, has some funds
-		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		key1, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key2, _     = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
 
-		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		addr1       = common.BytesToAddress(cryptoAddr1[:])
 		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
 
 		addr2 = common.BytesToAddress(cryptoAddr2[:])
-		funds   = new(big.Int).Mul(common.Big1, big.NewInt(params.Ether))
-		gspec   = &Genesis{
+		funds = new(big.Int).Mul(common.Big1, big.NewInt(params.Ether))
+		gspec = &Genesis{
 			Config:    params.TestChainConfig,
 			Timestamp: uint64(params.InitiallyActiveTime.Unix()),
 			Alloc: types.GenesisAlloc{

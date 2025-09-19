@@ -29,6 +29,7 @@ import (
 
 	"github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
+	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
@@ -57,11 +58,10 @@ import (
 	"github.com/luxfi/node/chains/atomic"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
-	"github.com/luxfi/consensus/engine/chain/block"
 
 	protocolchain "github.com/luxfi/consensus/protocol/chain"
-	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/math/set"
+	luxdconstants "github.com/luxfi/node/utils/constants"
 )
 
 var (
@@ -86,13 +86,13 @@ var (
 		// Copy the config and its extras
 		cpy := *cfg
 		cpy.ChainID = big.NewInt(43111)
-		
+
 		// Copy the extras to the new config
 		if extra := params.GetExtra(cfg); extra != nil {
 			extraCpy := *extra
 			params.SetExtra(&cpy, &extraCpy)
 		}
-		
+
 		g.Config = &cpy
 
 		// Create allocation for the test addresses
@@ -113,14 +113,14 @@ var (
 		if err != nil {
 			panic(err)
 		}
-		
+
 		// Now we need to add the network upgrades to the JSON
 		// Parse the JSON into a map to add the extras
 		var jsonMap map[string]interface{}
 		if err := json.Unmarshal(b, &jsonMap); err != nil {
 			panic(err)
 		}
-		
+
 		// Add the network upgrades to the config
 		if configMap, ok := jsonMap["config"].(map[string]interface{}); ok {
 			if extra := params.GetExtra(&cpy); extra != nil {
@@ -142,13 +142,13 @@ var (
 				}
 			}
 		}
-		
+
 		// Marshal the modified map back to JSON
 		b, err = json.Marshal(jsonMap)
 		if err != nil {
 			panic(err)
 		}
-		
+
 		// Debug: Print the config to verify it includes timestamps
 		if configMap, ok := jsonMap["config"].(map[string]interface{}); ok {
 			if durangoTs, ok := configMap["durangoTimestamp"]; ok {
@@ -157,7 +157,7 @@ var (
 				fmt.Println("DEBUG: Genesis missing durangoTimestamp")
 			}
 		}
-		
+
 		return string(b)
 	}
 
@@ -3743,18 +3743,18 @@ func TestStandaloneDB(t *testing.T) {
 		return key
 	}())
 	require.NoError(t, err)
-	
+
 	// Debug: Check sender address
 	sender, err := types.Sender(types.NewEIP155Signer(vm.chainConfig.ChainID), signedTx0)
 	require.NoError(t, err)
 	t.Logf("Transaction sender: %s, expected: %s", sender.Hex(), testEthAddrs[0].Hex())
-	
+
 	// Check balance using state DB
 	stateDB, err := vm.blockChain.State()
 	require.NoError(t, err)
 	balance := stateDB.GetBalance(sender)
 	t.Logf("Sender balance: %s", balance.String())
-	
+
 	errs := vm.txPool.AddRemotesSync([]*types.Transaction{signedTx0})
 	require.NoError(t, errs[0])
 

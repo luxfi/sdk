@@ -15,7 +15,7 @@ import (
 func TestHeaderEncoding(t *testing.T) {
 	t.Skip("Skipping header encoding test - configuration issue")
 	require := require.New(t)
-	
+
 	// Create a simple header
 	header := &types.Header{
 		ParentHash:  common.Hash{1},
@@ -35,46 +35,46 @@ func TestHeaderEncoding(t *testing.T) {
 		Nonce:       types.BlockNonce{},
 		BaseFee:     big.NewInt(875000000),
 	}
-	
+
 	// Encode it manually
 	buf := new(bytes.Buffer)
 	err := rlp.Encode(buf, header)
 	require.NoError(err, "Failed to encode header")
-	
+
 	encodedBytes := buf.Bytes()
 	t.Logf("Encoded header size: %d bytes", len(encodedBytes))
 	t.Logf("First 32 bytes: %x", encodedBytes[:32])
-	
+
 	// Try to decode it back
 	var decoded types.Header
 	err = rlp.DecodeBytes(encodedBytes, &decoded)
 	require.NoError(err, "Failed to decode header")
-	
+
 	// Verify fields match
 	require.Equal(header.Number.Uint64(), decoded.Number.Uint64(), "Number mismatch")
 	require.Equal(header.BaseFee.Uint64(), decoded.BaseFee.Uint64(), "BaseFee mismatch")
-	
+
 	// Now test with database
 	db := rawdb.NewMemoryDatabase()
-	
+
 	// Compute hash
 	hash := header.Hash()
 	t.Logf("Header hash: %s", hash.Hex())
-	
+
 	// Write using rawdb
 	rawdb.WriteHeader(db, header)
-	
+
 	// Check what was written
 	it := db.NewIterator(nil, nil)
 	defer it.Release()
-	
+
 	count := 0
 	for it.Next() {
 		key := it.Key()
 		value := it.Value()
 		t.Logf("DB Key[%d]: %x (len=%d)", count, key, len(key))
 		t.Logf("DB Value[%d]: len=%d", count, len(value))
-		
+
 		// If this looks like our header key, try to decode the value
 		if len(key) == 41 && key[0] == 'h' {
 			var storedHeader types.Header
@@ -87,7 +87,7 @@ func TestHeaderEncoding(t *testing.T) {
 		}
 		count++
 	}
-	
+
 	// Try to read it back
 	readHeader := rawdb.ReadHeader(db, hash, 0)
 	require.NotNil(readHeader, "Should be able to read header back")

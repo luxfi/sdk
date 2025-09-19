@@ -36,8 +36,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/accounts/abi/bind"
+	"github.com/luxfi/geth/common"
 	"github.com/stretchr/testify/require"
 )
 

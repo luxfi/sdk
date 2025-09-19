@@ -56,6 +56,7 @@ func NewDatabaseWithNodeDB(db ethdb.Database, tdb *triedb.Database) Database {
 	// TODO: NewDatabaseWithNodeDB seems to be removed, using NewDatabase instead
 	return ethstate.NewDatabase(tdb, nil)
 }
+
 // func wrapIfFirewood(db Database) Database {
 // 	fw, ok := db.TrieDB().Backend().(*firewood.Database)
 // 	if !ok {

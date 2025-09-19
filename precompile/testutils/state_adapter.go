@@ -4,11 +4,11 @@
 package testutils
 
 import (
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/tracing"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/tracing"
 )
 
 // StateDBAdapter wraps *state.StateDB to implement contract.StateDB

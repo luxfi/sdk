@@ -6,15 +6,15 @@ package allowlisttest
 import (
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	ethtypes "github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
+	"github.com/luxfi/geth/common"
+	ethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

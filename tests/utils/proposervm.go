@@ -8,13 +8,13 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/log"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/log"
 )
 
 const numTriggerTxs = 2 // Number of txs needed to activate the proposer VM fork

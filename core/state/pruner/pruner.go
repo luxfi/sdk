@@ -38,16 +38,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/evm/core/state/snapshot"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/core/state/snapshot"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/log"
 )
 
 const (

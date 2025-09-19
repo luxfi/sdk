@@ -33,13 +33,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/event"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
@@ -50,6 +44,12 @@ import (
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/event"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/stretchr/testify/require"
 )
 

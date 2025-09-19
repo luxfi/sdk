@@ -31,10 +31,10 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/luxfi/geth/core/types"
+	lru "github.com/hashicorp/golang-lru"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/rpc"
-	lru "github.com/hashicorp/golang-lru"
+	"github.com/luxfi/geth/core/types"
 )
 
 // additional slots in the header cache to allow processing queries

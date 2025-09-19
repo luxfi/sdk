@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
 )
 
 var (

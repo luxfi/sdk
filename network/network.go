@@ -15,13 +15,13 @@ import (
 	"github.com/luxfi/geth/log"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/luxfi/node/codec"
 	nodeCore "github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/version"
+	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/utils"
-	
+
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 
@@ -42,7 +42,7 @@ var (
 	errExpiredRequest                          = errors.New("expired request")
 	_                     Network              = (*network)(nil)
 	_                     validators.Connector = (*network)(nil)
-	_                     nodeCore.AppHandler    = (*network)(nil)
+	_                     nodeCore.AppHandler  = (*network)(nil)
 )
 
 // loggerWrapper wraps geth/log.Logger to implement luxfi/log.Logger interface
@@ -120,7 +120,7 @@ type network struct {
 	outstandingRequestHandlers map[uint32]message.ResponseHandler // maps luxd requestID => message.ResponseHandler
 	activeAppRequests          *semaphore.Weighted                // controls maximum number of active outbound requests
 	sdkNetwork                 *p2p.Network                       // SDK network (luxd p2p) for sending messages to peers
-	appSender                  nodeCore.AppSender                   // luxd AppSender for sending messages
+	appSender                  nodeCore.AppSender                 // luxd AppSender for sending messages
 	codec                      codec.Manager                      // Codec used for parsing messages
 	appRequestHandler          message.RequestHandler             // maps request type => handler
 	peers                      *peerTracker                       // tracking of peers & bandwidth
@@ -148,11 +148,11 @@ func NewNetwork(
 ) (Network, error) {
 	// P2P network initialization skipped - logger interface handled separately
 	var p2pNetwork *p2p.Network
-	
+
 	// For now, use empty node ID since GetNodeID doesn't exist in node's consensus package
 	// This would normally come from the VM's context
 	nodeID := ids.EmptyNodeID
-	
+
 	return &network{
 		appSender:                  appSender,
 		codec:                      codec,

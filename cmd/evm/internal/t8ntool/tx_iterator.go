@@ -36,12 +36,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/params"
 )
 
 // txWithKey is a helper-struct, to allow us to use the types.Transaction along with

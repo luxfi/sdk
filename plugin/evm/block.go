@@ -203,7 +203,7 @@ func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block
 			PChainHeight: proposerVMBlockCtx.PChainHeight,
 		}
 	}
-	
+
 	return b.verify(&precompileconfig.PredicateContext{
 		ConsensusCtx:       context.Background(),
 		ProposerVMBlockCtx: consensusBlockCtx,

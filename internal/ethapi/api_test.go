@@ -42,19 +42,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/upgrade"
-	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/geth/accounts/keystore"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
+	"github.com/holiman/uint256"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/kzg4844"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/dummy"
@@ -66,7 +56,17 @@ import (
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/evm/utils"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/accounts/keystore"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/node/upgrade"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/slices"
 )
@@ -848,7 +848,7 @@ func TestCall(t *testing.T) {
 	var (
 		accounts = newAccounts(3)
 		genesis  = &core.Genesis{
-			Config: &cfg,
+			Config:   &cfg,
 			GasLimit: 8_000_000, // Lux requires 8M gas limit
 			Alloc: types.GenesisAlloc{
 				accounts[0].addr: {Balance: new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(100))}, // 100 ETH
@@ -1048,8 +1048,13 @@ func TestSignTransaction(t *testing.T) {
 	t.Parallel()
 	// Initialize test accounts
 	var (
-		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+		key, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		to     = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1086,8 +1091,13 @@ func TestSignBlobTransaction(t *testing.T) {
 	t.Parallel()
 	// Initialize test accounts
 	var (
-		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+		key, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		to     = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1120,8 +1130,13 @@ func TestSendBlobTransaction(t *testing.T) {
 	t.Parallel()
 	// Initialize test accounts
 	var (
-		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+		key, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		to     = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1154,8 +1169,13 @@ func TestFillBlobTransaction(t *testing.T) {
 	t.Parallel()
 	// Initialize test accounts
 	var (
-		key, _  = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		to      = func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+		key, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		to     = func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		genesis = &core.Genesis{
 			Config: params.TestChainConfig,
 			Alloc:  types.GenesisAlloc{},
@@ -1620,14 +1640,14 @@ func TestRPCGetBlockOrHeader(t *testing.T) {
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		acc2Addr   = func() common.Address {
+		acc2Addr = func() common.Address {
 			cryptoAddr := crypto.PubkeyToAddress(acc2Key.PublicKey)
 			var commonAddr common.Address
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		genesis    = &core.Genesis{
-			Config: params.TestChainConfig,
+		genesis = &core.Genesis{
+			Config:   params.TestChainConfig,
 			GasLimit: 8_000_000, // Lux requires 8M gas limit
 			Alloc: types.GenesisAlloc{
 				acc1Addr: {Balance: new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(100))}, // 100 ETH
@@ -1646,7 +1666,7 @@ func TestRPCGetBlockOrHeader(t *testing.T) {
 		})
 		// NewBlock signature changed - now takes Body and Receipts
 		pendingBody = &types.Body{Transactions: []*types.Transaction{tx}}
-		pending = types.NewBlock(&types.Header{Number: big.NewInt(11), Time: 42}, pendingBody, nil, blocktest.NewHasher())
+		pending     = types.NewBlock(&types.Header{Number: big.NewInt(11), Time: 42}, pendingBody, nil, blocktest.NewHasher())
 	)
 	backend := newTestBackend(t, genBlocks, genesis, dummy.NewFakerWithMode(dummy.Mode{ModeSkipCoinbase: true, ModeSkipBlockFee: true}), func(i int, b *core.BlockGen) {
 		// Transfer from account[0] to account[1]
@@ -1880,14 +1900,14 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		acc2Addr   = func() common.Address {
+		acc2Addr = func() common.Address {
 			cryptoAddr := crypto.PubkeyToAddress(acc2Key.PublicKey)
 			var commonAddr common.Address
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		contract   = common.HexToAddress("0000000000000000000000000000000000031ec7")
-		genesis    = &core.Genesis{
+		contract = common.HexToAddress("0000000000000000000000000000000000031ec7")
+		genesis  = &core.Genesis{
 			Config:        &config,
 			GasLimit:      8_000_000, // Lux requires 8M gas limit
 			ExcessBlobGas: new(uint64),

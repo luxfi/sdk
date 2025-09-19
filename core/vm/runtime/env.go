@@ -28,8 +28,8 @@
 package runtime
 
 import (
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/core/vm"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {

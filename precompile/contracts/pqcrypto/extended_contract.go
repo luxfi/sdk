@@ -8,12 +8,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto/mldsa"
 	"github.com/luxfi/crypto/mlkem"
 	"github.com/luxfi/crypto/slhdsa"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/vm"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 	MLDSAGenKeyGas  = 15000
 	MLKEMGenKeyGas  = 12000
 	SLHDSAGenKeyGas = 25000
-	
+
 	// Additional function selectors
 	MLDSASignSelector    = "mldsa_sign"
 	SLHDSASignSelector   = "slhdsa_sign"
@@ -40,29 +40,29 @@ func (p *pqCryptoPrecompile) mldsaSign(input []byte) ([]byte, uint64, error) {
 	if len(input) < 4 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := mldsa.Mode(input[0])
 	privKeyLen := int(input[1])<<8 | int(input[2])
-	
+
 	if len(input) < 3+privKeyLen {
 		return nil, 0, errInvalidInput
 	}
-	
-	privKeyBytes := input[3:3+privKeyLen]
+
+	privKeyBytes := input[3 : 3+privKeyLen]
 	message := input[3+privKeyLen:]
-	
+
 	// Reconstruct private key
 	privKey, err := mldsa.PrivateKeyFromBytes(privKeyBytes, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Sign message
 	signature, err := privKey.Sign(rand.Reader, message, nil)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	return signature, 0, nil
 }
 
@@ -72,29 +72,29 @@ func (p *pqCryptoPrecompile) slhdsaSign(input []byte) ([]byte, uint64, error) {
 	if len(input) < 4 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := slhdsa.Mode(input[0])
 	privKeyLen := int(input[1])<<8 | int(input[2])
-	
+
 	if len(input) < 3+privKeyLen {
 		return nil, 0, errInvalidInput
 	}
-	
-	privKeyBytes := input[3:3+privKeyLen]
+
+	privKeyBytes := input[3 : 3+privKeyLen]
 	message := input[3+privKeyLen:]
-	
+
 	// Reconstruct private key
 	privKey, err := slhdsa.PrivateKeyFromBytes(privKeyBytes, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Sign message
 	signature, err := privKey.Sign(rand.Reader, message, nil)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	return signature, 0, nil
 }
 
@@ -104,26 +104,26 @@ func (p *pqCryptoPrecompile) mldsaGenKey(input []byte) ([]byte, uint64, error) {
 	if len(input) < 1 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := mldsa.Mode(input[0])
-	
+
 	// Generate key pair
 	privKey, err := mldsa.GenerateKey(rand.Reader, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Serialize keys
 	privBytes := privKey.Bytes()
 	pubBytes := privKey.PublicKey.Bytes()
-	
+
 	// Output format: [privkey_len(2)] [privkey] [pubkey]
 	output := make([]byte, 2+len(privBytes)+len(pubBytes))
 	output[0] = byte(len(privBytes) >> 8)
 	output[1] = byte(len(privBytes))
 	copy(output[2:2+len(privBytes)], privBytes)
 	copy(output[2+len(privBytes):], pubBytes)
-	
+
 	return output, 0, nil
 }
 
@@ -133,26 +133,26 @@ func (p *pqCryptoPrecompile) mlkemGenKey(input []byte) ([]byte, uint64, error) {
 	if len(input) < 1 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := mlkem.Mode(input[0])
-	
+
 	// Generate key pair - returns (privKey, pubKey, error)
 	privKey, pubKey, err := mlkem.GenerateKeyPair(rand.Reader, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Serialize keys
 	privBytes := privKey.Bytes()
 	pubBytes := pubKey.Bytes()
-	
+
 	// Output format: [privkey_len(2)] [privkey] [pubkey]
 	output := make([]byte, 2+len(privBytes)+len(pubBytes))
 	output[0] = byte(len(privBytes) >> 8)
 	output[1] = byte(len(privBytes))
 	copy(output[2:2+len(privBytes)], privBytes)
 	copy(output[2+len(privBytes):], pubBytes)
-	
+
 	return output, 0, nil
 }
 
@@ -162,26 +162,26 @@ func (p *pqCryptoPrecompile) slhdsaGenKey(input []byte) ([]byte, uint64, error) 
 	if len(input) < 1 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := slhdsa.Mode(input[0])
-	
+
 	// Generate key pair
 	privKey, err := slhdsa.GenerateKey(rand.Reader, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Serialize keys
 	privBytes := privKey.Bytes()
 	pubBytes := privKey.PublicKey.Bytes()
-	
+
 	// Output format: [privkey_len(2)] [privkey] [pubkey]
 	output := make([]byte, 2+len(privBytes)+len(pubBytes))
 	output[0] = byte(len(privBytes) >> 8)
 	output[1] = byte(len(privBytes))
 	copy(output[2:2+len(privBytes)], privBytes)
 	copy(output[2+len(privBytes):], pubBytes)
-	
+
 	return output, 0, nil
 }
 
@@ -190,10 +190,10 @@ func (p *pqCryptoPrecompile) ExtendedRequiredGas(input []byte) uint64 {
 	if len(input) < 4 {
 		return 0
 	}
-	
+
 	// Parse function selector (first 4 bytes)
 	selector := string(input[:4])
-	
+
 	switch selector {
 	case MLDSASignSelector[:4]:
 		return MLDSASignGas
@@ -215,23 +215,23 @@ func (p *pqCryptoPrecompile) ExtendedRun(accessibleState contract.AccessibleStat
 	if len(input) < 4 {
 		return nil, suppliedGas, errInvalidInput
 	}
-	
+
 	// Calculate required gas
 	requiredGas := p.ExtendedRequiredGas(input)
 	if requiredGas == 0 {
 		// Try original run
 		return p.Run(accessibleState, caller, addr, input, suppliedGas, readOnly)
 	}
-	
+
 	if suppliedGas < requiredGas {
 		return nil, 0, vm.ErrOutOfGas
 	}
 	remainingGas = suppliedGas - requiredGas
-	
+
 	// Parse function selector
 	selector := string(input[:4])
 	data := input[4:]
-	
+
 	switch selector {
 	case MLDSASignSelector[:4]:
 		if readOnly {

@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/math/set"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/math/set"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

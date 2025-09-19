@@ -9,16 +9,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/database"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	luxuptime "github.com/luxfi/consensus/uptime"
 	luxvalidators "github.com/luxfi/consensus/validators"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/database"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/utils/timer/mockable"
 
 	"github.com/luxfi/log"
 )
@@ -135,7 +135,7 @@ func (m *manager) sync(ctx context.Context) error {
 			Weight: weight,
 		}
 	}
-	
+
 	// load the current validator set into the validator state
 	if err := loadValidators(m.State, convertedValidatorSet); err != nil {
 		return fmt.Errorf("failed to load current validators: %w", err)

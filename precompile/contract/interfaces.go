@@ -8,10 +8,10 @@ import (
 	"context"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/geth/common"
 	ethtypes "github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/holiman/uint256"
 )
 
 // StatefulPrecompiledContract is the interface for executing a precompiled contract

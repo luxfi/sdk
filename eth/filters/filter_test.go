@@ -35,18 +35,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/triedb"
 	"github.com/stretchr/testify/require"
 )
 
@@ -72,9 +72,9 @@ func BenchmarkFilters(b *testing.B) {
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		addr2   = common.BytesToAddress([]byte("jeff"))
-		addr3   = common.BytesToAddress([]byte("ethereum"))
-		addr4   = common.BytesToAddress([]byte("random addresses please"))
+		addr2 = common.BytesToAddress([]byte("jeff"))
+		addr3 = common.BytesToAddress([]byte("ethereum"))
+		addr4 = common.BytesToAddress([]byte("random addresses please"))
 
 		gspec = &core.Genesis{
 			Alloc:   types.GenesisAlloc{addr1: {Balance: big.NewInt(1000000)}},
@@ -141,7 +141,7 @@ func TestFilters(t *testing.T) {
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		signer  = types.NewLondonSigner(big.NewInt(1))
+		signer = types.NewLondonSigner(big.NewInt(1))
 		// Logging contract
 		contract  = common.Address{0xfe}
 		contract2 = common.Address{0xff}

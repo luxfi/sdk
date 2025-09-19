@@ -5,10 +5,10 @@ package validators
 
 import (
 	"context"
-	
-	"github.com/luxfi/ids"
+
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/ids"
 )
 
 // ConsensusStateWrapper wraps consensus.ValidatorState to implement validators.State
@@ -34,7 +34,7 @@ func (w *ConsensusStateWrapper) GetValidatorSet(ctx context.Context, height uint
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Convert map[ids.NodeID]uint64 to map[ids.NodeID]*validators.GetValidatorOutput
 	result := make(map[ids.NodeID]*validators.GetValidatorOutput)
 	for nodeID, weight := range simpleMap {

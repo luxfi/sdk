@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"github.com/luxfi/node/codec"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/wrappers"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/codec"
+	"github.com/luxfi/node/utils/wrappers"
 )
 
 func TestState(t *testing.T) {

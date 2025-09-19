@@ -33,10 +33,10 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethdb/memorydb"
 )
 
 func copyDestructs(destructs map[common.Hash]struct{}) map[common.Hash]struct{} {

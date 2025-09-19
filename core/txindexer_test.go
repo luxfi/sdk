@@ -32,15 +32,15 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/ethdb"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/consensus/dummy"
 	"github.com/luxfi/evm/core/coretest"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,16 +51,16 @@ func TestTransactionIndices(t *testing.T) {
 	// Configure and generate a sample block chain
 	require := require.New(t)
 	var (
-		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		key1, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key2, _     = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
 
-		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		addr1       = common.BytesToAddress(cryptoAddr1[:])
 		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
 
 		addr2 = common.BytesToAddress(cryptoAddr2[:])
-		funds   = big.NewInt(10000000000000)
-		gspec   = &Genesis{
+		funds = big.NewInt(10000000000000)
+		gspec = &Genesis{
 			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
 			Alloc:  GenesisAlloc{addr1: {Balance: funds}},
 		}
@@ -176,16 +176,16 @@ func TestTransactionSkipIndexing(t *testing.T) {
 	// Configure and generate a sample block chain
 	require := require.New(t)
 	var (
-		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		key1, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key2, _     = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
 		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
 
-		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		addr1       = common.BytesToAddress(cryptoAddr1[:])
 		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
 
 		addr2 = common.BytesToAddress(cryptoAddr2[:])
-		funds   = big.NewInt(10000000000000)
-		gspec   = &Genesis{
+		funds = big.NewInt(10000000000000)
+		gspec = &Genesis{
 			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
 			Alloc:  GenesisAlloc{addr1: {Balance: funds}},
 		}

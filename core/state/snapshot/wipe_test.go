@@ -31,10 +31,10 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb/memorydb"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // Tests that given a database with random data content, all parts of a snapshot

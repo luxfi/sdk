@@ -24,7 +24,7 @@ type mockExtras struct {
 type mockHeaderExtras struct{}
 
 func (m mockHeaderExtras) Set(header interface{}, extra *HeaderExtra) {}
-func (m mockHeaderExtras) Get(header interface{}) *HeaderExtra { return nil }
+func (m mockHeaderExtras) Get(header interface{}) *HeaderExtra        { return nil }
 
 var extras = mockExtras{
 	Header: mockHeaderExtras{},

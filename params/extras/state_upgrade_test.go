@@ -8,10 +8,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/utils/utilstest"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
 	"github.com/stretchr/testify/require"
 )
 

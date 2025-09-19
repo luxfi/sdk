@@ -34,6 +34,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/eth/tracers"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/asm"
 	"github.com/luxfi/geth/core/rawdb"
@@ -41,16 +47,10 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/evm/accounts/abi"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/eth/tracers"
-	"github.com/luxfi/evm/params"
 
 	// force-load js tracers to trigger registration
-	_ "github.com/luxfi/geth/eth/tracers/js"
 	"github.com/holiman/uint256"
+	_ "github.com/luxfi/geth/eth/tracers/js"
 )
 
 func TestDefaults(t *testing.T) {

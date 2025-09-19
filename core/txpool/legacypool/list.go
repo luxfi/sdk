@@ -36,9 +36,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/holiman/uint256"
 	"golang.org/x/exp/slices"
 )
 
