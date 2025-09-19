@@ -35,7 +35,6 @@
     "release:prepare": "rm -rf ./node_modules && npm install && npm run build"
   },
   "dependencies": {
-    "@luxfi/luxjs": "^4.0.5",
     "@openzeppelin/contracts": "^4.9.6"
   },
   "engines": {
