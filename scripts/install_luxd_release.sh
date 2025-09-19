@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+echo "=== Installing Lux Node Release ==="
+
 EVM_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
@@ -17,111 +19,99 @@ GOOS=$(go env GOOS)
 BASEDIR=${BASEDIR:-"/tmp/luxd-release"}
 LUXD_BUILD_PATH=${LUXD_BUILD_PATH:-${BASEDIR}/luxd}
 
+echo "Installing to: $LUXD_BUILD_PATH"
+echo "OS: $GOOS, Arch: $GOARCH"
+
+# Create base directory
 mkdir -p "${BASEDIR}"
 
-# Use LUX_VERSION from constants.sh or environment
-LUX_VERSION=${LUX_VERSION:-"v1.16.15"}
-
-LUXD_DOWNLOAD_URL=https://github.com/luxfi/node/releases/download/${LUX_VERSION}/luxd-linux-${GOARCH}-${LUX_VERSION}.tar.gz
-LUXD_DOWNLOAD_PATH=${BASEDIR}/luxd-linux-${GOARCH}-${LUX_VERSION}.tar.gz
-
-if [[ ${GOOS} == "darwin" ]]; then
-  LUXD_DOWNLOAD_URL=https://github.com/luxfi/node/releases/download/${LUX_VERSION}/luxd-macos-${LUX_VERSION}.zip
-  LUXD_DOWNLOAD_PATH=${BASEDIR}/luxd-macos-${LUX_VERSION}.zip
+# Check if already installed
+if [[ -f "${LUXD_BUILD_PATH}" ]]; then
+  echo "luxd already installed at ${LUXD_BUILD_PATH}"
+  INSTALLED_VERSION=$("${LUXD_BUILD_PATH}" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
+  echo "Installed version: $INSTALLED_VERSION"
+  
+  if [[ "${LUXD_VERSION}" == "${INSTALLED_VERSION}" ]]; then
+    echo "Version matches required ${LUXD_VERSION}, skipping download"
+    exit 0
+  fi
+  
+  echo "Version mismatch, reinstalling..."
+  rm -f "${LUXD_BUILD_PATH}"
 fi
 
-BUILD_DIR=${LUXD_BUILD_PATH}-${LUX_VERSION}
+############################
+# download and install luxd
+############################
 
-extract_archive() {
-  mkdir -p "${BUILD_DIR}"
+# For now, we'll build from source if the binary isn't available
+echo "Checking for pre-built binary..."
+DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-linux-${GOARCH}-v${LUXD_VERSION}.tar.gz"
 
-  if [[ ${LUXD_DOWNLOAD_PATH} == *.tar.gz ]]; then
-    tar xzvf "${LUXD_DOWNLOAD_PATH}" --directory "${BUILD_DIR}" --strip-components 1
-  elif [[ ${LUXD_DOWNLOAD_PATH} == *.zip ]]; then
-    unzip "${LUXD_DOWNLOAD_PATH}" -d "${BUILD_DIR}"
-    mv "${BUILD_DIR}"/build/* "${BUILD_DIR}"
-    rm -rf "${BUILD_DIR}"/build/
+if [[ "$GOOS" == "darwin" ]]; then
+  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-macos-${GOARCH}-v${LUXD_VERSION}.tar.gz"
+elif [[ "$GOOS" == "windows" ]]; then
+  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-windows-${GOARCH}-v${LUXD_VERSION}.zip"
+fi
+
+echo "Attempting to download from: $DOWNLOAD_URL"
+
+# Try to download pre-built binary
+if command -v curl &> /dev/null; then
+  HTTP_CODE=$(curl -sL -w "%{http_code}" -o "${BASEDIR}/luxd.tar.gz" "$DOWNLOAD_URL")
+  
+  if [[ "$HTTP_CODE" == "200" ]]; then
+    echo "Downloaded pre-built binary"
+    tar -xzf "${BASEDIR}/luxd.tar.gz" -C "${BASEDIR}"
+    
+    # Find the luxd binary
+    LUXD_PATH=$(find "${BASEDIR}" -name "luxd" -type f | head -1)
+    if [[ -n "$LUXD_PATH" ]]; then
+      mv "$LUXD_PATH" "${LUXD_BUILD_PATH}"
+      chmod +x "${LUXD_BUILD_PATH}"
+      echo "Installed luxd to ${LUXD_BUILD_PATH}"
+    else
+      echo "Error: luxd binary not found in archive"
+      exit 1
+    fi
+  else
+    echo "Pre-built binary not available (HTTP $HTTP_CODE)"
+    
+    # Fallback: build from source
+    echo "Building from source..."
+    TEMP_DIR="${BASEDIR}/build_tmp"
+    rm -rf "$TEMP_DIR"
+    git clone --depth 1 --branch "v${LUXD_VERSION}" https://github.com/luxfi/node.git "$TEMP_DIR"
+    
+    cd "$TEMP_DIR"
+    ./scripts/build.sh
+    
+    if [[ -f "build/luxd" ]]; then
+      mv "build/luxd" "${LUXD_BUILD_PATH}"
+      echo "Built and installed luxd to ${LUXD_BUILD_PATH}"
+    else
+      echo "Error: Failed to build luxd"
+      exit 1
+    fi
+    
+    cd "$EVM_PATH"
+    rm -rf "$TEMP_DIR"
   fi
+else
+  echo "Error: curl not found"
+  exit 1
+fi
+
+# Verify installation
+if [[ ! -f "${LUXD_BUILD_PATH}" ]]; then
+  echo "Error: Installation failed - luxd not found at ${LUXD_BUILD_PATH}"
+  exit 1
+fi
+
+echo "Verifying installation..."
+"${LUXD_BUILD_PATH}" --version || {
+  echo "Error: luxd verification failed"
+  exit 1
 }
 
-# first check if we already have the archive
-if [[ -f ${LUXD_DOWNLOAD_PATH} ]]; then
-  # if the download path already exists, extract and exit
-  echo "found luxd ${LUX_VERSION} at ${LUXD_DOWNLOAD_PATH}"
-
-  extract_archive
-else
-  # try to download the archive if it exists
-  if curl -s --head --request GET "${LUXD_DOWNLOAD_URL}" | grep "302" >/dev/null; then
-    echo "${LUXD_DOWNLOAD_URL} found"
-    echo "downloading to ${LUXD_DOWNLOAD_PATH}"
-    curl -L "${LUXD_DOWNLOAD_URL}" -o "${LUXD_DOWNLOAD_PATH}"
-
-    extract_archive
-  else
-    # else the version is a git commitish (or it's invalid)
-    GIT_CLONE_URL=https://github.com/luxfi/node.git
-    GIT_CLONE_PATH=${BASEDIR}/luxd-repo/
-
-    # check to see if the repo already exists, if not clone it
-    if [[ ! -d ${GIT_CLONE_PATH} ]]; then
-      echo "cloning ${GIT_CLONE_URL} to ${GIT_CLONE_PATH}"
-      git clone --no-checkout ${GIT_CLONE_URL} "${GIT_CLONE_PATH}"
-    fi
-
-    # check to see if the commitish exists in the repo
-    WORKDIR=$(pwd)
-
-    cd "${GIT_CLONE_PATH}"
-
-    git fetch
-
-    echo "checking out ${LUX_VERSION}"
-
-    set +e
-    # try to checkout the branch
-    git checkout origin/"${LUX_VERSION}" >/dev/null 2>&1
-    CHECKOUT_STATUS=$?
-    set -e
-
-    # if it's not a branch, try to checkout the commit
-    if [[ $CHECKOUT_STATUS -ne 0 ]]; then
-      set +e
-      git checkout "${LUX_VERSION}" >/dev/null 2>&1
-      CHECKOUT_STATUS=$?
-      set -e
-
-      if [[ $CHECKOUT_STATUS -ne 0 ]]; then
-        echo
-        echo "'${LUX_VERSION}' is not a valid release tag, commit hash, or branch name"
-        exit 1
-      fi
-    fi
-
-    COMMIT=$(git rev-parse HEAD)
-
-    # use the commit hash instead of the branch name or tag
-    BUILD_DIR=${LUXD_BUILD_PATH}-${COMMIT}
-
-    # if the build-directory doesn't exist, build luxd
-    if [[ ! -d ${BUILD_DIR} ]]; then
-      echo "building luxd ${COMMIT} to ${BUILD_DIR}"
-      ./scripts/build.sh
-      mkdir -p "${BUILD_DIR}"
-
-      mv "${GIT_CLONE_PATH}"/build/* "${BUILD_DIR}"/
-    fi
-
-    cd "$WORKDIR"
-  fi
-fi
-
-LUXD_PATH=${LUXD_BUILD_PATH}/luxd
-
-mkdir -p "${LUXD_BUILD_PATH}"
-
-cp "${BUILD_DIR}"/luxd "${LUXD_PATH}"
-
-echo "Installed Luxd release ${LUX_VERSION}"
-echo "Luxd Path: ${LUXD_PATH}"
-echo "Plugin Dir: ${DEFAULT_PLUGIN_DIR}"
+echo "=== Lux Node Installation Complete ==="

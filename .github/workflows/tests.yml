@@ -37,8 +37,8 @@ jobs:
         run: scripts/actionlint.sh
       - name: go mod tidy
         run: |
-          ./ci_setup.sh
-          git diff --exit-code --exclude go.mod
+          go mod tidy
+          git diff --exit-code
       - name: Ensure consistent luxd version
         shell: bash
         run: |
@@ -62,7 +62,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: echo "TIMEOUT=1200s" >> "$GITHUB_ENV"
       - name: CI Setup
-        run: ./ci_setup.sh
+        run: |
+          # Remove local replace directives for CI
+          sed -i.bak '/replace.*\.\.\/.*$/d' go.mod
+          sed -i.bak '/replace.*\/home\/.*$/d' go.mod
+          go mod download
+          go mod tidy
         shell: bash
       - name: fjl/gencodec generated files are up to date
         run: |
