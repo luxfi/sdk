@@ -92,7 +92,7 @@ func PrintWait(cancel chan struct{}) {
 func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	table := tablewriter.NewWriter(os.Stdout)
 	header := []string{"node", "VM", "URL", "ALIAS_URL"}
-	table.Append(header)
+	table.SetHeader(header)
 
 	nodeInfos := map[string]*rpcpb.NodeInfo{}
 	for _, nodeInfo := range clusterInfo.NodeInfos {

@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxdconstants "github.com/luxfi/node/utils/constants"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 	"github.com/luxfi/sdk/application"
@@ -199,7 +199,7 @@ func GetRegisterL1ValidatorMessage(
 	ctx context.Context,
 	rpcURL string,
 	network models.Network,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
 	subnetID ids.ID,
 	blockchainID ids.ID,
@@ -311,7 +311,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	ctx context.Context,
 	network models.Network,
 	rpcURL string,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
 	subnetID ids.ID,
 	validationID ids.ID,
@@ -396,7 +396,7 @@ func InitValidatorRegistration(
 	balanceOwners localWarpMessage.PChainOwner,
 	disableOwners localWarpMessage.PChainOwner,
 	weight uint64,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	isPos bool,
 	delegationFee uint16,
 	stakeDuration time.Duration,
@@ -551,7 +551,7 @@ func FinishValidatorRegistration(
 	ownerAddressStr string,
 	privateKey string,
 	validationID ids.ID,
-	aggregatorLogger logging.Logger,
+	aggregatorLogger luxlog.Logger,
 	validatorManagerAddressStr string,
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
