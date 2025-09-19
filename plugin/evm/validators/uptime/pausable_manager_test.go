@@ -304,7 +304,7 @@ func setupTestEnv(nodeID ids.NodeID, startTime time.Time) (interfaces.PausableMa
 	clk := mockable.Clock{}
 	clk.Set(startTime)
 	s := uptime.NewTestState()
-	s.AddNode(nodeID, startTime)
+	// TestState should handle node initialization internally
 	up := NewPausableManager(uptime.NewManager(s, &clk))
 	return up, &clk, s
 }
