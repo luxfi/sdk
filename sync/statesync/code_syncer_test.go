@@ -8,16 +8,16 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/luxfi/node/utils"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/ethdb/memorydb"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/plugin/evm/message"
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/handlers"
 	handlerstats "github.com/luxfi/evm/sync/handlers/stats"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	"github.com/luxfi/node/utils"
 	"github.com/stretchr/testify/assert"
 )
 

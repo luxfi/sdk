@@ -40,17 +40,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/tracing"
-	"github.com/luxfi/geth/core/types"
+	"github.com/holiman/billy"
+	"github.com/holiman/uint256"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/kzg4844"
-	"github.com/luxfi/geth/ethdb/memorydb"
-	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
@@ -58,8 +52,14 @@ import (
 	"github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
-	"github.com/holiman/billy"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/geth/rlp"
 )
 
 var (
@@ -77,11 +77,11 @@ var testChainConfig *params.ChainConfig
 func init() {
 	testChainConfig = new(params.ChainConfig)
 	*testChainConfig = params.Copy(params.TestChainConfig)
-	
+
 	// Use a valid test fee configuration
 	params.GetExtra(testChainConfig).FeeConfig = commontype.ValidTestFeeConfig
 	params.GetExtra(testChainConfig).FeeConfig.MinBaseFee = new(big.Int).SetUint64(1)
-	
+
 	// Set SubnetEVMTimestamp to enable base fee calculation
 	params.GetExtra(testChainConfig).NetworkUpgrades.SubnetEVMTimestamp = new(uint64)
 	*params.GetExtra(testChainConfig).NetworkUpgrades.SubnetEVMTimestamp = 0
@@ -113,7 +113,7 @@ func (bc *testBlockChain) CurrentBlock() *types.Header {
 	if bc.blobfee == nil {
 		bc.blobfee = uint256.NewInt(ethparams.BlobTxMinBlobGasprice)
 	}
-	
+
 	// Ensure CancunTime is initialized
 	if bc.config.CancunTime == nil {
 		bc.config.CancunTime = new(uint64)

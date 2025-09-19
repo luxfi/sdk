@@ -32,6 +32,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
@@ -42,7 +43,6 @@ import (
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/geth/triedb/hashdb"
 	"github.com/luxfi/geth/triedb/pathdb"
-	"github.com/holiman/uint256"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -179,9 +179,9 @@ func newHelper(scheme string) *testHelper {
 	if scheme == rawdb.PathScheme {
 		// Configure PathDB for testing with proper initialization
 		config.PathDB = &pathdb.Config{
-			StateHistory:   256,
-			TrieCleanSize:  256 * 1024 * 1024,
-			StateCleanSize: 256 * 1024 * 1024,
+			StateHistory:    256,
+			TrieCleanSize:   256 * 1024 * 1024,
+			StateCleanSize:  256 * 1024 * 1024,
 			WriteBufferSize: 4 * 1024 * 1024, // Add write buffer
 		}
 	} else {
@@ -190,12 +190,12 @@ func newHelper(scheme string) *testHelper {
 		}
 	}
 	triedb := triedb.NewDatabase(diskdb, config)
-	
+
 	// Initialize the database with empty root if using PathDB
 	if scheme == rawdb.PathScheme {
 		triedb.Commit(types.EmptyRootHash, false)
 	}
-	
+
 	accTrie, _ := trie.NewStateTrie(trie.StateTrieID(types.EmptyRootHash), triedb)
 	return &testHelper{
 		diskdb:  diskdb,

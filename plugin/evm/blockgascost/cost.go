@@ -7,8 +7,8 @@ package blockgascost
 import (
 	"math"
 
-	safemath "github.com/luxfi/node/utils/math"
 	"github.com/luxfi/evm/commontype"
+	safemath "github.com/luxfi/node/utils/math"
 )
 
 // BlockGasCost calculates the required block gas cost.
@@ -32,7 +32,7 @@ func BlockGasCost(
 		minBlockGasCost uint64 = feeConfig.MinBlockGasCost.Uint64()
 		maxBlockGasCost uint64 = feeConfig.MaxBlockGasCost.Uint64()
 	)
-	
+
 	var cost uint64
 	if timeElapsed > feeConfig.TargetBlockRate {
 		cost, err = safemath.Sub(parentCost, change)

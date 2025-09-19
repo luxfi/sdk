@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/luxfi/log"
 	"github.com/luxfi/node/utils/ulimit"
 	"github.com/luxfi/node/vms/rpcchainvm"
-	"github.com/luxfi/log"
 
 	"github.com/luxfi/evm/plugin/evm"
 )

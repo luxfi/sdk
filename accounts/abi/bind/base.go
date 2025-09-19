@@ -35,13 +35,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/evm/rpc"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/evm/accounts/abi"
-	"github.com/luxfi/evm/rpc"
 )
 
 const basefeeWiggleMultiplier = 2

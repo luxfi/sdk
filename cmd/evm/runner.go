@@ -38,12 +38,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/tracing"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/tracers/logger"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/cmd/evm/internal/compiler"
 	"github.com/luxfi/evm/cmd/utils"
 	"github.com/luxfi/evm/core"
@@ -51,6 +45,12 @@ import (
 	"github.com/luxfi/evm/core/vm/runtime"
 	"github.com/luxfi/evm/internal/flags"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/eth/tracers/logger"
+	"github.com/luxfi/geth/triedb"
 	"github.com/urfave/cli/v2"
 )
 

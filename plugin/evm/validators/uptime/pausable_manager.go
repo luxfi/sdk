@@ -6,11 +6,11 @@ package uptime
 import (
 	"errors"
 
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
+	"github.com/luxfi/log"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/uptime"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 )
 

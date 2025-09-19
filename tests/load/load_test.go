@@ -18,9 +18,9 @@ import (
 	"github.com/luxfi/log"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/tests/fixture/e2e"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
-	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/evm/tests/utils"

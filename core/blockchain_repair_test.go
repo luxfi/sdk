@@ -35,15 +35,15 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/stretchr/testify/require"
 )
 
@@ -244,7 +244,7 @@ func testLongShallowRepair(t *testing.T, snapshots bool) {
 // Tests a recovery for a long canonical chain where a recent block was already committed
 // to disk and then the process crashed. In this case we expect the chain to be rolled
 // back to the committed block, but the chain data itself left in the database for replaying.
-func TestLongDeepRepair(t *testing.T)              { testLongDeepRepair(t, false) }
+func TestLongDeepRepair(t *testing.T) { testLongDeepRepair(t, false) }
 func TestLongDeepRepairWithSnapshots(t *testing.T) {
 	testLongDeepRepair(t, true)
 }
@@ -565,11 +565,11 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	feeConfig := &params.GetExtra(&chainConfig).FeeConfig
 	feeConfig.MinBaseFee = big.NewInt(1)
 	var (
-		require = require.New(t)
-		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		cryptoAddr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		addr1 = common.Address(cryptoAddr1) // Direct conversion instead of byte manipulation
-		gspec   = &Genesis{
+		require     = require.New(t)
+		key1, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+		addr1       = common.Address(cryptoAddr1) // Direct conversion instead of byte manipulation
+		gspec       = &Genesis{
 			BaseFee: feeConfig.MinBaseFee,
 			Config:  &chainConfig,
 			Alloc:   GenesisAlloc{addr1: {Balance: new(big.Int).Mul(big.NewInt(100000000), big.NewInt(params.Ether))}},

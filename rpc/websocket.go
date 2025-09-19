@@ -38,9 +38,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/log"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gorilla/websocket"
+	"github.com/luxfi/log"
 )
 
 const (

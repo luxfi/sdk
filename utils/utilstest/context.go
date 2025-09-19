@@ -7,11 +7,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/consensustest"
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/constants"
 )
 
@@ -38,7 +38,7 @@ func (t *testValidatorState) GetValidatorSet(height uint64, subnetID ids.ID) (ma
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Convert to map[ids.NodeID]uint64 for consensus interface
 	result := make(map[ids.NodeID]uint64, len(validators))
 	for nodeID, output := range validators {
@@ -70,12 +70,12 @@ func NewTestValidatorState() consensus.ValidatorState {
 			return map[ids.NodeID]*validators.GetValidatorOutput{}, nil
 		},
 	}
-	
+
 	return &testValidatorState{State: state}
 }
 
 // NewTestValidatorStateFromBase creates a testValidatorState that wraps an existing validatorstest.State
-// This is useful when you need to use a specific validatorstest.State with custom functions 
+// This is useful when you need to use a specific validatorstest.State with custom functions
 // but still implement the consensus.ValidatorState interface.
 func NewTestValidatorStateFromBase(baseState *validatorstest.State) consensus.ValidatorState {
 	return &testValidatorState{State: baseState}

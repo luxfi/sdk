@@ -8,17 +8,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/node/cache"
-	"github.com/luxfi/node/cache/lru"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/cache"
+	"github.com/luxfi/node/cache/lru"
 
 	"github.com/luxfi/consensus/protocol/chain"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 
-	"github.com/luxfi/geth/log"
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
+	"github.com/luxfi/geth/log"
 )
 
 var (

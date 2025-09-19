@@ -35,13 +35,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,7 +49,7 @@ func TestCheckCompatible(t *testing.T) {
 	// Skip this test as it tests geth's CheckCompatible which doesn't handle
 	// Lux-specific network upgrades the way the test expects
 	t.Skip("Skipping CheckCompatible test - geth's CheckCompatible doesn't handle Lux-specific upgrades")
-	
+
 	type test struct {
 		stored, new   *ChainConfig
 		headBlock     uint64
@@ -168,19 +168,19 @@ func TestConfigRules(t *testing.T) {
 
 	// Get the extras configuration
 	extra := GetExtra(c)
-	
+
 	var stamp uint64
 	// Test that SubnetEVM is not active at timestamp 0
 	if extra.NetworkUpgrades.IsSubnetEVM(stamp) {
 		t.Errorf("expected timestamp %v to not be SubnetEVM", stamp)
 	}
-	
+
 	stamp = 500
 	// Test that SubnetEVM is active at timestamp 500
 	if !extra.NetworkUpgrades.IsSubnetEVM(stamp) {
 		t.Errorf("expected timestamp %v to be SubnetEVM", stamp)
 	}
-	
+
 	stamp = math.MaxInt64
 	// Test that SubnetEVM is active at max timestamp
 	if !extra.NetworkUpgrades.IsSubnetEVM(stamp) {
@@ -294,20 +294,20 @@ func TestExtrasMarshaling(t *testing.T) {
 		},
 		GenesisPrecompiles: extras.Precompiles{},
 	}
-	
+
 	result, err := json.Marshal(extra)
 	require.NoError(t, err)
 	t.Logf("Extras marshaled: %s", string(result))
-	
+
 	// Check that it contains expected fields
 	var decoded map[string]interface{}
 	err = json.Unmarshal(result, &decoded)
 	require.NoError(t, err)
-	
+
 	require.Contains(t, decoded, "feeConfig")
 	require.Contains(t, decoded, "subnetEVMTimestamp")
 	require.Contains(t, decoded, "durangoTimestamp")
-	
+
 	feeConfig := decoded["feeConfig"].(map[string]interface{})
 	require.Equal(t, float64(8000000), feeConfig["gasLimit"])
 }
@@ -326,7 +326,7 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 	}
-	
+
 	extraConfig := &extras.ChainConfig{
 		FeeConfig:          DefaultFeeConfig,
 		AllowFeeRecipients: false,
@@ -336,10 +336,10 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 		},
 		GenesisPrecompiles: extras.Precompiles{},
 	}
-	
+
 	// Set the extras
 	WithExtra(chainConfig, extraConfig)
-	
+
 	config := ChainConfigWithUpgradesJSON{
 		ChainConfig: *chainConfig,
 		UpgradeConfig: extras.UpgradeConfig{
@@ -350,10 +350,10 @@ func TestChainConfigMarshalWithUpgrades(t *testing.T) {
 			},
 		},
 	}
-	
+
 	// Need to re-set the extras for the copied ChainConfig
 	WithExtra(&config.ChainConfig, extraConfig)
-	
+
 	result, err := json.Marshal(&config)
 	require.NoError(t, err)
 	expectedJSON := `{

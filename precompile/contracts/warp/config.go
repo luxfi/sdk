@@ -8,13 +8,13 @@ import (
 	"fmt"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/warp"
-	"github.com/luxfi/warp/payload"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/log"
-	"github.com/luxfi/evm/precompile/precompileconfig"
-	"github.com/luxfi/evm/predicate"
+	"github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 )
 
 const (
@@ -214,7 +214,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 	// This is a critical security feature that needs to be properly implemented
 	// TODO: Fix the validator state interface mismatches
 	return fmt.Errorf("warp signature verification is temporarily disabled due to version incompatibilities")
-	
+
 	// Original verification code (commented out due to interface mismatches):
 	// err := warpMsg.Signature.Verify(
 	// 	context.Background(),

@@ -7,7 +7,7 @@ on:
     branches: [ main, develop, master ]
 
 env:
-  GO_VERSION: '1.24.6'
+  GO_VERSION: '1.22.0'
 
 jobs:
   lint:
@@ -58,7 +58,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        go: ['1.24.6']
+        go: ['1.22.0']
     steps:
     - uses: actions/checkout@v4
 

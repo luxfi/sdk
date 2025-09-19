@@ -14,7 +14,7 @@ import (
 func TestNewTestConsensusContext(t *testing.T) {
 	// Test that NewTestConsensusContext creates a context with validator state
 	consensusCtx := NewTestConsensusContext(t)
-	
+
 	// Extract validator state from context using consensus.GetValidatorState
 	validatorState := consensus.GetValidatorState(consensusCtx)
 	require.NotNil(t, validatorState)

@@ -20,13 +20,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/log"
 
-	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/tests/fixture/e2e"
 	"github.com/luxfi/node/tests/fixture/tmpnet"
 	"github.com/luxfi/node/utils/constants"
@@ -35,8 +35,6 @@ import (
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 
-	ethereum "github.com/luxfi/geth"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/load"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
@@ -49,6 +47,8 @@ import (
 	"github.com/luxfi/evm/tests/utils"
 	"github.com/luxfi/evm/tests/warp/aggregator"
 	warpBackend "github.com/luxfi/evm/warp"
+	ethereum "github.com/luxfi/geth"
+	"github.com/luxfi/geth/core/types"
 )
 
 const (

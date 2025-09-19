@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/common"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 var errNoKey = errors.New("PrecompileUpgrade cannot be empty")

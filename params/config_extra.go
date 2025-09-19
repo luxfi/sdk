@@ -9,12 +9,12 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/node/upgrade"
 )
 
 const (
@@ -36,7 +36,7 @@ var (
 	// Simple map-based replacement for libevm payloads system
 	chainConfigExtras = make(map[*ChainConfig]*extras.ChainConfig)
 	chainConfigMutex  sync.RWMutex
-	
+
 	// Last Rules context - workaround since Rules is passed by value
 	// This assumes single-threaded test execution
 	lastRulesContext struct {
@@ -65,14 +65,14 @@ type RulesExtra struct {
 	IsEtna      bool
 	IsFortuna   bool
 	IsGranite   bool
-	
+
 	// Fields for predicate support
 	PredicatersExist bool
 	Predicaters      map[common.Address]precompileconfig.Predicater
-	
+
 	// LuxRules for header verification
 	LuxRules extras.LuxRules
-	
+
 	// Active precompiles for this rule set
 	activePrecompiles map[common.Address]bool
 }
@@ -142,7 +142,7 @@ func GetExtra(c *ChainConfig) *extras.ChainConfig {
 	chainConfigMutex.RLock()
 	ex, ok := chainConfigExtras[c]
 	chainConfigMutex.RUnlock()
-	
+
 	if !ok || ex == nil {
 		chainConfigMutex.Lock()
 		// Double-check after acquiring write lock
@@ -192,39 +192,39 @@ func (cu *ChainConfigWithUpgradesJSON) MarshalJSON() ([]byte, error) {
 	extra := GetExtra(&cu.ChainConfig)
 	// fmt.Printf("DEBUG ChainConfigWithUpgradesJSON.MarshalJSON: extra=%+v\n", extra)
 	// fmt.Printf("DEBUG extra.FeeConfig: %+v\n", extra.FeeConfig)
-	
+
 	// Marshal the base ChainConfig
 	baseJSON, err := json.Marshal(&cu.ChainConfig)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Marshal the extras
 	extraJSON, err := extra.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Debug
 	// fmt.Printf("DEBUG: Base JSON: %s\n", string(baseJSON))
 	// fmt.Printf("DEBUG: Extra JSON: %s\n", string(extraJSON))
-	
+
 	// Parse both as maps to merge
 	var baseMap map[string]json.RawMessage
 	if err := json.Unmarshal(baseJSON, &baseMap); err != nil {
 		return nil, err
 	}
-	
+
 	var extraMap map[string]json.RawMessage
 	if err := json.Unmarshal(extraJSON, &extraMap); err != nil {
 		return nil, err
 	}
-	
+
 	// Merge extras into base - overwrite any conflicting keys with extras values
 	for k, v := range extraMap {
 		baseMap[k] = v
 	}
-	
+
 	// Now marshal the merged config
 	chainConfigJSON, err := json.Marshal(baseMap)
 	if err != nil {
@@ -306,15 +306,15 @@ func GetRulesExtra(rules Rules) RulesExtra {
 	chainConfig := lastRulesContext.chainConfig
 	timestamp := lastRulesContext.timestamp
 	lastRulesContextMutex.RUnlock()
-	
+
 	if chainConfig == nil {
 		// No context found, return default RulesExtra
 		rulesExtra := RulesExtra{
-			IsSubnetEVM: true,
-			IsDurango:   true,
-			IsEtna:      true,
-			IsFortuna:   true,
-			IsGranite:   true,
+			IsSubnetEVM:      true,
+			IsDurango:        true,
+			IsEtna:           true,
+			IsFortuna:        true,
+			IsGranite:        true,
 			PredicatersExist: false,
 			Predicaters:      make(map[common.Address]precompileconfig.Predicater),
 		}
@@ -328,30 +328,30 @@ func GetRulesExtra(rules Rules) RulesExtra {
 		rulesExtra.activePrecompiles = make(map[common.Address]bool)
 		return rulesExtra
 	}
-	
+
 	// Get the extras rules for the chain config and timestamp
 	extrasRules := GetExtrasRules(rules, chainConfig, timestamp)
-	
+
 	// Build RulesExtra from extras.Rules
 	rulesExtra := RulesExtra{
-		IsSubnetEVM: extrasRules.LuxRules.IsSubnetEVM,
-		IsDurango:   extrasRules.LuxRules.IsDurango,
-		IsEtna:      extrasRules.LuxRules.IsEtna,
-		IsFortuna:   extrasRules.LuxRules.IsFortuna,
-		IsGranite:   extrasRules.LuxRules.IsGranite,
-		PredicatersExist: len(extrasRules.Predicaters) > 0,
-		Predicaters:      extrasRules.Predicaters,
-		LuxRules:         extrasRules.LuxRules,
+		IsSubnetEVM:       extrasRules.LuxRules.IsSubnetEVM,
+		IsDurango:         extrasRules.LuxRules.IsDurango,
+		IsEtna:            extrasRules.LuxRules.IsEtna,
+		IsFortuna:         extrasRules.LuxRules.IsFortuna,
+		IsGranite:         extrasRules.LuxRules.IsGranite,
+		PredicatersExist:  len(extrasRules.Predicaters) > 0,
+		Predicaters:       extrasRules.Predicaters,
+		LuxRules:          extrasRules.LuxRules,
 		activePrecompiles: make(map[common.Address]bool),
 	}
-	
+
 	// Populate active precompiles
 	for addr, config := range extrasRules.Precompiles {
 		if !config.IsDisabled() {
 			rulesExtra.activePrecompiles[addr] = true
 		}
 	}
-	
+
 	return rulesExtra
 }
 
@@ -365,10 +365,10 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 			AccepterPrecompiles: make(map[common.Address]precompileconfig.Accepter),
 		}
 	}
-	
+
 	extra := GetExtra(c)
 	luxRules := extra.NetworkUpgrades.GetLuxRules(timestamp)
-	
+
 	// Build extras.Rules
 	rules := &extras.Rules{
 		LuxRules:            luxRules,
@@ -376,7 +376,7 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 		Predicaters:         make(map[common.Address]precompileconfig.Predicater),
 		AccepterPrecompiles: make(map[common.Address]precompileconfig.Accepter),
 	}
-	
+
 	// Add active precompiles based on upgrades
 	for _, upgrade := range extra.PrecompileUpgrades {
 		if upgrade.Timestamp() != nil && *upgrade.Timestamp() <= timestamp {
@@ -385,7 +385,7 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 			if address == (common.Address{}) {
 				continue // Skip if no address found
 			}
-			
+
 			if upgrade.IsDisabled() {
 				delete(rules.Precompiles, address)
 				delete(rules.Predicaters, address)
@@ -401,7 +401,7 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 			}
 		}
 	}
-	
+
 	// Add genesis precompiles if at genesis
 	if timestamp == 0 {
 		for key, config := range extra.GenesisPrecompiles {
@@ -412,7 +412,7 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 					continue // Skip unknown precompiles
 				}
 				address := module.Address
-				
+
 				rules.Precompiles[address] = config
 				if predicater, ok := config.(precompileconfig.Predicater); ok {
 					rules.Predicaters[address] = predicater
@@ -423,6 +423,6 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 			}
 		}
 	}
-	
+
 	return rules
 }

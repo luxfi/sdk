@@ -8,26 +8,26 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto/mldsa"
 	"github.com/luxfi/crypto/mlkem"
 	"github.com/luxfi/crypto/slhdsa"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/vm"
 )
 
 const (
 	// Gas costs for PQ operations
-	MLDSAVerifyGas = 10000
+	MLDSAVerifyGas      = 10000
 	MLKEMEncapsulateGas = 8000
 	MLKEMDecapsulateGas = 8000
-	SLHDSAVerifyGas = 15000
-	
+	SLHDSAVerifyGas     = 15000
+
 	// Function selectors (first 4 bytes must be unique)
-	MLDSAVerifySelector = "mlds_verify"
+	MLDSAVerifySelector      = "mlds_verify"
 	MLKEMEncapsulateSelector = "encp_mlkem"
 	MLKEMDecapsulateSelector = "decp_mlkem"
-	SLHDSAVerifySelector = "slhs_verify"
+	SLHDSAVerifySelector     = "slhs_verify"
 )
 
 var (
@@ -36,7 +36,7 @@ var (
 	// Singleton instance
 	PQCryptoPrecompile = &pqCryptoPrecompile{}
 
-	errInvalidInput = errors.New("invalid input")
+	errInvalidInput     = errors.New("invalid input")
 	errInvalidSignature = errors.New("invalid signature")
 )
 
@@ -52,10 +52,10 @@ func (p *pqCryptoPrecompile) RequiredGas(input []byte) uint64 {
 	if len(input) < 4 {
 		return 0
 	}
-	
+
 	// Parse function selector (first 4 bytes)
 	selector := string(input[:4])
-	
+
 	switch selector {
 	case MLDSAVerifySelector[:4]:
 		return MLDSAVerifyGas
@@ -75,18 +75,18 @@ func (p *pqCryptoPrecompile) Run(accessibleState contract.AccessibleState, calle
 	if len(input) < 4 {
 		return nil, suppliedGas, errInvalidInput
 	}
-	
+
 	// Calculate required gas
 	requiredGas := p.RequiredGas(input)
 	if suppliedGas < requiredGas {
 		return nil, 0, vm.ErrOutOfGas
 	}
 	remainingGas = suppliedGas - requiredGas
-	
+
 	// Parse function selector
 	selector := string(input[:4])
 	data := input[4:]
-	
+
 	switch selector {
 	case MLDSAVerifySelector[:4]:
 		return p.mldsaVerify(data)
@@ -107,30 +107,30 @@ func (p *pqCryptoPrecompile) mldsaVerify(input []byte) ([]byte, uint64, error) {
 	if len(input) < 6 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := mldsa.Mode(input[0])
 	pubKeyLen := int(input[1])<<8 | int(input[2])
-	
+
 	if len(input) < 3+pubKeyLen+2 {
 		return nil, 0, errInvalidInput
 	}
-	
-	pubKeyBytes := input[3:3+pubKeyLen]
+
+	pubKeyBytes := input[3 : 3+pubKeyLen]
 	msgLen := int(input[3+pubKeyLen])<<8 | int(input[3+pubKeyLen+1])
-	
+
 	if len(input) < 3+pubKeyLen+2+msgLen {
 		return nil, 0, errInvalidInput
 	}
-	
-	message := input[3+pubKeyLen+2:3+pubKeyLen+2+msgLen]
+
+	message := input[3+pubKeyLen+2 : 3+pubKeyLen+2+msgLen]
 	signature := input[3+pubKeyLen+2+msgLen:]
-	
+
 	// Reconstruct public key
 	pubKey, err := mldsa.PublicKeyFromBytes(pubKeyBytes, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Verify signature
 	valid := pubKey.Verify(message, signature, nil)
 	if valid {
@@ -145,22 +145,22 @@ func (p *pqCryptoPrecompile) mlkemEncapsulate(input []byte) ([]byte, uint64, err
 	if len(input) < 2 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := mlkem.Mode(input[0])
 	pubKeyBytes := input[1:]
-	
+
 	// Reconstruct public key
 	pubKey, err := mlkem.PublicKeyFromBytes(pubKeyBytes, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Encapsulate - returns EncapsulationResult and error
 	result, err := pubKey.Encapsulate(rand.Reader)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Return ciphertext + shared secret
 	output := append(result.Ciphertext, result.SharedSecret...)
 	return output, 0, nil
@@ -172,29 +172,29 @@ func (p *pqCryptoPrecompile) mlkemDecapsulate(input []byte) ([]byte, uint64, err
 	if len(input) < 4 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := mlkem.Mode(input[0])
 	privKeyLen := int(input[1])<<8 | int(input[2])
-	
+
 	if len(input) < 3+privKeyLen {
 		return nil, 0, errInvalidInput
 	}
-	
-	privKeyBytes := input[3:3+privKeyLen]
+
+	privKeyBytes := input[3 : 3+privKeyLen]
 	ciphertext := input[3+privKeyLen:]
-	
+
 	// Reconstruct private key
 	privKey, err := mlkem.PrivateKeyFromBytes(privKeyBytes, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Decapsulate
 	sharedSecret, err := privKey.Decapsulate(ciphertext)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	return sharedSecret, 0, nil
 }
 
@@ -204,30 +204,30 @@ func (p *pqCryptoPrecompile) slhdsaVerify(input []byte) ([]byte, uint64, error) 
 	if len(input) < 6 {
 		return nil, 0, errInvalidInput
 	}
-	
+
 	mode := slhdsa.Mode(input[0])
 	pubKeyLen := int(input[1])<<8 | int(input[2])
-	
+
 	if len(input) < 3+pubKeyLen+2 {
 		return nil, 0, errInvalidInput
 	}
-	
-	pubKeyBytes := input[3:3+pubKeyLen]
+
+	pubKeyBytes := input[3 : 3+pubKeyLen]
 	msgLen := int(input[3+pubKeyLen])<<8 | int(input[3+pubKeyLen+1])
-	
+
 	if len(input) < 3+pubKeyLen+2+msgLen {
 		return nil, 0, errInvalidInput
 	}
-	
-	message := input[3+pubKeyLen+2:3+pubKeyLen+2+msgLen]
+
+	message := input[3+pubKeyLen+2 : 3+pubKeyLen+2+msgLen]
 	signature := input[3+pubKeyLen+2+msgLen:]
-	
+
 	// Reconstruct public key
 	pubKey, err := slhdsa.PublicKeyFromBytes(pubKeyBytes, mode)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// Verify signature
 	valid := pubKey.Verify(message, signature, nil)
 	if valid {

@@ -32,9 +32,9 @@ import (
 	"math/big"
 	"time"
 
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 // Guarantees extras initialisation before a call to [params.ChainConfig.Rules].
@@ -85,8 +85,8 @@ var (
 			LondonBlock:         big.NewInt(0),
 			// TODO: Once upgrade API is stable, restore network-specific upgrade times
 			// For now, use InitiallyActiveTime for test networks
-			ShanghaiTime:        utils.TimeToNewUint64(InitiallyActiveTime),
-			CancunTime:          utils.TimeToNewUint64(InitiallyActiveTime),
+			ShanghaiTime: utils.TimeToNewUint64(InitiallyActiveTime),
+			CancunTime:   utils.TimeToNewUint64(InitiallyActiveTime),
 			BlobScheduleConfig: &ethparams.BlobScheduleConfig{
 				Cancun: &ethparams.BlobConfig{
 					Target:         3,
@@ -274,13 +274,13 @@ func (c *ChainConfigJSON) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, c.ChainConfig); err != nil {
 		return err
 	}
-	
+
 	// Now unmarshal the extras fields
 	extraFields := &extras.ChainConfig{}
 	if err := json.Unmarshal(data, extraFields); err != nil {
 		return err
 	}
-	
+
 	// Set the extras using WithExtra
 	WithExtra(c.ChainConfig, extraFields)
 	return nil
@@ -290,34 +290,34 @@ func (c *ChainConfigJSON) UnmarshalJSON(data []byte) error {
 func (c *ChainConfigJSON) MarshalJSON() ([]byte, error) {
 	// Get the extras
 	extra := GetExtra(c.ChainConfig)
-	
+
 	// Marshal the standard config
 	configJSON, err := json.Marshal(c.ChainConfig)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Marshal the extras
 	extraJSON, err := extra.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Merge the two JSON objects
 	var configMap map[string]json.RawMessage
 	if err := json.Unmarshal(configJSON, &configMap); err != nil {
 		return nil, err
 	}
-	
+
 	var extraMap map[string]json.RawMessage
 	if err := json.Unmarshal(extraJSON, &extraMap); err != nil {
 		return nil, err
 	}
-	
+
 	// Merge extras into config
 	for k, v := range extraMap {
 		configMap[k] = v
 	}
-	
+
 	return json.Marshal(configMap)
 }

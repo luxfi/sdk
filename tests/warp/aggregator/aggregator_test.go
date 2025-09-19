@@ -12,9 +12,9 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
+	"github.com/luxfi/ids"
 	luxWarp "github.com/luxfi/warp"
 )
 

@@ -9,12 +9,12 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/precompile/allowlist"
+	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/evm/precompile/allowlist"
-	"github.com/luxfi/evm/precompile/contract"
-	"github.com/holiman/uint256"
 )
 
 const (

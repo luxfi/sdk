@@ -35,8 +35,8 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 )
 
 // The ABI holds information about a contract's context and available

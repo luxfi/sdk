@@ -6,9 +6,9 @@ package stateupgrade
 import (
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/evm/params/extras"
 	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/geth/common"
 )
 
 // Configure applies the state upgrade to the state.

@@ -29,15 +29,15 @@
 package miner
 
 import (
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/event"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/node/utils/timer/mockable"
 )
 
 // Backend wraps all methods required for mining.

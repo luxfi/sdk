@@ -7,9 +7,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	ethtypes "github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/extstate"
 	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
@@ -17,6 +14,9 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/evm/precompile/testutils"
+	"github.com/luxfi/geth/common"
+	ethtypes "github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

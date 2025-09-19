@@ -6,11 +6,11 @@ package precompileconfig
 
 import (
 	"context"
-	
+
 	"github.com/luxfi/consensus/engine/chain/block"
-	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/geth/common"
+	luxWarp "github.com/luxfi/warp"
 )
 
 // StatefulPrecompileConfig defines the interface for a stateful precompile to
@@ -60,7 +60,7 @@ type WarpMessageWriter interface {
 // AcceptContext defines the context passed in to a precompileconfig's Accepter
 type AcceptContext struct {
 	ConsensusCtx context.Context
-	Warp    WarpMessageWriter
+	Warp         WarpMessageWriter
 }
 
 // Accepter is an optional interface for StatefulPrecompiledContracts to implement.

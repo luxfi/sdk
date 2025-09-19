@@ -30,11 +30,11 @@ package blobpool
 import (
 	"errors"
 
+	"github.com/holiman/billy"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
-	"github.com/holiman/billy"
+	"github.com/luxfi/log"
 )
 
 // limboBlob is a wrapper around an opaque blobset that also contains the tx hash

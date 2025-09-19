@@ -34,14 +34,14 @@ import (
 	"io"
 	"time"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/trie/triestate"
+	"github.com/luxfi/log"
 )
 
 var (
@@ -332,7 +332,7 @@ func (dl *diffLayer) journal(w io.Writer) error {
 	if err := rlp.Encode(w, jacct); err != nil {
 		return err
 	}
-	
+
 	storage := make([]journalStorage, 0)
 	if dl.states != nil {
 		// For storage, we need to group by account

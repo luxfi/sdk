@@ -31,15 +31,15 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/consensus/dummy"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/consensus/dummy"
-	"github.com/luxfi/evm/params"
 )
 
 func ExampleGenerateChain() {
@@ -49,20 +49,20 @@ func ExampleGenerateChain() {
 
 func exampleGenerateChainOriginal() {
 	var (
-		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		key2, _ = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
-		key3, _ = crypto.HexToECDSA("49a7b37aa6f6645917e7b807e9d1c00d4fa71f18343b0d4122a4d2df64dd6fee")
+		key1, _     = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+		key2, _     = crypto.HexToECDSA("8a1f9a8f95be41cd7ccb6168179afb4504aefe388d1e14474d32c45c72ce7b7a")
+		key3, _     = crypto.HexToECDSA("49a7b37aa6f6645917e7b807e9d1c00d4fa71f18343b0d4122a4d2df64dd6fee")
 		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
 
-		addr1 = common.BytesToAddress(cryptoAddr1[:])
+		addr1       = common.BytesToAddress(cryptoAddr1[:])
 		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
 
-		addr2 = common.BytesToAddress(cryptoAddr2[:])
+		addr2       = common.BytesToAddress(cryptoAddr2[:])
 		cryptoAddr3 = crypto.PubkeyToAddress(key3.PublicKey)
 
 		addr3 = common.BytesToAddress(cryptoAddr3[:])
-		db      = rawdb.NewMemoryDatabase()
-		genDb   = rawdb.NewMemoryDatabase()
+		db    = rawdb.NewMemoryDatabase()
+		genDb = rawdb.NewMemoryDatabase()
 	)
 
 	// Ensure that key1 has some funds in the genesis block.

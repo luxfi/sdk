@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/node/upgrade"
 	"github.com/stretchr/testify/require"
 )
 

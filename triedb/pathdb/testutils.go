@@ -31,9 +31,9 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/trie/triestate"
 	"golang.org/x/exp/slices"

@@ -8,14 +8,14 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/ethdb/memorydb"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/ethdb/memorydb"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/ids"
 	"github.com/stretchr/testify/assert"
 )
 

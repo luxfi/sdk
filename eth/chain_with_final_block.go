@@ -5,8 +5,8 @@
 package eth
 
 import (
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/core/types"
 )
 
 const blocksToKeep = 604_800 // Approx. 2 weeks worth of blocks assuming 2s block time

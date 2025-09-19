@@ -40,8 +40,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/accounts/abi"
+	"github.com/luxfi/log"
 )
 
 // Lang is a target programming language selector to generate bindings for.

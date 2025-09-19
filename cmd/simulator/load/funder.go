@@ -9,14 +9,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/log"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/cmd/simulator/key"
 	"github.com/luxfi/evm/cmd/simulator/metrics"
 	"github.com/luxfi/evm/cmd/simulator/txs"
 	"github.com/luxfi/evm/ethclient"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/log"
 )
 
 // DistributeFunds ensures that each address in keys has at least [minFundsPerAddr] by sending funds

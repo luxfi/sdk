@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/ids"
 )
 
 const MaxCodeHashesPerRequest = 5

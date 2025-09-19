@@ -6,9 +6,9 @@ package extras
 import (
 	"testing"
 
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
-	"github.com/luxfi/evm/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -201,10 +201,10 @@ func TestCheckNetworkUpgradesCompatible(t *testing.T) {
 
 func TestVerifyNetworkUpgrades(t *testing.T) {
 	testcases := []struct {
-		name          string
-		upgrades      *NetworkUpgrades
+		name         string
+		upgrades     *NetworkUpgrades
 		luxdUpgrades upgrade.Config
-		valid         bool
+		valid        bool
 	}{
 		{
 			name: "ValidNetworkUpgrades_for_latest_network",
@@ -216,7 +216,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				GraniteTimestamp:   utils.NewUint64(0), // Must be 0 for Latest
 			},
 			luxdUpgrades: upgradetest.GetConfig(upgradetest.Latest),
-			valid:         true,
+			valid:        true,
 		},
 		{
 			name: "Invalid_Durango_nil_upgrade",
@@ -225,7 +225,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   nil,
 			},
 			luxdUpgrades: upgrade.Mainnet,
-			valid:         false,
+			valid:        false,
 		},
 		{
 			name: "Invalid_Subnet-EVM_non-zero",
@@ -234,7 +234,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(2),
 			},
 			luxdUpgrades: upgrade.Mainnet,
-			valid:         false,
+			valid:        false,
 		},
 		{
 			name: "Invalid_Durango_before_default_upgrade",
@@ -243,7 +243,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(1),
 			},
 			luxdUpgrades: upgrade.Mainnet,
-			valid:         false,
+			valid:        false,
 		},
 		{
 			name: "Invalid_Mainnet_Durango_reconfigured",
@@ -252,7 +252,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(1000), // Changed from default 0
 			},
 			luxdUpgrades: upgrade.Mainnet,
-			valid:         false,
+			valid:        false,
 		},
 		{
 			name: "Invalid_Testnet_Durango_reconfigured",
@@ -261,7 +261,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(1000), // Changed from default 0
 			},
 			luxdUpgrades: upgrade.Fuji,
-			valid:         false,
+			valid:        false,
 		},
 		{
 			name: "Valid_Etna_nil_when_unscheduled",
@@ -271,7 +271,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				EtnaTimestamp:      nil, // Valid when Etna is unscheduled
 			},
 			luxdUpgrades: upgrade.Mainnet,
-			valid:         true,
+			valid:        true,
 		},
 		{
 			name: "Invalid_Etna_before_Durango",
@@ -281,7 +281,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				EtnaTimestamp:      utils.NewUint64(99),
 			},
 			luxdUpgrades: upgrade.Mainnet,
-			valid:         false,
+			valid:        false,
 		},
 		{
 			name: "Valid_Fortuna_nil",
@@ -292,7 +292,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				FortunaTimestamp:   nil,
 			},
 			luxdUpgrades: upgrade.Fuji,
-			valid:         true,
+			valid:        true,
 		},
 	}
 	for _, test := range testcases {

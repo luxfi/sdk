@@ -9,15 +9,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/rlp"
 )
 
 func (s *BlockChainAPI) GetChainConfig(ctx context.Context) *params.ChainConfigWithUpgradesJSON {
@@ -142,7 +142,7 @@ type ActivePrecompilesResult struct {
 
 type ActiveRulesResult struct {
 	EthRules          params.Rules                       `json:"ethRules"`
-	LuxRules    extras.LuxRules              `json:"luxRules"`
+	LuxRules          extras.LuxRules                    `json:"luxRules"`
 	ActivePrecompiles map[string]ActivePrecompilesResult `json:"precompiles"`
 }
 
@@ -157,7 +157,7 @@ func (s *BlockChainAPI) GetActiveRulesAt(ctx context.Context, blockTimestamp *ui
 	rules := s.b.ChainConfig().Rules(common.Big0, params.IsMergeTODO, timestamp)
 	extrasRules := params.GetExtrasRules(rules, s.b.ChainConfig(), timestamp)
 	res := ActiveRulesResult{
-		EthRules:       rules,
+		EthRules: rules,
 		LuxRules: extrasRules.LuxRules,
 	}
 	res.ActivePrecompiles = make(map[string]ActivePrecompilesResult)

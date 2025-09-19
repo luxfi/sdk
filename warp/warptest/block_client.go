@@ -10,9 +10,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/consensus/protocol/chain"
 	"github.com/luxfi/consensus/choices"
+	"github.com/luxfi/consensus/protocol/chain"
+	"github.com/luxfi/ids"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -32,7 +32,7 @@ func (b *mockBlock) Accept(context.Context) error {
 	return nil
 }
 
-// Reject marks the block as rejected  
+// Reject marks the block as rejected
 func (b *mockBlock) Reject(context.Context) error {
 	return nil
 }

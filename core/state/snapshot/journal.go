@@ -33,13 +33,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/log"
 )
 
 // journalGenerator is a disk layer entry containing the generator progress marker.

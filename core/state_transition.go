@@ -32,18 +32,18 @@ import (
 	"math"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto/kzg4844"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/vmerrors"
+	"github.com/luxfi/evm/precompile/contracts/txallowlist"
+	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	cmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto/kzg4844"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/vmerrors"
-	"github.com/luxfi/evm/precompile/contracts/txallowlist"
-	"github.com/luxfi/evm/utils"
-	"github.com/holiman/uint256"
 )
 
 // ExecutionResult includes all output after executing given evm

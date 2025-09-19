@@ -8,10 +8,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 var testFeeConfig = commontype.FeeConfig{

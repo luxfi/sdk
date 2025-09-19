@@ -12,10 +12,10 @@ import (
 type WarpSigner interface {
 	// Sign signs a message and returns the signature bytes
 	Sign(msg []byte) ([]byte, error)
-	
+
 	// PublicKey returns the public key bytes
 	PublicKey() []byte
-	
+
 	// NodeID returns the node ID
 	NodeID() ids.NodeID
 }

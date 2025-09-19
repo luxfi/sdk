@@ -31,11 +31,11 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/evm/core"
-	"github.com/holiman/uint256"
 )
 
 // LazyTransaction contains a small subset of the transaction properties that is

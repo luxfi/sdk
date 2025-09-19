@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/luxfi/database/memdb"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/plugin/evm/validators/state"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
+	"github.com/luxfi/ids"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
@@ -45,8 +45,8 @@ func TestLoadNewValidators(t *testing.T) {
 			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{},
 			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -57,8 +57,8 @@ func TestLoadNewValidators(t *testing.T) {
 			name: "before one/after empty",
 			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{},
@@ -73,14 +73,14 @@ func TestLoadNewValidators(t *testing.T) {
 			name: "no change",
 			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -91,18 +91,18 @@ func TestLoadNewValidators(t *testing.T) {
 			name: "status and weight change and new one",
 			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    2,
+					NodeID: testNodeIDs[0],
+					Weight: 2,
 				},
 				testValidationIDs[1]: {
-					NodeID:    testNodeIDs[1],
-					Weight:    1,
+					NodeID: testNodeIDs[1],
+					Weight: 1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -117,14 +117,14 @@ func TestLoadNewValidators(t *testing.T) {
 			name: "renew validation ID",
 			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[1]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			registerMockListenerCalls: func(mock *interfaces.MockStateCallbackListener) {
@@ -140,14 +140,14 @@ func TestLoadNewValidators(t *testing.T) {
 			name: "renew node ID",
 			initialValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[0],
-					Weight:    1,
+					NodeID: testNodeIDs[0],
+					Weight: 1,
 				},
 			},
 			newValidators: map[ids.ID]*luxdvalidators.GetValidatorOutput{
 				testValidationIDs[0]: {
-					NodeID:    testNodeIDs[1],
-					Weight:    1,
+					NodeID: testNodeIDs[1],
+					Weight: 1,
 				},
 			},
 			expectedLoadErr: state.ErrImmutableField,

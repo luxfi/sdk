@@ -31,18 +31,18 @@ import (
 	"math"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/params/extras"
-	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
-	"github.com/holiman/uint256"
 )
 
 // Config is a basic type specifying certain configuration flags for running

@@ -6,10 +6,10 @@ package deployerallowlist
 import (
 	"fmt"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/geth/common"
 )
 
 var _ contract.Configurator = (*configurator)(nil)

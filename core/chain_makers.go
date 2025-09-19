@@ -31,20 +31,20 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/consensus"
+	"github.com/luxfi/evm/constants"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/header"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/geth/consensus/misc/eip4844"
-	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/params"
-	"github.com/luxfi/evm/plugin/evm/header"
-	"github.com/holiman/uint256"
 )
 
 // BlockGen creates blocks for testing.
@@ -486,7 +486,6 @@ func (cm *chainMaker) blockByNumber(number uint64) *types.Block {
 }
 
 // ChainReader/ChainContext implementation
-
 
 func (cm *chainMaker) CurrentHeader() *types.Header {
 	if len(cm.chain) == 0 {

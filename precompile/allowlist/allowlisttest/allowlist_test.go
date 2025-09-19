@@ -6,11 +6,11 @@ package allowlisttest
 import (
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/geth/common"
 )
 
 var (

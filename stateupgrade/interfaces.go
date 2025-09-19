@@ -6,8 +6,8 @@ package stateupgrade
 import (
 	"math/big"
 
-	"github.com/luxfi/geth/common"
 	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/common"
 )
 
 // StateDB is the interface for accessing EVM state in state upgrades

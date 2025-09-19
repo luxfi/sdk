@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
+	"github.com/luxfi/geth/core/types"
 )
 
 const (

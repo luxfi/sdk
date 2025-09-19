@@ -43,9 +43,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/evm/core"
 	"golang.org/x/exp/slices"
 )
 

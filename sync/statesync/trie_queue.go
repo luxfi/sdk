@@ -4,9 +4,9 @@
 package statesync
 
 import (
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // trieQueue persists storage trie roots with their associated

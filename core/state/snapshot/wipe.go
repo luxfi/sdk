@@ -31,11 +31,11 @@ import (
 	"bytes"
 	"time"
 
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/log"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
 )
 
 // WipeSnapshot starts a goroutine to iterate over the entire key-value database

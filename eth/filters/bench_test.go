@@ -33,12 +33,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/luxfi/evm/core/bloombits"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/bitutil"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/evm/core/bloombits"
 )
 
 func BenchmarkBloomBits512(b *testing.B) {

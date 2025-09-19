@@ -35,6 +35,11 @@ import (
 	"os"
 	"path"
 
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
+	customheader "github.com/luxfi/evm/plugin/evm/header"
+	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
+	"github.com/luxfi/evm/tests"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/tracing"
@@ -42,11 +47,6 @@ import (
 	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/log"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/params"
-	customheader "github.com/luxfi/evm/plugin/evm/header"
-	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
-	"github.com/luxfi/evm/tests"
 	"github.com/urfave/cli/v2"
 )
 

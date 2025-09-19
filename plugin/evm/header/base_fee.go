@@ -7,9 +7,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/geth/core/types"
 )
 
 var errEstimateBaseFeeWithoutActivation = errors.New("cannot estimate base fee for chain without activation scheduled")

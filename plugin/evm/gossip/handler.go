@@ -7,11 +7,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/log"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/consensus/engine/core"
-	"github.com/luxfi/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -43,7 +43,7 @@ func NewTxGossipHandler[T gossip.Gossipable](
 		throttlingPeriod,
 		int(requestsPerPeer), // Convert float64 to int for limit
 	)
-	
+
 	throttledHandler := p2p.NewThrottlerHandler(
 		handler,
 		throttler,

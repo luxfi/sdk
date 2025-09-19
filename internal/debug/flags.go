@@ -37,8 +37,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/luxfi/log"
 	"github.com/luxfi/evm/internal/flags"
+	"github.com/luxfi/log"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v2"
@@ -242,10 +242,10 @@ func Setup(ctx *cli.Context) error {
 			output = terminalOutput
 		}
 	}
-	
+
 	// Use terminal handler for now
 	glogger = log.NewGlogHandler(log.NewTerminalHandler(output, useColor))
-	
+
 	if ctx.Bool(logjsonFlag.Name) {
 		log.Warn("The flag '--log.json' is deprecated, please use '--log.format=json' instead")
 	}

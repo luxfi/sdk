@@ -8,15 +8,15 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/evm/plugin/evm/customrawdb"
-	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/stretchr/testify/assert"
 )
 

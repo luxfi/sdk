@@ -8,12 +8,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus"
-	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/warp/payload"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/ids"
+	luxWarp "github.com/luxfi/warp"
+	"github.com/luxfi/warp/payload"
 )
 
 var errNoValidators = errors.New("cannot aggregate signatures from subnet with no validators")

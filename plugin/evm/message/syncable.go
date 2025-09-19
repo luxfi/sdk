@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/ids"
 )
 
 // var _ block.StateSummary = (*SyncSummary)(nil)

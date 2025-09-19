@@ -40,19 +40,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/tracing"
-	"github.com/luxfi/geth/core/types"
+	"github.com/holiman/uint256"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/core/txpool"
 	"github.com/luxfi/evm/params"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/trie"
 )
 
 var (

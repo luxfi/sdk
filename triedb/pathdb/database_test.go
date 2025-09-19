@@ -34,14 +34,14 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/trie/triestate"
-	"github.com/holiman/uint256"
 	"github.com/stretchr/testify/require"
 )
 
@@ -155,9 +155,9 @@ func (t *tester) randAccount() (common.Address, []byte) {
 func (t *tester) generateStorage(ctx *genctx, addr common.Address) common.Hash {
 	var (
 		addrHashBytes = crypto.Keccak256(addr.Bytes())
-		addrHash = common.BytesToHash(addrHashBytes)
-		storage  = make(map[common.Hash][]byte)
-		origin   = make(map[common.Hash][]byte)
+		addrHash      = common.BytesToHash(addrHashBytes)
+		storage       = make(map[common.Hash][]byte)
+		origin        = make(map[common.Hash][]byte)
 	)
 	for i := 0; i < 10; i++ {
 		v, _ := rlp.EncodeToBytes(common.TrimLeftZeroes(randBytes(32)))
@@ -177,9 +177,9 @@ func (t *tester) generateStorage(ctx *genctx, addr common.Address) common.Hash {
 func (t *tester) mutateStorage(ctx *genctx, addr common.Address, root common.Hash) common.Hash {
 	var (
 		addrHashBytes = crypto.Keccak256(addr.Bytes())
-		addrHash = common.BytesToHash(addrHashBytes)
-		storage  = make(map[common.Hash][]byte)
-		origin   = make(map[common.Hash][]byte)
+		addrHash      = common.BytesToHash(addrHashBytes)
+		storage       = make(map[common.Hash][]byte)
+		origin        = make(map[common.Hash][]byte)
 	)
 	for hash, val := range t.storages[addrHash] {
 		origin[hash] = val
@@ -207,9 +207,9 @@ func (t *tester) mutateStorage(ctx *genctx, addr common.Address, root common.Has
 func (t *tester) clearStorage(ctx *genctx, addr common.Address, root common.Hash) common.Hash {
 	var (
 		addrHashBytes = crypto.Keccak256(addr.Bytes())
-		addrHash = common.BytesToHash(addrHashBytes)
-		storage  = make(map[common.Hash][]byte)
-		origin   = make(map[common.Hash][]byte)
+		addrHash      = common.BytesToHash(addrHashBytes)
+		storage       = make(map[common.Hash][]byte)
+		origin        = make(map[common.Hash][]byte)
 	)
 	for hash, val := range t.storages[addrHash] {
 		origin[hash] = val

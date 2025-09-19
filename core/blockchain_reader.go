@@ -30,12 +30,6 @@ package core
 import (
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/constants"
@@ -44,6 +38,12 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/precompile/contracts/feemanager"
 	"github.com/luxfi/evm/precompile/contracts/rewardmanager"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/geth/triedb"
 )
 
 // CurrentHeader retrieves the current head header of the canonical chain. The

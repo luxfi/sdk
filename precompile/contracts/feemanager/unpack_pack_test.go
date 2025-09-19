@@ -8,11 +8,11 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/math"
 	"github.com/stretchr/testify/require"
 )
 

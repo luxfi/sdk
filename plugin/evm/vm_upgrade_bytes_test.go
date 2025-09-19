@@ -26,9 +26,9 @@ import (
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
-	"github.com/luxfi/math/set"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

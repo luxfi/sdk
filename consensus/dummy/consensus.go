@@ -9,18 +9,18 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/evm/plugin/evm/vmerrors"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/trie"
+	"github.com/luxfi/node/utils/timer/mockable"
 
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 )
@@ -340,7 +340,7 @@ func (eng *DummyEngine) Finalize(chain consensus.ChainHeaderReader, block *types
 	if eng.consensusMode.ModeSkipHeader {
 		return nil
 	}
-	
+
 	config := params.GetExtra(chain.Config())
 	timestamp := block.Time()
 	// we use the parent to determine the fee config
@@ -447,7 +447,7 @@ func blockGasCostEqual(actual, expected *big.Int) bool {
 	if actual == nil && expected == nil {
 		return true
 	}
-	
+
 	// If one is nil and the other is zero, they're equal
 	if actual == nil && expected != nil && expected.Sign() == 0 {
 		return true
@@ -455,7 +455,7 @@ func blockGasCostEqual(actual, expected *big.Int) bool {
 	if expected == nil && actual != nil && actual.Sign() == 0 {
 		return true
 	}
-	
+
 	// Otherwise use normal big.Int comparison
 	return utils.BigEqual(actual, expected)
 }

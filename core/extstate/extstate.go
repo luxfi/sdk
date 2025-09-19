@@ -1,12 +1,11 @@
 package extstate
 
 import (
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/tracing"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 // ExtState wraps a StateDB for extended state operations
@@ -59,7 +58,7 @@ func (p *PrecompileAdapter) GetNonce(addr common.Address) uint64 {
 // SetNonce sets account nonce
 func (p *PrecompileAdapter) SetNonce(addr common.Address, nonce uint64) {
 	if p.extState.stateDB != nil {
-		p.extState.stateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
+		p.extState.stateDB.SetNonce(addr, nonce)
 	}
 }
 
@@ -74,7 +73,7 @@ func (p *PrecompileAdapter) GetBalance(addr common.Address) *uint256.Int {
 // AddBalance adds balance to an account
 func (p *PrecompileAdapter) AddBalance(addr common.Address, amount *uint256.Int) {
 	if p.extState.stateDB != nil && amount != nil {
-		p.extState.stateDB.AddBalance(addr, amount, tracing.BalanceChangeUnspecified)
+		p.extState.stateDB.AddBalance(addr, amount)
 	}
 }
 

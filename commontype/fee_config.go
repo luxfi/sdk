@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
 )
 
 // FeeConfig specifies the parameters for the dynamic fee algorithm, which determines the gas limit, base fee, and block gas cost of blocks

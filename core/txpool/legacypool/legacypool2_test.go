@@ -31,14 +31,14 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/event"
-	"github.com/luxfi/evm/core/state"
-	"github.com/holiman/uint256"
 )
 
 func pricedValuedTransaction(nonce uint64, value int64, gaslimit uint64, gasprice *big.Int, key *ecdsa.PrivateKey) *types.Transaction {

@@ -31,24 +31,24 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/holiman/uint256"
+	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/core"
+	"github.com/luxfi/evm/core/state"
+	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/consensus/misc/eip4844"
-	"github.com/luxfi/evm/core"
-	"github.com/luxfi/evm/core/state"
-	"github.com/luxfi/evm/params"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/log"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -184,8 +184,8 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 		// Create a minimal header for CalcBlobFee
 		header := &types.Header{
 			ExcessBlobGas: &excessBlobGas,
-			Time: pre.Env.Timestamp,
-			Number: new(big.Int).SetUint64(pre.Env.Number),
+			Time:          pre.Env.Timestamp,
+			Number:        new(big.Int).SetUint64(pre.Env.Number),
 		}
 		vmContext.BlobBaseFee = eip4844.CalcBlobFee(chainConfig, header)
 	} else {
@@ -197,16 +197,16 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			// Create a minimal parent header for CalcExcessBlobGas
 			parentHeader := &types.Header{
 				ExcessBlobGas: parentExcessBlobGas,
-				BlobGasUsed: parentBlobGasUsed,
-				Time: pre.Env.Timestamp - 12, // Assume 12 second block time
-				Number: new(big.Int).SetUint64(pre.Env.Number - 1),
+				BlobGasUsed:   parentBlobGasUsed,
+				Time:          pre.Env.Timestamp - 12, // Assume 12 second block time
+				Number:        new(big.Int).SetUint64(pre.Env.Number - 1),
 			}
 			excessBlobGas = eip4844.CalcExcessBlobGas(chainConfig, parentHeader, pre.Env.Timestamp)
 			// Create current header for CalcBlobFee
 			header := &types.Header{
 				ExcessBlobGas: &excessBlobGas,
-				Time: pre.Env.Timestamp,
-				Number: new(big.Int).SetUint64(pre.Env.Number),
+				Time:          pre.Env.Timestamp,
+				Number:        new(big.Int).SetUint64(pre.Env.Number),
 			}
 			vmContext.BlobBaseFee = eip4844.CalcBlobFee(chainConfig, header)
 		}

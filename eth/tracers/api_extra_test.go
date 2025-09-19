@@ -12,13 +12,6 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/eth/tracers/logger"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/internal/ethapi"
 	"github.com/luxfi/evm/params"
@@ -26,6 +19,13 @@ import (
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/precompile/contracts/txallowlist"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/eth/tracers/logger"
+	ethparams "github.com/luxfi/geth/params"
 	"github.com/stretchr/testify/require"
 )
 

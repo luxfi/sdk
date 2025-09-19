@@ -30,8 +30,8 @@ package runtime_test
 import (
 	"fmt"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/core/vm/runtime"
+	"github.com/luxfi/geth/common"
 )
 
 func ExampleExecute() {

@@ -8,8 +8,8 @@
 package rewardmanager
 
 import (
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/common"
 )
 
 const (

@@ -32,9 +32,9 @@ import (
 	mrand "math/rand"
 	"testing"
 
+	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/holiman/uint256"
 )
 
 var rand = mrand.New(mrand.NewSource(1))

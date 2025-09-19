@@ -6,12 +6,12 @@ package deployerallowlisttest
 import (
 	"testing"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
 	"github.com/luxfi/evm/precompile/contracts/deployerallowlist"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/geth/common"
 	"go.uber.org/mock/gomock"
 )
 

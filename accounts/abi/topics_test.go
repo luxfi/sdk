@@ -266,7 +266,10 @@ func setupTopicsTests() []topicTest {
 			name: "hash type",
 			args: args{
 				createObj: func() interface{} { return &hashStruct{} },
-				resultObj: func() interface{} { h := crypto.Keccak256Hash([]byte("stringtopic")); return &hashStruct{common.BytesToHash(h[:])} },
+				resultObj: func() interface{} {
+					h := crypto.Keccak256Hash([]byte("stringtopic"))
+					return &hashStruct{common.BytesToHash(h[:])}
+				},
 				resultMap: func() map[string]interface{} {
 					h := crypto.Keccak256Hash([]byte("stringtopic"))
 					return map[string]interface{}{"hashValue": common.BytesToHash(h[:])}

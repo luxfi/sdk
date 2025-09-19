@@ -35,15 +35,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/geth/accounts"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/geth/event"
-	"github.com/luxfi/log"
 	luxconsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
@@ -62,6 +53,15 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/rpc"
+	"github.com/luxfi/geth/accounts"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/ethdb"
+	"github.com/luxfi/geth/event"
+	"github.com/luxfi/log"
+	"github.com/luxfi/node/utils/timer/mockable"
 )
 
 // Config contains the configuration options of the ETH protocol.

@@ -34,11 +34,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
+	"github.com/holiman/uint256"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core/txpool"
-	"github.com/holiman/uint256"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 func TestTransactionPriceNonceSortLegacy(t *testing.T) {
@@ -68,7 +68,12 @@ func testTransactionPriceNonceSort(t *testing.T, baseFee *big.Int) {
 	groups := map[common.Address][]*txpool.LazyTransaction{}
 	expectedCount := 0
 	for start, key := range keys {
-		addr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+		addr := func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 		count := 25
 		for i := 0; i < 25; i++ {
 			var tx *types.Transaction
@@ -163,7 +168,12 @@ func TestTransactionTimeSort(t *testing.T) {
 	// Generate a batch of transactions with overlapping prices, but different creation times
 	groups := map[common.Address][]*txpool.LazyTransaction{}
 	for start, key := range keys {
-		addr := func() common.Address { cryptoAddr := crypto.PubkeyToAddress(key.PublicKey); var commonAddr common.Address; copy(commonAddr[:], cryptoAddr[:]); return commonAddr }()
+		addr := func() common.Address {
+			cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
+			var commonAddr common.Address
+			copy(commonAddr[:], cryptoAddr[:])
+			return commonAddr
+		}()
 
 		tx, _ := types.SignTx(types.NewTransaction(0, common.Address{}, big.NewInt(100), 100, big.NewInt(1), nil), signer, key)
 		tx.SetTime(time.Unix(0, int64(len(keys)-start)))

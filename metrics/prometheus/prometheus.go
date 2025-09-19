@@ -73,7 +73,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 
 	switch m := metric.(type) {
 	case *metrics.Counter:
-		counter := *m  // Dereference the pointer first
+		counter := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_COUNTER.Enum(),
@@ -94,7 +94,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.CounterFloat64:
-		counter := *m  // Dereference the pointer first
+		counter := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_COUNTER.Enum(),
@@ -115,7 +115,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.Gauge:
-		gauge := *m  // Dereference the pointer first
+		gauge := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_GAUGE.Enum(),
@@ -136,7 +136,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.GaugeFloat64:
-		gauge := *m  // Dereference the pointer first
+		gauge := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_GAUGE.Enum(),
@@ -161,7 +161,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 	case metrics.GaugeInfo:
 		return nil, fmt.Errorf("%w: %q is a %T", errMetricSkip, name, m)
 	case *metrics.Histogram:
-		hist := *m  // Dereference the pointer first
+		hist := *m // Dereference the pointer first
 		snapshot := hist.Snapshot()
 
 		quantiles := []float64{.5, .75, .95, .99, .999, .9999}
@@ -210,7 +210,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.Meter:
-		meter := *m  // Dereference the pointer first
+		meter := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_GAUGE.Enum(),
@@ -231,7 +231,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.Timer:
-		timer := *m  // Dereference the pointer first
+		timer := *m // Dereference the pointer first
 		snapshot := timer.Snapshot()
 
 		quantiles := []float64{.5, .75, .95, .99, .999, .9999}
@@ -280,7 +280,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.ResettingTimer:
-		timer := *m  // Dereference the pointer first
+		timer := *m // Dereference the pointer first
 		snapshot := timer.Snapshot()
 		count := snapshot.Count()
 		if count == 0 {

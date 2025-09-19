@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/ids"
 )
 
 var _ Request = CodeRequest{}

@@ -35,14 +35,14 @@ import (
 	"fmt"
 	"math/big"
 
-	ethereum "github.com/luxfi/geth"
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/interfaces"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"
+	ethereum "github.com/luxfi/geth"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/common/hexutil"
+	"github.com/luxfi/geth/core/types"
 
 	// Force-load precompiles to trigger registration
 	_ "github.com/luxfi/evm/precompile/registry"

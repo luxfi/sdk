@@ -33,9 +33,9 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/evm/eth/tracers"
 )
 
 // traceWriter wraps a tracer with file writing capabilities.
@@ -53,7 +53,7 @@ func newTraceWriter(hooks *tracing.Hooks, tracer tracers.Tracer, f io.WriteClose
 		tracer: tracer,
 		f:      f,
 	}
-	
+
 	// Wrap the TxEnd hook to write output when transaction completes
 	originalTxEnd := hooks.OnTxEnd
 	hooks.OnTxEnd = func(receipt *types.Receipt, err error) {
@@ -62,7 +62,7 @@ func newTraceWriter(hooks *tracing.Hooks, tracer tracers.Tracer, f io.WriteClose
 		}
 		tw.writeResult()
 	}
-	
+
 	return tw
 }
 

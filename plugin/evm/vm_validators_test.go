@@ -16,8 +16,8 @@ import (
 	"github.com/luxfi/evm/plugin/evm/validators"
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -11,11 +11,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/constants"
 	"github.com/luxfi/evm/precompile/allowlist"
 	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/geth/core/types"
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/vm"

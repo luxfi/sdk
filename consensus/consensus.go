@@ -31,11 +31,11 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 )
 
 // ChainHeaderReader defines a small collection of methods needed to access the local

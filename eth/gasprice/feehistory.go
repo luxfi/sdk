@@ -34,10 +34,10 @@ import (
 	"math/big"
 	"slices"
 
+	"github.com/luxfi/evm/rpc"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/log"
-	"github.com/luxfi/evm/rpc"
 )
 
 var (

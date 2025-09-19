@@ -34,11 +34,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
-	"github.com/holiman/uint256"
 )
 
 // randomHash generates a random blob of data and returns it as a hash.

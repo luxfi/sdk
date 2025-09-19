@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/luxfi/node/upgrade"
-	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/evm/utils"
+	ethparams "github.com/luxfi/geth/params"
+	"github.com/luxfi/node/upgrade"
 )
 
 var errCannotBeNil = fmt.Errorf("timestamp cannot be nil")
@@ -121,7 +121,7 @@ func (n *NetworkUpgrades) SetDefaults(agoUpgrades upgrade.Config) {
 func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) error {
 	defaults := GetNetworkUpgrades(agoUpgrades)
 	maxTimestamp := uint64(time.Unix(1<<63-1, 0).Unix())
-	
+
 	// SubnetEVMTimestamp must not be nil
 	if n.SubnetEVMTimestamp == nil {
 		return fmt.Errorf("SubnetEVM fork block timestamp is invalid: %w", errCannotBeNil)
@@ -133,7 +133,7 @@ func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) erro
 	if err := verifyWithDefault(n.SubnetEVMTimestamp, defaults.SubnetEVMTimestamp); err != nil {
 		return fmt.Errorf("SubnetEVM fork block timestamp is invalid: %w", err)
 	}
-	
+
 	// DurangoTimestamp must not be nil
 	if n.DurangoTimestamp == nil {
 		return fmt.Errorf("Durango fork block timestamp is invalid: %w", errCannotBeNil)
@@ -148,7 +148,7 @@ func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) erro
 			return fmt.Errorf("Durango fork block timestamp is invalid: %w", err)
 		}
 	}
-	
+
 	// EtnaTimestamp - allow any value if unscheduled (at max time)
 	if defaults.EtnaTimestamp != nil && *defaults.EtnaTimestamp < maxTimestamp {
 		// EtnaTimestamp is scheduled, must not be nil
@@ -160,26 +160,26 @@ func (n *NetworkUpgrades) verifyNetworkUpgrades(agoUpgrades upgrade.Config) erro
 		}
 	}
 	// If unscheduled, allow any value including nil
-	
+
 	// FortunaTimestamp is optional, allow nil even if default is set
 	if n.FortunaTimestamp != nil && defaults.FortunaTimestamp != nil && *defaults.FortunaTimestamp < maxTimestamp {
 		if err := verifyWithDefault(n.FortunaTimestamp, defaults.FortunaTimestamp); err != nil {
 			return fmt.Errorf("Fortuna fork block timestamp is invalid: %w", err)
 		}
 	}
-	
+
 	// GraniteTimestamp is optional
 	if n.GraniteTimestamp != nil && defaults.GraniteTimestamp != nil && *defaults.GraniteTimestamp < maxTimestamp {
 		if err := verifyWithDefault(n.GraniteTimestamp, defaults.GraniteTimestamp); err != nil {
 			return fmt.Errorf("Granite fork block timestamp is invalid: %w", err)
 		}
 	}
-	
+
 	// Check that forks are enabled in order
 	if err := checkForks(n.forkOrder(), false); err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -265,11 +265,11 @@ func GetNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
 	nu := NetworkUpgrades{
 		SubnetEVMTimestamp: utils.NewUint64(0),
 	}
-	
+
 	// For now, we don't have specific upgrade times from the Config
 	// These will be set through chain config instead
 	// TODO: Update when upgrade.Config includes specific upgrade times
-	
+
 	return nu
 }
 
@@ -278,9 +278,9 @@ func GetDefaultNetworkUpgrades() NetworkUpgrades {
 	return NetworkUpgrades{
 		SubnetEVMTimestamp: utils.NewUint64(0),
 		DurangoTimestamp:   utils.NewUint64(0), // Already activated
-		EtnaTimestamp:      nil, // Not scheduled
-		FortunaTimestamp:   nil, // Not scheduled
-		GraniteTimestamp:   nil, // Not scheduled
+		EtnaTimestamp:      nil,                // Not scheduled
+		FortunaTimestamp:   nil,                // Not scheduled
+		GraniteTimestamp:   nil,                // Not scheduled
 	}
 }
 

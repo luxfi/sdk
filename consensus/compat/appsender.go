@@ -4,7 +4,7 @@ package compat
 
 import (
 	"context"
-	
+
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 )
@@ -21,7 +21,7 @@ type AppSender interface {
 	SendAppGossip(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error
 	// SendAppGossipSpecific sends a gossip message to a list of nodeIDs
 	SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error
-	
+
 	// Cross-chain communication
 	// Send a cross-chain app request to another chain
 	SendCrossChainAppRequest(ctx context.Context, chainID ids.ID, requestID uint32, appRequestBytes []byte) error
@@ -41,7 +41,7 @@ type AppHandler interface {
 	AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *AppError) error
 	// Handle an application-level gossip message
 	AppGossip(ctx context.Context, nodeID ids.NodeID, appGossipBytes []byte) error
-	
+
 	// Cross-chain
 	CrossChainAppRequest(ctx context.Context, chainID ids.ID, requestID uint32, deadline int64, appRequestBytes []byte) error
 	CrossChainAppResponse(ctx context.Context, chainID ids.ID, requestID uint32, appResponseBytes []byte) error

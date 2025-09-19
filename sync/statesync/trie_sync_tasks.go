@@ -6,14 +6,14 @@ package statesync
 import (
 	"fmt"
 
+	"github.com/luxfi/evm/sync/syncutils"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
-	"github.com/luxfi/log"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/evm/sync/syncutils"
+	"github.com/luxfi/log"
 )
 
 var (

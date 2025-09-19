@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/geth/common"
 )
 
 type Key struct {

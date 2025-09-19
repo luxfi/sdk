@@ -7,8 +7,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/evm/network"
+	"github.com/luxfi/ids"
 
 	"github.com/luxfi/consensus/version"
 )

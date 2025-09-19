@@ -34,9 +34,9 @@ import (
 	"math/big"
 	"reflect"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
-	"github.com/luxfi/crypto"
 )
 
 // packTopic packs rule into the corresponding hash value for a log's topic

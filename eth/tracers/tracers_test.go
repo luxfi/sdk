@@ -34,16 +34,16 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
-	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/geth/core/vm"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/geth/eth/tracers/logger"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
 	"github.com/luxfi/evm/tests"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/eth/tracers/logger"
 )
 
 func BenchmarkPrestateTracer(b *testing.B) {

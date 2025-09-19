@@ -11,19 +11,20 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/consensus/networking/router"
+	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/ids"
 	logging "github.com/luxfi/log"
 	metrics "github.com/luxfi/metric"
-	// "github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/node/network/p2p/lp118"
 	"github.com/luxfi/node/network/peer"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/consensus/networking/router"
 	"github.com/luxfi/node/utils/compression"
+	"github.com/luxfi/node/wallet/net/primary"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
-	"github.com/luxfi/node/wallet/net/primary"
-	"github.com/luxfi/evm/warp/messages"
 
 	p2pmessage "github.com/luxfi/node/message"
 )
@@ -105,12 +106,10 @@ func main() {
 		sourceChainID,
 		0,
 		time.Hour,
-		// TODO: Fix SignatureRequestHandlerID - API has changed
-		// p2p.PrefixMessage(
-		//	p2p.ProtocolPrefix(p2p.SignatureRequestHandlerID),
-		//	appRequestPayload,
-		// ),
-		appRequestPayload,
+		p2p.PrefixMessage(
+			p2p.ProtocolPrefix(lp118.HandlerID),
+			appRequestPayload,
+		),
 	)
 	if err != nil {
 		log.Fatalf("failed to create AppRequest: %s\n", err)
