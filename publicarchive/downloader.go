@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/cavaliergopher/grab/v3"
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/network"
 	"go.uber.org/zap"
@@ -37,7 +37,7 @@ type Getter struct {
 
 type Downloader struct {
 	getter    Getter
-	logger    logging.Logger
+	logger    luxlog.Logger
 	currentOp *sync.Mutex
 }
 
@@ -65,7 +65,7 @@ func newGetter(endpoint string, target string) (Getter, error) {
 // logLevel: the log level
 func NewDownloader(
 	net *network.Network,
-	logger logging.Logger,
+	logger luxlog.Logger,
 ) (Downloader, error) {
 	tmpFile, err := os.CreateTemp("", "luxd-public-archive-*")
 	if err != nil {

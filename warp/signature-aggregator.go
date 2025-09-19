@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/luxfi/node/utils/logging"
+	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/warp"
 	"go.uber.org/zap"
 )
@@ -38,7 +38,7 @@ type AggregateSignatureResponse struct {
 
 // SignMessage sends a request to the signature aggregator to sign a message.
 // It returns the signed warp message or an error if the operation fails.
-func SignMessage(logger logging.Logger, signatureAggregatorEndpoint string, message, justification, signingSubnetID string, quorumPercentage uint64) (*warp.Message, error) {
+func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, message, justification, signingSubnetID string, quorumPercentage uint64) (*warp.Message, error) {
 	if quorumPercentage == 0 {
 		quorumPercentage = DefaultQuorumPercentage
 	} else if quorumPercentage > 100 {
