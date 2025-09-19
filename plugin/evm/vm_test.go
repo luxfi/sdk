@@ -29,6 +29,7 @@ import (
 
 	"github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
+	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
@@ -319,14 +320,15 @@ func newVM(t *testing.T, config testVMConfig) *testVM {
 		[]byte(config.genesisJSON),
 		[]byte(config.upgradeJSON),
 		[]byte(config.configJSON),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		appSender,
 	)
 	require.NoError(t, err, "error initializing vm")
 
 	if !config.isSyncing {
-		require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
-		require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
+		require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.BootstrapOp))
+		require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.NormalOp))
 	}
 
 	return &testVM{
@@ -635,7 +637,8 @@ func testBuildEthTxBlock(t *testing.T, scheme string) {
 		[]byte(genesisJSONSubnetEVM),
 		[]byte(""),
 		[]byte(getConfig(scheme, `"pruning-enabled":true`)),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		nil,
 	); err != nil {
 		t.Fatal(err)
@@ -2723,7 +2726,8 @@ func TestVerifyManagerConfig(t *testing.T) {
 		genesisJSON, // Manually set genesis bytes due to custom genesis
 		[]byte(""),
 		[]byte(""),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		nil,
 	)
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
@@ -2753,7 +2757,8 @@ func TestVerifyManagerConfig(t *testing.T) {
 		genesisJSON, // Manually set genesis bytes due to custom genesis
 		upgradeBytesJSON,
 		[]byte(""),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		nil,
 	)
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
@@ -3566,14 +3571,14 @@ func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// Note: Cannot directly modify context fields, skipping metrics reset
 
 	// this will not be allowed
-	require.ErrorContains(t, reinitVM.Initialize(context.Background(), tvm.vm.ctx, tvm.db, genesisWithUpgradeBytes, []byte{}, []byte{}, []*commonEng.Fx{}, tvm.appSender), "mismatching Cancun fork timestamp in database")
+	require.ErrorContains(t, reinitVM.Initialize(context.Background(), tvm.vm.ctx, tvm.db, genesisWithUpgradeBytes, []byte{}, []byte{}, nil, []interface{}{}, tvm.appSender), "mismatching Cancun fork timestamp in database")
 
 	// Reset metrics to allow re-initialization
 	// Note: Cannot directly modify context fields, skipping metrics reset
 
 	// try again with skip-upgrade-check
 	config := []byte(`{"skip-upgrade-check": true}`)
-	require.NoError(t, reinitVM.Initialize(context.Background(), tvm.vm.ctx, tvm.db, genesisWithUpgradeBytes, []byte{}, config, []*commonEng.Fx{}, tvm.appSender))
+	require.NoError(t, reinitVM.Initialize(context.Background(), tvm.vm.ctx, tvm.db, genesisWithUpgradeBytes, []byte{}, config, nil, []interface{}{}, tvm.appSender))
 	require.NoError(t, reinitVM.Shutdown(context.Background()))
 }
 
@@ -3723,13 +3728,14 @@ func TestStandaloneDB(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		[]byte(configJSON),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		appSender,
 	)
 	defer vm.Shutdown(context.Background())
 	require.NoError(t, err, "error initializing VM")
-	require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.BootstrapOp))
+	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.NormalOp))
 
 	// Issue a block
 	acceptedBlockEvent := make(chan core.ChainEvent, 1)
@@ -3946,17 +3952,17 @@ func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, appSende
 	vm.Shutdown(context.Background())
 	restartedVM := &VM{}
 	// Note: Cannot directly modify context fields, skipping metrics reset
-	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, []*commonEng.Fx{}, appSender)
+	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, nil, []interface{}{}, appSender)
 	if err != nil {
 		return nil, err
 	}
 
 	if finishBootstrapping {
-		err = restartedVM.SetState(context.Background(), consensus.Bootstrapping)
+		err = restartedVM.SetState(context.Background(), consensusInterfaces.BootstrapOp)
 		if err != nil {
 			return nil, err
 		}
-		err = restartedVM.SetState(context.Background(), consensus.NormalOp)
+		err = restartedVM.SetState(context.Background(), consensusInterfaces.NormalOp)
 		if err != nil {
 			return nil, err
 		}

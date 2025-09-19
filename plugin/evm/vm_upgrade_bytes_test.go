@@ -15,6 +15,7 @@ import (
 	"github.com/holiman/uint256"
 	"github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
+	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params/extras"
@@ -107,7 +108,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	// tvm.vm.ctx.Metrics = metrics.NewPrefixGatherer() // Metrics not directly accessible from context
 
 	if err := tvm.vm.Initialize(
-		context.Background(), tvm.vm.ctx, tvm.db, []byte(genesisJSONSubnetEVM), upgradeBytesJSON, []byte{}, []*commonEng.Fx{}, tvm.appSender,
+		context.Background(), tvm.vm.ctx, tvm.db, []byte(genesisJSONSubnetEVM), upgradeBytesJSON, []byte{}, nil, []interface{}{}, tvm.appSender,
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -117,10 +118,10 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 		}
 	}()
 	// Set the VM's state to NormalOp to initialize the tx pool.
-	if err := tvm.vm.SetState(context.Background(), consensus.Bootstrapping); err != nil {
+	if err := tvm.vm.SetState(context.Background(), consensusInterfaces.BootstrapOp); err != nil {
 		t.Fatal(err)
 	}
-	if err := tvm.vm.SetState(context.Background(), consensus.NormalOp); err != nil {
+	if err := tvm.vm.SetState(context.Background(), consensusInterfaces.NormalOp); err != nil {
 		t.Fatal(err)
 	}
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
@@ -215,13 +216,14 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 		genesisBytes,
 		[]byte(upgradeBytesJSON),
 		nil,
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		appSender,
 	)
 	require.NoError(t, err, "error initializing GenesisVM")
 
-	require.NoError(t, vm.SetState(context.Background(), consensus.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), consensus.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.BootstrapOp))
+	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.NormalOp))
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {

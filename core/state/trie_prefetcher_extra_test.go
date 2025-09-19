@@ -172,7 +172,7 @@ func addKVs(
 		return nil, common.Hash{}, fmt.Errorf("creating state with snapshot: %w", err)
 	}
 	if prefetchers > 0 {
-		statedb.StartPrefetcher(namespace, nil)
+		statedb.StartPrefetcher(namespace, nil, nil)
 		defer statedb.StopPrefetcher()
 	}
 	for _, address := range []common.Address{address1, address2} {

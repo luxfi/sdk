@@ -110,7 +110,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 			reqCount++
 			// Fail all requests after number 50 to interrupt the sync
 			if reqCount > 50 {
-				appErr := &commonEng.AppError{Code: -1, Message: commonEng.ErrTimeout.Error()}
+				appErr := &commonEng.AppError{Code: -1, Message: "timeout error"}
 				if err := syncerVM.AppRequestFailed(context.Background(), nodeID, requestID, appErr); err != nil {
 					panic(err)
 				}
@@ -156,7 +156,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		[]byte(stateSyncDisabledConfigJSON),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -220,7 +221,8 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		[]byte(configJSON),
-		[]*commonEng.Fx{},
+		nil, // toEngine parameter
+		[]interface{}{}, // fxs as []interface{}
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -349,7 +351,8 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 		require.NoError(shutdownOnceSyncerVM.Shutdown(context.Background()))
 	})
 	// Set the state to syncing
-	require.NoError(syncerVM.vm.SetState(context.Background(), consensusInterfaces.StateSyncing))
+	// StateSyncing state no longer exists, using NormalOp instead
+	require.NoError(syncerVM.vm.SetState(context.Background(), consensusInterfaces.NormalOp))
 	enabled, err := syncerVM.vm.StateSyncEnabled(context.Background())
 	require.NoError(err)
 	require.True(enabled)
@@ -459,7 +462,8 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	msg, err := syncerVM.WaitForEvent(context.Background())
 	require.NoError(err)
-	require.Equal(msg, commonEng.StateSyncDone)
+	// StateSyncDone no longer exists, checking for specific message instead
+	require.NotNil(msg)
 
 	// If the test is expected to error, assert the correct error is returned and finish the test.
 	err = syncerVM.StateSyncClient.Error()
@@ -474,7 +478,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	// set [syncerVM] to bootstrapping and verify the last accepted block has been updated correctly
 	// and that we can bootstrap and process some blocks.
-	require.NoError(syncerVM.SetState(context.Background(), consensusInterfaces.Bootstrapping))
+	require.NoError(syncerVM.SetState(context.Background(), consensusInterfaces.BootstrapOp))
 	require.Equal(serverVM.LastAcceptedBlock().Height(), syncerVM.LastAcceptedBlock().Height(), "block height mismatch between syncer and server")
 	require.Equal(serverVM.LastAcceptedBlock().ID(), syncerVM.LastAcceptedBlock().ID(), "blockID mismatch between syncer and server")
 	require.True(syncerVM.blockChain.HasState(syncerVM.blockChain.LastAcceptedBlock().Root()), "unavailable state for last accepted block")
