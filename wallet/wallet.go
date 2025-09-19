@@ -9,8 +9,8 @@ import (
 	"fmt"
 
 	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/database/utils/set"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/sdk/chain"
 	"github.com/luxfi/sdk/crypto"
