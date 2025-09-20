@@ -24,7 +24,7 @@ require (
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/math v0.1.0
 	github.com/luxfi/metric v1.3.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.13.5
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
