@@ -16,13 +16,13 @@ type StateUpgradeAdapter struct {
 
 // AddBalance implements the legacy AddBalance without BalanceChangeReason
 func (a *StateUpgradeAdapter) AddBalance(addr common.Address, amount *uint256.Int) {
-	// Call the underlying AddBalance without the reason parameter for compatibility
+	// Call the underlying AddBalance without the reason parameter
 	a.StateDB.AddBalance(addr, amount)
 }
 
 // SetNonce implements the legacy SetNonce without NonceChangeReason
 func (a *StateUpgradeAdapter) SetNonce(addr common.Address, nonce uint64) {
-	// Call the underlying SetNonce without the reason parameter for compatibility
+	// Call the underlying SetNonce without the reason parameter
 	a.StateDB.SetNonce(addr, nonce)
 }
 
@@ -34,7 +34,7 @@ func (a *StateUpgradeAdapter) SetState(addr common.Address, key, value common.Ha
 
 // SetCode implements the stateupgrade.StateDB interface (no return value)
 func (a *StateUpgradeAdapter) SetCode(addr common.Address, code []byte) {
-	// Call the underlying SetCode - use the version without CodeChangeReason for compatibility
+	// Call the underlying SetCode without the reason parameter
 	_ = a.StateDB.SetCode(addr, code)
 }
 
