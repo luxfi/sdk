@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/core"
+	luxConsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database/memdb"
+	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/consensus/compat"
 	"github.com/luxfi/evm/metrics/metricstest"
 	"github.com/luxfi/evm/plugin/evm/validators"
@@ -20,7 +20,6 @@ import (
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/evm/warp/messages"
 	"github.com/luxfi/evm/warp/warptest"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/cache"
 	"github.com/luxfi/node/cache/lru"
@@ -380,7 +379,8 @@ func TestUptimeSignatures(t *testing.T) {
 		protoBytes, msg := getUptimeMessageBytes([]byte{}, validationID, 80)
 		responseBytes, appErr := handler.AppRequest(context.Background(), nodeID, time.Time{}, protoBytes)
 		require.Nil(t, appErr)
-		expectedSignature, err := consensusCtx.WarpSigner.Sign(msg)
+		warpSigner := consensus.GetWarpSigner(consensusCtx)
+		expectedSignature, err := warpSigner.Sign(msg.Bytes())
 		require.NoError(t, err)
 		response := &sdk.SignatureResponse{}
 		require.NoError(t, proto.Unmarshal(responseBytes, response))

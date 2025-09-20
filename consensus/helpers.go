@@ -95,3 +95,11 @@ func WithWarpSigner(ctx context.Context, signer WarpSigner) context.Context {
 func WithValidatorState(ctx context.Context, state interface{}) context.Context {
 	return context.WithValue(ctx, "validatorState", state)
 }
+
+// GetValidator retrieves the validator state from the context
+func GetValidator(ctx context.Context) interface{} {
+	if v := ctx.Value("validatorState"); v != nil {
+		return v
+	}
+	return nil
+}

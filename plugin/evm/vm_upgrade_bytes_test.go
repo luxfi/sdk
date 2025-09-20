@@ -13,8 +13,6 @@ import (
 	"time"
 
 	"github.com/holiman/uint256"
-	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/core"
 	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/core"

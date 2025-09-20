@@ -154,7 +154,7 @@ func TestOffChainMessages(t *testing.T) {
 				testUnsignedMessage.Bytes(),
 			},
 			check: func(require *require.Assertions, b Backend) {
-				msgID, _ := ids.ToID(testUnsignedMessage.ID())
+				msgID := testUnsignedMessage.ID()
 				msg, err := b.GetMessage(msgID)
 				require.NoError(err)
 				require.Equal(testUnsignedMessage.Bytes(), msg.Bytes())
@@ -168,7 +168,7 @@ func TestOffChainMessages(t *testing.T) {
 		},
 		"unknown message": {
 			check: func(require *require.Assertions, b Backend) {
-				msgID, _ := ids.ToID(testUnsignedMessage.ID())
+				msgID := testUnsignedMessage.ID()
 				_, err := b.GetMessage(msgID)
 				require.ErrorIs(err, database.ErrNotFound)
 			},
