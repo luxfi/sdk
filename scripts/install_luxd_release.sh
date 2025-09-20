@@ -11,6 +11,9 @@ EVM_PATH=$(
 # Load the constants
 source "$EVM_PATH"/scripts/constants.sh
 
+# Set LUXD_VERSION from LUX_VERSION if not already set
+LUXD_VERSION=${LUXD_VERSION:-${LUX_VERSION}}
+
 ############################
 # download luxd
 # https://github.com/luxfi/node/releases
