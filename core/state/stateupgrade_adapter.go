@@ -6,6 +6,7 @@ package state
 import (
 	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/tracing"
 )
 
 // StateUpgradeAdapter adapts the new geth StateDB interface (with BalanceChangeReason)
@@ -16,14 +17,14 @@ type StateUpgradeAdapter struct {
 
 // AddBalance implements the legacy AddBalance without BalanceChangeReason
 func (a *StateUpgradeAdapter) AddBalance(addr common.Address, amount *uint256.Int) {
-	// Call the underlying AddBalance without the reason parameter
-	a.StateDB.AddBalance(addr, amount)
+	// Call the underlying AddBalance with BalanceChangeUnspecified
+	a.StateDB.AddBalance(addr, amount, tracing.BalanceChangeUnspecified)
 }
 
 // SetNonce implements the legacy SetNonce without NonceChangeReason
 func (a *StateUpgradeAdapter) SetNonce(addr common.Address, nonce uint64) {
-	// Call the underlying SetNonce without the reason parameter
-	a.StateDB.SetNonce(addr, nonce)
+	// Call the underlying SetNonce with NonceChangeUnspecified
+	a.StateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
 }
 
 // SetState implements the stateupgrade.StateDB interface
@@ -34,7 +35,7 @@ func (a *StateUpgradeAdapter) SetState(addr common.Address, key, value common.Ha
 
 // SetCode implements the stateupgrade.StateDB interface (no return value)
 func (a *StateUpgradeAdapter) SetCode(addr common.Address, code []byte) {
-	// Call the underlying SetCode without the reason parameter
+	// Call the underlying SetCode (2 params in published version)
 	_ = a.StateDB.SetCode(addr, code)
 }
 
