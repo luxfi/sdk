@@ -41,7 +41,8 @@ func (h *discardHandler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 func (h *discardHandler) WithGroup(name string) slog.Handler {
-	panic("not implemented")
+	// For a discard handler, grouping doesn't matter - return another discard handler
+	return &discardHandler{}
 }
 
 func (h *discardHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
@@ -102,7 +103,15 @@ func (h *TerminalHandler) Enabled(_ context.Context, level slog.Level) bool {
 }
 
 func (h *TerminalHandler) WithGroup(name string) slog.Handler {
-	panic("not implemented")
+	// Create a new handler with the group prefix
+	// For simplicity, we can treat group as just an attribute prefix
+	return &TerminalHandler{
+		wr:           h.wr,
+		lvl:          h.lvl,
+		useColor:     h.useColor,
+		attrs:        append(h.attrs, slog.String("group", name)),
+		fieldPadding: make(map[string]int),
+	}
 }
 
 func (h *TerminalHandler) WithAttrs(attrs []slog.Attr) slog.Handler {

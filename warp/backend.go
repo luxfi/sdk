@@ -4,6 +4,7 @@
 package warp
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -103,7 +104,7 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 		}
 
 		// Compare source chain IDs
-		if unsignedMsg.SourceChainID != b.sourceChainID {
+		if !bytes.Equal(unsignedMsg.SourceChainID, b.sourceChainID[:]) {
 			return fmt.Errorf("wrong source chain ID at index %d", i)
 		}
 

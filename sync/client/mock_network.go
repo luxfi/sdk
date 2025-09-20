@@ -75,7 +75,8 @@ func (t *mockNetwork) processMock(request []byte) ([]byte, error) {
 }
 
 func (t *mockNetwork) Gossip([]byte) error {
-	panic("not implemented") // we don't care about this function for this test
+	// No-op for testing - we don't care about this function for this test
+	return nil
 }
 
 func (t *mockNetwork) mockResponse(times uint8, callback func(), response []byte) {

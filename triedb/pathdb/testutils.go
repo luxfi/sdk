@@ -105,20 +105,20 @@ func (h *testHasher) Commit(collectLeaf bool) (common.Hash, *trienode.NodeSet, e
 			continue
 		}
 		if len(val) == 0 {
-			set.AddNode(hash.Bytes(), trienode.NewDeletedWithPrev(h.cleans[hash]))
+			set.AddNode(hash.Bytes(), &trienode.NodeWithPrev{Node: trienode.NewDeleted(), Prev: h.cleans[hash]})
 		} else {
 			valHash := crypto.Keccak256Hash(val)
-			set.AddNode(hash.Bytes(), trienode.NewNodeWithPrev(common.BytesToHash(valHash[:]), val, h.cleans[hash]))
+			set.AddNode(hash.Bytes(), &trienode.NodeWithPrev{Node: trienode.New(common.BytesToHash(valHash[:]), val), Prev: h.cleans[hash]})
 		}
 	}
 	root, blob := hash(nodes)
 
 	// Include the dirty root node as well.
 	if root != types.EmptyRootHash && root != h.root {
-		set.AddNode(nil, trienode.NewNodeWithPrev(root, blob, nil))
+		set.AddNode(nil, &trienode.NodeWithPrev{Node: trienode.New(root, blob), Prev: nil})
 	}
 	if root == types.EmptyRootHash && h.root != types.EmptyRootHash {
-		set.AddNode(nil, trienode.NewDeletedWithPrev(nil))
+		set.AddNode(nil, &trienode.NodeWithPrev{Node: trienode.NewDeleted(), Prev: nil})
 	}
 	return root, set, nil
 }
