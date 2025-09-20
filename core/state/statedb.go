@@ -33,7 +33,6 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	ethstate "github.com/luxfi/geth/core/state"
-	"github.com/luxfi/geth/core/tracing"
 )
 
 // StateDB structs within the ethereum protocol are used to store anything
@@ -99,14 +98,9 @@ func (s *StateDB) SetState(addr common.Address, key, value common.Hash) common.H
 	return s.StateDB.SetState(addr, key, value)
 }
 
-// SetCode implements the vm.StateDB interface with 3 parameters
-func (s *StateDB) SetCode(addr common.Address, code []byte, reason tracing.CodeChangeReason) []byte {
-	return s.StateDB.SetCode(addr, code, reason)
-}
-
-// SetCodeUnspecified provides a 2-parameter convenience interface
-func (s *StateDB) SetCodeUnspecified(addr common.Address, code []byte) []byte {
-	return s.StateDB.SetCode(addr, code, tracing.CodeChangeUnspecified)
+// SetCode delegates to the underlying StateDB
+func (s *StateDB) SetCode(addr common.Address, code []byte) []byte {
+	return s.StateDB.SetCode(addr, code)
 }
 
 // VMStateDBAdapter provides VM interface compatibility by exposing the underlying geth StateDB

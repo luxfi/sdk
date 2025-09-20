@@ -22,7 +22,7 @@ type ValidatorReader interface {
 
 type Manager interface {
 	stateinterfaces.StateReader
-	uptime.Manager
+	uptime.Calculator
 	// Initialize initializes the validator manager
 	// by syncing the validator state with the current validator set
 	// and starting the uptime tracking.

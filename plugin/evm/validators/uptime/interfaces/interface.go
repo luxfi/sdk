@@ -10,7 +10,7 @@ import (
 )
 
 type PausableManager interface {
-	uptime.Manager
+	uptime.Calculator
 	validatorsstateinterfaces.StateCallbackListener
 	IsPaused(nodeID ids.NodeID) bool
 }

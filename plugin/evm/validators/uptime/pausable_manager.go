@@ -9,7 +9,6 @@ import (
 	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 	"github.com/luxfi/log"
 
-	"github.com/luxfi/consensus/uptime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 )
@@ -17,15 +16,15 @@ import (
 var errPausedDisconnect = errors.New("paused node cannot be disconnected")
 
 type pausableManager struct {
-	uptime.Manager
+	*Manager
 	pausedVdrs set.Set[ids.NodeID]
 	// connectedVdrs is a set of nodes that are connected to the manager.
 	// This is used to immediately connect nodes when they are unpaused.
 	connectedVdrs set.Set[ids.NodeID]
 }
 
-// NewPausableManager takes an uptime.Manager and returns a PausableManager
-func NewPausableManager(manager uptime.Manager) interfaces.PausableManager {
+// NewPausableManager takes a Manager and returns a PausableManager
+func NewPausableManager(manager *Manager) interfaces.PausableManager {
 	return &pausableManager{
 		pausedVdrs:    make(set.Set[ids.NodeID]),
 		connectedVdrs: make(set.Set[ids.NodeID]),
