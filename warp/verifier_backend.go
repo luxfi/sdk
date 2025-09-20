@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/ids"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
+	"github.com/luxfi/geth/crypto"
 )
 
 const (
@@ -24,7 +25,8 @@ const (
 // Verify verifies the signature of the message
 // It also implements the lp118.Verifier interface
 func (b *backend) Verify(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage, _ []byte) error {
-	messageID := unsignedMessage.ID()
+	messageIDBytes := unsignedMessage.ID()
+	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes))
 	// Known on-chain messages should be signed
 	if _, err := b.GetMessage(messageID); err == nil {
 		return nil

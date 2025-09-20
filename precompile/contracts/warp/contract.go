@@ -267,7 +267,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 	}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		consensus.GetNetworkID(ctx),
-		sourceChainID,
+		sourceChainID[:],
 		addressedPayload.Bytes(),
 	)
 	if err != nil {

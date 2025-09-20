@@ -47,7 +47,7 @@ func NewManager(
 	}
 
 	// Initialize uptime manager
-	uptimeManager := uptime.NewPausableManager(luxuptime.NewManager(validatorState, clock))
+	uptimeManager := uptime.NewPausableManager(uptime.NewManager(validatorState, clock))
 	validatorState.RegisterListener(uptimeManager)
 
 	return &manager{
