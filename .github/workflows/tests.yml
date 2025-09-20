@@ -22,13 +22,24 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
+      - name: Setup Go dependencies for lint
+        run: |
+          # Comment out local replace directives for lint
+          cp go.mod go.mod.backup
+          sed -i '/^replace.*\.\.\/.*$/d' go.mod
+          go mod tidy || true
+        shell: bash
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           working-directory: .
-          args: --timeout 10m
           skip-cache: true
+      - name: Restore go.mod
+        if: always()
+        run: |
+          mv go.mod.backup go.mod || true
+        shell: bash
       - name: Run shellcheck
         shell: bash
         run: scripts/shellcheck.sh

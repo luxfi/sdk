@@ -4,23 +4,7 @@
 package evm
 
 import (
-	"context"
 	"testing"
-	"time"
-
-	"github.com/luxfi/consensus"
-	commonEng "github.com/luxfi/consensus/core"
-	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
-	luxdvalidators "github.com/luxfi/consensus/validators"
-	"github.com/luxfi/consensus/validators/validatorstest"
-	"github.com/luxfi/database"
-	"github.com/luxfi/evm/plugin/evm/validators"
-	"github.com/luxfi/evm/utils/utilstest"
-	"github.com/luxfi/ids"
-	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/upgrade/upgradetest"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // TODO: Fix validator interfaces - GetCurrentValidatorOutput and StartedTracking no longer exist

@@ -14,7 +14,7 @@ import (
 
 	_ "embed"
 
-	"github.com/luxfi/consensus"
+	luxConsensus "github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/consensus/validators"
@@ -22,6 +22,7 @@ import (
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
+	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/eth/tracers"
 	"github.com/luxfi/evm/params"
@@ -639,7 +640,7 @@ func testReceiveWarpMessage(
 	vm.ctx = consensus.WithNetworkID(vm.ctx, testNetworkID)
 	unsignedMessage, err := luxWarp.NewUnsignedMessage(
 		consensus.GetNetworkID(vm.ctx),
-		sourceChainID[:],
+		sourceChainID,
 		addressedPayload.Bytes(),
 	)
 	require.NoError(err)
@@ -688,7 +689,7 @@ func testReceiveWarpMessage(
 	getValidatorSetTestErr := errors.New("can't get validator set test error")
 
 	testValidatorState2 := &validatorstest.State{
-		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			if msgFrom == fromPrimary {
 				return constants.PrimaryNetworkID, nil
 			}
@@ -707,7 +708,7 @@ func testReceiveWarpMessage(
 			for _, s := range signers {
 				vdrOutput[s.nodeID] = &validators.GetValidatorOutput{
 					NodeID:    s.nodeID,
-					PublicKey: s.secret.PublicKey(),
+					PublicKey: bls.PublicKeyToCompressedBytes(s.secret.PublicKey()),
 					Weight:    s.weight,
 				}
 			}
@@ -875,7 +876,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 	knownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("test"))
 	require.NoError(t, err)
 	chainID := consensus.GetChainID(tvm.vm.ctx)
-	knownWarpMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], knownPayload.Bytes())
+	knownWarpMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, knownPayload.Bytes())
 	require.NoError(t, err)
 
 	// Add the known message and get its signature to confirm
@@ -908,7 +909,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 				unknownPayload, err := payload.NewAddressedCall([]byte{1, 1, 1}, []byte("unknown"))
 				require.NoError(t, err)
 				chainID := consensus.GetChainID(tvm.vm.ctx)
-				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], unknownPayload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, unknownPayload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -920,7 +921,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 				payload, err := payload.NewHash(lastAcceptedID[:])
 				require.NoError(t, err)
 				chainID := consensus.GetChainID(tvm.vm.ctx)
-				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], payload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, payload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -933,7 +934,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 				payload, err := payload.NewHash(testID[:])
 				require.NoError(t, err)
 				chainID := consensus.GetChainID(tvm.vm.ctx)
-				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], payload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, payload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -983,7 +984,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 func TestClearWarpDB(t *testing.T) {
 	ctx, db, genesisBytes, _ := setupGenesis(t, upgradetest.Latest)
 	vm := &VM{}
-	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, []*commonEng.Fx{}, &TestSender{}))
+	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, nil, []interface{}{}, &TestSender{}))
 
 	// use multiple messages to test that all messages get cleared
 	payloads := [][]byte{[]byte("test1"), []byte("test2"), []byte("test3"), []byte("test4"), []byte("test5")}
@@ -992,7 +993,7 @@ func TestClearWarpDB(t *testing.T) {
 	// add all messages
 	for _, payload := range payloads {
 		chainID := consensus.GetChainID(vm.ctx)
-		unsignedMsg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(vm.ctx), chainID[:], payload)
+		unsignedMsg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(vm.ctx), chainID, payload)
 		require.NoError(t, err)
 		require.NoError(t, vm.warpBackend.AddMessage(unsignedMsg))
 		// ensure that the message was added
@@ -1007,7 +1008,7 @@ func TestClearWarpDB(t *testing.T) {
 	vm = &VM{}
 	// we need new context since the previous one has registered metrics.
 	ctx, _, _, _ = setupGenesis(t, upgradetest.Latest)
-	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, []*commonEng.Fx{}, &TestSender{}))
+	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte{}, nil, []interface{}{}, &TestSender{}))
 
 	// check messages are still present
 	for _, message := range messages {
@@ -1022,7 +1023,7 @@ func TestClearWarpDB(t *testing.T) {
 	vm = &VM{}
 	config := `{"prune-warp-db-enabled": true}`
 	ctx, _, _, _ = setupGenesis(t, upgradetest.Latest)
-	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte(config), []*commonEng.Fx{}, &TestSender{}))
+	require.NoError(t, vm.Initialize(context.Background(), ctx, db, genesisBytes, []byte{}, []byte(config), nil, []interface{}{}, &TestSender{}))
 
 	it := vm.warpDB.NewIterator()
 	require.False(t, it.Next())
