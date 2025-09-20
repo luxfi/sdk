@@ -65,7 +65,6 @@ func setupGenesisBlock(db ethdb.Database, triedb *triedb.Database, genesis *Gene
 }
 
 func TestGenesisBlockForTesting(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	genesisBlockForTestingHash := common.HexToHash("0x114ce61b50051f70768f982f7b59e82dd73b7bbd768e310c9d9f508d492e687b")
 	block := GenesisBlockForTesting(rawdb.NewMemoryDatabase(), common.Address{1}, big.NewInt(1))
 	if block.Hash() != genesisBlockForTestingHash {
@@ -74,7 +73,6 @@ func TestGenesisBlockForTesting(t *testing.T) {
 }
 
 func TestSetupGenesis(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme, customrawdb.FirewoodScheme} {
 		t.Run(scheme, func(t *testing.T) {
 			testSetupGenesis(t, scheme)
@@ -216,7 +214,6 @@ func testSetupGenesis(t *testing.T, scheme string) {
 }
 
 func TestStatefulPrecompilesConfigure(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	type test struct {
 		getConfig   func() *params.ChainConfig             // Return the config that enables the stateful precompile at the genesis for the test
 		assertState func(t *testing.T, sdb *state.StateDB) // Check that the stateful precompiles were configured correctly
@@ -275,7 +272,6 @@ func TestStatefulPrecompilesConfigure(t *testing.T) {
 
 // regression test for precompile activation after header block
 func TestPrecompileActivationAfterHeaderBlock(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	db := rawdb.NewMemoryDatabase()
 	customg := Genesis{
 		Config: params.TestChainConfig,
@@ -327,7 +323,6 @@ func TestPrecompileActivationAfterHeaderBlock(t *testing.T) {
 }
 
 func TestGenesisWriteUpgradesRegression(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	require := require.New(t)
 	config := params.Copy(params.TestChainConfig)
 	genesis := &Genesis{
@@ -391,7 +386,6 @@ func newDbConfig(t *testing.T, scheme string) *triedb.Config {
 }
 
 func TestVerkleGenesisCommit(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	var verkleTime uint64 = 0
 	verkleConfig := &params.ChainConfig{
 		ChainID:             big.NewInt(1),
@@ -441,7 +435,6 @@ func TestVerkleGenesisCommit(t *testing.T) {
 		t.Fatalf("expected trie to be verkle")
 	}
 
-	// TODO: Fix ExistsAccountTrieNode
 	// if !rawdb.ExistsAccountTrieNode(db, nil) {
 	// 	t.Fatal("could not find node")
 	// }

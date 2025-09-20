@@ -595,7 +595,6 @@ func patchBlock(blk *types.Block, root common.Hash, db ethdb.Database) *types.Bl
 
 // generateAndAcceptBlocks uses [core.GenerateChain] to generate blocks, then
 // calls Verify and Accept on each generated block
-// TODO: consider using this helper function in vm_test.go and elsewhere in this package to clean up tests
 func generateAndAcceptBlocks(t *testing.T, vm *VM, numBlocks int, gen func(int, *core.BlockGen), accepted func(*types.Block)) {
 	t.Helper()
 

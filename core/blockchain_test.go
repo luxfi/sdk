@@ -74,7 +74,6 @@ func createBlockChain(
 }
 
 func TestArchiveBlockChain(t *testing.T) {
-	t.Skip("Skipping archive test - blob fee calculation issue")
 	createArchiveBlockChain := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
 		return createBlockChain(db, archiveConfig, gspec, lastAcceptedHash)
 	}
@@ -86,7 +85,6 @@ func TestArchiveBlockChain(t *testing.T) {
 }
 
 func TestArchiveBlockChainSnapsDisabled(t *testing.T) {
-	t.Skip("Skipping archive test - blob fee calculation issue")
 	create := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
 		return createBlockChain(
 			db,
@@ -111,7 +109,6 @@ func TestArchiveBlockChainSnapsDisabled(t *testing.T) {
 }
 
 func TestPruningBlockChain(t *testing.T) {
-	t.Skip("Skipping pruning test - state issues")
 	createPruningBlockChain := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
 		return createBlockChain(db, pruningConfig, gspec, lastAcceptedHash)
 	}
@@ -123,7 +120,6 @@ func TestPruningBlockChain(t *testing.T) {
 }
 
 func TestPruningBlockChainSnapsDisabled(t *testing.T) {
-	t.Skip("Skipping pruning test - state issues")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testPruningBlockChainSnapsDisabled(t, scheme)
@@ -166,7 +162,6 @@ type wrappedStateManager struct {
 func (w *wrappedStateManager) Shutdown() error { return nil }
 
 func TestPruningBlockChainUngracefulShutdown(t *testing.T) {
-	t.Skip("Skipping pruning test - state issues")
 	create := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
 		blockchain, err := createBlockChain(db, pruningConfig, gspec, lastAcceptedHash)
 		if err != nil {
@@ -186,7 +181,6 @@ func TestPruningBlockChainUngracefulShutdown(t *testing.T) {
 }
 
 func TestPruningBlockChainUngracefulShutdownSnapsDisabled(t *testing.T) {
-	t.Skip("Skipping pruning test - state issues")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testPruningBlockChainUngracefulShutdownSnapsDisabled(t, scheme)
@@ -233,7 +227,6 @@ func testPruningBlockChainUngracefulShutdownSnapsDisabled(t *testing.T, scheme s
 }
 
 func TestEnableSnapshots(t *testing.T) {
-	t.Skip("Skipping enable snapshots test - state issues")
 	// Set snapshots to be disabled the first time, and then enable them on the restart
 	snapLimit := 0
 	create := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
@@ -269,7 +262,6 @@ func TestEnableSnapshots(t *testing.T) {
 }
 
 func TestCorruptSnapshots(t *testing.T) {
-	t.Skip("Skipping corrupt snapshots test - state issues")
 	create := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
 		// Delete the snapshot block hash and state root to ensure that if we die in between writing a snapshot
 		// diff layer to disk at any point, we can still recover on restart.
@@ -286,7 +278,6 @@ func TestCorruptSnapshots(t *testing.T) {
 }
 
 func TestBlockChainOfflinePruningUngracefulShutdown(t *testing.T) {
-	t.Skip("Skipping offline pruning test - state issues")
 	create := func(db ethdb.Database, gspec *Genesis, lastAcceptedHash common.Hash, _ string) (*BlockChain, error) {
 		// Import the chain. This runs all block validation rules.
 		blockchain, err := createBlockChain(db, pruningConfig, gspec, lastAcceptedHash)
@@ -433,7 +424,6 @@ func testRepopulateMissingTriesParallel(t *testing.T, parallelism int) {
 }
 
 func TestRepopulateMissingTries(t *testing.T) {
-	t.Skip("Skipping repopulate missing tries test - state issues")
 	// Test with different levels of parallelism as a regression test.
 	for _, parallelism := range []int{1, 2, 4, 1024} {
 		testRepopulateMissingTriesParallel(t, parallelism)
@@ -441,7 +431,6 @@ func TestRepopulateMissingTries(t *testing.T) {
 }
 
 func TestUngracefulAsyncShutdown(t *testing.T) {
-	t.Skip("Skipping ungraceful async shutdown test - state issues")
 	testUngracefulAsyncShutdown(t, rawdb.HashScheme, true)
 }
 
@@ -451,7 +440,6 @@ func TestUngracefulAsyncShutdown(t *testing.T) {
 // Firewood passes these tests because lastCommittedHeight always equals acceptorTip.
 // This means it will work as long as lastAcceptedHeight <= acceptorTip + 2 * commitInterval
 func TestUngracefulAsyncShutdownNoSnapshots(t *testing.T) {
-	t.Skip("Skipping ungraceful async shutdown test - state issues")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testUngracefulAsyncShutdown(t, scheme, false)
@@ -494,7 +482,6 @@ func testUngracefulAsyncShutdown(t *testing.T, scheme string, snapshotEnabled bo
 // TestCanonicalHashMarker tests all the canonical hash markers are updated/deleted
 // correctly in case reorg is called.
 func TestCanonicalHashMarker(t *testing.T) {
-	t.Skip("Skipping canonical hash marker test - state issues")
 	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme, customrawdb.FirewoodScheme} {
 		t.Run(scheme, func(t *testing.T) {
 			testCanonicalHashMarker(t, scheme)
@@ -615,7 +602,6 @@ func testCanonicalHashMarker(t *testing.T, scheme string) {
 }
 
 func TestTxLookupBlockChain(t *testing.T) {
-	t.Skip("Skipping tx lookup test - state issues")
 	cacheConf := &CacheConfig{
 		TrieCleanLimit:            256,
 		TrieDirtyLimit:            256,
@@ -640,7 +626,6 @@ func TestTxLookupBlockChain(t *testing.T) {
 }
 
 func TestTxLookupSkipIndexingBlockChain(t *testing.T) {
-	t.Skip("Skipping tx lookup test - blob fee calculation issue")
 	cacheConf := &CacheConfig{
 		TrieCleanLimit:            256,
 		TrieDirtyLimit:            256,
@@ -666,7 +651,6 @@ func TestTxLookupSkipIndexingBlockChain(t *testing.T) {
 }
 
 func TestCreateThenDeletePreByzantium(t *testing.T) {
-	t.Skip("Skipping state processing test - blob fee calculation issue")
 	// We want to use pre-byzantium rules where we have intermediate state roots
 	// between transactions.
 	config := *params.TestPreSubnetEVMChainConfig
@@ -681,7 +665,6 @@ func TestCreateThenDeletePreByzantium(t *testing.T) {
 	testCreateThenDelete(t, &config)
 }
 func TestCreateThenDeletePostByzantium(t *testing.T) {
-	t.Skip("Skipping state processing test - blob fee calculation issue")
 	testCreateThenDelete(t, params.TestChainConfig)
 }
 
@@ -765,7 +748,6 @@ func testCreateThenDelete(t *testing.T, config *params.ChainConfig) {
 }
 
 func TestDeleteThenCreate(t *testing.T) {
-	t.Skip("Skipping state processing test - blob fee calculation issue")
 	var (
 		engine        = dummy.NewFaker()
 		key, _        = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
@@ -884,7 +866,6 @@ func TestDeleteThenCreate(t *testing.T) {
 // TestTransientStorageReset ensures the transient storage is wiped correctly
 // between transactions.
 func TestTransientStorageReset(t *testing.T) {
-	t.Skip("Skipping state processing test - blob fee calculation issue")
 	var (
 		engine        = dummy.NewFaker()
 		key, _        = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
@@ -980,7 +961,6 @@ func TestTransientStorageReset(t *testing.T) {
 }
 
 func TestEIP3651(t *testing.T) {
-	t.Skip("Skipping state processing test - blob fee calculation issue")
 	var (
 		aa     = common.HexToAddress("0x000000000000000000000000000000000000aaaa")
 		bb     = common.HexToAddress("0x000000000000000000000000000000000000bbbb")

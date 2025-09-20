@@ -164,7 +164,6 @@ func BenchmarkJournal(b *testing.B) {
 			)
 			nodes[common.Hash{}][string(path)] = trienode.New(node.Hash, node.Blob)
 		}
-		// TODO(rjl493456442) a non-nil state set is expected.
 		return newDiffLayer(parent, common.Hash{}, 0, 0, nodes, nil)
 	}
 	var layer layer

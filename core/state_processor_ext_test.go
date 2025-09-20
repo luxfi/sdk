@@ -24,7 +24,6 @@ import (
 // blockchain imports a bad block with a transaction from a
 // non-whitelisted TX Allow List address.
 func TestBadTxAllowListBlock(t *testing.T) {
-	t.Skip("Skipping state processor test - configuration issue")
 	var (
 		db       = rawdb.NewMemoryDatabase()
 		testAddr = common.HexToAddress("0x71562b71999873DB5b286dF957af199Ec94617F7")

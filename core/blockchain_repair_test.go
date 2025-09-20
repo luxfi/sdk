@@ -283,11 +283,9 @@ func testLongDeepRepair(t *testing.T, snapshots bool) {
 // rolled back to the committed block, but the chain data itself left in the database
 // for replaying.
 func TestLongOldForkedShallowRepair(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongOldForkedShallowRepair(t, false)
 }
 func TestLongOldForkedShallowRepairWithSnapshots(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongOldForkedShallowRepair(t, true)
 }
 
@@ -326,11 +324,9 @@ func testLongOldForkedShallowRepair(t *testing.T, snapshots bool) {
 // chain is below the committed block. In this case we expect the canonical chain to be
 // rolled back to the committed block, but the chain data itself left in the database for replaying.
 func TestLongOldForkedDeepRepair(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongOldForkedDeepRepair(t, false)
 }
 func TestLongOldForkedDeepRepairWithSnapshots(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongOldForkedDeepRepair(t, true)
 }
 
@@ -369,11 +365,9 @@ func testLongOldForkedDeepRepair(t *testing.T, snapshots bool) {
 // the side chain is above the committed block. In this case we expect the chain to be
 // rolled back to the committed block, but the chain data itself left in the database for replaying.
 func TestLongNewerForkedShallowRepair(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongNewerForkedShallowRepair(t, false)
 }
 func TestLongNewerForkedShallowRepairWithSnapshots(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongNewerForkedShallowRepair(t, true)
 }
 
@@ -412,11 +406,9 @@ func testLongNewerForkedShallowRepair(t *testing.T, snapshots bool) {
 // chain is above the committed block. In this case we expect the canonical chain to be rolled
 // back to the committed block, but the chain data itself left in the database for replaying.
 func TestLongNewerForkedDeepRepair(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongNewerForkedDeepRepair(t, false)
 }
 func TestLongNewerForkedDeepRepairWithSnapshots(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongNewerForkedDeepRepair(t, true)
 }
 
@@ -454,11 +446,9 @@ func testLongNewerForkedDeepRepair(t *testing.T, snapshots bool) {
 // was already committed to disk and then the process crashed. In this case we expect the chain to be
 // rolled back to the committed block, but the chain data itself left in the database for replaying.
 func TestLongReorgedShallowRepair(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongReorgedShallowRepair(t, false)
 }
 func TestLongReorgedShallowRepairWithSnapshots(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongReorgedShallowRepair(t, true)
 }
 
@@ -497,11 +487,9 @@ func testLongReorgedShallowRepair(t *testing.T, snapshots bool) {
 // chains to be rolled back to the committed block, but the chain data itself left in the database
 // for replaying.
 func TestLongReorgedDeepRepair(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongReorgedDeepRepair(t, false)
 }
 func TestLongReorgedDeepRepairWithSnapshots(t *testing.T) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	testLongReorgedDeepRepair(t, true)
 }
 
@@ -536,7 +524,6 @@ func testLongReorgedDeepRepair(t *testing.T, snapshots bool) {
 }
 
 func testRepair(t *testing.T, tt *rewindTest, snapshots bool) {
-	t.Skip("Skipping repair tests - state synchronization issue needs investigation")
 	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme, customrawdb.FirewoodScheme} {
 		t.Run(scheme, func(t *testing.T) {
 			testRepairWithScheme(t, tt, snapshots, scheme)
@@ -550,7 +537,6 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	// fmt.Println(tt.dump(true))
 
 	if scheme == customrawdb.FirewoodScheme && snapshots {
-		t.Skip("Firewood scheme does not support snapshots")
 	}
 
 	// Create a temporary persistent database

@@ -1165,7 +1165,6 @@ func TestSendBlobTransaction(t *testing.T) {
 }
 
 func TestFillBlobTransaction(t *testing.T) {
-	t.Skip("Skipping due to BlockGasCost mismatch")
 	t.Parallel()
 	// Initialize test accounts
 	var (
@@ -1375,7 +1374,6 @@ func argsFromTransaction(tx *types.Transaction, from common.Address) Transaction
 		Nonce:                (*hexutil.Uint64)(&nonce),
 		Input:                (*hexutil.Bytes)(&input),
 		ChainID:              (*hexutil.Big)(tx.ChainId()),
-		// TODO: impl accessList conversion
 		//AccessList: tx.AccessList(),
 		BlobFeeCap: (*hexutil.Big)(tx.BlobGasFeeCap()),
 		BlobHashes: tx.BlobHashes(),

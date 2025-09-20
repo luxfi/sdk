@@ -59,7 +59,6 @@ func hashData(input []byte) common.Hash {
 
 // Tests that snapshot generation from an empty database.
 func TestGeneration(t *testing.T) {
-	t.Skip("Skipping due to nil pointer in pathdb")
 	testGeneration(t, rawdb.HashScheme)
 	testGeneration(t, rawdb.PathScheme)
 }
@@ -100,7 +99,6 @@ func testGeneration(t *testing.T, scheme string) {
 
 // Tests that snapshot generation with existent flat state.
 func TestGenerateExistentState(t *testing.T) {
-	t.Skip("Skipping due to pathdb nil pointer issue")
 	testGenerateExistentState(t, rawdb.HashScheme)
 	testGenerateExistentState(t, rawdb.PathScheme)
 }
@@ -284,7 +282,6 @@ func (t *testHelper) CommitAndGenerate() (common.Hash, *diskLayer) {
 //   - extra slots in the middle
 //   - extra slots in the end
 func TestGenerateExistentStateWithWrongStorage(t *testing.T) {
-	t.Skip("Skipping due to pathdb nil pointer issue")
 	testGenerateExistentStateWithWrongStorage(t, rawdb.HashScheme)
 	testGenerateExistentStateWithWrongStorage(t, rawdb.PathScheme)
 }
@@ -382,7 +379,6 @@ func testGenerateExistentStateWithWrongStorage(t *testing.T, scheme string) {
 // - wrong accounts
 // - extra accounts
 func TestGenerateExistentStateWithWrongAccounts(t *testing.T) {
-	t.Skip("Skipping due to pathdb nil pointer issue")
 	testGenerateExistentStateWithWrongAccounts(t, rawdb.HashScheme)
 	testGenerateExistentStateWithWrongAccounts(t, rawdb.PathScheme)
 }
@@ -443,7 +439,6 @@ func testGenerateExistentStateWithWrongAccounts(t *testing.T, scheme string) {
 // Tests that snapshot generation errors out correctly in case of a missing trie
 // node in the account trie.
 func TestGenerateCorruptAccountTrie(t *testing.T) {
-	t.Skip("Skipping due to pathdb nil pointer issue")
 	testGenerateCorruptAccountTrie(t, rawdb.HashScheme)
 	testGenerateCorruptAccountTrie(t, rawdb.PathScheme)
 }
@@ -485,7 +480,6 @@ func testGenerateCorruptAccountTrie(t *testing.T, scheme string) {
 // trie node for a storage trie. It's similar to internal corruption but it is
 // handled differently inside the generator.
 func TestGenerateMissingStorageTrie(t *testing.T) {
-	t.Skip("Skipping due to pathdb nil pointer issue")
 	testGenerateMissingStorageTrie(t, rawdb.HashScheme)
 	testGenerateMissingStorageTrie(t, rawdb.PathScheme)
 }
@@ -529,7 +523,6 @@ func testGenerateMissingStorageTrie(t *testing.T, scheme string) {
 // Tests that snapshot generation errors out correctly in case of a missing trie
 // node in a storage trie.
 func TestGenerateCorruptStorageTrie(t *testing.T) {
-	t.Skip("Skipping due to pathdb nil pointer issue")
 	testGenerateCorruptStorageTrie(t, rawdb.HashScheme)
 	testGenerateCorruptStorageTrie(t, rawdb.PathScheme)
 }
@@ -640,7 +633,6 @@ func testGenerateWithExtraAccounts(t *testing.T, scheme string) {
 
 func enableLogging() {
 	// log.SetDefault(log.NewLogger(log.NewTerminalHandlerWithLevel(os.Stderr, log.LevelTrace, true)))
-	// TODO: Fix logging
 }
 
 // Tests that snapshot generation when an extra account with storage exists in the snap state.

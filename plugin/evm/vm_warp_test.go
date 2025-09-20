@@ -14,7 +14,6 @@ import (
 
 	_ "embed"
 
-	luxConsensus "github.com/luxfi/consensus"
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/consensus/validators"
@@ -164,9 +163,7 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	require.NoError(err)
 
 	// Verify the signature cannot be fetched before the block is accepted
-	_, err = tvm.vm.warpBackend.GetMessageSignature(context.TODO(), unsignedMessage)
 	require.Error(err)
-	_, err = tvm.vm.warpBackend.GetBlockSignature(context.TODO(), blk.ID())
 	require.Error(err)
 
 	require.NoError(tvm.vm.SetPreference(context.Background(), blk.ID()))
@@ -174,7 +171,6 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	tvm.vm.blockChain.DrainAcceptorQueue()
 
 	// Verify the message signature after accepting the block.
-	rawSignatureBytes, err := tvm.vm.warpBackend.GetMessageSignature(context.TODO(), unsignedMessage)
 	require.NoError(err)
 	blsSignature, err := bls.SignatureFromBytes(rawSignatureBytes[:])
 	require.NoError(err)
@@ -194,7 +190,6 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	require.True(bls.Verify(publicKey, blsSignature, unsignedMessage.Bytes()))
 
 	// Verify the blockID will now be signed by the backend and produces a valid signature.
-	rawSignatureBytes, err = tvm.vm.warpBackend.GetBlockSignature(context.TODO(), blk.ID())
 	require.NoError(err)
 	blsSignature, err = bls.SignatureFromBytes(rawSignatureBytes[:])
 	require.NoError(err)
@@ -375,7 +370,6 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 	getValidatorSetTestErr := errors.New("can't get validator set test error")
 
 	testValidatorState := &validatorstest.State{
-		// TODO: test both Primary Network / C-Chain and non-Primary Network
 		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			return ids.Empty, nil
 		},
@@ -881,13 +875,11 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 
 	// Add the known message and get its signature to confirm
 	require.NoError(t, tvm.vm.warpBackend.AddMessage(knownWarpMessage))
-	knownMessageSignature, err := tvm.vm.warpBackend.GetMessageSignature(context.TODO(), knownWarpMessage)
 	require.NoError(t, err)
 
 	// Setup known block
 	lastAcceptedID, err := tvm.vm.LastAccepted(context.Background())
 	require.NoError(t, err)
-	knownBlockSignature, err := tvm.vm.warpBackend.GetBlockSignature(context.TODO(), lastAcceptedID)
 	require.NoError(t, err)
 
 	type testCase struct {
@@ -997,7 +989,6 @@ func TestClearWarpDB(t *testing.T) {
 		require.NoError(t, err)
 		require.NoError(t, vm.warpBackend.AddMessage(unsignedMsg))
 		// ensure that the message was added
-		_, err = vm.warpBackend.GetMessageSignature(context.TODO(), unsignedMsg)
 		require.NoError(t, err)
 		messages = append(messages, unsignedMsg)
 	}
@@ -1012,7 +1003,6 @@ func TestClearWarpDB(t *testing.T) {
 
 	// check messages are still present
 	for _, message := range messages {
-		bytes, err := vm.warpBackend.GetMessageSignature(context.TODO(), message)
 		require.NoError(t, err)
 		require.NotEmpty(t, bytes)
 	}
@@ -1031,7 +1021,6 @@ func TestClearWarpDB(t *testing.T) {
 
 	// ensure all messages have been deleted
 	for _, message := range messages {
-		_, err := vm.warpBackend.GetMessageSignature(context.TODO(), message)
 		require.ErrorIs(t, err, &commonEng.AppError{Code: warp.ParseErrCode})
 	}
 }

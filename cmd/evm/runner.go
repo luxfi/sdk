@@ -269,7 +269,7 @@ func runCmd(ctx *cli.Context) error {
 		}
 	} else {
 		if len(code) > 0 {
-			statedb.SetCode(receiver, code, tracing.CodeChangeUnspecified)
+			statedb.SetCodeUnspecified(receiver, code)
 		}
 		execFunc = func() ([]byte, uint64, error) {
 			return runtime.Call(receiver, input, &runtimeConfig)

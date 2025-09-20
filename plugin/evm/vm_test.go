@@ -245,7 +245,6 @@ func getEthBlock(t *testing.T, blk block.Block) *types.Block {
 		return evmBlock.ethBlock
 	}
 	// Skip complex type assertions for now - return a dummy block
-	t.Skip("Block type assertion not supported, skipping test")
 	return nil
 }
 
@@ -257,7 +256,6 @@ func getInternalBlock(t *testing.T, blk block.Block) *Block {
 		return evmBlock
 	}
 	// Skip complex type assertions for now
-	t.Skip("Block type assertion not supported, skipping test")
 	return nil
 }
 
@@ -3514,8 +3512,6 @@ func TestRewardManagerPrecompileAllowFeeRecipients(t *testing.T) {
 func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// The most recent network upgrade in Subnet-EVM is SubnetEVM itself, which cannot be disabled for this test since it results in
 	// disabling dynamic fees and causes a panic since some code assumes that this is enabled.
-	// TODO update this test when there is a future network upgrade that can be skipped in the config.
-	t.Skip("no skippable upgrades")
 
 	tvm := newVM(t, testVMConfig{
 		genesisJSON: genesisJSONPreSubnetEVM,

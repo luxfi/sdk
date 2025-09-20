@@ -59,7 +59,6 @@ func TestMustNotImport(t *testing.T) {
 		"plugin/evm/client": {"core", "plugin/evm/customtypes", "params"},
 		"plugin/evm/config": {"core", "params", "plugin/evm/customtypes"},
 		"plugin/evm/header": {"core", "core/vm", "params"},
-		// TODO: ethclient has a dependency on params, see the ethclient.go for more info.
 		// "ethclient":         {"plugin/evm/customtypes", "params"},
 		"warp": {"plugin/evm/customtypes", "params"},
 	}

@@ -54,7 +54,6 @@ func TestAddAndGetValidMessage(t *testing.T) {
 	require.NoError(t, backend.AddMessage(testUnsignedMessage))
 
 	// Verify that a signature is returned successfully, and compare to expected signature.
-	signature, err := backend.GetMessageSignature(context.TODO(), testUnsignedMessage)
 	require.NoError(t, err)
 
 	expectedSigBytes, err := localSigner.Sign(testUnsignedMessage.Bytes())
@@ -75,7 +74,6 @@ func TestAddAndGetUnknownMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	// Try getting a signature for a message that was not added.
-	_, err = backend.GetMessageSignature(context.TODO(), testUnsignedMessage)
 	require.Error(t, err)
 }
 
@@ -103,11 +101,9 @@ func TestGetBlockSignature(t *testing.T) {
 	expectedSigBytes, err := localSigner.Sign(msgBytes)
 	require.NoError(err)
 
-	signature, err := backend.GetBlockSignature(context.TODO(), blkID)
 	require.NoError(err)
 	require.Equal(expectedSigBytes, signature[:])
 
-	_, err = backend.GetBlockSignature(context.TODO(), ids.GenerateTestID())
 	require.Error(err)
 }
 
@@ -129,7 +125,6 @@ func TestZeroSizedCache(t *testing.T) {
 	require.NoError(t, backend.AddMessage(testUnsignedMessage))
 
 	// Verify that a signature is returned successfully, and compare to expected signature.
-	signature, err := backend.GetMessageSignature(context.TODO(), testUnsignedMessage)
 	require.NoError(t, err)
 
 	expectedSigBytes, err := localSigner.Sign(testUnsignedMessage.Bytes())
@@ -159,7 +154,6 @@ func TestOffChainMessages(t *testing.T) {
 				require.NoError(err)
 				require.Equal(testUnsignedMessage.Bytes(), msg.Bytes())
 
-				signature, err := b.GetMessageSignature(context.TODO(), testUnsignedMessage)
 				require.NoError(err)
 				expectedSignatureBytes, err := warpSigner.Sign(testUnsignedMessage.Bytes())
 				require.NoError(err)

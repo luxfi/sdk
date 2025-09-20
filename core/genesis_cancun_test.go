@@ -13,7 +13,6 @@ import (
 )
 
 func TestGenesisCancun(t *testing.T) {
-	t.Skip("Skipping genesis test - configuration issue")
 	require := require.New(t)
 
 	// Test with Cancun enabled (default TestChainConfig)

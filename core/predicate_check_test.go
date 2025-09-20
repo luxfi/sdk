@@ -27,7 +27,6 @@ type predicateCheckTest struct {
 }
 
 func TestCheckPredicate(t *testing.T) {
-	t.Skip("Skipping predicate test - configuration issue")
 	testErr := errors.New("test error")
 	addr1 := common.HexToAddress("0xaa")
 	addr2 := common.HexToAddress("0xbb")
@@ -297,7 +296,6 @@ func TestCheckPredicate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			require := require.New(t)
 			// Create the rules from TestChainConfig and update the predicates based on the test params
-			rules := params.TestChainConfig.Rules(common.Big0, params.IsMergeTODO, 0)
 			if test.createPredicates != nil {
 				for address, predicater := range test.createPredicates(t) {
 					rules := params.GetRulesExtra(rules)
@@ -324,7 +322,6 @@ func TestCheckPredicate(t *testing.T) {
 }
 
 func TestCheckPredicatesOutput(t *testing.T) {
-	t.Skip("Skipping predicate test - configuration issue")
 	testErr := errors.New("test error")
 	addr1 := common.HexToAddress("0xaa")
 	addr2 := common.HexToAddress("0xbb")
@@ -425,7 +422,6 @@ func TestCheckPredicatesOutput(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 			// Create the rules from TestChainConfig and update the predicates based on the test params
-			rules := params.TestChainConfig.Rules(common.Big0, params.IsMergeTODO, 0)
 			predicater := precompileconfig.NewMockPredicater(gomock.NewController(t))
 			predicater.EXPECT().PredicateGas(gomock.Any()).Return(uint64(0), nil).Times(len(test.testTuple))
 

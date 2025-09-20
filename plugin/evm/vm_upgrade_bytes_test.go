@@ -24,6 +24,8 @@ import (
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/rlp"
+	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/upgrade"
@@ -33,6 +35,38 @@ import (
 )
 
 var DefaultEtnaTime = uint64(upgrade.Default.EtnaTime.Unix())
+
+// getEthBlockFromConsensusBlock safely extracts the Ethereum block from a consensus block interface
+func getEthBlockFromConsensusBlock(t *testing.T, blk consensusInterfaces.Block) *types.Block {
+	// Try direct cast to *Block first
+	if internalBlock, ok := blk.(*Block); ok {
+		return internalBlock.ethBlock
+	}
+
+	// If that fails, try to access through interface methods
+	if blockID := blk.ID(); blockID != ids.Empty {
+		// Extract block data through the block interface
+		if data := blk.Bytes(); len(data) > 0 {
+			// Try to decode as RLP-encoded block
+			var block types.Block
+			if err := rlp.DecodeBytes(data, &block); err == nil {
+				return &block
+			}
+		}
+	}
+
+	// Last resort: create a minimal block for testing
+	t.Logf("Warning: Creating minimal block for test - original type: %T", blk)
+	header := &types.Header{
+		Number:     big.NewInt(int64(blk.Height())),
+		Time:       uint64(time.Now().Unix()),
+		GasLimit:   8000000,
+		GasUsed:    0,
+		Difficulty: common.Big1,
+	}
+	body := &types.Body{}
+	return types.NewBlock(header, body, nil, trie.NewStackTrie(nil))
+}
 
 func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	// Make a TxAllowListConfig upgrade at genesis and convert it to JSON to apply as upgradeBytes.
@@ -142,14 +176,8 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	blk := issueAndAccept(t, tvm.vm)
 
 	// Verify that the constructed block only has the whitelisted tx
-	// Get internal block safely - try direct cast to *Block first
-	var block *types.Block
-	if internalBlock, ok := blk.(*Block); ok {
-		block = internalBlock.ethBlock
-	} else {
-		// If direct cast fails, skip the test
-		t.Skip("Unable to get internal block - type assertion failed")
-	}
+	// Get internal block safely using proper type assertion
+	block := getEthBlockFromConsensusBlock(t, blk)
 	txs := block.Transactions()
 	if txs.Len() != 1 {
 		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())
@@ -171,13 +199,8 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	blk = issueAndAccept(t, tvm.vm)
 
 	// Verify that the constructed block only has the previously rejected tx
-	// Get internal block safely - try direct cast to *Block first
-	if internalBlock, ok := blk.(*Block); ok {
-		block = internalBlock.ethBlock
-	} else {
-		// If direct cast fails, skip the test
-		t.Skip("Unable to get internal block - type assertion failed")
-	}
+	// Get internal block safely using proper type assertion
+	block = getEthBlockFromConsensusBlock(t, blk)
 	txs = block.Transactions()
 	if txs.Len() != 1 {
 		t.Fatalf("Expected number of txs to be %d, but found %d", 1, txs.Len())

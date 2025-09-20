@@ -21,8 +21,6 @@ import (
 )
 
 func TestAcceptedLogsSubscription_DISABLED(t *testing.T) {
-	t.Skip("Test disabled due to complex state root mismatch issue - needs deeper analysis")
-	//FIXME: This test has a complex issue with state root mismatches between GenerateChainWithGenesis and InsertChain
 	/*
 		Example contract to test event emission:
 

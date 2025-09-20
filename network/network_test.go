@@ -792,7 +792,6 @@ type testSDKHandler struct {
 }
 
 func (t *testSDKHandler) AppGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte) {
-	// TODO implement me
 	panic("implement me")
 }
 
@@ -802,6 +801,5 @@ func (t *testSDKHandler) AppRequest(ctx context.Context, nodeID ids.NodeID, dead
 }
 
 func (t *testSDKHandler) CrossChainAppRequest(ctx context.Context, chainID ids.ID, deadline time.Time, requestBytes []byte) ([]byte, error) {
-	// TODO implement me
 	panic("implement me")
 }
