@@ -6,7 +6,6 @@ package state
 import (
 	"github.com/holiman/uint256"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/tracing"
 )
 
 // StateUpgradeAdapter adapts the new geth StateDB interface (with BalanceChangeReason)
@@ -17,14 +16,14 @@ type StateUpgradeAdapter struct {
 
 // AddBalance implements the legacy AddBalance without BalanceChangeReason
 func (a *StateUpgradeAdapter) AddBalance(addr common.Address, amount *uint256.Int) {
-	// Use BalanceChangeUnspecified for state upgrade balance changes
-	a.StateDB.AddBalance(addr, amount, tracing.BalanceChangeUnspecified)
+	// Call the underlying AddBalance without the reason parameter for compatibility
+	a.StateDB.AddBalance(addr, amount)
 }
 
 // SetNonce implements the legacy SetNonce without NonceChangeReason
 func (a *StateUpgradeAdapter) SetNonce(addr common.Address, nonce uint64) {
-	// Use NonceChangeUnspecified for state upgrade nonce changes
-	a.StateDB.SetNonce(addr, nonce, tracing.NonceChangeUnspecified)
+	// Call the underlying SetNonce without the reason parameter for compatibility
+	a.StateDB.SetNonce(addr, nonce)
 }
 
 // SetState implements the stateupgrade.StateDB interface
@@ -35,9 +34,8 @@ func (a *StateUpgradeAdapter) SetState(addr common.Address, key, value common.Ha
 
 // SetCode implements the stateupgrade.StateDB interface (no return value)
 func (a *StateUpgradeAdapter) SetCode(addr common.Address, code []byte) {
-	// Call the underlying SetCode which takes 3 parameters (addr, code, reason)
-	// We use CodeChangeUnspecified for state upgrade code changes
-	_ = a.StateDB.SetCode(addr, code, tracing.CodeChangeGenesis)
+	// Call the underlying SetCode - use the version without CodeChangeReason for compatibility
+	_ = a.StateDB.SetCode(addr, code)
 }
 
 // NewStateUpgradeAdapter creates a new adapter for state upgrade compatibility
