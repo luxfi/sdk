@@ -46,12 +46,12 @@ fi
 
 # For now, we'll build from source if the binary isn't available
 echo "Checking for pre-built binary..."
-DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-linux-${GOARCH}-v${LUXD_VERSION}.tar.gz"
+DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/avalanchego-linux-${GOARCH}-v${LUXD_VERSION}.tar.gz"
 
 if [[ "$GOOS" == "darwin" ]]; then
-  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-macos-${GOARCH}-v${LUXD_VERSION}.tar.gz"
+  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/avalanchego-macos-v${LUXD_VERSION}.zip"
 elif [[ "$GOOS" == "windows" ]]; then
-  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-windows-${GOARCH}-v${LUXD_VERSION}.zip"
+  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/avalanchego-windows-${GOARCH}-v${LUXD_VERSION}.zip"
 fi
 
 echo "Attempting to download from: $DOWNLOAD_URL"
@@ -62,10 +62,17 @@ if command -v curl &> /dev/null; then
   
   if [[ "$HTTP_CODE" == "200" ]]; then
     echo "Downloaded pre-built binary"
-    tar -xzf "${BASEDIR}/luxd.tar.gz" -C "${BASEDIR}"
+    if [[ "$GOOS" == "darwin" ]]; then
+      unzip -q "${BASEDIR}/luxd.tar.gz" -d "${BASEDIR}"
+    else
+      tar -xzf "${BASEDIR}/luxd.tar.gz" -C "${BASEDIR}"
+    fi
     
-    # Find the luxd binary
+    # Find the luxd/avalanchego binary (try both names)
     LUXD_PATH=$(find "${BASEDIR}" -name "luxd" -type f | head -1)
+    if [[ -z "$LUXD_PATH" ]]; then
+      LUXD_PATH=$(find "${BASEDIR}" -name "avalanchego" -type f | head -1)
+    fi
     if [[ -n "$LUXD_PATH" ]]; then
       mv "$LUXD_PATH" "${LUXD_BUILD_PATH}"
       chmod +x "${LUXD_BUILD_PATH}"
