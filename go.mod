@@ -1,6 +1,6 @@
 module github.com/luxfi/evm
 
-go 1.24.6
+go 1.25.1
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.13.0
@@ -202,7 +202,8 @@ require (
 // Force tablewriter version for compatibility
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 
-// Use local luxfi packages instead of downloaded versions
+// CI/Production: Comment out these replace directives for CI
+// For local development: Uncomment these replace directives
 replace github.com/luxfi/node => ../node
 
 replace github.com/luxfi/consensus => ../consensus
@@ -220,33 +221,3 @@ replace github.com/luxfi/metric => ../metric
 replace github.com/luxfi/ids => ../ids
 
 replace github.com/luxfi/log => ../log
-
-// replace github.com/luxfi/crypto => ../crypto
-
-// replace github.com/luxfi/database => ../database
-
-// replace github.com/luxfi/geth => ../geth
-
-// replace github.com/luxfi/ids => ../ids
-
-// replace github.com/luxfi/log => ../log
-
-// replace github.com/luxfi/math => ../math
-
-// replace github.com/luxfi/metric => ../metric
-
-// replace github.com/luxfi/warp => ../warp
-
-// For local development, uncomment the block below and comment out the CI/Production block
-// replace (
-// 	github.com/luxfi/consensus => ../consensus
-// 	github.com/luxfi/crypto => ../crypto
-// 	github.com/luxfi/database => ../database
-// 	github.com/luxfi/geth => /home/z/work/lux/geth
-// 	github.com/luxfi/go-bip39 => ../go-bip39
-// 	github.com/luxfi/ids => ../ids
-// 	github.com/luxfi/log => ../log
-// 	github.com/luxfi/metric => ../metric
-// 	github.com/luxfi/node => ../node
-// 	github.com/luxfi/warp => ../warp
-// )
