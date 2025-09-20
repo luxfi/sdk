@@ -1,59 +1,25 @@
 #!/bin/bash
-# CI Setup Script for LUX EVM Module
-# This script prepares the module for CI builds by removing local replace directives
-
 set -e
 
-echo "=== CI Setup for LUX EVM Module ==="
+echo "Setting up CI environment..."
 
-# Check if we're in the right directory
-if [ ! -f "go.mod" ]; then
-    echo "Error: go.mod not found. Please run this script from the evm directory."
-    exit 1
-fi
-
-# Detect OS
-OS=$(uname -s)
-echo "Detected OS: $OS"
-
-# macOS specific setup
-if [ "$OS" = "Darwin" ]; then
-    echo "Setting up macOS environment..."
-    # Use Go from PATH, don't rely on Homebrew
-    export PATH="/usr/local/go/bin:$PATH"
-    export GOPATH="$HOME/go"
-    export PATH="$GOPATH/bin:$PATH"
-fi
-
-# Validate Go installation
-if ! command -v go &> /dev/null; then
-    echo "Error: Go is not installed or not in PATH"
-    exit 1
-fi
-
-echo "Go version: $(go version)"
-
-# Backup original go.mod
-echo "Backing up go.mod..."
+# Always remove local replace directives for CI (GitHub Actions always sets CI=true)
+echo "Removing local replace directives for CI..."
 cp go.mod go.mod.backup
 
-# Remove local replace directives (keep tablewriter replace)
-echo "Removing local replace directives..."
-sed -i.bak '/replace.*\.\.\/.*$/d' go.mod
-sed -i.bak '/replace.*\/home\/.*$/d' go.mod
+# Use portable sed syntax that works on both Linux and macOS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS requires -i ''
+    sed -i '' '/^replace github\.com\/luxfi\/.*=>.*/d' go.mod
+else
+    # Linux sed
+    sed -i '/^replace github\.com\/luxfi\/.*=>.*/d' go.mod
+fi
 
-# Show what's left in replace directives
-echo "Remaining replace directives:"
-grep "^replace" go.mod || echo "  (none except commented ones)"
+echo "Local replace directives removed for CI"
 
-# Download dependencies
-echo "Downloading dependencies..."
-go mod download || echo "Warning: Some dependencies may not be available"
-
-# Run go mod tidy
+# Run go mod tidy to ensure dependencies are correct
 echo "Running go mod tidy..."
-go mod tidy || true
+go mod tidy
 
-echo ""
-echo "=== CI Setup Complete ==="
-echo ""
+echo "CI setup complete"
