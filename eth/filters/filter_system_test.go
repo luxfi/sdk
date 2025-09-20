@@ -71,7 +71,6 @@ func (b *testBackend) ChainConfig() *params.ChainConfig {
 }
 
 func (b *testBackend) CurrentHeader() *types.Header {
-	hdr, _ := b.HeaderByNumber(context.TODO(), rpc.LatestBlockNumber)
 	return hdr
 }
 

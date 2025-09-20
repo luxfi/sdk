@@ -64,7 +64,6 @@ var waitDeployedTests = map[string]struct {
 }
 
 func TestWaitDeployed(t *testing.T) {
-	t.Skip("Skipping due to merkle root issue in simulated backend")
 	t.Parallel()
 	for name, test := range waitDeployedTests {
 		backend := simulated.NewBackend(
@@ -124,7 +123,6 @@ func TestWaitDeployed(t *testing.T) {
 }
 
 func TestWaitDeployedCornerCases(t *testing.T) {
-	t.Skip("Skipping due to merkle root issue in simulated backend")
 	backend := simulated.NewBackend(
 		func() types.GenesisAlloc {
 			cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)

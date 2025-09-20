@@ -74,7 +74,6 @@ func testInsert(t *testing.T, bc *BlockChain, chain []*types.Block, wantErr erro
 
 // This test checks status reporting of InsertHeaderChain.
 func TestHeaderInsertion(t *testing.T) {
-	t.Skip("Skipping header insertion test - configuration issue")
 	var (
 		db    = rawdb.NewMemoryDatabase()
 		gspec = &Genesis{

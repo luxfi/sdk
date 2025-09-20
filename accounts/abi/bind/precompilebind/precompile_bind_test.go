@@ -621,7 +621,6 @@ func TestPrecompileBind(t *testing.T) {
 	// Skip the test if no Go command can be found
 	gocmd := runtime.GOROOT() + "/bin/go"
 	if !common.FileExist(gocmd) {
-		t.Skip("go sdk not found for testing")
 	}
 	// Create a temporary workspace for the test suite
 	ws := t.TempDir()

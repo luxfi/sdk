@@ -1935,7 +1935,6 @@ var bindTests = []struct {
 			if err := contract.Error(new(bind.CallOpts)); err == nil {
 				t.Fatalf("expected contract to throw error")
 			}
-			// TODO (MariusVanDerWijden unpack error using abigen
 			// once that is implemented
 	   `,
 		nil,
@@ -2116,7 +2115,6 @@ func golangBindings(t *testing.T, overload bool) {
 	// Skip the test if no Go command can be found
 	gocmd := runtime.GOROOT() + "/bin/go"
 	if !common.FileExist(gocmd) {
-		t.Skip("go sdk not found for testing")
 	}
 	// Create a temporary workspace for the test suite
 	ws := t.TempDir()

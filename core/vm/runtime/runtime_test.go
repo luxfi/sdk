@@ -377,7 +377,7 @@ func benchmarkNonModifyingCode(gas uint64, code []byte, name string, tracerCode 
 
 	//cfg.State.CreateAccount(cfg.Origin)
 	// set the receiver's (the executing contract) code for execution.
-	cfg.State.SetCode(destination, code, tracing.CodeChangeContractCreation)
+	cfg.State.SetCodeUnspecified(destination, code)
 	vmenv.Call(sender, destination, nil, gas, uint256.MustFromBig(cfg.Value))
 
 	b.Run(name, func(b *testing.B) {
@@ -506,7 +506,6 @@ func BenchmarkSimpleLoop(b *testing.B) {
 // TestEip2929Cases contains various testcases that are used for
 // EIP-2929 about gas repricings
 func TestEip2929Cases(t *testing.T) {
-	t.Skip("Test only useful for generating documentation")
 	id := 1
 	prettyPrint := func(comment string, code []byte) {
 		instrs := make([]string, 0)
@@ -617,11 +616,9 @@ func TestEip2929Cases(t *testing.T) {
 // correctly
 // see: https://github.com/luxfi/geth/issues/22649
 func TestColdAccountAccessCost(t *testing.T) {
-	t.Skip("Skipping tracer-based test due to nil scope issue in upstream geth")
 }
 
 func TestRuntimeJSTracer(t *testing.T) {
-	t.Skip("Skipping JS tracer test due to tracer nil pointer issues")
 	jsTracers := []string{
 		`{enters: 0, exits: 0, enterGas: 0, gasUsed: 0, steps:0,
 	step: function() { this.steps++},
@@ -796,7 +793,6 @@ func TestRuntimeJSTracer(t *testing.T) {
 }
 
 func TestJSTracerCreateTx(t *testing.T) {
-	t.Skip("Skipping JS tracer create test due to tracer nil pointer issues")
 	jsTracer := `
 	{enters: 0, exits: 0,
 	step: function() {},

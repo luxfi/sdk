@@ -71,7 +71,6 @@ var (
 
 // Chain configuration with Cancun enabled.
 //
-// TODO(karalabe): replace with params.MainnetChainConfig after Cancun.
 var testChainConfig *params.ChainConfig
 
 func init() {

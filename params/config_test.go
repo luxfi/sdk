@@ -281,10 +281,8 @@ func TestActivePrecompiles(t *testing.T) {
 		},
 	)
 
-	rules0 := RulesAt(config, common.Big0, IsMergeTODO, 0)
 	require.True(t, GetRulesExtra(rules0).IsPrecompileEnabled(nativeminter.Module.Address))
 
-	rules1 := RulesAt(config, common.Big0, IsMergeTODO, 1)
 	require.False(t, GetRulesExtra(rules1).IsPrecompileEnabled(nativeminter.Module.Address))
 }
 

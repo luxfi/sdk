@@ -768,7 +768,15 @@ func makeWarpPredicateTests(tb testing.TB) map[string]precompiletest.PredicateTe
 }
 
 func TestWarpPredicate(t *testing.T) {
-	t.Skip("Skipping due to warp.Signature RLP serialization issues")
+	// Handle potential RLP serialization issues gracefully
+	defer func() {
+		if r := recover(); r != nil {
+			t.Logf("Recovered from RLP serialization issue: %v", r)
+			// Convert panic to test failure with useful information
+			t.Fatalf("Warp predicate test failed due to RLP serialization: %v", r)
+		}
+	}()
+
 	predicateTests := makeWarpPredicateTests(t)
 	precompiletest.RunPredicateTests(t, predicateTests)
 }

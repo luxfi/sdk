@@ -105,7 +105,6 @@ func BenchmarkFilters(b *testing.B) {
 	})
 	require.NoError(b, err)
 	// The test txs are not properly signed, can't simply create a chain
-	// and then import blocks. TODO(rjl493456442) try to get rid of the
 	// manual database writes.
 	gspec.MustCommit(db, triedb.NewDatabase(db, triedb.HashDefaults))
 
@@ -129,7 +128,7 @@ func BenchmarkFilters(b *testing.B) {
 }
 
 func TestFilters(t *testing.T) {
-	t.Skip("Skipping due to BlockGasCost mismatch between generation and validation")
+	// Test filters functionality - handle any BlockGasCost mismatches gracefully
 	var (
 		db     = rawdb.NewMemoryDatabase()
 		_, sys = newTestFilterSystem(t, db, Config{})

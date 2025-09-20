@@ -13,7 +13,6 @@ import (
 )
 
 func TestGenesisDebug(t *testing.T) {
-	t.Skip("Skipping genesis debug test - configuration issue")
 	require := require.New(t)
 
 	// Create a simple genesis

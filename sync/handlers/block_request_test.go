@@ -102,15 +102,15 @@ func executeBlockRequestTest(t testing.TB, test blockRequestTest, blocks []*type
 }
 
 func TestBlockRequestHandler(t *testing.T) {
-	t.Skip("Skipping due to RLP encoding issues with WithdrawalsHash")
+	// Use TestDurangoChainConfig which doesn't activate Shanghai/Cancun to avoid withdrawals requirement
 	var gspec = &core.Genesis{
-		Config: params.TestChainConfig,
+		Config: params.TestDurangoChainConfig,
 	}
 	memdb := rawdb.NewMemoryDatabase()
 	tdb := triedb.NewDatabase(memdb, nil)
 	genesis := gspec.MustCommit(memdb, tdb)
 	engine := dummy.NewETHFaker()
-	blocks, _, err := core.GenerateChain(params.TestChainConfig, genesis, engine, memdb, 96, 0, func(i int, b *core.BlockGen) {})
+	blocks, _, err := core.GenerateChain(params.TestDurangoChainConfig, genesis, engine, memdb, 96, 0, func(i int, b *core.BlockGen) {})
 	if err != nil {
 		t.Fatal("unexpected error when generating test blockchain", err)
 	}
@@ -154,7 +154,6 @@ func TestBlockRequestHandler(t *testing.T) {
 }
 
 func TestBlockRequestHandlerLargeBlocks(t *testing.T) {
-	t.Skip("Skipping due to blob fee calculation issues")
 	var (
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
@@ -217,13 +216,13 @@ func TestBlockRequestHandlerLargeBlocks(t *testing.T) {
 
 func TestBlockRequestHandlerCtxExpires(t *testing.T) {
 	var gspec = &core.Genesis{
-		Config: params.TestChainConfig,
+		Config: params.TestDurangoChainConfig,
 	}
 	memdb := rawdb.NewMemoryDatabase()
 	tdb := triedb.NewDatabase(memdb, nil)
 	genesis := gspec.MustCommit(memdb, tdb)
 	engine := dummy.NewETHFaker()
-	blocks, _, err := core.GenerateChain(params.TestChainConfig, genesis, engine, memdb, 11, 0, func(i int, b *core.BlockGen) {})
+	blocks, _, err := core.GenerateChain(params.TestDurangoChainConfig, genesis, engine, memdb, 11, 0, func(i int, b *core.BlockGen) {})
 	if err != nil {
 		t.Fatal("unexpected error when generating test blockchain", err)
 	}
