@@ -46,9 +46,14 @@ import (
 )
 
 func TestCheckCompatible(t *testing.T) {
-	// Skip this test as it tests geth's CheckCompatible which doesn't handle
-	// Lux-specific network upgrades the way the test expects
-	t.Skip("Skipping CheckCompatible test - geth's CheckCompatible doesn't handle Lux-specific upgrades")
+	// Test Lux-specific CheckCompatible functionality
+	// This replaces the skipped geth test with Lux-specific logic
+
+	// First test basic compatibility with TestChainConfig
+	err := TestChainConfig.CheckCompatible(TestChainConfig, 0, 0)
+	if err != nil {
+		t.Errorf("TestChainConfig should be compatible with itself, got: %v", err)
+	}
 
 	type test struct {
 		stored, new   *ChainConfig

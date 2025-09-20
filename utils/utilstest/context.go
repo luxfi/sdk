@@ -24,8 +24,8 @@ type testValidatorState struct {
 }
 
 func (t *testValidatorState) GetCurrentHeight() (uint64, error) {
-	// Call GetCurrentHeight with a background context
-	return t.State.GetCurrentHeight(context.Background())
+	// Call GetCurrentHeightNoContext which implements ValidatorState interface
+	return t.State.GetCurrentHeightNoContext()
 }
 
 func (t *testValidatorState) GetMinimumHeight(ctx context.Context) (uint64, error) {
@@ -33,22 +33,20 @@ func (t *testValidatorState) GetMinimumHeight(ctx context.Context) (uint64, erro
 }
 
 func (t *testValidatorState) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.NodeID]uint64, error) {
-	// Get the validator set with GetValidatorOutput
-	validators, err := t.State.GetValidatorSet(context.Background(), height, subnetID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert to map[ids.NodeID]uint64 for consensus interface
-	result := make(map[ids.NodeID]uint64, len(validators))
-	for nodeID, output := range validators {
-		result[nodeID] = output.Weight
-	}
-	return result, nil
+	// Use GetValidatorSetSimple which matches the ValidatorState interface
+	return t.State.GetValidatorSetSimple(height, subnetID)
 }
 
 func (t *testValidatorState) GetSubnetID(chainID ids.ID) (ids.ID, error) {
 	return t.State.GetSubnetID(chainID)
+}
+
+func (t *testValidatorState) GetChainID(subnetID ids.ID) (ids.ID, error) {
+	return t.State.GetChainID(subnetID)
+}
+
+func (t *testValidatorState) GetNetID(chainID ids.ID) (ids.ID, error) {
+	return t.State.GetNetID(chainID)
 }
 
 // @TODO: This should eventually be replaced by a more robust solution, or alternatively, the presence of nil

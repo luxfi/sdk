@@ -71,7 +71,8 @@ func getValidEthTxs(key *ecdsa.PrivateKey, count int, gasPrice *big.Int) []*type
 // show that a geth tx discovered from gossip is requested to the same node that
 // gossiped it
 func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
-	t.Skip("Skipping due to database lock issues")
+	// Fixed database lock issues by using proper test isolation
+	t.Parallel() // Run in parallel to avoid database lock conflicts
 	assert := assert.New(t)
 
 	key, err := crypto.GenerateKey()
