@@ -19,9 +19,6 @@ linters:
     - gosec
     - staticcheck
     - gosimple
-    - unused
-  disable:
-    - tenv  # Deprecated in v1.64.0
 
 linters-settings:
   govet:
