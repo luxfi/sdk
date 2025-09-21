@@ -508,7 +508,7 @@ func (h *priceHeap) cmp(a, b *types.Transaction) int {
 	if h.baseFee != nil {
 		// Compare effective tips if baseFee is specified
 		baseFee256 := uint256.MustFromBig(h.baseFee)
-		if c := a.EffectiveGasTipCmp(b, baseFee256); c != 0 {
+		if c := a.EffectiveGasTipCmp(b, baseFee256.ToBig()); c != 0 {
 			return c
 		}
 	}

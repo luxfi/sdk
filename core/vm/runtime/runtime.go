@@ -150,7 +150,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 
 	cfg.State.CreateAccount(address)
 	// set the receiver's (the executing contract) code for execution.
-	cfg.State.SetCodeUnspecified(address, code)
+	cfg.State.SetCode(address, code)
 	// Call the code with the given configuration.
 	ret, _, err := vmenv.Call(
 		sender,

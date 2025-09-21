@@ -60,7 +60,7 @@ func ApplyPrecompileActivations(c *params.ChainConfig, parentTimestamp *uint64, 
 			// Set the code of the precompile's address to a non-zero length byte slice to ensure that the precompile
 			// can be called from within Solidity contracts. Solidity adds a check before invoking a contract to ensure
 			// that it does not attempt to invoke a non-existent contract.
-			_ = statedb.SetCodeUnspecified(module.Address, []byte{0x1})
+			_ = statedb.SetCode(module.Address, []byte{0x1})
 			extstatedb := extstate.New(statedb)
 			adapter := extstate.NewPrecompileAdapter(extstatedb)
 			if err := module.Configure(params.GetExtra(c), activatingConfig, adapter, blockContext); err != nil {

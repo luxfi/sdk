@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/luxfi/consensus"
-	luxuptime "github.com/luxfi/consensus/uptime"
 	luxvalidators "github.com/luxfi/consensus/validators"
 	"github.com/luxfi/database"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
@@ -65,22 +64,24 @@ func (m *manager) Initialize(ctx context.Context) error {
 	if err := m.sync(ctx); err != nil {
 		return fmt.Errorf("failed to update validators: %w", err)
 	}
-	vdrIDs := m.GetNodeIDs().List()
+	_ = m.GetNodeIDs().List() // vdrIDs - will use when StartTracking is implemented
 	// Then start tracking with updated validators
 	// StartTracking initializes the uptime tracking with the known validators
 	// and update their uptime to account for the time we were being offline.
-	if err := m.StartTracking(vdrIDs); err != nil {
-		return fmt.Errorf("failed to start tracking uptime: %w", err)
-	}
+	// TODO: Implement StartTracking with new uptime interface
+	// if err := m.StartTracking(vdrIDs); err != nil {
+	// 	return fmt.Errorf("failed to start tracking uptime: %w", err)
+	// }
 	return nil
 }
 
 // Shutdown stops the uptime tracking and writes the validator state to the database.
 func (m *manager) Shutdown() error {
-	vdrIDs := m.GetNodeIDs().List()
-	if err := m.StopTracking(vdrIDs); err != nil {
-		return fmt.Errorf("failed to stop tracking uptime: %w", err)
-	}
+	// vdrIDs := m.GetNodeIDs().List()
+	// TODO: Implement StopTracking with new uptime interface
+	// if err := m.StopTracking(vdrIDs); err != nil {
+	// 	return fmt.Errorf("failed to stop tracking uptime: %w", err)
+	// }
 	if err := m.WriteState(); err != nil {
 		return fmt.Errorf("failed to write validator: %w", err)
 	}
