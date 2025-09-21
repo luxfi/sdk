@@ -81,17 +81,17 @@ func init() {
 	vdrs = map[ids.NodeID]*validators.GetValidatorOutput{
 		testVdrs[0].nodeID: {
 			NodeID:    testVdrs[0].nodeID,
-			PublicKey: testVdrs[0].cryptoPK,
+			PublicKey: bls.PublicKeyToCompressedBytes(testVdrs[0].cryptoPK),
 			Weight:    testVdrs[0].vdr.Weight,
 		},
 		testVdrs[1].nodeID: {
 			NodeID:    testVdrs[1].nodeID,
-			PublicKey: testVdrs[1].cryptoPK,
+			PublicKey: bls.PublicKeyToCompressedBytes(testVdrs[1].cryptoPK),
 			Weight:    testVdrs[1].vdr.Weight,
 		},
 		testVdrs[2].nodeID: {
 			NodeID:    testVdrs[2].nodeID,
-			PublicKey: testVdrs[2].cryptoPK,
+			PublicKey: bls.PublicKeyToCompressedBytes(testVdrs[2].cryptoPK),
 			Weight:    testVdrs[2].vdr.Weight,
 		},
 	}
@@ -106,7 +106,7 @@ func init() {
 		panic(err)
 	}
 	addressedPayloadBytes = addressedPayload.Bytes()
-	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID[:], addressedPayload.Bytes())
+	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, addressedPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -220,7 +220,10 @@ func (t *testValidatorStateWrapper) GetCurrentHeight() (uint64, error) {
 }
 
 func (t *testValidatorStateWrapper) GetMinimumHeight(ctx context.Context) (uint64, error) {
-	return t.State.GetMinimumHeight(ctx)
+	if t.State.GetMinimumHeightF != nil {
+		return t.State.GetMinimumHeightF(ctx)
+	}
+	return 0, nil
 }
 
 func (t *testValidatorStateWrapper) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.NodeID]uint64, error) {
@@ -236,7 +239,24 @@ func (t *testValidatorStateWrapper) GetValidatorSet(height uint64, subnetID ids.
 }
 
 func (t *testValidatorStateWrapper) GetSubnetID(chainID ids.ID) (ids.ID, error) {
-	return t.State.GetSubnetID(context.Background(), chainID)
+	if t.State.GetSubnetIDF != nil {
+		return t.State.GetSubnetIDF(chainID)
+	}
+	return ids.Empty, nil
+}
+
+func (t *testValidatorStateWrapper) GetChainID(subnetID ids.ID) (ids.ID, error) {
+	if t.State.GetChainIDF != nil {
+		return t.State.GetChainIDF(subnetID)
+	}
+	return ids.Empty, nil
+}
+
+func (t *testValidatorStateWrapper) GetNetID(chainID ids.ID) (ids.ID, error) {
+	if t.State.GetNetIDF != nil {
+		return t.State.GetNetIDF(chainID)
+	}
+	return ids.Empty, nil
 }
 
 // createConsensusCtx creates a context.Context instance with a validator state specified by the given validatorRanges
@@ -250,7 +270,7 @@ func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context
 				Weight: validatorRange.weight,
 			}
 			if validatorRange.publicKey {
-				validatorOutput.PublicKey = testVdrs[i].cryptoPK
+				validatorOutput.PublicKey = bls.PublicKeyToCompressedBytes(testVdrs[i].cryptoPK)
 			}
 			getValidatorsOutput[testVdrs[i].nodeID] = validatorOutput
 		}
@@ -258,7 +278,7 @@ func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context
 
 	consensusCtx := utilstest.NewTestConsensusContext(tb)
 	state := &validatorstest.State{
-		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			return sourceSubnetID, nil
 		},
 		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
@@ -299,7 +319,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	cChainID := ids.GenerateTestID()
 	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(err)
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID[:], addressedCall.Bytes())
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID, addressedCall.Bytes())
 	require.NoError(err)
 
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
@@ -311,7 +331,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 		validatorOutput := &validators.GetValidatorOutput{
 			NodeID:    testVdrs[i].nodeID,
 			Weight:    20,
-			PublicKey: testVdrs[i].cryptoPK,
+			PublicKey: bls.PublicKeyToCompressedBytes(testVdrs[i].cryptoPK),
 		}
 		getValidatorsOutput[testVdrs[i].nodeID] = validatorOutput
 		blsSignatures = append(blsSignatures, sig)
@@ -337,11 +357,14 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	subnetID := ids.GenerateTestID()
 	chainID := ids.GenerateTestID()
 	// Use consensus helper functions to add values to context
-	consensusCtx = consensus.WithSubnetID(consensusCtx, subnetID)
-	consensusCtx = consensus.WithChainID(consensusCtx, chainID)
+	consensusCtx = consensus.WithIDs(consensusCtx, consensus.IDs{
+		NetworkID: 1,
+		NetID:     subnetID,
+		ChainID:   chainID,
+	})
 
 	state := &validatorstest.State{
-		GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			require.Equal(chainID, cChainID)
 			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
 		},
@@ -457,7 +480,7 @@ func TestInvalidAddressedPayload(t *testing.T) {
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
 	// Create an unsigned message with an invalid addressed payload
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID[:], []byte{1, 2, 3})
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, []byte{1, 2, 3})
 	require.NoError(t, err)
 	warpMsg := &luxWarp.Message{
 		UnsignedMessage: unsignedMsg,
@@ -487,7 +510,7 @@ func TestInvalidBitSet(t *testing.T) {
 	require.NoError(t, err)
 	unsignedMsg, err := luxWarp.NewUnsignedMessage(
 		constants.UnitTestID,
-		sourceChainID[:],
+		sourceChainID,
 		addressedCall.Bytes(),
 	)
 	require.NoError(t, err)
@@ -744,14 +767,14 @@ func makeWarpPredicateTests(tb testing.TB) map[string]precompiletest.PredicateTe
 			getValidatorsOutput[testVdrs[i].nodeID] = &validators.GetValidatorOutput{
 				NodeID:    testVdrs[i].nodeID,
 				Weight:    20,
-				PublicKey: testVdrs[i%numSigners].cryptoPK,
+				PublicKey: bls.PublicKeyToCompressedBytes(testVdrs[i%numSigners].cryptoPK),
 			}
 		}
 
 		consensusCtx := utilstest.NewTestConsensusContext(tb)
 
 		state := &validatorstest.State{
-			GetSubnetIDF: func(ctx context.Context, chainID ids.ID) (ids.ID, error) {
+			GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 				return sourceSubnetID, nil
 			},
 			GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {

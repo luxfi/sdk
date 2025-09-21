@@ -35,7 +35,7 @@ func TestAggregateSignatures(t *testing.T) {
 	sourceChainID := ids.ID{'y', 'e', 'e', 't'}
 	unsignedMsg, err := luxWarp.NewUnsignedMessage(
 		1338,
-		sourceChainID[:],
+		sourceChainID,
 		[]byte("hello world"),
 	)
 	require.NoError(t, err)

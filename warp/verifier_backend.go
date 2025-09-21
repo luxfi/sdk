@@ -26,7 +26,7 @@ const (
 // It also implements the lp118.Verifier interface
 func (b *backend) Verify(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage, _ []byte) error {
 	messageIDBytes := unsignedMessage.ID()
-	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes))
+	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes[:]))
 	// Known on-chain messages should be signed
 	if _, err := b.GetMessage(messageID); err == nil {
 		return nil

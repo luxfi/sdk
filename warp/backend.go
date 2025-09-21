@@ -114,7 +114,7 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 			return fmt.Errorf("%w at index %d as AddressedCall: %w", errParsingOffChainMessage, i, err)
 		}
 		messageID := unsignedMsg.ID()
-		msgIDHash := ids.ID(crypto.Keccak256Hash(messageID))
+		msgIDHash := ids.ID(crypto.Keccak256Hash(messageID[:]))
 		b.offchainAddressedCallMsgs[msgIDHash.String()] = unsignedMsg
 	}
 
@@ -123,7 +123,7 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 
 func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 	messageIDBytes := unsignedMessage.ID()
-	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes))
+	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes[:]))
 	log.Debug("Adding warp message to backend", "messageID", messageID)
 
 	// In the case when a node restarts, and possibly changes its bls key, the cache gets emptied but the database does not.
@@ -141,7 +141,7 @@ func (b *backend) AddMessage(unsignedMessage *luxWarp.UnsignedMessage) error {
 
 func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
 	messageIDBytes := unsignedMessage.ID()
-	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes))
+	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes[:]))
 
 	log.Debug("Getting warp message from backend", "messageID", messageID)
 	if sig, ok := b.signatureCache.Get(messageID); ok {
@@ -162,13 +162,13 @@ func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte
 		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}
 
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID[:], blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(b.networkID, b.sourceChainID, blockHashPayload.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new unsigned warp message: %w", err)
 	}
 
 	messageIDBytes := unsignedMessage.ID()
-	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes))
+	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes[:]))
 	if sig, ok := b.signatureCache.Get(messageID); ok {
 		return sig, nil
 	}
@@ -213,7 +213,7 @@ func (b *backend) signMessage(unsignedMessage *luxWarp.UnsignedMessage) ([]byte,
 	sig := make([]byte, 64)
 
 	messageIDBytes := unsignedMessage.ID()
-	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes))
+	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes[:]))
 	b.signatureCache.Put(messageID, sig)
 	return sig, nil
 }
