@@ -99,6 +99,7 @@ import (
 
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/core/appsender"
+	nodeCommonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/database"
@@ -964,7 +965,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		UnmarshalBlock: func(ctx context.Context, b []byte) (nodechain.Block, error) {
+		UnmarshalBlock: func(ctx context.Context, b []byte) (nodeConsensusChain.Block, error) {
 			// parseBlock returns consensus block, we need to return node block
 			ethBlock := &types.Block{}
 			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
@@ -972,7 +973,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		BuildBlock: func(ctx context.Context) (nodechain.Block, error) {
+		BuildBlock: func(ctx context.Context) (nodeConsensusChain.Block, error) {
 			// Call VM's BuildBlock directly which returns the right type
 			return vm.BuildBlock(ctx)
 		},
@@ -1393,7 +1394,7 @@ func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
 
 // GetAcceptedBlock attempts to retrieve block [blkID] from the VM. This method
 // only returns accepted blocks.
-func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodechain.Block, error) {
+func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeConsensusChain.Block, error) {
 	// First verify the block is accepted
 	ethBlock := vm.blockChain.GetBlockByHash(common.BytesToHash(blkID[:]))
 	if ethBlock == nil {
@@ -1799,7 +1800,7 @@ type warpVerifierAdapter struct {
 	backend warp.Backend
 }
 
-func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.UnsignedMessage, justification []byte) *commonEng.AppError {
+func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.UnsignedMessage, justification []byte) *nodeCommonEng.AppError {
 	// Convert node warp message to consensus warp message
 	luxMsg := &luxWarp.UnsignedMessage{
 		NetworkID:     msg.NetworkID,
@@ -1808,7 +1809,7 @@ func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.Unsigned
 	}
 
 	if err := w.backend.Verify(ctx, luxMsg, justification); err != nil {
-		return &commonEng.AppError{
+		return &nodeCommonEng.AppError{
 			Code:    1,
 			Message: err.Error(),
 		}
