@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/utils/set"
 	nodeCore "github.com/luxfi/node/consensus/engine/core"
 )
 

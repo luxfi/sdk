@@ -21,7 +21,7 @@ import (
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/utils/set"
 	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/upgrade/upgradetest"
 
@@ -136,7 +136,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	// Perform sync resulting in early termination.
 	testSyncerVM(t, vmSetup, test)
 
-	test.syncMode = block.StateSyncStatic
+	test.syncMode = consensusBlock.StateSyncStatic
 	test.responseIntercept = nil
 	test.expectedErr = nil
 

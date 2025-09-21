@@ -32,7 +32,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	testUnsignedMessage, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID, testAddressedCallPayload.Bytes())
+	testUnsignedMessage, err = luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], testAddressedCallPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +53,8 @@ func TestAddAndGetValidMessage(t *testing.T) {
 	// Add testUnsignedMessage to the warp backend
 	require.NoError(t, backend.AddMessage(testUnsignedMessage))
 
-	// Verify that a signature is returned successfully, and compare to expected signature.
+	// Get the signature for the message
+	signature, err := backend.GetMessageSignature(context.Background(), testUnsignedMessage)
 	require.NoError(t, err)
 
 	expectedSigBytes, err := localSigner.Sign(testUnsignedMessage.Bytes())
@@ -74,6 +75,7 @@ func TestAddAndGetUnknownMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	// Try getting a signature for a message that was not added.
+	_, err = backend.GetMessageSignature(context.Background(), testUnsignedMessage)
 	require.Error(t, err)
 }
 
@@ -95,15 +97,18 @@ func TestGetBlockSignature(t *testing.T) {
 
 	blockHashPayload, err := payload.NewHash(blkID[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 	msgBytes := unsignedMessage.Bytes()
 	expectedSigBytes, err := localSigner.Sign(msgBytes)
 	require.NoError(err)
 
+	signature, err := backend.GetBlockSignature(context.Background(), blkID)
 	require.NoError(err)
 	require.Equal(expectedSigBytes, signature[:])
 
+	// Try to get a signature for a block that doesn't exist
+	_, err = backend.GetBlockSignature(context.Background(), ids.GenerateTestID())
 	require.Error(err)
 }
 
@@ -124,7 +129,8 @@ func TestZeroSizedCache(t *testing.T) {
 	// Add testUnsignedMessage to the warp backend
 	require.NoError(t, backend.AddMessage(testUnsignedMessage))
 
-	// Verify that a signature is returned successfully, and compare to expected signature.
+	// Get the signature for the message
+	signature, err := backend.GetMessageSignature(context.Background(), testUnsignedMessage)
 	require.NoError(t, err)
 
 	expectedSigBytes, err := localSigner.Sign(testUnsignedMessage.Bytes())

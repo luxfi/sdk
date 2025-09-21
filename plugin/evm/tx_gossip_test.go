@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/utils/set"
 	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
@@ -55,7 +55,7 @@ func TestEthTxGossip(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		consensusCtx,
+		&consensusCtx,
 		memdb.New(),
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
@@ -112,7 +112,9 @@ func TestEthTxGossip(t *testing.T) {
 		wg.Done()
 	}
 	// Use requestingNodeID for the request since vm.ctx doesn't have NodeID
-	require.NoError(client.AppRequest(ctx, set.Of(requestingNodeID), requestBytes, onResponse))
+	nodeSet := set.Set[ids.NodeID]{}
+	nodeSet.Add(requestingNodeID)
+	require.NoError(client.AppRequest(ctx, nodeSet, requestBytes, onResponse))
 	require.NoError(vm.AppRequest(ctx, requestingNodeID, 1, time.Time{}, <-sentAppRequest))
 	// Use requestingNodeID for the response
 	require.NoError(network.AppResponse(ctx, requestingNodeID, 1, <-sentResponse))
@@ -151,7 +153,9 @@ func TestEthTxGossip(t *testing.T) {
 
 		wg.Done()
 	}
-	require.NoError(client.AppRequest(ctx, set.Of(consensus.GetNodeID(vm.ctx)), requestBytes, onResponse))
+	nodeSet2 := set.Set[ids.NodeID]{}
+	nodeSet2.Add(consensus.GetNodeID(vm.ctx))
+	require.NoError(client.AppRequest(ctx, nodeSet2, requestBytes, onResponse))
 	require.NoError(vm.AppRequest(ctx, requestingNodeID, 3, time.Time{}, <-sentAppRequest))
 	require.NoError(network.AppResponse(ctx, consensus.GetNodeID(consensusCtx), 3, <-sentResponse))
 	wg.Wait()
@@ -172,7 +176,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		consensusCtx,
+		&consensusCtx,
 		memdb.New(),
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
@@ -227,7 +231,7 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		consensusCtx,
+		&consensusCtx,
 		memdb.New(),
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
