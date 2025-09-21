@@ -29,7 +29,7 @@ import (
 
 	commonEng "github.com/luxfi/consensus/core"
 	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
-	"github.com/luxfi/consensus/engine/chain/block"
+	"github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
@@ -59,8 +59,7 @@ import (
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	nodeConsensus "github.com/luxfi/node/consensus"
-
-	protocolchain "github.com/luxfi/consensus/protocol/chain"
+	"github.com/luxfi/node/consensus/validators"
 	"github.com/luxfi/node/utils/set"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 )
@@ -221,7 +220,7 @@ func createTestConsensusContext(t *testing.T) *nodeConsensus.Context {
 		ChainDataDir:    t.TempDir(),
 		Log:             log.NewNoOpLogger(),
 		Metrics:         nil,
-		ValidatorState:  utilstest.NewTestValidatorState(),
+		ValidatorState:  nil, // Using nil for testing
 	}
 }
 
@@ -232,7 +231,7 @@ func toECDSA(key *secp256k1.PrivateKey) (*ecdsa.PrivateKey, error) {
 }
 
 // getEthBlock safely extracts the underlying ethBlock from a chain.Block
-func getEthBlock(t *testing.T, blk block.Block) *types.Block {
+func getEthBlock(t *testing.T, blk chain.Block) *types.Block {
 	t.Helper()
 	// Try direct cast first (this might be the actual type)
 	if evmBlock, ok := blk.(*Block); ok {
@@ -242,8 +241,8 @@ func getEthBlock(t *testing.T, blk block.Block) *types.Block {
 	return nil
 }
 
-// getInternalBlock safely extracts the internal Block from a block.Block
-func getInternalBlock(t *testing.T, blk block.Block) *Block {
+// getInternalBlock safely extracts the internal Block from a chain.Block
+func getInternalBlock(t *testing.T, blk chain.Block) *Block {
 	t.Helper()
 	// Try direct cast first
 	if evmBlock, ok := blk.(*Block); ok {
@@ -253,23 +252,23 @@ func getInternalBlock(t *testing.T, blk block.Block) *Block {
 	return nil
 }
 
-// getEthBlockFromProtocol safely extracts the underlying ethBlock from a protocolchain.Block
-func getEthBlockFromProtocol(t *testing.T, blk protocolchain.Block) *types.Block {
+// getEthBlockFromProtocol safely extracts the underlying ethBlock from a chain.Block
+func getEthBlockFromProtocol(t *testing.T, blk chain.Block) *types.Block {
 	t.Helper()
-	// The protocol chain Block should be the same as our *Block type
+	// The chain Block should be the same as our *Block type
 	block, ok := blk.(*Block)
 	if !ok {
-		t.Fatalf("Expected protocol block to be a *Block, got %T", blk)
+		t.Fatalf("Expected chain block to be a *Block, got %T", blk)
 	}
 	return block.ethBlock
 }
 
-// getInternalBlockFromProtocol safely extracts the internal Block from a protocolchain.Block
-func getInternalBlockFromProtocol(t *testing.T, blk protocolchain.Block) *Block {
+// getInternalBlockFromProtocol safely extracts the internal Block from a chain.Block
+func getInternalBlockFromProtocol(t *testing.T, blk chain.Block) *Block {
 	t.Helper()
 	block, ok := blk.(*Block)
 	if !ok {
-		t.Fatalf("Expected protocol block to be a *Block, got %T", blk)
+		t.Fatalf("Expected chain block to be a *Block, got %T", blk)
 	}
 	return block
 }
@@ -346,7 +345,7 @@ func getConfig(scheme, otherConfig string) string {
 func setupGenesis(
 	t *testing.T,
 	fork string,
-) (context.Context,
+) (*nodeConsensus.Context,
 	*prefixdb.Database,
 	[]byte,
 	*atomic.Memory,
@@ -486,7 +485,7 @@ func testVMUpgrades(t *testing.T, scheme string) {
 	}
 }
 
-func issueAndAccept(t *testing.T, vm *VM) block.Block {
+func issueAndAccept(t *testing.T, vm *VM) chain.Block {
 	t.Helper()
 
 	msg, err := vm.WaitForEvent(context.Background())
@@ -2715,8 +2714,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 		genesisJSON, // Manually set genesis bytes due to custom genesis
 		[]byte(""),
 		[]byte(""),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil, // fxs parameter
 		nil,
 	)
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
@@ -2746,8 +2744,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 		genesisJSON, // Manually set genesis bytes due to custom genesis
 		upgradeBytesJSON,
 		[]byte(""),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil, // fxs parameter
 		nil,
 	)
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
@@ -3558,14 +3555,14 @@ func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// Note: Cannot directly modify context fields, skipping metrics reset
 
 	// this will not be allowed
-	require.ErrorContains(t, reinitVM.Initialize(context.Background(), tvm.vm.ctx, tvm.db, genesisWithUpgradeBytes, []byte{}, []byte{}, nil, []interface{}{}, tvm.appSender), "mismatching Cancun fork timestamp in database")
+	require.ErrorContains(t, reinitVM.Initialize(context.Background(), tvm.vm.chainCtx, tvm.db, genesisWithUpgradeBytes, []byte{}, []byte{}, nil, tvm.appSender), "mismatching Cancun fork timestamp in database")
 
 	// Reset metrics to allow re-initialization
 	// Note: Cannot directly modify context fields, skipping metrics reset
 
 	// try again with skip-upgrade-check
 	config := []byte(`{"skip-upgrade-check": true}`)
-	require.NoError(t, reinitVM.Initialize(context.Background(), tvm.vm.ctx, tvm.db, genesisWithUpgradeBytes, []byte{}, config, nil, []interface{}{}, tvm.appSender))
+	require.NoError(t, reinitVM.Initialize(context.Background(), tvm.vm.chainCtx, tvm.db, genesisWithUpgradeBytes, []byte{}, config, nil, tvm.appSender))
 	require.NoError(t, reinitVM.Shutdown(context.Background()))
 }
 
@@ -3934,11 +3931,11 @@ func TestFeeManagerRegressionMempoolMinFeeAfterRestart(t *testing.T) {
 	require.Equal(t, newHead.Head.Hash(), common.Hash(blk.ID()))
 }
 
-func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, appSender commonEng.AppSender, finishBootstrapping bool) (*VM, error) {
+func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, appSender *TestSender, finishBootstrapping bool) (*VM, error) {
 	vm.Shutdown(context.Background())
 	restartedVM := &VM{}
 	// Note: Cannot directly modify context fields, skipping metrics reset
-	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, nil, appSender)
+	err := restartedVM.Initialize(context.Background(), vm.chainCtx, sharedDB, genesisBytes, nil, nil, nil, appSender)
 	if err != nil {
 		return nil, err
 	}
