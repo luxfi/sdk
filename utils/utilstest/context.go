@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/consensus/validators"
 	"github.com/luxfi/consensus/validators/validatorstest"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
 )
 
 // SubnetEVMTestChainID is a evm specific chain ID for testing
@@ -29,7 +28,8 @@ func (t *testValidatorState) GetCurrentHeight() (uint64, error) {
 }
 
 func (t *testValidatorState) GetMinimumHeight(ctx context.Context) (uint64, error) {
-	return t.State.GetMinimumHeight(ctx)
+	// Return 0 for test purposes - minimum height for testing
+	return 0, nil
 }
 
 func (t *testValidatorState) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.NodeID]uint64, error) {
