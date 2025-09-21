@@ -98,7 +98,7 @@ func TestSendWarpMessage(t *testing.T) {
 	require.NoError(t, err)
 	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
 		consensus.GetNetworkID(defaultConsensusCtx),
-		blockchainID,
+		blockchainID[:],
 		sendWarpMessageAddressedPayload.Bytes(),
 	)
 	require.NoError(t, err)
@@ -187,7 +187,7 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 		packagedPayloadBytes,
 	)
 	require.NoError(t, err)
-	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, addressedPayload.Bytes())
+	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], addressedPayload.Bytes())
 	require.NoError(t, err)
 	warpMessage, err := luxWarp.NewMessage(unsignedWarpMsg, &luxWarp.BitSetSignature{}) // Create message with empty signature for testing
 	require.NoError(t, err)
@@ -393,7 +393,7 @@ func TestGetVerifiedWarpMessage(t *testing.T) {
 			Caller:  callerAddr,
 			InputFn: func(t testing.TB) []byte { return getVerifiedWarpMsg },
 			Predicates: func() [][]byte {
-				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid addressed payload
+				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], []byte{1, 2, 3}) // Invalid addressed payload
 				require.NoError(t, err)
 				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
 				require.NoError(t, err)
@@ -653,7 +653,7 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 			Caller:  callerAddr,
 			InputFn: func(t testing.TB) []byte { return getVerifiedWarpBlockHash },
 			Predicates: func() [][]byte {
-				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID, []byte{1, 2, 3}) // Invalid block hash payload
+				unsignedMessage, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], []byte{1, 2, 3}) // Invalid block hash payload
 				require.NoError(t, err)
 				warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
 				require.NoError(t, err)
@@ -717,7 +717,7 @@ func TestPackEvents(t *testing.T) {
 
 	unsignedWarpMessage, err := luxWarp.NewUnsignedMessage(
 		networkID,
-		sourceChainID,
+		sourceChainID[:],
 		addressedPayload.Bytes(),
 	)
 	require.NoError(t, err)

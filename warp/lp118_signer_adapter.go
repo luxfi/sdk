@@ -25,7 +25,7 @@ func (a *LP118SignerAdapter) Sign(unsignedMsg *platformWarp.UnsignedMessage) ([]
 	// Convert platformvm/warp.UnsignedMessage to luxfi/warp.UnsignedMessage
 	msg, err := luxWarp.NewUnsignedMessage(
 		unsignedMsg.NetworkID,
-		unsignedMsg.SourceChainID,
+		unsignedMsg.SourceChainID[:],
 		unsignedMsg.Payload,
 	)
 	if err != nil {
