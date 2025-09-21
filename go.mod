@@ -22,9 +22,9 @@ require (
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.1.22
-	github.com/luxfi/math v0.1.0
+	github.com/luxfi/math v0.1.1
 	github.com/luxfi/metric v1.3.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.16.17
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
