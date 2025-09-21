@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/log"
 )
 

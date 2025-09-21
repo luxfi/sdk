@@ -84,6 +84,7 @@ import (
 	nodeblock "github.com/luxfi/consensus/engine/chain/block"
 	consensusInterfaces "github.com/luxfi/consensus/interfaces"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
+	nodeConsensusChain "github.com/luxfi/node/consensus/chain"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
@@ -954,8 +955,8 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		MissingCacheSize:    missingCacheSize,
 		UnverifiedCacheSize: unverifiedCacheSize,
 		BytesToIDCacheSize:  bytesToIDCacheSize,
-		// Our vm methods return *Block which implements nodechain.Block
-		GetBlock: func(ctx context.Context, id ids.ID) (nodechain.Block, error) {
+		// Our vm methods return *Block which needs to implement the node's chain.Block
+		GetBlock: func(ctx context.Context, id ids.ID) (nodeConsensusChain.Block, error) {
 			// getBlock returns consensus block, we need to return node block
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 			if ethBlock == nil {

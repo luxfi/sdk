@@ -32,10 +32,11 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"path/filepath"
 	"sync"
 	"time"
 
-	luxconsensus "github.com/luxfi/consensus"
+
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"
@@ -207,7 +208,8 @@ func New(
 	// If the context is not set, avoid a panic. Only necessary during firewood use.
 	chainDataDir := ""
 	if ctx := params.GetExtra(config.Genesis.Config).ConsensusCtx; ctx != nil {
-		chainDataDir = luxconsensus.GetChainDataDir(ctx)
+		// TODO: Fix GetChainDataDir with new consensus interface
+		chainDataDir = filepath.Join(chainDataDir, "chain")
 	}
 
 	var (

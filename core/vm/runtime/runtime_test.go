@@ -30,7 +30,6 @@ package runtime
 import (
 	"fmt"
 	"math/big"
-	"os"
 	"strings"
 	"testing"
 
@@ -46,7 +45,6 @@ import (
 	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
-	"github.com/luxfi/geth/eth/tracers/logger"
 
 	// force-load js tracers to trigger registration
 	"github.com/holiman/uint256"
@@ -125,7 +123,7 @@ func TestCall(t *testing.T) {
 		byte(vm.PUSH1), 32,
 		byte(vm.PUSH1), 0,
 		byte(vm.RETURN),
-	}, tracing.CodeChangeContractCreation)
+	})
 
 	ret, _, err := Call(address, nil, &Config{State: state})
 	if err != nil {
@@ -178,7 +176,7 @@ func benchmarkEVM_Create(bench *testing.B, code string) {
 	)
 
 	statedb.CreateAccount(sender)
-	statedb.SetCode(receiver, common.FromHex(code), tracing.CodeChangeContractCreation)
+	statedb.SetCode(receiver, common.FromHex(code))
 	runtimeConfig := Config{
 		Origin:      sender,
 		State:       statedb,
@@ -372,12 +370,12 @@ func benchmarkNonModifyingCode(gas uint64, code []byte, name string, tracerCode 
 			byte(vm.PUSH1), 0x00,
 			byte(vm.PUSH1), 0x00,
 			byte(vm.REVERT),
-		}, tracing.CodeChangeContractCreation)
+		})
 	}
 
 	//cfg.State.CreateAccount(cfg.Origin)
 	// set the receiver's (the executing contract) code for execution.
-	cfg.State.SetCodeUnspecified(destination, code)
+	cfg.State.SetCode(destination, code)
 	vmenv.Call(sender, destination, nil, gas, uint256.MustFromBig(cfg.Value))
 
 	b.Run(name, func(b *testing.B) {
@@ -525,7 +523,6 @@ func TestEip2929Cases(t *testing.T) {
 			code, ops)
 		Execute(code, nil, &Config{
 			EVMConfig: vm.Config{
-				Tracer:    logger.NewMarkdownLogger(nil, os.Stdout).Hooks(),
 				ExtraEips: []int{2929},
 			},
 		})
@@ -761,12 +758,12 @@ func TestRuntimeJSTracer(t *testing.T) {
 	for i, jsTracer := range jsTracers {
 		for j, tc := range tests {
 			statedb, _ := state.New(types.EmptyRootHash, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
-			statedb.SetCode(main, tc.code, tracing.CodeChangeContractCreation)
-			statedb.SetCode(common.HexToAddress("0xbb"), calleeCode, tracing.CodeChangeContractCreation)
-			statedb.SetCode(common.HexToAddress("0xcc"), calleeCode, tracing.CodeChangeContractCreation)
-			statedb.SetCode(common.HexToAddress("0xdd"), calleeCode, tracing.CodeChangeContractCreation)
-			statedb.SetCode(common.HexToAddress("0xee"), calleeCode, tracing.CodeChangeContractCreation)
-			statedb.SetCode(common.HexToAddress("0xff"), depressedCode, tracing.CodeChangeContractCreation)
+			statedb.SetCode(main, tc.code)
+			statedb.SetCode(common.HexToAddress("0xbb"), calleeCode)
+			statedb.SetCode(common.HexToAddress("0xcc"), calleeCode)
+			statedb.SetCode(common.HexToAddress("0xdd"), calleeCode)
+			statedb.SetCode(common.HexToAddress("0xee"), calleeCode)
+			statedb.SetCode(common.HexToAddress("0xff"), depressedCode)
 
 			tracer, err := tracers.DefaultDirectory.New(jsTracer, new(tracers.Context), nil, params.TestChainConfig)
 			if err != nil {

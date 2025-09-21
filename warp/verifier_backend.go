@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/ids"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
-	"github.com/luxfi/geth/crypto"
+	"github.com/luxfi/crypto"
 )
 
 const (

@@ -979,7 +979,7 @@ func (diff *StateOverride) Apply(state *state.StateDB) error {
 		}
 		// Override account(contract) code.
 		if account.Code != nil {
-			state.SetCodeUnspecified(addr, *account.Code)
+			state.SetCode(addr, *account.Code)
 		}
 		// Override account balance.
 		if account.Balance != nil {
