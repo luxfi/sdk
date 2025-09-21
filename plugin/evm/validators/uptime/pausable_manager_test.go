@@ -14,6 +14,41 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// testUptimeState is a mock implementation of uptime.State for testing
+type testUptimeState struct {
+	startTimes map[ids.NodeID]time.Time
+	uptimes    map[ids.NodeID]time.Duration
+}
+
+func (t *testUptimeState) GetStartTime(nodeID ids.NodeID) (time.Time, error) {
+	if startTime, ok := t.startTimes[nodeID]; ok {
+		return startTime, nil
+	}
+	return time.Time{}, nil
+}
+
+func (t *testUptimeState) SetStartTime(nodeID ids.NodeID, startTime time.Time) error {
+	t.startTimes[nodeID] = startTime
+	return nil
+}
+
+func (t *testUptimeState) GetUptime(nodeID ids.NodeID) (time.Duration, time.Time, error) {
+	uptime, ok := t.uptimes[nodeID]
+	if !ok {
+		uptime = 0
+	}
+	return uptime, time.Now(), nil
+}
+
+func (t *testUptimeState) SetUptime(nodeID ids.NodeID, uptime time.Duration, lastUpdated time.Time) error {
+	t.uptimes[nodeID] = uptime
+	return nil
+}
+
+func (t *testUptimeState) GetValidatorWeightDiffs(height uint64, subnetID ids.ID) (map[ids.NodeID]*uptime.ValidatorChanges, error) {
+	return map[ids.NodeID]*uptime.ValidatorChanges{}, nil
+}
+
 func TestPausableManager(t *testing.T) {
 	vID := ids.GenerateTestID()
 	nodeID0 := ids.GenerateTestNodeID()
@@ -174,7 +209,7 @@ func TestPausableManager(t *testing.T) {
 				currentTime = addTime(clk, 3*time.Second)
 				require.NoError(up.StopTracking([]ids.NodeID{nodeID0}))
 				checkUptime(t, up, nodeID0, expectedUptime, currentTime)
-				up = NewPausableManager(uptime.NewManager(s, clk))
+				up = NewPausableManager(NewManager(s, clk))
 
 				// Uptime should not have increased since the node was paused
 				// and we have not started tracking again
@@ -303,9 +338,12 @@ func TestPausableManager(t *testing.T) {
 func setupTestEnv(nodeID ids.NodeID, startTime time.Time) (interfaces.PausableManager, *mockable.Clock, uptime.State) {
 	clk := mockable.Clock{}
 	clk.Set(startTime)
-	s := uptime.NewTestState()
-	// TestState should handle node initialization internally
-	up := NewPausableManager(uptime.NewManager(s, &clk))
+	// Create a test state that implements uptime.State
+	s := &testUptimeState{
+		startTimes: make(map[ids.NodeID]time.Time),
+		uptimes:    make(map[ids.NodeID]time.Duration),
+	}
+	up := NewPausableManager(NewManager(s, &clk))
 	return up, &clk, s
 }
 
