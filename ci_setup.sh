@@ -18,10 +18,6 @@ fi
 
 echo "Local replace directives removed for CI"
 
-# Fix the node version to v1.13.5 (the latest available release)
-echo "Fixing luxfi/node version to v1.13.5..."
-go get github.com/luxfi/node@v1.13.5
-
 # Run go mod tidy to ensure dependencies are correct
 echo "Running go mod tidy..."
 go mod tidy
