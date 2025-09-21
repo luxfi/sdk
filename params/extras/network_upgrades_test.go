@@ -279,7 +279,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(0), // Genesis
-				EtnaTimestamp:      nil, // Valid when Etna is unscheduled
+				EtnaTimestamp:      nil,                // Valid when Etna is unscheduled
 			},
 			luxdUpgrades: testMainnetConfig,
 			valid:        true,
@@ -298,7 +298,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 			name: "Valid_Fortuna_nil",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
-				DurangoTimestamp:   utils.NewUint64(0), // Genesis
+				DurangoTimestamp:   utils.NewUint64(0),   // Genesis
 				EtnaTimestamp:      utils.NewUint64(500), // Test timestamp
 				FortunaTimestamp:   nil,
 			},

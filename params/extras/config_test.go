@@ -62,7 +62,7 @@ $`,
 						{
 							BlockTimestamp: pointer(uint64(14)),
 							StateUpgradeAccounts: map[common.Address]StateUpgradeAccount{
-								common.Address{15}: {
+								{15}: {
 									Code: []byte{16},
 								},
 							},

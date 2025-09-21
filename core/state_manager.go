@@ -97,11 +97,11 @@ func (np *noPruningTrieWriter) InsertTrie(block *types.Block) error {
 func (np *noPruningTrieWriter) AcceptTrie(block *types.Block) error {
 	// We don't need to call [Dereference] on the block root at the end of this
 	// function because it is removed from the [TrieDB.Dirties] map in [Commit].
-	return np.TrieDB.Commit(block.Root(), false)
+	return np.Commit(block.Root(), false)
 }
 
 func (np *noPruningTrieWriter) RejectTrie(block *types.Block) error {
-	return np.TrieDB.Dereference(block.Root())
+	return np.Dereference(block.Root())
 }
 
 func (np *noPruningTrieWriter) Shutdown() error { return nil }
@@ -120,11 +120,11 @@ type cappedMemoryTrieWriter struct {
 func (cm *cappedMemoryTrieWriter) InsertTrie(block *types.Block) error {
 	// The use of [Cap] in [InsertTrie] prevents exceeding the configured memory
 	// limit (and OOM) in case there is a large backlog of processing (unaccepted) blocks.
-	_, nodes, imgs := cm.TrieDB.Size() // all memory is contained within the nodes return for hashdb
+	_, nodes, imgs := cm.Size() // all memory is contained within the nodes return for hashdb
 	if nodes <= cm.memoryCap && imgs <= cm.imageCap {
 		return nil
 	}
-	if err := cm.TrieDB.Cap(cm.memoryCap - ethdb.IdealBatchSize); err != nil {
+	if err := cm.Cap(cm.memoryCap - ethdb.IdealBatchSize); err != nil {
 		return fmt.Errorf("failed to cap trie for block %s: %w", block.Hash().Hex(), err)
 	}
 
@@ -146,7 +146,7 @@ func (cm *cappedMemoryTrieWriter) AcceptTrie(block *types.Block) error {
 	// Commit this root if we have reached the [commitInterval].
 	modCommitInterval := block.NumberU64() % cm.commitInterval
 	if modCommitInterval == 0 {
-		if err := cm.TrieDB.Commit(root, true); err != nil {
+		if err := cm.Commit(root, true); err != nil {
 			return fmt.Errorf("failed to commit trie for block %s: %w", block.Hash().Hex(), err)
 		}
 		return nil
@@ -168,19 +168,19 @@ func (cm *cappedMemoryTrieWriter) AcceptTrie(block *types.Block) error {
 		return nil
 	}
 	targetMemory := cm.targetCommitSize + cm.flushStepSize*common.StorageSize(distanceFromCommit)
-	_, nodes, _ := cm.TrieDB.Size()
+	_, nodes, _ := cm.Size()
 	if nodes <= targetMemory {
 		return nil
 	}
 	targetCap := targetMemory - ethdb.IdealBatchSize
-	if err := cm.TrieDB.Cap(targetCap); err != nil {
+	if err := cm.Cap(targetCap); err != nil {
 		return fmt.Errorf("failed to cap trie for block %s (target=%s): %w", block.Hash().Hex(), targetCap, err)
 	}
 	return nil
 }
 
 func (cm *cappedMemoryTrieWriter) RejectTrie(block *types.Block) error {
-	cm.TrieDB.Dereference(block.Root())
+	cm.Dereference(block.Root())
 	return nil
 }
 
@@ -194,5 +194,5 @@ func (cm *cappedMemoryTrieWriter) Shutdown() error {
 
 	// Attempt to commit last item added to [dereferenceQueue] on shutdown to avoid
 	// re-processing the state on the next startup.
-	return cm.TrieDB.Commit(last, true)
+	return cm.Commit(last, true)
 }

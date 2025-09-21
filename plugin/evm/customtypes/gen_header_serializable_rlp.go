@@ -2,8 +2,11 @@
 
 package customtypes
 
-import "github.com/luxfi/geth/rlp"
-import "io"
+import (
+	"io"
+
+	"github.com/luxfi/geth/rlp"
+)
 
 func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 	w := rlp.NewEncoderBuffer(_w)

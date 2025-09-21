@@ -70,7 +70,6 @@ var (
 )
 
 // Chain configuration with Cancun enabled.
-//
 var testChainConfig *params.ChainConfig
 
 func init() {
@@ -82,8 +81,8 @@ func init() {
 	params.GetExtra(testChainConfig).FeeConfig.MinBaseFee = new(big.Int).SetUint64(1)
 
 	// Set SubnetEVMTimestamp to enable base fee calculation
-	params.GetExtra(testChainConfig).NetworkUpgrades.SubnetEVMTimestamp = new(uint64)
-	*params.GetExtra(testChainConfig).NetworkUpgrades.SubnetEVMTimestamp = 0
+	params.GetExtra(testChainConfig).SubnetEVMTimestamp = new(uint64)
+	*params.GetExtra(testChainConfig).SubnetEVMTimestamp = 0
 
 	testChainConfig.CancunTime = new(uint64)
 	*testChainConfig.CancunTime = uint64(time.Now().Unix())

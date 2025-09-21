@@ -79,15 +79,15 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/consensus/engine/chain/block"
-	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
-	nodeConsensusChain "github.com/luxfi/node/consensus/chain"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
+	nodeConsensus "github.com/luxfi/node/consensus"
+	nodeConsensusChain "github.com/luxfi/node/consensus/chain"
+	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
@@ -98,8 +98,8 @@ import (
 
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/core/appsender"
-	nodeCommonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/math/set"
+	nodeCommonEng "github.com/luxfi/node/consensus/engine/core"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -383,7 +383,7 @@ func (vm *VM) Initialize(
 	fxs []*nodeCommonEng.Fx,
 	appSender nodeCommonEng.AppSender,
 ) error {
-	// Convert fxs from []*nodeCommonEng.Fx to []*commonEng.Fx 
+	// Convert fxs from []*nodeCommonEng.Fx to []*commonEng.Fx
 	typedFxs := make([]*commonEng.Fx, len(fxs))
 	for i, fx := range fxs {
 		typedFxs[i] = &commonEng.Fx{
@@ -614,7 +614,7 @@ func (vm *VM) initializeInternal(
 		return fmt.Errorf("failed to create network: %w", err)
 	}
 	// P2PValidators might be nil in test environments
-	p2pValidatorsInterface := vm.Network.P2PValidators()
+	p2pValidatorsInterface := vm.P2PValidators()
 	if p2pValidatorsInterface != nil {
 		vm.p2pValidators = p2pValidatorsInterface.(*p2p.Validators)
 	}
@@ -698,7 +698,7 @@ func (vm *VM) initializeInternal(
 	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, nil)
 	// Use adapter to convert lp118.Handler to p2p.Handler
 	p2pHandler := newLP118HandlerAdapter(warpHandler)
-	vm.Network.AddHandler(lp118.HandlerID, p2pHandler)
+	vm.AddHandler(lp118.HandlerID, p2pHandler)
 
 	vm.setAppRequestHandlers()
 
@@ -820,8 +820,8 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 		configExtra.UpgradeConfig = upgradeConfig
 	}
 
-	if configExtra.UpgradeConfig.NetworkUpgradeOverrides != nil {
-		overrides := configExtra.UpgradeConfig.NetworkUpgradeOverrides
+	if configExtra.NetworkUpgradeOverrides != nil {
+		overrides := configExtra.NetworkUpgradeOverrides
 		marshaled, err := json.Marshal(overrides)
 		if err != nil {
 			log.Warn("Failed to marshal network upgrade overrides", "error", err, "overrides", overrides)
@@ -945,7 +945,7 @@ func (vm *VM) initializeStateSyncClient(lastAcceptedHeight uint64) error {
 	// If StateSync is disabled, clear any ongoing summary so that we will not attempt to resume
 	// sync using a snapshot that has been modified by the node running normal operations.
 	if !vm.config.StateSyncEnabled {
-		return vm.StateSyncClient.ClearOngoingSummary()
+		return vm.ClearOngoingSummary()
 	}
 
 	return nil
@@ -1024,11 +1024,11 @@ func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
 // onBootstrapStarted marks this VM as bootstrapping
 func (vm *VM) onBootstrapStarted() error {
 	vm.bootstrapped.Set(false)
-	if err := vm.StateSyncClient.Error(); err != nil {
+	if err := vm.Error(); err != nil {
 		return err
 	}
 	// After starting bootstrapping, do not attempt to resume a previous state sync.
-	if err := vm.StateSyncClient.ClearOngoingSummary(); err != nil {
+	if err := vm.ClearOngoingSummary(); err != nil {
 		return err
 	}
 	// Ensure snapshots are initialized before bootstrapping (i.e., if state sync is skipped).
@@ -1074,10 +1074,10 @@ func (vm *VM) onNormalOperationsStarted() error {
 		if !ok {
 			return fmt.Errorf("failed to get P2P validators")
 		}
-		ethTxGossipClient = vm.Network.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(p2pValidators))
+		ethTxGossipClient = vm.NewClient(TxGossipHandlerID, p2p.WithValidatorSampling(p2pValidators))
 	} else {
 		// In test mode, use a client without validator sampling
-		ethTxGossipClient = vm.Network.NewClient(TxGossipHandlerID)
+		ethTxGossipClient = vm.NewClient(TxGossipHandlerID)
 	}
 	ethTxGossipMetrics, err := gossip.NewMetrics(vm.sdkMetrics, ethTxGossipNamespace)
 	if err != nil {
@@ -1152,7 +1152,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 		vm.ethTxGossipHandler = handler
 	}
 
-	if err := vm.Network.AddHandler(TxGossipHandlerID, vm.ethTxGossipHandler); err != nil {
+	if err := vm.AddHandler(TxGossipHandlerID, vm.ethTxGossipHandler); err != nil {
 		return fmt.Errorf("failed to add eth tx gossip handler: %w", err)
 	}
 
@@ -1208,7 +1208,7 @@ func (vm *VM) setAppRequestHandlers() {
 	)
 
 	networkHandler := newNetworkHandler(vm.blockChain, vm.chaindb, evmTrieDB, vm.warpBackend, vm.networkCodec)
-	vm.Network.SetRequestHandler(networkHandler)
+	vm.SetRequestHandler(networkHandler)
 }
 
 func (vm *VM) WaitForEvent(ctx context.Context) (nodeCommonEng.Message, error) {
@@ -1516,7 +1516,7 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 	}
 
 	if vm.config.WarpAPIEnabled {
-		warpSDKClient := vm.Network.NewClient(lp118.HandlerID)
+		warpSDKClient := vm.NewClient(lp118.HandlerID)
 		// lp118.NewSignatureAggregator expects a node/utils/logging.Logger
 		// For now, pass nil as the logger is optional
 		signatureAggregator := lp118.NewSignatureAggregator(nil, warpSDKClient)
@@ -1813,9 +1813,10 @@ type warpVerifierAdapter struct {
 
 func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.UnsignedMessage, justification []byte) *nodeCommonEng.AppError {
 	// Convert node warp message to consensus warp message
+	// Published luxfi/warp v0.1.1 uses []byte for SourceChainID, not ids.ID
 	luxMsg := &luxWarp.UnsignedMessage{
 		NetworkID:     msg.NetworkID,
-		SourceChainID: msg.SourceChainID,
+		SourceChainID: msg.SourceChainID[:], // Convert ids.ID to []byte
 		Payload:       msg.Payload,
 	}
 

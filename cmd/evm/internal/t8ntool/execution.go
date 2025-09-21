@@ -306,7 +306,7 @@ func (pre *Prestate) Apply(vmConfig vm.Config, chainConfig *params.ChainConfig,
 			// If the transaction created a contract, store the creation address in the receipt.
 			if msg.To == nil {
 				var cryptoAddr crypto.Address
-				copy(cryptoAddr[:], evm.TxContext.Origin[:])
+				copy(cryptoAddr[:], evm.Origin[:])
 				createdAddr := crypto.CreateAddress(cryptoAddr, tx.Nonce())
 				receipt.ContractAddress = common.BytesToAddress(createdAddr[:])
 			}

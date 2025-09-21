@@ -34,10 +34,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient/simulated"
 	"github.com/luxfi/evm/params"
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 )

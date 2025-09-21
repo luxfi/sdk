@@ -18,8 +18,8 @@ import (
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 
-	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/evm/plugin/evm/validators/interfaces"
 	"github.com/luxfi/geth/log"
 )
 

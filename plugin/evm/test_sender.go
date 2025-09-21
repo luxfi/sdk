@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
 	nodeCore "github.com/luxfi/node/consensus/engine/core"
+	"github.com/luxfi/node/utils/set"
 )
 
 // TestSender is a test implementation of the Sender interface

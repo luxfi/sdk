@@ -61,7 +61,7 @@ func TestVerifyUpgradeConfig(t *testing.T) {
 			chainConfig := chainConfig
 
 			// verify with the upgrades from the test
-			chainConfig.UpgradeConfig.PrecompileUpgrades = tt.upgrades
+			chainConfig.PrecompileUpgrades = tt.upgrades
 			err := chainConfig.Verify()
 
 			if tt.expectedErrorString != "" {

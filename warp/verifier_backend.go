@@ -10,11 +10,11 @@ import (
 
 	"github.com/luxfi/evm/warp/messages"
 
+	"github.com/luxfi/crypto"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
-	"github.com/luxfi/crypto"
 )
 
 const (

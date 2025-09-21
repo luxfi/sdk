@@ -349,7 +349,7 @@ func (c *ChainConfig) Verify() error {
 	// Verify the network upgrades are internally consistent given the existing chainConfig.
 	// Use default config for validation
 	agoUpgrades := upgrade.Config{}
-	if err := c.NetworkUpgrades.verifyNetworkUpgrades(agoUpgrades); err != nil {
+	if err := c.verifyNetworkUpgrades(agoUpgrades); err != nil {
 		return fmt.Errorf("invalid network upgrades: %w", err)
 	}
 
