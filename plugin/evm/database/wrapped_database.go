@@ -60,7 +60,7 @@ func (db ethDbWrapper) NewIterator(prefix []byte, start []byte) ethdb.Iterator {
 		copy(newStart[len(prefix):], start)
 		start = newStart
 	}
-	return db.Database.NewIteratorWithStartAndPrefix(start, prefix)
+	return db.NewIteratorWithStartAndPrefix(start, prefix)
 }
 
 // NewIteratorWithStart implements ethdb.Database

@@ -16,14 +16,14 @@ import (
 	"github.com/stretchr/testify/require"
 
 	// consensusInterfaces "github.com/luxfi/consensus/core/interfaces" // TODO: Remove if not needed
-	commonEng "github.com/luxfi/node/consensus/engine/core"
-	consensusBlock "github.com/luxfi/node/consensus/engine/chain/block"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/set"
 	nodeConsensus "github.com/luxfi/node/consensus"
+	consensusBlock "github.com/luxfi/node/consensus/engine/chain/block"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/secp256k1"
@@ -336,7 +336,7 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	require.NoError(err)
 	internalBlock, err := serverVM.vm.parseBlock(context.Background(), blockBytes)
 	require.NoError(err)
-	require.NoError(serverVM.vm.State.SetLastAcceptedBlock(internalBlock))
+	require.NoError(serverVM.vm.SetLastAcceptedBlock(internalBlock))
 
 	// patch syncableInterval for test
 	serverVM.vm.StateSyncServer.(*stateSyncServer).syncableInterval = test.syncableInterval
@@ -469,7 +469,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	require.NotNil(msg)
 
 	// If the test is expected to error, assert the correct error is returned and finish the test.
-	err = syncerVM.StateSyncClient.Error()
+	err = syncerVM.Error()
 	if test.expectedErr != nil {
 		require.ErrorIs(err, test.expectedErr)
 		// Note we re-open the database here to avoid a closed error when the test is for a shutdown VM.

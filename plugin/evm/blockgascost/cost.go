@@ -29,8 +29,8 @@ func BlockGasCost(
 	}
 
 	var (
-		minBlockGasCost uint64 = feeConfig.MinBlockGasCost.Uint64()
-		maxBlockGasCost uint64 = feeConfig.MaxBlockGasCost.Uint64()
+		minBlockGasCost = feeConfig.MinBlockGasCost.Uint64()
+		maxBlockGasCost = feeConfig.MaxBlockGasCost.Uint64()
 	)
 
 	var cost uint64

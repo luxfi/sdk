@@ -78,7 +78,7 @@ type workerPool struct {
 func (wp *workerPool) Done() {
 	// Done is guaranteed to only be called after all work is already complete,
 	// so we call Wait for goroutines to finish before returning.
-	wp.BoundedWorkers.Wait()
+	wp.Wait()
 }
 
 // TODO: PrefetcherOption and WithWorkerPools seem to be removed from geth

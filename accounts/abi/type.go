@@ -426,7 +426,7 @@ func isValidFieldName(fieldName string) bool {
 			return false
 		}
 
-		if !(isLetter(c) || unicode.IsDigit(c)) {
+		if !isLetter(c) && !unicode.IsDigit(c) {
 			return false
 		}
 	}

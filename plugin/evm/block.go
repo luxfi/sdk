@@ -238,7 +238,7 @@ func (b *Block) verify(predicateContext *precompileconfig.PredicateContext, writ
 	// Additionally, if a block is already in processing, then it has already passed verification and
 	// at this point we have checked the predicates are still valid in the different context so we
 	// can return nil.
-	if b.vm.State.IsProcessing(b.id) {
+	if b.vm.IsProcessing(b.id) {
 		return nil
 	}
 

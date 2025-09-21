@@ -66,5 +66,5 @@ func (*configurator) Configure(chainConfig precompileconfig.ChainConfig, cfg pre
 		// default to disabling rewards
 		DisableFeeRewards(state)
 	}
-	return config.AllowListConfig.Configure(chainConfig, ContractAddress, state, blockContext)
+	return config.Configure(chainConfig, ContractAddress, state, blockContext)
 }

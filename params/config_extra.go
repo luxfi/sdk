@@ -288,7 +288,7 @@ func SetNetworkUpgradeDefaults(c *ChainConfig) {
 	// GetExtra(c).NetworkUpgrades.SetDefaults(GetExtra(c).ConsensusCtx.NetworkUpgrades)
 	// For now, set empty defaults with empty upgrade config
 	emptyUpgradeConfig := upgrade.Config{}
-	GetExtra(c).NetworkUpgrades.SetDefaults(emptyUpgradeConfig)
+	GetExtra(c).SetDefaults(emptyUpgradeConfig)
 }
 
 // SetRulesContext associates a Rules instance with its ChainConfig and timestamp
@@ -334,11 +334,11 @@ func GetRulesExtra(rules Rules) RulesExtra {
 
 	// Build RulesExtra from extras.Rules
 	rulesExtra := RulesExtra{
-		IsSubnetEVM:       extrasRules.LuxRules.IsSubnetEVM,
-		IsDurango:         extrasRules.LuxRules.IsDurango,
-		IsEtna:            extrasRules.LuxRules.IsEtna,
-		IsFortuna:         extrasRules.LuxRules.IsFortuna,
-		IsGranite:         extrasRules.LuxRules.IsGranite,
+		IsSubnetEVM:       extrasRules.IsSubnetEVM,
+		IsDurango:         extrasRules.IsDurango,
+		IsEtna:            extrasRules.IsEtna,
+		IsFortuna:         extrasRules.IsFortuna,
+		IsGranite:         extrasRules.IsGranite,
 		PredicatersExist:  len(extrasRules.Predicaters) > 0,
 		Predicaters:       extrasRules.Predicaters,
 		LuxRules:          extrasRules.LuxRules,
@@ -367,7 +367,7 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 	}
 
 	extra := GetExtra(c)
-	luxRules := extra.NetworkUpgrades.GetLuxRules(timestamp)
+	luxRules := extra.GetLuxRules(timestamp)
 
 	// Build extras.Rules
 	rules := &extras.Rules{

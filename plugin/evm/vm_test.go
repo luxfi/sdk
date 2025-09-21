@@ -29,7 +29,6 @@ import (
 
 	commonEng "github.com/luxfi/consensus/core"
 	// consensusInterfaces "github.com/luxfi/consensus/core/interfaces" // TODO: Remove if not needed
-	"github.com/luxfi/node/consensus/chain"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
@@ -56,12 +55,15 @@ import (
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/chains/atomic"
+	"github.com/luxfi/node/consensus/chain"
+
 	// "github.com/luxfi/node/upgrade" // TODO: Remove if not needed
-	"github.com/luxfi/node/upgrade/upgradetest"
 	nodeConsensus "github.com/luxfi/node/consensus"
+	"github.com/luxfi/node/upgrade/upgradetest"
+
 	// "github.com/luxfi/node/consensus/validators" // TODO: Remove if not needed
-	"github.com/luxfi/node/utils/set"
 	luxdconstants "github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/node/utils/set"
 )
 
 var (
@@ -599,7 +601,7 @@ func testBuildEthTxBlock(t *testing.T, scheme string) {
 	}
 
 	// Clear the cache and ensure that GetBlock returns internal blocks with the correct status
-	tvm.vm.State.Flush()
+	tvm.vm.Flush()
 	blk2Refreshed, err := tvm.vm.GetBlockInternal(context.Background(), blk2.ID())
 	if err != nil {
 		t.Fatal(err)

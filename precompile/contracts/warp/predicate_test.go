@@ -106,7 +106,7 @@ func init() {
 		panic(err)
 	}
 	addressedPayloadBytes = addressedPayload.Bytes()
-	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID[:], addressedPayload.Bytes())
+	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, addressedPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -220,8 +220,8 @@ func (t *testValidatorStateWrapper) GetCurrentHeight() (uint64, error) {
 }
 
 func (t *testValidatorStateWrapper) GetMinimumHeight(ctx context.Context) (uint64, error) {
-	if t.State.GetMinimumHeightF != nil {
-		return t.State.GetMinimumHeightF(ctx)
+	if t.GetMinimumHeightF != nil {
+		return t.GetMinimumHeightF(ctx)
 	}
 	return 0, nil
 }
@@ -239,22 +239,22 @@ func (t *testValidatorStateWrapper) GetValidatorSet(height uint64, subnetID ids.
 }
 
 func (t *testValidatorStateWrapper) GetSubnetID(chainID ids.ID) (ids.ID, error) {
-	if t.State.GetSubnetIDF != nil {
-		return t.State.GetSubnetIDF(chainID)
+	if t.GetSubnetIDF != nil {
+		return t.GetSubnetIDF(chainID)
 	}
 	return ids.Empty, nil
 }
 
 func (t *testValidatorStateWrapper) GetChainID(subnetID ids.ID) (ids.ID, error) {
-	if t.State.GetChainIDF != nil {
-		return t.State.GetChainIDF(subnetID)
+	if t.GetChainIDF != nil {
+		return t.GetChainIDF(subnetID)
 	}
 	return ids.Empty, nil
 }
 
 func (t *testValidatorStateWrapper) GetNetID(chainID ids.ID) (ids.ID, error) {
-	if t.State.GetNetIDF != nil {
-		return t.State.GetNetIDF(chainID)
+	if t.GetNetIDF != nil {
+		return t.GetNetIDF(chainID)
 	}
 	return ids.Empty, nil
 }
@@ -319,7 +319,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	cChainID := ids.GenerateTestID()
 	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(err)
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID[:], addressedCall.Bytes())
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID, addressedCall.Bytes())
 	require.NoError(err)
 
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
@@ -480,7 +480,7 @@ func TestInvalidAddressedPayload(t *testing.T) {
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
 	// Create an unsigned message with an invalid addressed payload
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID[:], []byte{1, 2, 3})
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, []byte{1, 2, 3})
 	require.NoError(t, err)
 	warpMsg := &luxWarp.Message{
 		UnsignedMessage: unsignedMsg,
@@ -510,7 +510,7 @@ func TestInvalidBitSet(t *testing.T) {
 	require.NoError(t, err)
 	unsignedMsg, err := luxWarp.NewUnsignedMessage(
 		constants.UnitTestID,
-		sourceChainID[:],
+		sourceChainID,
 		addressedCall.Bytes(),
 	)
 	require.NoError(t, err)

@@ -161,7 +161,7 @@ func applyTransaction(msg *Message, config *params.ChainConfig, gp *GasPool, sta
 	if msg.To == nil {
 		// Convert common.Address to crypto.Address
 		var cryptoAddr crypto.Address
-		copy(cryptoAddr[:], evm.TxContext.Origin[:])
+		copy(cryptoAddr[:], evm.Origin[:])
 		createdAddr := crypto.CreateAddress(cryptoAddr, tx.Nonce())
 		// Convert crypto.Address back to common.Address
 		receipt.ContractAddress = common.BytesToAddress(createdAddr[:])

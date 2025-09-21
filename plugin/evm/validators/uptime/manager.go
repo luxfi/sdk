@@ -12,9 +12,9 @@ import (
 // Manager tracks validator uptime and connection status
 type Manager struct {
 	uptime.Calculator
-	state      uptime.State
-	clock      interface{}
-	connected  set.Set[ids.NodeID]
+	state     uptime.State
+	clock     interface{}
+	connected set.Set[ids.NodeID]
 }
 
 // NewManager creates a new uptime manager

@@ -14,10 +14,10 @@ import (
 type contextKey string
 
 const (
-	chainIDKey     contextKey = "chainID"
-	networkIDKey   contextKey = "networkID"
-	subnetIDKey    contextKey = "subnetID"
-	warpSignerKey  contextKey = "warpSigner"
+	chainIDKey    contextKey = "chainID"
+	networkIDKey  contextKey = "networkID"
+	subnetIDKey   contextKey = "subnetID"
+	warpSignerKey contextKey = "warpSigner"
 )
 
 // GetChainID retrieves the chain ID from the context

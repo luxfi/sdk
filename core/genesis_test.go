@@ -52,6 +52,7 @@ import (
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/geth/triedb"
 	gethpathdb "github.com/luxfi/geth/triedb/pathdb"
+
 	// "github.com/luxfi/evm/triedb/firewood"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/luxfi/evm/triedb/pathdb"
@@ -302,7 +303,7 @@ func TestPrecompileActivationAfterHeaderBlock(t *testing.T) {
 
 	activatedGenesisConfig := params.Copy(customg.Config)
 	contractDeployerConfig := deployerallowlist.NewConfig(utils.NewUint64(51), nil, nil, nil)
-	params.GetExtra(&activatedGenesisConfig).UpgradeConfig.PrecompileUpgrades = []extras.PrecompileUpgrade{
+	params.GetExtra(&activatedGenesisConfig).PrecompileUpgrades = []extras.PrecompileUpgrade{
 		{
 			Config: contractDeployerConfig,
 		},
@@ -340,7 +341,7 @@ func TestGenesisWriteUpgradesRegression(t *testing.T) {
 	_, _, err := SetupGenesisBlock(db, trieDB, genesis, genesisBlock.Hash(), false)
 	require.NoError(err)
 
-	params.GetExtra(genesis.Config).UpgradeConfig.PrecompileUpgrades = []extras.PrecompileUpgrade{
+	params.GetExtra(genesis.Config).PrecompileUpgrades = []extras.PrecompileUpgrade{
 		{
 			Config: deployerallowlist.NewConfig(utils.NewUint64(51), nil, nil, nil),
 		},

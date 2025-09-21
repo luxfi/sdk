@@ -48,5 +48,5 @@ func (*configurator) Configure(chainConfig precompileconfig.ChainConfig, cfg pre
 	if !ok {
 		return fmt.Errorf("expected config type %T, got %T: %v", &Config{}, cfg, cfg)
 	}
-	return config.AllowListConfig.Configure(chainConfig, ContractAddress, state, blockContext)
+	return config.Configure(chainConfig, ContractAddress, state, blockContext)
 }

@@ -59,10 +59,9 @@ func u64(val uint64) *uint64 { return &val }
 // contain invalid transactions
 func TestStateProcessorErrors(t *testing.T) {
 	// Test state processor functionality
-	cpcfg := params.Copy(params.TestChainConfig)
-	config := &cpcfg
-	config.ShanghaiTime = u64(0)
-	config.CancunTime = u64(0)
+	// Use TestSubnetEVMChainConfig which has SubnetEVM enabled
+	config := params.TestSubnetEVMChainConfig
+	// Override the MinBaseFee for this test
 	params.GetExtra(config).FeeConfig.MinBaseFee = big.NewInt(legacy.BaseFee)
 
 	var (
@@ -124,7 +123,7 @@ func TestStateProcessorErrors(t *testing.T) {
 						Nonce:   0,
 					},
 				},
-				GasLimit: params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
+				GasLimit: params.GetExtra(config).FeeConfig.GasLimit.Uint64(),
 			}
 			tooBigInitCode = [ethparams.MaxInitCodeSize + 1]byte{}
 		)
@@ -286,7 +285,7 @@ func TestStateProcessorErrors(t *testing.T) {
 						Nonce:   0,
 					},
 				},
-				GasLimit: params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
+				GasLimit: params.GetExtra(config).FeeConfig.GasLimit.Uint64(),
 			}
 		)
 		blockchain, err := NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)
@@ -329,7 +328,7 @@ func TestStateProcessorErrors(t *testing.T) {
 						Code:    common.FromHex("0xB0B0FACE"),
 					},
 				},
-				GasLimit: params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
+				GasLimit: params.GetExtra(config).FeeConfig.GasLimit.Uint64(),
 			}
 		)
 		blockchain, err := NewBlockChain(db, DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, common.Hash{}, false)

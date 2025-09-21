@@ -143,7 +143,7 @@ func (m *manager) sync(ctx context.Context) error {
 	}
 
 	// write validators to the database
-	if err := m.State.WriteState(); err != nil {
+	if err := m.WriteState(); err != nil {
 		return fmt.Errorf("failed to write validator state: %w", err)
 	}
 

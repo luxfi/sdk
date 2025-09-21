@@ -36,7 +36,6 @@ import (
 	"sync"
 	"time"
 
-
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/bloombits"

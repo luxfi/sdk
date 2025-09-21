@@ -135,7 +135,7 @@ func TestCheckCompatible(t *testing.T) {
 			wantErr: &ethparams.ConfigCompatError{
 				What:         "SubnetEVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
-				NewTime:      GetExtra(TestPreSubnetEVMChainConfig).NetworkUpgrades.SubnetEVMTimestamp,
+				NewTime:      GetExtra(TestPreSubnetEVMChainConfig).SubnetEVMTimestamp,
 				RewindToTime: 0,
 			},
 		},
@@ -147,7 +147,7 @@ func TestCheckCompatible(t *testing.T) {
 			wantErr: &ethparams.ConfigCompatError{
 				What:         "SubnetEVM fork block timestamp",
 				StoredTime:   utils.NewUint64(0),
-				NewTime:      GetExtra(TestPreSubnetEVMChainConfig).NetworkUpgrades.SubnetEVMTimestamp,
+				NewTime:      GetExtra(TestPreSubnetEVMChainConfig).SubnetEVMTimestamp,
 				RewindToTime: 0,
 			},
 		},
@@ -176,19 +176,19 @@ func TestConfigRules(t *testing.T) {
 
 	var stamp uint64
 	// Test that SubnetEVM is not active at timestamp 0
-	if extra.NetworkUpgrades.IsSubnetEVM(stamp) {
+	if extra.IsSubnetEVM(stamp) {
 		t.Errorf("expected timestamp %v to not be SubnetEVM", stamp)
 	}
 
 	stamp = 500
 	// Test that SubnetEVM is active at timestamp 500
-	if !extra.NetworkUpgrades.IsSubnetEVM(stamp) {
+	if !extra.IsSubnetEVM(stamp) {
 		t.Errorf("expected timestamp %v to be SubnetEVM", stamp)
 	}
 
 	stamp = math.MaxInt64
 	// Test that SubnetEVM is active at max timestamp
-	if !extra.NetworkUpgrades.IsSubnetEVM(stamp) {
+	if !extra.IsSubnetEVM(stamp) {
 		t.Errorf("expected timestamp %v to be SubnetEVM", stamp)
 	}
 }
