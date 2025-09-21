@@ -23,7 +23,7 @@ require (
 	github.com/luxfi/ids v1.0.2
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/math v0.1.1
-	github.com/luxfi/metric v1.3.0
+	github.com/luxfi/metric v1.4.0
 	github.com/luxfi/node v1.16.15
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
@@ -183,7 +183,7 @@ replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v
 
 // replace github.com/luxfi/database => ../database
 
-// replace github.com/luxfi/geth => ../geth
+replace github.com/luxfi/geth => ../geth
 
 // replace github.com/luxfi/warp => ../warp
 

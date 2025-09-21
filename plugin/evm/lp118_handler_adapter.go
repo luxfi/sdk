@@ -16,11 +16,11 @@ import (
 
 // lp118HandlerAdapter adapts lp118.Handler to p2p.Handler
 type lp118HandlerAdapter struct {
-	handler lp118.Handler
+	handler *lp118.Handler
 }
 
 // newLP118HandlerAdapter creates a new adapter
-func newLP118HandlerAdapter(handler lp118.Handler) p2p.Handler {
+func newLP118HandlerAdapter(handler *lp118.Handler) p2p.Handler {
 	return &lp118HandlerAdapter{
 		handler: handler,
 	}
@@ -35,19 +35,8 @@ func (a *lp118HandlerAdapter) AppGossip(ctx context.Context, nodeID ids.NodeID, 
 func (a *lp118HandlerAdapter) AppRequest(ctx context.Context, nodeID ids.NodeID, deadline time.Time, requestBytes []byte) ([]byte, *nodecore.AppError) {
 	// Forward to lp118 handler
 	resp, err := a.handler.AppRequest(ctx, nodeID, deadline, requestBytes)
-	if err != nil {
-		// Convert error to AppError if it's not already
-		// err is already *nodecore.AppError from lp118.Handler
-		if appErr, ok := err.(*nodecore.AppError); ok {
-			return nil, appErr
-		}
-		// Create a new AppError from the error
-		return nil, &nodecore.AppError{
-			Code:    -1,
-			Message: err.Error(),
-		}
-	}
-	return resp, nil
+	// err is already *nodecore.AppError from lp118.Handler
+	return resp, err
 }
 
 // CrossChainAppRequest handles cross-chain requests
