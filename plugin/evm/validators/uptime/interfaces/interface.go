@@ -12,5 +12,14 @@ import (
 type PausableManager interface {
 	uptime.Calculator
 	validatorsstateinterfaces.StateCallbackListener
+
+	// Connection management
+	Connect(nodeID ids.NodeID) error
+	Disconnect(nodeID ids.NodeID) error
+	IsConnected(nodeID ids.NodeID) bool
+	StartTracking(nodeIDs []ids.NodeID) error
+	StopTracking(nodeIDs []ids.NodeID) error
+
+	// Pause management
 	IsPaused(nodeID ids.NodeID) bool
 }

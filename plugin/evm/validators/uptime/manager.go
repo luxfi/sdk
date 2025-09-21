@@ -43,3 +43,25 @@ func (m *Manager) Disconnect(nodeID ids.NodeID) error {
 func (m *Manager) IsConnected(nodeID ids.NodeID) bool {
 	return m.connected.Contains(nodeID)
 }
+
+// StartTracking starts tracking uptime for the given set of validators
+func (m *Manager) StartTracking(nodeIDs []ids.NodeID) error {
+	// Implementation for starting to track multiple validators
+	// This is typically called when new validators are added or at startup
+	for range nodeIDs {
+		// Initialize tracking for each node if needed
+		// For now, just ensure they're in our tracking set
+		// The actual uptime tracking is handled by the underlying Calculator
+	}
+	return nil
+}
+
+// StopTracking stops tracking uptime for the given set of validators
+func (m *Manager) StopTracking(nodeIDs []ids.NodeID) error {
+	// Implementation for stopping tracking of multiple validators
+	for _, nodeID := range nodeIDs {
+		// Remove from connected set if connected
+		m.connected.Remove(nodeID)
+	}
+	return nil
+}

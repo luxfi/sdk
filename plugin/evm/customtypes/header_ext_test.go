@@ -4,7 +4,6 @@
 package customtypes
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"math/big"
 	"reflect"

@@ -1,3 +1,5 @@
+version: 2
+
 run:
   timeout: 10m
   tests: true
@@ -11,20 +13,21 @@ run:
 linters:
   enable:
     - govet
-    - gofmt
-    - goimports
     - ineffassign
     - misspell
     - unconvert
     - gosec
     - staticcheck
-    - gosimple
+  settings:
+    gosec:
+      excludes:
+        - G107  # Potential HTTP request made with variable url
+        - G404  # Use of weak random number generator
 
-linters-settings:
-  gosec:
-    excludes:
-      - G107  # Potential HTTP request made with variable url
-      - G404  # Use of weak random number generator
+formatters:
+  enable:
+    - gofmt
+    - goimports
 
 issues:
   exclude-rules:
