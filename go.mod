@@ -173,6 +173,9 @@ require (
 // Force tablewriter version for compatibility
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 
+// Patch luxfi/node to fix metrics compatibility
+replace github.com/luxfi/node => ../node-patched
+
 // CI/Production: Comment out these replace directives for CI
 // For local development: Uncomment these replace directives
 // replace github.com/luxfi/node => ../node
