@@ -3,9 +3,9 @@ run:
   tests: true
   build-tags:
     - all
-  skip-dirs:
+  exclude-dirs:
     - tests/antithesis
-  skip-files:
+  exclude-files:
     - ".*\\.pb\\.go$"
 
 linters:
@@ -21,8 +21,6 @@ linters:
     - gosimple
 
 linters-settings:
-  govet:
-    check-shadowing: false
   gosec:
     excludes:
       - G107  # Potential HTTP request made with variable url
