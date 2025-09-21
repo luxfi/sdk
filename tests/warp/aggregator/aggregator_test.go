@@ -22,22 +22,24 @@ func newValidator(t testing.TB, weight uint64) (bls.Signer, *luxWarp.Validator) 
 	sk, err := localsigner.New()
 	require.NoError(t, err)
 	pk := sk.PublicKey()
+	nodeID := ids.GenerateTestNodeID()
 	return sk, &luxWarp.Validator{
 		PublicKey:      pk,
 		PublicKeyBytes: bls.PublicKeyToCompressedBytes(pk),
 		Weight:         weight,
-		NodeIDs:        []ids.NodeID{ids.GenerateTestNodeID()},
+		NodeID:         nodeID[:],
 	}
 }
 
 func TestAggregateSignatures(t *testing.T) {
 	errTest := errors.New("test error")
-	unsignedMsg := &luxWarp.UnsignedMessage{
-		NetworkID:     1338,
-		SourceChainID: ids.ID{'y', 'e', 'e', 't'},
-		Payload:       []byte("hello world"),
-	}
-	require.NoError(t, unsignedMsg.Initialize())
+	sourceChainID := ids.ID{'y', 'e', 'e', 't'}
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(
+		1338,
+		sourceChainID[:],
+		[]byte("hello world"),
+	)
+	require.NoError(t, err)
 
 	nodeID1, nodeID2, nodeID3 := ids.GenerateTestNodeID(), ids.GenerateTestNodeID(), ids.GenerateTestNodeID()
 	vdrWeight := uint64(10001)
@@ -62,17 +64,17 @@ func TestAggregateSignatures(t *testing.T) {
 	vdrs := []*luxWarp.Validator{
 		{
 			PublicKey: vdr1.PublicKey,
-			NodeIDs:   []ids.NodeID{nodeID1},
+			NodeID:    nodeID1[:],
 			Weight:    vdr1.Weight,
 		},
 		{
 			PublicKey: vdr2.PublicKey,
-			NodeIDs:   []ids.NodeID{nodeID2},
+			NodeID:    nodeID2[:],
 			Weight:    vdr2.Weight,
 		},
 		{
 			PublicKey: vdr3.PublicKey,
-			NodeIDs:   []ids.NodeID{nodeID3},
+			NodeID:    nodeID3[:],
 			Weight:    vdr3.Weight,
 		},
 	}

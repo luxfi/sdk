@@ -66,7 +66,6 @@ import (
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/node/upgrade"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/slices"
 )
@@ -1910,7 +1909,7 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 			GasLimit:      8_000_000, // Lux requires 8M gas limit
 			ExcessBlobGas: new(uint64),
 			BlobGasUsed:   new(uint64),
-			Timestamp:     uint64(upgrade.InitiallyActiveTime.Unix()),
+			Timestamp:     0, // Use genesis timestamp of 0
 			Alloc: types.GenesisAlloc{
 				acc1Addr: {Balance: new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(100))}, // 100 ETH
 				acc2Addr: {Balance: new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(100))}, // 100 ETH

@@ -71,7 +71,8 @@ func (b *testBackend) ChainConfig() *params.ChainConfig {
 }
 
 func (b *testBackend) CurrentHeader() *types.Header {
-	return hdr
+	// Return the latest header from the database
+	return rawdb.ReadHeadHeader(b.db)
 }
 
 func (b *testBackend) ChainDb() ethdb.Database {

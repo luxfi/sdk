@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/evm/commontype"
-	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/precompileconfig"
@@ -82,7 +82,7 @@ var (
 			SuppliedGas: SetFeeConfigGasCost + FeeConfigChangedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
 
@@ -102,7 +102,7 @@ var (
 			SuppliedGas: SetFeeConfigGasCost + FeeConfigChangedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
 
@@ -127,7 +127,7 @@ var (
 				InitialFeeConfig: &testFeeConfig,
 			},
 			ExpectedErr: "cannot be greater than maxBlockGasCost",
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
 			},
@@ -148,7 +148,7 @@ var (
 				mbc.EXPECT().Number().Return(testBlockNumber).AnyTimes()
 				mbc.EXPECT().Timestamp().Return(uint64(0)).AnyTimes()
 			},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
@@ -160,7 +160,7 @@ var (
 		},
 		"get fee config from non-enabled address": {
 			Caller: allowlisttest.TestNoRoleAddr,
-			BeforeHook: func(t testing.TB, state *extstate.StateDB) {
+			BeforeHook: func(t testing.TB, state *state.StateDB) {
 				blockContext := contract.NewMockBlockContext(gomock.NewController(t))
 				blockContext.EXPECT().Number().Return(big.NewInt(6)).Times(1)
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
@@ -181,7 +181,7 @@ var (
 				}
 				return res
 			}(),
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
 				require.Equal(t, testFeeConfig, feeConfig)
@@ -212,7 +212,7 @@ var (
 			SetupBlockContext: func(mbc *contract.MockBlockContext) {
 				mbc.EXPECT().Number().Return(testBlockNumber)
 			},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
 				require.Equal(t, testFeeConfig, feeConfig)
@@ -221,7 +221,7 @@ var (
 		},
 		"get last changed at from non-enabled address": {
 			Caller: allowlisttest.TestNoRoleAddr,
-			BeforeHook: func(t testing.TB, state *extstate.StateDB) {
+			BeforeHook: func(t testing.TB, state *state.StateDB) {
 				blockContext := contract.NewMockBlockContext(gomock.NewController(t))
 				blockContext.EXPECT().Number().Return(testBlockNumber).Times(1)
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
@@ -242,7 +242,7 @@ var (
 				}
 				return res
 			}(),
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
 				require.Equal(t, testFeeConfig, feeConfig)
@@ -346,7 +346,7 @@ var (
 				mbc.EXPECT().Number().Return(testBlockNumber).AnyTimes()
 				mbc.EXPECT().Timestamp().Return(uint64(0)).AnyTimes()
 			},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, testFeeConfig, feeConfig)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
@@ -390,7 +390,7 @@ var (
 				mbc.EXPECT().Number().Return(testBlockNumber).AnyTimes()
 				mbc.EXPECT().Timestamp().Return(uint64(0)).AnyTimes()
 			},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				feeConfig := GetStoredFeeConfig(state)
 				require.Equal(t, regressionFeeConfig, feeConfig)
 				lastChangedAt := GetFeeConfigLastChangedAt(state)
@@ -416,7 +416,7 @@ var (
 			SuppliedGas: SetFeeConfigGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				logs := state.Logs()
 				require.Empty(t, logs)
 			},

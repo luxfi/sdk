@@ -13,7 +13,6 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/evm/consensus"
-	"github.com/luxfi/evm/consensus/compat"
 	"github.com/luxfi/evm/metrics/metricstest"
 	"github.com/luxfi/evm/plugin/evm/validators"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"

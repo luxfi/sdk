@@ -281,6 +281,11 @@ func TestActivePrecompiles(t *testing.T) {
 		},
 	)
 
+	// Create rules for timestamp 0 and 1
+	// Rules(blockNum *big.Int, isMerge bool, timestamp uint64)
+	rules0 := config.Rules(&big.Int{}, false, 0)
+	rules1 := config.Rules(&big.Int{}, false, 1)
+
 	require.True(t, GetRulesExtra(rules0).IsPrecompileEnabled(nativeminter.Module.Address))
 
 	require.False(t, GetRulesExtra(rules1).IsPrecompileEnabled(nativeminter.Module.Address))

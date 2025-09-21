@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/evm/predicate"
@@ -146,7 +146,7 @@ func TestSendWarpMessage(t *testing.T) {
 				}
 				return bytes
 			}(),
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				logs := state.Logs()
 				require.Len(t, logs, 1)
 				log := logs[0]

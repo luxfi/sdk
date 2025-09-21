@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"github.com/luxfi/consensus"
-	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 	"github.com/luxfi/math/set"
+	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"
@@ -60,11 +60,10 @@ func TestEthTxGossip(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		nil,
-		nil, // toEngine parameter
 		nil,
 		responseSender,
 	))
-	require.NoError(vm.SetState(ctx, consensusInterfaces.NormalOp))
+	require.NoError(vm.SetState(ctx, nodeConsensus.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
@@ -178,11 +177,10 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		nil,
-		nil, // toEngine parameter
 		nil,
 		sender,
 	))
-	require.NoError(vm.SetState(ctx, consensusInterfaces.NormalOp))
+	require.NoError(vm.SetState(ctx, nodeConsensus.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
@@ -234,11 +232,10 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		nil,
-		nil, // toEngine parameter
 		nil,
 		sender,
 	))
-	require.NoError(vm.SetState(ctx, consensusInterfaces.NormalOp))
+	require.NoError(vm.SetState(ctx, nodeConsensus.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))

@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/constants"
-	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
@@ -75,7 +75,7 @@ var (
 			SuppliedGas: AllowFeeRecipientsGasCost + FeeRecipientsAllowedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				_, isFeeRecipients := GetStoredRewardAddress(state)
 				require.True(t, isFeeRecipients)
 
@@ -102,7 +102,7 @@ var (
 			SuppliedGas: AllowFeeRecipientsGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check no logs are stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -120,7 +120,7 @@ var (
 			SuppliedGas: SetRewardAddressGasCost + RewardAddressChangedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				address, isFeeRecipients := GetStoredRewardAddress(state)
 				require.Equal(t, rewardAddress, address)
 				require.False(t, isFeeRecipients)
@@ -141,7 +141,7 @@ var (
 			SuppliedGas: AllowFeeRecipientsGasCost + FeeRecipientsAllowedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				_, isFeeRecipients := GetStoredRewardAddress(state)
 				require.True(t, isFeeRecipients)
 
@@ -161,7 +161,7 @@ var (
 			SuppliedGas: SetRewardAddressGasCost + RewardAddressChangedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				address, isFeeRecipients := GetStoredRewardAddress(state)
 				require.Equal(t, rewardAddress, address)
 				require.False(t, isFeeRecipients)
@@ -189,7 +189,7 @@ var (
 			SuppliedGas: SetRewardAddressGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check no logs are stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -207,7 +207,7 @@ var (
 			SuppliedGas: DisableRewardsGasCost + RewardsDisabledEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				address, isFeeRecipients := GetStoredRewardAddress(state)
 				require.False(t, isFeeRecipients)
 				require.Equal(t, constants.BlackholeAddr, address)
@@ -228,7 +228,7 @@ var (
 			SuppliedGas: DisableRewardsGasCost + RewardsDisabledEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				address, isFeeRecipients := GetStoredRewardAddress(state)
 				require.False(t, isFeeRecipients)
 				require.Equal(t, constants.BlackholeAddr, address)
@@ -256,7 +256,7 @@ var (
 			SuppliedGas: SetRewardAddressGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check logs are not stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -264,7 +264,7 @@ var (
 		},
 		"get current reward address from no role succeeds": {
 			Caller: allowlisttest.TestNoRoleAddr,
-			BeforeHook: func(t testing.TB, state *extstate.StateDB) {
+			BeforeHook: func(t testing.TB, state *state.StateDB) {
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
 				StoreRewardAddress(testutils.WrapStateDB(state), rewardAddress)
 			},
@@ -286,7 +286,7 @@ var (
 		},
 		"get are fee recipients allowed from no role succeeds": {
 			Caller: allowlisttest.TestNoRoleAddr,
-			BeforeHook: func(t testing.TB, state *extstate.StateDB) {
+			BeforeHook: func(t testing.TB, state *state.StateDB) {
 				allowlisttest.SetDefaultRoles(Module.Address)(t, state)
 				EnableAllowFeeRecipients(testutils.WrapStateDB(state))
 			},

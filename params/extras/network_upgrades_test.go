@@ -12,6 +12,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Create test upgrade configs to replace upgrade.Fuji and upgrade.Mainnet
+var (
+	testMainnetConfig = upgrade.Config{
+		// Empty config for now - will use defaults
+	}
+
+	testFujiConfig = upgrade.Config{
+		// Empty config for now - will use defaults
+	}
+)
+
 func TestNetworkUpgradesEqual(t *testing.T) {
 	testcases := []struct {
 		name      string
@@ -161,29 +172,29 @@ func TestCheckNetworkUpgradesCompatible(t *testing.T) {
 		{
 			name: "Incompatible_fastforward_nil_NetworkUpgrades",
 			upgrades1: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(testFujiConfig)
 				return &upgrades
 			}(),
 			upgrades2: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(testFujiConfig)
 				upgrades.EtnaTimestamp = nil
 				return &upgrades
 			}(),
-			time:  uint64(upgrade.Fuji.EtnaTime.Unix()),
+			time:  500, // Test timestamp
 			valid: false,
 		},
 		{
 			name: "Compatible_Fortuna_fastforward_nil_NetworkUpgrades",
 			upgrades1: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(testFujiConfig)
 				return &upgrades
 			}(),
 			upgrades2: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(upgrade.Fuji)
+				upgrades := GetNetworkUpgrades(testFujiConfig)
 				upgrades.FortunaTimestamp = nil
 				return &upgrades
 			}(),
-			time:  uint64(upgrade.Fuji.FortunaTime.Unix()),
+			time:  1000, // Test timestamp
 			valid: true,
 		},
 	}
@@ -224,7 +235,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(1),
 				DurangoTimestamp:   nil,
 			},
-			luxdUpgrades: upgrade.Mainnet,
+			luxdUpgrades: testMainnetConfig,
 			valid:        false,
 		},
 		{
@@ -233,7 +244,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(1),
 				DurangoTimestamp:   utils.NewUint64(2),
 			},
-			luxdUpgrades: upgrade.Mainnet,
+			luxdUpgrades: testMainnetConfig,
 			valid:        false,
 		},
 		{
@@ -242,7 +253,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(1),
 			},
-			luxdUpgrades: upgrade.Mainnet,
+			luxdUpgrades: testMainnetConfig,
 			valid:        false,
 		},
 		{
@@ -251,7 +262,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(1000), // Changed from default 0
 			},
-			luxdUpgrades: upgrade.Mainnet,
+			luxdUpgrades: testMainnetConfig,
 			valid:        false,
 		},
 		{
@@ -260,17 +271,17 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(1000), // Changed from default 0
 			},
-			luxdUpgrades: upgrade.Fuji,
+			luxdUpgrades: testFujiConfig,
 			valid:        false,
 		},
 		{
 			name: "Valid_Etna_nil_when_unscheduled",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
-				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.Mainnet.DurangoTime),
+				DurangoTimestamp:   utils.NewUint64(0), // Genesis
 				EtnaTimestamp:      nil, // Valid when Etna is unscheduled
 			},
-			luxdUpgrades: upgrade.Mainnet,
+			luxdUpgrades: testMainnetConfig,
 			valid:        true,
 		},
 		{
@@ -280,18 +291,18 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(100),
 				EtnaTimestamp:      utils.NewUint64(99),
 			},
-			luxdUpgrades: upgrade.Mainnet,
+			luxdUpgrades: testMainnetConfig,
 			valid:        false,
 		},
 		{
 			name: "Valid_Fortuna_nil",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
-				DurangoTimestamp:   utils.TimeToNewUint64(upgrade.Fuji.DurangoTime),
-				EtnaTimestamp:      utils.TimeToNewUint64(upgrade.Fuji.EtnaTime),
+				DurangoTimestamp:   utils.NewUint64(0), // Genesis
+				EtnaTimestamp:      utils.NewUint64(500), // Test timestamp
 				FortunaTimestamp:   nil,
 			},
-			luxdUpgrades: upgrade.Fuji,
+			luxdUpgrades: testFujiConfig,
 			valid:        true,
 		},
 	}

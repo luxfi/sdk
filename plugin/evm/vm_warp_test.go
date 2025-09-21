@@ -86,7 +86,7 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 
 	require.NoError(genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango]))))
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
-		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(upgrade.InitiallyActiveTime)),
+		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.NewUint64(0)), // Enable at genesis
 	}
 	genesisJSON, err := genesis.MarshalJSON()
 	require.NoError(err)
@@ -332,7 +332,7 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 	genesis := &core.Genesis{}
 	require.NoError(genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango]))))
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
-		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.TimeToNewUint64(upgrade.InitiallyActiveTime)),
+		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.NewUint64(0)), // Enable at genesis
 	}
 	genesisJSON, err := genesis.MarshalJSON()
 	require.NoError(err)
@@ -526,11 +526,11 @@ func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 	}()
 
 	// enable warp at the default genesis time
-	enableTime := upgrade.InitiallyActiveTime
+	enableTime := time.Unix(0, 0)
 	enableConfig := warpcontract.NewDefaultConfig(utils.TimeToNewUint64(enableTime))
 
 	// disable warp so we can re-enable it with RequirePrimaryNetworkSigners
-	disableTime := upgrade.InitiallyActiveTime.Add(10 * time.Second)
+	disableTime := time.Unix(0, 0).Add(10 * time.Second)
 	disableConfig := warpcontract.NewDisableConfig(utils.TimeToNewUint64(disableTime))
 
 	// re-enable warp with RequirePrimaryNetworkSigners
@@ -564,21 +564,21 @@ func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 			sourceChainID: consensus.GetChainID(tvm.vm.ctx),
 			msgFrom:       fromSubnet,
 			useSigners:    signersSubnet,
-			blockTime:     upgrade.InitiallyActiveTime,
+			blockTime:     time.Unix(0, 0), // Genesis time
 		},
 		{
 			name:          "P-Chain message should be signed by subnet without RequirePrimaryNetworkSigners",
 			sourceChainID: constants.PlatformChainID,
 			msgFrom:       fromPrimary,
 			useSigners:    signersSubnet,
-			blockTime:     upgrade.InitiallyActiveTime.Add(blockGap),
+			blockTime:     time.Unix(0, 0).Add(blockGap), // Genesis + blockGap
 		},
 		{
 			name:          "C-Chain message should be signed by subnet without RequirePrimaryNetworkSigners",
 			sourceChainID: consensus.GetChainID(tvm.vm.ctx),
 			msgFrom:       fromPrimary,
 			useSigners:    signersSubnet,
-			blockTime:     upgrade.InitiallyActiveTime.Add(2 * blockGap),
+			blockTime:     time.Unix(0, 0).Add(2 * blockGap), // Genesis + 2*blockGap
 		},
 		// Note here we disable warp and re-enable it with RequirePrimaryNetworkSigners
 		// by using reEnableTime.
