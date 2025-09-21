@@ -183,7 +183,7 @@ replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v
 
 // replace github.com/luxfi/database => ../database
 
-replace github.com/luxfi/geth => ../geth
+// replace github.com/luxfi/geth => ../geth
 
 // replace github.com/luxfi/warp => ../warp
 
