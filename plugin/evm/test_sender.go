@@ -7,9 +7,9 @@ import (
 	"context"
 	"testing"
 
-	consensusSet "github.com/luxfi/consensus/utils/set"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	nodeCore "github.com/luxfi/node/consensus/engine/core"
 )
 
 // TestSender is a test implementation of the Sender interface
@@ -36,10 +36,10 @@ type TestSender struct {
 }
 
 // SendAppGossip implements the consensus AppSender interface
-func (s *TestSender) SendAppGossip(ctx context.Context, nodeIDs consensusSet.Set[ids.NodeID], msg []byte) error {
-	// Convert consensus set to node set for internal functions
+func (s *TestSender) SendAppGossip(ctx context.Context, config nodeCore.SendConfig, msg []byte) error {
+	// Convert SendConfig to node set for internal functions
 	nodeSet := set.Set[ids.NodeID]{}
-	for id := range nodeIDs {
+	for id := range config.NodeIDs {
 		nodeSet.Add(id)
 	}
 
@@ -57,14 +57,9 @@ func (s *TestSender) SendAppGossip(ctx context.Context, nodeIDs consensusSet.Set
 	return nil
 }
 
-func (s *TestSender) SendAppGossipSpecific(ctx context.Context, nodeIDs consensusSet.Set[ids.NodeID], msg []byte) error {
-	// Convert consensus set to node set for internal functions
-	nodeSet := set.Set[ids.NodeID]{}
-	for id := range nodeIDs {
-		nodeSet.Add(id)
-	}
+func (s *TestSender) SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], msg []byte) error {
 	if s.SendAppGossipSpecificF != nil {
-		return s.SendAppGossipSpecificF(ctx, nodeSet, msg)
+		return s.SendAppGossipSpecificF(ctx, nodeIDs, msg)
 	}
 	if s.CantSendAppGossipSpecific && s.T != nil {
 		s.T.Helper()
@@ -73,15 +68,9 @@ func (s *TestSender) SendAppGossipSpecific(ctx context.Context, nodeIDs consensu
 	return nil
 }
 
-func (s *TestSender) SendAppRequest(ctx context.Context, nodeIDs consensusSet.Set[ids.NodeID], requestID uint32, request []byte) error {
-	// Convert consensus set to node set for internal functions
-	nodeSet := set.Set[ids.NodeID]{}
-	for id := range nodeIDs {
-		nodeSet.Add(id)
-	}
-
+func (s *TestSender) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, request []byte) error {
 	if s.SendAppRequestF != nil {
-		return s.SendAppRequestF(ctx, nodeSet, requestID, request)
+		return s.SendAppRequestF(ctx, nodeIDs, requestID, request)
 	}
 	if s.CantSendAppRequest && s.T != nil {
 		s.T.Helper()

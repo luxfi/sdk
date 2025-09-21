@@ -79,7 +79,7 @@ var (
 		g := new(core.Genesis)
 		g.Difficulty = big.NewInt(0)
 		g.GasLimit = 8000000
-		g.Timestamp = uint64(upgrade.InitiallyActiveTime.Unix())
+		g.Timestamp = 0 // Genesis timestamp
 
 		// Use chainId: 43111, so that it does not overlap with any Lux ChainIDs, which may have their
 		// config overridden in vm.Initialize.
@@ -161,12 +161,12 @@ var (
 		return string(b)
 	}
 
-	// forkToChainConfig maps a fork to a chain config
-	forkToChainConfig = map[upgradetest.Fork]*params.ChainConfig{
-		upgradetest.Durango: params.TestDurangoChainConfig,
-		upgradetest.Etna:    params.TestEtnaChainConfig,
-		upgradetest.Granite: params.TestGraniteChainConfig,
-		// upgradetest.Latest equals Granite, so it maps to the same config
+	// forkToChainConfig maps a fork name to a chain config
+	forkToChainConfig = map[string]*params.ChainConfig{
+		"Durango": params.TestDurangoChainConfig,
+		"Etna":    params.TestEtnaChainConfig,
+		"Granite": params.TestGraniteChainConfig,
+		"Latest":  params.TestGraniteChainConfig,
 	}
 
 	// These will be initialized after init() runs
@@ -195,7 +195,7 @@ func init() {
 
 type testVMConfig struct {
 	isSyncing bool
-	fork      *upgradetest.Fork
+	fork      *string
 	// If genesisJSON is empty, defaults to the genesis corresponding to the
 	// fork.
 	genesisJSON string
@@ -226,7 +226,7 @@ func createTestConsensusContext(t *testing.T) *testConsensusContext {
 	return &testConsensusContext{
 		Context:         baseCtx,
 		ChainID:         utilstest.SubnetEVMTestChainID,
-		NetworkUpgrades: upgradetest.GetConfig(upgradetest.Latest),
+		NetworkUpgrades: upgradetest.GetConfig("latest"),
 		ChainDataDir:    t.TempDir(),
 	}
 }
@@ -282,7 +282,7 @@ func getInternalBlockFromProtocol(t *testing.T, blk protocolchain.Block) *Block 
 
 func newVM(t *testing.T, config testVMConfig) *testVM {
 	ctx := createTestConsensusContext(t)
-	fork := upgradetest.Latest
+	fork := "Latest"
 	if config.fork != nil {
 		fork = *config.fork
 	}
@@ -352,7 +352,7 @@ func getConfig(scheme, otherConfig string) string {
 // setupGenesis sets up the genesis
 func setupGenesis(
 	t *testing.T,
-	fork upgradetest.Fork,
+	fork string,
 ) (context.Context,
 	*prefixdb.Database,
 	[]byte,
@@ -2515,7 +2515,7 @@ func TestTxAllowListSuccessfulTx(t *testing.T) {
 	managerKey := testKeys[1]
 	managerAddress := testEthAddrs[1]
 	genesis := &core.Genesis{}
-	if err := genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango]))); err != nil {
+	if err := genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig["Durango"]))); err != nil {
 		t.Fatal(err)
 	}
 	// this manager role should not be activated because DurangoTimestamp is in the future
@@ -2702,7 +2702,7 @@ func TestTxAllowListSuccessfulTx(t *testing.T) {
 
 func TestVerifyManagerConfig(t *testing.T) {
 	genesis := &core.Genesis{}
-	ctx, dbManager, genesisBytes, _ := setupGenesis(t, upgradetest.Durango)
+	ctx, dbManager, genesisBytes, _ := setupGenesis(t, "Durango")
 	require.NoError(t, genesis.UnmarshalJSON(genesisBytes))
 
 	durangoTimestamp := time.Now().Add(10 * time.Hour)
@@ -2730,7 +2730,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 	require.ErrorIs(t, err, allowlist.ErrCannotAddManagersBeforeDurango)
 
 	genesis = &core.Genesis{}
-	require.NoError(t, genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango]))))
+	require.NoError(t, genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig["Durango"]))))
 	params.GetExtra(genesis.Config).DurangoTimestamp = utils.TimeToNewUint64(durangoTimestamp)
 	genesisJSON, err = genesis.MarshalJSON()
 	require.NoError(t, err)
@@ -2746,7 +2746,7 @@ func TestVerifyManagerConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	vm = &VM{}
-	ctx, dbManager, _, _ = setupGenesis(t, upgradetest.Latest)
+	ctx, dbManager, _, _ = setupGenesis(t, "Latest")
 	err = vm.Initialize(
 		context.Background(),
 		ctx,
@@ -2769,7 +2769,7 @@ func TestTxAllowListDisablePrecompile(t *testing.T) {
 	if err := genesis.UnmarshalJSON([]byte(genesisJSONSubnetEVM)); err != nil {
 		t.Fatal(err)
 	}
-	enableAllowListTimestamp := upgrade.InitiallyActiveTime // enable at initially active time
+	enableAllowListTimestamp := time.Unix(0, 0) // enable at genesis
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		txallowlist.ConfigKey: txallowlist.NewConfig(utils.TimeToNewUint64(enableAllowListTimestamp), testEthAddrs[0:1], nil, nil),
 	}
@@ -3557,7 +3557,7 @@ func TestSkipChainConfigCheckCompatible(t *testing.T) {
 	// use the block's timestamp instead of 0 since rewind to genesis
 	// is hardcoded to be allowed in core/genesis.go.
 	genesisWithUpgrade := &core.Genesis{}
-	require.NoError(t, json.Unmarshal([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango])), genesisWithUpgrade))
+	require.NoError(t, json.Unmarshal([]byte(toGenesisJSON(forkToChainConfig["Durango"])), genesisWithUpgrade))
 	params.GetExtra(genesisWithUpgrade.Config).EtnaTimestamp = utils.TimeToNewUint64(blk.Timestamp())
 	genesisWithUpgradeBytes, err := json.Marshal(genesisWithUpgrade)
 	require.NoError(t, err)
@@ -3587,39 +3587,39 @@ func TestParentBeaconRootBlock(t *testing.T) {
 	}{
 		{
 			name:          "non-empty parent beacon root in Durango",
-			genesisJSON:   toGenesisJSON(forkToChainConfig[upgradetest.Durango]),
+			genesisJSON:   toGenesisJSON(forkToChainConfig["Durango"]),
 			beaconRoot:    &common.Hash{0x01},
 			expectedError: true,
 			// err string wont work because it will also fail with blob gas is non-empty (zeroed)
 		},
 		{
 			name:          "empty parent beacon root in Durango",
-			genesisJSON:   toGenesisJSON(forkToChainConfig[upgradetest.Durango]),
+			genesisJSON:   toGenesisJSON(forkToChainConfig["Durango"]),
 			beaconRoot:    &common.Hash{},
 			expectedError: true,
 		},
 		{
 			name:          "nil parent beacon root in Durango",
-			genesisJSON:   toGenesisJSON(forkToChainConfig[upgradetest.Durango]),
+			genesisJSON:   toGenesisJSON(forkToChainConfig["Durango"]),
 			beaconRoot:    nil,
 			expectedError: false,
 		},
 		{
 			name:          "non-empty parent beacon root in E-Upgrade (Cancun)",
-			genesisJSON:   toGenesisJSON(forkToChainConfig[upgradetest.Etna]),
+			genesisJSON:   toGenesisJSON(forkToChainConfig["Etna"]),
 			beaconRoot:    &common.Hash{0x01},
 			expectedError: true,
 			errString:     "expected empty hash",
 		},
 		{
 			name:          "empty parent beacon root in E-Upgrade (Cancun)",
-			genesisJSON:   toGenesisJSON(forkToChainConfig[upgradetest.Etna]),
+			genesisJSON:   toGenesisJSON(forkToChainConfig["Etna"]),
 			beaconRoot:    &common.Hash{},
 			expectedError: false,
 		},
 		{
 			name:          "nil parent beacon root in E-Upgrade (Cancun)",
-			genesisJSON:   toGenesisJSON(forkToChainConfig[upgradetest.Etna]),
+			genesisJSON:   toGenesisJSON(forkToChainConfig["Etna"]),
 			beaconRoot:    nil,
 			expectedError: true,
 			errString:     "header is missing parentBeaconRoot",
@@ -3720,7 +3720,7 @@ func TestStandaloneDB(t *testing.T) {
 		context.Background(),
 		ctx,
 		sharedDB,
-		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
+		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		[]byte(configJSON),
 		nil, // toEngine parameter

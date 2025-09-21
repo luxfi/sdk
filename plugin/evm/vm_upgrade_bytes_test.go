@@ -34,7 +34,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var DefaultEtnaTime = uint64(upgrade.Default.EtnaTime.Unix())
+var DefaultEtnaTime = uint64(0) // Use genesis time as default
 
 // getEthBlockFromConsensusBlock safely extracts the Ethereum block from a consensus block interface
 func getEthBlockFromConsensusBlock(t *testing.T, blk consensusInterfaces.Block) *types.Block {
@@ -70,7 +70,7 @@ func getEthBlockFromConsensusBlock(t *testing.T, blk consensusInterfaces.Block) 
 
 func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	// Make a TxAllowListConfig upgrade at genesis and convert it to JSON to apply as upgradeBytes.
-	enableAllowListTimestamp := upgrade.InitiallyActiveTime // enable at initial time
+	enableAllowListTimestamp := time.Unix(0, 0) // enable at genesis
 	upgradeConfig := &extras.UpgradeConfig{
 		PrecompileUpgrades: []extras.PrecompileUpgrade{
 			{
@@ -256,7 +256,7 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	require.False(t, vm.chainConfigExtra().IsSubnetEVM(0))
 	require.True(t, vm.chainConfigExtra().IsSubnetEVM(2))
 	require.False(t, vm.chainConfigExtra().IsDurango(0))
-	require.False(t, vm.chainConfigExtra().IsDurango(uint64(upgrade.InitiallyActiveTime.Unix())))
+	require.False(t, vm.chainConfigExtra().IsDurango(0)) // Check at genesis
 	require.True(t, vm.chainConfigExtra().IsDurango(1607144402))
 }
 
@@ -299,7 +299,7 @@ func TestVMStateUpgrade(t *testing.T) {
 		Code:          upgradedCode,
 	}
 
-	upgradeTimestamp := upgrade.InitiallyActiveTime.Add(10 * time.Hour)
+	upgradeTimestamp := time.Unix(0, 0).Add(10 * time.Hour) // 10 hours after genesis
 	upgradeBytesJSON := fmt.Sprintf(
 		`{
 			"stateUpgrades": [

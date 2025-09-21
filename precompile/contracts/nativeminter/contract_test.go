@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/holiman/uint256"
-	"github.com/luxfi/evm/core/extstate"
+	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/precompile/allowlist/allowlisttest"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
@@ -47,7 +47,7 @@ var (
 			SuppliedGas: MintGasCost + NativeCoinMintedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				expected := uint256.MustFromBig(common.Big1)
 				require.Equal(t, expected, stateDB.GetBalance(allowlisttest.TestEnabledAddr), "expected minted funds")
 
@@ -63,7 +63,7 @@ var (
 					allowlisttest.TestEnabledAddr: math.NewHexOrDecimal256(2),
 				},
 			},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				expected := uint256.MustFromBig(common.Big2)
 				require.Equal(t, expected, stateDB.GetBalance(allowlisttest.TestEnabledAddr), "expected minted funds")
 			},
@@ -80,7 +80,7 @@ var (
 			SuppliedGas: MintGasCost + NativeCoinMintedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				expected := uint256.MustFromBig(common.Big1)
 				require.Equal(t, expected, stateDB.GetBalance(allowlisttest.TestEnabledAddr), "expected minted funds")
 
@@ -100,7 +100,7 @@ var (
 			SuppliedGas: MintGasCost + NativeCoinMintedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				expected := uint256.MustFromBig(common.Big1)
 				require.Equal(t, expected, stateDB.GetBalance(allowlisttest.TestAdminAddr), "expected minted funds")
 
@@ -120,7 +120,7 @@ var (
 			SuppliedGas: MintGasCost + NativeCoinMintedEventGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				expected := uint256.MustFromBig(math.MaxBig256)
 				require.Equal(t, expected, stateDB.GetBalance(allowlisttest.TestAdminAddr), "expected minted funds")
 
@@ -196,7 +196,7 @@ var (
 			SuppliedGas: MintGasCost,
 			ReadOnly:    false,
 			ExpectedRes: []byte{},
-			AfterHook: func(t testing.TB, stateDB *extstate.StateDB) {
+			AfterHook: func(t testing.TB, stateDB *state.StateDB) {
 				// Check no logs are stored in state
 				logs := stateDB.Logs()
 				require.Empty(t, logs)
@@ -243,7 +243,7 @@ var (
 			ExpectedRes: []byte{},
 			SuppliedGas: MintGasCost + NativeCoinMintedEventGasCost,
 			ReadOnly:    false,
-			AfterHook: func(t testing.TB, state *extstate.StateDB) {
+			AfterHook: func(t testing.TB, state *state.StateDB) {
 				expected := uint256.MustFromBig(common.Big1)
 				require.Equal(t, expected, state.GetBalance(allowlisttest.TestEnabledAddr), "expected minted funds")
 

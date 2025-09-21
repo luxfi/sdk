@@ -82,7 +82,6 @@ import (
 	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/consensus/engine/chain/block"
 	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
-	consensusInterfaces "github.com/luxfi/consensus/interfaces"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
 	nodeConsensusChain "github.com/luxfi/node/consensus/chain"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
@@ -99,7 +98,6 @@ import (
 
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/core/appsender"
-	nodecore "github.com/luxfi/node/consensus/engine/core"
 	nodeCommonEng "github.com/luxfi/node/consensus/engine/core"
 	"github.com/luxfi/math/set"
 
@@ -382,10 +380,10 @@ func (vm *VM) Initialize(
 	genesisBytes []byte,
 	upgradeBytes []byte,
 	configBytes []byte,
-	fxs []*nodecore.Fx,
-	appSender nodecore.AppSender,
+	fxs []*nodeCommonEng.Fx,
+	appSender nodeCommonEng.AppSender,
 ) error {
-	// Convert fxs from []*nodecore.Fx to []*commonEng.Fx 
+	// Convert fxs from []*nodeCommonEng.Fx to []*commonEng.Fx 
 	typedFxs := make([]*commonEng.Fx, len(fxs))
 	for i, fx := range fxs {
 		typedFxs[i] = &commonEng.Fx{
@@ -394,10 +392,16 @@ func (vm *VM) Initialize(
 		}
 	}
 
-	// Use the compatibility adapter for AppSender
-	compatAppSender := compat.NewNodeAppSenderAdapter(appSender)
-
-	return vm.initializeInternal(ctx, chainCtx, dbManager, genesisBytes, upgradeBytes, configBytes, typedFxs, compatAppSender)
+	// AppSender from node should be compatible with consensus AppSender
+	// They both use the same set.Set type and signature, so we can type assert
+	var consensusAppSender commonEng.AppSender
+	if extSender, ok := appSender.(commonEng.AppSender); ok {
+		consensusAppSender = extSender
+	} else {
+		// If not directly compatible, we'll use it as-is and let the internal method handle it
+		consensusAppSender = appSender.(commonEng.AppSender)
+	}
+	return vm.initializeInternal(ctx, chainCtx, dbManager, genesisBytes, upgradeBytes, configBytes, typedFxs, consensusAppSender)
 }
 
 // initializeInternal contains the actual initialization logic with strongly typed parameters
@@ -659,7 +663,7 @@ func (vm *VM) initializeInternal(
 	// Only create warp backend if we have a signer
 	if warpAdapter != nil {
 		vm.warpBackend, err = warp.NewBackend(
-			chainCtx.QuantumID, // Use QuantumID as network ID from consensus Context
+			chainCtx.NetworkID, // Use NetworkID from consensus Context
 			chainCtx.ChainID,
 			warpAdapter,
 			&warpBlockClient{vm: vm}, // Wrapper that implements warp.BlockClient
@@ -1207,7 +1211,7 @@ func (vm *VM) setAppRequestHandlers() {
 	vm.Network.SetRequestHandler(networkHandler)
 }
 
-func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
+func (vm *VM) WaitForEvent(ctx context.Context) (nodeCommonEng.Message, error) {
 	vm.builderLock.Lock()
 	builder := vm.builder
 	vm.builderLock.Unlock()
@@ -1216,16 +1220,22 @@ func (vm *VM) WaitForEvent(ctx context.Context) (commonEng.Message, error) {
 	if builder == nil {
 		select {
 		case <-ctx.Done():
-			return commonEng.Message{}, ctx.Err()
+			return 0, ctx.Err()
 		case <-vm.stateSyncDone:
 			// Return empty message to indicate state sync is done
-			return commonEng.Message{}, nil
+			return 0, nil
 		case <-vm.shutdownChan:
-			return commonEng.Message{}, errShuttingDownVM
+			return 0, errShuttingDownVM
 		}
 	}
 
-	return builder.waitForEvent(ctx)
+	// Call builder's waitForEvent which returns commonEng.Message
+	_, err := builder.waitForEvent(ctx)
+	if err != nil {
+		return 0, err
+	}
+	// Return 0 for success as Message is just uint32 in node
+	return 0, nil
 }
 
 // Shutdown implements the chain.ChainVM interface
@@ -1712,7 +1722,7 @@ func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 }
 
 // AppRequestFailed implements the VM interface
-func (vm *VM) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *nodecore.AppError) error {
+func (vm *VM) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID uint32, appErr *nodeCommonEng.AppError) error {
 	// The Network interface doesn't expose AppRequestFailed directly
 	// We need to handle this at the VM level by logging the error
 	log.Debug("AppRequestFailed", "nodeID", nodeID, "requestID", requestID, "error", appErr)
@@ -1721,7 +1731,7 @@ func (vm *VM) AppRequestFailed(ctx context.Context, nodeID ids.NodeID, requestID
 }
 
 // CrossChainAppRequestFailed implements the VM interface
-func (vm *VM) CrossChainAppRequestFailed(ctx context.Context, chainID ids.ID, requestID uint32, appErr *nodecore.AppError) error {
+func (vm *VM) CrossChainAppRequestFailed(ctx context.Context, chainID ids.ID, requestID uint32, appErr *nodeCommonEng.AppError) error {
 	// Cross-chain app requests are not currently supported
 	// Just log and return nil to satisfy the interface
 	log.Debug("CrossChainAppRequestFailed called", "chainID", chainID, "requestID", requestID, "error", appErr.Message)

@@ -34,12 +34,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient/simulated"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/crypto"
 )
 
 var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
@@ -66,15 +66,12 @@ var waitDeployedTests = map[string]struct {
 func TestWaitDeployed(t *testing.T) {
 	t.Parallel()
 	for name, test := range waitDeployedTests {
+		cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+		testAddr := common.BytesToAddress(cryptoAddr[:])
 		backend := simulated.NewBackend(
-			func() types.GenesisAlloc {
-				cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
-				var addr common.Address
-				copy(addr[:], cryptoAddr[:])
-				return types.GenesisAlloc{
-					addr: {Balance: new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(1000))},
-				}
-			}(),
+			types.GenesisAlloc{
+				testAddr: {Balance: new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(100000))},
+			},
 		)
 		defer backend.Close()
 
@@ -123,15 +120,12 @@ func TestWaitDeployed(t *testing.T) {
 }
 
 func TestWaitDeployedCornerCases(t *testing.T) {
+	cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
+	testAddr := common.BytesToAddress(cryptoAddr[:])
 	backend := simulated.NewBackend(
-		func() types.GenesisAlloc {
-			cryptoAddr := crypto.PubkeyToAddress(testKey.PublicKey)
-			var addr common.Address
-			copy(addr[:], cryptoAddr[:])
-			return types.GenesisAlloc{
-				addr: {Balance: big.NewInt(1000000000000000000)},
-			}
-		}(),
+		types.GenesisAlloc{
+			testAddr: {Balance: new(big.Int).Mul(big.NewInt(1000000000000000000), big.NewInt(1000))},
+		},
 	)
 	defer backend.Close()
 

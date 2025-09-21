@@ -15,13 +15,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	commonEng "github.com/luxfi/consensus/core"
 	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
-	"github.com/luxfi/consensus/engine/chain/block"
+	commonEng "github.com/luxfi/node/consensus/engine/core"
+	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/node/upgrade/upgradetest"
 
 	"github.com/luxfi/crypto"
@@ -60,7 +61,7 @@ func TestSkipStateSync(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 300, // must be greater than [syncableInterval] to skip sync
-		syncMode:           block.StateSyncSkipped,
+		syncMode:           consensusBlock.StateSyncSkipped,
 	}
 	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
 
@@ -74,7 +75,7 @@ func TestStateSyncFromScratch(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           consensusBlock.StateSyncStatic,
 	}
 	vmSetup := createSyncServerAndClientVMs(t, test, parentsToGet)
 
@@ -89,7 +90,7 @@ func TestStateSyncFromScratchExceedParent(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   numToGen,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           consensusBlock.StateSyncStatic,
 	}
 	vmSetup := createSyncServerAndClientVMs(t, test, int(numToGen))
 
@@ -106,7 +107,7 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           consensusBlock.StateSyncStatic,
 		responseIntercept: func(syncerVM *VM, nodeID ids.NodeID, requestID uint32, response []byte) {
 			lock.Lock()
 			defer lock.Unlock()
@@ -155,13 +156,12 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	stateSyncDisabledConfigJSON := `{"state-sync-enabled":false}`
 	if err := syncDisabledVM.Initialize(
 		context.Background(),
-		vmSetup.syncerVM.ctx,
+		vmSetup.syncerVM.chainCtx,
 		vmSetup.syncerDB,
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		[]byte(stateSyncDisabledConfigJSON),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil,
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -220,13 +220,12 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 	// Note: Cannot reset metrics on live context - skipping
 	if err := syncReEnabledVM.Initialize(
 		context.Background(),
-		vmSetup.syncerVM.ctx,
+		vmSetup.syncerVM.chainCtx,
 		vmSetup.syncerDB,
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
 		[]byte(configJSON),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil,
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -275,7 +274,7 @@ func TestVMShutdownWhileSyncing(t *testing.T) {
 	test := syncTest{
 		syncableInterval:   256,
 		stateSyncMinBlocks: 50, // must be less than [syncableInterval] to perform sync
-		syncMode:           block.StateSyncStatic,
+		syncMode:           consensusBlock.StateSyncStatic,
 		responseIntercept: func(syncerVM *VM, nodeID ids.NodeID, requestID uint32, response []byte) {
 			lock.Lock()
 			defer lock.Unlock()
@@ -355,8 +354,8 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 		require.NoError(shutdownOnceSyncerVM.Shutdown(context.Background()))
 	})
 	// Set the state to syncing
-	// StateSyncing state no longer exists, using NormalOp instead
-	require.NoError(syncerVM.vm.SetState(context.Background(), consensusInterfaces.NormalOp))
+	// Use NormalOp state from node consensus
+	require.NoError(syncerVM.vm.SetState(context.Background(), nodeConsensus.NormalOp))
 	enabled, err := syncerVM.vm.StateSyncEnabled(context.Background())
 	require.NoError(err)
 	require.True(enabled)
@@ -436,7 +435,7 @@ type syncTest struct {
 	responseIntercept  func(vm *VM, nodeID ids.NodeID, requestID uint32, response []byte)
 	stateSyncMinBlocks uint64
 	syncableInterval   uint64
-	syncMode           block.StateSyncMode
+	syncMode           consensusBlock.StateSyncMode
 	expectedErr        error
 }
 
@@ -460,7 +459,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	syncMode, err := parsedSummary.Accept(context.Background())
 	require.NoError(err, "error accepting state summary")
 	require.Equal(test.syncMode, syncMode)
-	if syncMode == block.StateSyncSkipped {
+	if syncMode == consensusBlock.StateSyncSkipped {
 		return
 	}
 
@@ -482,7 +481,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	// set [syncerVM] to bootstrapping and verify the last accepted block has been updated correctly
 	// and that we can bootstrap and process some blocks.
-	require.NoError(syncerVM.SetState(context.Background(), consensusInterfaces.BootstrapOp))
+	require.NoError(syncerVM.SetState(context.Background(), nodeConsensus.Bootstrapping))
 	require.Equal(serverVM.LastAcceptedBlock().Height(), syncerVM.LastAcceptedBlock().Height(), "block height mismatch between syncer and server")
 	require.Equal(serverVM.LastAcceptedBlock().ID(), syncerVM.LastAcceptedBlock().ID(), "blockID mismatch between syncer and server")
 	require.True(syncerVM.blockChain.HasState(syncerVM.blockChain.LastAcceptedBlock().Root()), "unavailable state for last accepted block")
@@ -537,7 +536,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	)
 
 	// check we can transition to [NormalOp] state and continue to process blocks.
-	require.NoError(syncerVM.SetState(context.Background(), consensusInterfaces.NormalOp))
+	require.NoError(syncerVM.SetState(context.Background(), nodeConsensus.NormalOp))
 	require.True(syncerVM.bootstrapped.Get())
 
 	// Generate blocks after we have entered normal consensus as well
