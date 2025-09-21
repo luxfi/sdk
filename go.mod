@@ -180,7 +180,7 @@ replace github.com/luxfi/node => ../node-patched
 // For local development: Uncomment these replace directives
 // replace github.com/luxfi/node => ../node
 
-// replace github.com/luxfi/consensus => ../consensus
+replace github.com/luxfi/consensus => ../consensus
 
 // replace github.com/luxfi/crypto => ../crypto
 
@@ -188,7 +188,7 @@ replace github.com/luxfi/node => ../node-patched
 
 // replace github.com/luxfi/geth => ../geth
 
-// replace github.com/luxfi/warp => ../warp
+replace github.com/luxfi/warp => ../warp
 
 // replace github.com/luxfi/metric => ../metric
 

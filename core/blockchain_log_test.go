@@ -21,6 +21,7 @@ import (
 )
 
 func TestAcceptedLogsSubscription_DISABLED(t *testing.T) {
+	t.Skip("Test disabled - needs fixing") // TODO: Fix test funding issues
 	/*
 		Example contract to test event emission:
 

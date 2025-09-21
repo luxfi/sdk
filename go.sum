@@ -244,8 +244,6 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzWu4=
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
-github.com/luxfi/consensus v1.18.0 h1:QBRauj3gogjQl1Idmv9eSTczTcJF9uKzrqT2mfhKOqI=
-github.com/luxfi/consensus v1.18.0/go.mod h1:oS/s/8B8KnoqebJKThklZbGAnK1cW51KxuljVjr1pbY=
 github.com/luxfi/crypto v1.16.16 h1:hRHP4++vXNf4zjody/zNGU5AzPmV+tPldRorhlnVoBU=
 github.com/luxfi/crypto v1.16.16/go.mod h1:dhshhrUIuwlrfgYBgYQS6h55EFD3yZex6vlPT1sXKZ4=
 github.com/luxfi/database v1.1.13 h1:J0iNaejPDFfvevvX/TDr61pcfEciPRSKK1czoDbg+n0=
@@ -266,8 +264,6 @@ github.com/luxfi/metrics v1.1.1 h1:aKVEtytAl3TqSvInRpDc6ZdSJsCbTmCCl0UAl2YNXWU=
 github.com/luxfi/metrics v1.1.1/go.mod h1:ynSRcRjG+t1snUvFUbQFEu0UGibyw8gsitltQ9H1YDA=
 github.com/luxfi/trace v0.1.2 h1:KhRZbk2lQQmmYZjdTWcZKCYkLfu7/VUiLFIsWFKhkwg=
 github.com/luxfi/trace v0.1.2/go.mod h1:4SleFc5NVbQYEfn6rYafdfxvHJ+QSdkGAIfKiICYvQE=
-github.com/luxfi/warp v0.1.1 h1:PL+cW7BDWpi5rtIP8DWJPHEAVe/CA2T52zo1HzvfYvg=
-github.com/luxfi/warp v0.1.1/go.mod h1:DZ3z+8SeLZq3r2ztCpHIqGAhjUg7cs4OypWxaAwyr3E=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
 github.com/mattn/go-colorable v0.1.14/go.mod h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stgPZH1UqBm1s8=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=

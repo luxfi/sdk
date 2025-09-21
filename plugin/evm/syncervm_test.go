@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
+	// consensusInterfaces "github.com/luxfi/consensus/core/interfaces" // TODO: Remove if not needed
 	commonEng "github.com/luxfi/node/consensus/engine/core"
 	consensusBlock "github.com/luxfi/node/consensus/engine/chain/block"
 	luxdatabase "github.com/luxfi/database"

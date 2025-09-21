@@ -1815,7 +1815,7 @@ func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.Unsigned
 	// Convert node warp message to consensus warp message
 	luxMsg := &luxWarp.UnsignedMessage{
 		NetworkID:     msg.NetworkID,
-		SourceChainID: msg.SourceChainID[:],
+		SourceChainID: msg.SourceChainID,
 		Payload:       msg.Payload,
 	}
 
