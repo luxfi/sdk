@@ -27,9 +27,10 @@ import (
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/utils/set"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
+	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -140,7 +141,7 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 	// tvm.vm.ctx.Metrics = metrics.NewPrefixGatherer() // Metrics not directly accessible from context
 
 	if err := tvm.vm.Initialize(
-		context.Background(), tvm.vm.ctx, tvm.db, []byte(genesisJSONSubnetEVM), upgradeBytesJSON, []byte{}, nil, []interface{}{}, tvm.appSender,
+		context.Background(), tvm.vm.chainCtx, tvm.db, []byte(genesisJSONSubnetEVM), upgradeBytesJSON, []byte{}, nil, tvm.appSender,
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -150,10 +151,10 @@ func TestVMUpgradeBytesPrecompile(t *testing.T) {
 		}
 	}()
 	// Set the VM's state to NormalOp to initialize the tx pool.
-	if err := tvm.vm.SetState(context.Background(), consensusInterfaces.BootstrapOp); err != nil {
+	if err := tvm.vm.SetState(context.Background(), nodeConsensus.Bootstrapping); err != nil {
 		t.Fatal(err)
 	}
-	if err := tvm.vm.SetState(context.Background(), consensusInterfaces.NormalOp); err != nil {
+	if err := tvm.vm.SetState(context.Background(), nodeConsensus.NormalOp); err != nil {
 		t.Fatal(err)
 	}
 	newTxPoolHeadChan := make(chan core.NewTxPoolReorgEvent, 1)
@@ -243,8 +244,8 @@ func TestNetworkUpgradesOverriden(t *testing.T) {
 	)
 	require.NoError(t, err, "error initializing GenesisVM")
 
-	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.BootstrapOp))
-	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), nodeConsensus.Bootstrapping))
+	require.NoError(t, vm.SetState(context.Background(), nodeConsensus.NormalOp))
 
 	defer func() {
 		if err := vm.Shutdown(context.Background()); err != nil {
@@ -386,14 +387,14 @@ func TestVMEupgradeActivatesCancun(t *testing.T) {
 	}{
 		{
 			name:        "Etna activates Cancun",
-			genesisJSON: toGenesisJSON(forkToChainConfig[upgradetest.Etna]),
+			genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
 			check: func(t *testing.T, vm *VM) {
 				require.True(t, vm.chainConfig.IsCancun(common.Big0, DefaultEtnaTime))
 			},
 		},
 		{
 			name:        "Later Etna activates Cancun",
-			genesisJSON: toGenesisJSON(forkToChainConfig[upgradetest.Durango]),
+			genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
 			upgradeJSON: func() string {
 				upgrade := &extras.UpgradeConfig{
 					NetworkUpgradeOverrides: &extras.NetworkUpgrades{
@@ -411,7 +412,7 @@ func TestVMEupgradeActivatesCancun(t *testing.T) {
 		},
 		{
 			name:        "Changed Etna changes Cancun",
-			genesisJSON: toGenesisJSON(forkToChainConfig[upgradetest.Etna]),
+			genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
 			upgradeJSON: func() string {
 				upgrade := &extras.UpgradeConfig{
 					NetworkUpgradeOverrides: &extras.NetworkUpgrades{

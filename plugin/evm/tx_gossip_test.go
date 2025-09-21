@@ -43,7 +43,7 @@ func TestEthTxGossip(t *testing.T) {
 		NetworkUpgrades: upgradetest.GetConfig("latest"),
 		ChainDataDir:    t.TempDir(),
 		Log:             log.NewNoOpLogger(),
-		ValidatorState:  utilstest.NewTestValidatorState(),
+		ValidatorState:  nil, // Using nil for testing
 	}
 	validatorState := utilstest.NewTestValidatorState()
 
@@ -165,7 +165,7 @@ func TestEthTxGossip(t *testing.T) {
 	nodeSet2.Add(consensus.GetNodeID(vm.ctx))
 	require.NoError(client.AppRequest(ctx, nodeSet2, requestBytes, onResponse))
 	require.NoError(vm.AppRequest(ctx, requestingNodeID, 3, time.Time{}, <-sentAppRequest))
-	require.NoError(network.AppResponse(ctx, consensus.GetNodeID(consensusCtx), 3, <-sentResponse))
+	require.NoError(network.AppResponse(ctx, consensusCtx.NodeID, 3, <-sentResponse))
 	wg.Wait()
 }
 
@@ -180,7 +180,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 		NetworkUpgrades: upgradetest.GetConfig("latest"),
 		ChainDataDir:    t.TempDir(),
 		Log:             log.NewNoOpLogger(),
-		ValidatorState:  utilstest.NewTestValidatorState(),
+		ValidatorState:  nil, // Using nil for testing
 	}
 	sender := &TestSender{
 		SentAppGossip: make(chan []byte, 1),
@@ -245,7 +245,7 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 		NetworkUpgrades: upgradetest.GetConfig("latest"),
 		ChainDataDir:    t.TempDir(),
 		Log:             log.NewNoOpLogger(),
-		ValidatorState:  utilstest.NewTestValidatorState(),
+		ValidatorState:  nil, // Using nil for testing
 	}
 
 	sender := &TestSender{}

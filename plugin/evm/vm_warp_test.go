@@ -84,7 +84,7 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	require := require.New(t)
 	genesis := &core.Genesis{}
 
-	require.NoError(genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango]))))
+	require.NoError(genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig["Latest"]))))
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.NewUint64(0)), // Enable at genesis
 	}
@@ -198,7 +198,7 @@ func testSendWarpMessage(t *testing.T, scheme string) {
 	blockHashPayload, err := payload.NewHash(blockID[:])
 	require.NoError(err)
 	chainID = consensus.GetChainID(tvm.vm.ctx)
-	blockUnsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, blockHashPayload.Bytes())
+	blockUnsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 
 	// Verify the produced message signature is valid
@@ -224,7 +224,7 @@ func testValidateWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -258,7 +258,7 @@ func testValidateInvalidWarpMessage(t *testing.T, scheme string) {
 		payloadData,
 	)
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, addressedPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], addressedPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -285,7 +285,7 @@ func testValidateWarpBlockHash(t *testing.T, scheme string) {
 	blockHash := ids.GenerateTestID()
 	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -314,7 +314,7 @@ func testValidateInvalidWarpBlockHash(t *testing.T, scheme string) {
 	blockHash := ids.GenerateTestID()
 	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(err)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID, blockHashPayload.Bytes())
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(testNetworkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(err)
 
 	exampleWarpABI := contract.ParseABI(exampleWarpABI)
@@ -330,7 +330,7 @@ func testValidateInvalidWarpBlockHash(t *testing.T, scheme string) {
 func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp.UnsignedMessage, validSignature bool, txPayload []byte) {
 	require := require.New(t)
 	genesis := &core.Genesis{}
-	require.NoError(genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig[upgradetest.Durango]))))
+	require.NoError(genesis.UnmarshalJSON([]byte(toGenesisJSON(forkToChainConfig["Latest"]))))
 	params.GetExtra(genesis.Config).GenesisPrecompiles = extras.Precompiles{
 		warpcontract.ConfigKey: warpcontract.NewDefaultConfig(utils.NewUint64(0)), // Enable at genesis
 	}
@@ -370,9 +370,7 @@ func testWarpVMTransaction(t *testing.T, scheme string, unsignedMessage *luxWarp
 	getValidatorSetTestErr := errors.New("can't get validator set test error")
 
 	testValidatorState := &validatorstest.State{
-		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
-			return ids.Empty, nil
-		},
+		// GetSubnetIDF removed - not available in current interface
 		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			if height < minimumValidPChainHeight {
 				return nil, getValidatorSetTestErr
@@ -516,7 +514,7 @@ func TestReceiveWarpMessage(t *testing.T) {
 
 func testReceiveWarpMessageWithScheme(t *testing.T, scheme string) {
 	require := require.New(t)
-	fork := upgradetest.Durango
+	fork := "Latest"
 	tvm := newVM(t, testVMConfig{
 		fork:       &fork,
 		configJSON: getConfig(scheme, ""),
@@ -856,7 +854,7 @@ func TestSignatureRequestsToVM(t *testing.T) {
 }
 
 func testSignatureRequestsToVM(t *testing.T, scheme string) {
-	fork := upgradetest.Durango
+	fork := "Latest"
 	tvm := newVM(t, testVMConfig{
 		fork:       &fork,
 		configJSON: getConfig(scheme, ""),
@@ -870,7 +868,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 	knownPayload, err := payload.NewAddressedCall([]byte{0, 0, 0}, []byte("test"))
 	require.NoError(t, err)
 	chainID := consensus.GetChainID(tvm.vm.ctx)
-	knownWarpMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, knownPayload.Bytes())
+	knownWarpMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], knownPayload.Bytes())
 	require.NoError(t, err)
 
 	// Add the known message and get its signature to confirm
@@ -901,7 +899,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 				unknownPayload, err := payload.NewAddressedCall([]byte{1, 1, 1}, []byte("unknown"))
 				require.NoError(t, err)
 				chainID := consensus.GetChainID(tvm.vm.ctx)
-				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, unknownPayload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], unknownPayload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -913,7 +911,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 				payload, err := payload.NewHash(lastAcceptedID[:])
 				require.NoError(t, err)
 				chainID := consensus.GetChainID(tvm.vm.ctx)
-				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, payload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], payload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -926,7 +924,7 @@ func testSignatureRequestsToVM(t *testing.T, scheme string) {
 				payload, err := payload.NewHash(testID[:])
 				require.NoError(t, err)
 				chainID := consensus.GetChainID(tvm.vm.ctx)
-				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID, payload.Bytes())
+				msg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(tvm.vm.ctx), chainID[:], payload.Bytes())
 				require.NoError(t, err)
 				return msg
 			}(),
@@ -985,7 +983,7 @@ func TestClearWarpDB(t *testing.T) {
 	// add all messages
 	for _, payload := range payloads {
 		chainID := consensus.GetChainID(vm.ctx)
-		unsignedMsg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(vm.ctx), chainID, payload)
+		unsignedMsg, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(vm.ctx), chainID[:], payload)
 		require.NoError(t, err)
 		require.NoError(t, vm.warpBackend.AddMessage(unsignedMsg))
 		// ensure that the message was added
