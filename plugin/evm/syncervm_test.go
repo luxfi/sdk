@@ -17,7 +17,7 @@ import (
 
 	consensusInterfaces "github.com/luxfi/consensus/core/interfaces"
 	commonEng "github.com/luxfi/node/consensus/engine/core"
-	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
+	consensusBlock "github.com/luxfi/node/consensus/engine/chain/block"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"

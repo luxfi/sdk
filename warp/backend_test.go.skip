@@ -155,7 +155,9 @@ func TestOffChainMessages(t *testing.T) {
 				testUnsignedMessage.Bytes(),
 			},
 			check: func(require *require.Assertions, b Backend) {
-				msgID := testUnsignedMessage.ID()
+				msgIDBytes := testUnsignedMessage.ID()
+				msgID, err := ids.ToID(msgIDBytes)
+				require.NoError(err)
 				msg, err := b.GetMessage(msgID)
 				require.NoError(err)
 				require.Equal(testUnsignedMessage.Bytes(), msg.Bytes())
