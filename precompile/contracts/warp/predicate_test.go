@@ -106,7 +106,7 @@ func init() {
 		panic(err)
 	}
 	addressedPayloadBytes = addressedPayload.Bytes()
-	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, addressedPayload.Bytes())
+	unsignedMsg, err = luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID[:], addressedPayload.Bytes())
 	if err != nil {
 		panic(err)
 	}
@@ -213,6 +213,10 @@ type validatorRange struct {
 // testValidatorStateWrapper wraps validatorstest.State to implement consensus.ValidatorState
 type testValidatorStateWrapper struct {
 	*validatorstest.State
+	GetMinimumHeightF func(context.Context) (uint64, error)
+	GetSubnetIDF      func(ids.ID) (ids.ID, error)
+	GetChainIDF       func(ids.ID) (ids.ID, error)
+	GetNetIDF         func(ids.ID) (ids.ID, error)
 }
 
 func (t *testValidatorStateWrapper) GetCurrentHeight() (uint64, error) {
@@ -278,15 +282,17 @@ func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context
 
 	consensusCtx := utilstest.NewTestConsensusContext(tb)
 	state := &validatorstest.State{
-		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
-			return sourceSubnetID, nil
-		},
 		GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			return getValidatorsOutput, nil
 		},
 	}
 	// Use consensus.WithValidatorState to add validator state to context
-	wrappedState := &testValidatorStateWrapper{State: state}
+	wrappedState := &testValidatorStateWrapper{
+		State: state,
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
+			return sourceSubnetID, nil
+		},
+	}
 	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
 	return consensusCtx
 }
@@ -319,7 +325,7 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	cChainID := ids.GenerateTestID()
 	addressedCall, err := payload.NewAddressedCall(agoUtils.RandomBytes(20), agoUtils.RandomBytes(100))
 	require.NoError(err)
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID, addressedCall.Bytes())
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, cChainID[:], addressedCall.Bytes())
 	require.NoError(err)
 
 	getValidatorsOutput := make(map[ids.NodeID]*validators.GetValidatorOutput)
@@ -364,10 +370,6 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	})
 
 	state := &validatorstest.State{
-		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
-			require.Equal(chainID, cChainID)
-			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
-		},
 		GetValidatorSetF: func(ctx context.Context, height uint64, requestedSubnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 			expectedSubnetID := subnetID
 			if requirePrimaryNetworkSigners {
@@ -379,7 +381,13 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	}
 
 	// Add validator state to context (wrap it first)
-	wrappedState := &testValidatorStateWrapper{State: state}
+	wrappedState := &testValidatorStateWrapper{
+		State: state,
+		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
+			require.Equal(chainID, cChainID)
+			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
+		},
+	}
 	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
 
 	test := precompiletest.PredicateTest{
@@ -480,7 +488,7 @@ func TestInvalidAddressedPayload(t *testing.T) {
 	}
 	copy(warpSignature.Signature[:], bls.SignatureToBytes(aggregateSignature))
 	// Create an unsigned message with an invalid addressed payload
-	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID, []byte{1, 2, 3})
+	unsignedMsg, err := luxWarp.NewUnsignedMessage(constants.UnitTestID, sourceChainID[:], []byte{1, 2, 3})
 	require.NoError(t, err)
 	warpMsg := &luxWarp.Message{
 		UnsignedMessage: unsignedMsg,
@@ -510,7 +518,7 @@ func TestInvalidBitSet(t *testing.T) {
 	require.NoError(t, err)
 	unsignedMsg, err := luxWarp.NewUnsignedMessage(
 		constants.UnitTestID,
-		sourceChainID,
+		sourceChainID[:],
 		addressedCall.Bytes(),
 	)
 	require.NoError(t, err)
@@ -774,15 +782,17 @@ func makeWarpPredicateTests(tb testing.TB) map[string]precompiletest.PredicateTe
 		consensusCtx := utilstest.NewTestConsensusContext(tb)
 
 		state := &validatorstest.State{
-			GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
-				return sourceSubnetID, nil
-			},
 			GetValidatorSetF: func(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 				return getValidatorsOutput, nil
 			},
 		}
 		// Wrap state and add to context
-		wrappedState := &testValidatorStateWrapper{State: state}
+		wrappedState := &testValidatorStateWrapper{
+			State: state,
+			GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
+				return sourceSubnetID, nil
+			},
+		}
 		consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
 
 		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(numSigners), predicateBytes)
