@@ -58,9 +58,10 @@ import (
 	"github.com/luxfi/node/chains/atomic"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/upgrade/upgradetest"
+	nodeConsensus "github.com/luxfi/node/consensus"
 
 	protocolchain "github.com/luxfi/consensus/protocol/chain"
-	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/utils/set"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 )
 
@@ -210,24 +211,17 @@ type testVM struct {
 	appSender    *TestSender
 }
 
-// testConsensusContext mimics the structure expected by VM tests
-type testConsensusContext struct {
-	context.Context
-	ChainID         ids.ID
-	SharedMemory    atomic.SharedMemory
-	Lock            sync.RWMutex
-	NetworkUpgrades upgrade.Config
-	ChainDataDir    string
-}
-
 // createTestConsensusContext creates a test consensus context with the required fields
-func createTestConsensusContext(t *testing.T) *testConsensusContext {
-	baseCtx := utilstest.NewTestConsensusContext(t)
-	return &testConsensusContext{
-		Context:         baseCtx,
+func createTestConsensusContext(t *testing.T) *nodeConsensus.Context {
+	return &nodeConsensus.Context{
+		NetworkID:       testNetworkID,
 		ChainID:         utilstest.SubnetEVMTestChainID,
+		NodeID:          ids.GenerateTestNodeID(),
 		NetworkUpgrades: upgradetest.GetConfig("latest"),
 		ChainDataDir:    t.TempDir(),
+		Log:             log.NewNoOpLogger(),
+		Metrics:         nil,
+		ValidatorState:  utilstest.NewTestValidatorState(),
 	}
 }
 
@@ -317,15 +311,14 @@ func newVM(t *testing.T, config testVMConfig) *testVM {
 		[]byte(config.genesisJSON),
 		[]byte(config.upgradeJSON),
 		[]byte(config.configJSON),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil, // fxs parameter
 		appSender,
 	)
 	require.NoError(t, err, "error initializing vm")
 
 	if !config.isSyncing {
-		require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.BootstrapOp))
-		require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.NormalOp))
+		require.NoError(t, vm.SetState(context.Background(), nodeConsensus.Bootstrapping))
+		require.NoError(t, vm.SetState(context.Background(), nodeConsensus.NormalOp))
 	}
 
 	return &testVM{
@@ -529,7 +522,7 @@ func TestBuildEthTxBlock(t *testing.T) {
 }
 
 func testBuildEthTxBlock(t *testing.T, scheme string) {
-	fork := upgradetest.ApricotPhase2
+	fork := upgradetest.Latest
 	tvm := newVM(t, testVMConfig{
 		genesisJSON: genesisJSONSubnetEVM,
 		configJSON:  getConfig(scheme, `"pruning-enabled":true`),
@@ -634,8 +627,7 @@ func testBuildEthTxBlock(t *testing.T, scheme string) {
 		[]byte(genesisJSONSubnetEVM),
 		[]byte(""),
 		[]byte(getConfig(scheme, `"pruning-enabled":true`)),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil, // fxs parameter
 		nil,
 	); err != nil {
 		t.Fatal(err)
@@ -3723,14 +3715,13 @@ func TestStandaloneDB(t *testing.T) {
 		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		[]byte(configJSON),
-		nil, // toEngine parameter
-		[]interface{}{}, // fxs as []interface{}
+		nil, // fxs parameter
 		appSender,
 	)
 	defer vm.Shutdown(context.Background())
 	require.NoError(t, err, "error initializing VM")
-	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.BootstrapOp))
-	require.NoError(t, vm.SetState(context.Background(), consensusInterfaces.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), nodeConsensus.Bootstrapping))
+	require.NoError(t, vm.SetState(context.Background(), nodeConsensus.NormalOp))
 
 	// Issue a block
 	acceptedBlockEvent := make(chan core.ChainEvent, 1)
@@ -3947,17 +3938,17 @@ func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, appSende
 	vm.Shutdown(context.Background())
 	restartedVM := &VM{}
 	// Note: Cannot directly modify context fields, skipping metrics reset
-	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, nil, []interface{}{}, appSender)
+	err := restartedVM.Initialize(context.Background(), vm.ctx, sharedDB, genesisBytes, nil, nil, nil, appSender)
 	if err != nil {
 		return nil, err
 	}
 
 	if finishBootstrapping {
-		err = restartedVM.SetState(context.Background(), consensusInterfaces.BootstrapOp)
+		err = restartedVM.SetState(context.Background(), nodeConsensus.Bootstrapping)
 		if err != nil {
 			return nil, err
 		}
-		err = restartedVM.SetState(context.Background(), consensusInterfaces.NormalOp)
+		err = restartedVM.SetState(context.Background(), nodeConsensus.NormalOp)
 		if err != nil {
 			return nil, err
 		}

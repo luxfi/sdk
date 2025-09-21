@@ -36,7 +36,15 @@ import (
 func TestEthTxGossip(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
-	consensusCtx := utilstest.NewTestConsensusContext(t)
+	consensusCtx := &nodeConsensus.Context{
+		NetworkID:       1337,
+		ChainID:         ids.GenerateTestID(),
+		NodeID:          ids.GenerateTestNodeID(),
+		NetworkUpgrades: upgradetest.GetConfig("latest"),
+		ChainDataDir:    t.TempDir(),
+		Log:             log.NewNoOpLogger(),
+		ValidatorState:  utilstest.NewTestValidatorState(),
+	}
 	validatorState := utilstest.NewTestValidatorState()
 
 	sentResponse := make(chan []byte, 1)
@@ -55,7 +63,7 @@ func TestEthTxGossip(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		&consensusCtx,
+		consensusCtx,
 		memdb.New(),
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
@@ -165,7 +173,15 @@ func TestEthTxGossip(t *testing.T) {
 func TestEthTxPushGossipOutbound(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
-	consensusCtx := utilstest.NewTestConsensusContext(t)
+	consensusCtx := &nodeConsensus.Context{
+		NetworkID:       1337,
+		ChainID:         ids.GenerateTestID(),
+		NodeID:          ids.GenerateTestNodeID(),
+		NetworkUpgrades: upgradetest.GetConfig("latest"),
+		ChainDataDir:    t.TempDir(),
+		Log:             log.NewNoOpLogger(),
+		ValidatorState:  utilstest.NewTestValidatorState(),
+	}
 	sender := &TestSender{
 		SentAppGossip: make(chan []byte, 1),
 	}
@@ -176,7 +192,7 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		&consensusCtx,
+		consensusCtx,
 		memdb.New(),
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
@@ -222,7 +238,15 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 func TestEthTxPushGossipInbound(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
-	consensusCtx := utilstest.NewTestConsensusContext(t)
+	consensusCtx := &nodeConsensus.Context{
+		NetworkID:       1337,
+		ChainID:         ids.GenerateTestID(),
+		NodeID:          ids.GenerateTestNodeID(),
+		NetworkUpgrades: upgradetest.GetConfig("latest"),
+		ChainDataDir:    t.TempDir(),
+		Log:             log.NewNoOpLogger(),
+		ValidatorState:  utilstest.NewTestValidatorState(),
+	}
 
 	sender := &TestSender{}
 	vm := &VM{
@@ -231,7 +255,7 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 
 	require.NoError(vm.Initialize(
 		ctx,
-		&consensusCtx,
+		consensusCtx,
 		memdb.New(),
 		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
 		nil,
