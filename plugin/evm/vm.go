@@ -79,9 +79,9 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	nodeConsensus "github.com/luxfi/consensus"
+	nodeConsensus "github.com/luxfi/node/consensus"
 	"github.com/luxfi/consensus/engine/chain/block"
-	nodeblock "github.com/luxfi/consensus/engine/chain/block"
+	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
 	consensusInterfaces "github.com/luxfi/consensus/interfaces"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
 	nodeConsensusChain "github.com/luxfi/node/consensus/chain"
@@ -364,7 +364,7 @@ type VM struct {
 }
 
 // ParseBlock implements nodeblock.ChainVM interface
-func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeblock.Block, error) {
+func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeConsensusChain.Block, error) {
 	// Call the embedded State's ParseBlock and convert the result
 	blk, err := vm.State.ParseBlock(ctx, b)
 	if err != nil {
@@ -377,29 +377,27 @@ func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeblock.Block, error)
 // Initialize implements the chain.ChainVM interface with generic interface{} parameters
 func (vm *VM) Initialize(
 	ctx context.Context,
-	chainCtx interface{},
-	dbManager interface{},
+	chainCtx *nodeConsensus.Context,
+	dbManager database.Database,
 	genesisBytes []byte,
 	upgradeBytes []byte,
 	configBytes []byte,
-	toEngine interface{},
-	fxs []interface{},
-	appSender interface{},
+	fxs []*nodecore.Fx,
+	appSender nodecore.AppSender,
 ) error {
-	// Convert interface{} parameters to strongly typed ones
-	typedChainCtx := chainCtx.(*nodeConsensus.Context)
-	typedDB := dbManager.(database.Database)
-
-	// Convert fxs from []interface{} to []*commonEng.Fx
+	// Convert fxs from []*nodecore.Fx to []*commonEng.Fx 
 	typedFxs := make([]*commonEng.Fx, len(fxs))
 	for i, fx := range fxs {
-		typedFxs[i] = fx.(*commonEng.Fx)
+		typedFxs[i] = &commonEng.Fx{
+			ID: fx.ID,
+			Fx: fx.Fx,
+		}
 	}
 
-	// Convert appSender interface to typed AppSender
-	typedAppSender := appSender.(commonEng.AppSender)
+	// Use the compatibility adapter for AppSender
+	compatAppSender := compat.NewNodeAppSenderAdapter(appSender)
 
-	return vm.initializeInternal(ctx, typedChainCtx, typedDB, genesisBytes, upgradeBytes, configBytes, typedFxs, typedAppSender)
+	return vm.initializeInternal(ctx, chainCtx, dbManager, genesisBytes, upgradeBytes, configBytes, typedFxs, compatAppSender)
 }
 
 // initializeInternal contains the actual initialization logic with strongly typed parameters
@@ -1002,17 +1000,17 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state consensusInterfaces.State) error {
+func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 
 	switch state {
-	case consensusInterfaces.StateSyncing:
+	case nodeConsensus.StateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case consensusInterfaces.Bootstrapping:
+	case nodeConsensus.Bootstrapping:
 		return vm.onBootstrapStarted()
-	case consensusInterfaces.NormalOp:
+	case nodeConsensus.NormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
 		return fmt.Errorf("unknown state: %v", state)
@@ -1269,7 +1267,7 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (nodeblock.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (nodeConsensusChain.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
@@ -1279,7 +1277,7 @@ func (vm *VM) BuildBlock(ctx context.Context) (nodeblock.Block, error) {
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodeblock.Block, error) {
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodeConsensusChain.Block, error) {
 	// Convert node context to consensus context
 	var consensusCtx *block.Context
 	if proposerVMBlockCtx != nil {
@@ -1373,7 +1371,7 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
 // GetBlock implements the ChainVM interface
-func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodeblock.Block, error) {
+func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodeConsensusChain.Block, error) {
 	blk, err := vm.getBlock(ctx, id)
 	if err != nil {
 		return nil, err

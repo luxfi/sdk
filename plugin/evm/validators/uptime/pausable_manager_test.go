@@ -20,33 +20,25 @@ type testUptimeState struct {
 	uptimes    map[ids.NodeID]time.Duration
 }
 
-func (t *testUptimeState) GetStartTime(nodeID ids.NodeID) (time.Time, error) {
+func (t *testUptimeState) GetStartTime(nodeID ids.NodeID, netID ids.ID) (time.Time, error) {
 	if startTime, ok := t.startTimes[nodeID]; ok {
 		return startTime, nil
 	}
 	return time.Time{}, nil
 }
 
-func (t *testUptimeState) SetStartTime(nodeID ids.NodeID, startTime time.Time) error {
-	t.startTimes[nodeID] = startTime
-	return nil
-}
-
-func (t *testUptimeState) GetUptime(nodeID ids.NodeID) (time.Duration, time.Time, error) {
+func (t *testUptimeState) GetUptime(nodeID ids.NodeID, netID ids.ID) (time.Duration, time.Duration, error) {
 	uptime, ok := t.uptimes[nodeID]
 	if !ok {
 		uptime = 0
 	}
-	return uptime, time.Now(), nil
+	// Return uptime and total possible uptime
+	return uptime, uptime, nil
 }
 
-func (t *testUptimeState) SetUptime(nodeID ids.NodeID, uptime time.Duration, lastUpdated time.Time) error {
+func (t *testUptimeState) SetUptime(nodeID ids.NodeID, netID ids.ID, uptime time.Duration, lastUpdated time.Time) error {
 	t.uptimes[nodeID] = uptime
 	return nil
-}
-
-func (t *testUptimeState) GetValidatorWeightDiffs(height uint64, subnetID ids.ID) (map[ids.NodeID]*uptime.ValidatorChanges, error) {
-	return map[ids.NodeID]*uptime.ValidatorChanges{}, nil
 }
 
 func TestPausableManager(t *testing.T) {
@@ -354,8 +346,12 @@ func addTime(clk *mockable.Clock, duration time.Duration) time.Time {
 
 func checkUptime(t *testing.T, up interfaces.PausableManager, nodeID ids.NodeID, expectedUptime time.Duration, expectedLastUpdate time.Time) {
 	t.Helper()
-	uptime, lastUpdated, err := up.CalculateUptime(nodeID)
+	// Use a default subnet ID for testing
+	subnetID := ids.GenerateTestID()
+	uptime, totalUptime, err := up.CalculateUptime(nodeID, subnetID)
 	require.NoError(t, err)
-	require.Equal(t, expectedLastUpdate.Unix(), lastUpdated.Unix())
+	// Compare the duration directly, not Unix timestamps
 	require.Equal(t, expectedUptime, uptime)
+	// totalUptime should be at least as much as uptime
+	require.GreaterOrEqual(t, totalUptime, uptime)
 }
