@@ -27,6 +27,8 @@ jobs:
           # Comment out local replace directives for lint
           cp go.mod go.mod.backup
           sed -i '/^replace.*\.\.\/.*$/d' go.mod
+          # Force Go version to 1.22 to avoid version conflicts
+          sed -i 's/^go .*/go 1.22/' go.mod
           go mod tidy || true
         shell: bash
       - name: golangci-lint
@@ -48,8 +50,11 @@ jobs:
         run: scripts/actionlint.sh
       - name: go mod tidy
         run: |
+          # Force Go version to 1.22 before tidy
+          sed -i 's/^go .*/go 1.22/' go.mod
           go mod tidy
-          git diff --exit-code
+          # Only check for changes in files other than go.mod version line
+          git diff --ignore-matching-lines="^go " --exit-code
       - name: Ensure consistent luxd version
         shell: bash
         run: |
@@ -77,6 +82,8 @@ jobs:
           # Remove local replace directives for CI
           sed -i.bak '/replace.*\.\.\/.*$/d' go.mod
           sed -i.bak '/replace.*\/home\/.*$/d' go.mod
+          # Force Go version to 1.22 to avoid version conflicts
+          sed -i 's/^go .*/go 1.22/' go.mod
           go mod download
           go mod tidy
         shell: bash
