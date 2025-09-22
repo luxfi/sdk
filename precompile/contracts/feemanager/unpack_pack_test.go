@@ -41,7 +41,7 @@ func FuzzPackGetFeeConfigOutputEqualTest(f *testing.F) {
 			MaxBlockGasCost:          bigIntVal,
 			BlockGasCostStep:         bigIntVal,
 		}
-		doCheckOutputs := !(bigIntVal.Cmp(abi.MaxUint256) > 0)
+		doCheckOutputs := bigIntVal.Cmp(abi.MaxUint256) <= 0
 		// we can only check if outputs are correct if the value is less than MaxUint256
 		// otherwise the value will be truncated when packed,
 		// and thus unpacked output will not be equal to the value
@@ -169,7 +169,7 @@ func FuzzPackGetLastChangedAtOutput(f *testing.F) {
 	f.Add(math.MaxBig256.Add(math.MaxBig256, common.Big1).Bytes())
 	f.Fuzz(func(t *testing.T, bigIntBytes []byte) {
 		bigIntVal := new(big.Int).SetBytes(bigIntBytes)
-		doCheckOutputs := !(bigIntVal.Cmp(abi.MaxUint256) > 0)
+		doCheckOutputs := bigIntVal.Cmp(abi.MaxUint256) <= 0
 		// we can only check if outputs are correct if the value is less than MaxUint256
 		// otherwise the value will be truncated when packed,
 		// and thus unpacked output will not be equal to the value
@@ -197,7 +197,7 @@ func FuzzPackSetFeeConfigEqualTest(f *testing.F) {
 			MaxBlockGasCost:          bigIntVal,
 			BlockGasCostStep:         bigIntVal,
 		}
-		doCheckOutputs := !(bigIntVal.Cmp(abi.MaxUint256) > 0)
+		doCheckOutputs := bigIntVal.Cmp(abi.MaxUint256) <= 0
 		// we can only check if outputs are correct if the value is less than MaxUint256
 		// otherwise the value will be truncated when packed,
 		// and thus unpacked output will not be equal to the value

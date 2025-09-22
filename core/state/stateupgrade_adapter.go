@@ -35,7 +35,7 @@ func (a *StateUpgradeAdapter) SetState(addr common.Address, key, value common.Ha
 
 // SetCode implements the stateupgrade.StateDB interface (no return value)
 func (a *StateUpgradeAdapter) SetCode(addr common.Address, code []byte) {
-	// Call the underlying SetCode method with default reason
+	// Call the wrapper method with a default reason
 	_ = a.StateDB.SetCode(addr, code, tracing.CodeChangeUnspecified)
 }
 

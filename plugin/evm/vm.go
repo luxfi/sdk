@@ -79,15 +79,15 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
+	nodeConsensusBlock "github.com/luxfi/consensus/engine/chain/block"
+	nodeblock "github.com/luxfi/consensus/engine/chain/block"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
+	nodeRouter "github.com/luxfi/consensus/router"
+	nodeConsensus "github.com/luxfi/consensus/snow"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
-	nodeConsensus "github.com/luxfi/consensus/snow"
-	nodeConsensusBlock "github.com/luxfi/consensus/engine/chain/block"
-	nodeblock "github.com/luxfi/consensus/engine/chain/block"
-	nodeRouter "github.com/luxfi/consensus/router"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
@@ -98,8 +98,8 @@ import (
 
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/core/appsender"
-	"github.com/luxfi/math/set"
 	nodeCommonEng "github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -1770,7 +1770,6 @@ func (vm *VM) GetLastStateSummary(ctx context.Context) (nodeblock.StateSummary, 
 	}
 	return nil, fmt.Errorf("summary does not implement message.SyncSummary")
 }
-
 
 // stateSummaryWrapper wraps message.SyncSummary to implement nodeblock.StateSummary
 type stateSummaryWrapper struct {
