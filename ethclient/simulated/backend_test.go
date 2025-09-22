@@ -94,7 +94,6 @@ func newTx(sim *Backend, key *ecdsa.PrivateKey) (*types.Transaction, error) {
 }
 
 func TestNewBackend(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	sim := NewBackend(types.GenesisAlloc{})
 	defer sim.Close()
 
@@ -118,7 +117,6 @@ func TestNewBackend(t *testing.T) {
 }
 
 func TestAdjustTime(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	sim := NewBackend(types.GenesisAlloc{})
 	defer sim.Close()
 
