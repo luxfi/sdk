@@ -472,7 +472,7 @@ func InitValidatorRegistration(
 				if !errors.Is(err, ErrNodeAlreadyRegistered) {
 					return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator registration")
 				}
-				ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
+				ux.Logger.PrintToUser("%s", luxlog.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 				alreadyInitialized = true
 			} else {
 				ux.Logger.PrintToUser("Validator registration initialized. InitiateTxHash: %s", tx.Hash())
@@ -498,7 +498,7 @@ func InitValidatorRegistration(
 				if !errors.Is(err, ErrNodeAlreadyRegistered) {
 					return nil, ids.Empty, nil, evm.TransactionError(tx, err, "failure initializing validator registration")
 				}
-				ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
+				ux.Logger.PrintToUser("%s", luxlog.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 				alreadyInitialized = true
 			} else if generateRawTxOnly {
 				return nil, ids.Empty, tx, nil
@@ -506,7 +506,7 @@ func InitValidatorRegistration(
 			ux.Logger.PrintToUser("Validator weight: %d", weight)
 		}
 	} else {
-		ux.Logger.PrintToUser("%s", logging.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
+		ux.Logger.PrintToUser("%s", luxlog.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 	}
 
 	var unsignedMessage *warp.UnsignedMessage

@@ -372,18 +372,18 @@ func SetupPoS(
 	// Initialize the PoS parameters on the validator manager contract
 	// This would typically involve calling initialization methods on the contract
 	log.Info("Setting PoS parameters",
-		logging.UserString("minimumStakeAmount", posParams.MinimumStakeAmount.String()),
-		logging.UserString("maximumStakeAmount", posParams.MaximumStakeAmount.String()),
-		logging.UserString("minimumStakeDuration", fmt.Sprintf("%d", posParams.MinimumStakeDuration)),
-		logging.UserString("minimumDelegationFee", fmt.Sprintf("%d", posParams.MinimumDelegationFee)),
-		logging.UserString("maximumStakeMultiplier", fmt.Sprintf("%d", posParams.MaximumStakeMultiplier)),
-		logging.UserString("weightToValueFactor", posParams.WeightToValueFactor.String()),
-		logging.UserString("rewardCalculatorAddress", fmt.Sprintf("%x", posParams.RewardCalculatorAddress)),
+		luxlog.UserString("minimumStakeAmount", posParams.MinimumStakeAmount.String()),
+		luxlog.UserString("maximumStakeAmount", posParams.MaximumStakeAmount.String()),
+		luxlog.UserString("minimumStakeDuration", fmt.Sprintf("%d", posParams.MinimumStakeDuration)),
+		luxlog.UserString("minimumDelegationFee", fmt.Sprintf("%d", posParams.MinimumDelegationFee)),
+		luxlog.UserString("maximumStakeMultiplier", fmt.Sprintf("%d", posParams.MaximumStakeMultiplier)),
+		luxlog.UserString("weightToValueFactor", posParams.WeightToValueFactor.String()),
+		luxlog.UserString("rewardCalculatorAddress", fmt.Sprintf("%x", posParams.RewardCalculatorAddress)),
 	)
 
 	// Set up signature aggregation if endpoint is provided
 	if signatureAggregatorEndpoint != "" {
-		log.Info("Configuring signature aggregator", logging.UserString("endpoint", signatureAggregatorEndpoint))
+		log.Info("Configuring signature aggregator", luxlog.UserString("endpoint", signatureAggregatorEndpoint))
 	}
 
 	log.Info("Proof of Stake validator manager initialized successfully")
