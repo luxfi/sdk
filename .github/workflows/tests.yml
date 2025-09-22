@@ -28,7 +28,11 @@ jobs:
           cp go.mod go.mod.backup
           sed -i '/^replace.*\.\.\/.*$/d' go.mod
           # Force Go version to 1.22 to avoid version conflicts
-          sed -i 's/^go .*/go 1.22/' go.mod
+          echo 'module github.com/luxfi/evm' > go.mod.tmp
+          echo '' >> go.mod.tmp
+          echo 'go 1.22' >> go.mod.tmp
+          tail -n +4 go.mod >> go.mod.tmp
+          mv go.mod.tmp go.mod
           go mod tidy || true
         shell: bash
       - name: golangci-lint
@@ -51,10 +55,16 @@ jobs:
       - name: go mod tidy
         run: |
           # Force Go version to 1.22 before tidy
-          sed -i 's/^go .*/go 1.22/' go.mod
+          echo 'module github.com/luxfi/evm' > go.mod.tmp
+          echo '' >> go.mod.tmp
+          echo 'go 1.22' >> go.mod.tmp
+          tail -n +4 go.mod >> go.mod.tmp
+          mv go.mod.tmp go.mod
           go mod tidy
-          # Only check for changes in files other than go.mod version line
-          git diff --ignore-matching-lines="^go " --exit-code
+          # Reset go version to avoid false positive in diff
+          git checkout -- go.mod
+          go mod tidy
+          git diff --exit-code
       - name: Ensure consistent luxd version
         shell: bash
         run: |
@@ -83,7 +93,11 @@ jobs:
           sed -i.bak '/replace.*\.\.\/.*$/d' go.mod
           sed -i.bak '/replace.*\/home\/.*$/d' go.mod
           # Force Go version to 1.22 to avoid version conflicts
-          sed -i 's/^go .*/go 1.22/' go.mod
+          echo 'module github.com/luxfi/evm' > go.mod.tmp
+          echo '' >> go.mod.tmp
+          echo 'go 1.22' >> go.mod.tmp
+          tail -n +4 go.mod >> go.mod.tmp
+          mv go.mod.tmp go.mod
           go mod download
           go mod tidy
         shell: bash

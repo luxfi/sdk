@@ -50,12 +50,12 @@ fi
 
 # For now, we'll build from source if the binary isn't available
 echo "Checking for pre-built binary..."
-DOWNLOAD_URL="https://github.com/ava-labs/avalanchego/releases/download/v${LUXD_VERSION}/avalanchego-linux-${GOARCH}-v${LUXD_VERSION}.tar.gz"
+DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-linux-${GOARCH}-v${LUXD_VERSION}.tar.gz"
 
 if [[ "$GOOS" == "darwin" ]]; then
-  DOWNLOAD_URL="https://github.com/ava-labs/avalanchego/releases/download/v${LUXD_VERSION}/avalanchego-macos-v${LUXD_VERSION}.zip"
+  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-macos-v${LUXD_VERSION}.zip"
 elif [[ "$GOOS" == "windows" ]]; then
-  DOWNLOAD_URL="https://github.com/ava-labs/avalanchego/releases/download/v${LUXD_VERSION}/avalanchego-windows-${GOARCH}-v${LUXD_VERSION}.zip"
+  DOWNLOAD_URL="https://github.com/luxfi/node/releases/download/v${LUXD_VERSION}/luxd-windows-${GOARCH}-v${LUXD_VERSION}.zip"
 fi
 
 echo "Attempting to download from: $DOWNLOAD_URL"
@@ -92,7 +92,7 @@ if command -v curl &> /dev/null; then
     echo "Building from source..."
     TEMP_DIR="${BASEDIR}/build_tmp"
     rm -rf "$TEMP_DIR"
-    git clone --depth 1 --branch "v${LUXD_VERSION}" https://github.com/ava-labs/avalanchego.git "$TEMP_DIR"
+    git clone --depth 1 --branch "v${LUXD_VERSION}" https://github.com/luxfi/node.git "$TEMP_DIR"
     
     cd "$TEMP_DIR"
     ./scripts/build.sh
