@@ -79,19 +79,18 @@ import (
 
 	luxRPC "github.com/gorilla/rpc/v2"
 
-	"github.com/luxfi/consensus/engine/chain/block"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
-	nodeConsensus "github.com/luxfi/consensus"
-	nodeConsensusChain "github.com/luxfi/consensus/chain"
+	nodeConsensus "github.com/luxfi/consensus/snow"
+	nodeConsensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	nodeblock "github.com/luxfi/consensus/engine/chain/block"
+	nodeRouter "github.com/luxfi/consensus/router"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
-	nodeset "github.com/luxfi/node/utils/set"
 	nodemockable "github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/version"
@@ -363,7 +362,7 @@ type VM struct {
 }
 
 // ParseBlock implements nodeblock.ChainVM interface
-func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeConsensusChain.Block, error) {
+func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeConsensusBlock.Block, error) {
 	// Call the embedded State's ParseBlock and convert the result
 	blk, err := vm.State.ParseBlock(ctx, b)
 	if err != nil {
@@ -376,28 +375,42 @@ func (vm *VM) ParseBlock(ctx context.Context, b []byte) (nodeConsensusChain.Bloc
 // Initialize implements the chain.ChainVM interface with generic interface{} parameters
 func (vm *VM) Initialize(
 	ctx context.Context,
-	chainCtx *nodeConsensus.Context,
-	dbManager database.Database,
+	chainCtx interface{},
+	dbManager interface{},
 	genesisBytes []byte,
 	upgradeBytes []byte,
 	configBytes []byte,
-	fxs []*nodeCommonEng.Fx,
-	appSender nodeCommonEng.AppSender,
+	msgChan interface{},
+	fxs []interface{},
+	appSender interface{},
 ) error {
-	// Convert fxs from []*nodeCommonEng.Fx to []*commonEng.Fx
+	// Type assert the parameters
+	typedChainCtx, ok := chainCtx.(*nodeConsensus.Context)
+	if !ok {
+		return fmt.Errorf("chainCtx is not *nodeConsensus.Context")
+	}
+	typedDBManager, ok := dbManager.(database.Database)
+	if !ok {
+		return fmt.Errorf("dbManager is not database.Database")
+	}
+	typedAppSender, ok := appSender.(nodeCommonEng.AppSender)
+	if !ok {
+		return fmt.Errorf("appSender is not nodeCommonEng.AppSender")
+	}
+
+	// Convert fxs from []interface{} to []*nodeCommonEng.Fx
 	typedFxs := make([]*commonEng.Fx, len(fxs))
 	for i, fx := range fxs {
-		typedFxs[i] = &commonEng.Fx{
-			ID: fx.ID,
-			Fx: fx.Fx,
+		if typedFx, ok := fx.(*nodeCommonEng.Fx); ok {
+			typedFxs[i] = &commonEng.Fx{
+				ID: typedFx.ID,
+				Fx: typedFx.Fx,
+			}
 		}
 	}
 
-	// Create an adapter for AppSender if needed
-	var consensusAppSender commonEng.AppSender
-	// We need to create an adapter since the types are from different packages
-	consensusAppSender = &appSenderAdapter{sender: appSender}
-	return vm.initializeInternal(ctx, chainCtx, dbManager, genesisBytes, upgradeBytes, configBytes, typedFxs, consensusAppSender)
+	// No adapter needed - nodeCommonEng.AppSender is an alias for commonEng.AppSender
+	return vm.initializeInternal(ctx, typedChainCtx, typedDBManager, genesisBytes, upgradeBytes, configBytes, typedFxs, typedAppSender)
 }
 
 // initializeInternal contains the actual initialization logic with strongly typed parameters
@@ -692,8 +705,8 @@ func (vm *VM) initializeInternal(
 	warpVerifier := &warpVerifierAdapter{backend: vm.warpBackend}
 	// Pass nil for signer since lp118 doesn't use it the same way
 	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, nil)
-	// Use adapter to convert lp118.Handler to p2p.Handler
-	p2pHandler := newLP118HandlerAdapter(warpHandler)
+	// Use built-in adapter to convert lp118.Handler to p2p.Handler
+	p2pHandler := lp118.NewHandlerAdapter(warpHandler)
 	vm.AddHandler(lp118.HandlerID, p2pHandler)
 
 	vm.setAppRequestHandlers()
@@ -956,27 +969,27 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		UnverifiedCacheSize: unverifiedCacheSize,
 		BytesToIDCacheSize:  bytesToIDCacheSize,
 		// Our vm methods return *Block which needs to implement the node's chain.Block
-		GetBlock: func(ctx context.Context, id ids.ID) (nodeConsensusChain.Block, error) {
-			// getBlock returns consensus block, we need to return node block
+		GetBlock: func(ctx context.Context, id ids.ID) (nodechain.Block, error) {
+			// getBlock returns our block
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 			if ethBlock == nil {
 				return nil, database.ErrNotFound
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		UnmarshalBlock: func(ctx context.Context, b []byte) (nodeConsensusChain.Block, error) {
-			// parseBlock returns consensus block, we need to return node block
+		UnmarshalBlock: func(ctx context.Context, b []byte) (nodechain.Block, error) {
+			// parseBlock returns our block
 			ethBlock := &types.Block{}
 			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 				return nil, err
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		BuildBlock: func(ctx context.Context) (nodeConsensusChain.Block, error) {
-			// Call VM's BuildBlock directly which returns the right type
-			return vm.BuildBlock(ctx)
+		BuildBlock: func(ctx context.Context) (nodechain.Block, error) {
+			// Call VM's buildBlock directly which returns the right type
+			return vm.buildBlock(ctx)
 		},
-		// BuildBlockWithContext: func(ctx context.Context, proposerVMBlockCtx *block.Context) (chain.Block, error) {
+		// BuildBlockWithContext: func(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodechain.Block, error) {
 		// 	// Call VM's BuildBlockWithContext directly which returns the right type
 		// 	return vm.BuildBlockWithContext(ctx, proposerVMBlockCtx)
 		// },
@@ -1207,7 +1220,7 @@ func (vm *VM) setAppRequestHandlers() {
 	vm.SetRequestHandler(networkHandler)
 }
 
-func (vm *VM) WaitForEvent(ctx context.Context) (nodeCommonEng.Message, error) {
+func (vm *VM) WaitForEvent(ctx context.Context) (nodeRouter.Message, error) {
 	vm.builderLock.Lock()
 	builder := vm.builder
 	vm.builderLock.Unlock()
@@ -1216,22 +1229,22 @@ func (vm *VM) WaitForEvent(ctx context.Context) (nodeCommonEng.Message, error) {
 	if builder == nil {
 		select {
 		case <-ctx.Done():
-			return 0, ctx.Err()
+			return nil, ctx.Err()
 		case <-vm.stateSyncDone:
-			// Return empty message to indicate state sync is done
-			return 0, nil
+			// Return nil message to indicate state sync is done
+			return nil, nil
 		case <-vm.shutdownChan:
-			return 0, errShuttingDownVM
+			return nil, errShuttingDownVM
 		}
 	}
 
 	// Call builder's waitForEvent which returns commonEng.Message
 	_, err := builder.waitForEvent(ctx)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	// Return 0 for success as Message is just uint32 in node
-	return 0, nil
+	// Return nil for success
+	return nil, nil
 }
 
 // Shutdown implements the chain.ChainVM interface
@@ -1273,7 +1286,7 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
-func (vm *VM) BuildBlock(ctx context.Context) (nodeConsensusChain.Block, error) {
+func (vm *VM) BuildBlock(ctx context.Context) (nodeConsensusBlock.Block, error) {
 	blk, err := vm.buildBlock(ctx)
 	if err != nil {
 		return nil, err
@@ -1283,11 +1296,11 @@ func (vm *VM) BuildBlock(ctx context.Context) (nodeConsensusChain.Block, error) 
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
-func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodeConsensusChain.Block, error) {
+func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodeConsensusBlock.Block, error) {
 	// Convert node context to consensus context
-	var consensusCtx *block.Context
+	var consensusCtx *nodeblock.Context
 	if proposerVMBlockCtx != nil {
-		consensusCtx = &block.Context{
+		consensusCtx = &nodeblock.Context{
 			PChainHeight: proposerVMBlockCtx.PChainHeight,
 		}
 	}
@@ -1300,11 +1313,11 @@ func (vm *VM) BuildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nod
 }
 
 // buildBlock builds a block to be wrapped by ChainState
-func (vm *VM) buildBlock(ctx context.Context) (block.Block, error) {
+func (vm *VM) buildBlock(ctx context.Context) (nodechain.Block, error) {
 	return vm.buildBlockWithContext(ctx, nil)
 }
 
-func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *block.Context) (block.Block, error) {
+func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nodeblock.Context) (nodechain.Block, error) {
 	if proposerVMBlockCtx != nil {
 		log.Debug("Building block with context", "pChainBlockHeight", proposerVMBlockCtx.PChainHeight)
 	} else {
@@ -1349,7 +1362,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *blo
 }
 
 // parseBlock parses [b] into a block to be wrapped by ChainState.
-func (vm *VM) parseBlock(_ context.Context, b []byte) (block.Block, error) {
+func (vm *VM) parseBlock(_ context.Context, b []byte) (nodechain.Block, error) {
 	ethBlock := new(types.Block)
 	if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 		return nil, err
@@ -1377,7 +1390,7 @@ func (vm *VM) ParseEthBlock(b []byte) (*types.Block, error) {
 // getBlock attempts to retrieve block [id] from the VM to be wrapped
 // by ChainState.
 // GetBlock implements the ChainVM interface
-func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodeConsensusChain.Block, error) {
+func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodeConsensusBlock.Block, error) {
 	blk, err := vm.getBlock(ctx, id)
 	if err != nil {
 		return nil, err
@@ -1386,7 +1399,7 @@ func (vm *VM) GetBlock(ctx context.Context, id ids.ID) (nodeConsensusChain.Block
 	return NewBlockAdapter(blk.(nodechain.Block)), nil
 }
 
-func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
+func (vm *VM) getBlock(_ context.Context, id ids.ID) (nodechain.Block, error) {
 	ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 	// If [ethBlock] is nil, return [database.ErrNotFound] here
 	// so that the miss is considered cacheable.
@@ -1399,7 +1412,7 @@ func (vm *VM) getBlock(_ context.Context, id ids.ID) (block.Block, error) {
 
 // GetAcceptedBlock attempts to retrieve block [blkID] from the VM. This method
 // only returns accepted blocks.
-func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeConsensusChain.Block, error) {
+func (vm *VM) GetAcceptedBlock(ctx context.Context, blkID ids.ID) (nodeConsensusBlock.Block, error) {
 	// First verify the block is accepted
 	ethBlock := vm.blockChain.GetBlockByHash(common.BytesToHash(blkID[:]))
 	if ethBlock == nil {
@@ -1758,71 +1771,6 @@ func (vm *VM) GetLastStateSummary(ctx context.Context) (nodeblock.StateSummary, 
 	return nil, fmt.Errorf("summary does not implement message.SyncSummary")
 }
 
-// appSenderAdapter adapts node's AppSender to consensus's AppSender
-type appSenderAdapter struct {
-	sender nodeCommonEng.AppSender
-}
-
-func (a *appSenderAdapter) SendAppGossip(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
-	// Convert set.Set[ids.NodeID] to nodeset.Set[ids.NodeID]
-	nodeIDSet := nodeset.NewSet[ids.NodeID](len(nodeIDs))
-	for nodeID := range nodeIDs {
-		nodeIDSet.Add(nodeID)
-	}
-	// Use a default SendConfig with the provided node IDs
-	config := nodeCommonEng.SendConfig{
-		NodeIDs:       nodeIDSet,
-		Validators:    0,
-		NonValidators: 0,
-		Peers:         0,
-	}
-	return a.sender.SendAppGossip(ctx, config, appGossipBytes)
-}
-
-func (a *appSenderAdapter) SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
-	// Convert set.Set[ids.NodeID] to nodeset.Set[ids.NodeID]
-	nodeIDSet := nodeset.NewSet[ids.NodeID](len(nodeIDs))
-	for nodeID := range nodeIDs {
-		nodeIDSet.Add(nodeID)
-	}
-	// Use a default SendConfig with the provided node IDs
-	config := nodeCommonEng.SendConfig{
-		NodeIDs:       nodeIDSet,
-		Validators:    0,
-		NonValidators: 0,
-		Peers:         0,
-	}
-	return a.sender.SendAppGossip(ctx, config, appGossipBytes)
-}
-
-func (a *appSenderAdapter) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, appRequestBytes []byte) error {
-	// Convert set.Set[ids.NodeID] to nodeset.Set[ids.NodeID]
-	nodeIDSet := nodeset.NewSet[ids.NodeID](len(nodeIDs))
-	for nodeID := range nodeIDs {
-		nodeIDSet.Add(nodeID)
-	}
-	return a.sender.SendAppRequest(ctx, nodeIDSet, requestID, appRequestBytes)
-}
-
-func (a *appSenderAdapter) SendAppResponse(ctx context.Context, nodeID ids.NodeID, requestID uint32, appResponseBytes []byte) error {
-	return a.sender.SendAppResponse(ctx, nodeID, requestID, appResponseBytes)
-}
-
-func (a *appSenderAdapter) SendCrossChainAppRequest(ctx context.Context, chainID ids.ID, requestID uint32, appRequestBytes []byte) error {
-	return a.sender.SendCrossChainAppRequest(ctx, chainID, requestID, appRequestBytes)
-}
-
-func (a *appSenderAdapter) SendCrossChainAppResponse(ctx context.Context, chainID ids.ID, requestID uint32, appResponseBytes []byte) error {
-	return a.sender.SendCrossChainAppResponse(ctx, chainID, requestID, appResponseBytes)
-}
-
-func (a *appSenderAdapter) SendAppError(ctx context.Context, nodeID ids.NodeID, requestID uint32, errorCode int32, errorMessage string) error {
-	return a.sender.SendAppError(ctx, nodeID, requestID, errorCode, errorMessage)
-}
-
-func (a *appSenderAdapter) SendCrossChainAppError(ctx context.Context, chainID ids.ID, requestID uint32, errorCode int32, errorMessage string) error {
-	return a.sender.SendCrossChainAppError(ctx, chainID, requestID, errorCode, errorMessage)
-}
 
 // stateSummaryWrapper wraps message.SyncSummary to implement nodeblock.StateSummary
 type stateSummaryWrapper struct {

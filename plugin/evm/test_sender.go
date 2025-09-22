@@ -39,8 +39,10 @@ type TestSender struct {
 func (s *TestSender) SendAppGossip(ctx context.Context, config nodeCore.SendConfig, msg []byte) error {
 	// Convert SendConfig to node set for internal functions
 	nodeSet := set.Set[ids.NodeID]{}
-	for id := range config.NodeIDs {
-		nodeSet.Add(id)
+	for _, id := range config.NodeIDs {
+		if nodeID, ok := id.(ids.NodeID); ok {
+			nodeSet.Add(nodeID)
+		}
 	}
 
 	if s.SendAppGossipF != nil {
