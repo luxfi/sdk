@@ -7,9 +7,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/luxfi/consensus/utils/set"
 	"github.com/luxfi/ids"
-	nodeCore "github.com/luxfi/consensus/engine/core"
-	"github.com/luxfi/node/utils/set"
 )
 
 // TestSender is a test implementation of the Sender interface
@@ -36,17 +35,9 @@ type TestSender struct {
 }
 
 // SendAppGossip implements the consensus AppSender interface
-func (s *TestSender) SendAppGossip(ctx context.Context, config nodeCore.SendConfig, msg []byte) error {
-	// Convert SendConfig to node set for internal functions
-	nodeSet := set.Set[ids.NodeID]{}
-	for _, id := range config.NodeIDs {
-		if nodeID, ok := id.(ids.NodeID); ok {
-			nodeSet.Add(nodeID)
-		}
-	}
-
+func (s *TestSender) SendAppGossip(ctx context.Context, nodeIDs set.Set[ids.NodeID], msg []byte) error {
 	if s.SendAppGossipF != nil {
-		return s.SendAppGossipF(ctx, nodeSet, msg)
+		return s.SendAppGossipF(ctx, nodeIDs, msg)
 	}
 	if s.SentAppGossip != nil {
 		// Send to channel if available

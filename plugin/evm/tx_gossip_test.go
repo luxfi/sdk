@@ -12,18 +12,20 @@ import (
 	"time"
 
 	"github.com/luxfi/consensus"
+	nodeConsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	nodeConsensus "github.com/luxfi/consensus"
+
 	// consensusInterfaces "github.com/luxfi/consensus/interfaces" // not needed since using snow.State
 	"github.com/luxfi/consensus/snow"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"
+
 	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
+	"github.com/luxfi/consensus/utils/set"
 	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/set"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 

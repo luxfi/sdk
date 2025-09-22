@@ -19,13 +19,15 @@ import (
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
+
 	// nodeConsensus "github.com/luxfi/consensus" // not used after fixes
 	// consensusInterfaces "github.com/luxfi/consensus/interfaces" // not needed since using snow.State
-	"github.com/luxfi/consensus/snow"
 	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	commonEng "github.com/luxfi/consensus/engine/core"
+	"github.com/luxfi/consensus/snow"
+
 	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
-	"github.com/luxfi/node/utils/set"
+	"github.com/luxfi/consensus/utils/set"
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/crypto/secp256k1"

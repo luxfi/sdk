@@ -33,7 +33,7 @@ func FuzzPackMintNativeCoinEqualTest(f *testing.F) {
 	f.Add(constants.BlackholeAddr.Bytes(), common.Big2.Bytes())
 	f.Fuzz(func(t *testing.T, b []byte, bigIntBytes []byte) {
 		bigIntVal := new(big.Int).SetBytes(bigIntBytes)
-		doCheckOutputs := !(bigIntVal.Cmp(abi.MaxUint256) > 0)
+		doCheckOutputs := bigIntVal.Cmp(abi.MaxUint256) <= 0
 		// we can only check if outputs are correct if the value is less than MaxUint256
 		// otherwise the value will be truncated when packed,
 		// and thus unpacked output will not be equal to the value

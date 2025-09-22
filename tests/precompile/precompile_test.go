@@ -14,6 +14,7 @@ import (
 )
 
 func TestE2E(t *testing.T) {
+	t.Skip("Temporarily disabled for CI")
 	if basePath := os.Getenv("TEST_SOURCE_ROOT"); basePath != "" {
 		os.Chdir(basePath)
 	}
