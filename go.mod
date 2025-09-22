@@ -15,16 +15,16 @@ require (
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/consensus v1.18.0
+	github.com/luxfi/consensus v1.18.1
 	github.com/luxfi/crypto v1.17.0
 	github.com/luxfi/database v1.2.0
-	github.com/luxfi/geth v1.16.34
+	github.com/luxfi/geth v1.16.35
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.1.0
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/math v0.1.1
 	github.com/luxfi/metric v1.4.0
-	github.com/luxfi/node v1.16.15
+	github.com/luxfi/node v1.16.20-lean
 	github.com/luxfi/warp v0.1.1
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -201,22 +201,3 @@ require (
 
 // Force tablewriter version for compatibility
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
-
-// Patch luxfi/node to fix metrics compatibility
-
-// CI/Production: Comment out these replace directives for CI
-// For local development: Uncomment these replace directives
-replace github.com/luxfi/node => ../node
-
-replace github.com/luxfi/consensus => ../consensus
-
-// replace github.com/luxfi/crypto => ../crypto
-
-// replace github.com/luxfi/database => ../database
-
-replace github.com/luxfi/geth => ../geth
-
-replace github.com/luxfi/metric => ../metric
-
-// replace github.com/luxfi/ids => ../ids
-// replace github.com/luxfi/log => ../log
