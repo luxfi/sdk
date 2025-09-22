@@ -16,10 +16,12 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 	nodeConsensus "github.com/luxfi/consensus"
+	// consensusInterfaces "github.com/luxfi/consensus/interfaces" // not needed since using snow.State
+	"github.com/luxfi/consensus/snow"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"
-	"github.com/luxfi/node/upgrade/upgradetest"
+	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/set"
 	"github.com/prometheus/client_golang/prometheus"
@@ -36,14 +38,10 @@ import (
 func TestEthTxGossip(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
+	// Create a valid context using the actual structure
 	consensusCtx := &nodeConsensus.Context{
-		NetworkID:       1337,
-		ChainID:         ids.GenerateTestID(),
-		NodeID:          ids.GenerateTestNodeID(),
-		NetworkUpgrades: upgradetest.GetConfig("latest"),
-		ChainDataDir:    t.TempDir(),
-		Log:             log.NewNoOpLogger(),
-		ValidatorState:  nil, // Using nil for testing
+		ChainID: ids.GenerateTestID(),
+		NodeID:  ids.GenerateTestNodeID(),
 	}
 	validatorState := utilstest.NewTestValidatorState()
 
@@ -65,13 +63,14 @@ func TestEthTxGossip(t *testing.T) {
 		ctx,
 		consensusCtx,
 		memdb.New(),
-		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
+		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		nil,
 		nil,
+		nil, // fxs parameter
 		responseSender,
 	))
-	require.NoError(vm.SetState(ctx, nodeConsensus.NormalOp))
+	require.NoError(vm.SetState(ctx, snow.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
@@ -173,14 +172,10 @@ func TestEthTxGossip(t *testing.T) {
 func TestEthTxPushGossipOutbound(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
+	// Create a valid context using the actual structure
 	consensusCtx := &nodeConsensus.Context{
-		NetworkID:       1337,
-		ChainID:         ids.GenerateTestID(),
-		NodeID:          ids.GenerateTestNodeID(),
-		NetworkUpgrades: upgradetest.GetConfig("latest"),
-		ChainDataDir:    t.TempDir(),
-		Log:             log.NewNoOpLogger(),
-		ValidatorState:  nil, // Using nil for testing
+		ChainID: ids.GenerateTestID(),
+		NodeID:  ids.GenerateTestNodeID(),
 	}
 	sender := &TestSender{
 		SentAppGossip: make(chan []byte, 1),
@@ -194,13 +189,14 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 		ctx,
 		consensusCtx,
 		memdb.New(),
-		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
+		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		nil,
 		nil,
+		nil, // fxs parameter
 		sender,
 	))
-	require.NoError(vm.SetState(ctx, nodeConsensus.NormalOp))
+	require.NoError(vm.SetState(ctx, snow.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
@@ -238,14 +234,10 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 func TestEthTxPushGossipInbound(t *testing.T) {
 	require := require.New(t)
 	ctx := context.Background()
+	// Create a valid context using the actual structure
 	consensusCtx := &nodeConsensus.Context{
-		NetworkID:       1337,
-		ChainID:         ids.GenerateTestID(),
-		NodeID:          ids.GenerateTestNodeID(),
-		NetworkUpgrades: upgradetest.GetConfig("latest"),
-		ChainDataDir:    t.TempDir(),
-		Log:             log.NewNoOpLogger(),
-		ValidatorState:  nil, // Using nil for testing
+		ChainID: ids.GenerateTestID(),
+		NodeID:  ids.GenerateTestNodeID(),
 	}
 
 	sender := &TestSender{}
@@ -257,13 +249,14 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 		ctx,
 		consensusCtx,
 		memdb.New(),
-		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
+		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		nil,
 		nil,
+		nil, // fxs parameter
 		sender,
 	))
-	require.NoError(vm.SetState(ctx, nodeConsensus.NormalOp))
+	require.NoError(vm.SetState(ctx, snow.NormalOp))
 
 	defer func() {
 		require.NoError(vm.Shutdown(ctx))
