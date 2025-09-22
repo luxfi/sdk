@@ -20,7 +20,7 @@ import (
 
 	"github.com/luxfi/evm/network/peertest"
 	"github.com/luxfi/evm/plugin/evm/message"
-	nodeCore "github.com/luxfi/node/consensus/engine/core"
+	nodeCore "github.com/luxfi/consensus/engine/core"
 
 	consensusVersion "github.com/luxfi/consensus/version"
 	"github.com/luxfi/ids"

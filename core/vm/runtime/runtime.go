@@ -39,6 +39,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/rawdb"
+	"github.com/luxfi/geth/core/tracing"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	ethparams "github.com/luxfi/geth/params"
@@ -150,7 +151,7 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 
 	cfg.State.CreateAccount(address)
 	// set the receiver's (the executing contract) code for execution.
-	cfg.State.SetCode(address, code)
+	cfg.State.SetCode(address, code, tracing.CodeChangeUnspecified)
 	// Call the code with the given configuration.
 	ret, _, err := vmenv.Call(
 		sender,

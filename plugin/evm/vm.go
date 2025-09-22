@@ -85,12 +85,13 @@ import (
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
-	nodeConsensus "github.com/luxfi/node/consensus"
-	nodeConsensusChain "github.com/luxfi/node/consensus/chain"
-	nodeblock "github.com/luxfi/node/consensus/engine/chain/block"
+	nodeConsensus "github.com/luxfi/consensus"
+	nodeConsensusChain "github.com/luxfi/consensus/chain"
+	nodeblock "github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/node/upgrade"
 	"github.com/luxfi/node/utils/perms"
 	"github.com/luxfi/node/utils/profiler"
+	nodeset "github.com/luxfi/node/utils/set"
 	nodemockable "github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
 	"github.com/luxfi/node/version"
@@ -99,7 +100,7 @@ import (
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/core/appsender"
 	"github.com/luxfi/math/set"
-	nodeCommonEng "github.com/luxfi/node/consensus/engine/core"
+	nodeCommonEng "github.com/luxfi/consensus/engine/core"
 
 	"github.com/luxfi/database"
 	luxUtils "github.com/luxfi/node/utils"
@@ -392,15 +393,10 @@ func (vm *VM) Initialize(
 		}
 	}
 
-	// AppSender from node should be compatible with consensus AppSender
-	// They both use the same set.Set type and signature, so we can type assert
+	// Create an adapter for AppSender if needed
 	var consensusAppSender commonEng.AppSender
-	if extSender, ok := appSender.(commonEng.AppSender); ok {
-		consensusAppSender = extSender
-	} else {
-		// If not directly compatible, we'll use it as-is and let the internal method handle it
-		consensusAppSender = appSender.(commonEng.AppSender)
-	}
+	// We need to create an adapter since the types are from different packages
+	consensusAppSender = &appSenderAdapter{sender: appSender}
 	return vm.initializeInternal(ctx, chainCtx, dbManager, genesisBytes, upgradeBytes, configBytes, typedFxs, consensusAppSender)
 }
 
@@ -1755,8 +1751,77 @@ func (vm *VM) GetLastStateSummary(ctx context.Context) (nodeblock.StateSummary, 
 	if err != nil {
 		return nil, err
 	}
-	// Cast to node's StateSummary interface
-	return summary.(nodeblock.StateSummary), nil
+	// Cast and wrap the summary to match node's interface
+	if syncSummary, ok := summary.(message.SyncSummary); ok {
+		return &stateSummaryWrapper{summary: syncSummary}, nil
+	}
+	return nil, fmt.Errorf("summary does not implement message.SyncSummary")
+}
+
+// appSenderAdapter adapts node's AppSender to consensus's AppSender
+type appSenderAdapter struct {
+	sender nodeCommonEng.AppSender
+}
+
+func (a *appSenderAdapter) SendAppGossip(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
+	// Convert set.Set[ids.NodeID] to nodeset.Set[ids.NodeID]
+	nodeIDSet := nodeset.NewSet[ids.NodeID](len(nodeIDs))
+	for nodeID := range nodeIDs {
+		nodeIDSet.Add(nodeID)
+	}
+	// Use a default SendConfig with the provided node IDs
+	config := nodeCommonEng.SendConfig{
+		NodeIDs:       nodeIDSet,
+		Validators:    0,
+		NonValidators: 0,
+		Peers:         0,
+	}
+	return a.sender.SendAppGossip(ctx, config, appGossipBytes)
+}
+
+func (a *appSenderAdapter) SendAppGossipSpecific(ctx context.Context, nodeIDs set.Set[ids.NodeID], appGossipBytes []byte) error {
+	// Convert set.Set[ids.NodeID] to nodeset.Set[ids.NodeID]
+	nodeIDSet := nodeset.NewSet[ids.NodeID](len(nodeIDs))
+	for nodeID := range nodeIDs {
+		nodeIDSet.Add(nodeID)
+	}
+	// Use a default SendConfig with the provided node IDs
+	config := nodeCommonEng.SendConfig{
+		NodeIDs:       nodeIDSet,
+		Validators:    0,
+		NonValidators: 0,
+		Peers:         0,
+	}
+	return a.sender.SendAppGossip(ctx, config, appGossipBytes)
+}
+
+func (a *appSenderAdapter) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID], requestID uint32, appRequestBytes []byte) error {
+	// Convert set.Set[ids.NodeID] to nodeset.Set[ids.NodeID]
+	nodeIDSet := nodeset.NewSet[ids.NodeID](len(nodeIDs))
+	for nodeID := range nodeIDs {
+		nodeIDSet.Add(nodeID)
+	}
+	return a.sender.SendAppRequest(ctx, nodeIDSet, requestID, appRequestBytes)
+}
+
+func (a *appSenderAdapter) SendAppResponse(ctx context.Context, nodeID ids.NodeID, requestID uint32, appResponseBytes []byte) error {
+	return a.sender.SendAppResponse(ctx, nodeID, requestID, appResponseBytes)
+}
+
+func (a *appSenderAdapter) SendCrossChainAppRequest(ctx context.Context, chainID ids.ID, requestID uint32, appRequestBytes []byte) error {
+	return a.sender.SendCrossChainAppRequest(ctx, chainID, requestID, appRequestBytes)
+}
+
+func (a *appSenderAdapter) SendCrossChainAppResponse(ctx context.Context, chainID ids.ID, requestID uint32, appResponseBytes []byte) error {
+	return a.sender.SendCrossChainAppResponse(ctx, chainID, requestID, appResponseBytes)
+}
+
+func (a *appSenderAdapter) SendAppError(ctx context.Context, nodeID ids.NodeID, requestID uint32, errorCode int32, errorMessage string) error {
+	return a.sender.SendAppError(ctx, nodeID, requestID, errorCode, errorMessage)
+}
+
+func (a *appSenderAdapter) SendCrossChainAppError(ctx context.Context, chainID ids.ID, requestID uint32, errorCode int32, errorMessage string) error {
+	return a.sender.SendCrossChainAppError(ctx, chainID, requestID, errorCode, errorMessage)
 }
 
 // stateSummaryWrapper wraps message.SyncSummary to implement nodeblock.StateSummary
@@ -1802,8 +1867,11 @@ func (vm *VM) GetStateSummary(ctx context.Context, height uint64) (nodeblock.Sta
 	if err != nil {
 		return nil, err
 	}
-	// Cast to node's StateSummary interface
-	return summary.(nodeblock.StateSummary), nil
+	// Cast and wrap the summary to match node's interface
+	if syncSummary, ok := summary.(message.SyncSummary); ok {
+		return &stateSummaryWrapper{summary: syncSummary}, nil
+	}
+	return nil, fmt.Errorf("summary does not implement message.SyncSummary")
 }
 
 // warpVerifierAdapter adapts our warp.Backend to lp118.Verifier
