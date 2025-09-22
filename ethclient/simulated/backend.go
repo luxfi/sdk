@@ -119,6 +119,8 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 	ethConf.Miner.Etherbase = constants.BlackholeAddr
 	ethConf.Miner.TestOnlyAllowDuplicateBlocks = true
 	ethConf.TxPool.NoLocals = true
+	// Disable snapshots for simulated backend to avoid flattening issues
+	ethConf.SnapshotCache = 0
 
 	for _, option := range options {
 		option(&nodeConf, &ethConf)
@@ -202,7 +204,10 @@ func (n *Backend) buildBlock(accept bool, gap uint64) (common.Hash, error) {
 	if err := chain.InsertBlock(block); err != nil {
 		return common.Hash{}, err
 	}
-	if accept {
+
+	// For simulated backend, we only accept blocks when explicitly requested
+	// This avoids snapshot flattening issues during initialization
+	if accept && block.NumberU64() > 0 {
 		if err := n.acceptAncestors(block); err != nil {
 			return common.Hash{}, err
 		}
