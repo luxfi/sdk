@@ -5,12 +5,76 @@ package keychain
 import (
 	"fmt"
 
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/crypto/keychain"
+	"github.com/luxfi/node/version"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
 	"golang.org/x/exp/maps"
 )
+
+// ledgerAdapter wraps the SDK's LedgerDevice to implement the keychain.Ledger interface
+type ledgerAdapter struct {
+	device *ledger.LedgerDevice
+}
+
+// Version implements keychain.Ledger
+func (la *ledgerAdapter) Version() (*version.Semantic, error) {
+	return la.device.Version()
+}
+
+// Address implements keychain.Ledger
+func (la *ledgerAdapter) Address(displayHRP string, addressIndex uint32) (ids.ShortID, error) {
+	return la.device.Address(displayHRP, addressIndex)
+}
+
+// SignHash implements keychain.Ledger - signs for a single index
+func (la *ledgerAdapter) SignHash(hash []byte, addressIndex uint32) ([]byte, error) {
+	signatures, err := la.device.SignHash(hash, []uint32{addressIndex})
+	if err != nil {
+		return nil, err
+	}
+	if len(signatures) == 0 {
+		return nil, fmt.Errorf("no signature returned")
+	}
+	return signatures[0], nil
+}
+
+// Sign implements keychain.Ledger - signs for a single index
+func (la *ledgerAdapter) Sign(hash []byte, addressIndex uint32) ([]byte, error) {
+	signatures, err := la.device.Sign(hash, []uint32{addressIndex})
+	if err != nil {
+		return nil, err
+	}
+	if len(signatures) == 0 {
+		return nil, fmt.Errorf("no signature returned")
+	}
+	return signatures[0], nil
+}
+
+// SignTransaction implements keychain.Ledger - signs for multiple indices
+func (la *ledgerAdapter) SignTransaction(rawUnsignedHash []byte, addressIndices []uint32) ([][]byte, error) {
+	return la.device.Sign(rawUnsignedHash, addressIndices)
+}
+
+// GetAddresses implements keychain.Ledger
+func (la *ledgerAdapter) GetAddresses(addressIndices []uint32) ([]ids.ShortID, error) {
+	addrs := make([]ids.ShortID, len(addressIndices))
+	for i, idx := range addressIndices {
+		addr, err := la.device.Address("", idx) // Empty HRP should use default
+		if err != nil {
+			return nil, err
+		}
+		addrs[i] = addr
+	}
+	return addrs, nil
+}
+
+// Disconnect implements keychain.Ledger
+func (la *ledgerAdapter) Disconnect() error {
+	return la.device.Disconnect()
+}
 
 type Keychain struct {
 	keychain.Keychain
@@ -102,7 +166,9 @@ func (kc *Keychain) AddLedgerIndices(indices []uint32) error {
 	if kc.LedgerEnabled() {
 		kc.Ledger.LedgerIndices = utils.Unique(append(kc.Ledger.LedgerIndices, indices...))
 		utils.Uint32Sort(kc.Ledger.LedgerIndices)
-		newKc, err := keychain.NewLedgerKeychainFromIndices(kc.Ledger.LedgerDevice, kc.Ledger.LedgerIndices)
+		// Create a ledger adapter that implements the keychain.Ledger interface
+		ledgerAdapter := &ledgerAdapter{device: kc.Ledger.LedgerDevice}
+		newKc, err := keychain.NewLedgerKeychain(ledgerAdapter, kc.Ledger.LedgerIndices)
 		if err != nil {
 			return err
 		}
