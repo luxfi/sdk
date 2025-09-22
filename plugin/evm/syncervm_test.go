@@ -19,10 +19,12 @@ import (
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	nodeConsensus "github.com/luxfi/consensus"
+	// nodeConsensus "github.com/luxfi/consensus" // not used after fixes
+	// consensusInterfaces "github.com/luxfi/consensus/interfaces" // not needed since using snow.State
+	"github.com/luxfi/consensus/snow"
 	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	commonEng "github.com/luxfi/consensus/engine/core"
-	"github.com/luxfi/node/upgrade/upgradetest"
+	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
 	"github.com/luxfi/node/utils/set"
 
 	"github.com/luxfi/crypto"
@@ -158,10 +160,11 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		context.Background(),
 		vmSetup.syncerVM.chainCtx,
 		vmSetup.syncerDB,
-		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
+		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		[]byte(stateSyncDisabledConfigJSON),
 		nil,
+		nil, // fxs parameter
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -222,10 +225,11 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 		context.Background(),
 		vmSetup.syncerVM.chainCtx,
 		vmSetup.syncerDB,
-		[]byte(toGenesisJSON(forkToChainConfig[upgradetest.Latest])),
+		[]byte(toGenesisJSON(forkToChainConfig["Latest"])),
 		nil,
 		[]byte(configJSON),
 		nil,
+		nil, // fxs parameter
 		appSender,
 	); err != nil {
 		t.Fatal(err)
@@ -299,7 +303,7 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	require := require.New(t)
 	// configure [serverVM]
 	serverVM := newVM(t, testVMConfig{
-		genesisJSON: toGenesisJSON(forkToChainConfig[upgradetest.Latest]),
+		genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
 	})
 
 	t.Cleanup(func() {
@@ -344,7 +348,7 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	// initialise [syncerVM] with blank genesis state
 	stateSyncEnabledJSON := fmt.Sprintf(`{"state-sync-enabled":true, "state-sync-min-blocks": %d, "tx-lookup-limit": %d}`, test.stateSyncMinBlocks, 4)
 	syncerVM := newVM(t, testVMConfig{
-		genesisJSON: toGenesisJSON(forkToChainConfig[upgradetest.Latest]),
+		genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
 		configJSON:  stateSyncEnabledJSON,
 		isSyncing:   true,
 	})
@@ -355,7 +359,7 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	})
 	// Set the state to syncing
 	// Use NormalOp state from node consensus
-	require.NoError(syncerVM.vm.SetState(context.Background(), nodeConsensus.NormalOp))
+	require.NoError(syncerVM.vm.SetState(context.Background(), snow.NormalOp))
 	enabled, err := syncerVM.vm.StateSyncEnabled(context.Background())
 	require.NoError(err)
 	require.True(enabled)
@@ -481,7 +485,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 
 	// set [syncerVM] to bootstrapping and verify the last accepted block has been updated correctly
 	// and that we can bootstrap and process some blocks.
-	require.NoError(syncerVM.SetState(context.Background(), nodeConsensus.Bootstrapping))
+	require.NoError(syncerVM.SetState(context.Background(), snow.Bootstrapping))
 	require.Equal(serverVM.LastAcceptedBlock().Height(), syncerVM.LastAcceptedBlock().Height(), "block height mismatch between syncer and server")
 	require.Equal(serverVM.LastAcceptedBlock().ID(), syncerVM.LastAcceptedBlock().ID(), "blockID mismatch between syncer and server")
 	require.True(syncerVM.blockChain.HasState(syncerVM.blockChain.LastAcceptedBlock().Root()), "unavailable state for last accepted block")
@@ -536,7 +540,7 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	)
 
 	// check we can transition to [NormalOp] state and continue to process blocks.
-	require.NoError(syncerVM.SetState(context.Background(), nodeConsensus.NormalOp))
+	require.NoError(syncerVM.SetState(context.Background(), snow.NormalOp))
 	require.True(syncerVM.bootstrapped.Get())
 
 	// Generate blocks after we have entered normal consensus as well
