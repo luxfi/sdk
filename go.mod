@@ -25,39 +25,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/ethereum/go-ethereum => github.com/luxfi/geth v1.16.34-lux.6
-	github.com/luxfi/consensus => ../consensus
-	github.com/luxfi/crypto => ../crypto
-	github.com/luxfi/database => ../database
-	github.com/luxfi/evm => ../evm
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/ids => ../ids
-	github.com/luxfi/log => ../log
-	github.com/luxfi/lpm => ../lpm
-	github.com/luxfi/math => ../math
-	github.com/luxfi/metric => ../metric
-	github.com/luxfi/metrics => ../metrics
-	github.com/luxfi/netrunner => ../netrunner
-	github.com/luxfi/netrunner-sdk => ../netrunner-sdk
-	github.com/luxfi/node => ../node
-	// Map old node paths to new modules
-	github.com/luxfi/node/utils/constants => ../node
-	github.com/luxfi/node/utils/crypto/keychain => ../node
-	github.com/luxfi/node/utils/formatting/address => ../node
-	github.com/luxfi/node/utils/json => ../node
-	github.com/luxfi/node/utils/logging => ../log
-	github.com/luxfi/node/utils/rpc => ../node
-	github.com/luxfi/node/utils/set => ../node
-	github.com/luxfi/node/utils/units => ../node
-	github.com/luxfi/node/vms/components/verify => ../node
-	github.com/luxfi/node/vms/platformvm => ../node
-	github.com/luxfi/node/vms/platformvm/txs => ../node
-	github.com/luxfi/node/vms/platformvm/warp => ../node
-	github.com/luxfi/node/vms/platformvm/warp/payload => ../node
-	github.com/luxfi/node/vms/secp256k1fx => ../node
-	github.com/luxfi/warp => ../warp
-)
 
 exclude (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074
