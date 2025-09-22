@@ -73,13 +73,12 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 
 	switch m := metric.(type) {
 	case *metrics.Counter:
-		counter := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_COUNTER.Enum(),
 			Metric: []*dto.Metric{{
 				Counter: &dto.Counter{
-					Value: ptrTo(float64(counter.Snapshot().Count())),
+					Value: ptrTo(float64((*m).Snapshot().Count())),
 				},
 			}},
 		}, nil
@@ -94,13 +93,12 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.CounterFloat64:
-		counter := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_COUNTER.Enum(),
 			Metric: []*dto.Metric{{
 				Counter: &dto.Counter{
-					Value: ptrTo(counter.Snapshot().Count()),
+					Value: ptrTo((*m).Snapshot().Count()),
 				},
 			}},
 		}, nil
@@ -115,13 +113,12 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.Gauge:
-		gauge := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_GAUGE.Enum(),
 			Metric: []*dto.Metric{{
 				Gauge: &dto.Gauge{
-					Value: ptrTo(float64(gauge.Snapshot().Value())),
+					Value: ptrTo(float64((*m).Snapshot().Value())),
 				},
 			}},
 		}, nil
@@ -136,13 +133,12 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.GaugeFloat64:
-		gauge := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_GAUGE.Enum(),
 			Metric: []*dto.Metric{{
 				Gauge: &dto.Gauge{
-					Value: ptrTo(gauge.Snapshot().Value()),
+					Value: ptrTo((*m).Snapshot().Value()),
 				},
 			}},
 		}, nil
@@ -157,12 +153,11 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.GaugeInfo:
-		return nil, fmt.Errorf("%w: %q is a %T", errMetricSkip, name, m)
+		return nil, fmt.Errorf("%w: %q is a *metrics.GaugeInfo", errMetricSkip, name)
 	case metrics.GaugeInfo:
-		return nil, fmt.Errorf("%w: %q is a %T", errMetricSkip, name, m)
+		return nil, fmt.Errorf("%w: %q is a metrics.GaugeInfo", errMetricSkip, name)
 	case *metrics.Histogram:
-		hist := *m // Dereference the pointer first
-		snapshot := hist.Snapshot()
+		snapshot := (*m).Snapshot()
 
 		quantiles := []float64{.5, .75, .95, .99, .999, .9999}
 		thresholds := snapshot.Percentiles(quantiles)
@@ -210,13 +205,12 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.Meter:
-		meter := *m // Dereference the pointer first
 		return &dto.MetricFamily{
 			Name: &name,
 			Type: dto.MetricType_GAUGE.Enum(),
 			Metric: []*dto.Metric{{
 				Gauge: &dto.Gauge{
-					Value: ptrTo(float64(meter.Snapshot().Count())),
+					Value: ptrTo(float64((*m).Snapshot().Count())),
 				},
 			}},
 		}, nil
@@ -231,8 +225,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.Timer:
-		timer := *m // Dereference the pointer first
-		snapshot := timer.Snapshot()
+		snapshot := (*m).Snapshot()
 
 		quantiles := []float64{.5, .75, .95, .99, .999, .9999}
 		thresholds := snapshot.Percentiles(quantiles)
@@ -280,8 +273,7 @@ func metricFamily(registry Registry, name string) (mf *dto.MetricFamily, err err
 			}},
 		}, nil
 	case *metrics.ResettingTimer:
-		timer := *m // Dereference the pointer first
-		snapshot := timer.Snapshot()
+		snapshot := (*m).Snapshot()
 		count := snapshot.Count()
 		if count == 0 {
 			return nil, fmt.Errorf("%w: %q resetting timer metric count is zero", errMetricSkip, name)

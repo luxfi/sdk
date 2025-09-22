@@ -19,9 +19,9 @@ import (
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"
-	nodeConsensus "github.com/luxfi/node/consensus"
-	consensusBlock "github.com/luxfi/node/consensus/engine/chain/block"
-	commonEng "github.com/luxfi/node/consensus/engine/core"
+	nodeConsensus "github.com/luxfi/consensus"
+	consensusBlock "github.com/luxfi/consensus/engine/chain/block"
+	commonEng "github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/node/upgrade/upgradetest"
 	"github.com/luxfi/node/utils/set"
 

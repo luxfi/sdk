@@ -55,13 +55,13 @@ import (
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/chains/atomic"
-	"github.com/luxfi/node/consensus/chain"
+	"github.com/luxfi/consensus/chain"
 
 	// "github.com/luxfi/node/upgrade" // TODO: Remove if not needed
-	nodeConsensus "github.com/luxfi/node/consensus"
+	nodeConsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/node/upgrade/upgradetest"
 
-	// "github.com/luxfi/node/consensus/validators" // TODO: Remove if not needed
+	// "github.com/luxfi/consensus/validators" // TODO: Remove if not needed
 	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/node/utils/set"
 )
