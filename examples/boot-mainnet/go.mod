@@ -3,8 +3,8 @@ module github.com/luxfi/sdk/examples/boot-mainnet
 go 1.22
 
 require (
-	github.com/luxfi/log v1.0.4
-	github.com/luxfi/sdk v0.0.0
+	github.com/luxfi/log v1.1.22
+	github.com/luxfi/sdk v1.8.0
 )
 
 require (
@@ -28,13 +28,3 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
 
-replace (
-	github.com/luxfi/consensus => ../../../consensus
-	github.com/luxfi/crypto => ../../../crypto
-	github.com/luxfi/ids => ../../../ids
-	github.com/luxfi/log => ../../../log
-	github.com/luxfi/metric => ../../../metrics
-	github.com/luxfi/netrunner-sdk => ../../../netrunner-sdk
-	github.com/luxfi/node => ../../../node
-	github.com/luxfi/sdk => ../../
-)
