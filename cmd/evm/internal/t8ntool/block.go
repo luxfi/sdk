@@ -295,10 +295,10 @@ func dispatchBlock(ctx *cli.Context, baseDir string, block *types.Block) error {
 	}
 	switch dest := ctx.String(OutputBlockFlag.Name); dest {
 	case "stdout":
-		os.Stdout.Write(b)
+		_, _ = os.Stdout.Write(b)
 		os.Stdout.WriteString("\n")
 	case "stderr":
-		os.Stderr.Write(b)
+		_, _ = os.Stderr.Write(b)
 		os.Stderr.WriteString("\n")
 	default:
 		if err := saveFile(baseDir, dest, enc); err != nil {

@@ -19,7 +19,7 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 	w.WriteBytes(obj.ReceiptHash[:])
 	w.WriteBytes(obj.Bloom[:])
 	if obj.Difficulty == nil {
-		w.Write(rlp.EmptyString)
+		_, _ = w.Write(rlp.EmptyString)
 	} else {
 		if obj.Difficulty.Sign() == -1 {
 			return rlp.ErrNegativeBigInt
@@ -27,7 +27,7 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 		w.WriteBigInt(obj.Difficulty)
 	}
 	if obj.Number == nil {
-		w.Write(rlp.EmptyString)
+		_, _ = w.Write(rlp.EmptyString)
 	} else {
 		if obj.Number.Sign() == -1 {
 			return rlp.ErrNegativeBigInt
@@ -47,7 +47,7 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 	_tmp5 := obj.ParentBeaconRoot != nil
 	if _tmp1 || _tmp2 || _tmp3 || _tmp4 || _tmp5 {
 		if obj.BaseFee == nil {
-			w.Write(rlp.EmptyString)
+			_, _ = w.Write(rlp.EmptyString)
 		} else {
 			if obj.BaseFee.Sign() == -1 {
 				return rlp.ErrNegativeBigInt
@@ -57,7 +57,7 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 	}
 	if _tmp2 || _tmp3 || _tmp4 || _tmp5 {
 		if obj.BlockGasCost == nil {
-			w.Write(rlp.EmptyString)
+			_, _ = w.Write(rlp.EmptyString)
 		} else {
 			if obj.BlockGasCost.Sign() == -1 {
 				return rlp.ErrNegativeBigInt
@@ -67,21 +67,21 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 	}
 	if _tmp3 || _tmp4 || _tmp5 {
 		if obj.BlobGasUsed == nil {
-			w.Write([]byte{0x80})
+			_, _ = w.Write([]byte{0x80})
 		} else {
 			w.WriteUint64((*obj.BlobGasUsed))
 		}
 	}
 	if _tmp4 || _tmp5 {
 		if obj.ExcessBlobGas == nil {
-			w.Write([]byte{0x80})
+			_, _ = w.Write([]byte{0x80})
 		} else {
 			w.WriteUint64((*obj.ExcessBlobGas))
 		}
 	}
 	if _tmp5 {
 		if obj.ParentBeaconRoot == nil {
-			w.Write([]byte{0x80})
+			_, _ = w.Write([]byte{0x80})
 		} else {
 			w.WriteBytes(obj.ParentBeaconRoot[:])
 		}

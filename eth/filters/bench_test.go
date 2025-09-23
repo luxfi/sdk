@@ -143,7 +143,7 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 	)
 	for i := 0; i < benchFilterCnt; i++ {
 		if i%20 == 0 {
-			db.Close()
+			_ = db.Close()
 			// db, _ = rawdb.NewLevelDBDatabase(benchDataDir, 128, 1024, "", false)
 			db = rawdb.NewMemoryDatabase()
 			backend = &testBackend{db: db, sections: cnt}
@@ -161,7 +161,7 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 	d = time.Since(start)
 	b.Log("Finished running filter benchmarks")
 	b.Log(" ", d, "total  ", d/time.Duration(benchFilterCnt), "per address", d*time.Duration(1000000)/time.Duration(benchFilterCnt*cnt*sectionSize), "per million blocks")
-	db.Close()
+	_ = db.Close()
 }
 
 //nolint:unused
@@ -205,5 +205,5 @@ func BenchmarkNoBloomBits(b *testing.B) {
 	d := time.Since(start)
 	b.Log("Finished running filter benchmarks")
 	b.Log(" ", d, "total  ", d*time.Duration(1000000)/time.Duration(headNum+1), "per million blocks")
-	db.Close()
+	_ = db.Close()
 }

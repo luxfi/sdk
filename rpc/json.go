@@ -280,7 +280,7 @@ func (c *jsonCodec) writeJSONSkipDeadline(ctx context.Context, v interface{}, is
 func (c *jsonCodec) close() {
 	c.closer.Do(func() {
 		close(c.closeCh)
-		c.conn.Close()
+		_ = c.conn.Close()
 	})
 }
 
@@ -296,7 +296,7 @@ func (c *jsonCodec) closed() <-chan interface{} {
 func parseMessage(raw json.RawMessage) ([]*jsonrpcMessage, bool) {
 	if !isBatch(raw) {
 		msgs := []*jsonrpcMessage{{}}
-		json.Unmarshal(raw, &msgs[0])
+		_ = json.Unmarshal(raw, &msgs[0])
 		return msgs, false
 	}
 	dec := json.NewDecoder(bytes.NewReader(raw))

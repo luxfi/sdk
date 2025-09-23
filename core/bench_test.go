@@ -276,7 +276,7 @@ func benchWriteChain(b *testing.B, full bool, count uint64) {
 		// For benchmarks, use memory database instead of LevelDB
 		db := rawdb.NewMemoryDatabase()
 		makeChainForBench(db, genesis, full, count)
-		db.Close()
+		_ = db.Close()
 	}
 }
 
@@ -287,7 +287,7 @@ func benchReadChain(b *testing.B, full bool, count uint64) {
 	db := rawdb.NewMemoryDatabase()
 	genesis := &Genesis{Config: params.TestChainConfig}
 	makeChainForBench(db, genesis, full, count)
-	db.Close()
+	_ = db.Close()
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -309,6 +309,6 @@ func benchReadChain(b *testing.B, full bool, count uint64) {
 			}
 		}
 		chain.Stop()
-		db.Close()
+		_ = db.Close()
 	}
 }

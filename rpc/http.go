@@ -189,7 +189,7 @@ func (c *Client) sendHTTP(ctx context.Context, op *requestOp, msg interface{}) e
 	if err != nil {
 		return err
 	}
-	defer respBody.Close()
+	defer func() { _ = respBody.Close() }()
 
 	var resp jsonrpcMessage
 	batch := [1]*jsonrpcMessage{&resp}
@@ -206,7 +206,7 @@ func (c *Client) sendBatchHTTP(ctx context.Context, op *requestOp, msgs []*jsonr
 	if err != nil {
 		return err
 	}
-	defer respBody.Close()
+	defer func() { _ = respBody.Close() }()
 
 	var respmsgs []*jsonrpcMessage
 	if err := json.NewDecoder(respBody).Decode(&respmsgs); err != nil {
@@ -251,7 +251,7 @@ func (hc *httpConn) doRequest(ctx context.Context, msg interface{}) (io.ReadClos
 		if _, err := buf.ReadFrom(resp.Body); err == nil {
 			body = buf.Bytes()
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, HTTPError{
 			Status:     resp.Status,
 			StatusCode: resp.StatusCode,

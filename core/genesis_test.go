@@ -153,7 +153,7 @@ func testSetupGenesis(t *testing.T, scheme string) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				tdb.Close()
+				_ = tdb.Close()
 
 				cacheConfig := DefaultCacheConfigWithScheme(scheme)
 				cacheConfig.ChainDataDir = t.TempDir()

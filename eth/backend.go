@@ -398,17 +398,17 @@ func (s *Ethereum) Start() {
 // Ethereum protocol.
 // FIXME remove error from type if this will never return an error
 func (s *Ethereum) Stop() error {
-	s.bloomIndexer.Close()
+	_ = s.bloomIndexer.Close()
 	close(s.closeBloomHandler)
-	s.txPool.Close()
+	_ = s.txPool.Close()
 	s.blockchain.Stop()
-	s.engine.Close()
+	_ = s.engine.Close()
 
 	// Clean shutdown marker as the last thing before closing db
 	s.shutdownTracker.Stop()
 	log.Info("Stopped shutdownTracker")
 
-	s.chainDb.Close()
+	_ = s.chainDb.Close()
 	log.Info("Closed chaindb")
 	s.eventMux.Stop()
 	log.Info("Stopped EventMux")

@@ -402,7 +402,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 
 		for _, id := range fails {
 			if err := p.store.Delete(id); err != nil {
-				p.Close()
+				_ = p.Close()
 				return err
 			}
 		}
@@ -414,7 +414,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 	}
 	feeConfig, _, err := p.chain.GetFeeConfigAt(p.head)
 	if err != nil {
-		p.Close()
+		_ = p.Close()
 		return err
 	}
 	baseFee, err := header.EstimateNextBaseFee(
@@ -424,7 +424,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 		uint64(time.Now().Unix()),
 	)
 	if err != nil {
-		p.Close()
+		_ = p.Close()
 		return err
 	}
 	var (
@@ -441,7 +441,7 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserve txpool.Addres
 	// recently but not yet finalized
 	p.limbo, err = newLimbo(limbodir)
 	if err != nil {
-		p.Close()
+		_ = p.Close()
 		return err
 	}
 	// Set the configured gas tip, triggering a filtering of anything just loaded

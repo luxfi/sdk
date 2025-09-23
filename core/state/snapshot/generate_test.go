@@ -52,7 +52,7 @@ func hashData(input []byte) common.Hash {
 	var hasher = sha3.NewLegacyKeccak256()
 	var hash common.Hash
 	hasher.Reset()
-	hasher.Write(input)
+	_, _ = hasher.Write(input)
 	hasher.Sum(hash[:0])
 	return hash
 }

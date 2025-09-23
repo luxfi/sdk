@@ -599,7 +599,7 @@ func TestOpenDrops(t *testing.T) {
 			}
 		}
 	}
-	store.Close()
+	_ = store.Close()
 
 	// Create a blob pool out of the pre-seeded data
 	statedb, _ := state.New(types.EmptyRootHash, state.NewDatabase(rawdb.NewDatabase(memorydb.New())), nil)
@@ -731,7 +731,7 @@ func TestOpenIndex(t *testing.T) {
 		blob, _ := rlp.EncodeToBytes(tx)
 		store.Put(blob)
 	}
-	store.Close()
+	_ = store.Close()
 
 	// Create a blob pool out of the pre-seeded data
 	statedb, _ := state.New(types.EmptyRootHash, state.NewDatabase(rawdb.NewDatabase(memorydb.New())), nil)
@@ -832,7 +832,7 @@ func TestOpenHeap(t *testing.T) {
 	store.Put(blob1)
 	store.Put(blob2)
 	store.Put(blob3)
-	store.Close()
+	_ = store.Close()
 
 	// Create a blob pool out of the pre-seeded data
 	statedb, _ := state.New(types.EmptyRootHash, state.NewDatabase(rawdb.NewDatabase(memorydb.New())), nil)
@@ -910,7 +910,7 @@ func TestOpenCap(t *testing.T) {
 	store.Put(blob1)
 	store.Put(blob2)
 	store.Put(blob3)
-	store.Close()
+	_ = store.Close()
 
 	// Verify pool capping twice: first by reducing the data cap, then restarting
 	// with a high cap to ensure everything was persisted previously
@@ -957,7 +957,7 @@ func TestOpenCap(t *testing.T) {
 		// Do not remove this, nor alter the above to be generic.
 		verifyPoolInternals(t, pool)
 
-		pool.Close()
+		_ = pool.Close()
 	}
 }
 
@@ -1340,7 +1340,7 @@ func TestAdd(t *testing.T) {
 			}
 		}
 		statedb.Commit(0, true, false)
-		store.Close()
+		_ = store.Close()
 
 		// Create a blob pool out of the pre-seeded dats
 		chain := &testBlockChain{
@@ -1365,7 +1365,7 @@ func TestAdd(t *testing.T) {
 		}
 		// Verify the pool internals and close down the test
 		verifyPoolInternals(t, pool)
-		pool.Close()
+		_ = pool.Close()
 	}
 }
 

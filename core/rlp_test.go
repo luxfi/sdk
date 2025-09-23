@@ -175,7 +175,7 @@ func BenchmarkHashing(b *testing.B) {
 			}
 			for txIt.Next() {
 				hasher.Reset()
-				hasher.Write(txIt.Value())
+				_, _ = hasher.Write(txIt.Value())
 				hasher.Sum(hash[:0])
 				got = hash
 			}

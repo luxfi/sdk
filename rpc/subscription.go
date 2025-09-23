@@ -86,7 +86,7 @@ func randomIDGenerator() func() ID {
 		mu.Lock()
 		defer mu.Unlock()
 		id := make([]byte, 16)
-		rng.Read(id)
+		_, _ = rng.Read(id)
 		return encodeID(id)
 	}
 }

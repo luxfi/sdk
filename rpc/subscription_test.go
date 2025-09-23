@@ -157,7 +157,7 @@ func TestServerUnsubscribe(t *testing.T) {
 
 	// Subscribe.
 	p2.SetDeadline(time.Now().Add(10 * time.Second))
-	p2.Write([]byte(`{"jsonrpc":"2.0","id":1,"method":"nftest2_subscribe","params":["someSubscription",0,10]}`))
+	_, _ = p2.Write([]byte(`{"jsonrpc":"2.0","id":1,"method":"nftest2_subscribe","params":["someSubscription",0,10]}`))
 
 	// Handle received messages.
 	var (
@@ -176,7 +176,7 @@ func TestServerUnsubscribe(t *testing.T) {
 	}
 
 	// Unsubscribe and check that it is handled on the server side.
-	p2.Write([]byte(`{"jsonrpc":"2.0","method":"nftest2_unsubscribe","params":["` + sub.subid + `"]}`))
+	_, _ = p2.Write([]byte(`{"jsonrpc":"2.0","method":"nftest2_unsubscribe","params":["` + sub.subid + `"]}`))
 	for {
 		select {
 		case id := <-service.unsubscribed:
@@ -232,7 +232,7 @@ func readAndValidateMessage(in *json.Decoder) (*subConfirmation, *subscriptionRe
 		} else if err := json.Unmarshal(msg.Result, &c.subid); err != nil {
 			return nil, nil, fmt.Errorf("invalid response: %v", err)
 		} else {
-			json.Unmarshal(msg.ID, &c.reqid)
+			_ = json.Unmarshal(msg.ID, &c.reqid)
 			return &c, nil, nil
 		}
 	default:

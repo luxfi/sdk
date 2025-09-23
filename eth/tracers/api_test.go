@@ -1019,8 +1019,8 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 			want res
 		)
 		resBytes, _ := json.Marshal(result)
-		json.Unmarshal(resBytes, &have)
-		json.Unmarshal([]byte(tc.want), &want)
+		_ = json.Unmarshal(resBytes, &have)
+		_ = json.Unmarshal([]byte(tc.want), &want)
 		if !reflect.DeepEqual(have, want) {
 			t.Logf("result: %v\n", string(resBytes))
 			t.Errorf("test %d, result mismatch, have\n%v\n, want\n%v\n", i, have, want)
