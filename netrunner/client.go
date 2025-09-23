@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/luxfi/log"
-	netrunner "github.com/luxfi/netrunner-sdk"
-	"github.com/luxfi/netrunner-sdk/rpcpb"
+	"github.com/luxfi/netrunner/client"
+	"github.com/luxfi/netrunner/rpcpb"
 )
 
-// Client wraps the netrunner-sdk client with additional functionality
+// Client wraps the netrunner client with additional functionality
 type Client struct {
-	client netrunner.Client
+	client client.Client
 	logger log.Logger
 	config *Config
 }
@@ -49,28 +49,24 @@ func NewClient(config *Config, logger log.Logger) (*Client, error) {
 		logger = log.NewNoOpLogger()
 	}
 
-	// Create netrunner-sdk config
-	sdkConfig := netrunner.Config{
-		LogLevel:    config.LogLevel,
+	// Create netrunner client
+	netrunnerClient, err := client.New(client.Config{
 		Endpoint:    config.Endpoint,
 		DialTimeout: config.DialTimeout,
-	}
-
-	// Create netrunner client
-	client, err := netrunner.New(sdkConfig)
+	}, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create netrunner client: %w", err)
 	}
 
 	return &Client{
-		client: client,
+		client: netrunnerClient,
 		logger: logger,
 		config: config,
 	}, nil
 }
 
 // Start starts a new network with the given configuration
-func (c *Client) Start(ctx context.Context, execPath string, opts ...netrunner.OpOption) (*rpcpb.StartResponse, error) {
+func (c *Client) Start(ctx context.Context, execPath string, opts ...client.OpOption) (*rpcpb.StartResponse, error) {
 	c.logger.Info("starting network", "execPath", execPath)
 	resp, err := c.client.Start(ctx, execPath, opts...)
 	if err != nil {
@@ -118,9 +114,9 @@ func (c *Client) CreateBlockchains(ctx context.Context, specs []*rpcpb.Blockchai
 }
 
 // CreateSubnets creates new subnets
-func (c *Client) CreateSubnets(ctx context.Context, opts ...netrunner.OpOption) (*rpcpb.CreateSubnetsResponse, error) {
+func (c *Client) CreateSubnets(ctx context.Context, specs []*rpcpb.SubnetSpec) (*rpcpb.CreateSubnetsResponse, error) {
 	c.logger.Info("creating subnets")
-	resp, err := c.client.CreateSubnets(ctx, opts...)
+	resp, err := c.client.CreateSubnets(ctx, specs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create subnets: %w", err)
 	}
@@ -129,7 +125,7 @@ func (c *Client) CreateSubnets(ctx context.Context, opts ...netrunner.OpOption) 
 }
 
 // AddNode adds a new node to the network
-func (c *Client) AddNode(ctx context.Context, name string, execPath string, opts ...netrunner.OpOption) (*rpcpb.AddNodeResponse, error) {
+func (c *Client) AddNode(ctx context.Context, name string, execPath string, opts ...client.OpOption) (*rpcpb.AddNodeResponse, error) {
 	c.logger.Info("adding node", "name", name)
 	resp, err := c.client.AddNode(ctx, name, execPath, opts...)
 	if err != nil {
@@ -151,7 +147,7 @@ func (c *Client) RemoveNode(ctx context.Context, name string) error {
 }
 
 // RestartNode restarts a node in the network
-func (c *Client) RestartNode(ctx context.Context, name string, opts ...netrunner.OpOption) error {
+func (c *Client) RestartNode(ctx context.Context, name string, opts ...client.OpOption) error {
 	c.logger.Info("restarting node", "name", name)
 	_, err := c.client.RestartNode(ctx, name, opts...)
 	if err != nil {
