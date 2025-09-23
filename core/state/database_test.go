@@ -315,7 +315,7 @@ func FuzzTree(f *testing.F) {
 	for randSeed := range int64(1000) {
 		rand := rand.New(rand.NewSource(randSeed))
 		steps := make([]byte, 32)
-		_, _ = _, err := rand.Read(steps)
+		_, err := rand.Read(steps)
 		if err != nil {
 			f.Fatal(err)
 		}

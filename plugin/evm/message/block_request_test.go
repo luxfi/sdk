@@ -44,7 +44,7 @@ func TestMarshalBlockResponse(t *testing.T) {
 	blocksBytes := make([][]byte, 32)
 	for i := range blocksBytes {
 		blocksBytes[i] = make([]byte, r.Intn(32)+32) // min 32 length, max 64
-		_, _ = _, err := r.Read(blocksBytes[i])
+		_, err := r.Read(blocksBytes[i])
 		assert.NoError(t, err)
 	}
 
