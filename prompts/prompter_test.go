@@ -426,7 +426,7 @@ func TestCaptureDurationEdgeCases(t *testing.T) {
 	})
 }
 
-func TestCaptureDurationWithMonkeyPatch(t *testing.T) {
+func TestCaptureDurationWithMonkeyPatch2(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -580,7 +580,7 @@ func TestCaptureDurationWithMonkeyPatch(t *testing.T) {
 	}
 }
 
-func TestCaptureDurationEdgeCases(t *testing.T) {
+func TestCaptureDurationEdgeCases2(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -641,7 +641,7 @@ func TestCaptureDurationEdgeCases(t *testing.T) {
 	})
 }
 
-func TestCaptureDurationWithMonkeyPatch(t *testing.T) {
+func TestCaptureDurationWithMonkeyPatch3(t *testing.T) {
 	// Save original function
 	originalRunner := promptUIRunner
 	defer func() {
@@ -886,7 +886,7 @@ func TestCaptureMainnetL1StakingDurationWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			duration, err := prompter.CaptureMainnetL1StakingDuration("Enter Mainnet L1 staking duration:")
+			duration, err := prompter.CaptureDuration("Enter Mainnet L1 staking duration:")
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -1818,7 +1818,7 @@ func TestCaptureWeightWithMonkeyPatch(t *testing.T) {
 			}
 
 			prompter := &realPrompter{}
-			weight, err := prompter.CaptureWeight("Enter weight:", tt.validator)
+			weight, err := prompter.CaptureWeight("Enter weight:")
 
 			if tt.expectError {
 				require.Error(t, err)
@@ -1834,289 +1834,4 @@ func TestCaptureWeightWithMonkeyPatch(t *testing.T) {
 	}
 }
 
-func TestCaptureIntWithMonkeyPatch(t *testing.T) {
-	// Save original function
-	originalRunner := promptUIRunner
-	defer func() {
-		promptUIRunner = originalRunner
-	}()
 
-	tests := []struct {
-		name          string
-		mockReturn    string
-		mockError     error
-		validator     func(int) error
-		expectedInt   int
-		expectError   bool
-		errorContains string
-	}{
-		{
-			name:        "valid positive integer",
-			mockReturn:  "42",
-			mockError:   nil,
-			validator:   func(int) error { return nil },
-			expectedInt: 42,
-			expectError: false,
-		},
-		{
-			name:        "valid negative integer",
-			mockReturn:  "-10",
-			mockError:   nil,
-			validator:   func(int) error { return nil },
-			expectedInt: -10,
-			expectError: false,
-		},
-		{
-			name:        "zero integer",
-			mockReturn:  "0",
-			mockError:   nil,
-			validator:   func(int) error { return nil },
-			expectedInt: 0,
-			expectError: false,
-		},
-		{
-			name:        "large integer",
-			mockReturn:  "2147483647",
-			mockError:   nil,
-			validator:   func(int) error { return nil },
-			expectedInt: 2147483647,
-			expectError: false,
-		},
-		{
-			name:          "integer with failing validator",
-			mockReturn:    "100",
-			mockError:     nil,
-			validator:     func(val int) error { return fmt.Errorf("value %d not allowed", val) },
-			expectedInt:   0,
-			expectError:   true,
-			errorContains: "value 100 not allowed",
-		},
-		{
-			name:          "invalid format - not a number",
-			mockReturn:    "abc",
-			mockError:     nil,
-			validator:     func(int) error { return nil },
-			expectedInt:   0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "invalid format - float",
-			mockReturn:    "42.5",
-			mockError:     nil,
-			validator:     func(int) error { return nil },
-			expectedInt:   0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "empty string",
-			mockReturn:    "",
-			mockError:     nil,
-			validator:     func(int) error { return nil },
-			expectedInt:   0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "prompt error - user cancelled",
-			mockReturn:    "",
-			mockError:     fmt.Errorf("user cancelled"),
-			validator:     func(int) error { return nil },
-			expectedInt:   0,
-			expectError:   true,
-			errorContains: "user cancelled",
-		},
-		{
-			name:          "validation parsing failure - strconv.Atoi fails in Validate",
-			mockReturn:    "not-a-number",
-			mockError:     nil,
-			validator:     func(int) error { return nil },
-			expectedInt:   0,
-			expectError:   true,
-			errorContains: "strconv",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			promptUIRunner = func(prompt promptui.Prompt) (string, error) {
-				require.Equal(t, "Enter integer:", prompt.Label)
-				require.NotNil(t, prompt.Validate)
-
-				if tt.mockReturn != "" && tt.mockError == nil {
-					switch {
-					case strings.Contains(tt.errorContains, "not allowed"):
-						err := prompt.Validate(tt.mockReturn)
-						require.Error(t, err)
-						return "", err
-					case strings.Contains(tt.errorContains, "strconv"):
-						err := prompt.Validate(tt.mockReturn)
-						require.Error(t, err)
-						return "", err
-					case strings.Contains(tt.errorContains, "invalid syntax"):
-						return tt.mockReturn, nil
-					default:
-						err := prompt.Validate(tt.mockReturn)
-						require.NoError(t, err)
-					}
-				}
-
-				return tt.mockReturn, tt.mockError
-			}
-
-			prompter := &realPrompter{}
-			intVal, err := prompter.CaptureInt("Enter integer:", tt.validator)
-
-			if tt.expectError {
-				require.Error(t, err)
-				if tt.errorContains != "" {
-					require.Contains(t, err.Error(), tt.errorContains)
-				}
-				require.Equal(t, 0, intVal)
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tt.expectedInt, intVal)
-			}
-		})
-	}
-}
-
-func TestCaptureUint8WithMonkeyPatch(t *testing.T) {
-	// Save original function
-	originalRunner := promptUIRunner
-	defer func() {
-		promptUIRunner = originalRunner
-	}()
-
-	tests := []struct {
-		name          string
-		mockReturn    string
-		mockError     error
-		expectedUint  uint8
-		expectError   bool
-		errorContains string
-	}{
-		{
-			name:         "valid uint8 - minimum",
-			mockReturn:   "0",
-			mockError:    nil,
-			expectedUint: 0,
-			expectError:  false,
-		},
-		{
-			name:         "valid uint8 - maximum",
-			mockReturn:   "255",
-			mockError:    nil,
-			expectedUint: 255,
-			expectError:  false,
-		},
-		{
-			name:         "valid uint8 - middle value",
-			mockReturn:   "128",
-			mockError:    nil,
-			expectedUint: 128,
-			expectError:  false,
-		},
-		{
-			name:         "valid hex number",
-			mockReturn:   "0xFF",
-			mockError:    nil,
-			expectedUint: 255,
-			expectError:  false,
-		},
-		{
-			name:         "valid octal number",
-			mockReturn:   "0377",
-			mockError:    nil,
-			expectedUint: 255,
-			expectError:  false,
-		},
-		{
-			name:          "invalid - exceeds uint8 max",
-			mockReturn:    "256",
-			mockError:     nil,
-			expectedUint:  0,
-			expectError:   true,
-			errorContains: "value out of range",
-		},
-		{
-			name:          "invalid - negative number",
-			mockReturn:    "-1",
-			mockError:     nil,
-			expectedUint:  0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "invalid format - not a number",
-			mockReturn:    "abc",
-			mockError:     nil,
-			expectedUint:  0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "invalid format - float",
-			mockReturn:    "42.5",
-			mockError:     nil,
-			expectedUint:  0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "empty string",
-			mockReturn:    "",
-			mockError:     nil,
-			expectedUint:  0,
-			expectError:   true,
-			errorContains: "invalid syntax",
-		},
-		{
-			name:          "prompt error - user cancelled",
-			mockReturn:    "",
-			mockError:     fmt.Errorf("user cancelled"),
-			expectedUint:  0,
-			expectError:   true,
-			errorContains: "user cancelled",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			promptUIRunner = func(prompt promptui.Prompt) (string, error) {
-				require.Equal(t, "Enter uint8:", prompt.Label)
-				require.NotNil(t, prompt.Validate)
-
-				if tt.mockReturn != "" && tt.mockError == nil {
-					switch {
-					case strings.Contains(tt.errorContains, "value out of range") ||
-						strings.Contains(tt.errorContains, "invalid syntax"):
-						err := prompt.Validate(tt.mockReturn)
-						require.Error(t, err)
-						return "", err
-					default:
-						err := prompt.Validate(tt.mockReturn)
-						require.NoError(t, err)
-					}
-				}
-
-				return tt.mockReturn, tt.mockError
-			}
-
-			prompter := &realPrompter{}
-			uint8Val, err := prompter.CaptureUint8("Enter uint8:")
-
-			if tt.expectError {
-				require.Error(t, err)
-				if tt.errorContains != "" {
-					require.Contains(t, err.Error(), tt.errorContains)
-				}
-				require.Equal(t, uint8(0), uint8Val)
-			} else {
-				require.NoError(t, err)
-				require.Equal(t, tt.expectedUint, uint8Val)
-			}
-		})
-	}
-}

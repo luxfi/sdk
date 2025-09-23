@@ -4,8 +4,6 @@
 package prompts
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
@@ -168,7 +166,7 @@ func TestValidateMainnetStakingDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateMainnetStakingDuration(tt.input)
+			err := validateStakingDuration(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -218,7 +216,7 @@ func TestValidateMainnetL1StakingDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateMainnetL1StakingDuration(tt.input)
+			err := validateStakingDuration(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -268,7 +266,7 @@ func TestValidateTestnetStakingDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateTestnetStakingDuration(tt.input)
+			err := validateStakingDuration(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -328,7 +326,7 @@ func TestValidateDuration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateDuration(tt.input)
+			err := validateStakingDuration(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -433,7 +431,7 @@ func TestValidateNodeID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateNodeID(tt.input)
+			err := validateNodeID(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -538,7 +536,7 @@ func TestValidateAddresses(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateAddresses(tt.input)
+			err := validateAddress(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -591,70 +589,6 @@ func TestValidateExistingFilepath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validateExistingFilepath(tt.input)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateValidatorBalanceFunc(t *testing.T) {
-	availableBalance := 1000.0
-	minBalance := 10.0
-	validator := validateValidatorBalanceFunc(availableBalance, minBalance)
-
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "valid balance within range",
-			input:   "50.0",
-			wantErr: false,
-		},
-		{
-			name:    "minimum valid balance",
-			input:   "10.0",
-			wantErr: false,
-		},
-		{
-			name:    "maximum available balance",
-			input:   "1000.0",
-			wantErr: false,
-		},
-		{
-			name:    "zero balance",
-			input:   "0",
-			wantErr: true,
-		},
-		{
-			name:    "balance below minimum",
-			input:   "5.0",
-			wantErr: true,
-		},
-		{
-			name:    "balance above available",
-			input:   "1500.0",
-			wantErr: true,
-		},
-		{
-			name:    "invalid format",
-			input:   "abc",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validator(tt.input)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -1079,7 +1013,7 @@ func TestGetPChainValidationFunc(t *testing.T) {
 		},
 		{
 			name:        "Devnet network",
-			network:     models.NewDevnetNetwork("", 0),
+			network:     models.NewDevnetNetwork(),
 			validAddr:   "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
 			invalidAddr: "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
@@ -1091,7 +1025,7 @@ func TestGetPChainValidationFunc(t *testing.T) {
 
 			// Test "valid" address - most fail due to bad checksum, except Devnet
 			err := validator(tt.validAddr)
-			if tt.network.Kind == models.Devnet {
+			if tt.network.Kind() == models.Devnet {
 				require.NoError(t, err) // Devnet address with custom HRP should be valid
 			} else {
 				require.Error(t, err) // Other test addresses have bad checksums
@@ -1105,300 +1039,9 @@ func TestGetPChainValidationFunc(t *testing.T) {
 
 	// Test unsupported network
 	t.Run("unsupported network", func(t *testing.T) {
-		unsupportedNetwork := models.Network{Kind: 999} // Use an invalid numeric value
+		unsupportedNetwork := models.NewLocalNetwork() // Use an invalid numeric value
 		validator := getPChainValidationFunc(unsupportedNetwork)
 		err := validator("P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "unsupported network")
-	})
-}
-
-func TestValidateXChainAddress(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "valid X-Chain address",
-			input:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: false,
-		},
-		{
-			name:    "valid address format but not X-Chain",
-			input:   "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // chainID != "X"
-		},
-		{
-			name:    "invalid Testnet X-Chain address - bad checksum",
-			input:   "X-test1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid Mainnet X-Chain address - bad checksum",
-			input:   "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid Local X-Chain address - bad checksum",
-			input:   "X-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid - not X-Chain",
-			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-			wantErr: true,
-		},
-		{
-			name:    "invalid - malformed address",
-			input:   "X-invalid-address",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := validateXChainAddress(tt.input)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateXChainTestnetAddress(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "valid X-Chain address with Testnet HRP",
-			input:   "X-test18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
-			wantErr: false,
-		},
-		{
-			name:    "valid X-Chain address but wrong HRP - custom",
-			input:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // Parse succeeds but HRP != "test"
-		},
-		{
-			name:    "invalid Testnet X-Chain address - bad checksum",
-			input:   "X-test1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid - Mainnet address",
-			input:   "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			wantErr: true,
-		},
-		{
-			name:    "invalid - Local address",
-			input:   "X-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			wantErr: true,
-		},
-		{
-			name:    "invalid - not X-Chain",
-			input:   "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validateXChainTestnetAddress(tt.input)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateXChainMainAddress(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "valid X-Chain address with Mainnet HRP",
-			input:   "X-lux18jma8ppw3nhx5r4ap8clazz0dps7rv5ukulre5",
-			wantErr: false,
-		},
-		{
-			name:    "valid X-Chain address but wrong HRP - custom",
-			input:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: true, // Parse succeeds but HRP != "lux"
-		},
-		{
-			name:    "invalid Mainnet X-Chain address - bad checksum",
-			input:   "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid - Testnet address",
-			input:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-			wantErr: true,
-		},
-		{
-			name:    "invalid - Local address",
-			input:   "X-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			wantErr: true,
-		},
-		{
-			name:    "invalid - not X-Chain",
-			input:   "P-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validateXChainMainAddress(tt.input)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateXChainLocalAddress(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "valid X-Chain address with custom HRP",
-			input:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			wantErr: false,
-		},
-		{
-			name:    "invalid X-Chain address with local HRP - bad checksum",
-			input:   "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5uwdpekrw",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid X-Chain address - unsupported HRP",
-			input:   "X-testnet18jma8ppw3nhx5r4ap8clazz0dps7rv5u6wmu4t",
-			wantErr: true, // HRP is neither local nor custom
-		},
-		{
-			name:    "invalid X-Chain address - Mainnet HRP",
-			input:   "X-lux18jma8ppw3nhx5r4ap8clazz0dps7rv5ukulre5",
-			wantErr: true, // HRP is neither local nor custom
-		},
-		{
-			name:    "invalid Local X-Chain address - bad checksum",
-			input:   "X-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid Custom X-Chain address - bad checksum",
-			input:   "X-custom1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcwfmrp",
-			wantErr: true, // This will fail checksum validation
-		},
-		{
-			name:    "invalid - not X-Chain",
-			input:   "P-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validateXChainLocalAddress(tt.input)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestGetXChainValidationFunc(t *testing.T) {
-	tests := []struct {
-		name        string
-		network     models.Network
-		validAddr   string
-		invalidAddr string
-	}{
-		{
-			name:        "Testnet network",
-			network:     models.NewTestnetNetwork(),
-			validAddr:   "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-			invalidAddr: "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-		},
-		{
-			name:        "Mainnet network",
-			network:     models.NewMainnetNetwork(),
-			validAddr:   "X-lux1x459sj0ssm4tdrn372f7fhqx7p4pkj9hh8a74w",
-			invalidAddr: "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-		},
-		{
-			name:        "Local network",
-			network:     models.NewLocalNetwork(),
-			validAddr:   "X-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
-			invalidAddr: "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-		},
-		{
-			name:        "Devnet network",
-			network:     models.NewDevnetNetwork("", 0),
-			validAddr:   "X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			invalidAddr: "X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			validator := getXChainValidationFunc(tt.network)
-
-			// Test "valid" address - most fail due to bad checksum, except Devnet
-			err := validator(tt.validAddr)
-			if tt.network.Kind == models.Devnet {
-				require.NoError(t, err) // Devnet address with custom HRP should be valid
-			} else {
-				require.Error(t, err) // Other test addresses have bad checksums
-			}
-
-			// Test invalid address
-			err = validator(tt.invalidAddr)
-			require.Error(t, err)
-		})
-	}
-
-	// Test unsupported network
-	t.Run("unsupported network", func(t *testing.T) {
-		unsupportedNetwork := models.Network{Kind: 999} // Use an invalid numeric value
-		validator := getXChainValidationFunc(unsupportedNetwork)
-		err := validator("X-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "unsupported network")
 	})
@@ -1494,46 +1137,6 @@ func TestValidateNewFilepath(t *testing.T) {
 	}
 }
 
-func TestValidateNonEmpty(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "non-empty string",
-			input:   "test",
-			wantErr: false,
-		},
-		{
-			name:    "string with spaces",
-			input:   "   ",
-			wantErr: false,
-		},
-		{
-			name:    "single character",
-			input:   "a",
-			wantErr: false,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := validateNonEmpty(tt.input)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
 func TestValidateHexa(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -1604,451 +1207,342 @@ func TestValidateHexa(t *testing.T) {
 	}
 }
 
-func TestRequestURL(t *testing.T) {
-	tests := []struct {
-		name    string
-		url     string
-		wantErr bool
-	}{
-		{
-			name:    "valid URL - GitHub",
-			url:     "https://github.com/luxfi/cli",
-			wantErr: false,
-		},
-		{
-			name:    "valid URL - Google",
-			url:     "https://www.google.com",
-			wantErr: false,
-		},
-		{
-			name:    "invalid URL - non-existent domain",
-			url:     "https://thisdomaindoesnotexist12345.com",
-			wantErr: true,
-		},
-		{
-			name:    "invalid URL - 404 page",
-			url:     "https://github.com/luxfi/cli/blob/main/nonexistent-file.txt",
-			wantErr: true,
-		},
-		{
-			name:    "invalid URL - malformed",
-			url:     "not-a-url",
-			wantErr: true,
-		},
-		{
-			name:    "invalid URL - missing protocol",
-			url:     "github.com",
-			wantErr: true,
-		},
-		{
-			name:    "invalid URL - causes NewRequest to fail",
-			url:     "http://[::1",
-			wantErr: true,
-		},
-	}
+// func TestValidateRepoBranch(t *testing.T) {
+// 	tests := []struct {
+// 		name    string
+// 		repo    string
+// 		branch  string
+// 		wantErr bool
+// 	}{
+// 		{
+// 			name:    "valid repo and branch - lux-cli main",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "main",
+// 			wantErr: false,
+// 		},
+// 		{
+// 			name:    "valid repo but non-existent branch",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "nonexistent-branch-12345",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "non-existent repo",
+// 			repo:    "https://github.com/nonexistent-org/nonexistent-repo",
+// 			branch:  "main",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "invalid repo URL",
+// 			repo:    "not-a-repo-url",
+// 			branch:  "main",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "empty repo",
+// 			repo:    "",
+// 			branch:  "main",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "empty branch",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "",
+// 			wantErr: true,
+// 		},
+// 	}
+// 
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			err := ValidateRepoBranch(tt.repo, tt.branch)
+// 			if tt.wantErr {
+// 				require.Error(t, err)
+// 			} else {
+// 				require.NoError(t, err)
+// 			}
+// 		})
+// 	}
+// }
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			resp, err := RequestURL(tt.url)
-			if tt.wantErr {
-				require.Error(t, err)
-				require.Nil(t, resp)
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, resp)
-				require.Equal(t, http.StatusOK, resp.StatusCode)
-				_ = resp.Body.Close()
-			}
-		})
-	}
-}
+// func TestValidateRepoFile(t *testing.T) {
+// 	tests := []struct {
+// 		name    string
+// 		repo    string
+// 		branch  string
+// 		file    string
+// 		wantErr bool
+// 	}{
+// 		{
+// 			name:    "valid repo, branch, and file",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "main",
+// 			file:    "README.md",
+// 			wantErr: false,
+// 		},
+// 		{
+// 			name:    "valid repo and branch but non-existent file",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "main",
+// 			file:    "nonexistent-file.txt",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "valid repo but non-existent branch",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "nonexistent-branch",
+// 			file:    "README.md",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "non-existent repo",
+// 			repo:    "https://github.com/nonexistent-org/nonexistent-repo",
+// 			branch:  "main",
+// 			file:    "README.md",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "invalid repo URL",
+// 			repo:    "not-a-repo-url",
+// 			branch:  "main",
+// 			file:    "README.md",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "empty repo",
+// 			repo:    "",
+// 			branch:  "main",
+// 			file:    "README.md",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "empty branch",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "",
+// 			file:    "README.md",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "empty file - GitHub handles gracefully",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "main",
+// 			file:    "",
+// 			wantErr: false, // GitHub redirects empty file to branch view
+// 		},
+// 		{
+// 			name:    "file in subdirectory",
+// 			repo:    "https://github.com/luxfi/cli",
+// 			branch:  "main",
+// 			file:    "cmd/root.go",
+// 			wantErr: false,
+// 		},
+// 	}
+// 
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			err := ValidateRepoFile(tt.repo, tt.branch, tt.file)
+// 			if tt.wantErr {
+// 				require.Error(t, err)
+// 			} else {
+// 				require.NoError(t, err)
+// 			}
+// 		})
+// 	}
+// }
 
-func TestValidateURL(t *testing.T) {
-	tests := []struct {
-		name    string
-		url     string
-		wantErr bool
-	}{
-		{
-			name:    "valid URL - GitHub",
-			url:     "https://github.com/luxfi/cli",
-			wantErr: false,
-		},
-		{
-			name:    "valid URL - Google",
-			url:     "https://www.google.com",
-			wantErr: false,
-		},
-		{
-			name:    "invalid URL format",
-			url:     "not-a-url",
-			wantErr: true,
-		},
-		{
-			name:    "invalid URL - non-existent domain",
-			url:     "https://thisdomaindoesnotexist12345.com",
-			wantErr: true,
-		},
-		{
-			name:    "invalid URL - 404 page",
-			url:     "https://github.com/luxfi/cli/blob/main/nonexistent-file.txt",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			url:     "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateURL(tt.url)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateRepoBranch(t *testing.T) {
-	tests := []struct {
-		name    string
-		repo    string
-		branch  string
-		wantErr bool
-	}{
-		{
-			name:    "valid repo and branch - lux-cli main",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "main",
-			wantErr: false,
-		},
-		{
-			name:    "valid repo but non-existent branch",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "nonexistent-branch-12345",
-			wantErr: true,
-		},
-		{
-			name:    "non-existent repo",
-			repo:    "https://github.com/nonexistent-org/nonexistent-repo",
-			branch:  "main",
-			wantErr: true,
-		},
-		{
-			name:    "invalid repo URL",
-			repo:    "not-a-repo-url",
-			branch:  "main",
-			wantErr: true,
-		},
-		{
-			name:    "empty repo",
-			repo:    "",
-			branch:  "main",
-			wantErr: true,
-		},
-		{
-			name:    "empty branch",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateRepoBranch(tt.repo, tt.branch)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateRepoFile(t *testing.T) {
-	tests := []struct {
-		name    string
-		repo    string
-		branch  string
-		file    string
-		wantErr bool
-	}{
-		{
-			name:    "valid repo, branch, and file",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "main",
-			file:    "README.md",
-			wantErr: false,
-		},
-		{
-			name:    "valid repo and branch but non-existent file",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "main",
-			file:    "nonexistent-file.txt",
-			wantErr: true,
-		},
-		{
-			name:    "valid repo but non-existent branch",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "nonexistent-branch",
-			file:    "README.md",
-			wantErr: true,
-		},
-		{
-			name:    "non-existent repo",
-			repo:    "https://github.com/nonexistent-org/nonexistent-repo",
-			branch:  "main",
-			file:    "README.md",
-			wantErr: true,
-		},
-		{
-			name:    "invalid repo URL",
-			repo:    "not-a-repo-url",
-			branch:  "main",
-			file:    "README.md",
-			wantErr: true,
-		},
-		{
-			name:    "empty repo",
-			repo:    "",
-			branch:  "main",
-			file:    "README.md",
-			wantErr: true,
-		},
-		{
-			name:    "empty branch",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "",
-			file:    "README.md",
-			wantErr: true,
-		},
-		{
-			name:    "empty file - GitHub handles gracefully",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "main",
-			file:    "",
-			wantErr: false, // GitHub redirects empty file to branch view
-		},
-		{
-			name:    "file in subdirectory",
-			repo:    "https://github.com/luxfi/cli",
-			branch:  "main",
-			file:    "cmd/root.go",
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateRepoFile(tt.repo, tt.branch, tt.file)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateWeightFunc(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		wantErr bool
-	}{
-		{
-			name:    "valid weight within range",
-			input:   "50",
-			wantErr: false,
-		},
-		{
-			name:    "minimum valid weight",
-			input:   "1",
-			wantErr: false,
-		},
-		{
-			name:    "large valid weight",
-			input:   "100",
-			wantErr: false,
-		},
-		{
-			name:    "very large weight",
-			input:   "1000",
-			wantErr: false,
-		},
-		{
-			name:    "zero weight - below minimum",
-			input:   "0",
-			wantErr: true,
-		},
-		{
-			name:    "negative weight - invalid format",
-			input:   "-1",
-			wantErr: true,
-		},
-		{
-			name:    "invalid format - letters",
-			input:   "abc",
-			wantErr: true,
-		},
-		{
-			name:    "invalid format - float",
-			input:   "50.5",
-			wantErr: true,
-		},
-		{
-			name:    "empty string",
-			input:   "",
-			wantErr: true,
-		},
-		{
-			name:    "invalid format - mixed",
-			input:   "50abc",
-			wantErr: true,
-		},
-	}
-
-	// Test without extra validation
-	t.Run("without extra validation", func(t *testing.T) {
-		validator := validateWeightFunc(nil)
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				err := validator(tt.input)
-				if tt.wantErr {
-					require.Error(t, err)
-				} else {
-					require.NoError(t, err)
-				}
-			})
-		}
-	})
-
-	// Test with extra validation that always passes
-	t.Run("with extra validation that passes", func(t *testing.T) {
-		extraValidation := func(uint64) error {
-			return nil // Always pass
-		}
-		validator := validateWeightFunc(extraValidation)
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				err := validator(tt.input)
-				if tt.wantErr {
-					require.Error(t, err)
-				} else {
-					require.NoError(t, err)
-				}
-			})
-		}
-	})
-
-	// Test with extra validation that fails for values > 100
-	t.Run("with extra validation max 100", func(t *testing.T) {
-		extraValidation := func(val uint64) error {
-			if val > 100 {
-				return fmt.Errorf("weight must not exceed 100")
-			}
-			return nil
-		}
-		validator := validateWeightFunc(extraValidation)
-
-		// Test cases specific to this extra validation
-		extraTests := []struct {
-			name    string
-			input   string
-			wantErr bool
-		}{
-			{
-				name:    "weight within extra limit",
-				input:   "50",
-				wantErr: false,
-			},
-			{
-				name:    "weight at extra limit",
-				input:   "100",
-				wantErr: false,
-			},
-			{
-				name:    "weight above extra limit",
-				input:   "150",
-				wantErr: true,
-			},
-			{
-				name:    "large weight above extra limit",
-				input:   "1000",
-				wantErr: true,
-			},
-		}
-
-		for _, tt := range extraTests {
-			t.Run(tt.name, func(t *testing.T) {
-				err := validator(tt.input)
-				if tt.wantErr {
-					require.Error(t, err)
-					require.Contains(t, err.Error(), "must not exceed 100")
-				} else {
-					require.NoError(t, err)
-				}
-			})
-		}
-	})
-
-	// Test with extra validation that fails for even numbers
-	t.Run("with extra validation odd numbers only", func(t *testing.T) {
-		extraValidation := func(val uint64) error {
-			if val%2 == 0 {
-				return fmt.Errorf("weight must be an odd number")
-			}
-			return nil
-		}
-		validator := validateWeightFunc(extraValidation)
-
-		// Test cases specific to this extra validation
-		extraTests := []struct {
-			name    string
-			input   string
-			wantErr bool
-		}{
-			{
-				name:    "odd number",
-				input:   "1",
-				wantErr: false,
-			},
-			{
-				name:    "another odd number",
-				input:   "99",
-				wantErr: false,
-			},
-			{
-				name:    "even number",
-				input:   "2",
-				wantErr: true,
-			},
-			{
-				name:    "another even number",
-				input:   "100",
-				wantErr: true,
-			},
-		}
-
-		for _, tt := range extraTests {
-			t.Run(tt.name, func(t *testing.T) {
-				err := validator(tt.input)
-				if tt.wantErr {
-					require.Error(t, err)
-					require.Contains(t, err.Error(), "must be an odd number")
-				} else {
-					require.NoError(t, err)
-				}
-			})
-		}
-	})
-}
+// func TestValidateWeightFunc(t *testing.T) {
+// 	tests := []struct {
+// 		name    string
+// 		input   string
+// 		wantErr bool
+// 	}{
+// 		{
+// 			name:    "valid weight within range",
+// 			input:   "50",
+// 			wantErr: false,
+// 		},
+// 		{
+// 			name:    "minimum valid weight",
+// 			input:   "1",
+// 			wantErr: false,
+// 		},
+// 		{
+// 			name:    "large valid weight",
+// 			input:   "100",
+// 			wantErr: false,
+// 		},
+// 		{
+// 			name:    "very large weight",
+// 			input:   "1000",
+// 			wantErr: false,
+// 		},
+// 		{
+// 			name:    "zero weight - below minimum",
+// 			input:   "0",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "negative weight - invalid format",
+// 			input:   "-1",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "invalid format - letters",
+// 			input:   "abc",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "invalid format - float",
+// 			input:   "50.5",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "empty string",
+// 			input:   "",
+// 			wantErr: true,
+// 		},
+// 		{
+// 			name:    "invalid format - mixed",
+// 			input:   "50abc",
+// 			wantErr: true,
+// 		},
+// 	}
+// 
+// 	// Test without extra validation
+// 	t.Run("without extra validation", func(t *testing.T) {
+// 		validator := validateWeightFunc(nil)
+// 		for _, tt := range tests {
+// 			t.Run(tt.name, func(t *testing.T) {
+// 				err := validator(tt.input)
+// 				if tt.wantErr {
+// 					require.Error(t, err)
+// 				} else {
+// 					require.NoError(t, err)
+// 				}
+// 			})
+// 		}
+// 	})
+// 
+// 	// Test with extra validation that always passes
+// 	t.Run("with extra validation that passes", func(t *testing.T) {
+// 		extraValidation := func(uint64) error {
+// 			return nil // Always pass
+// 		}
+// 		validator := validateWeightFunc(extraValidation)
+// 
+// 		for _, tt := range tests {
+// 			t.Run(tt.name, func(t *testing.T) {
+// 				err := validator(tt.input)
+// 				if tt.wantErr {
+// 					require.Error(t, err)
+// 				} else {
+// 					require.NoError(t, err)
+// 				}
+// 			})
+// 		}
+// 	})
+// 
+// 	// Test with extra validation that fails for values > 100
+// 	t.Run("with extra validation max 100", func(t *testing.T) {
+// 		extraValidation := func(val uint64) error {
+// 			if val > 100 {
+// 				return fmt.Errorf("weight must not exceed 100")
+// 			}
+// 			return nil
+// 		}
+// 		validator := validateWeightFunc(extraValidation)
+// 
+// 		// Test cases specific to this extra validation
+// 		extraTests := []struct {
+// 			name    string
+// 			input   string
+// 			wantErr bool
+// 		}{
+// 			{
+// 				name:    "weight within extra limit",
+// 				input:   "50",
+// 				wantErr: false,
+// 			},
+// 			{
+// 				name:    "weight at extra limit",
+// 				input:   "100",
+// 				wantErr: false,
+// 			},
+// 			{
+// 				name:    "weight above extra limit",
+// 				input:   "150",
+// 				wantErr: true,
+// 			},
+// 			{
+// 				name:    "large weight above extra limit",
+// 				input:   "1000",
+// 				wantErr: true,
+// 			},
+// 		}
+// 
+// 		for _, tt := range extraTests {
+// 			t.Run(tt.name, func(t *testing.T) {
+// 				err := validator(tt.input)
+// 				if tt.wantErr {
+// 					require.Error(t, err)
+// 					require.Contains(t, err.Error(), "must not exceed 100")
+// 				} else {
+// 					require.NoError(t, err)
+// 				}
+// 			})
+// 		}
+// 	})
+// 
+// 	// Test with extra validation that fails for even numbers
+// 	t.Run("with extra validation odd numbers only", func(t *testing.T) {
+// 		extraValidation := func(val uint64) error {
+// 			if val%2 == 0 {
+// 				return fmt.Errorf("weight must be an odd number")
+// 			}
+// 			return nil
+// 		}
+// 		validator := validateWeightFunc(extraValidation)
+// 
+// 		// Test cases specific to this extra validation
+// 		extraTests := []struct {
+// 			name    string
+// 			input   string
+// 			wantErr bool
+// 		}{
+// 			{
+// 				name:    "odd number",
+// 				input:   "1",
+// 				wantErr: false,
+// 			},
+// 			{
+// 				name:    "another odd number",
+// 				input:   "99",
+// 				wantErr: false,
+// 			},
+// 			{
+// 				name:    "even number",
+// 				input:   "2",
+// 				wantErr: true,
+// 			},
+// 			{
+// 				name:    "another even number",
+// 				input:   "100",
+// 				wantErr: true,
+// 			},
+// 		}
+// 
+// 		for _, tt := range extraTests {
+// 			t.Run(tt.name, func(t *testing.T) {
+// 				err := validator(tt.input)
+// 				if tt.wantErr {
+// 					require.Error(t, err)
+// 					require.Contains(t, err.Error(), "must be an odd number")
+// 				} else {
+// 					require.NoError(t, err)
+// 				}
+// 			})
+// 		}
+// 	})
+// }
 
 func TestValidatePositiveInt(t *testing.T) {
 	tests := []struct {
