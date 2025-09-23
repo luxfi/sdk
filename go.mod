@@ -6,11 +6,10 @@ require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.17.0
-	github.com/luxfi/geth v1.16.34
+	github.com/luxfi/geth v1.16.35
 	github.com/luxfi/ids v1.1.0
 	github.com/luxfi/log v1.1.22
-	github.com/luxfi/netrunner-sdk v0.0.0
-	github.com/luxfi/warp v0.1.1
+	github.com/luxfi/warp v0.1.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -25,7 +24,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-
 exclude (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250728155136-f173205681a0
@@ -36,7 +34,12 @@ require (
 	github.com/chelnak/ysmrr v0.6.0
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
+	github.com/luxfi/database v1.2.0
+	github.com/luxfi/evm v1.16.18
 	github.com/luxfi/ledger-lux-go v1.0.0
+	github.com/luxfi/lpm v1.0.0-lux.2
+	github.com/luxfi/netrunner v1.9.2
+	github.com/luxfi/node v1.16.20-lean
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1
@@ -122,7 +125,6 @@ require (
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
-	github.com/onsi/ginkgo/v2 v2.25.1 // indirect
 	github.com/pires/go-proxyproto v0.8.1 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -172,8 +174,6 @@ require (
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ethereum/go-bigmodexpfix v0.0.0-20250911101455-f9e208c548ab // indirect
-	github.com/fjl/gencodec v0.1.1 // indirect
-	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db // indirect
@@ -181,15 +181,10 @@ require (
 	github.com/jackpal/gateway v1.1.1 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/kasperdi/SPHINCSPLUS-golang v0.0.0-20231223193046-84468b93f7e9 // indirect
-	github.com/luxfi/consensus v1.18.0 // indirect
-	github.com/luxfi/database v1.2.0 // indirect
-	github.com/luxfi/evm v1.16.17 // indirect
-	github.com/luxfi/lpm v1.7.12 // indirect
+	github.com/luxfi/consensus v1.18.1 // indirect
 	github.com/luxfi/math v0.1.1 // indirect
 	github.com/luxfi/metric v1.4.0 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
-	github.com/luxfi/netrunner v1.9.1 // indirect
-	github.com/luxfi/node v1.16.17 // indirect
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/otiai10/copy v1.14.1 // indirect
@@ -202,5 +197,4 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/tools v0.36.0 // indirect
 )
