@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	// consensusInterfaces "github.com/luxfi/consensus/core/interfaces" // TODO: Remove if not needed
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/prefixdb"
 	"github.com/luxfi/ids"

@@ -472,9 +472,10 @@ var bindTests = []struct {
 			statedb, err := state.New(common.Hash{}, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
 			require.NoError(t, err)
 			wrappedStateDB := extstate.New(statedb)
+			precompileDB := extstate.NewPrecompileAdapter(wrappedStateDB)
 			address := common.BigToAddress(big.NewInt(1))
-			SetHelloWorldAllowListStatus(wrappedStateDB, address, allowlist.EnabledRole)
-			role := GetHelloWorldAllowListStatus(wrappedStateDB, address)
+			SetHelloWorldAllowListStatus(precompileDB, address, allowlist.EnabledRole)
+			role := GetHelloWorldAllowListStatus(precompileDB, address)
 			require.Equal(t, role, allowlist.EnabledRole)
 		`,
 		"",

@@ -28,7 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	commonEng "github.com/luxfi/consensus/core"
-	// consensusInterfaces "github.com/luxfi/consensus/core/interfaces" // TODO: Remove if not needed
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
@@ -58,13 +57,11 @@ import (
 
 	// "github.com/luxfi/consensus/chain" // not used after fixes
 
-	// "github.com/luxfi/node/upgrade" // TODO: Remove if not needed
 	nodeConsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/consensus/snow"
 
 	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
 
-	// "github.com/luxfi/consensus/validators" // TODO: Remove if not needed
 	"github.com/luxfi/consensus/utils/set"
 	luxdconstants "github.com/luxfi/node/utils/constants"
 )

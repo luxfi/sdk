@@ -20,8 +20,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAcceptedLogsSubscription_DISABLED(t *testing.T) {
-	t.Skip("Test disabled - needs fixing") // TODO: Fix test funding issues
+func TestAcceptedLogsSubscription(t *testing.T) {
+	// Test re-enabled for mainnet deployment
 	/*
 		Example contract to test event emission:
 

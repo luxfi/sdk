@@ -18,7 +18,7 @@ import (
 func pointer[T any](v T) *T { return &v }
 
 func TestChainConfigDescription(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 
 	tests := map[string]struct {
@@ -90,7 +90,7 @@ $`,
 }
 
 func TestChainConfigVerify(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 
 	validFeeConfig := commontype.FeeConfig{
