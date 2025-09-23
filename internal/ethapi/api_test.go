@@ -108,7 +108,7 @@ func testTransactionMarshal(t *testing.T, tests []txData, config *params.ChainCo
 }
 
 func TestTransaction_RoundTripRpcJSON(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	var (
 		config = params.TestChainConfig
 		tests  = allTransactionTypes(common.Address{0xde, 0xad}, config)
@@ -117,7 +117,7 @@ func TestTransaction_RoundTripRpcJSON(t *testing.T) {
 }
 
 func TestTransactionBlobTx(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	config := *params.TestChainConfig
 	// config.ShanghaiTime = new(uint64)
 	config.CancunTime = new(uint64)
@@ -676,7 +676,7 @@ func (b testBackend) HistoricalProofQueryWindow() (queryWindow uint64) {
 }
 
 func TestEstimateGas(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 	// Initialize test accounts
 	var (
@@ -832,7 +832,7 @@ func TestEstimateGas(t *testing.T) {
 }
 
 func TestCall(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	// Enable BLOBHASH opcode in Cancun
 	// Use TestPreSubnetEVMChainConfig which doesn't have SubnetEVM at time 0
 	cfg := *params.TestPreSubnetEVMChainConfig
@@ -1048,7 +1048,7 @@ func TestCall(t *testing.T) {
 }
 
 func TestSignTransaction(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 	// Initialize test accounts
 	var (
@@ -1092,7 +1092,7 @@ func TestSignTransaction(t *testing.T) {
 }
 
 func TestSignBlobTransaction(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 	// Initialize test accounts
 	var (
@@ -1132,7 +1132,7 @@ func TestSignBlobTransaction(t *testing.T) {
 }
 
 func TestSendBlobTransaction(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 	// Initialize test accounts
 	var (
@@ -1171,7 +1171,7 @@ func TestSendBlobTransaction(t *testing.T) {
 }
 
 func TestFillBlobTransaction(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 	// Initialize test accounts
 	var (
@@ -1418,7 +1418,7 @@ func hex2Bytes(str string) *hexutil.Bytes {
 }
 
 func TestRPCMarshalBlock(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 	var (
 		txs []*types.Transaction
@@ -1634,7 +1634,7 @@ func TestRPCMarshalBlock(t *testing.T) {
 }
 
 func TestRPCGetBlockOrHeader(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 
 	// Initialize test accounts
@@ -1999,7 +1999,7 @@ func setupReceiptBackend(t *testing.T, genBlocks int) (*testBackend, []common.Ha
 }
 
 func TestRPCGetTransactionReceipt(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 
 	var (
@@ -2068,7 +2068,7 @@ func TestRPCGetTransactionReceipt(t *testing.T) {
 }
 
 func TestRPCGetBlockReceipts(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	t.Parallel()
 
 	var (

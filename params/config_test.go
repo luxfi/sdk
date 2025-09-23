@@ -46,7 +46,7 @@ import (
 )
 
 func TestCheckCompatible(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	// Test Lux-specific CheckCompatible functionality
 	// This replaces the skipped geth test with Lux-specific logic
 
@@ -163,7 +163,7 @@ func TestCheckCompatible(t *testing.T) {
 }
 
 func TestConfigRules(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	c := WithExtra(
 		&ChainConfig{},
 		&extras.ChainConfig{
@@ -196,7 +196,7 @@ func TestConfigRules(t *testing.T) {
 }
 
 func TestConfigUnmarshalJSON(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	require := require.New(t)
 
 	testRewardManagerConfig := rewardmanager.NewConfig(
@@ -268,7 +268,7 @@ func TestConfigUnmarshalJSON(t *testing.T) {
 }
 
 func TestActivePrecompiles(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	config := WithExtra(
 		&ChainConfig{},
 		&extras.ChainConfig{
@@ -296,7 +296,7 @@ func TestActivePrecompiles(t *testing.T) {
 }
 
 func TestExtrasMarshaling(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	// Test that extras.ChainConfig marshals correctly
 	extra := &extras.ChainConfig{
 		FeeConfig:          DefaultFeeConfig,
@@ -326,7 +326,7 @@ func TestExtrasMarshaling(t *testing.T) {
 }
 
 func TestChainConfigMarshalWithUpgrades(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test re-enabled for mainnet deployment
 	// Create ChainConfig with extras
 	chainConfig := &ChainConfig{
 		ChainID:             big.NewInt(1),
