@@ -12,5 +12,5 @@ const (
 	// Timeout for the health API to check the Luxd is ready
 	HealthCheckTimeout = 5 * time.Second
 
-	DefaultLocalNodeURI = "http://127.0.0.1:9650"
+	DefaultLocalNodeURI = "http://127.0.0.1:9630"
 )
