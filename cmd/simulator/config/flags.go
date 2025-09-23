@@ -115,7 +115,7 @@ func BuildFlagSet() *pflag.FlagSet {
 func addSimulatorFlags(fs *pflag.FlagSet) {
 	fs.Bool(VersionKey, false, "Print the version and exit")
 	fs.String(ConfigFilePathKey, "", "Specify the config path to use to load a YAML config for the simulator")
-	fs.StringSlice(EndpointsKey, []string{"ws://127.0.0.1:9650/ext/bc/C/ws"}, "Specify a comma separated list of RPC Websocket Endpoints (minimum of 1 endpoint)")
+	fs.StringSlice(EndpointsKey, []string{"ws://127.0.0.1:9630/ext/bc/C/ws"}, "Specify a comma separated list of RPC Websocket Endpoints (minimum of 1 endpoint)")
 	fs.Int64(MaxFeeCapKey, 50, "Specify the maximum fee cap to use for transactions denominated in GWei (must be > 0)")
 	fs.Int64(MaxTipCapKey, 1, "Specify the max tip cap for transactions denominated in GWei (must be >= 0)")
 	fs.Uint64(TxsPerWorkerKey, 100, "Specify the number of transactions to create per worker (must be > 0)")
