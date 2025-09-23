@@ -148,12 +148,12 @@ func runTestScript(t *testing.T, file string) {
 // 		}
 // 		conn.SetDeadline(deadline)
 // 		// Write the request, then half-close the connection so the server stops reading.
-// 		conn.Write([]byte(request))
+_, _ = // 		conn.Write([]byte(request))
 // 		conn.(*net.TCPConn).CloseWrite()
 // 		// Now try to get the response.
 // 		buf := make([]byte, 2000)
-// 		n, err := conn.Read(buf)
-// 		conn.Close()
+_, _ = // 		n, err := conn.Read(buf)
+_ = // 		conn.Close()
 //
 // 		if err != nil {
 // 			t.Fatal("read error:", err)

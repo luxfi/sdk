@@ -144,7 +144,7 @@ func (tt *TestCmd) matchExactOutput(want []byte) error {
 		// Grab any additional buffered output in case of mismatch
 		// because it might help with debugging.
 		buf = append(buf, make([]byte, tt.stdout.Buffered())...)
-		tt.stdout.Read(buf[n:])
+		_, _ = tt.stdout.Read(buf[n:])
 		// Find the mismatch position.
 		for i := 0; i < n; i++ {
 			if want[i] != buf[i] {
@@ -237,7 +237,7 @@ func (tt *TestCmd) StderrText() string {
 }
 
 func (tt *TestCmd) CloseStdin() {
-	tt.stdin.Close()
+	_ = tt.stdin.Close()
 }
 
 func (tt *TestCmd) Kill() {
@@ -273,7 +273,7 @@ func (tl *testlogger) Write(b []byte) (n int, err error) {
 		}
 	}
 	tl.mu.Lock()
-	tl.buf.Write(b)
+	_, _ = tl.buf.Write(b)
 	tl.mu.Unlock()
 	return len(b), err
 }
@@ -290,7 +290,7 @@ type runeTee struct {
 
 func (rtee *runeTee) Read(b []byte) (n int, err error) {
 	n, err = rtee.in.Read(b)
-	rtee.buf.Write(b[:n])
+	_, _ = rtee.buf.Write(b[:n])
 	return n, err
 }
 

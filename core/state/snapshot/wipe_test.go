@@ -52,10 +52,10 @@ func TestWipe(t *testing.T) {
 	for i := 0; i < 500; i++ {
 		// Generate keys with wrong length for a state snapshot item
 		keysuffix := make([]byte, 31)
-		rand.Read(keysuffix)
+		_, _ = rand.Read(keysuffix)
 		db.Put(append(rawdb.SnapshotAccountPrefix, keysuffix...), randomHash().Bytes())
 		keysuffix = make([]byte, 33)
-		rand.Read(keysuffix)
+		_, _ = rand.Read(keysuffix)
 		db.Put(append(rawdb.SnapshotAccountPrefix, keysuffix...), randomHash().Bytes())
 	}
 	count := func() (items int) {

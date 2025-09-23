@@ -172,7 +172,7 @@ func TestEventMultiValueWithArrayUnpack(t *testing.T) {
 	var b bytes.Buffer
 	var i uint8 = 1
 	for ; i <= 3; i++ {
-		b.Write(packNum(reflect.ValueOf(i)))
+		_, _ = b.Write(packNum(reflect.ValueOf(i)))
 	}
 	unpacked, err := abi.Unpack("test", b.Bytes())
 	require.NoError(t, err)
@@ -380,7 +380,7 @@ func TestEventUnpackIndexed(t *testing.T) {
 	abi, err := JSON(strings.NewReader(definition))
 	require.NoError(t, err)
 	var b bytes.Buffer
-	b.Write(packNum(reflect.ValueOf(uint8(8))))
+	_, _ = b.Write(packNum(reflect.ValueOf(uint8(8))))
 	var rst testStruct
 	require.NoError(t, abi.UnpackIntoInterface(&rst, "test", b.Bytes()))
 	require.Equal(t, uint8(0), rst.Value1)
@@ -400,9 +400,9 @@ func TestEventIndexedWithArrayUnpack(t *testing.T) {
 	var b bytes.Buffer
 	stringOut := "abc"
 	// number of fields that will be encoded * 32
-	b.Write(packNum(reflect.ValueOf(32)))
-	b.Write(packNum(reflect.ValueOf(len(stringOut))))
-	b.Write(common.RightPadBytes([]byte(stringOut), 32))
+	_, _ = b.Write(packNum(reflect.ValueOf(32)))
+	_, _ = b.Write(packNum(reflect.ValueOf(len(stringOut))))
+	_, _ = b.Write(common.RightPadBytes([]byte(stringOut), 32))
 
 	var rst testStruct
 	require.NoError(t, abi.UnpackIntoInterface(&rst, "test", b.Bytes()))

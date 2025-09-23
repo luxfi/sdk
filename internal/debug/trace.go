@@ -47,7 +47,7 @@ func (h *HandlerT) StartGoTrace(file string) error {
 		return err
 	}
 	if err := trace.Start(f); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	h.traceW = f
@@ -65,7 +65,7 @@ func (h *HandlerT) StopGoTrace() error {
 		return errors.New("trace not in progress")
 	}
 	log.Info("Done writing Go trace", "dump", h.traceFile)
-	h.traceW.Close()
+	_ = h.traceW.Close()
 	h.traceW = nil
 	h.traceFile = ""
 	return nil

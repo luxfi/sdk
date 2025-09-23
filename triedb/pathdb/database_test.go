@@ -141,8 +141,8 @@ func newTester(t *testing.T, historyLimit uint64) *tester {
 }
 
 func (t *tester) release() {
-	t.db.Close()
-	t.db.diskdb.Close()
+	_ = t.db.Close()
+	_ = t.db.diskdb.Close()
 }
 
 func (t *tester) randAccount() (common.Address, []byte) {
@@ -513,7 +513,7 @@ func TestJournal(t *testing.T) {
 	if err := tester.db.Journal(tester.lastHash()); err != nil {
 		t.Errorf("Failed to journal, err: %v", err)
 	}
-	tester.db.Close()
+	_ = tester.db.Close()
 	tester.db = New(tester.db.diskdb, nil)
 
 	// Verify states including disk layer and all diff on top.
@@ -538,7 +538,7 @@ func TestCorruptedJournal(t *testing.T) {
 	if err := tester.db.Journal(tester.lastHash()); err != nil {
 		t.Errorf("Failed to journal, err: %v", err)
 	}
-	tester.db.Close()
+	_ = tester.db.Close()
 	rootBytes := rawdb.ReadAccountTrieNode(tester.db.diskdb, nil)
 	root := common.BytesToHash(crypto.Keccak256(rootBytes))
 
@@ -578,7 +578,7 @@ func TestCorruptedJournal(t *testing.T) {
 // 	tester := newTester(t, 10)
 // 	defer tester.release()
 //
-// 	tester.db.Close()
+_ = // 	tester.db.Close()
 // 	tester.db = New(tester.db.diskdb, &Config{StateHistory: 10})
 //
 // 	head, err := tester.db.freezer.Ancients()

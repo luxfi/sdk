@@ -128,7 +128,7 @@ func (m *Metrics) Print(outputFile string) error {
 		if err != nil {
 			return err
 		}
-		defer jsonFile.Close()
+		defer func() { _ = jsonFile.Close() }()
 
 		if err := json.NewEncoder(jsonFile).Encode(metrics); err != nil {
 			return err

@@ -333,7 +333,7 @@ func dispatchOutput(ctx *cli.Context, baseDir string, result *ExecutionResult, a
 		if err != nil {
 			return NewError(ErrorJson, fmt.Errorf("failed marshalling output: %v", err))
 		}
-		os.Stdout.Write(b)
+		_, _ = os.Stdout.Write(b)
 		os.Stdout.WriteString("\n")
 	}
 	if len(stdErrObject) > 0 {
@@ -341,7 +341,7 @@ func dispatchOutput(ctx *cli.Context, baseDir string, result *ExecutionResult, a
 		if err != nil {
 			return NewError(ErrorJson, fmt.Errorf("failed marshalling output: %v", err))
 		}
-		os.Stderr.Write(b)
+		_, _ = os.Stderr.Write(b)
 		os.Stderr.WriteString("\n")
 	}
 	return nil

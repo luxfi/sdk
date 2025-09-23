@@ -490,7 +490,7 @@ func TestClientSubscribeClose(t *testing.T) {
 	}()
 
 	<-service.gotHangSubscriptionReq
-	client.Close()
+	_ = client.Close()
 	service.unblockHangSubscription <- struct{}{}
 
 	select {
@@ -781,7 +781,7 @@ func TestClientReconnect(t *testing.T) {
 
 	// Shut down the server and allow for some cool down time so we can listen on the same
 	// address again.
-	l1.Close()
+	_ = l1.Close()
 	s1.Stop()
 	time.Sleep(2 * time.Second)
 
@@ -886,7 +886,7 @@ func (l *flakeyListener) Accept() (net.Conn, error) {
 		timeout := time.Duration(rand.Int63n(int64(l.maxKillTimeout)))
 		time.AfterFunc(timeout, func() {
 			log.Debug(fmt.Sprintf("killing conn %v after %v", c.LocalAddr(), timeout))
-			c.Close()
+			_ = c.Close()
 		})
 	}
 	return c, err

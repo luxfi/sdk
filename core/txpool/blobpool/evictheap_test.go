@@ -204,7 +204,7 @@ func benchmarkPriceHeapReinit(b *testing.B, datacap uint64) {
 	index := make(map[common.Address][]*blobTxMeta)
 	for i := 0; i < int(blobs); i++ {
 		var addr common.Address
-		rand.Read(addr[:])
+		_, _ = rand.Read(addr[:])
 
 		var (
 			execTip = uint256.NewInt(rand.Uint64())
@@ -264,7 +264,7 @@ func benchmarkPriceHeapOverflow(b *testing.B, datacap uint64) {
 	index := make(map[common.Address][]*blobTxMeta)
 	for i := 0; i < int(blobs); i++ {
 		var addr common.Address
-		rand.Read(addr[:])
+		_, _ = rand.Read(addr[:])
 
 		var (
 			execTip = uint256.NewInt(rand.Uint64())
@@ -295,7 +295,7 @@ func benchmarkPriceHeapOverflow(b *testing.B, datacap uint64) {
 		metas = make([]*blobTxMeta, b.N)
 	)
 	for i := 0; i < b.N; i++ {
-		rand.Read(addrs[i][:])
+		_, _ = rand.Read(addrs[i][:])
 
 		var (
 			execTip = uint256.NewInt(rand.Uint64())

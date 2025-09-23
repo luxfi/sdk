@@ -532,7 +532,7 @@ func MakePreState(db ethdb.Database, accounts types.GenesisAlloc, snapshotter bo
 // Close should be called when the state is no longer needed, ie. after running the test.
 func (st *StateTestState) Close() {
 	if st.TrieDB != nil {
-		st.TrieDB.Close()
+		_ = st.TrieDB.Close()
 		st.TrieDB = nil
 	}
 	if st.Snapshots != nil {

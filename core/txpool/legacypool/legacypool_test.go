@@ -150,7 +150,7 @@ func pricedTransaction(nonce uint64, gaslimit uint64, gasprice *big.Int, key *ec
 
 func pricedDataTransaction(nonce uint64, gaslimit uint64, gasprice *big.Int, key *ecdsa.PrivateKey, bytes uint64) *types.Transaction {
 	data := make([]byte, bytes)
-	crand.Read(data)
+	_, _ = crand.Read(data)
 
 	tx, _ := types.SignTx(types.NewTransaction(nonce, common.Address{}, big.NewInt(0), gaslimit, gasprice, data), types.HomesteadSigner{}, key)
 	return tx
@@ -2402,8 +2402,8 @@ func testJournaling(t *testing.T, nolocals bool) {
 	defer os.Remove(journal)
 
 	// Clean up the temporary file, we only need the path for now
-	file.Close()
-	os.Remove(journal)
+	_ = file.Close()
+	_ = os.Remove(journal)
 
 	// Create the original pool to inject transaction into the journal
 	statedb, _ := state.New(types.EmptyRootHash, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
@@ -2448,7 +2448,7 @@ func testJournaling(t *testing.T, nolocals bool) {
 		t.Fatalf("pool internal state corrupted: %v", err)
 	}
 	// Terminate the old pool, bump the local nonce, create a new pool and ensure relevant transaction survive
-	pool.Close()
+	_ = pool.Close()
 	statedb.SetNonce(common.Address(crypto.PubkeyToAddress(local.PublicKey)), 1, tracing.NonceChangeUnspecified)
 	blockchain = newTestBlockChain(params.TestChainConfig, 1000000, statedb, new(event.Feed))
 
@@ -2475,7 +2475,7 @@ func testJournaling(t *testing.T, nolocals bool) {
 	statedb.SetNonce(common.Address(crypto.PubkeyToAddress(local.PublicKey)), 2, tracing.NonceChangeUnspecified)
 	<-pool.requestReset(nil, nil)
 	time.Sleep(2 * config.Rejournal)
-	pool.Close()
+	_ = pool.Close()
 
 	statedb.SetNonce(common.Address(crypto.PubkeyToAddress(local.PublicKey)), 1, tracing.NonceChangeUnspecified)
 	blockchain = newTestBlockChain(params.TestChainConfig, 1000000, statedb, new(event.Feed))
@@ -2498,7 +2498,7 @@ func testJournaling(t *testing.T, nolocals bool) {
 	if err := validatePoolInternals(pool); err != nil {
 		t.Fatalf("pool internal state corrupted: %v", err)
 	}
-	pool.Close()
+	_ = pool.Close()
 }
 
 // TestStatusCheck tests that the pool can correctly retrieve the
@@ -2690,7 +2690,7 @@ func BenchmarkInsertRemoteWithAllLocals(b *testing.B) {
 		for i := 0; i < len(remotes); i++ {
 			pool.addRemotes([]*types.Transaction{remotes[i]})
 		}
-		pool.Close()
+		_ = pool.Close()
 	}
 }
 

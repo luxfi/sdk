@@ -81,7 +81,7 @@ func newLimbo(datadir string) (*limbo, error) {
 		log.Warn("Dropping invalidated limboed blobs", "ids", fails)
 		for _, id := range fails {
 			if err := l.store.Delete(id); err != nil {
-				l.Close()
+				_ = l.Close()
 				return nil, err
 			}
 		}

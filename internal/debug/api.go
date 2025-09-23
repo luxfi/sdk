@@ -113,7 +113,7 @@ func (h *HandlerT) StartCPUProfile(file string) error {
 		return err
 	}
 	if err := pprof.StartCPUProfile(f); err != nil {
-		f.Close()
+		_ = f.Close()
 		return err
 	}
 	h.cpuW = f
@@ -131,7 +131,7 @@ func (h *HandlerT) StopCPUProfile() error {
 		return errors.New("CPU profiling not in progress")
 	}
 	log.Info("Done writing CPU profile", "dump", h.cpuFile)
-	h.cpuW.Close()
+	_ = h.cpuW.Close()
 	h.cpuW = nil
 	h.cpuFile = ""
 	return nil

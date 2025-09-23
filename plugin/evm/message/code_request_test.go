@@ -38,7 +38,7 @@ func TestMarshalCodeResponse(t *testing.T) {
 	// use deterministic random source for testing
 	r := rand.New(rand.NewSource(1))
 	codeData := make([]byte, 50)
-	_, err := r.Read(codeData)
+	_, _ = _, err := r.Read(codeData)
 	assert.NoError(t, err)
 
 	codeResponse := CodeResponse{

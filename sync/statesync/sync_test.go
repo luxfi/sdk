@@ -125,7 +125,7 @@ func TestSimpleSyncCases(t *testing.T) {
 				root, _ := statesynctest.FillAccounts(t, serverTrieDB, common.Hash{}, numAccounts, func(t *testing.T, index int, account types.StateAccount) types.StateAccount {
 					if index%3 == 0 {
 						codeBytes := make([]byte, 256)
-						_, err := rand.Read(codeBytes)
+						_, _ = _, err := rand.Read(codeBytes)
 						require.NoError(t, err, "error reading random code bytes")
 
 						codeHash := crypto.Keccak256Hash(codeBytes)
