@@ -71,7 +71,7 @@ var (
 
 	TestChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
@@ -100,7 +100,7 @@ var (
 
 	TestPreSubnetEVMChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
@@ -118,7 +118,7 @@ var (
 
 	TestSubnetEVMChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
@@ -136,7 +136,7 @@ var (
 
 	TestDurangoChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
@@ -155,7 +155,7 @@ var (
 
 	TestEtnaChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
@@ -182,7 +182,7 @@ var (
 
 	TestFortunaChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
@@ -209,7 +209,7 @@ var (
 
 	TestGraniteChainConfig = WithExtra(
 		&ChainConfig{
-			ChainID:             big.NewInt(1),
+			ChainID:             big.NewInt(1337),
 			HomesteadBlock:      big.NewInt(0),
 			EIP150Block:         big.NewInt(0),
 			EIP155Block:         big.NewInt(0),
