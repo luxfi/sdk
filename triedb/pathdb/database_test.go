@@ -578,7 +578,7 @@ func TestCorruptedJournal(t *testing.T) {
 // 	tester := newTester(t, 10)
 // 	defer tester.release()
 //
-_ = // 	tester.db.Close()
+// 	tester.db.Close()
 // 	tester.db = New(tester.db.diskdb, &Config{StateHistory: 10})
 //
 // 	head, err := tester.db.freezer.Ancients()

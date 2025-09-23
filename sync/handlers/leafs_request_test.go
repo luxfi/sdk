@@ -554,7 +554,7 @@ func TestLeafsRequestHandler_OnLeafsRequest(t *testing.T) {
 					// modify one entry of 1 in 4 segments
 					if i%(segmentLen*4) == 0 {
 						randomBytes := make([]byte, 5)
-						_, _ = _, err := rand.Read(randomBytes)
+						_, err := rand.Read(randomBytes)
 						assert.NoError(t, err)
 						rawdb.WriteStorageSnapshot(memdb, largeStorageAccount, it.Hash(), randomBytes)
 					}

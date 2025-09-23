@@ -490,7 +490,7 @@ func TestClientSubscribeClose(t *testing.T) {
 	}()
 
 	<-service.gotHangSubscriptionReq
-	_ = client.Close()
+	client.Close()
 	service.unblockHangSubscription <- struct{}{}
 
 	select {

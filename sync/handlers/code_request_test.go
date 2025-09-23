@@ -27,7 +27,7 @@ func TestCodeRequestHandler(t *testing.T) {
 	rawdb.WriteCode(database, common.Hash(codeHash), codeBytes)
 
 	maxSizeCodeBytes := make([]byte, ethparams.MaxCodeSize)
-	_, _ = n, err := rand.Read(maxSizeCodeBytes)
+	n, err := rand.Read(maxSizeCodeBytes)
 	assert.NoError(t, err)
 	assert.Equal(t, ethparams.MaxCodeSize, n)
 	maxSizeCodeHash := crypto.Keccak256Hash(maxSizeCodeBytes)

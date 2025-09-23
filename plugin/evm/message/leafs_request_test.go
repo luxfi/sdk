@@ -26,7 +26,7 @@ func TestMarshalLeafsRequest(t *testing.T) {
 	startBytes := make([]byte, common.HashLength)
 	endBytes := make([]byte, common.HashLength)
 
-	_, _ = _, err := r.Read(startBytes)
+	_, err := r.Read(startBytes)
 	assert.NoError(t, err)
 
 	_, err = r.Read(endBytes)
@@ -67,14 +67,14 @@ func TestMarshalLeafsResponse(t *testing.T) {
 		keysBytes[i] = make([]byte, common.HashLength)
 		valsBytes[i] = make([]byte, r.Intn(8)+8) // min 8 bytes, max 16 bytes
 
-		_, _ = _, err := r.Read(keysBytes[i])
+		_, err := r.Read(keysBytes[i])
 		assert.NoError(t, err)
 		_, err = r.Read(valsBytes[i])
 		assert.NoError(t, err)
 	}
 
 	nextKey := make([]byte, common.HashLength)
-	_, _ = _, err := r.Read(nextKey)
+	_, err := r.Read(nextKey)
 	assert.NoError(t, err)
 
 	proofVals := make([][]byte, 4)
