@@ -1,6 +1,6 @@
 module github.com/luxfi/sdk/examples/boot-mainnet
 
-go 1.22
+go 1.25
 
 require (
 	github.com/luxfi/log v1.1.22
