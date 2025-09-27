@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/log"
+	"github.com/luxfi/log/level"
 	"github.com/luxfi/sdk/network"
 )
 
@@ -37,7 +38,8 @@ func TestNewDownloader(t *testing.T) {
 		Name: "testnet",
 		Type: network.NetworkTypeTestnet,
 	}
-	downloader, err := NewDownloader(net, log.NewLogger("public-archive-downloader", log.NewWrappedCore(log.Info, os.Stdout, log.JSON.ConsoleEncoder())))
+	core := log.NewWrappedCore(level.Info, os.Stdout, log.JSON.ConsoleEncoder())
+	downloader, err := NewDownloader(net, log.NewLogger("public-archive-downloader", *core))
 	require.NoError(t, err, "NewDownloader should not return an error")
 	require.NotNil(t, downloader.logger, "downloader logger should not be nil")
 	require.NotNil(t, downloader.getter.client, "downloader getter client should not be nil")
@@ -138,19 +140,48 @@ func TestDownloader_UnpackTo(t *testing.T) {
 }
 
 func TestDownloader_EndToEnd(t *testing.T) {
+	// Create a mock tar.gz archive with test data
+	var tarBuf bytes.Buffer
+	tw := tar.NewWriter(&tarBuf)
+
+	// Add a test file to the tar
+	testContent := []byte("test file content")
+	hdr := &tar.Header{
+		Name: "testfile.txt",
+		Mode: 0600,
+		Size: int64(len(testContent)),
+	}
+	err := tw.WriteHeader(hdr)
+	require.NoError(t, err)
+	_, err = tw.Write(testContent)
+	require.NoError(t, err)
+	err = tw.Close()
+	require.NoError(t, err)
+
+	// Create mock HTTP server serving the tar archive
+	mockData := tarBuf.Bytes()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write(mockData)
+	}))
+	defer server.Close()
+
 	// Set up a temporary directory for testing
 	tmpDir := t.TempDir()
 	targetDir := filepath.Join(tmpDir, "extracted_files")
+	tmpFile, err := os.CreateTemp("", "test-download-*")
+	require.NoError(t, err)
+	defer os.Remove(tmpFile.Name())
 
-	// Configure the test network (Testnet in this case)
-	net := &network.Network{
-		Name: "testnet",
-		Type: network.NetworkTypeTestnet,
+	// Step 1: Create the downloader using mock server
+	getter, err := newGetter(server.URL, tmpFile.Name())
+	require.NoError(t, err)
+
+	core := log.NewWrappedCore(level.Debug, os.Stdout, log.JSON.ConsoleEncoder())
+	downloader := Downloader{
+		getter:    getter,
+		logger:    log.NewLogger("public-archive-downloader", *core),
+		currentOp: &sync.Mutex{},
 	}
-
-	// Step 1: Create the downloader
-	downloader, err := NewDownloader(net, log.NewLogger("public-archive-downloader", log.NewWrappedCore(log.Debug, os.Stdout, log.JSON.ConsoleEncoder())))
-	require.NoError(t, err, "Failed to initialize downloader")
 
 	// Step 2: Start the download
 	t.Log("Starting download...")
