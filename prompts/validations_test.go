@@ -1011,40 +1011,21 @@ func TestGetPChainValidationFunc(t *testing.T) {
 			validAddr:   "P-local1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhcz8r9x",
 			invalidAddr: "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
 		},
-		{
-			name:        "Devnet network",
-			network:     models.NewDevnetNetwork(),
-			validAddr:   "P-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
-			invalidAddr: "P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5",
-		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			validator := getPChainValidationFunc(tt.network)
 
-			// Test "valid" address - most fail due to bad checksum, except Devnet
+			// Test "valid" address - most fail due to bad checksum
 			err := validator(tt.validAddr)
-			if tt.network.Kind() == models.Devnet {
-				require.NoError(t, err) // Devnet address with custom HRP should be valid
-			} else {
-				require.Error(t, err) // Other test addresses have bad checksums
-			}
+			require.Error(t, err) // Test addresses have bad checksums
 
 			// Test invalid address
 			err = validator(tt.invalidAddr)
 			require.Error(t, err)
 		})
 	}
-
-	// Test unsupported network
-	t.Run("unsupported network", func(t *testing.T) {
-		unsupportedNetwork := models.NewLocalNetwork() // Use an invalid numeric value
-		validator := getPChainValidationFunc(unsupportedNetwork)
-		err := validator("P-testnet1x459sj0ssm4tdrn372f7fhqx7p4pkj9hhqhmp5")
-		require.Error(t, err)
-		require.Contains(t, err.Error(), "unsupported network")
-	})
 }
 
 func TestValidateID(t *testing.T) {

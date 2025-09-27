@@ -195,7 +195,7 @@ func (*realPrompter) CaptureDuration(promptStr string) (time.Duration, error) {
 		Validate: validateStakingDuration,
 	}
 
-	durationStr, err := prompt.Run()
+	durationStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -209,7 +209,7 @@ func (*realPrompter) CaptureDate(promptStr string) (time.Time, error) {
 		Validate: validateTime,
 	}
 
-	timeStr, err := prompt.Run()
+	timeStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -223,7 +223,7 @@ func (*realPrompter) CaptureID(promptStr string) (ids.ID, error) {
 		Validate: validateID,
 	}
 
-	idStr, err := prompt.Run()
+	idStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -236,7 +236,7 @@ func (*realPrompter) CaptureNodeID(promptStr string) (ids.NodeID, error) {
 		Validate: validateNodeID,
 	}
 
-	nodeIDStr, err := prompt.Run()
+	nodeIDStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return ids.EmptyNodeID, err
 	}
@@ -249,7 +249,7 @@ func (*realPrompter) CaptureWeight(promptStr string) (uint64, error) {
 		Validate: validateWeight,
 	}
 
-	amountStr, err := prompt.Run()
+	amountStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -263,7 +263,7 @@ func (*realPrompter) CaptureUint64(promptStr string) (uint64, error) {
 		Validate: validateBiggerThanZero,
 	}
 
-	amountStr, err := prompt.Run()
+	amountStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -290,7 +290,7 @@ func (*realPrompter) CapturePositiveInt(promptStr string, comparators []Comparat
 		},
 	}
 
-	amountStr, err := prompt.Run()
+	amountStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -314,7 +314,7 @@ func (*realPrompter) CaptureUint64Compare(promptStr string, comparators []Compar
 		},
 	}
 
-	amountStr, err := prompt.Run()
+	amountStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -328,7 +328,7 @@ func (*realPrompter) CapturePositiveBigInt(promptStr string) (*big.Int, error) {
 		Validate: validatePositiveBigInt,
 	}
 
-	amountStr, err := prompt.Run()
+	amountStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,7 @@ func (*realPrompter) CapturePChainAddress(promptStr string, network models.Netwo
 		Validate: getPChainValidationFunc(network),
 	}
 
-	return prompt.Run()
+	return promptUIRunner(prompt)
 }
 
 func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
@@ -356,7 +356,7 @@ func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
 		Validate: validateAddress,
 	}
 
-	addressStr, err := prompt.Run()
+	addressStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return crypto.Address{}, err
 	}
@@ -377,7 +377,7 @@ func (*realPrompter) CaptureExistingFilepath(promptStr string) (string, error) {
 		Validate: validateExistingFilepath,
 	}
 
-	pathStr, err := prompt.Run()
+	pathStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -391,7 +391,7 @@ func (*realPrompter) CaptureNewFilepath(promptStr string) (string, error) {
 		Validate: validateNewFilepath,
 	}
 
-	pathStr, err := prompt.Run()
+	pathStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -438,7 +438,7 @@ func (*realPrompter) CaptureEmail(promptStr string) (string, error) {
 		Validate: validateEmail,
 	}
 
-	str, err := prompt.Run()
+	str, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -452,7 +452,7 @@ func (*realPrompter) CaptureURL(promptStr string) (string, error) {
 		Validate: ValidateURLFormat,
 	}
 
-	urlStr, err := prompt.Run()
+	urlStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -465,7 +465,7 @@ func (*realPrompter) CaptureStringAllowEmpty(promptStr string) (string, error) {
 		Label: promptStr,
 	}
 
-	str, err := prompt.Run()
+	str, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -484,7 +484,7 @@ func (*realPrompter) CaptureString(promptStr string) (string, error) {
 		},
 	}
 
-	str, err := prompt.Run()
+	str, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -498,7 +498,7 @@ func (*realPrompter) CaptureGitURL(promptStr string) (*url.URL, error) {
 		Validate: validateURL,
 	}
 
-	str, err := prompt.Run()
+	str, err := promptUIRunner(prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +522,7 @@ func (*realPrompter) CaptureVersion(promptStr string) (string, error) {
 		},
 	}
 
-	str, err := prompt.Run()
+	str, err := promptUIRunner(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -564,7 +564,7 @@ func (*realPrompter) CaptureFutureDate(promptStr string, minDate time.Time) (tim
 		},
 	}
 
-	timestampStr, err := prompt.Run()
+	timestampStr, err := promptUIRunner(prompt)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -737,7 +737,7 @@ func (*realPrompter) CaptureValidatorBalance(promptStr string, availableBalance 
 			return nil
 		},
 	}
-	result, err := prompt.Run()
+	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -904,7 +904,7 @@ func (*realPrompter) CaptureFloat(promptStr string) (float64, error) {
 		},
 	}
 
-	result, err := prompt.Run()
+	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
@@ -916,23 +916,20 @@ func (*realPrompter) CaptureUint16(promptStr string) (uint16, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			val, err := strconv.ParseUint(input, 10, 16)
-			if err != nil {
-				return errors.New("please enter a valid uint16 number (0-65535)")
-			}
-			if val > 65535 {
-				return errors.New("value must be between 0 and 65535")
-			}
-			return nil
+			_, err := strconv.ParseUint(input, 0, 16)
+			return err
 		},
 	}
 
-	result, err := prompt.Run()
+	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
 
-	val, _ := strconv.ParseUint(result, 10, 16)
+	val, err := strconv.ParseUint(result, 0, 16)
+	if err != nil {
+		return 0, err
+	}
 	return uint16(val), nil
 }
 
@@ -940,19 +937,19 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 	prompt := promptui.Prompt{
 		Label: promptStr,
 		Validate: func(input string) error {
-			_, err := strconv.ParseUint(input, 10, 32)
-			if err != nil {
-				return errors.New("please enter a valid uint32 number")
-			}
-			return nil
+			_, err := strconv.ParseUint(input, 0, 32)
+			return err
 		},
 	}
 
-	result, err := prompt.Run()
+	result, err := promptUIRunner(prompt)
 	if err != nil {
 		return 0, err
 	}
 
-	val, _ := strconv.ParseUint(result, 10, 32)
+	val, err := strconv.ParseUint(result, 0, 32)
+	if err != nil {
+		return 0, err
+	}
 	return uint32(val), nil
 }

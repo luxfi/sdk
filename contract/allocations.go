@@ -323,8 +323,8 @@ func ContractAddressIsInGenesisData(
 	if err != nil {
 		return false, err
 	}
-	// Convert contractAddress to string for comparison
-	contractAddrStr := fmt.Sprintf("0x%x", contractAddress.Bytes())
+	// Convert contractAddress to string for comparison (lowercase hex without 0x prefix)
+	contractAddrStr := fmt.Sprintf("%x", contractAddress.Bytes())
 	for address, allocation := range genesis.Alloc {
 		if address == contractAddrStr {
 			return len(allocation.Code) > 0, nil
