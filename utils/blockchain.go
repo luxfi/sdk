@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strconv"
+	"strings"
 
 	"github.com/luxfi/ids"
 )
@@ -23,6 +25,44 @@ type Account struct {
 	Nonce   uint64            `json:"nonce,omitempty"`
 }
 
+// UnmarshalJSON custom unmarshaler for Account to handle hex string balances
+func (a *Account) UnmarshalJSON(data []byte) error {
+	type Alias Account
+	aux := &struct {
+		Balance interface{} `json:"balance"`
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Parse balance (hex string or numeric)
+	if aux.Balance != nil {
+		switch v := aux.Balance.(type) {
+		case string:
+			// Remove quotes if present
+			balance := new(big.Int)
+			if strings.HasPrefix(v, "0x") {
+				if _, ok := balance.SetString(v[2:], 16); !ok {
+					return fmt.Errorf("invalid hex balance: %s", v)
+				}
+			} else {
+				if _, ok := balance.SetString(v, 10); !ok {
+					return fmt.Errorf("invalid balance: %s", v)
+				}
+			}
+			a.Balance = balance
+		case float64:
+			a.Balance = big.NewInt(int64(v))
+		}
+	}
+
+	return nil
+}
+
 // SubnetEvmGenesis represents a subnet EVM genesis configuration
 type SubnetEvmGenesis struct {
 	Config     map[string]interface{} `json:"config"`
@@ -35,6 +75,68 @@ type SubnetEvmGenesis struct {
 	Number     string                 `json:"number,omitempty"`
 	GasUsed    string                 `json:"gasUsed,omitempty"`
 	ParentHash string                 `json:"parentHash,omitempty"`
+}
+
+// UnmarshalJSON custom unmarshaler to handle hex string or numeric values
+func (g *SubnetEvmGenesis) UnmarshalJSON(data []byte) error {
+	type Alias SubnetEvmGenesis
+	aux := &struct {
+		Timestamp  interface{} `json:"timestamp,omitempty"`
+		GasLimit   interface{} `json:"gasLimit"`
+		*Alias
+	}{
+		Alias: (*Alias)(g),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Parse timestamp (numeric or hex string)
+	if aux.Timestamp != nil {
+		switch v := aux.Timestamp.(type) {
+		case float64:
+			g.Timestamp = uint64(v)
+		case string:
+			if strings.HasPrefix(v, "0x") {
+				val, err := strconv.ParseUint(v[2:], 16, 64)
+				if err != nil {
+					return err
+				}
+				g.Timestamp = val
+			} else {
+				val, err := strconv.ParseUint(v, 10, 64)
+				if err != nil {
+					return err
+				}
+				g.Timestamp = val
+			}
+		}
+	}
+
+	// Parse gasLimit (numeric or hex string)
+	if aux.GasLimit != nil {
+		switch v := aux.GasLimit.(type) {
+		case float64:
+			g.GasLimit = uint64(v)
+		case string:
+			if strings.HasPrefix(v, "0x") {
+				val, err := strconv.ParseUint(v[2:], 16, 64)
+				if err != nil {
+					return err
+				}
+				g.GasLimit = val
+			} else {
+				val, err := strconv.ParseUint(v, 10, 64)
+				if err != nil {
+					return err
+				}
+				g.GasLimit = val
+			}
+		}
+	}
+
+	return nil
 }
 
 // ByteSliceToSubnetEvmGenesis converts a byte slice to a SubnetEVM genesis

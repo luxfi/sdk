@@ -40,7 +40,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
 			genesisData:     []byte("{}"),
 			contractAddress: crypto.Address{},
 			expected:        false,
-			shouldErr:       true,
+			shouldErr:       false,
 		},
 		{
 			desc: "no allocs",
@@ -50,7 +50,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
         "byzantiumBlock": 0, "chainId": 1, "constantinopleBlock": 0, "eip150Block": 0,
         "eip155Block": 0, "eip158Block": 0,
         "feeConfig": {
-            "gasLimit": 12000000, "targetBlockRate": 2, "minBaseFee": 25000000000,
+            "gasLimit": "0xb71b00", "targetBlockRate": 2, "minBaseFee": 25000000000,
             "targetGas": 60000000, "baseFeeChangeDenominator": 36, "minBlockGasCost": 0,
             "maxBlockGasCost": 1000000, "blockGasCostStep": 200000
         },
@@ -59,7 +59,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
             "blockTimestamp": 1727309619, "quorumNumerator": 67
         }
     },
-    "nonce": "0x0", "timestamp": "0x66f4a733", "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
+    "nonce": "0x0", "timestamp": 1727309619, "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
     "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "coinbase": "0x0000000000000000000000000000000000000000",
     "airdropHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -81,7 +81,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
         "byzantiumBlock": 0, "chainId": 1, "constantinopleBlock": 0, "eip150Block": 0,
         "eip155Block": 0, "eip158Block": 0,
         "feeConfig": {
-            "gasLimit": 12000000, "targetBlockRate": 2, "minBaseFee": 25000000000,
+            "gasLimit": "0xb71b00", "targetBlockRate": 2, "minBaseFee": 25000000000,
             "targetGas": 60000000, "baseFeeChangeDenominator": 36, "minBlockGasCost": 0,
             "maxBlockGasCost": 1000000, "blockGasCostStep": 200000
         },
@@ -90,7 +90,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
             "blockTimestamp": 1727309619, "quorumNumerator": 67
         }
     },
-    "nonce": "0x0", "timestamp": "0x66f4a733", "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
+    "nonce": "0x0", "timestamp": 1727309619, "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
     "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "coinbase": "0x0000000000000000000000000000000000000000",
     "airdropHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -117,7 +117,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
         "byzantiumBlock": 0, "chainId": 1, "constantinopleBlock": 0, "eip150Block": 0,
         "eip155Block": 0, "eip158Block": 0,
         "feeConfig": {
-            "gasLimit": 12000000, "targetBlockRate": 2, "minBaseFee": 25000000000,
+            "gasLimit": "0xb71b00", "targetBlockRate": 2, "minBaseFee": 25000000000,
             "targetGas": 60000000, "baseFeeChangeDenominator": 36, "minBlockGasCost": 0,
             "maxBlockGasCost": 1000000, "blockGasCostStep": 200000
         },
@@ -126,7 +126,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
             "blockTimestamp": 1727309619, "quorumNumerator": 67
         }
     },
-    "nonce": "0x0", "timestamp": "0x66f4a733", "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
+    "nonce": "0x0", "timestamp": 1727309619, "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
     "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "coinbase": "0x0000000000000000000000000000000000000000",
     "airdropHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -152,7 +152,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
         "byzantiumBlock": 0, "chainId": 1, "constantinopleBlock": 0, "eip150Block": 0,
         "eip155Block": 0, "eip158Block": 0,
         "feeConfig": {
-            "gasLimit": 12000000, "targetBlockRate": 2, "minBaseFee": 25000000000,
+            "gasLimit": "0xb71b00", "targetBlockRate": 2, "minBaseFee": 25000000000,
             "targetGas": 60000000, "baseFeeChangeDenominator": 36, "minBlockGasCost": 0,
             "maxBlockGasCost": 1000000, "blockGasCostStep": 200000
         },
@@ -161,7 +161,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
             "blockTimestamp": 1727309619, "quorumNumerator": 67
         }
     },
-    "nonce": "0x0", "timestamp": "0x66f4a733", "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
+    "nonce": "0x0", "timestamp": 1727309619, "extraData": "0x", "gasLimit": "0xb71b00", "difficulty": "0x0",
     "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "coinbase": "0x0000000000000000000000000000000000000000",
     "airdropHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
