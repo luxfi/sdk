@@ -252,7 +252,7 @@ type GenesisParams struct {
 
 // GenesisParams returns the genesis parameters for the network
 func (s Network) GenesisParams() *GenesisParams {
-	// Default values based on Avalanche mainnet
+	// Default values based on Lux mainnet
 	switch s {
 	case Mainnet, Testnet:
 		return &GenesisParams{
