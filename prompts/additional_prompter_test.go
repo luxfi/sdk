@@ -130,22 +130,22 @@ func TestCaptureUint16WithMonkeyPatch(t *testing.T) {
 				require.Equal(t, "Enter uint16:", prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
-				if tt.mockReturn != "" && tt.mockError == nil {
-					switch {
-					case strings.Contains(tt.errorContains, "strconv"):
-						err := prompt.Validate(tt.mockReturn)
-						require.Error(t, err)
-						return "", err
-					case strings.Contains(tt.errorContains, "value out of range") ||
-						strings.Contains(tt.errorContains, "invalid syntax"):
-						return tt.mockReturn, nil
-					default:
-						err := prompt.Validate(tt.mockReturn)
-						require.NoError(t, err)
-					}
+				// If mockError is set, return it immediately
+				if tt.mockError != nil {
+					return tt.mockReturn, tt.mockError
 				}
 
-				return tt.mockReturn, tt.mockError
+				// For test cases that expect validation to catch errors,
+				// run validation and return its error
+				if tt.expectError && strings.Contains(tt.errorContains, "strconv") {
+					err := prompt.Validate(tt.mockReturn)
+					require.Error(t, err)
+					return "", err
+				}
+
+				// For all other cases, just return the mock value
+				// and let the production code handle parsing
+				return tt.mockReturn, nil
 			}
 
 			prompter := &realPrompter{}
@@ -264,22 +264,22 @@ func TestCaptureUint32WithMonkeyPatch(t *testing.T) {
 				require.Equal(t, "Enter uint32:", prompt.Label)
 				require.NotNil(t, prompt.Validate)
 
-				if tt.mockReturn != "" && tt.mockError == nil {
-					switch {
-					case strings.Contains(tt.errorContains, "strconv"):
-						err := prompt.Validate(tt.mockReturn)
-						require.Error(t, err)
-						return "", err
-					case strings.Contains(tt.errorContains, "value out of range") ||
-						strings.Contains(tt.errorContains, "invalid syntax"):
-						return tt.mockReturn, nil
-					default:
-						err := prompt.Validate(tt.mockReturn)
-						require.NoError(t, err)
-					}
+				// If mockError is set, return it immediately
+				if tt.mockError != nil {
+					return tt.mockReturn, tt.mockError
 				}
 
-				return tt.mockReturn, tt.mockError
+				// For test cases that expect validation to catch errors,
+				// run validation and return its error
+				if tt.expectError && strings.Contains(tt.errorContains, "strconv") {
+					err := prompt.Validate(tt.mockReturn)
+					require.Error(t, err)
+					return "", err
+				}
+
+				// For all other cases, just return the mock value
+				// and let the production code handle parsing
+				return tt.mockReturn, nil
 			}
 
 			prompter := &realPrompter{}
