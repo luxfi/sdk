@@ -6,17 +6,17 @@ require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.17.0
-	github.com/luxfi/geth v1.16.35
+	github.com/luxfi/geth v1.16.37
 	github.com/luxfi/ids v1.1.0
 	github.com/luxfi/log v1.1.22
-	github.com/luxfi/warp v0.1.2
+	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
 	github.com/zondax/ledger-go v1.0.0 // indirect
 	go.uber.org/mock v0.6.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.41.0
+	golang.org/x/crypto v0.42.0
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
 	golang.org/x/net v0.43.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/afero v1.14.0
 	golang.org/x/mod v0.27.0
-	golang.org/x/text v0.28.0
+	golang.org/x/text v0.29.0
 )
 
 require (
@@ -158,9 +158,9 @@ require (
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.7.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/term v0.34.0 // indirect
+	golang.org/x/term v0.35.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
 	gonum.org/v1/gonum v0.16.0 // indirect
 	google.golang.org/grpc v1.75.1 // indirect
