@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxWarp "github.com/luxfi/node/vms/platformvm/warp"
+	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/sdk/constants"
 	mockethclient "github.com/luxfi/sdk/mocks/ethclient"
 
@@ -1805,13 +1805,14 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	callData := []byte{1, 2, 3, 4, 5}
 	value := big.NewInt(1000000000000000000) // 1 ETH
 	sourceChainID := ids.ID{1, 2, 3}
-	unsignedMessage := luxWarp.UnsignedMessage{
-		SourceChainID: sourceChainID,
-		Payload:       []byte{4, 5, 6},
-	}
-	warpMessage := &luxWarp.Message{
-		UnsignedMessage: unsignedMessage,
-	}
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(
+		0, // NetworkID
+		sourceChainID[:],
+		[]byte{4, 5, 6},
+	)
+	require.NoError(t, err)
+	warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
+	require.NoError(t, err)
 	tests := []struct {
 		name              string
 		from              crypto.Address
@@ -2053,13 +2054,7 @@ func TestSetupProposerVM(t *testing.T) {
 	defer func() {
 		sleepBetweenRepeats = originalSleepBetweenRepeats
 	}()
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockClient := mockethclient.NewMockClient(ctrl)
-	client := Client{
-		EthClient: mockClient,
-		URL:       "http://localhost:8545",
-	}
+
 	privateKey, err := crypto.GenerateKey()
 	require.NoError(t, err)
 	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
@@ -2068,13 +2063,13 @@ func TestSetupProposerVM(t *testing.T) {
 	tests := []struct {
 		name        string
 		privateKey  string
-		setupMock   func()
+		setupMock   func(*mockethclient.MockClient)
 		expectError bool
 	}{
 		{
 			name:       "successful setup",
 			privateKey: privateKeyHex,
-			setupMock: func() {
+			setupMock: func(mockClient *mockethclient.MockClient) {
 				// Allow flexible calls since the implementation does retries and checks
 				mockClient.EXPECT().ChainID(gomock.Any()).
 					Return(chainID, nil).AnyTimes()
@@ -2106,7 +2101,7 @@ func TestSetupProposerVM(t *testing.T) {
 		{
 			name:       "error getting chain ID",
 			privateKey: privateKeyHex,
-			setupMock: func() {
+			setupMock: func(mockClient *mockethclient.MockClient) {
 				for i := 0; i < repeatsOnFailure*repeatsOnFailure; i++ {
 					mockClient.EXPECT().ChainID(gomock.Any()).
 						Return(nil, errors.New("failed to get chain ID"))
@@ -2117,7 +2112,7 @@ func TestSetupProposerVM(t *testing.T) {
 		{
 			name:       "error getting block number",
 			privateKey: privateKeyHex,
-			setupMock: func() {
+			setupMock: func(mockClient *mockethclient.MockClient) {
 				for i := 0; i < repeatsOnFailure; i++ {
 					// GetChainID succeeds
 					mockClient.EXPECT().ChainID(gomock.Any()).
@@ -2134,7 +2129,7 @@ func TestSetupProposerVM(t *testing.T) {
 		{
 			name:       "error getting nonce",
 			privateKey: privateKeyHex,
-			setupMock: func() {
+			setupMock: func(mockClient *mockethclient.MockClient) {
 				for i := 0; i < repeatsOnFailure; i++ {
 					// GetChainID succeeds
 					mockClient.EXPECT().ChainID(gomock.Any()).
@@ -2153,7 +2148,7 @@ func TestSetupProposerVM(t *testing.T) {
 		{
 			name:       "error sending transaction",
 			privateKey: privateKeyHex,
-			setupMock: func() {
+			setupMock: func(mockClient *mockethclient.MockClient) {
 				// Allow any number of these calls since retries can vary
 				mockClient.EXPECT().ChainID(gomock.Any()).
 					Return(chainID, nil).AnyTimes()
@@ -2170,13 +2165,20 @@ func TestSetupProposerVM(t *testing.T) {
 		{
 			name:        "invalid private key",
 			privateKey:  "invalid",
-			setupMock:   func() {},
+			setupMock:   func(mockClient *mockethclient.MockClient) {},
 			expectError: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setupMock()
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			mockClient := mockethclient.NewMockClient(ctrl)
+			client := Client{
+				EthClient: mockClient,
+				URL:       "http://localhost:8545",
+			}
+			tt.setupMock(mockClient)
 			err := client.SetupProposerVM(tt.privateKey)
 			if tt.expectError {
 				require.Error(t, err)

@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm/warp"
+	"github.com/luxfi/warp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,7 +30,7 @@ func TestGetWarpMessagesFromLogs(t *testing.T) {
 	chainID := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		chainID,
+		chainID[:],
 		[]byte{},
 	)
 	require.NoError(t, err)
@@ -73,7 +73,7 @@ func TestExtractWarpMessageFromLogs(t *testing.T) {
 	chainID := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		chainID,
+		chainID[:],
 		[]byte{},
 	)
 	require.NoError(t, err)
@@ -127,7 +127,7 @@ func TestExtractWarpMessageFromReceipt(t *testing.T) {
 	chainID2 := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		chainID2,
+		chainID2[:],
 		[]byte{},
 	)
 	require.NoError(t, err)
