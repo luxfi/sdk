@@ -953,3 +953,102 @@ func (*realPrompter) CaptureUint32(promptStr string) (uint32, error) {
 	}
 	return uint32(val), nil
 }
+
+// CaptureAddresses captures multiple addresses
+func (rp *realPrompter) CaptureAddresses(promptStr string) ([]crypto.Address, error) {
+	var addresses []crypto.Address
+	for {
+		address, err := rp.CaptureAddress(promptStr + " (leave empty to finish)")
+		if err != nil {
+			if err.Error() == "input is empty" || err.Error() == "EOF" {
+				break
+			}
+			return nil, err
+		}
+		addresses = append(addresses, address)
+	}
+	return addresses, nil
+}
+
+// CaptureXChainAddress captures an X-Chain address
+func (rp *realPrompter) CaptureXChainAddress(promptStr string, network models.Network) (string, error) {
+	return rp.CaptureString(promptStr)
+}
+
+// CaptureValidatedString captures a string with validation
+func (rp *realPrompter) CaptureValidatedString(promptStr string, validator func(string) error) (string, error) {
+	for {
+		str, err := rp.CaptureString(promptStr)
+		if err != nil {
+			return "", err
+		}
+		if err := validator(str); err != nil {
+			ux.Logger.PrintToUser("Invalid input: %s", err.Error())
+			continue
+		}
+		return str, nil
+	}
+}
+
+// CaptureRepoBranch captures a repository branch
+func (rp *realPrompter) CaptureRepoBranch(promptStr string, repo string) (string, error) {
+	return rp.CaptureString(promptStr)
+}
+
+// CaptureRepoFile captures a repository file
+func (rp *realPrompter) CaptureRepoFile(promptStr string, repo string, branch string) (string, error) {
+	return rp.CaptureString(promptStr)
+}
+
+// CaptureInt captures an integer with validation
+func (rp *realPrompter) CaptureInt(promptStr string, validator func(int) error) (int, error) {
+	for {
+		str, err := rp.CaptureString(promptStr)
+		if err != nil {
+			return 0, err
+		}
+		val, err := strconv.Atoi(str)
+		if err != nil {
+			ux.Logger.PrintToUser("Invalid integer: %s", str)
+			continue
+		}
+		if validator != nil {
+			if err := validator(val); err != nil {
+				ux.Logger.PrintToUser("Invalid input: %s", err.Error())
+				continue
+			}
+		}
+		return val, nil
+	}
+}
+
+// CaptureUint8 captures a uint8 value
+func (rp *realPrompter) CaptureUint8(promptStr string) (uint8, error) {
+	for {
+		str, err := rp.CaptureString(promptStr)
+		if err != nil {
+			return 0, err
+		}
+		val, err := strconv.ParseUint(str, 10, 8)
+		if err != nil {
+			ux.Logger.PrintToUser("Invalid uint8: %s", str)
+			continue
+		}
+		return uint8(val), nil
+	}
+}
+
+// CaptureFujiDuration captures a duration for Fuji
+func (rp *realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
+	return rp.CaptureDuration(promptStr)
+}
+
+// CaptureMainnetDuration captures a duration for mainnet
+func (rp *realPrompter) CaptureMainnetDuration(promptStr string) (time.Duration, error) {
+	return rp.CaptureDuration(promptStr)
+}
+
+// CaptureMainnetL1StakingDuration captures a staking duration for mainnet L1
+func (rp *realPrompter) CaptureMainnetL1StakingDuration(promptStr string) (time.Duration, error) {
+	return rp.CaptureDuration(promptStr)
+}
