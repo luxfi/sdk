@@ -42,7 +42,7 @@ func NewDefaultConfig() Config {
 		StateSyncCommitInterval:   defaultCommitInterval * 4,
 		SnapshotWait:              false,
 		RPCGasCap:                 50_000_000, // 50M Gas Limit
-		RPCTxFeeCap:               100,        // 100 AVAX
+		RPCTxFeeCap:               100,        // 100 LUX
 		MetricsExpensiveEnabled:   true,
 		// Default to no maximum API call duration
 		APIMaxDuration: timeToDuration(0),
