@@ -1,12 +1,12 @@
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 package utils
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"strconv"
 	"strings"
 
 	"github.com/luxfi/ids"
@@ -21,10 +21,54 @@ func GetDefaultBlockchainAirdropKeyName(blockchainName string) string {
 
 // Account represents an account in the genesis allocation
 type Account struct {
-	Balance *big.Int          `json:"balance"`
-	Code    []byte            `json:"code,omitempty"`
+	Balance interface{}       `json:"balance"`      // Can be string (hex) or number
+	Code    interface{}       `json:"code,omitempty"` // Can be string (hex) or []byte
 	Storage map[string]string `json:"storage,omitempty"`
-	Nonce   uint64            `json:"nonce,omitempty"`
+	Nonce   interface{}       `json:"nonce,omitempty"` // Can be string (hex) or uint64
+}
+
+// GetBalance returns the balance as a big.Int
+func (a *Account) GetBalance() *big.Int {
+	if a.Balance == nil {
+		return big.NewInt(0)
+	}
+	switch v := a.Balance.(type) {
+	case string:
+		// Handle hex string
+		balance := new(big.Int)
+		if strings.HasPrefix(v, "0x") {
+			balance.SetString(v[2:], 16)
+		} else {
+			balance.SetString(v, 10)
+		}
+		return balance
+	case float64:
+		return big.NewInt(int64(v))
+	case int64:
+		return big.NewInt(v)
+	default:
+		return big.NewInt(0)
+	}
+}
+
+// GetCode returns the code as a byte slice
+func (a *Account) GetCode() []byte {
+	if a.Code == nil {
+		return nil
+	}
+	switch v := a.Code.(type) {
+	case string:
+		// Handle hex string
+		if strings.HasPrefix(v, "0x") {
+			code, _ := hex.DecodeString(v[2:])
+			return code
+		}
+		return []byte(v)
+	case []byte:
+		return v
+	default:
+		return nil
+	}
 }
 
 // UnmarshalJSON custom unmarshaler for Account to handle hex string balances
@@ -69,14 +113,16 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 type SubnetEvmGenesis struct {
 	Config     map[string]interface{} `json:"config"`
 	Alloc      map[string]Account     `json:"alloc"`
-	Timestamp  uint64                 `json:"timestamp,omitempty"`
-	GasLimit   uint64                 `json:"gasLimit"`
+	Timestamp  interface{}            `json:"timestamp,omitempty"` // Can be string (hex) or uint64
+	GasLimit   interface{}            `json:"gasLimit"`             // Can be string (hex) or uint64
 	Difficulty string                 `json:"difficulty,omitempty"`
 	MixHash    string                 `json:"mixHash,omitempty"`
 	Coinbase   string                 `json:"coinbase,omitempty"`
 	Number     string                 `json:"number,omitempty"`
 	GasUsed    string                 `json:"gasUsed,omitempty"`
 	ParentHash string                 `json:"parentHash,omitempty"`
+	Nonce      string                 `json:"nonce,omitempty"`
+	ExtraData  string                 `json:"extraData,omitempty"`
 }
 
 // UnmarshalJSON custom unmarshaler to handle hex string or numeric values
