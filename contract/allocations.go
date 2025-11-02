@@ -1,4 +1,4 @@
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 package contract
 
@@ -80,7 +80,8 @@ func GetBlockchainAirdropKeyInfo(
 	maxBalanceAddr := ""
 	maxBalancePrivKey := ""
 	for address, alloc := range genesis.Alloc {
-		if alloc.Balance == nil {
+		balance := alloc.GetBalance()
+		if balance == nil || balance.Cmp(big.NewInt(0)) == 0 {
 			continue
 		}
 		// address is already a string
@@ -88,8 +89,8 @@ func GetBlockchainAirdropKeyInfo(
 		if err != nil {
 			return "", "", "", err
 		}
-		if found && alloc.Balance.Cmp(maxBalance) > 0 {
-			maxBalance = alloc.Balance
+		if found && balance.Cmp(maxBalance) > 0 {
+			maxBalance = balance
 			maxBalanceKeyName = keyName
 			maxBalanceAddr = addressStr
 			maxBalancePrivKey = privKey
@@ -181,7 +182,7 @@ func sumGenesisSupply(
 		return sum, err
 	}
 	for _, allocation := range genesis.Alloc {
-		sum.Add(sum, allocation.Balance)
+		sum.Add(sum, allocation.GetBalance())
 	}
 	return sum, nil
 }
@@ -222,7 +223,7 @@ func getGenesisNativeMinterAdmin(
 		// The native minter precompile is at a specific address
 		nativeMinterAddress := common.HexToAddress("0x0200000000000000000000000000000000000001")
 
-		if alloc, exists := genesis.Alloc[nativeMinterAddress.Hex()]; exists && len(alloc.Code) > 0 {
+		if alloc, exists := genesis.Alloc[nativeMinterAddress.Hex()]; exists && len(alloc.GetCode()) > 0 {
 			// Native minter is configured
 			// Look for admin addresses in the genesis state
 			for addr := range genesis.Alloc {
@@ -331,11 +332,18 @@ func ContractAddressIsInGenesisData(
 	if err != nil {
 		return false, err
 	}
-	// Convert contractAddress to string for comparison (lowercase hex without 0x prefix)
+	// Check if it's a valid EVM genesis
+	if genesis.Config == nil {
+		return false, fmt.Errorf("invalid EVM genesis: missing config")
+	}
+	// Convert contractAddress to string for comparison
+	// Try both with and without 0x prefix
 	contractAddrStr := fmt.Sprintf("%x", contractAddress.Bytes())
+	contractAddrStrWithPrefix := fmt.Sprintf("0x%x", contractAddress.Bytes())
 	for address, allocation := range genesis.Alloc {
-		if address == contractAddrStr {
-			return len(allocation.Code) > 0, nil
+		if address == contractAddrStr || address == contractAddrStrWithPrefix {
+			code := allocation.GetCode()
+			return len(code) > 0, nil
 		}
 	}
 	return false, nil
