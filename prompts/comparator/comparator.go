@@ -1,4 +1,4 @@
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package comparator
@@ -42,6 +42,7 @@ func (c *Comparator) Validate(val uint64) error {
 			return fmt.Errorf("the value must be different than %s (%d)", c.Label, c.Value)
 		}
 	default:
+		// Unknown comparator types pass through without validation
 		return nil
 	}
 	return nil
