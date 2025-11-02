@@ -1,4 +1,4 @@
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 package keychain
 
@@ -6,78 +6,48 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/crypto/keychain"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/ledger-lux-go/keychain"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
 	"golang.org/x/exp/maps"
 )
 
-// ledgerAdapter wraps the SDK's LedgerDevice to implement the keychain.Ledger interface
+// ledgerAdapter adapts sdk/ledger.LedgerDevice to ledger-lux-go/keychain.Ledger interface
 type ledgerAdapter struct {
 	device *ledger.LedgerDevice
 }
 
-// Version implements keychain.Ledger
-func (la *ledgerAdapter) Version() (*version.Semantic, error) {
-	return la.device.Version()
+func (la *ledgerAdapter) Version() (major, minor, patch uint32, err error) {
+	v, err := la.device.Version()
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	return uint32(v.Major), uint32(v.Minor), uint32(v.Patch), nil
 }
 
-// Address implements keychain.Ledger
 func (la *ledgerAdapter) Address(displayHRP string, addressIndex uint32) (ids.ShortID, error) {
 	return la.device.Address(displayHRP, addressIndex)
 }
 
-// SignHash implements keychain.Ledger - signs for a single index
-func (la *ledgerAdapter) SignHash(hash []byte, addressIndex uint32) ([]byte, error) {
-	signatures, err := la.device.SignHash(hash, []uint32{addressIndex})
-	if err != nil {
-		return nil, err
-	}
-	if len(signatures) == 0 {
-		return nil, fmt.Errorf("no signature returned")
-	}
-	return signatures[0], nil
+func (la *ledgerAdapter) Addresses(addressIndices []uint32) ([]ids.ShortID, error) {
+	return la.device.Addresses(addressIndices)
 }
 
-// Sign implements keychain.Ledger - signs for a single index
-func (la *ledgerAdapter) Sign(hash []byte, addressIndex uint32) ([]byte, error) {
-	signatures, err := la.device.Sign(hash, []uint32{addressIndex})
-	if err != nil {
-		return nil, err
-	}
-	if len(signatures) == 0 {
-		return nil, fmt.Errorf("no signature returned")
-	}
-	return signatures[0], nil
+func (la *ledgerAdapter) SignHash(hash []byte, addressIndices []uint32) ([][]byte, error) {
+	return la.device.SignHash(hash, addressIndices)
 }
 
-// SignTransaction implements keychain.Ledger - signs for multiple indices
-func (la *ledgerAdapter) SignTransaction(rawUnsignedHash []byte, addressIndices []uint32) ([][]byte, error) {
-	return la.device.Sign(rawUnsignedHash, addressIndices)
+func (la *ledgerAdapter) Sign(unsignedTxBytes []byte, addressIndices []uint32) ([][]byte, error) {
+	return la.device.Sign(unsignedTxBytes, addressIndices)
 }
 
-// GetAddresses implements keychain.Ledger
-func (la *ledgerAdapter) GetAddresses(addressIndices []uint32) ([]ids.ShortID, error) {
-	addrs := make([]ids.ShortID, len(addressIndices))
-	for i, idx := range addressIndices {
-		addr, err := la.device.Address("", idx) // Empty HRP should use default
-		if err != nil {
-			return nil, err
-		}
-		addrs[i] = addr
-	}
-	return addrs, nil
-}
-
-// Disconnect implements keychain.Ledger
 func (la *ledgerAdapter) Disconnect() error {
 	return la.device.Disconnect()
 }
 
 type Keychain struct {
-	keychain.Keychain
+	*keychain.LedgerKeychain
 	network network.Network
 	Ledger  *Ledger
 }
@@ -152,8 +122,8 @@ func NewKeychain(
 	// Create nil keychain for now
 	// TODO: Implement proper keychain loading from key path
 	kc := Keychain{
-		Keychain: nil,
-		network:  network,
+		LedgerKeychain: nil,
+		network:        network,
 	}
 	return &kc, nil
 }
@@ -166,13 +136,12 @@ func (kc *Keychain) AddLedgerIndices(indices []uint32) error {
 	if kc.LedgerEnabled() {
 		kc.Ledger.LedgerIndices = utils.Unique(append(kc.Ledger.LedgerIndices, indices...))
 		utils.Uint32Sort(kc.Ledger.LedgerIndices)
-		// Create a ledger adapter that implements the keychain.Ledger interface
-		ledgerAdapter := &ledgerAdapter{device: kc.Ledger.LedgerDevice}
-		newKc, err := keychain.NewLedgerKeychain(ledgerAdapter, kc.Ledger.LedgerIndices)
+		adapter := &ledgerAdapter{device: kc.Ledger.LedgerDevice}
+		newKc, err := keychain.NewLedgerKeychainFromIndices(adapter, kc.Ledger.LedgerIndices)
 		if err != nil {
 			return err
 		}
-		kc.Keychain = newKc
+		kc.LedgerKeychain = newKc
 		return nil
 	}
 	return fmt.Errorf("keychain is not ledger enabled")
