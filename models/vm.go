@@ -1,4 +1,4 @@
-// Copyright (C) 2022, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2022, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 package models
 
@@ -7,7 +7,7 @@ import "github.com/luxfi/sdk/constants"
 type VMType string
 
 const (
-	EVM         = "EVM"
+	EVM         = "Lux EVM"
 	SubnetEvm   = EVM // Alias for backward compatibility
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
