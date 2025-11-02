@@ -2,27 +2,6 @@ module github.com/luxfi/sdk
 
 go 1.25.1
 
-// Local development replacements
-replace (
-	github.com/luxfi/consensus => ../consensus
-	github.com/luxfi/coreth => ../coreth
-	github.com/luxfi/crypto => ../crypto
-	github.com/luxfi/database => ../database
-	github.com/luxfi/evm => ../evm
-	github.com/luxfi/geth => ../geth
-	github.com/luxfi/ids => ../ids
-	github.com/luxfi/ledger => ../ledger
-	github.com/luxfi/ledger-lux-go => ../ledger-lux-go
-	github.com/luxfi/log => ../log
-	github.com/luxfi/lpm => ../lpm
-	github.com/luxfi/metric => ../metric
-	github.com/luxfi/netrunner-sdk => ../netrunner-sdk
-	github.com/luxfi/node => ../node
-	github.com/luxfi/simplex => github.com/luxfi/bft v0.1.0
-	github.com/luxfi/trace => ../trace
-	github.com/luxfi/warp => ../warp
-)
-
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
@@ -62,7 +41,6 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/consensus v1.2.14
-	github.com/luxfi/ledger v0.0.0-00010101000000-000000000000
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
