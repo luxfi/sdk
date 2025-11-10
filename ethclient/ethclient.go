@@ -102,6 +102,7 @@ type Client interface {
 	NonceAtHash(ctx context.Context, account common.Address, blockHash common.Hash) (uint64, error)
 	FilterLogs(context.Context, ethereum.FilterQuery) ([]types.Log, error)
 	SubscribeFilterLogs(context.Context, ethereum.FilterQuery, chan<- types.Log) (ethereum.Subscription, error)
+	SubscribeTransactionReceipts(context.Context, *ethereum.TransactionReceiptsQuery, chan<- []*types.Receipt) (ethereum.Subscription, error)
 	AcceptedCodeAt(context.Context, common.Address) ([]byte, error)
 	AcceptedNonceAt(context.Context, common.Address) (uint64, error)
 	AcceptedCallContract(context.Context, ethereum.CallMsg) ([]byte, error)
@@ -585,6 +586,15 @@ func (ec *client) SubscribeFilterLogs(ctx context.Context, q ethereum.FilterQuer
 		// Defensively prefer returning nil interface explicitly on error-path, instead
 		// of letting default golang behavior wrap it with non-nil interface that stores
 		// nil concrete type value.
+		return nil, err
+	}
+	return sub, nil
+}
+
+// SubscribeTransactionReceipts subscribes to notifications about transaction receipts.
+func (ec *client) SubscribeTransactionReceipts(ctx context.Context, q *ethereum.TransactionReceiptsQuery, ch chan<- []*types.Receipt) (ethereum.Subscription, error) {
+	sub, err := ec.c.EthSubscribe(ctx, ch, "transactionReceipts", q)
+	if err != nil {
 		return nil, err
 	}
 	return sub, nil

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/consensus/uptime"
+	"github.com/luxfi/consensus/validator/uptime"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/ids"
 )

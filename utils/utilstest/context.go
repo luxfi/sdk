@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/consensustest"
-	"github.com/luxfi/consensus/validators"
-	"github.com/luxfi/consensus/validators/validatorstest"
+	"github.com/luxfi/consensus/test/helpers"
+	"github.com/luxfi/consensus/validator"
+	"github.com/luxfi/consensus/validator/validatorstest"
 	"github.com/luxfi/ids"
 )
 
@@ -22,9 +22,12 @@ type testValidatorState struct {
 	*validatorstest.State
 }
 
-func (t *testValidatorState) GetCurrentHeight() (uint64, error) {
-	// Call GetCurrentHeightNoContext which implements ValidatorState interface
-	return 0, nil // TODO: Fix GetCurrentHeightNoContext
+func (t *testValidatorState) GetCurrentHeight(ctx context.Context) (uint64, error) {
+	// Call GetCurrentHeightF if available, otherwise return 0
+	if t.State != nil && t.State.GetCurrentHeightF != nil {
+		return t.State.GetCurrentHeightF(ctx)
+	}
+	return 0, nil
 }
 
 func (t *testValidatorState) GetMinimumHeight(ctx context.Context) (uint64, error) {

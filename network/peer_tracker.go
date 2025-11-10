@@ -83,7 +83,14 @@ func (p *peerTracker) shouldTrackNewPeer() bool {
 // getResponsivePeer returns a random [ids.NodeID] of a peer that has responded
 // to a request.
 func (p *peerTracker) getResponsivePeer() (ids.NodeID, utils_math.Averager, bool) {
-	nodeID, ok := p.responsivePeers.Peek()
+	// Get an arbitrary element from the set (without removing it)
+	var nodeID ids.NodeID
+	var ok bool
+	for id := range p.responsivePeers {
+		nodeID = id
+		ok = true
+		break
+	}
 	if !ok {
 		return ids.NodeID{}, nil, false
 	}
@@ -134,7 +141,11 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 		return nodeID, true
 	}
 	// if no nodes found in the bandwidth heap, return a tracked node at random
-	return p.trackedPeers.Peek()
+	// Get an arbitrary element from the tracked peers set
+	for id := range p.trackedPeers {
+		return id, true
+	}
+	return ids.NodeID{}, false
 }
 
 func (p *peerTracker) TrackPeer(nodeID ids.NodeID) {

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/luxfi/consensus"
-	luxvalidators "github.com/luxfi/consensus/validators"
+	luxvalidators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/database"
 	validators "github.com/luxfi/evm/plugin/evm/validators/state"
 	stateinterfaces "github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
@@ -117,7 +117,7 @@ func (m *manager) sync(ctx context.Context) error {
 	// get current validator set
 	validatorState := consensus.GetValidatorState(m.chainCtx)
 	subnetID := consensus.GetSubnetID(m.chainCtx)
-	currentHeight, err := validatorState.GetCurrentHeight()
+	currentHeight, err := validatorState.GetCurrentHeight(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get current height: %w", err)
 	}

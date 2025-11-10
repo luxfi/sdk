@@ -101,7 +101,7 @@ func (addressedPayloadHandler) packFailed() []byte {
 }
 
 func (addressedPayloadHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
-	addressedPayload, err := payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
+	addressedPayload, err := payload.Parse(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidAddressedPayload, err)
 	}
@@ -127,7 +127,7 @@ func (blockHashHandler) packFailed() []byte {
 }
 
 func (blockHashHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
-	parsedPayload, err := payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
+	parsedPayload, err := payload.Parse(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidBlockHashPayload, err)
 	}

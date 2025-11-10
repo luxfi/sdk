@@ -1,4 +1,4 @@
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries Inc All rights reserved.
 // Extended Post-Quantum Cryptography Precompile Implementation
 
 package pqcrypto

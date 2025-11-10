@@ -105,10 +105,10 @@ type Config struct {
 	ReadOnly       bool   // Flag whether the database is opened in read only mode.
 }
 
-func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
-	// DBOverride is a type alias for Database (not *Database), so we dereference
-	return *triedb.NewDatabase(diskdb, nil)
-}
+// func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
+// 	// DBOverride is a type alias for Database (not *Database), so we dereference
+// 	return *triedb.NewDatabase(diskdb, nil)
+// }
 
 // sanitize checks the provided user configurations and changes anything that's
 // unreasonable or unworkable.
@@ -251,13 +251,13 @@ func (r *layerReader) Storage(accountHash, storageHash common.Hash) ([]byte, err
 }
 
 // Reader retrieves a layer belonging to the given state root.
-func (db *Database) Reader(root common.Hash) (database.Reader, error) {
-	l := db.tree.get(root)
-	if l == nil {
-		return nil, fmt.Errorf("state %#x is not available", root)
-	}
-	return &layerReader{layer: l}, nil
-}
+// func (db *Database) Reader(root common.Hash) (database.Reader, error) {
+// 	l := db.tree.get(root)
+// 	if l == nil {
+// 		return nil, fmt.Errorf("state %#x is not available", root)
+// 	}
+// 	return &layerReader{layer: l}, nil
+// }
 
 // Update adds a new layer into the tree, if that can be linked to an existing
 // old parent. It is disallowed to insert a disk layer (the origin of all). Apart

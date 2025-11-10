@@ -34,7 +34,7 @@ func (b *backend) Verify(ctx context.Context, unsignedMessage *luxWarp.UnsignedM
 		return fmt.Errorf("failed to get message %s: %w", messageID, err)
 	}
 
-	parsed, err := payload.ParsePayload(unsignedMessage.Payload)
+	parsed, err := payload.Parse(unsignedMessage.Payload)
 	if err != nil {
 		b.stats.IncMessageParseFail()
 		return fmt.Errorf("failed to parse payload: %w", err)
@@ -54,13 +54,9 @@ func (b *backend) Verify(ctx context.Context, unsignedMessage *luxWarp.UnsignedM
 // verifyBlockMessage returns nil if blockHashPayload contains the ID
 // of an accepted block indicating it should be signed by the VM.
 func (b *backend) verifyBlockMessage(ctx context.Context, blockHashPayload *payload.Hash) error {
-	// Convert bytes to ids.ID
-	blockID, err := ids.ToID(blockHashPayload.Hash)
-	if err != nil {
-		b.stats.IncBlockValidationFail()
-		return fmt.Errorf("invalid block ID: %w", err)
-	}
-	_, err = b.blockClient.GetAcceptedBlock(ctx, blockID)
+	// blockHashPayload.Hash is already an ids.ID
+	blockID := blockHashPayload.Hash
+	_, err := b.blockClient.GetAcceptedBlock(ctx, blockID)
 	if err != nil {
 		b.stats.IncBlockValidationFail()
 		return fmt.Errorf("failed to get block %s: %w", blockID, err)
