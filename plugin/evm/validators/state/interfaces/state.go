@@ -4,7 +4,7 @@
 package interfaces
 
 import (
-	"github.com/luxfi/consensus/uptime"
+	"github.com/luxfi/consensus/validator/uptime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 )

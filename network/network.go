@@ -16,7 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	nodeCore "github.com/luxfi/consensus/engine/core"
-	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/network/p2p"

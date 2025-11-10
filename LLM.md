@@ -42,7 +42,7 @@ The module is being updated to use:
 4. **warp v1.16.15-lux** - Tagged to match node version
 
 ### Main Compatibility Issues
-1. **ID Types**: Node expects `node/ids.NodeID` but consensus uses `luxfi/ids.NodeID`
+1. **ID Types**: Node expects `ids.NodeID` but consensus uses `luxfi/ids.NodeID`
 2. **Block Interface**: Mismatch between `consensus/chain.Block` and `node/consensus/chain.Block`
 3. **Logger Interface**: luxfi/log.Logger vs node/utils/logging.Logger incompatibility
 4. **AppError Types**: consensus/core.AppError vs node/snow/engine/common.AppError

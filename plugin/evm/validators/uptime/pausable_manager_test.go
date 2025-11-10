@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/consensus/uptime"
+	"github.com/luxfi/consensus/validator/uptime"
 	"github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/timer/mockable"

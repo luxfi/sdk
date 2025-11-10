@@ -17,8 +17,6 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 
-	// consensusInterfaces "github.com/luxfi/consensus/interfaces" // not needed since using snow.State
-	"github.com/luxfi/consensus/snow"
 	"github.com/luxfi/node/network/p2p"
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"

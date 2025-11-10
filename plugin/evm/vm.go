@@ -82,8 +82,7 @@ import (
 	nodeConsensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	nodeblock "github.com/luxfi/consensus/engine/chain/block"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
-	nodeRouter "github.com/luxfi/consensus/router"
-	nodeConsensus "github.com/luxfi/consensus/snow"
+	nodeConsensus "github.com/luxfi/consensus"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
@@ -969,7 +968,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 		UnverifiedCacheSize: unverifiedCacheSize,
 		BytesToIDCacheSize:  bytesToIDCacheSize,
 		// Our vm methods return *Block which needs to implement the node's chain.Block
-		GetBlock: func(ctx context.Context, id ids.ID) (nodechain.Block, error) {
+		GetBlock: func(ctx context.Context, id ids.ID) (nodeblock.Block, error) {
 			// getBlock returns our block
 			ethBlock := vm.blockChain.GetBlockByHash(common.Hash(id))
 			if ethBlock == nil {
@@ -977,7 +976,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		UnmarshalBlock: func(ctx context.Context, b []byte) (nodechain.Block, error) {
+		UnmarshalBlock: func(ctx context.Context, b []byte) (nodeblock.Block, error) {
 			// parseBlock returns our block
 			ethBlock := &types.Block{}
 			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
@@ -985,7 +984,7 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			}
 			return vm.newBlock(ethBlock), nil
 		},
-		BuildBlock: func(ctx context.Context) (nodechain.Block, error) {
+		BuildBlock: func(ctx context.Context) (nodeblock.Block, error) {
 			// Call VM's buildBlock directly which returns the right type
 			return vm.buildBlock(ctx)
 		},
@@ -1013,17 +1012,17 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state nodeConsensus.State) error {
+func (vm *VM) SetState(_ context.Context, state commonEng.VMState) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 
 	switch state {
-	case nodeConsensus.StateSyncing:
+	case commonEng.VMStateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
-	case nodeConsensus.Bootstrapping:
+	case commonEng.VMBootstrapping:
 		return vm.onBootstrapStarted()
-	case nodeConsensus.NormalOp:
+	case commonEng.VMNormalOp:
 		return vm.onNormalOperationsStarted()
 	default:
 		return fmt.Errorf("unknown state: %v", state)
@@ -1168,8 +1167,10 @@ func (vm *VM) onNormalOperationsStarted() error {
 	if vm.ethTxPullGossiper == nil && p2pValidators != nil {
 		// Only create pull gossiper if we have P2P validators
 		// Use VM's logger instead of consensus logger
+		// Convert to node logging interface
+		nodeLogger := gossipHandler.NewLoggerAdapter(vm.logger.Logger)
 		ethTxPullGossiper := gossip.NewPullGossiper[*GossipEthTx](
-			vm.logger,
+			nodeLogger,
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipClient,
@@ -1186,15 +1187,17 @@ func (vm *VM) onNormalOperationsStarted() error {
 
 	// Get logger for gossip routines
 	// Use VM's logger for gossip routines
+	// Convert to node logging interface
+	nodeLogger := gossipHandler.NewLoggerAdapter(vm.logger.Logger)
 
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, vm.logger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
+		gossip.Every(ctx, nodeLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 	vm.shutdownWg.Add(1)
 	go func() {
-		gossip.Every(ctx, vm.logger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
+		gossip.Every(ctx, nodeLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
 		vm.shutdownWg.Done()
 	}()
 
@@ -1220,7 +1223,7 @@ func (vm *VM) setAppRequestHandlers() {
 	vm.SetRequestHandler(networkHandler)
 }
 
-func (vm *VM) WaitForEvent(ctx context.Context) (nodeRouter.Message, error) {
+func (vm *VM) WaitForEvent(ctx context.Context) (interface{}, error) {
 	vm.builderLock.Lock()
 	builder := vm.builder
 	vm.builderLock.Unlock()

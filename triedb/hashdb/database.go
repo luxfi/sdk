@@ -115,8 +115,9 @@ type Config struct {
 	ReferenceRootAtomicallyOnUpdate bool   // Whether to reference the root node on update
 }
 
-func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
-	// DBOverride is a type alias for Database (not *Database), so we dereference
+// TODO: DBOverride type not defined in triedb
+// func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
+// 	// DBOverride is a type alias for Database (not *Database), so we dereference
 	return *triedb.NewDatabase(diskdb, nil)
 }
 

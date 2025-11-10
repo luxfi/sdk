@@ -1,4 +1,4 @@
-// Copyright (C) 2025, Lux Industries Inc. All rights reserved.
+// Copyright (C) 2025, Lux Industries Inc All rights reserved.
 // Quasar Consensus Precompiles for Hyper-Efficient On-Chain Verification
 
 package quasar

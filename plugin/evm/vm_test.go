@@ -55,12 +55,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/chains/atomic"
 
-	// "github.com/luxfi/consensus/chain" // not used after fixes
-
 	nodeConsensus "github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/snow"
-
-	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
 
 	"github.com/luxfi/consensus/utils/set"
 	luxdconstants "github.com/luxfi/node/utils/constants"

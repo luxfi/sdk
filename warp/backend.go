@@ -109,7 +109,7 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 			return fmt.Errorf("wrong source chain ID at index %d", i)
 		}
 
-		_, err = payload.ParsePayload(unsignedMsg.Payload)
+		_, err = payload.Parse(unsignedMsg.Payload)
 		if err != nil {
 			return fmt.Errorf("%w at index %d as AddressedCall: %w", errParsingOffChainMessage, i, err)
 		}
@@ -157,7 +157,7 @@ func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxW
 func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error) {
 	log.Debug("Getting block from backend", "blockID", blockID)
 
-	blockHashPayload, err := payload.NewHash(blockID[:])
+	blockHashPayload, err := payload.NewHash(blockID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}

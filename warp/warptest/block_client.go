@@ -10,7 +10,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/luxfi/consensus/choices"
+	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/consensus/protocol/chain"
 	"github.com/luxfi/ids"
 )

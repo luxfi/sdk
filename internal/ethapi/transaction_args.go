@@ -37,7 +37,7 @@ import (
 	"math/big"
 
 	"github.com/holiman/uint256"
-	"github.com/luxfi/crypto/kzg4844"
+	"github.com/luxfi/geth/crypto/kzg4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/rpc"

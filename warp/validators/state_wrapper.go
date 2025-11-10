@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/luxfi/consensus"
-	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/ids"
 )
 
@@ -23,8 +23,8 @@ func NewConsensusStateWrapper(vs consensus.ValidatorState) *ConsensusStateWrappe
 
 // GetCurrentHeight implements validators.State
 func (w *ConsensusStateWrapper) GetCurrentHeight(ctx context.Context) (uint64, error) {
-	// consensus.ValidatorState doesn't use context for GetCurrentHeight
-	return w.vs.GetCurrentHeight()
+	// Pass context to consensus.ValidatorState.GetCurrentHeight
+	return w.vs.GetCurrentHeight(ctx)
 }
 
 // GetValidatorSet implements validators.State
@@ -61,7 +61,7 @@ func (w *ConsensusStateWrapper) GetSubnetID(ctx context.Context, chainID ids.ID)
 // GetCurrentValidatorSet implements validators.State
 func (w *ConsensusStateWrapper) GetCurrentValidatorSet(ctx context.Context, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 	// Get current height and use GetValidatorSet
-	height, err := w.vs.GetCurrentHeight()
+	height, err := w.vs.GetCurrentHeight(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -165,7 +165,7 @@ func TestSendWarpMessage(t *testing.T) {
 
 				unsignedWarpMsg, err := UnpackSendWarpEventDataToMessage(log.Data)
 				require.NoError(t, err)
-				parsedPayload, err := payload.ParsePayload(unsignedWarpMsg.Payload)
+				parsedPayload, err := payload.Parse(unsignedWarpMsg.Payload)
 				require.NoError(t, err)
 				addressedPayload, ok := parsedPayload.(*payload.AddressedCall)
 				require.True(t, ok, "payload should be AddressedCall")
