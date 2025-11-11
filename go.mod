@@ -2,9 +2,30 @@ module github.com/luxfi/sdk
 
 go 1.25.1
 
+// Local development - comment out for releases
+replace (
+	github.com/luxfi/bft => ../bft
+	github.com/luxfi/consensus => ../consensus
+	github.com/luxfi/crypto => ../crypto
+	github.com/luxfi/database => ../database
+	github.com/luxfi/evm => ../evm
+	github.com/luxfi/geth => ../geth
+	github.com/luxfi/ids => ../ids
+	github.com/luxfi/ledger => ../ledger
+	github.com/luxfi/log => ../log
+	github.com/luxfi/lpm => ../lpm
+	github.com/luxfi/metric => ../metric
+	github.com/luxfi/netrunner => ../netrunner
+	github.com/luxfi/netrunner-sdk => ../netrunner-sdk
+	github.com/luxfi/node => ../node
+	github.com/luxfi/trace => ../trace
+	github.com/luxfi/warp => ../warp
+)
+
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
+	github.com/luxfi/bft v0.1.2
 	github.com/luxfi/crypto v1.3.2
 	github.com/luxfi/evm v0.7.8-lux.9
 	github.com/luxfi/geth v1.16.34
@@ -41,6 +62,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/consensus v1.2.14
+	github.com/luxfi/ledger v0.8.0
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9

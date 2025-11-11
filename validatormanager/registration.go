@@ -280,7 +280,7 @@ func GetRegisterL1ValidatorMessage(
 		}
 	} else {
 		payload := registerSubnetValidatorUnsignedMessage.Payload
-		parsedPayload, err := warpPayload.ParsePayload(payload)
+		parsedPayload, err := warpPayload.Parse(payload)
 		if err != nil {
 			return nil, ids.Empty, fmt.Errorf("failed to parse payload: %w", err)
 		}
