@@ -225,23 +225,68 @@ Successfully implemented and verified readonly database access for legacy Pebble
 - **Chain ID**: 96369
 - **Purpose**: Legacy subnet-evm data for regenesis export
 
-### Regenesis Architecture
-The complete regenesis workflow is:
-1. Deploy EVM instance with readonly database access (IN PROGRESS)
-2. Expose RPC endpoint for legacy blockchain
-3. Export data using `lux export` command
-4. Import to new C-Chain using genesis configuration
-5. Verify final state matches original chain
+### Correct Migration Approach
 
-### Configuration Files
-- `chain-config-readonly.json` - Chain-specific configuration with database path
-- `node-config-readonly.json` - Node-level configuration for local network
-- `deploy-readonly-evm.sh` - Deployment script for readonly instance
-- `READONLY_DEPLOYMENT.md` - Complete deployment documentation
+**IMPORTANT**: Do NOT manually migrate database files between formats.
+
+The proper workflow using lux-cli and VM interfaces:
+1. **Deploy L2**: Use `lux l2 create` and `lux l2 deploy` to create a Net
+2. **Export Data**: Use VM's exporter interface via lux-cli export commands
+3. **Import to C-Chain**: Use VM's importer interface via `lux migrate import`
+
+### VM Importer/Exporter Interface
+
+Each VM must implement:
+- **Exporter Interface**: Serialize blockchain state to portable format
+- **Importer Interface**: Deserialize and load blockchain state
+- **Format**: VM-agnostic, standardized data structure
+
+### Current lux-cli Status
+
+The `lux migrate` command exists but is incomplete:
+- `lux migrate prepare` - Placeholder, needs migration-tools implementation
+- `lux migrate import` - Not yet implemented
+- `lux migrate bootstrap` - Partial implementation
+- `lux migrate validate` - Not implemented
+
+### Implementation Needed
+
+To complete the migration workflow:
+
+1. **VM Exporter** (`plugin/evm/export.go`):
+   ```go
+   func (vm *VM) Export(ctx context.Context) ([]byte, error) {
+       // Export blockchain state to standardized format
+       // Include: genesis, blocks, state trie, metadata
+   }
+   ```
+
+2. **VM Importer** (`plugin/evm/import.go`):
+   ```go
+   func (vm *VM) Import(ctx context.Context, data []byte) error {
+       // Import blockchain state from standardized format
+       // Validate and load into C-Chain database
+   }
+   ```
+
+3. **lux-cli Migration Tools**:
+   - Implement `migration-tools/migrate.go` that calls VM exporter/importer
+   - Complete `lux migrate prepare` to use VM interfaces
+   - Implement `lux migrate import` for C-Chain import
+
+### Architecture Principles
+
+- ✅ Use VM's native export/import interfaces
+- ✅ Let each VM handle its own data format
+- ✅ Generic migration via standardized interfaces
+- ❌ NO manual database file copying
+- ❌ NO format-specific conversion scripts
+- ❌ NO direct database manipulation outside VM
 
 ### Next Steps
-1. Configure node to load specific blockchain (dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ)
-2. Start node with readonly EVM plugin
-3. Verify RPC endpoint returns correct block height
-4. Test `lux export` command against readonly instance
-5. Complete end-to-end regenesis workflow
+
+1. Implement VM exporter/importer interface in EVM
+2. Create migration-tools in lux-cli that use these interfaces
+3. Complete `lux migrate` command implementation
+4. Test full export → import workflow
+5. Verify C-Chain can serve exported data via RPC
