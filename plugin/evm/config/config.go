@@ -101,6 +101,7 @@ type Config struct {
 	AdminAPIEnabled      bool   `json:"admin-api-enabled"`
 	AdminAPIDir          string `json:"admin-api-dir"`
 	WarpAPIEnabled       bool   `json:"warp-api-enabled"`
+	MigrateAPIEnabled    bool   `json:"migrate-api-enabled"`
 
 	// EnabledEthAPIs is a list of Ethereum services that should be enabled
 	// If none is specified, then we use the default list [defaultEnabledAPIs]
