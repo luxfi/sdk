@@ -369,3 +369,43 @@ node/cmd/chainmigrate/chainmigrate \
 1. Complete full EVM integration (initialize VM with readonly DB)
 2. Implement importer.go for destination chain
 3. Test end-to-end export → import workflow
+
+## Integration Approach - CORRECTED (2025-11-23)
+
+### ✅ DRY Principle: All tooling in lux-cli
+
+**Previous Approach (WRONG):** ❌
+- Created ad-hoc cmd/chainmigrate binary in node repo
+- Used symlinks to bridge binaries
+- Scattered tooling across repos
+
+**Current Approach (CORRECT):** ✅
+- All migration logic in lux-cli directly
+- Uses ChainExporter interface as Go import
+- No external binaries
+- No symlinks  
+- Single source of truth: lux-cli
+
+**Implementation:**
+```go
+// lux-cli/cmd/migratecmd/utils.go
+import "github.com/luxfi/node/chainmigrate"
+
+func runMigration(sourceDB, destDB string, chainID int64) error {
+    config := chainmigrate.ExporterConfig{
+        ChainType:    chainmigrate.ChainTypeSubnetEVM,
+        DatabasePath: sourceDB,
+        DatabaseType: "pebble",
+    }
+    // Use ChainExporter interface directly
+    // exporter := evm.NewExporter(vm)
+    // exporter.ExportBlocks(ctx, start, end)
+}
+```
+
+**Benefits:**
+- Single codebase for all CLI tooling
+- No dependency on external binaries
+- Clean Go imports and interfaces
+- Easy to test and maintain
+- Follows DRY principle
