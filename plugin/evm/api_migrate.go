@@ -25,13 +25,13 @@ func NewMigrateAPI(vm *VM) *MigrateAPI {
 
 // BlockData represents a block with all its data for export
 type BlockData struct {
-	Number       uint64               `json:"number"`
-	Hash         common.Hash          `json:"hash"`
-	ParentHash   common.Hash          `json:"parentHash"`
-	Header       string               `json:"header"`       // RLP-encoded header (hex)
-	Body         string               `json:"body"`         // RLP-encoded body (hex)
-	Receipts     string               `json:"receipts"`     // RLP-encoded receipts (hex)
-	Transactions []types.Transaction  `json:"transactions"` // Full transactions
+	Number       uint64                `json:"number"`
+	Hash         common.Hash           `json:"hash"`
+	ParentHash   common.Hash           `json:"parentHash"`
+	Header       string                `json:"header"`       // RLP-encoded header (hex)
+	Body         string                `json:"body"`         // RLP-encoded body (hex)
+	Receipts     string                `json:"receipts"`     // RLP-encoded receipts (hex)
+	Transactions []*types.Transaction  `json:"transactions"` // Full transactions
 }
 
 // ChainInfo provides metadata about the blockchain
@@ -193,7 +193,7 @@ func (api *MigrateAPI) ImportBlocks(blocks []*BlockData) (int, error) {
 		}
 
 		// Reconstruct block
-		block := types.NewBlockWithHeader(&header).WithBody(body.Transactions, body.Uncles)
+		block := types.NewBlockWithHeader(&header).WithBody(body)
 
 		// Skip genesis
 		if block.NumberU64() == 0 {
