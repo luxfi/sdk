@@ -102,8 +102,8 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 			"evm-warp-e2e",
 			nodes,
 			tmpnet.FlagsMap{},
-			utils.NewTmpnetSubnet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),
-			utils.NewTmpnetSubnet(subnetBName, genesisPath, utils.DefaultChainConfig, nodes...),
+			utils.NewTmpnetNet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),
+			utils.NewTmpnetNet(subnetBName, genesisPath, utils.DefaultChainConfig, nodes...),
 		),
 	)
 

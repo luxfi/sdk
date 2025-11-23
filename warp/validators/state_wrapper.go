@@ -6,18 +6,18 @@ package validators
 import (
 	"context"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/ids"
 )
 
-// ConsensusStateWrapper wraps consensus.ValidatorState to implement validators.State
+// ConsensusStateWrapper wraps consensuscontext.ValidatorState to implement validators.State
 type ConsensusStateWrapper struct {
-	vs consensus.ValidatorState
+	vs consensuscontext.ValidatorState
 }
 
 // NewConsensusStateWrapper creates a new wrapper
-func NewConsensusStateWrapper(vs consensus.ValidatorState) *ConsensusStateWrapper {
+func NewConsensusStateWrapper(vs consensuscontext.ValidatorState) *ConsensusStateWrapper {
 	return &ConsensusStateWrapper{vs: vs}
 }
 

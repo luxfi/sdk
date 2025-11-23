@@ -30,7 +30,7 @@ func NewTmpnetNodes(count int) []*tmpnet.Node {
 	return nodes
 }
 
-func NewTmpnetNetwork(owner string, nodes []*tmpnet.Node, flags tmpnet.FlagsMap, subnets ...*tmpnet.Subnet) *tmpnet.Network {
+func NewTmpnetNetwork(owner string, nodes []*tmpnet.Node, flags tmpnet.FlagsMap, nets ...*tmpnet.Net) *tmpnet.Network {
 	defaultFlags := tmpnet.FlagsMap{}
 	defaultFlags.SetDefaults(flags)
 	defaultFlags.SetDefaults(tmpnet.FlagsMap{
@@ -40,15 +40,15 @@ func NewTmpnetNetwork(owner string, nodes []*tmpnet.Node, flags tmpnet.FlagsMap,
 		Owner:        owner,
 		DefaultFlags: defaultFlags,
 		Nodes:        nodes,
-		Subnets:      subnets,
+		Nets:         nets,
 	}
 }
 
 // Create the configuration that will enable creation and access to a
-// subnet created on a temporary network.
-func NewTmpnetSubnet(name string, genesisPath string, chainConfig map[string]any, nodes ...*tmpnet.Node) *tmpnet.Subnet {
+// net created on a temporary network.
+func NewTmpnetNet(name string, genesisPath string, chainConfig map[string]any, nodes ...*tmpnet.Node) *tmpnet.Net {
 	if len(nodes) == 0 {
-		panic("a subnet must be validated by at least one node")
+		panic("a net must be validated by at least one node")
 	}
 
 	validatorIDs := make([]ids.NodeID, len(nodes))
@@ -66,7 +66,7 @@ func NewTmpnetSubnet(name string, genesisPath string, chainConfig map[string]any
 		panic(err)
 	}
 
-	return &tmpnet.Subnet{
+	return &tmpnet.Net{
 		Name: name,
 		Chains: []*tmpnet.Chain{
 			{

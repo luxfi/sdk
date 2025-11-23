@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
 	"github.com/luxfi/database/prefixdb"
@@ -51,7 +51,7 @@ type DatabaseConfig struct {
 func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 	db := avaDB
 	// skip standalone database initialization if we are running in unit tests
-	if consensus.GetNetworkID(vm.ctx) != constants.UnitTestID {
+	if consensuscontext.GetNetworkID(vm.ctx) != constants.UnitTestID {
 		// first initialize the accepted block database to check if we need to use a standalone database
 		acceptedDB := prefixdb.New(acceptedPrefix, avaDB)
 		useStandAloneDB, err := vm.useStandaloneDatabase(acceptedDB)

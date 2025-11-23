@@ -744,7 +744,7 @@ func (db *Database) Scheme() string {
 
 // Reader retrieves a node reader belonging to the given state root.
 // An error will be returned if the requested state is not available.
-func (db *Database) Reader(root common.Hash) (database.Reader, error) {
+func (db *Database) Reader(root common.Hash) (database.StateReader, error) {
 	if _, err := db.node(root); err != nil {
 		return nil, fmt.Errorf("state %#x is not available, %v", root, err)
 	}

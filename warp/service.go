@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/log"
 	"github.com/luxfi/ids"
@@ -81,8 +81,8 @@ func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, qu
 	if err != nil {
 		return nil, err
 	}
-	chainID := consensus.GetChainID(a.chainContext)
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(consensus.GetNetworkID(a.chainContext), chainID[:], blockHashPayload.Bytes())
+	chainID := consensuscontext.GetChainID(a.chainContext)
+	unsignedMessage, err := luxWarp.NewUnsignedMessage(consensuscontext.GetNetworkID(a.chainContext), chainID[:], blockHashPayload.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, qu
 }
 
 func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *luxWarp.UnsignedMessage, quorumNum uint64, subnetIDStr string) (hexutil.Bytes, error) {
-	subnetID := consensus.GetSubnetID(a.chainContext)
+	subnetID := consensuscontext.GetSubnetID(a.chainContext)
 	if len(subnetIDStr) > 0 {
 		sid, err := ids.FromString(subnetIDStr)
 		if err != nil {
@@ -99,7 +99,7 @@ func (a *API) aggregateSignatures(ctx context.Context, unsignedMessage *luxWarp.
 		}
 		subnetID = sid
 	}
-	validatorState := consensus.GetValidatorState(a.chainContext)
+	validatorState := consensuscontext.GetValidatorState(a.chainContext)
 	pChainHeight, err := validatorState.GetCurrentHeight(ctx)
 	if err != nil {
 		return nil, err
