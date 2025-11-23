@@ -370,42 +370,100 @@ node/cmd/chainmigrate/chainmigrate \
 2. Implement importer.go for destination chain
 3. Test end-to-end export → import workflow
 
-## Integration Approach - CORRECTED (2025-11-23)
+## Integration Approach - RPC-BASED (2025-11-23)
 
-### ✅ DRY Principle: All tooling in lux-cli
+### ✅ RPC Control: lux-cli uses netrunner + RPC only
 
-**Previous Approach (WRONG):** ❌
-- Created ad-hoc cmd/chainmigrate binary in node repo
-- Used symlinks to bridge binaries
-- Scattered tooling across repos
+**Previous Approaches (WRONG):** ❌
+1. Created ad-hoc cmd/chainmigrate binary in node repo
+2. Used symlinks to bridge binaries
+3. Used ChainExporter interface as Go import in lux-cli
+4. Direct Go package dependencies
 
 **Current Approach (CORRECT):** ✅
-- All migration logic in lux-cli directly
-- Uses ChainExporter interface as Go import
-- No external binaries
-- No symlinks  
-- Single source of truth: lux-cli
+- **lux-cli**: RPC client for fleet control
+- **netrunner**: Deploys and manages node fleet
+- **EVM MigrateAPI**: RPC endpoints for export/import
+- NO Go package imports between cli and evm
+- Pure RPC communication only
+
+**Architecture:**
+```
+lux-cli (RPC client)
+    ↓ HTTP JSON-RPC calls
+netrunner (fleet manager)
+    ↓ deploys nodes
+EVM node (with MigrateAPI)
+    ↓ migrate_getBlocks
+    ↓ migrate_importBlocks
+Database (PebbleDB/LevelDB)
+```
 
 **Implementation:**
 ```go
 // lux-cli/cmd/migratecmd/utils.go
-import "github.com/luxfi/node/chainmigrate"
+func runMigration(sourceRPC, destRPC string, chainID int64) error {
+    // Get current block via RPC
+    blockNum, err := getCurrentBlock(ctx, sourceRPC)
 
-func runMigration(sourceDB, destDB string, chainID int64) error {
-    config := chainmigrate.ExporterConfig{
-        ChainType:    chainmigrate.ChainTypeSubnetEVM,
-        DatabasePath: sourceDB,
-        DatabaseType: "pebble",
+    // Call migrate_getBlocks via RPC (no Go imports!)
+    req := &RPCRequest{
+        Method: "migrate_getBlocks",
+        Params: []interface{}{0, blockNum, 100},
     }
-    // Use ChainExporter interface directly
-    // exporter := evm.NewExporter(vm)
-    // exporter.ExportBlocks(ctx, start, end)
+    callRPC(sourceRPC, req, &blocks)
+
+    // Import via RPC to destination
+    req = &RPCRequest{
+        Method: "migrate_importBlocks",
+        Params: []interface{}{blocks},
+    }
+    callRPC(destRPC, req, &result)
 }
 ```
 
+**EVM RPC Endpoints:**
+```go
+// plugin/evm/api_migrate.go
+type MigrateAPI struct {
+    vm *VM
+}
+
+// RPC: migrate_getChainInfo
+func (api *MigrateAPI) GetChainInfo() (*ChainInfo, error)
+
+// RPC: migrate_getBlocks (batch, max 100 blocks)
+func (api *MigrateAPI) GetBlocks(start, end, limit uint64) ([]*BlockData, error)
+
+// RPC: migrate_streamBlocks (streaming via channels)
+func (api *MigrateAPI) StreamBlocks(start, end uint64) (chan *BlockData, chan error)
+
+// RPC: migrate_importBlocks
+func (api *MigrateAPI) ImportBlocks(blocks []*BlockData) (int, error)
+```
+
 **Benefits:**
-- Single codebase for all CLI tooling
-- No dependency on external binaries
-- Clean Go imports and interfaces
-- Easy to test and maintain
-- Follows DRY principle
+- True fleet control via RPC (lux-cli controls remote nodes)
+- No Go package coupling between repos
+- Can control nodes anywhere (local, remote, cloud)
+- Netrunner handles deployment, lux-cli handles orchestration
+- Works with any number of nodes
+- Clean separation: deploy vs control vs execution
+
+**Workflow:**
+1. Deploy source EVM with netrunner (readonly DB):
+   ```bash
+   netrunner engine start evm-source --data-dir=/readonly/db
+   ```
+
+2. Deploy destination C-Chain with netrunner:
+   ```bash
+   netrunner engine start c-chain
+   ```
+
+3. Run migration via lux-cli (RPC calls):
+   ```bash
+   lux migrate prepare \
+     --source-rpc=http://node1:9650/ext/bc/C/rpc \
+     --dest-rpc=http://node2:9650/ext/bc/C/rpc
+   ```
