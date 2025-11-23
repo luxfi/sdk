@@ -4,6 +4,7 @@
 package evm
 
 import (
+	"github.com/luxfi/crypto/bls"
 	"context"
 	"encoding/json"
 	"errors"
@@ -92,7 +93,6 @@ import (
 	"github.com/luxfi/node/utils/profiler"
 	nodemockable "github.com/luxfi/node/utils/timer/mockable"
 	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/version"
 	nodeChain "github.com/luxfi/node/vms/components/chain"
 
 	commonEng "github.com/luxfi/consensus/core"
@@ -204,7 +204,7 @@ func (w *warpSignerAdapter) Sign(msg []byte) ([]byte, error) {
 	}
 
 	// Return the signature bytes
-	return sig.Bytes(), nil
+	return bls.SignatureToBytes(sig), nil
 }
 
 func (w *warpSignerAdapter) PublicKey() []byte {
@@ -212,7 +212,7 @@ func (w *warpSignerAdapter) PublicKey() []byte {
 	if pk == nil {
 		return nil
 	}
-	return pk.Bytes()
+	return bls.PublicKeyToCompressedBytes(pk)
 }
 
 func (w *warpSignerAdapter) NodeID() ids.NodeID {
@@ -1012,11 +1012,11 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	return nil
 }
 
-func (vm *VM) SetState(_ context.Context, state commonEng.VMState) error {
+func (vm *VM) SetState(_ context.Context, state uint32) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 
-	switch state {
+	switch commonEng.VMState(state) {
 	case commonEng.VMStateSyncing:
 		vm.bootstrapped.Set(false)
 		return nil
@@ -1555,7 +1555,7 @@ func (vm *VM) CreateHandlers(context.Context) (map[string]http.Handler, error) {
 }
 
 // NewHTTPHandler implements the block.ChainVM interface
-func (vm *VM) NewHTTPHandler(ctx context.Context) (http.Handler, error) {
+func (vm *VM) NewHTTPHandler(ctx context.Context) (interface{}, error) {
 	handlers, err := vm.CreateHandlers(ctx)
 	if err != nil {
 		return nil, err
@@ -1709,7 +1709,7 @@ func attachEthService(handler *rpc.Server, apis []rpc.API, names []string) error
 	return nil
 }
 
-func (vm *VM) Connected(ctx context.Context, nodeID ids.NodeID, version *version.Application) error {
+func (vm *VM) Connected(ctx context.Context, nodeID ids.NodeID, version interface{}) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 

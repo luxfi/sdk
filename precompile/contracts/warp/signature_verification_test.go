@@ -8,8 +8,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/luxfi/consensus/validators"
-	"github.com/luxfi/consensus/validators/validatorsmock"
+	"github.com/luxfi/consensus/validator"
+	"github.com/luxfi/consensus/validator/validatorsmock"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"

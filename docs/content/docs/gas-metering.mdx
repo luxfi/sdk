@@ -1,0 +1,441 @@
+---
+title: Gas Metering
+description: Understanding gas costs and metering in the Lux EVM
+---
+
+# Gas Metering
+
+Gas metering in the Lux EVM ensures fair resource allocation and prevents infinite loops while maintaining Ethereum compatibility.
+
+## Gas Fundamentals
+
+### What is Gas?
+
+Gas represents the computational effort required to execute operations on the EVM. Every operation consumes a specific amount of gas based on its complexity.
+
+### Gas Components
+
+1. **Gas Price**: Amount of LUX wei per unit of gas
+2. **Gas Limit**: Maximum gas allowed for transaction
+3. **Gas Used**: Actual gas consumed during execution
+4. **Base Fee**: Minimum gas price per block (EIP-1559)
+5. **Priority Fee**: Tip to validators for inclusion
+
+## Gas Cost Structure
+
+### Basic Operation Costs
+
+| Operation Category | Gas Cost | Description |
+|-------------------|----------|-------------|
+| Arithmetic | 3-8 | Basic math operations |
+| Comparison | 3 | Value comparisons |
+| Bitwise | 3 | AND, OR, XOR operations |
+| Memory | 3 per word | Memory read/write |
+| Storage (cold) | 2,100 | First access in transaction |
+| Storage (warm) | 100 | Subsequent accesses |
+| Storage Write (new) | 20,000 | New storage slot |
+| Storage Write (update) | 2,900 | Existing non-zero value |
+| Storage Clear | -15,000 | Refund for clearing |
+
+### Dynamic Gas Costs
+
+#### Memory Expansion
+```javascript
+function memoryGasCost(memSize) {
+    const wordSize = Math.ceil(memSize / 32);
+    const memoryCost = (wordSize * wordSize) / 512 + (3 * wordSize);
+    return Math.floor(memoryCost);
+}
+```
+
+#### Call Operations
+```javascript
+// Base cost + value transfer + memory expansion + call stipend
+gasCost = 700 + // Base
+    (value > 0 ? 9000 : 0) + // Value transfer
+    memoryExpansionCost + // Memory
+    (newAccount ? 25000 : 0); // New account creation
+```
+
+## EIP-1559 Fee Model
+
+### Base Fee Algorithm
+
+The Lux EVM implements EIP-1559 dynamic fee adjustment:
+
+```go
+// Base fee calculation
+func CalcBaseFee(config *Config, parent *Header) *big.Int {
+    parentGasTarget := parent.GasLimit / config.ElasticityMultiplier
+
+    if parent.GasUsed == parentGasTarget {
+        return parent.BaseFee
+    }
+
+    if parent.GasUsed > parentGasTarget {
+        // Increase base fee
+        gasUsedDelta := parent.GasUsed - parentGasTarget
+        baseFeeDelta := parent.BaseFee * gasUsedDelta /
+                       parentGasTarget / config.BaseFeeChangeDenominator
+        return parent.BaseFee + max(baseFeeDelta, 1)
+    } else {
+        // Decrease base fee
+        gasUsedDelta := parentGasTarget - parent.GasUsed
+        baseFeeDelta := parent.BaseFee * gasUsedDelta /
+                       parentGasTarget / config.BaseFeeChangeDenominator
+        return parent.BaseFee - baseFeeDelta
+    }
+}
+```
+
+### Transaction Types
+
+#### Legacy Transaction (Type 0)
+```javascript
+// Total cost = gasPrice * gasUsed
+const totalCost = tx.gasPrice * tx.gasUsed;
+```
+
+#### EIP-1559 Transaction (Type 2)
+```javascript
+// Effective gas price = min(maxFeePerGas, baseFee + maxPriorityFeePerGas)
+const effectiveGasPrice = Math.min(
+    tx.maxFeePerGas,
+    block.baseFee + tx.maxPriorityFeePerGas
+);
+const totalCost = effectiveGasPrice * tx.gasUsed;
+```
+
+## Gas Optimization Techniques
+
+### Storage Optimization
+
+#### Variable Packing
+```solidity
+// Inefficient: 2 storage slots (64,000 gas)
+contract Inefficient {
+    uint256 a;  // Slot 0
+    uint128 b;  // Slot 1
+    uint128 c;  // Slot 2
+}
+
+// Efficient: 2 storage slots (42,000 gas)
+contract Efficient {
+    uint256 a;  // Slot 0
+    uint128 b;  // Slot 1 (packed)
+    uint128 c;  // Slot 1 (packed)
+}
+```
+
+#### Storage Patterns
+```solidity
+contract StoragePatterns {
+    mapping(address => uint256) private _balances;
+    uint256 private _totalSupply;
+
+    // Cache storage in memory (saves gas)
+    function transfer(address to, uint256 amount) public {
+        uint256 senderBalance = _balances[msg.sender]; // 1 SLOAD
+        require(senderBalance >= amount);
+
+        _balances[msg.sender] = senderBalance - amount; // 1 SSTORE
+        _balances[to] += amount; // 1 SSTORE
+    }
+
+    // Use events instead of storage when possible
+    event DataLogged(address indexed user, uint256 value);
+
+    function logInsteadOfStore(uint256 value) public {
+        emit DataLogged(msg.sender, value); // 375 gas vs 20,000
+    }
+}
+```
+
+### Computation Optimization
+
+#### Loop Optimization
+```solidity
+// Expensive: Multiple storage reads
+function sumExpensive() public view returns (uint256) {
+    uint256 sum = 0;
+    for (uint i = 0; i < array.length; i++) { // length read each iteration
+        sum += array[i];
+    }
+    return sum;
+}
+
+// Optimized: Cache length
+function sumOptimized() public view returns (uint256) {
+    uint256 sum = 0;
+    uint256 length = array.length; // Single read
+    for (uint i = 0; i < length; i++) {
+        sum += array[i];
+    }
+    return sum;
+}
+```
+
+#### Short-Circuit Evaluation
+```solidity
+// Place cheaper conditions first
+function optimizedCheck(uint256 value) public view returns (bool) {
+    // Cheap check first (3 gas)
+    if (value == 0) return false;
+
+    // Expensive check second (2100 gas)
+    if (storageVariable > value) return false;
+
+    return true;
+}
+```
+
+## Gas Metering Implementation
+
+### Gas Counter
+
+```go
+type GasCounter struct {
+    gas       uint64  // Remaining gas
+    gasUsed   uint64  // Total consumed
+    refund    uint64  // Refundable gas
+    memory    uint64  // Memory size
+}
+
+func (g *GasCounter) UseGas(amount uint64) error {
+    if g.gas < amount {
+        return ErrOutOfGas
+    }
+    g.gas -= amount
+    g.gasUsed += amount
+    return nil
+}
+```
+
+### Intrinsic Gas Calculation
+
+```go
+func IntrinsicGas(data []byte, isContractCreation bool) (uint64, error) {
+    gas := params.TxGas // 21,000 base
+
+    if isContractCreation {
+        gas = params.TxGasContractCreation // 53,000 for creation
+    }
+
+    // Data gas
+    for _, byte := range data {
+        if byte == 0 {
+            gas += params.TxDataZeroGas // 4 per zero byte
+        } else {
+            gas += params.TxDataNonZeroGas // 16 per non-zero byte
+        }
+    }
+
+    return gas, nil
+}
+```
+
+## Block Gas Mechanics
+
+### Block Gas Limits
+
+```yaml
+# Lux EVM gas configuration
+feeConfig:
+  gasLimit: 8000000          # Maximum gas per block
+  targetGas: 15000000        # Target gas for fee adjustment
+  minBaseFee: 25000000000    # 25 gwei minimum
+  maxBaseFee: 1000000000000  # 1000 gwei maximum
+  blockGasCostStep: 200000   # Gas cost step for blocks
+```
+
+### Gas Pool Management
+
+```go
+type GasPool uint64
+
+func (gp *GasPool) SubGas(amount uint64) error {
+    if uint64(*gp) < amount {
+        return ErrGasLimitReached
+    }
+    *gp -= amount
+    return nil
+}
+
+func (gp *GasPool) AddGas(amount uint64) *GasPool {
+    *gp += amount
+    return gp
+}
+```
+
+## Precompile Gas Costs
+
+### Standard Precompiles
+
+| Precompile | Address | Base Gas | Dynamic Gas |
+|------------|---------|----------|-------------|
+| ECRECOVER | 0x01 | 3,000 | - |
+| SHA256 | 0x02 | 60 | 12 per 32 bytes |
+| RIPEMD160 | 0x03 | 600 | 120 per 32 bytes |
+| IDENTITY | 0x04 | 15 | 3 per 32 bytes |
+| MODEXP | 0x05 | 200 | Complex formula |
+| ECADD | 0x06 | 150 | - |
+| ECMUL | 0x07 | 6,000 | - |
+| ECPAIRING | 0x08 | 45,000 | 34,000 per pair |
+
+### Lux-Specific Precompiles
+
+```solidity
+// Warp messaging gas costs
+uint256 constant WARP_VERIFY_BASE = 5000;
+uint256 constant WARP_VERIFY_PER_SIGNATURE = 1000;
+
+// PQCrypto operations
+uint256 constant PQ_SIGN_GAS = 50000;
+uint256 constant PQ_VERIFY_GAS = 30000;
+
+// Fee manager operations
+uint256 constant FEE_CONFIG_READ = 2100;
+uint256 constant FEE_CONFIG_WRITE = 20000;
+```
+
+## Gas Refunds
+
+### Storage Refunds
+
+```solidity
+contract GasRefund {
+    mapping(address => uint256) public data;
+
+    // Get refund for clearing storage
+    function clearStorage(address user) public {
+        delete data[user]; // 15,000 gas refund
+    }
+
+    // Self-destruct refund (deprecated in some networks)
+    function destroy() public {
+        selfdestruct(payable(msg.sender)); // 24,000 gas refund
+    }
+}
+```
+
+### Refund Limitations
+
+- Maximum refund: 50% of gas used
+- Applied after transaction execution
+- Cannot exceed transaction gas limit
+
+## Gas Estimation
+
+### Estimation Algorithm
+
+```javascript
+async function estimateGas(tx) {
+    // Binary search for optimal gas
+    let lo = 21000; // Minimum gas
+    let hi = block.gasLimit; // Maximum gas
+
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+
+        try {
+            await eth.call({...tx, gas: mid});
+            hi = mid;
+        } catch (err) {
+            if (err.message.includes('out of gas')) {
+                lo = mid + 1;
+            } else {
+                throw err; // Other error
+            }
+        }
+    }
+
+    // Add 10% buffer for safety
+    return Math.floor(hi * 1.1);
+}
+```
+
+### Best Practices
+
+1. **Always estimate gas** before sending transactions
+2. **Add buffer** (10-20%) to estimates
+3. **Monitor base fee** trends
+4. **Use priority fee** for time-sensitive transactions
+5. **Batch operations** when possible
+
+## Monitoring & Analysis
+
+### Gas Metrics
+
+```bash
+# Monitor gas prices
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "method":"eth_gasPrice",
+    "params":[],
+    "id":1
+}' http://localhost:9650/ext/bc/C/rpc
+
+# Get fee history
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "method":"eth_feeHistory",
+    "params":[10, "latest", [25, 50, 75]],
+    "id":1
+}' http://localhost:9650/ext/bc/C/rpc
+```
+
+### Gas Profiling
+
+```javascript
+// Profile contract gas usage
+const trace = await debug.traceTransaction(txHash, {
+    tracer: "callTracer",
+    tracerConfig: {
+        onlyTopCall: false,
+        withLog: true
+    }
+});
+
+console.log(`Total gas used: ${trace.gas}`);
+trace.calls.forEach(call => {
+    console.log(`${call.type}: ${call.gasUsed} gas`);
+});
+```
+
+## Common Gas Pitfalls
+
+### Infinite Loops
+```solidity
+// BAD: Can consume all gas
+while (condition) {
+    // No break condition
+}
+
+// GOOD: Bounded iteration
+for (uint i = 0; i < MAX_ITERATIONS && condition; i++) {
+    // Process with limit
+}
+```
+
+### Unbounded Operations
+```solidity
+// BAD: Gas cost grows with array size
+function processAll(uint256[] memory data) public {
+    for (uint i = 0; i < data.length; i++) {
+        // Process each item
+    }
+}
+
+// GOOD: Process in batches
+function processBatch(uint256[] memory data, uint256 start, uint256 count) public {
+    uint256 end = min(start + count, data.length);
+    for (uint i = start; i < end; i++) {
+        // Process limited batch
+    }
+}
+```
+
+## See Also
+- [Opcode Reference](/docs/opcodes)
+- [Smart Contract Optimization](/docs/gas-optimization)
+- [Performance Tuning](/docs/index#performance-tuning)

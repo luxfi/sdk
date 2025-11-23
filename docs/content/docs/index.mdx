@@ -1,0 +1,492 @@
+---
+title: Lux EVM Documentation
+description: Comprehensive documentation for the Lux blockchain EVM implementation
+---
+
+# Lux EVM
+
+The Lux EVM is a high-performance Ethereum Virtual Machine implementation designed for the Lux blockchain ecosystem. It provides full EVM compatibility with enhanced features for subnets and custom blockchain deployments.
+
+## Overview
+
+The Lux EVM (formerly Subnet EVM) is a specialized virtual machine that:
+- Implements full Ethereum Virtual Machine compatibility
+- Supports Solidity smart contracts and DeFi protocols
+- Integrates seamlessly with the Lux consensus layer
+- Provides enhanced performance optimizations
+- Offers customizable precompiles for advanced functionality
+- Includes post-quantum cryptographic support
+
+### Key Features
+
+- **Full EVM Compatibility**: Deploy and execute standard Ethereum smart contracts
+- **High Performance**: Optimized for throughput with sub-second finality
+- **Custom Precompiles**: Extensible architecture for specialized functionality
+- **Configurable Economics**: Adjustable gas limits and fee structures
+- **Cross-Chain Communication**: Built-in Warp messaging for interoperability
+- **Post-Quantum Ready**: Support for quantum-resistant cryptography via PQCrypto precompile
+
+## Architecture
+
+The Lux EVM consists of several core components:
+
+### Core Components
+
+#### 1. Virtual Machine (VM)
+The VM package (`/plugin/evm/`) implements the Luxd VM interface, managing:
+- Block building and consensus integration
+- State transitions and validation
+- Network message handling
+- API service endpoints
+
+#### 2. Blockchain Core
+The core package (`/core/`) maintains:
+- Blockchain state and canonical chain
+- Transaction pool management
+- State trie and merkle forest
+- Block processing and finalization
+
+#### 3. Precompiled Contracts
+Native contracts (`/precompile/contracts/`) providing:
+- **DeployerAllowList**: Control contract deployment permissions
+- **FeeManager**: Dynamic fee configuration
+- **NativeMinter**: Native token minting capabilities
+- **RewardManager**: Validator reward distribution
+- **TxAllowList**: Transaction permission management
+- **Warp**: Cross-chain messaging protocol
+- **PQCrypto**: Post-quantum cryptographic operations
+- **Quasar**: Advanced consensus features
+
+## Key Differences from Standard EVM
+
+### 1. Consensus Integration
+Unlike standard Ethereum, Lux EVM integrates with the Lux consensus protocol:
+- Snow consensus family support
+- Instant finality (no reorganizations after acceptance)
+- Validator-based block production
+- No proof-of-work or proof-of-stake
+
+### 2. Enhanced Block Format
+Modified block structure includes:
+- `BlockGasCost`: Dynamic surcharge for block production
+- Simplified header without uncle/ommer references
+- Deterministic block timestamps
+- Consensus-driven block acceptance
+
+### 3. Transaction Types
+Streamlined transaction model:
+- Standard EVM transactions (legacy, EIP-1559)
+- No atomic transactions (removed for simplicity)
+- Warp message transactions for cross-chain
+- Precompile interactions as regular calls
+
+### 4. Fee Model
+Configurable economic parameters:
+- Dynamic base fee (EIP-1559 compatible)
+- Block gas cost mechanism
+- Customizable gas limits per genesis
+- Fee recipient configuration
+
+## Smart Contract Deployment
+
+### Development Environment
+
+#### Supported Tools
+- **Remix IDE**: Browser-based development
+- **Hardhat**: Professional development framework
+- **Foundry**: Fast, portable testing toolkit
+- **Truffle**: Comprehensive suite (deprecated)
+- **MetaMask**: Web3 wallet integration
+
+#### Deployment Process
+
+1. **Configure Network**
+```javascript
+// Hardhat configuration
+module.exports = {
+  networks: {
+    luxevm: {
+      url: "http://localhost:9650/ext/bc/C/rpc",
+      chainId: 43112,
+      accounts: [privateKey]
+    }
+  }
+};
+```
+
+2. **Deploy Contract**
+```javascript
+// Deploy using ethers.js
+const Contract = await ethers.getContractFactory("MyContract");
+const contract = await Contract.deploy();
+await contract.deployed();
+```
+
+3. **Verify Deployment**
+```javascript
+console.log("Contract deployed to:", contract.address);
+console.log("Transaction hash:", contract.deployTransaction.hash);
+```
+
+## Gas Optimization
+
+### Best Practices
+
+#### 1. Storage Optimization
+- Pack struct variables efficiently
+- Use `uint256` for single values
+- Minimize storage operations
+- Clear storage when possible
+
+#### 2. Computation Efficiency
+- Cache repeated calculations
+- Use bitwise operations when applicable
+- Minimize external calls
+- Batch operations together
+
+#### 3. Precompile Usage
+Leverage native precompiles for:
+- Complex cryptographic operations
+- Cross-chain messaging
+- Access control lists
+- Fee management
+- Post-quantum signatures
+
+### Gas Costs
+
+| Operation | Standard EVM | Lux EVM | Notes |
+|-----------|-------------|---------|--------|
+| SLOAD | 2100 | 2100 | Cold storage read |
+| SSTORE | 20000 | 20000 | New storage write |
+| CREATE | 32000 | 32000 | Contract creation |
+| CALL | 700 | 700 | External call base |
+| Precompile | Variable | Optimized | Native execution |
+
+## API Reference
+
+### JSON-RPC Endpoints
+
+#### Ethereum Compatible APIs
+
+##### eth Namespace
+- `eth_blockNumber`: Current block number
+- `eth_getBalance`: Account balance query
+- `eth_getCode`: Contract bytecode retrieval
+- `eth_getTransactionReceipt`: Transaction receipt
+- `eth_call`: Execute call without transaction
+- `eth_estimateGas`: Gas estimation
+- `eth_sendRawTransaction`: Submit signed transaction
+- `eth_getLogs`: Event log filtering
+- `eth_getBlockByNumber`: Block data by number
+- `eth_getBlockByHash`: Block data by hash
+- `eth_chainId`: Get chain ID
+- `eth_syncing`: Sync status
+- `eth_gasPrice`: Current gas price
+
+##### web3 Namespace
+- `web3_clientVersion`: Client version string
+- `web3_sha3`: Keccak-256 hashing
+
+##### net Namespace
+- `net_version`: Network ID
+- `net_peerCount`: Connected peer count
+- `net_listening`: Node listening status
+
+#### Lux-Specific APIs
+
+##### admin Namespace (when enabled)
+- `admin_importChain`: Import blockchain data
+- `admin_exportChain`: Export blockchain data
+- `admin_startCPUProfiler`: Start profiling
+- `admin_stopCPUProfiler`: Stop profiling
+
+##### debug Namespace (when enabled)
+- `debug_traceTransaction`: Transaction execution trace
+- `debug_traceBlockByNumber`: Block execution trace
+- `debug_getBadBlocks`: Retrieve bad blocks
+- `debug_getModifiedAccountsByNumber`: State changes
+
+##### validators Namespace
+- `validators_getValidatorSet`: Current validator set
+- `validators_getUptime`: Validator uptime info
+
+##### warp Namespace
+- `warp_sendWarpMessage`: Send cross-chain message
+- `warp_getWarpMessage`: Retrieve warp message
+- `warp_getBlockSignature`: Block signature data
+
+### WebSocket Subscriptions
+
+```javascript
+// Subscribe to new blocks
+const subscription = await web3.eth.subscribe('newBlockHeaders');
+subscription.on('data', block => {
+  console.log('New block:', block.number);
+});
+
+// Subscribe to pending transactions
+const pendingTxSub = await web3.eth.subscribe('pendingTransactions');
+pendingTxSub.on('data', txHash => {
+  console.log('Pending transaction:', txHash);
+});
+
+// Subscribe to logs/events
+const eventSub = await web3.eth.subscribe('logs', {
+  address: contractAddress,
+  topics: [eventSignature]
+});
+```
+
+## Integration with Lux
+
+### Network Configuration
+
+#### Genesis Configuration
+```json
+{
+  "config": {
+    "chainId": 43112,
+    "homesteadBlock": 0,
+    "eip150Block": 0,
+    "eip155Block": 0,
+    "eip158Block": 0,
+    "byzantiumBlock": 0,
+    "constantinopleBlock": 0,
+    "petersburgBlock": 0,
+    "istanbulBlock": 0,
+    "muirGlacierBlock": 0,
+    "subnetEVMTimestamp": 0,
+    "feeConfig": {
+      "gasLimit": 8000000,
+      "targetBlockRate": 2,
+      "minBaseFee": 25000000000,
+      "targetGas": 15000000,
+      "baseFeeChangeDenominator": 36,
+      "minBlockGasCost": 0,
+      "maxBlockGasCost": 1000000,
+      "blockGasCostStep": 200000
+    }
+  },
+  "alloc": {},
+  "nonce": "0x0",
+  "timestamp": "0x0",
+  "extraData": "0x",
+  "gasLimit": "0x7A1200",
+  "difficulty": "0x0",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "coinbase": "0x0000000000000000000000000000000000000000",
+  "number": "0x0",
+  "gasUsed": "0x0",
+  "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+}
+```
+
+### Subnet Deployment
+
+1. **Create Subnet**
+```bash
+lux subnet create mysubnet --evm
+```
+
+2. **Configure VM**
+```bash
+lux subnet configure mysubnet \
+  --chain-id 99999 \
+  --token-symbol TKN \
+  --gas-limit 8000000
+```
+
+3. **Deploy to Network**
+```bash
+lux subnet deploy mysubnet --local
+```
+
+### Cross-Chain Communication
+
+#### Warp Messaging
+```solidity
+// Send cross-chain message
+IWarpMessenger warp = IWarpMessenger(WARP_ADDRESS);
+warp.sendWarpMessage(
+  destinationChainID,
+  destinationAddress,
+  payload
+);
+
+// Receive and verify message
+(WarpMessage memory message, bool valid) = warp.getVerifiedWarpMessage(index);
+if (valid) {
+  processMessage(message.payload);
+}
+```
+
+## Performance Tuning
+
+### Configuration Options
+
+#### State Management
+```toml
+[state]
+# Pruning configuration
+pruning-enabled = true
+commit-interval = 4096
+snapshot-async = true
+snapshot-verification-enabled = false
+trie-clean-cache = 512
+trie-dirty-cache = 512
+trie-prefetcher-parallelism = 16
+```
+
+#### Transaction Pool
+```toml
+[tx-pool]
+locals = []
+no-locals = false
+journal = "transactions.rlp"
+rejournal = "1h"
+price-limit = 1
+price-bump = 10
+account-slots = 16
+global-slots = 5120
+account-queue = 64
+global-queue = 1024
+lifetime = "3h"
+```
+
+#### API Server
+```toml
+[api]
+eth-apis = ["eth", "net", "web3", "debug", "txpool"]
+ws-enabled = true
+ws-port = 8546
+http-port = 8545
+max-connections = 1024
+```
+
+### Benchmarking
+
+```bash
+# Run performance benchmarks
+go test -bench=. -benchtime=10s ./core/...
+
+# Profile CPU usage
+go test -cpuprofile=cpu.prof -bench=.
+go tool pprof cpu.prof
+
+# Memory profiling
+go test -memprofile=mem.prof -bench=.
+go tool pprof mem.prof
+```
+
+## Security Considerations
+
+### Best Practices
+
+1. **Access Control**
+   - Use AllowList precompiles for permissions
+   - Implement role-based access in contracts
+   - Validate all external inputs
+
+2. **Gas Limits**
+   - Set appropriate block gas limits
+   - Monitor gas price fluctuations
+   - Implement circuit breakers
+
+3. **Cross-Chain Security**
+   - Verify Warp message signatures
+   - Implement replay protection
+   - Validate source chain IDs
+
+4. **Node Security**
+   - Enable TLS for RPC endpoints
+   - Use authentication for admin APIs
+   - Regular security updates
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Transaction Pending
+- Check gas price against base fee
+- Verify nonce sequence
+- Confirm account balance
+
+#### 2. Contract Deployment Fails
+- Verify bytecode size < 24KB
+- Check constructor parameters
+- Ensure sufficient gas
+
+#### 3. RPC Connection Issues
+- Verify node is synced
+- Check firewall settings
+- Confirm endpoint URL
+
+#### 4. State Sync Problems
+- Clear state cache
+- Restart with clean database
+- Check disk space
+
+### Debug Commands
+
+```bash
+# Check node status
+curl -X POST --data '{
+  "jsonrpc":"2.0",
+  "method":"eth_syncing",
+  "params":[],
+  "id":1
+}' http://localhost:8545
+
+# Get debug traces
+curl -X POST --data '{
+  "jsonrpc":"2.0",
+  "method":"debug_traceTransaction",
+  "params":["0xhash"],
+  "id":1
+}' http://localhost:8545
+
+# Export state
+./evm export-state --datadir /path/to/data
+```
+
+## Migration Guide
+
+### From Ethereum
+
+1. **Update Chain ID**: Use Lux-specific chain ID
+2. **Adjust Gas Settings**: Account for different fee model
+3. **Remove Uncle Logic**: No uncle/ommer blocks
+4. **Update Block Headers**: Different header structure
+5. **Test Finality**: Instant finality behavior
+
+### From C-Chain
+
+1. **Remove Atomic Txs**: Not supported in Subnet EVM
+2. **Update Multicoin**: Single native token only
+3. **Adjust Import/Export**: No cross-chain transfers
+4. **Configure Genesis**: Subnet-specific settings
+
+## Resources
+
+### Documentation
+- [Lux Network Docs](https://docs.lux.network)
+- [EVM Subnet Tutorial](https://docs.lux.network/subnets)
+- [API Reference](https://docs.lux.network/api-reference)
+
+### Development Tools
+- [Lux CLI](https://github.com/luxfi/lux-cli)
+- [Subnet Explorer](https://subnets.lux.network)
+- [Faucet](https://faucet.lux.network)
+
+### Community
+- [Discord](https://discord.gg/lux)
+- [Forum](https://forum.lux.network)
+- [GitHub](https://github.com/luxfi)
+
+## Next Steps
+
+- [Quick Start Guide](/docs/quick-start) - Get up and running quickly
+- [Smart Contract Examples](/docs/examples) - Sample contracts and patterns
+- [Advanced Configuration](/docs/configuration) - Deep dive into settings
+- [Precompile Development](/docs/precompiles) - Build custom precompiles
+- [Performance Optimization](/docs/optimization) - Maximize throughput

@@ -29,7 +29,6 @@ package pathdb
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"sync"
 
@@ -41,8 +40,6 @@ import (
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/trie/triestate"
-	"github.com/luxfi/geth/triedb"
-	"github.com/luxfi/geth/triedb/database"
 	"github.com/luxfi/log"
 )
 
@@ -345,7 +342,8 @@ func (db *Database) Enable(root common.Hash) error {
 	// Drop the stale state journal in persistent database and
 	// reset the persistent state id back to zero.
 	batch := db.diskdb.NewBatch()
-	rawdb.DeleteTrieJournal(batch)
+	// TODO: DeleteTrieJournal not implemented in rawdb
+	// rawdb.DeleteTrieJournal(batch)
 	rawdb.WritePersistentStateID(batch, 0)
 	if err := batch.Write(); err != nil {
 		return err

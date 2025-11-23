@@ -1,0 +1,256 @@
+---
+title: EVM Opcode Reference
+description: Complete opcode reference for the Lux EVM implementation
+---
+
+# EVM Opcode Reference
+
+The Lux EVM implements the complete Ethereum Virtual Machine opcode set, maintaining full compatibility with Ethereum smart contracts.
+
+## Opcode Categories
+
+### Stack Operations (0x00 - 0x1F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| STOP | 0x00 | 0 | Halts execution |
+| ADD | 0x01 | 3 | Addition operation |
+| MUL | 0x02 | 5 | Multiplication operation |
+| SUB | 0x03 | 3 | Subtraction operation |
+| DIV | 0x04 | 5 | Integer division operation |
+| SDIV | 0x05 | 5 | Signed integer division |
+| MOD | 0x06 | 5 | Modulo remainder operation |
+| SMOD | 0x07 | 5 | Signed modulo remainder |
+| ADDMOD | 0x08 | 8 | Modulo addition |
+| MULMOD | 0x09 | 8 | Modulo multiplication |
+| EXP | 0x0A | 10* | Exponential operation |
+| SIGNEXTEND | 0x0B | 5 | Extend sign bit |
+| LT | 0x10 | 3 | Less-than comparison |
+| GT | 0x11 | 3 | Greater-than comparison |
+| SLT | 0x12 | 3 | Signed less-than |
+| SGT | 0x13 | 3 | Signed greater-than |
+| EQ | 0x14 | 3 | Equality comparison |
+| ISZERO | 0x15 | 3 | Check if zero |
+| AND | 0x16 | 3 | Bitwise AND operation |
+| OR | 0x17 | 3 | Bitwise OR operation |
+| XOR | 0x18 | 3 | Bitwise XOR operation |
+| NOT | 0x19 | 3 | Bitwise NOT operation |
+| BYTE | 0x1A | 3 | Retrieve single byte |
+| SHL | 0x1B | 3 | Shift left (EIP-145) |
+| SHR | 0x1C | 3 | Logical shift right (EIP-145) |
+| SAR | 0x1D | 3 | Arithmetic shift right (EIP-145) |
+
+### Memory Operations (0x20 - 0x3F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| KECCAK256 | 0x20 | 30* | Compute Keccak-256 hash |
+| ADDRESS | 0x30 | 2 | Get address of current contract |
+| BALANCE | 0x31 | 700 | Get balance of account |
+| ORIGIN | 0x32 | 2 | Get transaction sender |
+| CALLER | 0x33 | 2 | Get immediate caller |
+| CALLVALUE | 0x34 | 2 | Get deposited value |
+| CALLDATALOAD | 0x35 | 3 | Load call data |
+| CALLDATASIZE | 0x36 | 2 | Get size of call data |
+| CALLDATACOPY | 0x37 | 3* | Copy call data to memory |
+| CODESIZE | 0x38 | 2 | Get size of code |
+| CODECOPY | 0x39 | 3* | Copy code to memory |
+| GASPRICE | 0x3A | 2 | Get gas price |
+| EXTCODESIZE | 0x3B | 700 | Get external code size |
+| EXTCODECOPY | 0x3C | 700* | Copy external code |
+| RETURNDATASIZE | 0x3D | 2 | Get return data size |
+| RETURNDATACOPY | 0x3E | 3* | Copy return data |
+| EXTCODEHASH | 0x3F | 700 | Get external code hash |
+
+### Block Information (0x40 - 0x4F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| BLOCKHASH | 0x40 | 20 | Get block hash |
+| COINBASE | 0x41 | 2 | Get block coinbase |
+| TIMESTAMP | 0x42 | 2 | Get block timestamp |
+| NUMBER | 0x43 | 2 | Get block number |
+| DIFFICULTY | 0x44 | 2 | Get block difficulty (deprecated) |
+| GASLIMIT | 0x45 | 2 | Get block gas limit |
+| CHAINID | 0x46 | 2 | Get chain ID (EIP-1344) |
+| SELFBALANCE | 0x47 | 5 | Get own balance (EIP-1884) |
+| BASEFEE | 0x48 | 2 | Get base fee (EIP-3198) |
+
+### Stack, Memory, Storage Operations (0x50 - 0x5F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| POP | 0x50 | 2 | Remove item from stack |
+| MLOAD | 0x51 | 3* | Load word from memory |
+| MSTORE | 0x52 | 3* | Save word to memory |
+| MSTORE8 | 0x53 | 3 | Save byte to memory |
+| SLOAD | 0x54 | 2100 | Load word from storage |
+| SSTORE | 0x55 | 20000* | Save word to storage |
+| JUMP | 0x56 | 8 | Alter program counter |
+| JUMPI | 0x57 | 10 | Conditional jump |
+| PC | 0x58 | 2 | Get program counter |
+| MSIZE | 0x59 | 2 | Get memory size |
+| GAS | 0x5A | 2 | Get available gas |
+| JUMPDEST | 0x5B | 1 | Mark jump destination |
+
+### Push Operations (0x60 - 0x7F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| PUSH0 | 0x5F | 2 | Push 0 onto stack (EIP-3855) |
+| PUSH1 | 0x60 | 3 | Push 1 byte onto stack |
+| PUSH2 | 0x61 | 3 | Push 2 bytes onto stack |
+| ... | ... | 3 | ... |
+| PUSH32 | 0x7F | 3 | Push 32 bytes onto stack |
+
+### Duplication Operations (0x80 - 0x8F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| DUP1 | 0x80 | 3 | Duplicate 1st stack item |
+| DUP2 | 0x81 | 3 | Duplicate 2nd stack item |
+| ... | ... | 3 | ... |
+| DUP16 | 0x8F | 3 | Duplicate 16th stack item |
+
+### Swap Operations (0x90 - 0x9F)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| SWAP1 | 0x90 | 3 | Swap 1st and 2nd stack items |
+| SWAP2 | 0x91 | 3 | Swap 1st and 3rd stack items |
+| ... | ... | 3 | ... |
+| SWAP16 | 0x9F | 3 | Swap 1st and 17th stack items |
+
+### Logging Operations (0xA0 - 0xA4)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| LOG0 | 0xA0 | 375* | Append log with 0 topics |
+| LOG1 | 0xA1 | 750* | Append log with 1 topic |
+| LOG2 | 0xA2 | 1125* | Append log with 2 topics |
+| LOG3 | 0xA3 | 1500* | Append log with 3 topics |
+| LOG4 | 0xA4 | 1875* | Append log with 4 topics |
+
+### System Operations (0xF0 - 0xFF)
+
+| Opcode | Hex | Gas | Description |
+|--------|-----|-----|-------------|
+| CREATE | 0xF0 | 32000* | Create new contract |
+| CALL | 0xF1 | 700* | Call another contract |
+| CALLCODE | 0xF2 | 700* | Call with current storage |
+| RETURN | 0xF3 | 0 | Return from execution |
+| DELEGATECALL | 0xF4 | 700* | Delegate call to contract |
+| CREATE2 | 0xF5 | 32000* | Create with salt (EIP-1014) |
+| STATICCALL | 0xFA | 700* | Static call to contract |
+| REVERT | 0xFD | 0 | Revert execution |
+| INVALID | 0xFE | 0 | Invalid instruction |
+| SELFDESTRUCT | 0xFF | 5000* | Destroy contract |
+
+## Gas Cost Notes
+
+- **\*** indicates variable or additional gas costs
+- Gas costs shown are base costs; actual costs may vary based on:
+  - Memory expansion
+  - Storage operations (cold vs warm)
+  - Call stipends and value transfers
+  - EIP-1559 dynamic fees
+  - Block gas limits
+
+## EVM Version Support
+
+The Lux EVM supports all Ethereum hard fork features up to and including:
+
+- **Frontier**: Basic EVM operations
+- **Homestead**: DELEGATECALL, exception handling
+- **Byzantium**: REVERT, RETURNDATASIZE, RETURNDATACOPY, STATICCALL
+- **Constantinople**: CREATE2, EXTCODEHASH, bitwise shifting
+- **Istanbul**: CHAINID, SELFBALANCE, reduced gas costs
+- **Berlin**: EIP-2929 gas cost changes
+- **London**: EIP-1559 base fee, BASEFEE opcode
+- **Paris**: Merge-related changes (DIFFICULTY → PREVRANDAO)
+- **Shanghai**: PUSH0 opcode (EIP-3855)
+
+## Lux-Specific Considerations
+
+### Precompile Integration
+Certain opcodes interact with Lux-specific precompiled contracts:
+- **Warp Messaging**: Cross-chain message validation
+- **PQCrypto**: Post-quantum cryptographic operations
+- **Fee Manager**: Dynamic fee adjustments
+
+### Gas Metering
+The Lux EVM uses configurable gas parameters:
+```solidity
+// Example gas configuration
+GasLimit: 8_000_000        // Block gas limit
+MinBaseFee: 25_000_000_000  // Minimum base fee (25 gwei)
+TargetGas: 15_000_000       // Target gas per block
+```
+
+### Performance Optimizations
+- **JIT Compilation**: Not supported (interpreter-only mode)
+- **State Caching**: Aggressive caching for frequently accessed storage
+- **Parallel Validation**: Transaction validation in parallel where possible
+
+## Code Examples
+
+### Using Opcodes in Assembly
+
+```solidity
+contract OpcodeExample {
+    function getChainId() public pure returns (uint256 chainId) {
+        assembly {
+            chainId := chainid()  // CHAINID opcode
+        }
+    }
+
+    function getSender() public view returns (address sender) {
+        assembly {
+            sender := caller()    // CALLER opcode
+        }
+    }
+
+    function getBlockInfo() public view returns (uint256 number, uint256 timestamp) {
+        assembly {
+            number := number()    // NUMBER opcode
+            timestamp := timestamp() // TIMESTAMP opcode
+        }
+    }
+}
+```
+
+### Gas-Efficient Storage
+
+```solidity
+contract GasOptimized {
+    // Pack variables to use single SSTORE
+    uint128 public value1;
+    uint128 public value2;
+
+    function updateBoth(uint128 v1, uint128 v2) public {
+        assembly {
+            // Single SSTORE for both values
+            sstore(0, or(shl(128, v2), v1))
+        }
+    }
+}
+```
+
+## Security Considerations
+
+### Stack Depth Limits
+- Maximum stack depth: 1024 items
+- Exceeding causes execution failure
+
+### Gas Limits
+- Always check remaining gas before operations
+- Use gas stipends carefully in calls
+
+### Invalid Opcodes
+- Any undefined opcode triggers INVALID (0xFE)
+- Consumes all remaining gas
+
+## See Also
+- [Smart Contract Development](/docs/smart-contracts)
+- [Gas Optimization](/docs/gas-optimization)
+- [Precompiled Contracts](/docs/index#precompiled-contracts)

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/geth/common"
@@ -205,7 +205,7 @@ func (c *Config) VerifyPredicate(predicateContext *precompileconfig.PredicateCon
 
 	// Wrap validators.State on the chain consensus context to special case the Primary Network
 	// Get ValidatorState from context
-	validatorState := consensus.GetValidatorState(predicateContext.ConsensusCtx)
+	validatorState := consensuscontext.GetValidatorState(predicateContext.ConsensusCtx)
 	if validatorState == nil {
 		return fmt.Errorf("validator state not found in context")
 	}

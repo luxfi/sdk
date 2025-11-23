@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/evm/accounts/abi"
 	"github.com/luxfi/evm/precompile/contract"
 	"github.com/luxfi/geth/common"
@@ -97,7 +97,7 @@ func getBlockchainID(accessibleState contract.AccessibleState, caller common.Add
 		return nil, 0, err
 	}
 	ctx := accessibleState.GetConsensusContext()
-	chainID := consensus.GetChainID(ctx)
+	chainID := consensuscontext.GetChainID(ctx)
 	packedOutput, err := PackGetBlockchainIDOutput(common.Hash(chainID))
 	if err != nil {
 		return nil, remainingGas, err
@@ -254,7 +254,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 
 	ctx := accessibleState.GetConsensusContext()
 	var (
-		sourceChainID = consensus.GetChainID(ctx)
+		sourceChainID = consensuscontext.GetChainID(ctx)
 		sourceAddress = caller
 	)
 
@@ -266,7 +266,7 @@ func sendWarpMessage(accessibleState contract.AccessibleState, caller common.Add
 		return nil, remainingGas, err
 	}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
-		consensus.GetNetworkID(ctx),
+		consensuscontext.GetNetworkID(ctx),
 		sourceChainID[:],
 		addressedPayload.Bytes(),
 	)

@@ -51,8 +51,8 @@ func (p *pqCryptoPrecompile) mldsaSign(input []byte) ([]byte, uint64, error) {
 	privKeyBytes := input[3 : 3+privKeyLen]
 	message := input[3+privKeyLen:]
 
-	// Reconstruct private key
-	privKey, err := mldsa.PrivateKeyFromBytes(privKeyBytes, mode)
+	// Reconstruct private key (mode first, then data)
+	privKey, err := mldsa.PrivateKeyFromBytes(mode, privKeyBytes)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -83,8 +83,8 @@ func (p *pqCryptoPrecompile) slhdsaSign(input []byte) ([]byte, uint64, error) {
 	privKeyBytes := input[3 : 3+privKeyLen]
 	message := input[3+privKeyLen:]
 
-	// Reconstruct private key
-	privKey, err := slhdsa.PrivateKeyFromBytes(privKeyBytes, mode)
+	// Reconstruct private key (mode first, then data)
+	privKey, err := slhdsa.PrivateKeyFromBytes(mode, privKeyBytes)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -136,15 +136,14 @@ func (p *pqCryptoPrecompile) mlkemGenKey(input []byte) ([]byte, uint64, error) {
 
 	mode := mlkem.Mode(input[0])
 
-	// Generate key pair - returns (privKey, pubKey, error)
-	privKey, _, err := mlkem.GenerateKeyPair(rand.Reader, mode)
+	// Generate key pair - returns (pubKey, privKey, error)
+	pubKey, privKey, err := mlkem.GenerateKeyPair(rand.Reader, mode)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	// Serialize keys - extract public key from private key
+	// Serialize keys
 	privBytes := privKey.Bytes()
-	pubKey := privKey.PublicKey
 	pubBytes := pubKey.Bytes()
 
 	// Output format: [privkey_len(2)] [privkey] [pubkey]
