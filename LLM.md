@@ -465,6 +465,12 @@ func (api *MigrateAPI) ImportBlocks(blocks []*BlockData) (int, error)
    ```bash
    lux migrate prepare
    # RPC endpoints discovered from netrunner at runtime
+   # Source: ext/bc/<blockchain-id>/rpc (old 96369 net)
+   # Dest: ext/bc/C/rpc (C-Chain)
    # Internal RPC uses port 9630 (not 9650)
    # Hosts/ports known at runtime, not hardcoded
    ```
+
+**RPC Path Format:**
+- **C-Chain**: `ext/bc/C/rpc` (uses C alias)
+- **Old 96369 Net**: `ext/bc/dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ/rpc` (uses blockchain ID)
