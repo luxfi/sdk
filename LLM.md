@@ -196,3 +196,52 @@ Successfully created comprehensive documentation for the Lux EVM implementation.
 6. **Warp** - Cross-chain messaging
 7. **PQCrypto** - Post-quantum cryptography
 8. **Quasar** - Advanced consensus features
+
+## Readonly Database Support (2025-11-22)
+
+### Status: ✅ VERIFIED WORKING
+
+Successfully implemented and verified readonly database access for legacy PebbleDB databases.
+
+### Key Changes
+1. **Database Factory Fix** (`~/work/lux/database/factory/pebbledb.go`)
+   - Added `readOnly bool` parameter to `newPebbleDB()` function
+   - Passes readonly flag to `pebbledb.New()` instead of hardcoded `false`
+   - Committed to database repo (commit aaee95a)
+
+2. **EVM Integration** (`~/work/lux/evm/go.mod`)
+   - Added replace directive: `replace github.com/luxfi/database => ../database`
+   - Enables EVM to use local database with readonly fix
+
+3. **Test Verification** (`test-readonly-db.go`)
+   - Successfully opens 7.1GB legacy PebbleDB in readonly mode
+   - Can read all keys without write access
+   - No corruption or modification risk
+
+### Legacy Database Details
+- **Location**: `/Users/z/work/lux/state/chaindata/lux-mainnet-96369/db/pebbledb`
+- **Size**: 7.1GB (751 files)
+- **Blockchain ID**: `dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ`
+- **Chain ID**: 96369
+- **Purpose**: Legacy subnet-evm data for regenesis export
+
+### Regenesis Architecture
+The complete regenesis workflow is:
+1. Deploy EVM instance with readonly database access (IN PROGRESS)
+2. Expose RPC endpoint for legacy blockchain
+3. Export data using `lux export` command
+4. Import to new C-Chain using genesis configuration
+5. Verify final state matches original chain
+
+### Configuration Files
+- `chain-config-readonly.json` - Chain-specific configuration with database path
+- `node-config-readonly.json` - Node-level configuration for local network
+- `deploy-readonly-evm.sh` - Deployment script for readonly instance
+- `READONLY_DEPLOYMENT.md` - Complete deployment documentation
+
+### Next Steps
+1. Configure node to load specific blockchain (dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ)
+2. Start node with readonly EVM plugin
+3. Verify RPC endpoint returns correct block height
+4. Test `lux export` command against readonly instance
+5. Complete end-to-end regenesis workflow
