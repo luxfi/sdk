@@ -1,0 +1,12 @@
+{
+  "network-id": "local",
+  "http-host": "0.0.0.0",
+  "http-port": 9650,
+  "staking-port": 9651,
+  "api-admin-enabled": true,
+  "api-keystore-enabled": false,
+  "api-metrics-enabled": true,
+  "log-level": "info",
+  "log-display-level": "info",
+  "db-dir": "/tmp/luxd-readonly"
+}
