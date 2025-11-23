@@ -461,9 +461,10 @@ func (api *MigrateAPI) ImportBlocks(blocks []*BlockData) (int, error)
    netrunner engine start c-chain
    ```
 
-3. Run migration via lux-cli (RPC calls):
+3. Run migration via lux-cli (auto-discovers RPC endpoints):
    ```bash
-   lux migrate prepare \
-     --source-rpc=http://node1:9650/ext/bc/C/rpc \
-     --dest-rpc=http://node2:9650/ext/bc/C/rpc
+   lux migrate prepare
+   # RPC endpoints discovered from netrunner at runtime
+   # Internal RPC uses port 9630 (not 9650)
+   # Hosts/ports known at runtime, not hardcoded
    ```
