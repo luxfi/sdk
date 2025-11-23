@@ -291,6 +291,13 @@ To complete the migration workflow:
 3. Chainmigrate interfaces.go fixed with correct imports
 4. Duplicate ChainMigrator definition resolved (renamed struct to Migrator)
 5. Broken implementation files disabled (.go.broken extension)
+6. Package consistency verified - all luxfi packages used correctly
+
+**📦 Required Package Imports:**
+- Ethereum types: `github.com/luxfi/geth` (NOT go-ethereum)
+- IDs: `github.com/luxfi/ids` (NOT luxfi/node/ids)
+- Logging: `github.com/luxfi/log` (ALWAYS use luxfi/log for consistency)
+- Chainmigrate: `github.com/luxfi/node/chainmigrate`
 
 **🔄 In Progress:**
 - Fixing exporter.go to match actual VM structure
