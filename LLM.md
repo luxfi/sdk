@@ -474,3 +474,43 @@ func (api *MigrateAPI) ImportBlocks(blocks []*BlockData) (int, error)
 **RPC Path Format:**
 - **C-Chain**: `ext/bc/C/rpc` (uses C alias)
 - **Old 96369 Net**: `ext/bc/dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ/rpc` (uses blockchain ID)
+
+## MigrateAPI Registration Status (2025-11-23)
+
+### ✅ COMPLETE: MigrateAPI Registered with EVM Node
+
+The MigrateAPI has been successfully registered with the EVM node and is now available via RPC.
+
+**Changes Made:**
+1. Added `MigrateAPIEnabled` config flag to `plugin/evm/config/config.go`
+2. Set default to `true` in `plugin/evm/config/default_config.go`
+3. Registered MigrateAPI in `plugin/evm/vm.go` (similar to WarpAPI)
+4. Fixed type errors in `plugin/evm/api_migrate.go`:
+   - Changed `Transactions` field from `[]types.Transaction` to `[]*types.Transaction`
+   - Fixed `WithBody` call to use `types.Body` directly
+
+**Available RPC Methods:**
+- `migrate_getChainInfo` - Returns blockchain metadata (chain ID, network ID, current height, etc.)
+- `migrate_getBlocks` - Exports blocks in batches (max 100 blocks per call)
+- `migrate_streamBlocks` - Streams blocks via channels (not yet exposed via JSON-RPC)
+- `migrate_importBlocks` - Imports blocks to the blockchain
+
+**Configuration:**
+```json
+{
+  "migrate-api-enabled": true  // Default: true
+}
+```
+
+**Testing Status:**
+- ✅ EVM plugin builds successfully
+- ✅ MigrateAPI properly registered in RPC handler
+- ✅ CLI commands (export-data, import-data) implemented
+- ⏳ End-to-end RPC testing pending
+
+**Next Steps:**
+1. Deploy EVM node with readonly database
+2. Test `migrate_getChainInfo` RPC call
+3. Test `migrate_getBlocks` with various block ranges
+4. Test full export → import workflow via lux-cli
+5. Verify imported data on destination chain
