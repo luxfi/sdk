@@ -122,9 +122,9 @@ func TestSLHDSAVerify(t *testing.T) {
 	precompile := PQCryptoPrecompile
 
 	// Generate SLH-DSA key pair
-	priv, err := slhdsa.GenerateKey(rand.Reader, slhdsa.SLHDSA128s)
+	priv, err := slhdsa.GenerateKey(rand.Reader, slhdsa.SHA2_128s)
 	require.NoError(err)
-	pub := &priv.PublicKey
+	pub := priv.PublicKey
 
 	// Test message
 	message := []byte("Test message for SLH-DSA signature")
@@ -136,7 +136,7 @@ func TestSLHDSAVerify(t *testing.T) {
 	// Prepare input for precompile
 	pubBytes := pub.Bytes()
 	input := []byte(SLHDSAVerifySelector[:4])
-	input = append(input, byte(slhdsa.SLHDSA128s))
+	input = append(input, byte(slhdsa.SHA2_128s))
 	input = append(input, byte(len(pubBytes)>>8), byte(len(pubBytes)))
 	input = append(input, pubBytes...)
 	input = append(input, byte(len(message)>>8), byte(len(message)))
