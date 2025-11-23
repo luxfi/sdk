@@ -18,7 +18,7 @@ Create `chain-config-readonly.json`:
   "chain-id": 96369,
   "database-type": "pebbledb",
   "database-read-only": true,
-  "database-path": "/home/z/.luxd-5node-rpc/node2/chains/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/db",
+  "database-path": "/Users/z/work/lux/state/chaindata/lux-mainnet-96369/db/pebbledb",
   "log-level": "info",
   "warp-api-enabled": true,
   "local-txs-enabled": true,
@@ -52,8 +52,8 @@ set -e
 # Paths
 NODE_BIN="$HOME/work/lux/node/build/luxd"
 EVM_PLUGIN="$HOME/work/lux/evm/build/evmplugin"
-DB_PATH="$HOME/.luxd-5node-rpc/node2/chains/2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB/db"
-CHAIN_ID="2G8mK7VCZX1dV8iPjkkTDMpYGZDCNLLVdTJVLmMsG5ZV7zKVmB"
+DB_PATH="$HOME/work/lux/state/chaindata/lux-mainnet-96369/db/pebbledb"
+CHAIN_ID="dnmzhuf6poM6PUNQCe7MWWfBdTJEnddhHRNXz2x7H6qSmyBEJ"
 
 # Verify prerequisites
 echo "Checking prerequisites..."
