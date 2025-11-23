@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/consensus/test/helpers"
 	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/validator/validatorstest"
@@ -17,7 +17,7 @@ import (
 // SubnetEVMTestChainID is a evm specific chain ID for testing
 var SubnetEVMTestChainID = ids.GenerateTestID()
 
-// testValidatorState wraps validatorstest.State to implement consensus.ValidatorState
+// testValidatorState wraps validatorstest.State to implement consensuscontext.ValidatorState
 type testValidatorState struct {
 	*validatorstest.State
 }
@@ -54,7 +54,7 @@ func (t *testValidatorState) GetNetID(chainID ids.ID) (ids.ID, error) {
 
 // @TODO: This should eventually be replaced by a more robust solution, or alternatively, the presence of nil
 // validator states shouldn't be depended upon by tests
-func NewTestValidatorState() consensus.ValidatorState {
+func NewTestValidatorState() consensuscontext.ValidatorState {
 	state := &validatorstest.State{
 		GetCurrentHeightF: func(context.Context) (uint64, error) {
 			return 0, nil
@@ -77,8 +77,8 @@ func NewTestValidatorState() consensus.ValidatorState {
 
 // NewTestValidatorStateFromBase creates a testValidatorState that wraps an existing validatorstest.State
 // This is useful when you need to use a specific validatorstest.State with custom functions
-// but still implement the consensus.ValidatorState interface.
-func NewTestValidatorStateFromBase(baseState *validatorstest.State) consensus.ValidatorState {
+// but still implement the consensuscontext.ValidatorState interface.
+func NewTestValidatorStateFromBase(baseState *validatorstest.State) consensuscontext.ValidatorState {
 	return &testValidatorState{State: baseState}
 }
 
@@ -101,9 +101,9 @@ func NewTestConsensusContext(t testing.TB) context.Context {
 	consensusCtx := consensustest.Context(t, SubnetEVMTestChainID)
 	// Create a standard context and add the consensus context to it
 	ctx := context.Background()
-	ctx = consensus.WithContext(ctx, consensusCtx)
+	ctx = consensuscontext.WithContext(ctx, consensusCtx)
 	// Add validator state to the context
-	return consensus.WithValidatorState(ctx, NewTestValidatorState())
+	return consensuscontext.WithValidatorState(ctx, NewTestValidatorState())
 }
 
 // NewTestConsensusContextWithChainID returns a context.Context with validator state properly configured for testing
@@ -112,7 +112,7 @@ func NewTestConsensusContextWithChainID(t testing.TB, chainID ids.ID) context.Co
 	consensusCtx := consensustest.Context(t, chainID)
 	// Create a standard context and add the consensus context to it
 	ctx := context.Background()
-	ctx = consensus.WithContext(ctx, consensusCtx)
+	ctx = consensuscontext.WithContext(ctx, consensusCtx)
 	// Add validator state to the context
-	return consensus.WithValidatorState(ctx, NewTestValidatorState())
+	return consensuscontext.WithValidatorState(ctx, NewTestValidatorState())
 }

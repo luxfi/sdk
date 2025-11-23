@@ -64,21 +64,21 @@ var _ = ginkgo.Describe("[Load Simulator]", ginkgo.Ordered, func() {
 				"evm-small-load",
 				nodes,
 				tmpnet.FlagsMap{},
-				utils.NewTmpnetSubnet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),
+				utils.NewTmpnetNet(subnetAName, genesisPath, utils.DefaultChainConfig, nodes...),
 			),
 		)
 	})
 
-	ginkgo.It("basic subnet load test", ginkgo.Label("load"), func() {
+	ginkgo.It("basic net load test", ginkgo.Label("load"), func() {
 		network := env.GetNetwork()
 
-		subnet := network.GetSubnet(subnetAName)
-		require.NotNil(subnet)
-		blockchainID := subnet.Chains[0].ChainID
+		net := network.GetNet(subnetAName)
+		require.NotNil(net)
+		blockchainID := net.Chains[0].ChainID
 
 		nodeURIs := env.GetNodeURIs()
-		validatorIDs := set.NewSet[ids.NodeID](len(subnet.ValidatorIDs))
-		validatorIDs.Add(subnet.ValidatorIDs...)
+		validatorIDs := set.NewSet[ids.NodeID](len(net.ValidatorIDs))
+		validatorIDs.Add(net.ValidatorIDs...)
 		rpcEndpoints := make([]string, 0, len(nodeURIs))
 		for _, nodeURI := range nodeURIs {
 			if !validatorIDs.Contains(nodeURI.NodeID) {

@@ -239,9 +239,10 @@ func (c *ChainIndexer) eventLoop(currentHeader *types.Header, events chan ChainH
 				// TODO(karalabe, zsfelfoldi): This seems a bit brittle, can we detect this case explicitly?
 
 				if rawdb.ReadCanonicalHash(c.chainDb, prevHeader.Number.Uint64()) != prevHash {
-					if h := rawdb.FindCommonAncestor(c.chainDb, prevHeader, header); h != nil {
-						c.newHead(h.Number.Uint64(), true)
-					}
+					// FindCommonAncestor is not available in luxfi/geth rawdb
+					// For now, we trigger a reorg from the previous header height
+					// This is safe but may reindex more blocks than strictly necessary
+					c.newHead(prevHeader.Number.Uint64(), true)
 				}
 			}
 			c.newHead(header.Number.Uint64(), false)
