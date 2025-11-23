@@ -206,3 +206,4 @@ replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v
 replace github.com/luxfi/consensus => ../consensus
 
 replace github.com/luxfi/node => ../node
+replace github.com/luxfi/database => ../database
