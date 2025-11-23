@@ -1,0 +1,520 @@
+---
+title: Precompiled Contracts
+description: Complete guide to precompiled contracts in the Lux EVM
+---
+
+# Precompiled Contracts
+
+Precompiled contracts are native implementations of complex operations that would be expensive to execute in EVM bytecode. The Lux EVM extends standard Ethereum precompiles with custom implementations for advanced functionality.
+
+## Standard Ethereum Precompiles
+
+### 0x01: ECRECOVER
+
+Recovers the address from an elliptic curve signature.
+
+```solidity
+// Interface
+function ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address);
+
+// Usage example
+contract ECRecoverExample {
+    function verifySignature(
+        bytes32 messageHash,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public pure returns (address) {
+        return ecrecover(messageHash, v, r, s);
+    }
+}
+```
+
+**Gas Cost**: 3,000
+
+### 0x02: SHA256
+
+Computes SHA256 hash.
+
+```solidity
+// Usage
+bytes32 hash = sha256(abi.encodePacked(data));
+```
+
+**Gas Cost**: 60 + 12 per 32 bytes
+
+### 0x03: RIPEMD160
+
+Computes RIPEMD-160 hash.
+
+```solidity
+// Usage
+bytes20 hash = ripemd160(abi.encodePacked(data));
+```
+
+**Gas Cost**: 600 + 120 per 32 bytes
+
+### 0x04: IDENTITY
+
+Returns input data (used for copying).
+
+```solidity
+// Usage for memory copy
+assembly {
+    let success := staticcall(gas(), 0x04, input, inputSize, output, outputSize)
+}
+```
+
+**Gas Cost**: 15 + 3 per 32 bytes
+
+### 0x05: MODEXP
+
+Modular exponentiation for RSA operations.
+
+```solidity
+// Computes (base ** exponent) % modulus
+function modExp(bytes memory base, bytes memory exponent, bytes memory modulus)
+    returns (bytes memory result);
+```
+
+**Gas Cost**: Complex formula based on input sizes
+
+### 0x06-0x08: Elliptic Curve Operations
+
+```solidity
+// 0x06: ECADD - Point addition
+// 0x07: ECMUL - Scalar multiplication
+// 0x08: ECPAIRING - Pairing check
+
+// Used for zero-knowledge proofs
+contract ZKVerifier {
+    function verifyProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory input
+    ) public view returns (bool) {
+        // Use ecpairing precompile
+        // ...
+    }
+}
+```
+
+## Lux-Specific Precompiles
+
+### DeployerAllowList (0x0200000000000000000000000000000000000000)
+
+Controls who can deploy contracts on the chain.
+
+```solidity
+interface IDeployerAllowList {
+    // Role definitions
+    uint256 constant ADMIN_ROLE = 2;
+    uint256 constant DEPLOYER_ROLE = 1;
+    uint256 constant NO_ROLE = 0;
+
+    // Read role
+    function readAllowList(address account) external view returns (uint256 role);
+
+    // Modify roles (admin only)
+    function setAdmin(address account) external;
+    function setDeployer(address account) external;
+    function revoke(address account) external;
+}
+
+// Usage example
+contract DeployerManager {
+    IDeployerAllowList constant DEPLOYER_LIST =
+        IDeployerAllowList(0x0200000000000000000000000000000000000000);
+
+    function grantDeployerRole(address account) public {
+        require(DEPLOYER_LIST.readAllowList(msg.sender) == 2, "Not admin");
+        DEPLOYER_LIST.setDeployer(account);
+    }
+}
+```
+
+### FeeManager (0x0200000000000000000000000000000000000003)
+
+Manages dynamic fee configuration.
+
+```solidity
+interface IFeeManager {
+    struct FeeConfig {
+        uint256 gasLimit;
+        uint256 targetBlockRate;
+        uint256 minBaseFee;
+        uint256 targetGas;
+        uint256 baseFeeChangeDenominator;
+        uint256 minBlockGasCost;
+        uint256 maxBlockGasCost;
+        uint256 blockGasCostStep;
+    }
+
+    function getFeeConfig() external view returns (FeeConfig memory);
+    function setFeeConfig(FeeConfig memory config) external;
+}
+
+// Usage example
+contract FeeController {
+    IFeeManager constant FEE_MANAGER =
+        IFeeManager(0x0200000000000000000000000000000000000003);
+
+    function updateMinBaseFee(uint256 newMinFee) public {
+        IFeeManager.FeeConfig memory config = FEE_MANAGER.getFeeConfig();
+        config.minBaseFee = newMinFee;
+        FEE_MANAGER.setFeeConfig(config);
+    }
+}
+```
+
+### NativeMinter (0x0200000000000000000000000000000000000001)
+
+Allows minting of native tokens.
+
+```solidity
+interface INativeMinter {
+    // Mint native tokens to an address
+    function mintNativeCoin(address to, uint256 amount) external;
+
+    // Role management
+    function readAllowList(address account) external view returns (uint256);
+    function setAdmin(address account) external;
+    function setMinter(address account) external;
+}
+
+// Usage example
+contract TokenMinter {
+    INativeMinter constant MINTER =
+        INativeMinter(0x0200000000000000000000000000000000000001);
+
+    function mintTokens(address recipient, uint256 amount) public {
+        require(MINTER.readAllowList(msg.sender) >= 1, "Not minter");
+        MINTER.mintNativeCoin(recipient, amount);
+    }
+}
+```
+
+### RewardManager (0x0200000000000000000000000000000000000004)
+
+Manages validator rewards distribution.
+
+```solidity
+interface IRewardManager {
+    struct RewardConfig {
+        address rewardAddress;
+        bool allowFeeRecipients;
+    }
+
+    function currentRewardAddress() external view returns (address);
+    function setRewardAddress(address newAddress) external;
+    function allowFeeRecipients() external view returns (bool);
+    function setAllowFeeRecipients(bool allow) external;
+    function areFeeRecipientsAllowed() external view returns (bool);
+}
+
+// Usage example
+contract RewardDistributor {
+    IRewardManager constant REWARDS =
+        IRewardManager(0x0200000000000000000000000000000000000004);
+
+    function updateRewardRecipient(address newRecipient) public {
+        REWARDS.setRewardAddress(newRecipient);
+    }
+}
+```
+
+### TxAllowList (0x0200000000000000000000000000000000000002)
+
+Controls transaction permissions.
+
+```solidity
+interface ITxAllowList {
+    uint256 constant ADMIN_ROLE = 2;
+    uint256 constant ALLOWED_ROLE = 1;
+    uint256 constant NO_ROLE = 0;
+
+    function readAllowList(address account) external view returns (uint256);
+    function setAdmin(address account) external;
+    function setAllowed(address account) external;
+    function revoke(address account) external;
+}
+
+// Usage example
+contract AccessController {
+    ITxAllowList constant TX_LIST =
+        ITxAllowList(0x0200000000000000000000000000000000000002);
+
+    function grantAccess(address user) public {
+        require(TX_LIST.readAllowList(msg.sender) == 2, "Not admin");
+        TX_LIST.setAllowed(user);
+    }
+}
+```
+
+### Warp Messenger (0x0200000000000000000000000000000000000005)
+
+Enables cross-chain messaging.
+
+```solidity
+interface IWarpMessenger {
+    struct WarpMessage {
+        bytes32 sourceChainID;
+        address originSenderAddress;
+        bytes payload;
+    }
+
+    struct WarpBlockHash {
+        bytes32 blockHash;
+        bytes32 receiptRoot;
+    }
+
+    // Send message to another chain
+    function sendWarpMessage(bytes calldata payload) external returns (bytes32 messageID);
+
+    // Get verified message
+    function getVerifiedWarpMessage(uint32 index)
+        external view returns (WarpMessage memory message, bool valid);
+
+    // Get verified block hash
+    function getVerifiedWarpBlockHash(uint32 index)
+        external view returns (WarpBlockHash memory blockHash, bool valid);
+}
+
+// Usage example
+contract CrossChainBridge {
+    IWarpMessenger constant WARP =
+        IWarpMessenger(0x0200000000000000000000000000000000000005);
+
+    function sendCrossChainMessage(bytes memory data) public returns (bytes32) {
+        return WARP.sendWarpMessage(data);
+    }
+
+    function receiveMessage(uint32 index) public view returns (bytes memory) {
+        (IWarpMessenger.WarpMessage memory message, bool valid) =
+            WARP.getVerifiedWarpMessage(index);
+        require(valid, "Invalid message");
+        return message.payload;
+    }
+}
+```
+
+### PQCrypto (0x0200000000000000000000000000000000000100)
+
+Post-quantum cryptographic operations.
+
+```solidity
+interface IPQCrypto {
+    // Algorithm types
+    uint8 constant ML_DSA_65 = 1;    // Dilithium
+    uint8 constant ML_KEM_768 = 2;   // Kyber
+    uint8 constant SLH_DSA_128 = 3;  // SPHINCS+
+
+    // Generate PQ key pair
+    function generateKeyPair(uint8 algorithm)
+        external returns (bytes memory publicKey, bytes memory privateKey);
+
+    // Sign with PQ algorithm
+    function sign(bytes memory message, bytes memory privateKey, uint8 algorithm)
+        external returns (bytes memory signature);
+
+    // Verify PQ signature
+    function verify(bytes memory message, bytes memory signature,
+                   bytes memory publicKey, uint8 algorithm)
+        external view returns (bool valid);
+
+    // Key encapsulation (KEM)
+    function encapsulate(bytes memory publicKey)
+        external returns (bytes memory ciphertext, bytes memory sharedSecret);
+
+    function decapsulate(bytes memory ciphertext, bytes memory privateKey)
+        external returns (bytes memory sharedSecret);
+}
+
+// Usage example
+contract QuantumSecure {
+    IPQCrypto constant PQ =
+        IPQCrypto(0x0200000000000000000000000000000000000100);
+
+    function createQuantumSignature(bytes memory message)
+        public returns (bytes memory signature) {
+        (, bytes memory privateKey) = PQ.generateKeyPair(1); // ML-DSA-65
+        return PQ.sign(message, privateKey, 1);
+    }
+}
+```
+
+### Quasar (0x0200000000000000000000000000000000000101)
+
+Advanced consensus features.
+
+```solidity
+interface IQuasar {
+    struct ConsensusData {
+        uint256 validatorCount;
+        uint256 minStake;
+        uint256 epochLength;
+        bytes32 currentEpochHash;
+    }
+
+    // Get consensus parameters
+    function getConsensusData() external view returns (ConsensusData memory);
+
+    // Validator operations
+    function isValidator(address account) external view returns (bool);
+    function getValidatorStake(address validator) external view returns (uint256);
+
+    // Epoch management
+    function getCurrentEpoch() external view returns (uint256);
+    function getEpochValidators(uint256 epoch)
+        external view returns (address[] memory);
+}
+
+// Usage example
+contract ValidatorInfo {
+    IQuasar constant QUASAR =
+        IQuasar(0x0200000000000000000000000000000000000101);
+
+    function getMyStake() public view returns (uint256) {
+        require(QUASAR.isValidator(msg.sender), "Not a validator");
+        return QUASAR.getValidatorStake(msg.sender);
+    }
+}
+```
+
+## Creating Custom Precompiles
+
+### Precompile Interface
+
+```go
+type PrecompiledContract interface {
+    // RequiredGas calculates gas consumption
+    RequiredGas(input []byte) uint64
+
+    // Run executes the precompiled contract
+    Run(input []byte) ([]byte, error)
+}
+```
+
+### Implementation Example
+
+```go
+// Custom precompile implementation
+type MyPrecompile struct{}
+
+func (p *MyPrecompile) RequiredGas(input []byte) uint64 {
+    // Calculate gas based on input
+    return uint64(len(input)) * 100
+}
+
+func (p *MyPrecompile) Run(input []byte) ([]byte, error) {
+    // Decode input
+    args := abi.Decode(input)
+
+    // Perform operation
+    result := processData(args)
+
+    // Encode output
+    return abi.Encode(result), nil
+}
+
+// Register precompile
+func RegisterPrecompile(address common.Address) {
+    PrecompiledContracts[address] = &MyPrecompile{}
+}
+```
+
+## Gas Costs
+
+### Standard Precompile Gas
+
+| Precompile | Base Cost | Dynamic Cost |
+|------------|-----------|--------------|
+| ECRECOVER | 3,000 | - |
+| SHA256 | 60 | 12/32 bytes |
+| RIPEMD160 | 600 | 120/32 bytes |
+| IDENTITY | 15 | 3/32 bytes |
+| MODEXP | 200 | Complex |
+| ECADD | 150 | - |
+| ECMUL | 6,000 | - |
+| ECPAIRING | 45,000 | 34,000/pair |
+
+### Lux Precompile Gas
+
+| Precompile | Read | Write | Special Ops |
+|------------|------|-------|-------------|
+| DeployerAllowList | 2,100 | 20,000 | - |
+| FeeManager | 5,000 | 25,000 | - |
+| NativeMinter | 2,100 | 30,000 | Mint: 50,000 |
+| RewardManager | 2,100 | 20,000 | - |
+| TxAllowList | 2,100 | 20,000 | - |
+| Warp | 10,000 | - | Verify: 50,000 |
+| PQCrypto | - | - | Sign: 100,000 |
+| Quasar | 5,000 | - | - |
+
+## Best Practices
+
+### Security Considerations
+
+1. **Access Control**: Always verify permissions before sensitive operations
+2. **Input Validation**: Validate all inputs to precompiles
+3. **Gas Limits**: Be aware of gas costs for precompile operations
+4. **Reentrancy**: Precompiles are not vulnerable to reentrancy
+
+### Performance Tips
+
+```solidity
+contract OptimizedPrecompile {
+    // Cache precompile results when possible
+    mapping(bytes32 => bytes) private cache;
+
+    function cachedOperation(bytes memory input) public returns (bytes memory) {
+        bytes32 key = keccak256(input);
+
+        if (cache[key].length > 0) {
+            return cache[key];
+        }
+
+        // Call precompile
+        (bool success, bytes memory result) = address(0x100).staticcall(input);
+        require(success, "Precompile failed");
+
+        cache[key] = result;
+        return result;
+    }
+}
+```
+
+### Testing Precompiles
+
+```javascript
+// Test precompile functionality
+const { ethers } = require("hardhat");
+
+describe("Precompile Tests", function () {
+    it("Should interact with FeeManager", async function () {
+        const FeeManager = await ethers.getContractAt(
+            "IFeeManager",
+            "0x0200000000000000000000000000000000000003"
+        );
+
+        const config = await FeeManager.getFeeConfig();
+        expect(config.minBaseFee).to.be.gt(0);
+    });
+
+    it("Should verify Warp message", async function () {
+        const Warp = await ethers.getContractAt(
+            "IWarpMessenger",
+            "0x0200000000000000000000000000000000000005"
+        );
+
+        const [message, valid] = await Warp.getVerifiedWarpMessage(0);
+        expect(valid).to.be.true;
+    });
+});
+```
+
+## See Also
+- [Gas Metering](/docs/gas-metering)
+- [Smart Contract Development](/docs/smart-contracts)
+- [Cross-Chain Communication](/docs/index#cross-chain-communication)

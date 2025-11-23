@@ -1,0 +1,418 @@
+---
+title: State Management
+description: Understanding state management and storage in the Lux EVM
+---
+
+# State Management
+
+The Lux EVM manages blockchain state through a sophisticated system that ensures consistency, performance, and reliability across the network.
+
+## State Architecture
+
+### State Components
+
+The EVM state consists of four primary components:
+
+1. **Account State**: Balances, nonces, code hashes, and storage roots
+2. **Storage State**: Contract storage key-value pairs
+3. **Code Storage**: Deployed contract bytecode
+4. **Transaction State**: Pending and processed transactions
+
+### State Trie Structure
+
+```
+                    State Root
+                        |
+                   Account Trie
+                   /    |    \
+              Account1  ...  AccountN
+                 |             |
+           Storage Trie   Storage Trie
+              /    \         /    \
+           Key1   Key2    Key1   Key2
+```
+
+## Account Model
+
+### Account Types
+
+#### Externally Owned Accounts (EOA)
+- Controlled by private keys
+- Can initiate transactions
+- No associated code
+- Simple balance and nonce tracking
+
+#### Contract Accounts
+- Controlled by contract code
+- Cannot initiate transactions
+- Contains executable bytecode
+- Maintains storage state
+
+### Account Structure
+
+```go
+type Account struct {
+    Nonce    uint64       // Transaction count
+    Balance  *big.Int     // Account balance in wei
+    CodeHash []byte       // Contract code hash (empty for EOA)
+    Root     common.Hash  // Storage trie root
+}
+```
+
+## Storage Management
+
+### Storage Layout
+
+Contract storage uses a key-value model with 256-bit keys and values:
+
+```solidity
+contract StorageExample {
+    uint256 public value;        // Slot 0
+    mapping(address => uint256) public balances; // Slot 1+
+    uint256[] public array;      // Slot 2 (length), data at keccak256(2)
+
+    struct Data {
+        uint128 a;
+        uint128 b;
+    }
+    Data public data;           // Slot 3 (packed)
+}
+```
+
+### Storage Slots
+
+Storage slot calculation for different data types:
+
+#### Simple Variables
+```solidity
+// Storage slot = position in declaration order
+uint256 first;  // slot 0
+uint256 second; // slot 1
+```
+
+#### Mappings
+```solidity
+// Storage slot = keccak256(key || slot)
+mapping(address => uint256) balances;
+// balances[addr] stored at: keccak256(addr || 0)
+```
+
+#### Dynamic Arrays
+```solidity
+// Array length at slot, elements at keccak256(slot) + index
+uint256[] array;
+// array.length at slot 0
+// array[i] at keccak256(0) + i
+```
+
+## State Transitions
+
+### Transaction Execution Flow
+
+1. **Pre-State Loading**
+   - Load sender account
+   - Verify nonce and balance
+   - Load recipient/contract state
+
+2. **Execution**
+   - Deduct gas costs
+   - Execute operation (transfer/call)
+   - Modify storage as needed
+
+3. **Post-State Update**
+   - Update account balances
+   - Increment nonces
+   - Commit storage changes
+
+4. **State Root Calculation**
+   - Update modified tries
+   - Calculate new state root
+   - Include in block header
+
+### State Validation
+
+```go
+func ValidateState(state *StateDB, block *Block) error {
+    // Verify state root matches block header
+    if state.IntermediateRoot() != block.Root {
+        return ErrInvalidStateRoot
+    }
+
+    // Validate account states
+    for _, tx := range block.Transactions {
+        if err := ValidateTransaction(state, tx); err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+```
+
+## State Database
+
+### StateDB Interface
+
+```go
+type StateDB interface {
+    // Account operations
+    GetBalance(addr common.Address) *big.Int
+    GetNonce(addr common.Address) uint64
+    GetCode(addr common.Address) []byte
+    SetCode(addr common.Address, code []byte)
+
+    // Storage operations
+    GetState(addr common.Address, key common.Hash) common.Hash
+    SetState(addr common.Address, key, value common.Hash)
+
+    // Transaction operations
+    AddRefund(gas uint64)
+    SubRefund(gas uint64)
+    GetRefund() uint64
+
+    // Snapshot operations
+    Snapshot() int
+    RevertToSnapshot(int)
+}
+```
+
+### State Caching
+
+The Lux EVM implements multi-layer caching:
+
+1. **Memory Cache**: Hot state in RAM
+2. **Disk Cache**: Recent state on SSD
+3. **Archive**: Historical state in database
+
+```yaml
+# Cache configuration
+state:
+  trie-clean-cache: 512    # MB for clean trie cache
+  trie-dirty-cache: 512    # MB for dirty trie cache
+  snapshot-cache: 256      # MB for snapshot cache
+  preimages: true          # Store preimages
+```
+
+## State Pruning
+
+### Pruning Strategies
+
+#### Full Node (Default)
+- Keeps recent 128 blocks
+- Prunes older state
+- Maintains block headers
+
+#### Archive Node
+- Keeps all historical state
+- No pruning
+- Higher storage requirements
+
+#### Light Client
+- Minimal state storage
+- Fetches on demand
+- Relies on state proofs
+
+### Configuration
+
+```toml
+[pruning]
+enabled = true
+mode = "full"               # full, archive, or light
+blocks-to-keep = 128       # Number of recent blocks to keep
+prune-interval = 3600      # Seconds between prune runs
+```
+
+## Snapshot Management
+
+### Snapshot Creation
+
+Snapshots provide fast state access without trie traversal:
+
+```go
+func CreateSnapshot(state *StateDB, block *Block) (*Snapshot, error) {
+    snapshot := &Snapshot{
+        Number: block.Number,
+        Hash:   block.Hash,
+        Root:   block.Root,
+    }
+
+    // Snapshot accounts
+    state.ForEachAccount(func(addr common.Address, acc *Account) {
+        snapshot.Accounts[addr] = acc.Copy()
+    })
+
+    // Snapshot storage
+    state.ForEachStorage(func(addr common.Address, key, value common.Hash) {
+        snapshot.Storage[addr][key] = value
+    })
+
+    return snapshot, nil
+}
+```
+
+### Snapshot Recovery
+
+```go
+func RecoverFromSnapshot(snapshot *Snapshot) (*StateDB, error) {
+    state := NewStateDB()
+
+    // Restore accounts
+    for addr, acc := range snapshot.Accounts {
+        state.SetAccount(addr, acc)
+    }
+
+    // Restore storage
+    for addr, storage := range snapshot.Storage {
+        for key, value := range storage {
+            state.SetState(addr, key, value)
+        }
+    }
+
+    return state, nil
+}
+```
+
+## Performance Optimization
+
+### Batch Operations
+
+```go
+// Efficient batch updates
+batch := state.NewBatch()
+for _, update := range updates {
+    batch.SetState(update.Addr, update.Key, update.Value)
+}
+batch.Commit() // Single trie update
+```
+
+### Parallel Processing
+
+```go
+// Parallel state validation
+var wg sync.WaitGroup
+errors := make(chan error, len(accounts))
+
+for _, account := range accounts {
+    wg.Add(1)
+    go func(acc *Account) {
+        defer wg.Done()
+        if err := ValidateAccount(acc); err != nil {
+            errors <- err
+        }
+    }(account)
+}
+
+wg.Wait()
+close(errors)
+```
+
+### Memory Management
+
+```go
+// Periodic cleanup
+ticker := time.NewTicker(5 * time.Minute)
+go func() {
+    for range ticker.C {
+        state.TrieDB().Dereference(oldRoot)
+        runtime.GC()
+    }
+}()
+```
+
+## State Verification
+
+### Merkle Proofs
+
+Generate and verify state proofs:
+
+```go
+// Generate proof
+proof, err := state.GetProof(address, keys)
+
+// Verify proof
+valid := VerifyProof(
+    block.Root,
+    address,
+    proof,
+    expectedValues,
+)
+```
+
+### State Sync
+
+Efficient state synchronization for new nodes:
+
+1. **Fast Sync**: Download state at recent block
+2. **Snap Sync**: Use snapshots for rapid sync
+3. **Full Sync**: Process all blocks from genesis
+
+## Best Practices
+
+### Storage Optimization
+
+1. **Pack Variables**: Combine multiple values in single slot
+2. **Use Events**: Log instead of storing when possible
+3. **Clean Up**: Delete unused storage to get gas refunds
+4. **Minimize Writes**: Cache and batch storage updates
+
+### State Access Patterns
+
+```solidity
+contract Optimized {
+    // Good: Single SLOAD
+    function efficient(uint256 id) public view {
+        uint256 value = storage[id];
+        // Use value multiple times
+    }
+
+    // Bad: Multiple SLOADs
+    function inefficient(uint256 id) public view {
+        if (storage[id] > 0) {
+            return storage[id] * 2;
+        }
+    }
+}
+```
+
+### Security Considerations
+
+1. **State Lock**: Prevent reentrancy with state locks
+2. **Consistency**: Ensure atomic state updates
+3. **Validation**: Always validate state transitions
+4. **Access Control**: Restrict state modifications
+
+## Monitoring & Debugging
+
+### State Metrics
+
+```bash
+# Check state size
+curl http://localhost:9650/ext/metrics | grep state
+
+# State trie metrics
+state_trie_cache_hits
+state_trie_cache_misses
+state_trie_nodes
+state_snapshot_size
+```
+
+### Debug APIs
+
+```javascript
+// Get state at specific block
+const state = await web3.eth.getStorageAt(
+    contractAddress,
+    storagePosition,
+    blockNumber
+);
+
+// Trace state changes
+const trace = await web3.debug.traceTransaction(txHash, {
+    tracer: "prestateTracer"
+});
+```
+
+## See Also
+- [Gas Optimization](/docs/gas-optimization)
+- [Smart Contract Development](/docs/smart-contracts)
+- [Performance Tuning](/docs/index#performance-tuning)

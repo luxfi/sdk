@@ -24,7 +24,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/log"
 
-	"github.com/luxfi/consensus/validators"
+	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/tests/fixture/e2e"

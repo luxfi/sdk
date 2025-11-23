@@ -44,7 +44,6 @@ import (
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie/trienode"
 	"github.com/luxfi/geth/trie/triestate"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/geth/triedb/database"
 	"github.com/luxfi/log"
 
@@ -118,8 +117,8 @@ type Config struct {
 // TODO: DBOverride type not defined in triedb
 // func (c Config) BackendConstructor(diskdb ethdb.Database) triedb.DBOverride {
 // 	// DBOverride is a type alias for Database (not *Database), so we dereference
-	return *triedb.NewDatabase(diskdb, nil)
-}
+// 	return *triedb.NewDatabase(diskdb, nil)
+// }
 
 // Defaults is the default setting for database if it's not specified.
 // Notably, clean cache is disabled explicitly,
