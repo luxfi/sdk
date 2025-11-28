@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	consensuscontext "github.com/luxfi/consensus/context"
-	"github.com/luxfi/consensus/test/helpers"
-	"github.com/luxfi/consensus/validator"
+	consensustest "github.com/luxfi/consensus/test/helpers"
+	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/validator/validatorstest"
 	"github.com/luxfi/ids"
 )
