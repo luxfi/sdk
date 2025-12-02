@@ -427,6 +427,10 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 		Transactions: txs,
 		Uncles:       uncles,
 	}
+	// EIP-4895: Include empty withdrawals for Shanghai to preserve WithdrawalsHash
+	if chain.Config().IsShanghai(header.Number, header.Time) {
+		body.Withdrawals = make([]*types.Withdrawal, 0)
+	}
 	return types.NewBlock(
 		header, body, receipts, trie.NewStackTrie(nil),
 	), nil

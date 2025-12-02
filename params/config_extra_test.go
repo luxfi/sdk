@@ -15,7 +15,7 @@ import (
 
 func TestSetEthUpgrades(t *testing.T) {
 	genesisBlock := big.NewInt(0)
-	genesisTimestamp := utils.NewUint64(initiallyActive)
+	_ = utils.NewUint64(initiallyActive) // genesisTimestamp - used when ShanghaiTime/CancunTime tests are enabled
 	tests := []struct {
 		fork     upgradetest.Fork
 		expected *ChainConfig

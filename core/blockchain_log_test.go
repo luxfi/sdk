@@ -14,14 +14,12 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
 	"github.com/stretchr/testify/require"
 )
 
 func TestAcceptedLogsSubscription(t *testing.T) {
-	// Test re-enabled for mainnet deployment
 	/*
 		Example contract to test event emission:
 
@@ -40,14 +38,17 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 		require = require.New(t)
 		engine  = dummy.NewCoinbaseFaker()
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
-		addr1   = crypto.PubkeyToAddress(key1.PublicKey)
-		funds   = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
-		gspec   = &Genesis{
+		// Get crypto.Address and convert to common.Address via bytes
+		cryptoAddr1     = crypto.PubkeyToAddress(key1.PublicKey)
+		addr1           = common.BytesToAddress(cryptoAddr1[:])
+		funds           = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
+		gspec           = &Genesis{
 			Config:  params.TestChainConfig,
-			Alloc:   GenesisAlloc{common.Address(addr1): {Balance: funds}},
+			Alloc:   GenesisAlloc{addr1: {Balance: funds}},
 			BaseFee: big.NewInt(legacy.BaseFee),
 		}
-		contractAddress = common.Address(crypto.CreateAddress(addr1, 0))
+		cryptoContractAddr = crypto.CreateAddress(cryptoAddr1, 0)
+		contractAddress    = common.BytesToAddress(cryptoContractAddr[:])
 		signer          = types.LatestSigner(gspec.Config)
 	)
 
@@ -57,7 +58,7 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 	packedFunction, err := parsed.Pack("Call")
 	require.NoError(err)
 
-	_, blocks, _, err := GenerateChainWithGenesis(gspec, engine, 2, 10, func(i int, b *BlockGen) {
+	db, blocks, _, err := GenerateChainWithGenesis(gspec, engine, 2, 10, func(i int, b *BlockGen) {
 		switch i {
 		case 0:
 			// First, we deploy the contract
@@ -75,8 +76,12 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 	})
 	require.NoError(err)
 
-	// Create a fresh blockchain with the same genesis
-	chain, err := NewBlockChain(rawdb.NewMemoryDatabase(), DefaultCacheConfig, gspec, engine, vm.Config{}, common.Hash{}, false)
+	// Create blockchain using the database from GenerateChainWithGenesis to ensure
+	// genesis hash and state are consistent with the generated blocks.
+	// Disable snapshots to avoid snapshot flattening issues during Accept.
+	cacheConfig := *DefaultCacheConfig
+	cacheConfig.SnapshotLimit = 0
+	chain, err := NewBlockChain(db, &cacheConfig, gspec, engine, vm.Config{}, common.Hash{}, false)
 	require.NoError(err)
 	defer chain.Stop()
 

@@ -68,7 +68,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		GasLimit:    header.GasLimit,
 		Random:      nil,
 		BlobBaseFee: func() *big.Int {
-			if chain.Config() != nil && header.ExcessBlobGas != nil {
+			if chain != nil && chain.Config() != nil && header.ExcessBlobGas != nil {
 				return eip4844.CalcBlobFee(chain.Config(), header)
 			}
 			return nil
@@ -76,11 +76,13 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 	}
 
 	// Shangai rules - set Random to Difficulty value
-	rules := chain.Config().Rules(header.Number, params.IsMergeTODO, header.Time)
-	if rules.IsShanghai {
-		blockContext.Random = new(common.Hash)
-		blockContext.Random.SetBytes(header.Difficulty.Bytes())
-		blockContext.Difficulty = new(big.Int)
+	if chain != nil && chain.Config() != nil {
+		rules := chain.Config().Rules(header.Number, params.IsMergeTODO, header.Time)
+		if rules.IsShanghai {
+			blockContext.Random = new(common.Hash)
+			blockContext.Random.SetBytes(header.Difficulty.Bytes())
+			blockContext.Difficulty = new(big.Int)
+		}
 	}
 
 	return blockContext

@@ -84,6 +84,7 @@ import (
 	nodeblock "github.com/luxfi/consensus/engine/chain/block"
 	nodechain "github.com/luxfi/consensus/protocol/chain"
 	nodeConsensus "github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
@@ -440,8 +441,13 @@ func (vm *VM) initializeInternal(
 
 	// Store the chain context
 	vm.chainCtx = chainCtx
-	// Create a regular context for operations
-	vm.ctx = ctx
+	// Create a regular context for operations, embedding the chain context
+	// so that functions like GetNetworkID can extract values from it
+	if chainCtx != nil {
+		vm.ctx = consensuscontext.WithContext(ctx, chainCtx)
+	} else {
+		vm.ctx = ctx
+	}
 
 	// Use ChainID from chainCtx for alias
 	var alias string

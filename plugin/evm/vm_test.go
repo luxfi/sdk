@@ -210,9 +210,14 @@ type testVM struct {
 // createTestConsensusContext creates a test consensus context with the required fields
 func createTestConsensusContext(t *testing.T) *nodeConsensus.Context {
 	// Create a valid context using the actual structure
+	// QuantumID must be UnitTestID (369) to skip standalone database initialization
+	// which uses a hardcoded /tmp/chaindata path and causes lock contention in parallel tests
+	// Note: GetNetworkID() returns QuantumID (not NetworkID), so we set QuantumID
 	ctx := &nodeConsensus.Context{
-		ChainID: utilstest.SubnetEVMTestChainID,
-		NodeID:  ids.GenerateTestNodeID(),
+		QuantumID: luxdconstants.UnitTestID,
+		NetworkID: luxdconstants.UnitTestID,
+		ChainID:   utilstest.SubnetEVMTestChainID,
+		NodeID:    ids.GenerateTestNodeID(),
 	}
 	// Store test-specific data in a global map or skip if not critical
 	return ctx
@@ -290,8 +295,8 @@ func newVM(t *testing.T, config testVMConfig) *testVM {
 	require.NoError(t, err, "error initializing vm")
 
 	if !config.isSyncing {
-		require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-		require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+		require.NoError(t, vm.SetState(context.Background(), uint32(commonEng.VMBootstrapping)))
+		require.NoError(t, vm.SetState(context.Background(), uint32(commonEng.VMNormalOp)))
 	}
 
 	return &testVM{
@@ -3787,8 +3792,8 @@ func TestStandaloneDB(t *testing.T) {
 	)
 	defer vm.Shutdown(context.Background())
 	require.NoError(t, err, "error initializing VM")
-	require.NoError(t, vm.SetState(context.Background(), snow.Bootstrapping))
-	require.NoError(t, vm.SetState(context.Background(), snow.NormalOp))
+	require.NoError(t, vm.SetState(context.Background(), uint32(commonEng.VMBootstrapping)))
+	require.NoError(t, vm.SetState(context.Background(), uint32(commonEng.VMNormalOp)))
 
 	// Issue a block
 	acceptedBlockEvent := make(chan core.ChainEvent, 1)
@@ -4012,11 +4017,11 @@ func restartVM(vm *VM, sharedDB database.Database, genesisBytes []byte, appSende
 	}
 
 	if finishBootstrapping {
-		err = restartedVM.SetState(context.Background(), snow.Bootstrapping)
+		err = restartedVM.SetState(context.Background(), uint32(commonEng.VMBootstrapping))
 		if err != nil {
 			return nil, err
 		}
-		err = restartedVM.SetState(context.Background(), snow.NormalOp)
+		err = restartedVM.SetState(context.Background(), uint32(commonEng.VMNormalOp))
 		if err != nil {
 			return nil, err
 		}

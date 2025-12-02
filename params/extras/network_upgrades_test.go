@@ -12,16 +12,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Create test upgrade configs to replace upgrade.Fuji and upgrade.Mainnet
-var (
-	testMainnetConfig = upgrade.Config{
-		// Empty config for now - will use defaults
+// getTestFujiUpgrades returns a test network upgrades config with EtnaTimestamp set
+// This is used for testing upgrade compatibility scenarios
+func getTestFujiUpgrades() NetworkUpgrades {
+	return NetworkUpgrades{
+		SubnetEVMTimestamp: utils.NewUint64(0),
+		DurangoTimestamp:   utils.NewUint64(0),
+		EtnaTimestamp:      utils.NewUint64(100), // Set for testing
+		FortunaTimestamp:   utils.NewUint64(1000),
+		GraniteTimestamp:   nil,
 	}
+}
 
-	testFujiConfig = upgrade.Config{
-		// Empty config for now - will use defaults
-	}
-)
+// Create test upgrade configs with scheduled upgrades for testing
+// These simulate network configs where Durango is already activated (at InitiallyActiveTime)
+func getTestMainnetConfig() upgrade.Config {
+	return upgradetest.GetConfig(upgradetest.Durango)
+}
+
+func getTestFujiConfig() upgrade.Config {
+	return upgradetest.GetConfig(upgradetest.Durango)
+}
 
 func TestNetworkUpgradesEqual(t *testing.T) {
 	testcases := []struct {
@@ -172,29 +183,29 @@ func TestCheckNetworkUpgradesCompatible(t *testing.T) {
 		{
 			name: "Incompatible_fastforward_nil_NetworkUpgrades",
 			upgrades1: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(testFujiConfig)
+				upgrades := getTestFujiUpgrades()
 				return &upgrades
 			}(),
 			upgrades2: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(testFujiConfig)
+				upgrades := getTestFujiUpgrades()
 				upgrades.EtnaTimestamp = nil
 				return &upgrades
 			}(),
-			time:  500, // Test timestamp
+			time:  500, // Time past Etna (100), so setting Etna to nil is incompatible
 			valid: false,
 		},
 		{
 			name: "Compatible_Fortuna_fastforward_nil_NetworkUpgrades",
 			upgrades1: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(testFujiConfig)
+				upgrades := getTestFujiUpgrades()
 				return &upgrades
 			}(),
 			upgrades2: func() *NetworkUpgrades {
-				upgrades := GetNetworkUpgrades(testFujiConfig)
+				upgrades := getTestFujiUpgrades()
 				upgrades.FortunaTimestamp = nil
 				return &upgrades
 			}(),
-			time:  1000, // Test timestamp
+			time:  500, // Time before Fortuna (1000), so setting Fortuna to nil is compatible
 			valid: true,
 		},
 	}
@@ -235,7 +246,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(1),
 				DurangoTimestamp:   nil,
 			},
-			luxdUpgrades: testMainnetConfig,
+			luxdUpgrades: getTestMainnetConfig(),
 			valid:        false,
 		},
 		{
@@ -244,16 +255,16 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(1),
 				DurangoTimestamp:   utils.NewUint64(2),
 			},
-			luxdUpgrades: testMainnetConfig,
+			luxdUpgrades: getTestMainnetConfig(),
 			valid:        false,
 		},
 		{
 			name: "Invalid_Durango_before_default_upgrade",
 			upgrades: &NetworkUpgrades{
 				SubnetEVMTimestamp: utils.NewUint64(0),
-				DurangoTimestamp:   utils.NewUint64(1),
+				DurangoTimestamp:   utils.NewUint64(1), // Non-zero when default is 0
 			},
-			luxdUpgrades: testMainnetConfig,
+			luxdUpgrades: getTestMainnetConfig(),
 			valid:        false,
 		},
 		{
@@ -262,7 +273,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(1000), // Changed from default 0
 			},
-			luxdUpgrades: testMainnetConfig,
+			luxdUpgrades: getTestMainnetConfig(),
 			valid:        false,
 		},
 		{
@@ -271,7 +282,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				SubnetEVMTimestamp: utils.NewUint64(0),
 				DurangoTimestamp:   utils.NewUint64(1000), // Changed from default 0
 			},
-			luxdUpgrades: testFujiConfig,
+			luxdUpgrades: getTestFujiConfig(),
 			valid:        false,
 		},
 		{
@@ -281,7 +292,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(0), // Genesis
 				EtnaTimestamp:      nil,                // Valid when Etna is unscheduled
 			},
-			luxdUpgrades: testMainnetConfig,
+			luxdUpgrades: getTestMainnetConfig(), // Durango is active, Etna is not
 			valid:        true,
 		},
 		{
@@ -291,7 +302,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				DurangoTimestamp:   utils.NewUint64(100),
 				EtnaTimestamp:      utils.NewUint64(99),
 			},
-			luxdUpgrades: testMainnetConfig,
+			luxdUpgrades: getTestMainnetConfig(),
 			valid:        false,
 		},
 		{
@@ -302,7 +313,7 @@ func TestVerifyNetworkUpgrades(t *testing.T) {
 				EtnaTimestamp:      utils.NewUint64(500), // Test timestamp
 				FortunaTimestamp:   nil,
 			},
-			luxdUpgrades: testFujiConfig,
+			luxdUpgrades: getTestFujiConfig(),
 			valid:        true,
 		},
 	}

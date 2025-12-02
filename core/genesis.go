@@ -357,6 +357,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	if g.ExtraData == nil {
 		head.Extra = []byte{}
 	}
+	var withdrawals []*types.Withdrawal
 	if conf := g.Config; conf != nil {
 		num := new(big.Int).SetUint64(g.Number)
 		confExtra := params.GetExtra(conf)
@@ -379,6 +380,11 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 				headerExtra.BlockGasCost = new(big.Int)
 			}
 		}
+		// EIP-4895: Set empty withdrawals hash for Shanghai
+		if conf.IsShanghai(num, g.Timestamp) {
+			head.WithdrawalsHash = &types.EmptyWithdrawalsHash
+			withdrawals = make([]*types.Withdrawal, 0)
+		}
 		if conf.IsCancun(num, g.Timestamp) {
 			// EIP-4788: The parentBeaconBlockRoot of the genesis block is always
 			// the zero hash. This is because the genesis block does not have a parent
@@ -397,7 +403,7 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 	}
 
 	// Create the genesis block to use the block hash
-	block := types.NewBlock(head, &types.Body{}, nil, trie.NewStackTrie(nil))
+	block := types.NewBlock(head, &types.Body{Withdrawals: withdrawals}, nil, trie.NewStackTrie(nil))
 
 	root, err = statedb.Commit(0, false, false)
 	if err != nil {

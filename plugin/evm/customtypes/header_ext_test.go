@@ -4,7 +4,7 @@
 package customtypes
 
 import (
-	"encoding/json"
+	"bytes"
 	"math/big"
 	"reflect"
 	"slices"
@@ -25,33 +25,61 @@ func TestHeaderRLP(t *testing.T) {
 	// Test header RLP encoding with current Lux header structure
 	t.Parallel()
 
-	got := testHeaderEncodeDecode(t, rlp.EncodeToBytes, rlp.DecodeBytes)
+	// Use HeaderExtra's EncodeRLP/DecodeRLP for proper round-trip
+	// because extras are stored in a map keyed by pointer
+	input, inputExtra := headerWithNonZeroFields()
+
+	var buf bytes.Buffer
+	err := inputExtra.EncodeRLP(input, &buf)
+	require.NoError(t, err, "encode")
+	encoded := buf.Bytes()
 
 	// Test current header structure - don't check against fixed values
 	// since the header structure has evolved
-	if len(got) == 0 {
+	if len(encoded) == 0 {
 		t.Fatal("Header RLP encoding returned empty bytes")
 	}
 
-	// Test that we can round-trip encode/decode
-	header, _ := headerWithNonZeroFields()
-	gotHashHex := header.Hash().Hex()
+	gotHeader := new(Header)
+	gotExtra := new(HeaderExtra)
+	stream := rlp.NewStream(bytes.NewReader(encoded), 0)
+	err = gotExtra.DecodeRLP(gotHeader, stream)
+	require.NoError(t, err, "decode")
+
+	wantHeader, wantExtra := headerWithNonZeroFields()
+	wantHeader.WithdrawalsHash = nil
+	assert.Equal(t, wantHeader, gotHeader)
+	assert.Equal(t, wantExtra, gotExtra)
 
 	// Just verify the hash is valid (not empty)
+	gotHashHex := gotHeader.Hash().Hex()
 	if gotHashHex == "0x0000000000000000000000000000000000000000000000000000000000000000" {
 		t.Error("Header hash should not be empty")
 	}
 
-	t.Logf("Header RLP length: %d, Hash: %s", len(got), gotHashHex)
+	t.Logf("Header RLP length: %d, Hash: %s", len(encoded), gotHashHex)
 }
 
 func TestHeaderJSON(t *testing.T) {
 	// Test with current Lux header structure
 	t.Parallel()
 
-	// Note we ignore the returned encoded bytes because we don't
-	// need to compare them to a JSON gold standard.
-	_ = testHeaderEncodeDecode(t, json.Marshal, json.Unmarshal)
+	// Use HeaderExtra's EncodeJSON/DecodeJSON for proper round-trip
+	// because extras are stored in a map keyed by pointer
+	input, inputExtra := headerWithNonZeroFields()
+
+	encoded, err := inputExtra.EncodeJSON(input)
+	require.NoError(t, err, "encode")
+
+	gotHeader := new(Header)
+	gotExtra := new(HeaderExtra)
+	err = gotExtra.DecodeJSON(gotHeader, encoded)
+	require.NoError(t, err, "decode")
+
+	wantHeader, wantExtra := headerWithNonZeroFields()
+	wantHeader.WithdrawalsHash = nil
+	assert.Equal(t, wantHeader, gotHeader)
+	assert.Equal(t, wantExtra, gotExtra)
 }
 
 func testHeaderEncodeDecode(
@@ -116,6 +144,7 @@ func headerWithNonZeroFields() (*Header, *HeaderExtra) {
 		BlobGasUsed:      ptrTo(uint64(18)),
 		ExcessBlobGas:    ptrTo(uint64(19)),
 		ParentBeaconRoot: &common.Hash{20},
+		RequestsHash:     &common.Hash{21},
 	}
 	extra := &HeaderExtra{
 		BlockGasCost: big.NewInt(21),

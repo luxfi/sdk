@@ -269,7 +269,7 @@ func TestGetBlocks(t *testing.T) {
 
 				return responseBytes
 			},
-			expectedErr: "failed to unmarshal response: rlp: expected List",
+			expectedErr: "failed to unmarshal response: rlp: expected input list",
 		},
 		"incorrect starting point": {
 			request: message.BlockRequest{

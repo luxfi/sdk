@@ -45,7 +45,8 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 	_tmp3 := obj.BlobGasUsed != nil
 	_tmp4 := obj.ExcessBlobGas != nil
 	_tmp5 := obj.ParentBeaconRoot != nil
-	if _tmp1 || _tmp2 || _tmp3 || _tmp4 || _tmp5 {
+	_tmp6 := obj.RequestsHash != nil
+	if _tmp1 || _tmp2 || _tmp3 || _tmp4 || _tmp5 || _tmp6 {
 		if obj.BaseFee == nil {
 			_, _ = w.Write(rlp.EmptyString)
 		} else {
@@ -55,7 +56,7 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 			w.WriteBigInt(obj.BaseFee)
 		}
 	}
-	if _tmp2 || _tmp3 || _tmp4 || _tmp5 {
+	if _tmp2 || _tmp3 || _tmp4 || _tmp5 || _tmp6 {
 		if obj.BlockGasCost == nil {
 			_, _ = w.Write(rlp.EmptyString)
 		} else {
@@ -65,25 +66,32 @@ func (obj *HeaderSerializable) EncodeRLP(_w io.Writer) error {
 			w.WriteBigInt(obj.BlockGasCost)
 		}
 	}
-	if _tmp3 || _tmp4 || _tmp5 {
+	if _tmp3 || _tmp4 || _tmp5 || _tmp6 {
 		if obj.BlobGasUsed == nil {
 			_, _ = w.Write([]byte{0x80})
 		} else {
 			w.WriteUint64((*obj.BlobGasUsed))
 		}
 	}
-	if _tmp4 || _tmp5 {
+	if _tmp4 || _tmp5 || _tmp6 {
 		if obj.ExcessBlobGas == nil {
 			_, _ = w.Write([]byte{0x80})
 		} else {
 			w.WriteUint64((*obj.ExcessBlobGas))
 		}
 	}
-	if _tmp5 {
+	if _tmp5 || _tmp6 {
 		if obj.ParentBeaconRoot == nil {
 			_, _ = w.Write([]byte{0x80})
 		} else {
 			w.WriteBytes(obj.ParentBeaconRoot[:])
+		}
+	}
+	if _tmp6 {
+		if obj.RequestsHash == nil {
+			_, _ = w.Write([]byte{0x80})
+		} else {
+			w.WriteBytes(obj.RequestsHash[:])
 		}
 	}
 	w.ListEnd(_tmp0)

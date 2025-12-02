@@ -108,10 +108,10 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 		FeeConfig:       extras.DefaultFeeConfig,
 		NetworkUpgrades: extras.GetDefaultNetworkUpgrades(),
 	}
-	params.SetExtra(&chainConfig, extra)
+	params.SetExtra(chainConfig, extra)
 
 	ethConf.Genesis = &core.Genesis{
-		Config:   &chainConfig,
+		Config:   chainConfig,
 		GasLimit: extra.FeeConfig.GasLimit.Uint64(),
 		Alloc:    alloc,
 	}

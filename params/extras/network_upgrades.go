@@ -261,16 +261,54 @@ func (n *NetworkUpgrades) GetLuxRules(time uint64) LuxRules {
 
 // GetNetworkUpgrades returns the network upgrades for the specified luxd upgrades.
 // Nil values are used to indicate optional upgrades.
+// The function respects the upgrade times from the config - if an upgrade is scheduled
+// at or after UnscheduledActivationTime, it is considered not scheduled.
+// InitiallyActiveTime is treated as "activated at genesis (timestamp 0)".
 func GetNetworkUpgrades(agoUpgrade upgrade.Config) NetworkUpgrades {
-	nu := NetworkUpgrades{
+	// SubnetEVM is always activated at genesis (0)
+	result := NetworkUpgrades{
 		SubnetEVMTimestamp: utils.NewUint64(0),
 	}
 
-	// For now, we don't have specific upgrade times from the Config
-	// These will be set through chain config instead
-	// TODO: Update when upgrade.Config includes specific upgrade times
+	// Use upgrade.UnscheduledActivationTime as the threshold for "unscheduled"
+	// UnscheduledActivationTime is time.Date(9999, time.December, 1, 0, 0, 0, 0, time.UTC)
+	unscheduledTime := uint64(upgrade.UnscheduledActivationTime.Unix())
 
-	return nu
+	// InitiallyActiveTime means "always active from genesis" for EVM purposes
+	// We convert it to 0 (genesis timestamp) for EVM network upgrades
+	initiallyActiveTime := upgrade.InitiallyActiveTime
+
+	// Helper to convert upgrade time to EVM timestamp
+	// Returns nil if unscheduled or zero time, 0 if initially active, or the actual timestamp
+	toEVMTimestamp := func(t time.Time) *uint64 {
+		// Zero time (not set) is treated as unscheduled
+		if t.IsZero() {
+			return nil
+		}
+		// Check if scheduled at unscheduled time (far future)
+		if t.Unix() >= int64(unscheduledTime) {
+			return nil // Unscheduled
+		}
+		// InitiallyActiveTime means "already active from genesis"
+		if t.Equal(initiallyActiveTime) {
+			return utils.NewUint64(0) // Genesis activation
+		}
+		return utils.NewUint64(uint64(t.Unix()))
+	}
+
+	// Check DurangoTime
+	result.DurangoTimestamp = toEVMTimestamp(agoUpgrade.DurangoTime)
+
+	// Check EtnaTime
+	result.EtnaTimestamp = toEVMTimestamp(agoUpgrade.EtnaTime)
+
+	// Check FortunaTime
+	result.FortunaTimestamp = toEVMTimestamp(agoUpgrade.FortunaTime)
+
+	// Check GraniteTime
+	result.GraniteTimestamp = toEVMTimestamp(agoUpgrade.GraniteTime)
+
+	return result
 }
 
 // GetDefaultNetworkUpgrades returns default network upgrades

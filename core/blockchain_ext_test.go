@@ -234,8 +234,7 @@ func InsertChainAcceptSingleBlock(t *testing.T, create createFunc) {
 		addr1       = common.BytesToAddress(cryptoAddr1[:])
 		cryptoAddr2 = crypto.PubkeyToAddress(key2.PublicKey)
 
-		addr2   = common.BytesToAddress(cryptoAddr2[:])
-		chainDB = rawdb.NewMemoryDatabase()
+		addr2 = common.BytesToAddress(cryptoAddr2[:])
 	)
 
 	// Ensure that key1 has some funds in the genesis block.
@@ -244,21 +243,25 @@ func InsertChainAcceptSingleBlock(t *testing.T, create createFunc) {
 		Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
 		Alloc:  GenesisAlloc{addr1: {Balance: genesisBalance}},
 	}
-	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer blockchain.Stop()
 
-	// This call generates a chain of 3 blocks.
+	// Generate chain first to get the database with genesis and blocks.
+	// This ensures the blockchain and generated blocks share the same database
+	// and genesis state, which is required for snapshot layer consistency.
 	signer := types.HomesteadSigner{}
-	_, chain, _, err := GenerateChainWithGenesis(gspec, blockchain.engine, 3, 10, func(i int, gen *BlockGen) {
+	chainDB, chain, _, err := GenerateChainWithGenesis(gspec, dummy.NewCoinbaseFaker(), 3, 10, func(i int, gen *BlockGen) {
 		tx, _ := types.SignTx(types.NewTransaction(gen.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
 		gen.AddTx(tx)
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Create blockchain using the database from GenerateChainWithGenesis.
+	blockchain, err := create(chainDB, gspec, common.Hash{}, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer blockchain.Stop()
 
 	// Insert three blocks into the chain and accept only the first block.
 	if _, err := blockchain.InsertChain(chain); err != nil {
@@ -1615,12 +1618,12 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 	genesisBalance := new(big.Int).Mul(big.NewInt(1000000), big.NewInt(params.Ether))
 	config := params.Copy(params.TestChainConfig)
 	// Set all of the required config parameters
-	params.GetExtra(&config).GenesisPrecompiles = extras.Precompiles{
+	params.GetExtra(config).GenesisPrecompiles = extras.Precompiles{
 		deployerallowlist.ConfigKey: deployerallowlist.NewConfig(utils.NewUint64(0), []common.Address{addr1}, nil, nil),
 		feemanager.ConfigKey:        feemanager.NewConfig(utils.NewUint64(0), []common.Address{addr1}, nil, nil, nil),
 	}
 	gspec := &Genesis{
-		Config: &config,
+		Config: config,
 		Alloc:  GenesisAlloc{addr1: {Balance: genesisBalance}},
 	}
 
@@ -1741,7 +1744,7 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 
 				feeConfig, _, err := blockchain.GetFeeConfigAt(blockchain.Genesis().Header())
 				assert.NoError(err)
-				assert.EqualValues(params.GetExtra(&config).FeeConfig, feeConfig)
+				assert.EqualValues(params.GetExtra(config).FeeConfig, feeConfig)
 			},
 		},
 	}

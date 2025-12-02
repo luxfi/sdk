@@ -969,6 +969,15 @@ func (t *Tree) DiskRoot() common.Hash {
 	return t.diskRoot()
 }
 
+// HasBlockLayer returns true if a snapshot layer exists for the given block hash.
+func (t *Tree) HasBlockLayer(blockHash common.Hash) bool {
+	t.lock.RLock()
+	defer t.lock.RUnlock()
+
+	_, ok := t.blockLayers[blockHash]
+	return ok
+}
+
 // Size returns the memory usage of the diff layers above the disk layer and the
 // dirty nodes buffered in the disk layer. Currently, the implementation uses a
 // special diff layer (the first) as an aggregator simulating a dirty buffer, so

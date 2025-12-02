@@ -41,6 +41,27 @@ func (t *testValidatorState) GetCurrentHeight(ctx context.Context) (uint64, erro
 	return 0, nil
 }
 
+func (t *testValidatorState) GetWarpValidatorSet(ctx context.Context, height uint64, netID ids.ID) (*validators.WarpSet, error) {
+	return &validators.WarpSet{
+		Height:     height,
+		Validators: make(map[ids.NodeID]*validators.WarpValidator),
+	}, nil
+}
+
+func (t *testValidatorState) GetWarpValidatorSets(ctx context.Context, heights []uint64, netIDs []ids.ID) (map[ids.ID]map[uint64]*validators.WarpSet, error) {
+	result := make(map[ids.ID]map[uint64]*validators.WarpSet)
+	for _, netID := range netIDs {
+		result[netID] = make(map[uint64]*validators.WarpSet)
+		for _, height := range heights {
+			result[netID][height] = &validators.WarpSet{
+				Height:     height,
+				Validators: make(map[ids.NodeID]*validators.WarpValidator),
+			}
+		}
+	}
+	return result, nil
+}
+
 func TestGetValidatorSetPrimaryNetwork(t *testing.T) {
 	require := require.New(t)
 

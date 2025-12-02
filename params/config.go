@@ -112,6 +112,9 @@ var (
 			MuirGlacierBlock:    big.NewInt(0),
 			BerlinBlock:         big.NewInt(0),
 			LondonBlock:         big.NewInt(0),
+			// Add Shanghai/Cancun so CheckCompatible test checks SubnetEVM fork, not Shanghai
+			ShanghaiTime: utils.TimeToNewUint64(InitiallyActiveTime),
+			CancunTime:   utils.TimeToNewUint64(InitiallyActiveTime),
 		},
 		extras.TestPreSubnetEVMChainConfig,
 	)
