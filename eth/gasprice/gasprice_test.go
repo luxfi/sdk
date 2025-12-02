@@ -412,7 +412,7 @@ func TestSuggestGasPriceAfterFeeConfigUpdate(t *testing.T) {
 
 	// create a chain config with fee manager enabled at genesis with [addr] as the admin
 	chainConfig := params.Copy(params.TestChainConfig)
-	chainConfigExtra := params.GetExtra(&chainConfig)
+	chainConfigExtra := params.GetExtra(chainConfig)
 	chainConfigExtra.GenesisPrecompiles = extras.Precompiles{
 		feemanager.ConfigKey: feemanager.NewConfig(utils.NewUint64(0), []common.Address{addr}, nil, nil, nil),
 	}
@@ -427,7 +427,7 @@ func TestSuggestGasPriceAfterFeeConfigUpdate(t *testing.T) {
 
 	// before issuing the block changing the fee into the chain, the fee estimation should
 	// follow the fee config in genesis.
-	backend := newTestBackend(t, &chainConfig, 0, func(i int, b *core.BlockGen) {})
+	backend := newTestBackend(t, chainConfig, 0, func(i int, b *core.BlockGen) {})
 	defer backend.teardown()
 	oracle, err := NewOracle(backend, config)
 	require.NoError(err)
@@ -441,7 +441,7 @@ func TestSuggestGasPriceAfterFeeConfigUpdate(t *testing.T) {
 	// StateCache().DiskDB() is not available in current version
 	// db := rawdb.NewDatabase(backend.chain.StateCache().DiskDB())
 	db := rawdb.NewMemoryDatabase()
-	blocks, _, err := core.GenerateChain(&chainConfig, genesis, engine, db, 1, 0, func(i int, b *core.BlockGen) {
+	blocks, _, err := core.GenerateChain(chainConfig, genesis, engine, db, 1, 0, func(i int, b *core.BlockGen) {
 		b.SetCoinbase(common.Address{1})
 
 		// admin issues tx to change fee config to higher MinBaseFee

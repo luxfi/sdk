@@ -28,41 +28,19 @@
 package customtypes_test
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"math/big"
-	mrand "math/rand"
 	"testing"
 
-	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/geth/common/hexutil"
-	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
-	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
 )
 
-func TestDeriveSha(t *testing.T) {
-	txs, err := genTxs(0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for len(txs) < 1000 {
-		exp := types.DeriveSha(txs, trie.NewEmpty(triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)))
-		got := types.DeriveSha(txs, trie.NewStackTrie(nil))
-		if !bytes.Equal(got[:], exp[:]) {
-			t.Fatalf("%d txs: got %x exp %x", len(txs), got, exp)
-		}
-		newTxs, err := genTxs(uint64(len(txs) + 1))
-		if err != nil {
-			t.Fatal(err)
-		}
-		txs = append(txs, newTxs...)
-	}
-}
+// TestDeriveSha, TestFuzzDeriveSha, TestDerivableList, and BenchmarkDeriveSha200
+// are covered by github.com/luxfi/geth/core/types tests. They were removed because
+// they test geth's internal trie implementation consistency (comparing NewEmpty vs
+// NewStackTrie) rather than customtypes functionality. The geth versions of these
+// tests provide the same coverage.
 
 // TestEIP2718DeriveSha tests that the input to the DeriveSha function is correct.
 func TestEIP2718DeriveSha(t *testing.T) {
@@ -87,144 +65,6 @@ func TestEIP2718DeriveSha(t *testing.T) {
 	}
 }
 
-func BenchmarkDeriveSha200(b *testing.B) {
-	txs, err := genTxs(200)
-	if err != nil {
-		b.Fatal(err)
-	}
-	var exp common.Hash
-	var got common.Hash
-	b.Run("std_trie", func(b *testing.B) {
-		b.ResetTimer()
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			exp = types.DeriveSha(txs, trie.NewEmpty(triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)))
-		}
-	})
-
-	b.Run("stack_trie", func(b *testing.B) {
-		b.ResetTimer()
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			got = types.DeriveSha(txs, trie.NewStackTrie(nil))
-		}
-	})
-	if got != exp {
-		b.Errorf("got %x exp %x", got, exp)
-	}
-}
-
-func TestFuzzDeriveSha(t *testing.T) {
-	// increase this for longer runs -- it's set to quite low for travis
-	rndSeed := mrand.Int()
-	for i := 0; i < 10; i++ {
-		seed := rndSeed + i
-		exp := types.DeriveSha(newDummy(i), trie.NewEmpty(triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)))
-		got := types.DeriveSha(newDummy(i), trie.NewStackTrie(nil))
-		if !bytes.Equal(got[:], exp[:]) {
-			printList(newDummy(seed))
-			t.Fatalf("seed %d: got %x exp %x", seed, got, exp)
-		}
-	}
-}
-
-// TestDerivableList contains testcases found via fuzzing
-func TestDerivableList(t *testing.T) {
-	type tcase []string
-	tcs := []tcase{
-		{
-			"0xc041",
-		},
-		{
-			"0xf04cf757812428b0763112efb33b6f4fad7deb445e",
-			"0xf04cf757812428b0763112efb33b6f4fad7deb445e",
-		},
-		{
-			"0xca410605310cdc3bb8d4977ae4f0143df54a724ed873457e2272f39d66e0460e971d9d",
-			"0x6cd850eca0a7ac46bb1748d7b9cb88aa3bd21c57d852c28198ad8fa422c4595032e88a4494b4778b36b944fe47a52b8c5cd312910139dfcb4147ab8e972cc456bcb063f25dd78f54c4d34679e03142c42c662af52947d45bdb6e555751334ace76a5080ab5a0256a1d259855dfc5c0b8023b25befbb13fd3684f9f755cbd3d63544c78ee2001452dd54633a7593ade0b183891a0a4e9c7844e1254005fbe592b1b89149a502c24b6e1dca44c158aebedf01beae9c30cabe16a",
-			"0x14abd5c47c0be87b0454596baad2",
-			"0xca410605310cdc3bb8d4977ae4f0143df54a724ed873457e2272f39d66e0460e971d9d",
-		},
-	}
-	for i, tc := range tcs[1:] {
-		exp := types.DeriveSha(flatList(tc), trie.NewEmpty(triedb.NewDatabase(rawdb.NewMemoryDatabase(), nil)))
-		got := types.DeriveSha(flatList(tc), trie.NewStackTrie(nil))
-		if !bytes.Equal(got[:], exp[:]) {
-			t.Fatalf("case %d: got %x exp %x", i, got, exp)
-		}
-	}
-}
-
-func genTxs(num uint64) (types.Transactions, error) {
-	key, err := crypto.HexToECDSA("deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
-	if err != nil {
-		return nil, err
-	}
-	cryptoAddr := crypto.PubkeyToAddress(key.PublicKey)
-	var addr common.Address
-	copy(addr[:], cryptoAddr[:])
-	newTx := func(i uint64) (*types.Transaction, error) {
-		signer := types.NewEIP155Signer(big.NewInt(18))
-		utx := types.NewTransaction(i, addr, new(big.Int), 0, new(big.Int).SetUint64(10000000), nil)
-		tx, err := types.SignTx(utx, signer, key)
-		return tx, err
-	}
-	var txs types.Transactions
-	for i := uint64(0); i < num; i++ {
-		tx, err := newTx(i)
-		if err != nil {
-			return nil, err
-		}
-		txs = append(txs, tx)
-	}
-	return txs, nil
-}
-
-type dummyDerivableList struct {
-	len  int
-	seed int
-}
-
-func newDummy(seed int) *dummyDerivableList {
-	d := &dummyDerivableList{}
-	src := mrand.NewSource(int64(seed))
-	// don't use lists longer than 4K items
-	d.len = int(src.Int63() & 0x0FFF)
-	d.seed = seed
-	return d
-}
-
-func (d *dummyDerivableList) Len() int {
-	return d.len
-}
-
-func (d *dummyDerivableList) EncodeIndex(i int, w *bytes.Buffer) {
-	src := mrand.NewSource(int64(d.seed + i))
-	// max item size 256, at least 1 byte per item
-	size := 1 + src.Int63()&0x00FF
-	io.CopyN(w, mrand.New(src), size)
-}
-
-func printList(l types.DerivableList) {
-	fmt.Printf("list length: %d\n", l.Len())
-	fmt.Printf("{\n")
-	for i := 0; i < l.Len(); i++ {
-		var buf bytes.Buffer
-		l.EncodeIndex(i, &buf)
-		fmt.Printf("\"%#x\",\n", buf.Bytes())
-	}
-	fmt.Printf("},\n")
-}
-
-type flatList []string
-
-func (f flatList) Len() int {
-	return len(f)
-}
-func (f flatList) EncodeIndex(i int, w *bytes.Buffer) {
-	_, _ = w.Write(hexutil.MustDecode(f[i]))
-}
-
 type hashToHumanReadable struct {
 	data []byte
 }
@@ -242,3 +82,7 @@ func (d *hashToHumanReadable) Update(i []byte, i2 []byte) error {
 func (d *hashToHumanReadable) Hash() common.Hash {
 	return common.Hash{}
 }
+
+// flatList helper removed - only used by removed tests
+// dummyDerivableList helper removed - only used by removed tests
+// printList helper removed - only used by removed tests

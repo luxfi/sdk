@@ -35,6 +35,20 @@ var (
 		BlockGasCostStep: big.NewInt(200_000),
 	}
 
+	// TestFeeConfig uses minimal fees for backward compatibility with tests
+	TestFeeConfig = commontype.FeeConfig{
+		GasLimit:        big.NewInt(8_000_000),
+		TargetBlockRate: 2,
+
+		MinBaseFee:               big.NewInt(1), // 1 wei for test compatibility
+		TargetGas:                big.NewInt(15_000_000),
+		BaseFeeChangeDenominator: big.NewInt(36),
+
+		MinBlockGasCost:  big.NewInt(0),
+		MaxBlockGasCost:  big.NewInt(1_000_000),
+		BlockGasCostStep: big.NewInt(200_000),
+	}
+
 	SubnetEVMDefaultChainConfig = &ChainConfig{
 		FeeConfig:          DefaultFeeConfig,
 		NetworkUpgrades:    GetDefaultNetworkUpgrades(), // TODO: upgrade.GetConfig seems to be removed
@@ -42,8 +56,8 @@ var (
 	}
 
 	TestChainConfig = &ChainConfig{
-		FeeConfig:          DefaultFeeConfig,
-		NetworkUpgrades:    GetDefaultNetworkUpgrades(), // TODO: upgrade.GetConfig seems to be removed
+		FeeConfig:          TestFeeConfig, // Use TestFeeConfig with MinBaseFee=1 for test compatibility
+		NetworkUpgrades:    GetDefaultNetworkUpgrades(),
 		GenesisPrecompiles: Precompiles{},
 	}
 
@@ -365,6 +379,11 @@ func (c *ChainConfig) IsPrecompileEnabled(address common.Address, timestamp uint
 // GetFeeConfig returns the original FeeConfig contained in the genesis ChainConfig.
 // Implements precompile.ChainConfig interface.
 func (c *ChainConfig) GetFeeConfig() commontype.FeeConfig {
+	if c.FeeConfig.GasLimit == nil {
+		fmt.Printf("DEBUG GetFeeConfig: GasLimit is nil, c=%p\n", c)
+	} else {
+		fmt.Printf("DEBUG GetFeeConfig: GasLimit=%v, c=%p\n", c.FeeConfig.GasLimit, c)
+	}
 	return c.FeeConfig
 }
 

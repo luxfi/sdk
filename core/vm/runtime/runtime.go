@@ -141,9 +141,11 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	var (
 		address = common.BytesToAddress([]byte("contract"))
 		vmenv   = NewEnv(cfg)
-		sender  = cfg.Origin
-		rules   = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, params.IsMergeTODO, vmenv.Context.Time)
+		rules   = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, vmenv.Context.Random != nil, vmenv.Context.Time)
 	)
+	if cfg.EVMConfig.Tracer != nil && cfg.EVMConfig.Tracer.OnTxStart != nil {
+		cfg.EVMConfig.Tracer.OnTxStart(vmenv.GetVMContext(), types.NewTx(&types.LegacyTx{To: &address, Data: input, Value: cfg.Value, Gas: cfg.GasLimit}), cfg.Origin)
+	}
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
 	// - reset transient storage(eip 1153)
@@ -153,13 +155,16 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 	// set the receiver's (the executing contract) code for execution.
 	cfg.State.SetCode(address, code, tracing.CodeChangeUnspecified)
 	// Call the code with the given configuration.
-	ret, _, err := vmenv.Call(
-		sender,
+	ret, leftOverGas, err := vmenv.Call(
+		cfg.Origin,
 		common.BytesToAddress([]byte("contract")),
 		input,
 		cfg.GasLimit,
 		uint256.MustFromBig(cfg.Value),
 	)
+	if cfg.EVMConfig.Tracer != nil && cfg.EVMConfig.Tracer.OnTxEnd != nil {
+		cfg.EVMConfig.Tracer.OnTxEnd(&types.Receipt{GasUsed: cfg.GasLimit - leftOverGas}, err)
+	}
 	return ret, cfg.State, err
 }
 
@@ -174,10 +179,12 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 		cfg.State, _ = state.New(types.EmptyRootHash, state.NewDatabase(rawdb.NewMemoryDatabase()), nil)
 	}
 	var (
-		vmenv  = NewEnv(cfg)
-		sender = cfg.Origin
-		rules  = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, params.IsMergeTODO, vmenv.Context.Time)
+		vmenv = NewEnv(cfg)
+		rules = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, vmenv.Context.Random != nil, vmenv.Context.Time)
 	)
+	if cfg.EVMConfig.Tracer != nil && cfg.EVMConfig.Tracer.OnTxStart != nil {
+		cfg.EVMConfig.Tracer.OnTxStart(vmenv.GetVMContext(), types.NewTx(&types.LegacyTx{Data: input, Value: cfg.Value, Gas: cfg.GasLimit}), cfg.Origin)
+	}
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
 	// - reset transient storage(eip 1153)
@@ -185,11 +192,14 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 
 	// Call the code with the given configuration.
 	code, address, leftOverGas, err := vmenv.Create(
-		sender,
+		cfg.Origin,
 		input,
 		cfg.GasLimit,
 		uint256.MustFromBig(cfg.Value),
 	)
+	if cfg.EVMConfig.Tracer != nil && cfg.EVMConfig.Tracer.OnTxEnd != nil {
+		cfg.EVMConfig.Tracer.OnTxEnd(&types.Receipt{GasUsed: cfg.GasLimit - leftOverGas}, err)
+	}
 	return code, address, leftOverGas, err
 }
 
@@ -203,10 +213,12 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 
 	var (
 		vmenv   = NewEnv(cfg)
-		sender  = cfg.Origin
 		statedb = cfg.State
-		rules   = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, params.IsMergeTODO, vmenv.Context.Time)
+		rules   = cfg.ChainConfig.Rules(vmenv.Context.BlockNumber, vmenv.Context.Random != nil, vmenv.Context.Time)
 	)
+	if cfg.EVMConfig.Tracer != nil && cfg.EVMConfig.Tracer.OnTxStart != nil {
+		cfg.EVMConfig.Tracer.OnTxStart(vmenv.GetVMContext(), types.NewTx(&types.LegacyTx{To: &address, Data: input, Value: cfg.Value, Gas: cfg.GasLimit}), cfg.Origin)
+	}
 	// Execute the preparatory steps for state transition which includes:
 	// - prepare accessList(post-berlin)
 	// - reset transient storage(eip 1153)
@@ -214,11 +226,14 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 
 	// Call the code with the given configuration.
 	ret, leftOverGas, err := vmenv.Call(
-		sender,
+		cfg.Origin,
 		address,
 		input,
 		cfg.GasLimit,
 		uint256.MustFromBig(cfg.Value),
 	)
+	if cfg.EVMConfig.Tracer != nil && cfg.EVMConfig.Tracer.OnTxEnd != nil {
+		cfg.EVMConfig.Tracer.OnTxEnd(&types.Receipt{GasUsed: cfg.GasLimit - leftOverGas}, err)
+	}
 	return ret, leftOverGas, err
 }

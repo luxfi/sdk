@@ -6,6 +6,7 @@ package customtypes
 import (
 	"io"
 
+	ethtypes "github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
 )
 
@@ -16,15 +17,25 @@ import (
 // 	noopStateAccountExtras,
 // ]()
 
-// Mock extras struct for compatibility
+// Mock extras struct for compatibility with libevm-style API
 type mockExtras struct {
 	Header mockHeaderExtras
 }
 
 type mockHeaderExtras struct{}
 
-func (m mockHeaderExtras) Set(header interface{}, extra *HeaderExtra) {}
-func (m mockHeaderExtras) Get(header interface{}) *HeaderExtra        { return nil }
+func (m mockHeaderExtras) Set(header interface{}, extra *HeaderExtra) {
+	if h, ok := header.(*ethtypes.Header); ok {
+		SetHeaderExtra(h, extra)
+	}
+}
+
+func (m mockHeaderExtras) Get(header interface{}) *HeaderExtra {
+	if h, ok := header.(*ethtypes.Header); ok {
+		return GetHeaderExtra(h)
+	}
+	return nil
+}
 
 var extras = mockExtras{
 	Header: mockHeaderExtras{},

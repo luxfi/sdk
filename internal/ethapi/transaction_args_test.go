@@ -38,6 +38,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
+	ethparams "github.com/luxfi/geth/params"
 )
 
 var _ feeBackend = &backendMock{}
@@ -262,6 +263,7 @@ type backendMock struct {
 }
 
 func newBackendMock() *backendMock {
+	var shanghaiTime uint64 = 500
 	var cancunTime uint64 = 600
 	config := &params.ChainConfig{
 		ChainID:             big.NewInt(42),
@@ -275,7 +277,9 @@ func newBackendMock() *backendMock {
 		IstanbulBlock:       big.NewInt(0),
 		MuirGlacierBlock:    big.NewInt(0),
 		LondonBlock:         big.NewInt(1100),
+		ShanghaiTime:        &shanghaiTime,
 		CancunTime:          &cancunTime,
+		BlobScheduleConfig:  ethparams.DefaultBlobSchedule,
 	}
 	return &backendMock{
 		current: &types.Header{

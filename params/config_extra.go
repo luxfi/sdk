@@ -156,10 +156,14 @@ func GetExtra(c *ChainConfig) *extras.ChainConfig {
 	return ex
 }
 
-func Copy(c *ChainConfig) ChainConfig {
+// Copy creates a deep copy of the ChainConfig and its extras.
+// Returns a pointer to ensure the extras mapping remains valid.
+func Copy(c *ChainConfig) *ChainConfig {
 	cpy := *c
 	extraCpy := *GetExtra(c)
-	return *WithExtra(&cpy, &extraCpy)
+	result := &cpy
+	WithExtra(result, &extraCpy)
+	return result
 }
 
 // WithExtra sets the extra payload on `c` and returns the modified argument.

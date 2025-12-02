@@ -43,7 +43,7 @@ import (
 	"github.com/holiman/billy"
 	"github.com/holiman/uint256"
 	"github.com/luxfi/crypto"
-	"github.com/luxfi/crypto/kzg4844"
+	"github.com/luxfi/geth/crypto/kzg4844"
 	"github.com/luxfi/evm/commontype"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
@@ -73,8 +73,7 @@ var (
 var testChainConfig *params.ChainConfig
 
 func init() {
-	testChainConfig = new(params.ChainConfig)
-	*testChainConfig = params.Copy(params.TestChainConfig)
+	testChainConfig = params.Copy(params.TestChainConfig)
 
 	// Use a valid test fee configuration
 	params.GetExtra(testChainConfig).FeeConfig = commontype.ValidTestFeeConfig

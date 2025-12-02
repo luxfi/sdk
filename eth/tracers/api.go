@@ -1076,8 +1076,7 @@ func APIs(backend Backend) []rpc.API {
 // overrideConfig returns a copy of [original] with network upgrades enabled by [override] enabled,
 // along with a boolean that indicates whether the copy is canonical (equivalent to the original).
 func overrideConfig(original *params.ChainConfig, override *params.ChainConfig) (*params.ChainConfig, bool) {
-	copy := new(params.ChainConfig)
-	*copy = params.Copy(original)
+	copy := params.Copy(original)
 	canon := true
 
 	overrideExtra := params.GetExtra(override)

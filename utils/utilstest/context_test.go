@@ -4,6 +4,7 @@
 package utilstest
 
 import (
+	"context"
 	"testing"
 
 	"github.com/luxfi/consensus"
@@ -25,7 +26,7 @@ func TestNewTestConsensusContext(t *testing.T) {
 	require.NotNil(t, validators)
 
 	// Test GetCurrentHeight
-	height, err := validatorState.GetCurrentHeight()
+	height, err := validatorState.GetCurrentHeight(context.Background())
 	require.NoError(t, err)
 	require.Equal(t, uint64(0), height)
 

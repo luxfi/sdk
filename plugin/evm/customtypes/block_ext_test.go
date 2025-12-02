@@ -29,7 +29,7 @@ func TestCopyHeader(t *testing.T) {
 		headerExtra := &HeaderExtra{}
 		extras.Header.Set(empty, headerExtra)
 
-		cpy := CopyHeader(empty)
+		cpy := CopyHeaderWithExtra(empty)
 
 		want := &Header{
 			Difficulty: new(big.Int),
@@ -47,7 +47,7 @@ func TestCopyHeader(t *testing.T) {
 
 		header, _ := headerWithNonZeroFields() // the header carries the [HeaderExtra] so we can ignore it
 
-		gotHeader := CopyHeader(header)
+		gotHeader := CopyHeaderWithExtra(header)
 		gotExtra := GetHeaderExtra(gotHeader)
 
 		wantHeader, wantExtra := headerWithNonZeroFields()

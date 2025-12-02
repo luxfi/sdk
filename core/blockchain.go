@@ -563,6 +563,13 @@ func (bc *BlockChain) flattenSnapshot(postAbortWork func() error, hash common.Ha
 		return err
 	}
 
+	// Check if the snapshot layer exists for this block hash.
+	// When SnapshotNoBuild is true, snapshot layers may not be created for new blocks,
+	// so we skip flattening if the layer doesn't exist.
+	if !bc.snaps.HasBlockLayer(hash) {
+		return nil
+	}
+
 	// Ensure we avoid flattening the snapshot while we are processing a block, or
 	// block execution will fallback to reading from the trie (which is much
 	// slower).

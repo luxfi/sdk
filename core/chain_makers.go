@@ -402,15 +402,8 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 	if err != nil {
 		panic(err)
 	}
-	// If BaseFee is still nil after header.BaseFee, set a default
-	if baseFee == nil {
-		// For test environments, always set a base fee
-		if feeConfig.MinBaseFee != nil {
-			baseFee = new(big.Int).Set(feeConfig.MinBaseFee)
-		} else {
-			baseFee = big.NewInt(1) // Fallback to 1 wei
-		}
-	}
+	// BaseFee is nil when neither London nor SubnetEVM forks are active.
+	// This is the correct behavior - pre-EIP1559 blocks should have no base fee.
 
 	header := &types.Header{
 		Root:       state.IntermediateRoot(cm.config.IsEIP158(parent.Number())),
@@ -423,6 +416,10 @@ func (cm *chainMaker) makeHeader(parent *types.Block, gap uint64, state *state.S
 		BaseFee:    baseFee,
 	}
 
+	// EIP-4895: Set empty withdrawals hash for Shanghai
+	if cm.config.IsShanghai(header.Number, header.Time) {
+		header.WithdrawalsHash = &types.EmptyWithdrawalsHash
+	}
 	if cm.config.IsCancun(header.Number, header.Time) {
 		excessBlobGas := eip4844.CalcExcessBlobGas(cm.config, parent.Header(), header.Time)
 		header.ExcessBlobGas = &excessBlobGas

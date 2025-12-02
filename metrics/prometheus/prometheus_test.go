@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -119,10 +120,8 @@ test_timer{quantile="0.9999"} 1.2e+08
 test_timer_sum 2.3e+08
 test_timer_count 6
 `
-	var (
-		stringReader = strings.NewReader(expectedString)
-		parser       expfmt.TextParser
-	)
+	stringReader := strings.NewReader(expectedString)
+	parser := expfmt.NewTextParser(model.LegacyValidation)
 	expectedMetrics, err := parser.TextToMetricFamilies(stringReader)
 	require.NoError(t, err)
 

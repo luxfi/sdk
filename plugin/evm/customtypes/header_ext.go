@@ -120,6 +120,16 @@ func (h *HeaderExtra) PostCopy(dst *ethtypes.Header) {
 	SetHeaderExtra(dst, cp)
 }
 
+// CopyHeaderWithExtra wraps geth's CopyHeader and ensures HeaderExtra is copied via PostCopy.
+// Use this instead of types.CopyHeader when you need HeaderExtra to be preserved.
+func CopyHeaderWithExtra(src *ethtypes.Header) *ethtypes.Header {
+	dst := ethtypes.CopyHeader(src)
+	if extra := GetHeaderExtra(src); extra != nil {
+		extra.PostCopy(dst)
+	}
+	return dst
+}
+
 func (h *HeaderSerializable) updateFromEth(eth *ethtypes.Header) {
 	h.ParentHash = eth.ParentHash
 	h.UncleHash = eth.UncleHash
@@ -140,6 +150,7 @@ func (h *HeaderSerializable) updateFromEth(eth *ethtypes.Header) {
 	h.BlobGasUsed = eth.BlobGasUsed
 	h.ExcessBlobGas = eth.ExcessBlobGas
 	h.ParentBeaconRoot = eth.ParentBeaconRoot
+	h.RequestsHash = eth.RequestsHash
 }
 
 func (h *HeaderSerializable) updateToEth(eth *ethtypes.Header) {
@@ -162,6 +173,7 @@ func (h *HeaderSerializable) updateToEth(eth *ethtypes.Header) {
 	eth.BlobGasUsed = h.BlobGasUsed
 	eth.ExcessBlobGas = h.ExcessBlobGas
 	eth.ParentBeaconRoot = h.ParentBeaconRoot
+	eth.RequestsHash = h.RequestsHash
 }
 
 func (h *HeaderSerializable) updateFromExtras(extras *HeaderExtra) {
@@ -210,6 +222,9 @@ type HeaderSerializable struct {
 
 	// ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
 	ParentBeaconRoot *common.Hash `json:"parentBeaconBlockRoot" rlp:"optional"`
+
+	// RequestsHash was added by EIP-7685 and is ignored in legacy headers.
+	RequestsHash *common.Hash `json:"requestsHash" rlp:"optional"`
 }
 
 // field type overrides for gencodec
