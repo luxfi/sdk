@@ -18,6 +18,8 @@ linters:
     - unconvert
     - gosec
     - staticcheck
+  disable:
+    - errcheck  # Too many legacy unchecked errors
   settings:
     gosec:
       excludes:

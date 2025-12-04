@@ -874,7 +874,7 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 		}
 		balance1 := sdb.GetBalance(addr1)
 		genBal := uint256.MustFromBig(genesisBalance)
-		gasCost5 := uint256.NewInt(5 * 21000) // 5 txs × gas
+		gasCost5 := uint256.NewInt(5 * 21000)                      // 5 txs × gas
 		expectedBalance1 := new(uint256.Int).Sub(genBal, gasCost5) // 1e18 - 105000
 		if balance1.Cmp(expectedBalance1) != 0 {
 			return fmt.Errorf("expected addr1 balance: %d, found balance: %d", expectedBalance1, balance1)
@@ -883,7 +883,7 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 		balance2 := sdb.GetBalance(addr2)
 		// addr2: receives 1e17 from chain2[0], but paid 5 × gas in chain1
 		xferAmt := uint256.MustFromBig(transferAmount)
-		expectedBalance2 := new(uint256.Int).Sub(genBal, gasCost5)   // 1e18 - 105000
+		expectedBalance2 := new(uint256.Int).Sub(genBal, gasCost5)         // 1e18 - 105000
 		expectedBalance2 = new(uint256.Int).Add(expectedBalance2, xferAmt) // + 1e17
 		if balance2.Cmp(expectedBalance2) != 0 {
 			return fmt.Errorf("expected addr2 balance: %d, found balance: %d", expectedBalance2, balance2)
@@ -897,7 +897,7 @@ func BuildOnVariousStages(t *testing.T, create createFunc) {
 		balance3 := sdb.GetBalance(addr3)
 		// addr3: sent 1e17 and paid 21000 gas in chain2[0]
 		gasCost1 := uint256.NewInt(21000)
-		expectedBalance3 := new(uint256.Int).Sub(genBal, xferAmt)     // 1e18 - 1e17
+		expectedBalance3 := new(uint256.Int).Sub(genBal, xferAmt)           // 1e18 - 1e17
 		expectedBalance3 = new(uint256.Int).Sub(expectedBalance3, gasCost1) // - 21000
 		if balance3.Cmp(expectedBalance3) != 0 {
 			return fmt.Errorf("expected addr3 balance: %d, found balance: %d", expectedBalance3, balance3)
@@ -1161,9 +1161,9 @@ func AcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 
 	// Ensure that key1 has some funds in the genesis block.
 	// Use large balance to accommodate gas costs with headroom for multiple txs.
-	genesisBalance := big.NewInt(2e18)       // 2 ETH
-	transferHalf := big.NewInt(5e17)         // 0.5 ETH per block (total 1 ETH)
-	transferQuarter := big.NewInt(25e16)     // 0.25 ETH
+	genesisBalance := big.NewInt(2e18)        // 2 ETH
+	transferHalf := big.NewInt(5e17)          // 0.5 ETH per block (total 1 ETH)
+	transferQuarter := big.NewInt(25e16)      // 0.25 ETH
 	transferThreeQuarter := big.NewInt(75e16) // 0.75 ETH (total 1 ETH)
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
@@ -1324,10 +1324,10 @@ func ReprocessAcceptBlockIdenticalStateRoot(t *testing.T, create createFunc) {
 
 	// Ensure that key1 has some funds in the genesis block.
 	// Use large balance to accommodate gas costs.
-	genesisBalance := big.NewInt(2e18)         // 2 ETH
-	transferHalf := big.NewInt(5e17)           // 0.5 ETH per block
-	transferQuarter := big.NewInt(25e16)       // 0.25 ETH
-	transferThreeQuarter := big.NewInt(75e16)  // 0.75 ETH
+	genesisBalance := big.NewInt(2e18)        // 2 ETH
+	transferHalf := big.NewInt(5e17)          // 0.5 ETH per block
+	transferQuarter := big.NewInt(25e16)      // 0.25 ETH
+	transferThreeQuarter := big.NewInt(75e16) // 0.75 ETH
 	gspec := &Genesis{
 		Config: params.TestChainConfig,
 		Alloc:  types.GenesisAlloc{addr1: {Balance: genesisBalance}},

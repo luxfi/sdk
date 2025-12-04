@@ -629,7 +629,7 @@ func TestTxLookupBlockChain(t *testing.T) {
 		TriePrefetcherParallelism: 4,
 		Pruning:                   true,
 		CommitInterval:            4096,
-		SnapshotLimit:             0,  // Disable snapshots - GenerateChainWithGenesis doesn't create snapshot layers
+		SnapshotLimit:             0, // Disable snapshots - GenerateChainWithGenesis doesn't create snapshot layers
 		StateHistory:              32,
 		AcceptorQueueLimit:        64, // ensure channel doesn't block
 		TransactionHistory:        5,

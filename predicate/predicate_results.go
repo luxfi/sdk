@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
+	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/units"
 	"github.com/luxfi/utils/wrappers"
 )

@@ -699,7 +699,7 @@ func (pool *LegacyPool) validateTx(tx *types.Transaction, local bool) error {
 	opts := &txpool.ValidationOptionsWithState{
 		State: pool.currentState,
 		// Use RulesAt to properly set up the RulesExtra context for precompile checks
-		Rules: params.RulesAt(pool.chainconfig, head.Number, params.IsMergeTODO, head.Time),
+		Rules:      params.RulesAt(pool.chainconfig, head.Number, params.IsMergeTODO, head.Time),
 		MinimumFee: pool.minimumFee,
 
 		FirstNonceGap: nil, // Pool allows arbitrary arrival order, don't invalidate nonce gaps

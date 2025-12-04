@@ -9,10 +9,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/database"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/cache"
 	"github.com/luxfi/cache/lru"
+	"github.com/luxfi/database"
+	"github.com/luxfi/ids"
 
 	"github.com/luxfi/consensus/protocol/chain"
 	luxWarp "github.com/luxfi/warp"

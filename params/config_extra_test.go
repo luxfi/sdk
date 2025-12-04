@@ -7,9 +7,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/luxfi/upgrade/upgradetest"
 	"github.com/luxfi/evm/params/extras"
 	"github.com/luxfi/evm/utils"
+	"github.com/luxfi/upgrade/upgradetest"
 	"github.com/stretchr/testify/require"
 )
 

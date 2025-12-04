@@ -2186,8 +2186,8 @@ func golangBindings(t *testing.T, overload bool) {
 		t.Fatalf("failed to convert binding test to modules: %v\n%s", err, out)
 	}
 	pwd, _ := os.Getwd()
-	evmRoot := filepath.Join(pwd, "..", "..", "..")                // Repo root (evm)
-	luxRoot := filepath.Join(evmRoot, "..")                        // Parent lux directory
+	evmRoot := filepath.Join(pwd, "..", "..", "..") // Repo root (evm)
+	luxRoot := filepath.Join(evmRoot, "..")         // Parent lux directory
 	replacer := exec.Command(gocmd, "mod", "edit", "-x",
 		"-require", "github.com/luxfi/evm@v0.0.0",
 		"-replace", "github.com/luxfi/evm="+evmRoot,
