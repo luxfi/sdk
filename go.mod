@@ -26,7 +26,7 @@ require (
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/math v1.0.0
 	github.com/luxfi/metric v1.4.5
-	github.com/luxfi/node v1.20.9
+	github.com/luxfi/node v1.21.1
 	github.com/luxfi/p2p v1.0.2
 	github.com/luxfi/timer v1.0.1
 	github.com/luxfi/units v1.0.0
