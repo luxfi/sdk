@@ -44,7 +44,7 @@ func init() {
 	// See https://github.com/luxfi/coreth/pull/999
 	c.SkipRegistrations(3)
 
-	Codec.RegisterCodec(Version, c)
+	errs.Add(Codec.RegisterCodec(Version, c))
 
 	if errs.Errored() {
 		panic(errs.Err)
