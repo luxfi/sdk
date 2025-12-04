@@ -2188,29 +2188,46 @@ func golangBindings(t *testing.T, overload bool) {
 	pwd, _ := os.Getwd()
 	evmRoot := filepath.Join(pwd, "..", "..", "..") // Repo root (evm)
 	luxRoot := filepath.Join(evmRoot, "..")         // Parent lux directory
-	replacer := exec.Command(gocmd, "mod", "edit", "-x",
-		"-require", "github.com/luxfi/evm@v0.0.0",
-		"-replace", "github.com/luxfi/evm="+evmRoot,
-		// Local dependencies from evm/go.mod
-		"-replace", "github.com/luxfi/consensus="+filepath.Join(luxRoot, "consensus"),
-		"-replace", "github.com/luxfi/node="+filepath.Join(luxRoot, "node"),
-		"-replace", "github.com/luxfi/database="+filepath.Join(luxRoot, "database"),
-		"-replace", "github.com/luxfi/warp="+filepath.Join(luxRoot, "warp"),
-		"-replace", "github.com/luxfi/geth="+filepath.Join(luxRoot, "geth"),
-		// Additional luxfi dependencies
-		"-replace", "github.com/luxfi/crypto="+filepath.Join(luxRoot, "crypto"),
-		"-replace", "github.com/luxfi/math="+filepath.Join(luxRoot, "math"),
-		"-replace", "github.com/luxfi/genesis="+filepath.Join(luxRoot, "genesis"),
-		"-replace", "github.com/luxfi/ids="+filepath.Join(luxRoot, "ids"),
-		"-replace", "github.com/luxfi/log="+filepath.Join(luxRoot, "log"),
-		"-replace", "github.com/luxfi/metric="+filepath.Join(luxRoot, "metric"),
-		"-replace", "github.com/luxfi/go-bip39="+filepath.Join(luxRoot, "go-bip39"),
-		"-replace", "github.com/luxfi/mock="+filepath.Join(luxRoot, "mock"),
-		"-replace", "github.com/luxfi/trace="+filepath.Join(luxRoot, "trace"),
-	)
-	replacer.Dir = pkg
-	if out, err := replacer.CombinedOutput(); err != nil {
-		t.Fatalf("failed to replace binding test dependency to current source tree: %v\n%s", err, out)
+
+	// Check if we're in a monorepo setup (local development) or standalone (CI)
+	isMonorepo := common.FileExist(filepath.Join(luxRoot, "consensus"))
+
+	if isMonorepo {
+		// Local development: use replace directives for all local packages
+		replacer := exec.Command(gocmd, "mod", "edit", "-x",
+			"-require", "github.com/luxfi/evm@v0.0.0",
+			"-replace", "github.com/luxfi/evm="+evmRoot,
+			// Local dependencies from evm/go.mod
+			"-replace", "github.com/luxfi/consensus="+filepath.Join(luxRoot, "consensus"),
+			"-replace", "github.com/luxfi/node="+filepath.Join(luxRoot, "node"),
+			"-replace", "github.com/luxfi/database="+filepath.Join(luxRoot, "database"),
+			"-replace", "github.com/luxfi/warp="+filepath.Join(luxRoot, "warp"),
+			"-replace", "github.com/luxfi/geth="+filepath.Join(luxRoot, "geth"),
+			// Additional luxfi dependencies
+			"-replace", "github.com/luxfi/crypto="+filepath.Join(luxRoot, "crypto"),
+			"-replace", "github.com/luxfi/math="+filepath.Join(luxRoot, "math"),
+			"-replace", "github.com/luxfi/genesis="+filepath.Join(luxRoot, "genesis"),
+			"-replace", "github.com/luxfi/ids="+filepath.Join(luxRoot, "ids"),
+			"-replace", "github.com/luxfi/log="+filepath.Join(luxRoot, "log"),
+			"-replace", "github.com/luxfi/metric="+filepath.Join(luxRoot, "metric"),
+			"-replace", "github.com/luxfi/go-bip39="+filepath.Join(luxRoot, "go-bip39"),
+			"-replace", "github.com/luxfi/mock="+filepath.Join(luxRoot, "mock"),
+			"-replace", "github.com/luxfi/trace="+filepath.Join(luxRoot, "trace"),
+		)
+		replacer.Dir = pkg
+		if out, err := replacer.CombinedOutput(); err != nil {
+			t.Fatalf("failed to replace binding test dependency to current source tree: %v\n%s", err, out)
+		}
+	} else {
+		// CI: use replace directive only for EVM, others use published versions
+		replacer := exec.Command(gocmd, "mod", "edit", "-x",
+			"-require", "github.com/luxfi/evm@v0.0.0",
+			"-replace", "github.com/luxfi/evm="+evmRoot,
+		)
+		replacer.Dir = pkg
+		if out, err := replacer.CombinedOutput(); err != nil {
+			t.Fatalf("failed to replace binding test dependency to current source tree: %v\n%s", err, out)
+		}
 	}
 	tidier := exec.Command(gocmd, "mod", "tidy", "-compat=1.23")
 	tidier.Dir = pkg
