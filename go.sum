@@ -197,8 +197,8 @@ github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzW
 github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
 github.com/luxfi/cache v1.0.0 h1:OcqGi/qs9ky+7O8fR6WMZtFsunvA40LBTg3QRQqJurs=
 github.com/luxfi/cache v1.0.0/go.mod h1:BEvpffvV3SXs/KSa9nUC1TszxKwUdIHwIaoXpeiYU+Y=
-github.com/luxfi/codec v1.0.1 h1:kX9cp/2slJKVVKKqFHH85+Ut9Ki4m+xbKe/K9D/QiZQ=
-github.com/luxfi/codec v1.0.1/go.mod h1:jeBaoj/RjO543/huHkufiSY+xjzT7LGIlAGMuLJPZQE=
+github.com/luxfi/codec v1.0.2 h1:kY5waqZDviojkl+mQZ1eDphLJBtMQiZSIQ4hRkx9aps=
+github.com/luxfi/codec v1.0.2/go.mod h1:jeBaoj/RjO543/huHkufiSY+xjzT7LGIlAGMuLJPZQE=
 github.com/luxfi/consensus v1.22.2 h1:IS2tmDHA3XUHLVKro2Cvb7KVKOEHKJs7TOTxCwEOlDc=
 github.com/luxfi/consensus v1.22.2/go.mod h1:EM4TGFoTYavBfxJF69gWvRxfUv6vw1N5nipHlkfvt0Y=
 github.com/luxfi/constants v1.0.0 h1:vNtrQwNrMl5Nvm3Z073OZeCsOd28dAnYBL6FL1AD6Xk=
