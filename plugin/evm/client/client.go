@@ -11,8 +11,8 @@ import (
 
 	"github.com/luxfi/evm/plugin/evm/config"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/api"
-	"github.com/luxfi/node/utils/rpc"
+	"github.com/luxfi/evm/api"
+	"github.com/luxfi/evm/utils/rpc"
 )
 
 // Interface compliance
