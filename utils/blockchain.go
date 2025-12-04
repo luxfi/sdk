@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/node/vms/platformvm"
+	"github.com/luxfi/node/vms/platformvm/txs"
 )
 
 // GetDefaultBlockchainAirdropKeyName returns the default key name for blockchain airdrops
@@ -157,10 +159,23 @@ func ByteSliceIsSubnetEvmGenesis(bytes []byte) bool {
 
 // GetBlockchainTx retrieves a blockchain transaction from the network
 func GetBlockchainTx(endpoint string, blockchainID ids.ID) (interface{}, error) {
-	// This is a stub implementation
-	// In a real implementation, this would make an API call to retrieve the transaction
-	// Returns interface{} to avoid importing node's internal packages
-	return nil, fmt.Errorf("GetBlockchainTx not yet implemented")
+	// Use platformvm client to fetch the transaction
+	pClient := platformvm.NewClient(endpoint)
+	ctx, cancel := GetAPIContext()
+	defer cancel()
+	txBytes, err := pClient.GetTx(ctx, blockchainID)
+	if err != nil {
+		return nil, err
+	}
+	var tx txs.Tx
+	if _, err = txs.Codec.Unmarshal(txBytes, &tx); err != nil {
+		return nil, fmt.Errorf("failed unmarshaling the createChainTx: %w", err)
+	}
+	createChainTx, ok := tx.Unsigned.(*txs.CreateChainTx)
+	if !ok {
+		return nil, fmt.Errorf("expected a CreateChainTx, got %T", tx.Unsigned)
+	}
+	return createChainTx, nil
 }
 
 // GetKeyNames returns a list of key names
