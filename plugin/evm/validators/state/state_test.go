@@ -15,7 +15,6 @@ import (
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/evm/plugin/evm/validators/state/interfaces"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/utils/wrappers"
 )
 
 func TestState(t *testing.T) {
@@ -268,7 +267,7 @@ func TestParseValidator(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0xBB, 0xA0,
 			},
 			expected:    nil,
-			expectedErr: wrappers.ErrInsufficientLength,
+			expectedErr: codec.ErrInsufficientLength,
 		},
 	}
 	for _, tt := range tests {
