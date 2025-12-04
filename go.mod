@@ -166,13 +166,3 @@ require (
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 
 // Use local packages instead of node dependencies
-
-
-
-
-
-
-
-
-
-
