@@ -20,9 +20,9 @@ import (
 // makeTestHeader creates a header with properly set extras for testing
 func makeTestHeader(number int64, parentHash common.Hash, gasUsed uint64) *types.Header {
 	header := &types.Header{
-		Number:   big.NewInt(number),
-		GasUsed:  gasUsed,
-		BaseFee:  big.NewInt(25_000_000_000), // Default test base fee
+		Number:  big.NewInt(number),
+		GasUsed: gasUsed,
+		BaseFee: big.NewInt(25_000_000_000), // Default test base fee
 	}
 	if parentHash != (common.Hash{}) {
 		header.ParentHash = parentHash

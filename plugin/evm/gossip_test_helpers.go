@@ -14,8 +14,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 
-	gossipHandler "github.com/luxfi/evm/plugin/evm/gossip"
 	"github.com/luxfi/evm/plugin/evm/config"
+	gossipHandler "github.com/luxfi/evm/plugin/evm/gossip"
 )
 
 // mockValidatorSet implements p2p.ValidatorSet for testing

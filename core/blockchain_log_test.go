@@ -39,17 +39,17 @@ func TestAcceptedLogsSubscription(t *testing.T) {
 		engine  = dummy.NewCoinbaseFaker()
 		key1, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 		// Get crypto.Address and convert to common.Address via bytes
-		cryptoAddr1     = crypto.PubkeyToAddress(key1.PublicKey)
-		addr1           = common.BytesToAddress(cryptoAddr1[:])
-		funds           = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
-		gspec           = &Genesis{
+		cryptoAddr1 = crypto.PubkeyToAddress(key1.PublicKey)
+		addr1       = common.BytesToAddress(cryptoAddr1[:])
+		funds       = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
+		gspec       = &Genesis{
 			Config:  params.TestChainConfig,
 			Alloc:   GenesisAlloc{addr1: {Balance: funds}},
 			BaseFee: big.NewInt(legacy.BaseFee),
 		}
 		cryptoContractAddr = crypto.CreateAddress(cryptoAddr1, 0)
 		contractAddress    = common.BytesToAddress(cryptoContractAddr[:])
-		signer          = types.LatestSigner(gspec.Config)
+		signer             = types.LatestSigner(gspec.Config)
 	)
 
 	parsed, err := abi.JSON(strings.NewReader(callableABI))

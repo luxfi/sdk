@@ -249,7 +249,7 @@ func ApplyTransactionWithResults(config *params.ChainConfig, bc ChainContext, bl
 	}
 	// TODO: StatefulPrecompileHook disabled - type not available in luxfi/geth
 	// cfg.StatefulPrecompileHook = NewStatefulPrecompileHookFull(config, nil, consensusCtx, predicateStorageSlots, predicateResults)
-	_ = consensusCtx         // Suppress unused warning until StatefulPrecompileHook is re-enabled
+	_ = consensusCtx          // Suppress unused warning until StatefulPrecompileHook is re-enabled
 	_ = predicateStorageSlots // Suppress unused warning until StatefulPrecompileHook is re-enabled
 	vmenv := vm.NewEVM(blockContext, statedb, config, cfg)
 	vmenv.SetTxContext(txContext)

@@ -46,7 +46,7 @@ type peerTracker struct {
 	numTrackedPeers        *metrics.Gauge
 	trackedPeers           set.Set[ids.NodeID] // peers that we have sent a request to
 	numResponsivePeers     *metrics.Gauge
-	responsivePeers        set.Set[ids.NodeID]     // peers that responded to the last request they were sent
+	responsivePeers        set.Set[ids.NodeID]  // peers that responded to the last request they were sent
 	bandwidthHeap          luxmath.AveragerHeap // tracks bandwidth peers are responding with
 	averageBandwidthMetric *metrics.GaugeFloat64
 	averageBandwidth       luxmath.Averager

@@ -22,11 +22,11 @@ import (
 	"github.com/luxfi/evm/network/peertest"
 	"github.com/luxfi/evm/plugin/evm/message"
 
+	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/linearcodec"
 	consensusVersion "github.com/luxfi/consensus/version"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/node/version"
 )
 

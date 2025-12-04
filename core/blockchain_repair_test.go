@@ -636,7 +636,7 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 	var sideblocks types.Blocks
 	if tt.sidechainBlocks > 0 {
 		// Generate blocks without state issues - use GenerateChainWithGenesis
-		// which creates its own db with proper genesis state 
+		// which creates its own db with proper genesis state
 		genDb, sideblocks, _, err := GenerateChainWithGenesis(gspec, engine, tt.sidechainBlocks, 10, func(i int, b *BlockGen) {
 			b.SetCoinbase(common.Address{0x01})
 			// Don't add transactions for simplicity
@@ -647,7 +647,7 @@ func testRepairWithScheme(t *testing.T, tt *rewindTest, snapshots bool, scheme s
 			t.Fatalf("Failed to import side chain: %v", err)
 		}
 	}
-	// Generate canonical blocks  
+	// Generate canonical blocks
 	genDb, canonblocks, _, err := GenerateChainWithGenesis(gspec, engine, tt.canonicalBlocks, 10, func(i int, b *BlockGen) {
 		b.SetCoinbase(common.Address{0x02})
 		b.SetDifficulty(big.NewInt(1000000))

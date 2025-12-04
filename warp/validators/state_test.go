@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/consensus/validator"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/ids"
 	"github.com/stretchr/testify/require"
 )
 

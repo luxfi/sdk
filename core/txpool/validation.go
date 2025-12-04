@@ -32,7 +32,6 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/crypto/kzg4844"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
@@ -41,6 +40,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/geth/crypto/kzg4844"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/log"
 )
