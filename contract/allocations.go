@@ -9,6 +9,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
@@ -155,13 +156,20 @@ func GetBlockchainGenesis(
 	network models.Network,
 	chainSpec ChainSpec,
 ) ([]byte, error) {
-	_, err := GetBlockchainID(app, network, chainSpec)
+	blockchainID, err := GetBlockchainID(app, network, chainSpec)
 	if err != nil {
 		return nil, err
 	}
-	// GetBlockchainTx is not implemented, return error for now
-	// TODO: Implement GetBlockchainTx to retrieve genesis data from network
-	return nil, fmt.Errorf("GetBlockchainTx not yet implemented")
+	// Retrieve the blockchain creation transaction to get the genesis data
+	createChainTxIntf, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get blockchain tx: %w", err)
+	}
+	createChainTx, ok := createChainTxIntf.(*txs.CreateChainTx)
+	if !ok {
+		return nil, fmt.Errorf("expected CreateChainTx, got %T", createChainTxIntf)
+	}
+	return createChainTx.GenesisData, nil
 }
 
 func sumGenesisSupply(
