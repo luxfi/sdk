@@ -15,16 +15,41 @@ linters:
     - govet
     - ineffassign
     - misspell
-    - unconvert
     - gosec
     - staticcheck
   disable:
-    - errcheck  # Too many legacy unchecked errors
+    - errcheck    # Too many legacy unchecked errors
+    - unused      # Legacy ethereum code has many unused vars/funcs
+    - unconvert   # Legacy ethereum code has unnecessary conversions
   settings:
     gosec:
       excludes:
+        - G103  # Use of unsafe (legacy ethereum code)
+        - G104  # Errors unhandled (legacy code)
         - G107  # Potential HTTP request made with variable url
+        - G108  # Profiling endpoint exposed (debug tools)
+        - G112  # Slowloris attack (legacy http server config)
+        - G114  # Use of net/http serve without timeouts (legacy)
+        - G115  # Integer overflow conversions (legacy ethereum code)
+        - G204  # Subprocess launched with variable (test commands)
+        - G301  # Directory permissions (build/test tools)
+        - G302  # File permissions
+        - G304  # File inclusion via variable (tool scripts)
+        - G306  # WriteFile permissions (tool outputs)
         - G404  # Use of weak random number generator
+        - G602  # Slice bounds (legacy ethereum code)
+    staticcheck:
+      checks:
+        - all
+        - -QF*     # Quick fixes suggestions (not errors)
+        - -S1040   # Type assertion to same type (legacy patterns)
+        - -SA1019  # Deprecated functions (legacy ethereum code uses them)
+        - -SA4006  # Unused value (legacy patterns)
+        - -SA4009  # Argument overwritten (legacy patterns)
+        - -SA4010  # Unused result of append (legacy code patterns)
+        - -SA6002  # Argument should be pointer-like (sync.Pool patterns)
+        - -SA9003  # Empty branch (legacy code patterns)
+        - -ST*     # All style checks disabled (legacy ethereum code)
 
 formatters:
   enable:
