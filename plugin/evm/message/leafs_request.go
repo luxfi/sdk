@@ -56,7 +56,7 @@ type LeafsResponse struct {
 	// This is not serialized since it is set in the client after verifying the response via
 	// VerifyRangeProof and determining if there are in fact more leaves to the right of the
 	// last value in this response.
-	More bool
+	More bool `serialize:"-"`
 
 	// ProofVals contain the edge merkle-proofs for the range of keys included in the response.
 	// The keys for the proof are simply the keccak256 hashes of the values, so they are not included in the response to save bandwidth.
