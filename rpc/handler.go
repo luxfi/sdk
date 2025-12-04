@@ -180,7 +180,7 @@ func (b *batchCallBuffer) doWrite(ctx context.Context, conn jsonWriter, isErrorR
 	}
 	b.wrote = true // can only write once
 	if len(b.resp) > 0 {
-		conn.writeJSONSkipDeadline(ctx, b.resp, isErrorResponse, true)
+		_ = conn.writeJSONSkipDeadline(ctx, b.resp, isErrorResponse, true)
 	}
 }
 
@@ -202,7 +202,7 @@ func (h *handler) handleBatch(msgs []*jsonrpcMessage) {
 	if len(msgs) == 0 {
 		h.startCallProc(func(cp *callProc) {
 			resp := errorMessage(&invalidRequestError{"empty batch"})
-			h.conn.writeJSONSkipDeadline(cp.ctx, resp, true, h.deadlineContext > 0)
+			_ = h.conn.writeJSONSkipDeadline(cp.ctx, resp, true, h.deadlineContext > 0)
 		})
 		return
 	}
@@ -272,7 +272,7 @@ func (h *handler) handleBatch(msgs []*jsonrpcMessage) {
 		h.addSubscriptions(cp.notifiers)
 		callBuffer.write(cp.ctx, h.conn)
 		for _, n := range cp.notifiers {
-			n.activate()
+			_ = n.activate()
 		}
 	})
 }
@@ -288,7 +288,7 @@ func (h *handler) respondWithBatchTooLarge(cp *callProc, batch []*jsonrpcMessage
 			break
 		}
 	}
-	h.conn.writeJSONSkipDeadline(cp.ctx, []*jsonrpcMessage{resp}, true, h.deadlineContext > 0)
+	_ = h.conn.writeJSONSkipDeadline(cp.ctx, []*jsonrpcMessage{resp}, true, h.deadlineContext > 0)
 }
 
 // handleMsg handles a single non-batch message.
@@ -318,7 +318,7 @@ func (h *handler) handleNonBatchCall(cp *callProc, msg *jsonrpcMessage) {
 			cancel()
 			responded.Do(func() {
 				resp := msg.errorResponse(&internalServerError{errcodeTimeout, errMsgTimeout})
-				h.conn.writeJSONSkipDeadline(cp.ctx, resp, true, h.deadlineContext > 0)
+				_ = h.conn.writeJSONSkipDeadline(cp.ctx, resp, true, h.deadlineContext > 0)
 			})
 		})
 	}
@@ -330,11 +330,11 @@ func (h *handler) handleNonBatchCall(cp *callProc, msg *jsonrpcMessage) {
 	h.addSubscriptions(cp.notifiers)
 	if answer != nil {
 		responded.Do(func() {
-			h.conn.writeJSONSkipDeadline(cp.ctx, answer, false, h.deadlineContext > 0)
+			_ = h.conn.writeJSONSkipDeadline(cp.ctx, answer, false, h.deadlineContext > 0)
 		})
 	}
 	for _, n := range cp.notifiers {
-		n.activate()
+		_ = n.activate()
 	}
 }
 

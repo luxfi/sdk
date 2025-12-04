@@ -65,11 +65,11 @@ func fuzzRlp(t *testing.T, input []byte) {
 	if len(input) == 0 || len(input) > 500*1024 {
 		return
 	}
-	rlp.Split(input)
+	_, _, _, _ = rlp.Split(input)
 	if elems, _, err := rlp.SplitList(input); err == nil {
-		rlp.CountValues(elems)
+		_, _ = rlp.CountValues(elems)
 	}
-	rlp.NewStream(bytes.NewReader(input), 0).Decode(new(interface{}))
+	_ = rlp.NewStream(bytes.NewReader(input), 0).Decode(new(interface{}))
 	if err := decodeEncode(input, new(interface{})); err != nil {
 		t.Fatal(err)
 	}

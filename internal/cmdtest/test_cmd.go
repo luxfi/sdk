@@ -96,7 +96,7 @@ func (tt *TestCmd) Run(name string, args ...string) {
 //
 //	geth.expect(`Passphrase: {{.InputLine "password"}}`)
 func (tt *TestCmd) InputLine(s string) string {
-	io.WriteString(tt.stdin, s+"\n")
+	_, _ = io.WriteString(tt.stdin, s+"\n")
 	return ""
 }
 

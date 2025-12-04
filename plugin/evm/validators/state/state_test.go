@@ -45,7 +45,8 @@ func TestState(t *testing.T) {
 		IsActive:       true,
 		IsL1Validator:  true,
 	}
-	state.AddValidator(vdr)
+	err = state.AddValidator(vdr)
+	require.NoError(err)
 
 	// adding the same validator should fail
 	err = state.AddValidator(vdr)

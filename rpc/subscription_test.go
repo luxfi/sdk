@@ -147,7 +147,7 @@ func TestSubscriptions(t *testing.T) {
 // This test checks that unsubscribing works.
 func TestServerUnsubscribe(t *testing.T) {
 	p1, p2 := net.Pipe()
-	defer p2.Close()
+	defer func() { _ = p2.Close() }()
 
 	// Start the server.
 	server := newTestServer()

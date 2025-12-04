@@ -55,8 +55,8 @@ func TestEIP2718DeriveSha(t *testing.T) {
 	} {
 		d := &hashToHumanReadable{}
 		var t1, t2 types.Transaction
-		rlp.DecodeBytes(common.FromHex(tc.rlpData), &t1)
-		rlp.DecodeBytes(common.FromHex(tc.rlpData), &t2)
+		_ = rlp.DecodeBytes(common.FromHex(tc.rlpData), &t1)
+		_ = rlp.DecodeBytes(common.FromHex(tc.rlpData), &t2)
 		txs := types.Transactions{&t1, &t2}
 		types.DeriveSha(txs, d)
 		if tc.exp != string(d.data) {
