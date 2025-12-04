@@ -20,10 +20,10 @@ require (
 	github.com/luxfi/geth v1.16.40
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.1.2
-	github.com/luxfi/log v1.1.22
+	github.com/luxfi/log v1.1.24
 	github.com/luxfi/math v0.1.5
 	github.com/luxfi/metric v1.4.5
-	github.com/luxfi/node v1.20.3
+	github.com/luxfi/node v1.20.7
 	github.com/luxfi/warp v1.16.19
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
