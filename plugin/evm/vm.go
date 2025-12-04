@@ -4,7 +4,6 @@
 package evm
 
 import (
-	warpbls "github.com/luxfi/warp/bls"
 	"context"
 	"encoding/json"
 	"errors"
@@ -87,6 +86,7 @@ import (
 	consensuscontext "github.com/luxfi/consensus/context"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
 	consensusversion "github.com/luxfi/consensus/version"
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
@@ -206,7 +206,7 @@ func (w *warpSignerAdapter) Sign(msg []byte) ([]byte, error) {
 	}
 
 	// Return the signature bytes
-	return warpbls.SignatureToBytes(sig), nil
+	return bls.SignatureToBytes(sig), nil
 }
 
 func (w *warpSignerAdapter) PublicKey() []byte {
@@ -214,7 +214,7 @@ func (w *warpSignerAdapter) PublicKey() []byte {
 	if pk == nil {
 		return nil
 	}
-	return warpbls.PublicKeyToBytes(pk)
+	return bls.PublicKeyToCompressedBytes(pk)
 }
 
 func (w *warpSignerAdapter) NodeID() ids.NodeID {
@@ -236,7 +236,7 @@ func (a *lp118SignerAdapter) Sign(msg *luxWarp.UnsignedMessage) ([]byte, error) 
 	}
 
 	// Return the signature bytes
-	return warpbls.SignatureToBytes(sig), nil
+	return bls.SignatureToBytes(sig), nil
 }
 
 // appSenderWrapper wraps a consensus AppSender to implement node's AppSender interface
