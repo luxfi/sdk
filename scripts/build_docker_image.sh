@@ -92,6 +92,7 @@ if ! docker pull "${LUXD_NODE_IMAGE}"; then
   LUXD_NODE_IMAGE="${LUXD_LOCAL_IMAGE_NAME}:${LUX_VERSION}"
   echo "Building ${LUXD_NODE_IMAGE} locally"
 
+  # shellcheck source=/dev/null
   source "${EVM_PATH}"/scripts/lib_luxd_clone.sh
   clone_luxd "${LUX_VERSION}"
   SKIP_BUILD_RACE=1 \
