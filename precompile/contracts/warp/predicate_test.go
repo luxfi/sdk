@@ -31,14 +31,6 @@ import (
 
 const pChainHeight uint64 = 1337
 
-// convertCryptoToWarpPublicKey converts a crypto/bls.PublicKey to warp's expected format
-// Note: This is a stub for now since warp/bls package was removed
-func convertCryptoToWarpPublicKey(cryptoPK *bls.PublicKey) (*bls.PublicKey, error) {
-	// After warp refactoring, warp uses crypto/bls directly
-	// Return the same key since types are now unified
-	return cryptoPK, nil
-}
-
 var (
 	_ agoUtils.Sortable[*testValidator] = (*testValidator)(nil)
 
@@ -136,19 +128,13 @@ func newTestValidator() *testValidator {
 	cryptoPK := sk.PublicKey()
 	cryptoPKBytes := bls.PublicKeyToCompressedBytes(cryptoPK)
 
-	// Convert crypto public key to warp public key
-	warpPK, err := convertCryptoToWarpPublicKey(cryptoPK)
-	if err != nil {
-		panic(err)
-	}
-
 	return &testValidator{
 		nodeID:   nodeID,
 		sk:       sk,
 		cryptoPK: cryptoPK,
 		vdr: &luxWarp.Validator{
-			PublicKey:      warpPK,
-			PublicKeyBytes: cryptoPKBytes, // Use the same bytes from crypto
+			PublicKey:      cryptoPK, // warp now uses crypto/bls directly
+			PublicKeyBytes: cryptoPKBytes,
 			Weight:         3,
 			NodeID:         nodeID[:],
 		},
