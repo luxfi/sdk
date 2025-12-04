@@ -11,8 +11,9 @@ import (
 
 	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/consensus/engine/chain/block"
-	"github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/validator/validatorstest"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
 	evmconsensus "github.com/luxfi/evm/consensus"
@@ -23,7 +24,6 @@ import (
 	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/ids"
 	agoUtils "github.com/luxfi/node/utils"
-	"github.com/luxfi/constants"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 	"github.com/stretchr/testify/require"

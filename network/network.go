@@ -18,7 +18,7 @@ import (
 
 	"github.com/luxfi/codec"
 	nodeCore "github.com/luxfi/consensus/engine/core"
-	"github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/p2p"
 	"github.com/luxfi/utils"
