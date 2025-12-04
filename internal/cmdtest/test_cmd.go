@@ -241,7 +241,7 @@ func (tt *TestCmd) CloseStdin() {
 }
 
 func (tt *TestCmd) Kill() {
-	tt.cmd.Process.Kill()
+	_ = tt.cmd.Process.Kill()
 	if tt.Cleanup != nil {
 		tt.Cleanup()
 	}

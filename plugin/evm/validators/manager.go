@@ -162,7 +162,7 @@ func loadValidators(validatorState stateinterfaces.State, newValidators map[ids.
 		// if the validator is not in the new set of validators
 		// delete the validator
 		if _, exists := newValidators[vID]; !exists {
-			validatorState.DeleteValidator(vID)
+			_ = validatorState.DeleteValidator(vID)
 		}
 	}
 
