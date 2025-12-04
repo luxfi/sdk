@@ -16,12 +16,12 @@ import (
 	"math"
 	"testing"
 
-	"github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/validator/validatorsmock"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/constants"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 

@@ -7,7 +7,7 @@ import (
 	"context"
 
 	consensuscontext "github.com/luxfi/consensus/context"
-	"github.com/luxfi/consensus/validator"
+	validators "github.com/luxfi/consensus/validator"
 	"github.com/luxfi/ids"
 )
 

@@ -15,8 +15,8 @@ import (
 
 	"github.com/luxfi/evm/sync/client/stats"
 
-	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/codec"
+	"github.com/luxfi/consensus/version"
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/network"

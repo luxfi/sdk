@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/luxfi/codec"
 	"github.com/luxfi/evm/core/state/snapshot"
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
@@ -22,7 +23,6 @@ import (
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/codec"
 )
 
 const (

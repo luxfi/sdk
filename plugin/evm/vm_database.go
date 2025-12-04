@@ -12,6 +12,7 @@ import (
 	"time"
 
 	consensuscontext "github.com/luxfi/consensus/context"
+	"github.com/luxfi/constants"
 	luxdatabase "github.com/luxfi/database"
 	"github.com/luxfi/database/factory"
 	"github.com/luxfi/database/prefixdb"
@@ -22,7 +23,6 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/log"
 	metrics "github.com/luxfi/metric"
-	"github.com/luxfi/constants"
 )
 
 const (
