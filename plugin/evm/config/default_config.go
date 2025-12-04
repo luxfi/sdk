@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	// pebbledbName is the database type name for PebbleDB
+	// badgerdbName is the database type name for BadgerDB
+	badgerdbName = "badgerdb"
+	// pebbledbName is the database type name for PebbleDB (legacy)
 	pebbledbName = "pebbledb"
 )
 
@@ -98,7 +100,7 @@ func NewDefaultConfig() Config {
 		ValidatorsAPIEnabled: true,
 		MigrateAPIEnabled:    true,
 		// Database settings
-		DatabaseType: pebbledbName,
+		DatabaseType: badgerdbName,
 		// Additional settings with sensible defaults
 		AllowUnprotectedTxs: false,
 	}

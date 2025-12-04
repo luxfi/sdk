@@ -33,7 +33,7 @@ require (
 	github.com/luxfi/upgrade v1.0.0
 	github.com/luxfi/utils v1.0.0
 	github.com/luxfi/vms v0.1.0
-	github.com/luxfi/warp v1.16.25
+	github.com/luxfi/warp v1.16.26
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/prometheus/client_golang v1.23.2
