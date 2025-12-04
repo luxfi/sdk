@@ -14,6 +14,7 @@ import (
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/spf13/cobra"
 )
 
@@ -286,13 +287,20 @@ func GetSubnetID(
 		}
 		subnetID = sc.Networks[network.Name()].SubnetID
 	case chainSpec.BlockchainID != "":
-		_, err := ids.FromString(chainSpec.BlockchainID)
+		blockchainID, err := ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failure parsing %s as id: %w", chainSpec.BlockchainID, err)
 		}
-		// GetBlockchainTx is not implemented
-		// TODO: Implement GetBlockchainTx to retrieve subnet ID from network
-		return ids.Empty, fmt.Errorf("GetBlockchainTx not yet implemented")
+		// Retrieve the blockchain creation transaction to get the subnet ID
+		createChainTxIntf, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
+		if err != nil {
+			return ids.Empty, fmt.Errorf("failed to get blockchain tx: %w", err)
+		}
+		createChainTx, ok := createChainTxIntf.(*txs.CreateChainTx)
+		if !ok {
+			return ids.Empty, fmt.Errorf("expected CreateChainTx, got %T", createChainTxIntf)
+		}
+		subnetID = createChainTx.NetID
 	default:
 		return ids.Empty, fmt.Errorf("blockchain is not defined")
 	}
