@@ -15,7 +15,7 @@ import (
 )
 
 func TestPQCryptoPrecompile(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Removed skip: tests the basic precompile setup
 	require := require.New(t)
 	precompile := PQCryptoPrecompile
 	require.NotNil(precompile)
@@ -23,7 +23,7 @@ func TestPQCryptoPrecompile(t *testing.T) {
 }
 
 func TestMLDSAVerify(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Removed skip: tests ML-DSA signature verification
 	require := require.New(t)
 	precompile := PQCryptoPrecompile
 
@@ -73,12 +73,12 @@ func TestMLDSAVerify(t *testing.T) {
 }
 
 func TestMLKEMEncapsulateDecapsulate(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Removed skip: tests ML-KEM encapsulation/decapsulation
 	require := require.New(t)
 	precompile := PQCryptoPrecompile
 
-	// Generate ML-KEM key pair
-	priv, pub, err := mlkem.GenerateKeyPair(rand.Reader, mlkem.MLKEM512)
+	// Generate ML-KEM key pair (API returns pub, priv, err)
+	pub, priv, err := mlkem.GenerateKeyPair(rand.Reader, mlkem.MLKEM512)
 	require.NoError(err)
 
 	// Test encapsulation
@@ -117,7 +117,7 @@ func TestMLKEMEncapsulateDecapsulate(t *testing.T) {
 }
 
 func TestSLHDSAVerify(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Removed skip: tests SLH-DSA signature verification
 	require := require.New(t)
 	precompile := PQCryptoPrecompile
 
@@ -153,7 +153,7 @@ func TestSLHDSAVerify(t *testing.T) {
 }
 
 func TestGasCalculation(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Removed skip: tests gas cost calculation for PQ operations
 	require := require.New(t)
 	precompile := PQCryptoPrecompile
 

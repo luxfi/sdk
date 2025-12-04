@@ -80,6 +80,34 @@ func (b *BlockAdapter) Bytes() []byte {
 	return b.consensus.Bytes()
 }
 
+// Unwrap returns the underlying consensus block.
+// This is useful for tests that need access to the internal *Block type.
+func (b *BlockAdapter) Unwrap() consensusblock.Block {
+	return b.consensus
+}
+
+// ShouldVerifyWithContext implements the block.WithVerifyContext interface
+// by delegating to the underlying block if it supports the interface
+func (b *BlockAdapter) ShouldVerifyWithContext(ctx context.Context) (bool, error) {
+	// Check if the underlying block implements WithVerifyContext
+	if verifiable, ok := b.consensus.(nodeblock.WithVerifyContext); ok {
+		return verifiable.ShouldVerifyWithContext(ctx)
+	}
+	// Default to false if not supported
+	return false, nil
+}
+
+// VerifyWithContext implements the block.WithVerifyContext interface
+// by delegating to the underlying block if it supports the interface
+func (b *BlockAdapter) VerifyWithContext(ctx context.Context, blockCtx *nodeblock.Context) error {
+	// Check if the underlying block implements WithVerifyContext
+	if verifiable, ok := b.consensus.(nodeblock.WithVerifyContext); ok {
+		return verifiable.VerifyWithContext(ctx, blockCtx)
+	}
+	// Fall back to regular verification
+	return b.consensus.Verify(ctx)
+}
+
 // ContextAdapter adapts between node and consensus context types
 type ContextAdapter struct {
 	nodeCtx *nodeblock.Context

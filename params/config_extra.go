@@ -381,6 +381,9 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 		AccepterPrecompiles: make(map[common.Address]precompileconfig.Accepter),
 	}
 
+	// Track which precompiles have been disabled by upgrades
+	disabledByUpgrade := make(map[string]bool)
+
 	// Add active precompiles based on upgrades
 	for _, upgrade := range extra.PrecompileUpgrades {
 		if upgrade.Timestamp() != nil && *upgrade.Timestamp() <= timestamp {
@@ -394,6 +397,8 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 				delete(rules.Precompiles, address)
 				delete(rules.Predicaters, address)
 				delete(rules.AccepterPrecompiles, address)
+				// Track that this precompile was disabled
+				disabledByUpgrade[upgrade.Config.Key()] = true
 			} else {
 				rules.Precompiles[address] = upgrade.Config
 				if predicater, ok := upgrade.Config.(precompileconfig.Predicater); ok {
@@ -402,29 +407,40 @@ func GetExtrasRules(ethRules Rules, c *ChainConfig, timestamp uint64) *extras.Ru
 				if accepter, ok := upgrade.Config.(precompileconfig.Accepter); ok {
 					rules.AccepterPrecompiles[address] = accepter
 				}
+				// If re-enabled, remove from disabled tracking
+				disabledByUpgrade[upgrade.Config.Key()] = false
 			}
 		}
 	}
 
-	// Add genesis precompiles if at genesis
-	if timestamp == 0 {
-		for key, config := range extra.GenesisPrecompiles {
-			if !config.IsDisabled() {
-				// Get address from the key
-				module, ok := modules.GetPrecompileModule(key)
-				if !ok {
-					continue // Skip unknown precompiles
-				}
-				address := module.Address
+	// Add genesis precompiles if they are active at this timestamp
+	// A genesis precompile is active if its Timestamp() <= timestamp and it's not disabled
+	for key, config := range extra.GenesisPrecompiles {
+		if config.IsDisabled() {
+			continue
+		}
+		// Check if the precompile was disabled by an upgrade
+		if disabledByUpgrade[key] {
+			continue // Skip - an upgrade disabled this genesis precompile
+		}
+		// Check if the precompile is active at this timestamp
+		configTs := config.Timestamp()
+		if configTs == nil || *configTs > timestamp {
+			continue // Not yet active
+		}
+		// Get address from the key
+		module, ok := modules.GetPrecompileModule(key)
+		if !ok {
+			continue // Skip unknown precompiles
+		}
+		address := module.Address
 
-				rules.Precompiles[address] = config
-				if predicater, ok := config.(precompileconfig.Predicater); ok {
-					rules.Predicaters[address] = predicater
-				}
-				if accepter, ok := config.(precompileconfig.Accepter); ok {
-					rules.AccepterPrecompiles[address] = accepter
-				}
-			}
+		rules.Precompiles[address] = config
+		if predicater, ok := config.(precompileconfig.Predicater); ok {
+			rules.Predicaters[address] = predicater
+		}
+		if accepter, ok := config.(precompileconfig.Accepter); ok {
+			rules.AccepterPrecompiles[address] = accepter
 		}
 	}
 

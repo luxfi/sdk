@@ -28,6 +28,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 
@@ -35,6 +36,8 @@ import (
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/core/state"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/params/extras"
+	"github.com/luxfi/evm/predicate"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/core/vm"
@@ -89,9 +92,27 @@ func (p *StateProcessor) Process(block *types.Block, parent *types.Header, state
 
 	var (
 		context = NewEVMBlockContext(header, p.bc, nil)
-		vmenv   = vm.NewEVM(context, statedb, p.config, cfg)
 		signer  = types.MakeSigner(p.config, header.Number, header.Time)
 	)
+	// Get rules for predicate storage slot computation
+	rules := p.config.Rules(header.Number, params.IsMergeTODO, header.Time)
+	rulesExtra := params.GetRulesExtra(rules)
+
+	// Parse predicate results from block header extra data
+	var predicateResults *predicate.Results
+	if rulesExtra.PredicatersExist {
+		var parseErr error
+		predicateResults, parseErr = predicate.ParseResultsFromHeaderExtra(header.Extra)
+		if parseErr != nil {
+			log.Debug("failed to parse predicate results from header", "hash", block.Hash(), "err", parseErr)
+		}
+	}
+
+	// Set up initial stateful precompile hook with consensus context from blockchain
+	// TODO: StatefulPrecompileHook disabled - type not available in luxfi/geth
+	// cfg.StatefulPrecompileHook = NewStatefulPrecompileHookFull(p.config, nil, p.bc.ConsensusContext(), nil, predicateResults)
+	_ = predicateResults // Suppress unused warning until StatefulPrecompileHook is re-enabled
+	vmenv := vm.NewEVM(context, statedb, p.config, cfg)
 	// Debug: Check if statedb is nil
 	if statedb == nil {
 		log.Error("StateDB is nil in Process!")
@@ -106,6 +127,20 @@ func (p *StateProcessor) Process(block *types.Block, parent *types.Header, state
 			return nil, nil, 0, fmt.Errorf("could not apply tx %d [%v]: %w", i, tx.Hash().Hex(), err)
 		}
 		statedb.SetTxContext(tx.Hash(), i)
+
+		// Compute predicate storage slots for this transaction and update the hook
+		var predicateStorageSlots map[common.Address][][]byte
+		if rulesExtra.PredicatersExist {
+			extrasRules := &extras.Rules{
+				Predicaters: rulesExtra.Predicaters,
+				LuxRules:    rulesExtra.LuxRules,
+			}
+			predicateStorageSlots = predicate.PreparePredicateStorageSlots(extrasRules, tx.AccessList())
+		}
+		// TODO: StatefulPrecompileHook disabled - type not available in luxfi/geth
+		// vmenv.Config.StatefulPrecompileHook = NewStatefulPrecompileHookFull(p.config, nil, p.bc.ConsensusContext(), predicateStorageSlots, predicateResults)
+		_ = predicateStorageSlots // Suppress unused warning until StatefulPrecompileHook is re-enabled
+
 		receipt, err := applyTransaction(msg, p.config, gp, statedb, blockNumber, blockHash, header.Time, tx, usedGas, vmenv)
 		if err != nil {
 			return nil, nil, 0, fmt.Errorf("could not apply tx %d [%v]: %w", i, tx.Hash().Hex(), err)
@@ -181,12 +216,41 @@ func applyTransaction(msg *Message, config *params.ChainConfig, gp *GasPool, sta
 // for the transaction, gas used and an error if the transaction failed,
 // indicating the block was invalid.
 func ApplyTransaction(config *params.ChainConfig, bc ChainContext, blockContext vm.BlockContext, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, error) {
+	return ApplyTransactionWithResults(config, bc, blockContext, gp, statedb, header, tx, usedGas, cfg, nil)
+}
+
+// ApplyTransactionWithResults is like ApplyTransaction but accepts pre-computed predicate results.
+// This is used by the miner when it has already verified predicates.
+func ApplyTransactionWithResults(config *params.ChainConfig, bc ChainContext, blockContext vm.BlockContext, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config, predicateResults *predicate.Results) (*types.Receipt, error) {
 	msg, err := TransactionToMessage(tx, types.MakeSigner(config, header.Number, header.Time), header.BaseFee)
 	if err != nil {
 		return nil, err
 	}
 	// Create a new context to be used in the EVM environment
 	txContext := NewEVMTxContext(msg)
+
+	// Compute predicate storage slots from the transaction's access list
+	rules := config.Rules(header.Number, params.IsMergeTODO, header.Time)
+	rulesExtra := params.GetRulesExtra(rules)
+	var predicateStorageSlots map[common.Address][][]byte
+	if rulesExtra.PredicatersExist {
+		extrasRules := &extras.Rules{
+			Predicaters: rulesExtra.Predicaters,
+			LuxRules:    rulesExtra.LuxRules,
+		}
+		predicateStorageSlots = predicate.PreparePredicateStorageSlots(extrasRules, tx.AccessList())
+	}
+
+	// Set up the stateful precompile hook with consensus context from chain
+	// bc can be nil in test contexts (e.g., AddTxWithVMConfig)
+	var consensusCtx context.Context
+	if bc != nil {
+		consensusCtx = bc.ConsensusContext()
+	}
+	// TODO: StatefulPrecompileHook disabled - type not available in luxfi/geth
+	// cfg.StatefulPrecompileHook = NewStatefulPrecompileHookFull(config, nil, consensusCtx, predicateStorageSlots, predicateResults)
+	_ = consensusCtx         // Suppress unused warning until StatefulPrecompileHook is re-enabled
+	_ = predicateStorageSlots // Suppress unused warning until StatefulPrecompileHook is re-enabled
 	vmenv := vm.NewEVM(blockContext, statedb, config, cfg)
 	vmenv.SetTxContext(txContext)
 	return applyTransaction(msg, config, gp, statedb, header.Number, header.Hash(), header.Time, tx, usedGas, vmenv)

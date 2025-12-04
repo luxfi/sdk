@@ -36,12 +36,14 @@ import (
 
 	"github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/lru"
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/log"
+	"github.com/luxfi/geth/rlp"
 )
 
 const (
@@ -165,6 +167,10 @@ func (hc *HeaderChain) GetHeader(hash common.Hash, number uint64) *types.Header 
 	if header == nil {
 		return nil
 	}
+	// Restore HeaderExtra (BlockGasCost) from the raw RLP data.
+	// geth's ReadHeader doesn't decode our custom BlockGasCost field,
+	// so we need to re-decode from the raw RLP to extract it.
+	restoreHeaderExtra(hc.chainDb, header, hash, number)
 	// Cache the found header for next time and return
 	hc.headerCache.Add(hash, header)
 	return header
@@ -235,4 +241,44 @@ func (hc *HeaderChain) Engine() consensus.Engine { return hc.engine }
 // a header chain does not have blocks available for retrieval.
 func (hc *HeaderChain) GetBlock(hash common.Hash, number uint64) *types.Block {
 	return nil
+}
+
+// restoreHeaderExtra reads the BlockGasCost from its separate database key
+// and stores it in the header's in-memory HeaderExtra.
+func restoreHeaderExtra(db ethdb.Reader, header *types.Header, hash common.Hash, number uint64) {
+	// Check if we already have the extra in memory
+	if extra := customtypes.GetHeaderExtra(header); extra != nil && extra.BlockGasCost != nil {
+		return
+	}
+
+	// Read BlockGasCost from its separate key
+	key := blockGasCostKey(number, hash)
+	data, err := db.Get(key)
+	if err != nil || len(data) == 0 {
+		return
+	}
+
+	var cost big.Int
+	if err := rlp.DecodeBytes(data, &cost); err != nil {
+		log.Trace("Failed to decode BlockGasCost", "hash", hash, "number", number, "err", err)
+		return
+	}
+
+	// Store the extracted extra in memory
+	customtypes.SetHeaderExtra(header, &customtypes.HeaderExtra{BlockGasCost: &cost})
+}
+
+// blockGasCostKey returns the database key for storing BlockGasCost.
+// blockGasCostPrefix + num (8 bytes) + hash (32 bytes)
+func blockGasCostKey(number uint64, hash common.Hash) []byte {
+	prefix := []byte("bgc")
+	result := make([]byte, len(prefix)+8+32)
+	copy(result, prefix)
+	// Encode number as big-endian 8 bytes
+	for i := 7; i >= 0; i-- {
+		result[len(prefix)+i] = byte(number)
+		number >>= 8
+	}
+	copy(result[len(prefix)+8:], hash[:])
+	return result
 }

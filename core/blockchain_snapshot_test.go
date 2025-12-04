@@ -394,8 +394,6 @@ func (snaptest *wipeCrashSnapshotTest) test(t *testing.T) {
 // journal will be persisted correctly. In this case no snapshot recovery is
 // required.
 func TestRestartWithNewSnapshot(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//
@@ -431,8 +429,6 @@ func TestRestartWithNewSnapshot(t *testing.T) {
 // so the chain should be rewound to genesis and the disk layer should be left
 // for recovery.
 func TestNoCommitCrashWithNewSnapshot(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//
@@ -469,8 +465,6 @@ func TestNoCommitCrashWithNewSnapshot(t *testing.T) {
 // point so the chain should be rewound to committed point and the disk layer
 // should be left for recovery.
 func TestLowCommitCrashWithNewSnapshot(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//
@@ -507,8 +501,6 @@ func TestLowCommitCrashWithNewSnapshot(t *testing.T) {
 // committed point so the chain should be rewound to genesis and the disk layer
 // should be left for recovery.
 func TestHighCommitCrashWithNewSnapshot(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//
@@ -543,8 +535,6 @@ func TestHighCommitCrashWithNewSnapshot(t *testing.T) {
 // enabling snapshot and after that re-enable the snapshot again. In this
 // case the snapshot should be rebuilt with latest chain head.
 func TestGappedNewSnapshot(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//
@@ -578,8 +568,6 @@ func TestGappedNewSnapshot(t *testing.T) {
 // more new blocks on top without enabling the snapshot. After the restart,
 // crash happens. Check everything is ok after the restart.
 func TestRecoverSnapshotFromWipingCrash(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Chain:
 	//   G->C1->C2->C3->C4->C5->C6->C7->C8 (HEAD)
 	//

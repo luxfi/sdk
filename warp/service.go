@@ -77,7 +77,7 @@ func (a *API) GetMessageAggregateSignature(ctx context.Context, messageID ids.ID
 
 // GetBlockAggregateSignature fetches the aggregate signature for the requested [blockID]
 func (a *API) GetBlockAggregateSignature(ctx context.Context, blockID ids.ID, quorumNum uint64, subnetIDStr string) (signedMessageBytes hexutil.Bytes, err error) {
-	blockHashPayload, err := payload.NewHash(blockID)
+	blockHashPayload, err := payload.NewHash(blockID[:])
 	if err != nil {
 		return nil, err
 	}

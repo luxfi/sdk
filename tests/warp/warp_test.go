@@ -20,7 +20,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/crypto"
+	"github.com/luxfi/crypto/bls"
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/log"
 
@@ -127,19 +128,19 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		validatorURIs[i] = node.URI
 	}
 
-	tmpnetSubnetA := network.GetSubnet(subnetAName)
+	tmpnetSubnetA := network.GetNet(subnetAName)
 	require.NotNil(tmpnetSubnetA)
 	subnetA = &Subnet{
-		SubnetID:      tmpnetSubnetA.SubnetID,
+		SubnetID:      tmpnetSubnetA.NetID,
 		BlockchainID:  tmpnetSubnetA.Chains[0].ChainID,
 		PreFundedKey:  tmpnetSubnetA.Chains[0].PreFundedKey.ToECDSA(),
 		ValidatorURIs: validatorURIs,
 	}
 
-	tmpnetSubnetB := network.GetSubnet(subnetBName)
+	tmpnetSubnetB := network.GetNet(subnetBName)
 	require.NotNil(tmpnetSubnetB)
 	subnetB = &Subnet{
-		SubnetID:      tmpnetSubnetB.SubnetID,
+		SubnetID:      tmpnetSubnetB.NetID,
 		BlockchainID:  tmpnetSubnetB.Chains[0].ChainID,
 		PreFundedKey:  tmpnetSubnetB.Chains[0].PreFundedKey.ToECDSA(),
 		ValidatorURIs: validatorURIs,
@@ -234,9 +235,9 @@ func newWarpTest(ctx context.Context, sendingSubnet *Subnet, receivingSubnet *Su
 		receivingSubnet:              receivingSubnet,
 		receivingSubnetURIs:          receivingSubnet.ValidatorURIs,
 		sendingSubnetFundedKey:       sendingSubnetFundedKey,
-		sendingSubnetFundedAddress:   crypto.PubkeyToAddress(sendingSubnetFundedKey.PublicKey),
+		sendingSubnetFundedAddress:   common.Address(secp256k1.PubkeyToAddress(sendingSubnetFundedKey.PublicKey)),
 		receivingSubnetFundedKey:     receivingSubnetFundedKey,
-		receivingSubnetFundedAddress: crypto.PubkeyToAddress(receivingSubnetFundedKey.PublicKey),
+		receivingSubnetFundedAddress: common.Address(secp256k1.PubkeyToAddress(receivingSubnetFundedKey.PublicKey)),
 	}
 	infoClient := info.NewClient(sendingSubnet.ValidatorURIs[0])
 	networkID, err := infoClient.GetNetworkID(ctx)
@@ -340,7 +341,7 @@ func (w *warpTest) sendMessageFromSendingSubnet() {
 	w.blockID = ids.ID(blockHash) // Set blockID to construct a warp message containing a block hash payload later
 	w.blockPayload, err = payload.NewHash(w.blockID)
 	require.NoError(err)
-	w.blockPayloadUnsignedMessage, err = luxWarp.NewUnsignedMessage(w.networkID, w.sendingSubnet.BlockchainID, w.blockPayload.Bytes())
+	w.blockPayloadUnsignedMessage, err = luxWarp.NewUnsignedMessage(w.networkID, w.sendingSubnet.BlockchainID[:], w.blockPayload.Bytes())
 	require.NoError(err)
 
 	log.Info("Fetching relevant warp logs from the newly produced block")
@@ -412,10 +413,15 @@ func (w *warpTest) aggregateSignaturesViaAPI() {
 	totalWeight := uint64(0)
 	warpValidators := make([]*luxWarp.Validator, 0, len(validators))
 	for nodeID, validator := range validators {
+		pk, err := bls.PublicKeyFromCompressedBytes(validator.PublicKey)
+		if err != nil {
+			require.NoError(err, "failed to parse BLS public key for nodeID %s", nodeID)
+		}
 		warpValidators = append(warpValidators, &luxWarp.Validator{
-			PublicKey: validator.PublicKey,
-			Weight:    validator.Weight,
-			NodeIDs:   []ids.NodeID{nodeID},
+			PublicKey:      pk,
+			PublicKeyBytes: validator.PublicKey,
+			Weight:         validator.Weight,
+			NodeID:         nodeID[:],
 		})
 		totalWeight += validator.Weight
 	}
@@ -452,7 +458,9 @@ func (w *warpTest) aggregateSignatures() {
 	if w.sendingSubnet.SubnetID == constants.PrimaryNetworkID {
 		subnetIDStr = w.receivingSubnet.SubnetID.String()
 	}
-	signedWarpMessageBytes, err := client.GetMessageAggregateSignature(ctx, w.addressedCallSignedMessage.ID(), warp.WarpQuorumDenominator, subnetIDStr)
+	messageID, err := ids.ToID(w.addressedCallSignedMessage.ID())
+	require.NoError(err)
+	signedWarpMessageBytes, err := client.GetMessageAggregateSignature(ctx, messageID, warp.WarpQuorumDenominator, subnetIDStr)
 	require.NoError(err)
 	require.Equal(w.addressedCallSignedMessage.Bytes(), signedWarpMessageBytes)
 
@@ -588,7 +596,7 @@ func (w *warpTest) executeHardHatTest() {
 
 	rpcURI := toRPCURI(w.sendingSubnetURIs[0], w.sendingSubnet.BlockchainID.String())
 
-	os.Setenv("SENDER_ADDRESS", crypto.PubkeyToAddress(w.sendingSubnetFundedKey.PublicKey).Hex())
+	os.Setenv("SENDER_ADDRESS", secp256k1.PubkeyToAddress(w.sendingSubnetFundedKey.PublicKey).Hex())
 	os.Setenv("SOURCE_CHAIN_ID", "0x"+w.sendingSubnet.BlockchainID.Hex())
 	os.Setenv("PAYLOAD", "0x"+common.Bytes2Hex(testPayload))
 	os.Setenv("EXPECTED_UNSIGNED_MESSAGE", "0x"+hex.EncodeToString(w.addressedCallUnsignedMessage.Bytes()))
@@ -688,7 +696,11 @@ func (w *warpTest) warpLoad() {
 		}
 		log.Info("Fetching addressed call aggregate signature via p2p API")
 
-		signedWarpMessageBytes, err := warpClient.GetMessageAggregateSignature(ctx, unsignedMessage.ID(), warp.WarpDefaultQuorumNumerator, subnetIDStr)
+		msgID, err := ids.ToID(unsignedMessage.ID())
+		if err != nil {
+			return nil, err
+		}
+		signedWarpMessageBytes, err := warpClient.GetMessageAggregateSignature(ctx, msgID, warp.WarpDefaultQuorumNumerator, subnetIDStr)
 		if err != nil {
 			return nil, err
 		}

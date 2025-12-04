@@ -1083,6 +1083,11 @@ func (context *ChainContext) Config() *params.ChainConfig {
 	return context.b.ChainConfig()
 }
 
+func (context *ChainContext) ConsensusContext() context.Context {
+	// Return the context (may contain consensus values if set by backend)
+	return context.ctx
+}
+
 func doCall(ctx context.Context, b Backend, args TransactionArgs, state *state.StateDB, header *types.Header, overrides *StateOverride, blockOverrides *BlockOverrides, timeout time.Duration, globalGasCap uint64) (*core.ExecutionResult, error) {
 	if err := overrides.Apply(state); err != nil {
 		return nil, err

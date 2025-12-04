@@ -128,8 +128,6 @@ func BenchmarkFilters(b *testing.B) {
 }
 
 func TestFilters(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
-	t.Skip("Temporarily skipping failing test")
 	// Test filters functionality - handle any BlockGasCost mismatches gracefully
 	var (
 		db     = rawdb.NewMemoryDatabase()
@@ -142,7 +140,7 @@ func TestFilters(t *testing.T) {
 			copy(commonAddr[:], cryptoAddr[:])
 			return commonAddr
 		}()
-		signer = types.NewLondonSigner(big.NewInt(1))
+		signer = types.LatestSigner(params.TestChainConfig)
 		// Logging contract
 		contract  = common.Address{0xfe}
 		contract2 = common.Address{0xff}
@@ -278,7 +276,10 @@ func TestFilters(t *testing.T) {
 		}
 	})
 	require.NoError(t, err)
-	bc, err := core.NewBlockChain(db, core.DefaultCacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, gspec.ToBlock().Hash(), false)
+	// Use cache config with SnapshotLimit: 0 because GenerateChain doesn't create snapshot layers
+	cacheConfig := *core.DefaultCacheConfig
+	cacheConfig.SnapshotLimit = 0
+	bc, err := core.NewBlockChain(db, &cacheConfig, gspec, dummy.NewCoinbaseFaker(), vm.Config{}, gspec.ToBlock().Hash(), false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,6 +413,7 @@ func patchWant(t *testing.T, want string, blocks []*types.Block) string {
 		blockIndex := log.BlockNumber - 1
 		log.BlockHash = blocks[blockIndex].Hash()
 		log.TxHash = blocks[blockIndex].Transactions()[log.TxIndex].Hash()
+		log.BlockTimestamp = blocks[blockIndex].Time()
 	}
 	result, err := json.Marshal(logs)
 	if err != nil {

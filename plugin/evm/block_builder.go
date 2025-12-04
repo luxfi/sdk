@@ -129,6 +129,18 @@ func (b *blockBuilder) waitForEvent(ctx context.Context) (commonEng.Message, err
 // waitForNeedToBuild waits until needToBuild returns true.
 // It returns the last time a block was built.
 func (b *blockBuilder) waitForNeedToBuild(ctx context.Context) (time.Time, error) {
+	// Start a goroutine to broadcast when context is cancelled
+	// This wakes up the Wait() call so we can check context cancellation
+	done := make(chan struct{})
+	go func() {
+		select {
+		case <-ctx.Done():
+			b.pendingSignal.Broadcast()
+		case <-done:
+		}
+	}()
+	defer close(done)
+
 	b.buildBlockLock.Lock()
 	defer b.buildBlockLock.Unlock()
 	for !b.needToBuild() {

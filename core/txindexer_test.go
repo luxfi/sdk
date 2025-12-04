@@ -60,20 +60,20 @@ func TestTransactionIndices(t *testing.T) {
 		addr2 = common.BytesToAddress(cryptoAddr2[:])
 		funds = big.NewInt(10000000000000)
 		gspec = &Genesis{
-			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
+			Config: params.TestChainConfig,
 			Alloc:  GenesisAlloc{addr1: {Balance: funds}},
 		}
 		signer = types.LatestSigner(gspec.Config)
 	)
 	genDb, blocks, _, err := GenerateChainWithGenesis(gspec, dummy.NewFaker(), 128, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, big.NewInt(1), nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
 	require.NoError(err)
 
 	blocks2, _, err := GenerateChain(gspec.Config, blocks[len(blocks)-1], dummy.NewFaker(), genDb, 10, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, big.NewInt(1), nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
@@ -87,8 +87,7 @@ func TestTransactionIndices(t *testing.T) {
 		Pruning:                   true,
 		CommitInterval:            4096,
 		StateHistory:              32,
-		SnapshotLimit:             256,
-		SnapshotNoBuild:           true, // Ensure the test errors if snapshot initialization fails
+		SnapshotLimit:             0, // Disable snapshots - GenerateChainWithGenesis doesn't create snapshot layers
 		AcceptorQueueLimit:        64,
 	}
 
@@ -184,20 +183,20 @@ func TestTransactionSkipIndexing(t *testing.T) {
 		addr2 = common.BytesToAddress(cryptoAddr2[:])
 		funds = big.NewInt(10000000000000)
 		gspec = &Genesis{
-			Config: &params.ChainConfig{HomesteadBlock: new(big.Int)},
+			Config: params.TestChainConfig,
 			Alloc:  GenesisAlloc{addr1: {Balance: funds}},
 		}
 		signer = types.LatestSigner(gspec.Config)
 	)
 	genDb, blocks, _, err := GenerateChainWithGenesis(gspec, dummy.NewCoinbaseFaker(), 5, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, big.NewInt(1), nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
 	require.NoError(err)
 
 	blocks2, _, err := GenerateChain(gspec.Config, blocks[len(blocks)-1], dummy.NewCoinbaseFaker(), genDb, 5, 10, func(i int, block *BlockGen) {
-		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, nil, nil), signer, key1)
+		tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr1), addr2, big.NewInt(10000), ethparams.TxGas, big.NewInt(1), nil), signer, key1)
 		require.NoError(err)
 		block.AddTx(tx)
 	})
@@ -211,8 +210,7 @@ func TestTransactionSkipIndexing(t *testing.T) {
 		Pruning:                   true,
 		CommitInterval:            4096,
 		StateHistory:              32,
-		SnapshotLimit:             256,
-		SnapshotNoBuild:           true, // Ensure the test errors if snapshot initialization fails
+		SnapshotLimit:             0, // Disable snapshots - GenerateChainWithGenesis doesn't create snapshot layers
 		AcceptorQueueLimit:        64,
 		SkipTxIndexing:            true,
 	}

@@ -222,6 +222,7 @@ func (client *stateSyncerClient) acceptSyncSummary(proposedSummary message.SyncS
 // the process begins with [fromHash] and it fetches parents recursively.
 // fetching starts from the first ancestor not found on disk
 func (client *stateSyncerClient) syncBlocks(ctx context.Context, fromHash common.Hash, fromHeight uint64, parentsToGet int) error {
+	log.Info("syncBlocks: starting", "fromHash", fromHash, "fromHeight", fromHeight, "parentsToGet", parentsToGet)
 	nextHash := fromHash
 	nextHeight := fromHeight
 	parentsPerRequest := uint16(32)
@@ -232,6 +233,7 @@ func (client *stateSyncerClient) syncBlocks(ctx context.Context, fromHash common
 		blk := rawdb.ReadBlock(client.chaindb, nextHash, nextHeight)
 		if blk != nil {
 			// block exists
+			log.Info("syncBlocks: block found on disk", "hash", nextHash, "height", nextHeight)
 			nextHash = blk.ParentHash()
 			nextHeight--
 			parentsToGet--
@@ -239,16 +241,20 @@ func (client *stateSyncerClient) syncBlocks(ctx context.Context, fromHash common
 		}
 
 		// block was not found
+		log.Info("syncBlocks: block NOT found on disk", "hash", nextHash, "height", nextHeight, "remainingParents", parentsToGet)
 		break
 	}
 
 	// get any blocks we couldn't find on disk from peers and write
 	// them to disk.
+	log.Info("syncBlocks: about to fetch from peers", "nextHash", nextHash, "nextHeight", nextHeight, "remainingParents", parentsToGet-1)
 	batch := client.chaindb.NewBatch()
 	for i := parentsToGet - 1; i >= 0 && (nextHash != common.Hash{}); {
 		if err := ctx.Err(); err != nil {
+			log.Info("syncBlocks: context cancelled", "err", err)
 			return err
 		}
+		log.Info("syncBlocks: calling GetBlocks", "hash", nextHash, "height", nextHeight, "parentsPerRequest", parentsPerRequest)
 		blocks, err := client.client.GetBlocks(ctx, nextHash, nextHeight, parentsPerRequest)
 		if err != nil {
 			log.Error("could not get blocks from peer", "err", err, "nextHash", nextHash, "remaining", i+1)

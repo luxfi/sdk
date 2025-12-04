@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/codec"
 	"github.com/luxfi/node/codec/linearcodec"
@@ -118,4 +119,17 @@ func (r *Results) String() string {
 	}
 
 	return sb.String()
+}
+
+// ParseResultsFromHeaderExtra parses predicate results from a block header's extra data.
+// The extra data format is: [windowData (WindowSize bytes)][predicateResultsData...]
+// Returns nil if there are no predicate results (extra data <= WindowSize).
+func ParseResultsFromHeaderExtra(extra []byte) (*Results, error) {
+	// Check if extra data has predicate results beyond the window
+	if len(extra) <= subnetevm.WindowSize {
+		return nil, nil
+	}
+
+	predicateBytes := extra[subnetevm.WindowSize:]
+	return ParseResults(predicateBytes)
 }

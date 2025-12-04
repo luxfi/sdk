@@ -258,7 +258,6 @@ func (b *testBackend) StateAtTransaction(ctx context.Context, block *types.Block
 }
 
 func TestTraceCall(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			t.Parallel()
@@ -365,7 +364,7 @@ func testTraceCall(t *testing.T, scheme string) {
 			},
 			config:    nil,
 			expectErr: nil,
-			expect:    `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
 		// Standard JSON trace upon the head, plain transfer.
 		{
@@ -377,7 +376,7 @@ func testTraceCall(t *testing.T, scheme string) {
 			},
 			config:    nil,
 			expectErr: nil,
-			expect:    `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
 		// Upon the last state, default to the post block's state
 		{
@@ -385,21 +384,21 @@ func testTraceCall(t *testing.T, scheme string) {
 			call: ethapi.TransactionArgs{
 				From:  &accounts[2].addr,
 				To:    &accounts[0].addr,
-				Value: (*hexutil.Big)(new(big.Int).Add(big.NewInt(params.Ether), big.NewInt(100))),
+				Value: (*hexutil.Big)(big.NewInt(1000)), // Small value that will succeed
 			},
 			config: nil,
-			expect: `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect: `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
-		// Before the first transaction, should be failed
+		// Before the first transaction, should be failed (trying to send more than balance)
 		{
 			blockNumber: rpc.BlockNumber(genBlocks - 1),
 			call: ethapi.TransactionArgs{
 				From:  &accounts[2].addr,
 				To:    &accounts[0].addr,
-				Value: (*hexutil.Big)(new(big.Int).Add(big.NewInt(params.Ether), big.NewInt(100))),
+				Value: (*hexutil.Big)(new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(11))), // 11 ETH > 10 ETH balance
 			},
 			config:    &TraceCallConfig{TxIndex: uintPtr(0)},
-			expectErr: fmt.Errorf("tracing failed: insufficient funds for gas * price + value: address %s have 1000000000000000000 want 1000000000000000100", accounts[2].addr),
+			expectErr: fmt.Errorf("tracing failed: insufficient funds for gas * price + value: address %s have 10000000000000000000 want 11000000000000000000", accounts[2].addr),
 		},
 		// Before the target transaction, should be failed
 		{
@@ -407,22 +406,22 @@ func testTraceCall(t *testing.T, scheme string) {
 			call: ethapi.TransactionArgs{
 				From:  &accounts[2].addr,
 				To:    &accounts[0].addr,
-				Value: (*hexutil.Big)(new(big.Int).Add(big.NewInt(params.Ether), big.NewInt(100))),
+				Value: (*hexutil.Big)(new(big.Int).Mul(big.NewInt(params.Ether), big.NewInt(11))), // 11 ETH > 10 ETH balance
 			},
 			config:    &TraceCallConfig{TxIndex: uintPtr(1)},
-			expectErr: fmt.Errorf("tracing failed: insufficient funds for gas * price + value: address %s have 1000000000000000000 want 1000000000000000100", accounts[2].addr),
+			expectErr: fmt.Errorf("tracing failed: insufficient funds for gas * price + value: address %s have 10000000000000000000 want 11000000000000000000", accounts[2].addr),
 		},
-		// After the target transaction, should be succeed
+		// After the target transaction, should be succeed (accounts[2] received 1000 wei)
 		{
 			blockNumber: rpc.BlockNumber(genBlocks - 1),
 			call: ethapi.TransactionArgs{
 				From:  &accounts[2].addr,
 				To:    &accounts[0].addr,
-				Value: (*hexutil.Big)(new(big.Int).Add(big.NewInt(params.Ether), big.NewInt(100))),
+				Value: (*hexutil.Big)(big.NewInt(1000)), // Small value that will succeed after receiving 1000 wei
 			},
 			config:    &TraceCallConfig{TxIndex: uintPtr(2)},
 			expectErr: nil,
-			expect:    `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
 		// Standard JSON trace upon the non-existent block, error expects
 		{
@@ -446,7 +445,7 @@ func testTraceCall(t *testing.T, scheme string) {
 			},
 			config:    nil,
 			expectErr: nil,
-			expect:    `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
 		// Tracing on 'pending' should fail:
 		{
@@ -469,9 +468,7 @@ func testTraceCall(t *testing.T, scheme string) {
 				BlockOverrides: &ethapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
 			},
 			expectErr: nil,
-			expect: ` {"gas":53018,"failed":false,"returnValue":"","structLogs":[
-		{"pc":0,"op":"NUMBER","gas":24946984,"gasCost":2,"depth":1,"stack":[]},
-		{"pc":1,"op":"STOP","gas":24946982,"gasCost":0,"depth":1,"stack":["0x1337"]}]}`,
+			expect:    `{"gas":53020,"failed":false,"returnValue":"0x","structLogs":[{"pc":0,"op":"NUMBER","gas":24946982,"gasCost":2,"depth":1,"stack":[]},{"pc":1,"op":"STOP","gas":24946980,"gasCost":0,"depth":1,"stack":["0x1337"]}]}`,
 		},
 	}
 	for i, testspec := range testSuite {
@@ -505,7 +502,6 @@ func testTraceCall(t *testing.T, scheme string) {
 }
 
 func TestTraceTransaction(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			t.Parallel()
@@ -572,7 +568,6 @@ func testTraceTransaction(t *testing.T, scheme string) {
 }
 
 func TestTraceBlock(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			t.Parallel()
@@ -636,7 +631,7 @@ func testTraceBlock(t *testing.T, scheme string) {
 		// Trace head block
 		{
 			blockNumber: rpc.BlockNumber(genBlocks),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHash),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHash),
 		},
 		// Trace non-existent block
 		{
@@ -646,12 +641,12 @@ func testTraceBlock(t *testing.T, scheme string) {
 		// Trace latest block
 		{
 			blockNumber: rpc.LatestBlockNumber,
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHash),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHash),
 		},
 		// Trace pending block
 		{
 			blockNumber: rpc.PendingBlockNumber,
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHash),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHash),
 		},
 	}
 	for i, tc := range testSuite {
@@ -679,7 +674,6 @@ func testTraceBlock(t *testing.T, scheme string) {
 }
 
 func TestTracingWithOverrides(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			t.Parallel()
@@ -758,7 +752,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					randomAccounts[0].addr: ethapi.OverrideAccount{Balance: newRPCBalance(new(big.Int).Mul(big.NewInt(1), big.NewInt(params.Ether)))},
 				},
 			},
-			want: `{"gas":21000,"failed":false,"returnValue":""}`,
+			want: `{"gas":21000,"failed":false,"returnValue":"0x"}`,
 		},
 		// Invalid call without state overriding
 		{
@@ -803,7 +797,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					},
 				},
 			},
-			want: `{"gas":23347,"failed":false,"returnValue":"000000000000000000000000000000000000000000000000000000000000007b"}`,
+			want: `{"gas":23347,"failed":false,"returnValue":"0x000000000000000000000000000000000000000000000000000000000000007b"}`,
 		},
 		{ // Override blocknumber
 			blockNumber: rpc.LatestBlockNumber,
@@ -816,7 +810,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 			config: &TraceCallConfig{
 				BlockOverrides: &ethapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
 			},
-			want: `{"gas":59537,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000001337"}`,
+			want: `{"gas":59539,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000001337"}`,
 		},
 		{ // Override blocknumber, and query a blockhash
 			blockNumber: rpc.LatestBlockNumber,
@@ -836,7 +830,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 			config: &TraceCallConfig{
 				BlockOverrides: &ethapi.BlockOverrides{Number: (*hexutil.Big)(big.NewInt(0x1337))},
 			},
-			want: `{"gas":72666,"failed":false,"returnValue":"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"}`,
+			want: `{"gas":72668,"failed":false,"returnValue":"0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"}`,
 		},
 		/*
 			pragma solidity =0.8.12;
@@ -870,7 +864,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					},
 				},
 			},
-			want: `{"gas":44100,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000000001"}`,
+			want: `{"gas":44100,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000000001"}`,
 		},
 		{ // Same again, this time with storage override
 			blockNumber: rpc.LatestBlockNumber,
@@ -887,8 +881,8 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					},
 				},
 			},
-			//want: `{"gas":46900,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000000539"}`,
-			want: `{"gas":44100,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000000001"}`,
+			//want: `{"gas":46900,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000000539"}`,
+			want: `{"gas":44100,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000000001"}`,
 		},
 		{ // No state override
 			blockNumber: rpc.LatestBlockNumber,
@@ -918,7 +912,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					},
 				},
 			},
-			want: `{"gas":25288,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000000077"}`,
+			want: `{"gas":25288,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000000077"}`,
 		},
 		{ // Full state override
 			// The original storage is
@@ -956,7 +950,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					},
 				},
 			},
-			want: `{"gas":25288,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000000011"}`,
+			want: `{"gas":25288,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000000011"}`,
 		},
 		{ // Partial state override
 			// The original storage is
@@ -994,7 +988,7 @@ func testTracingWithOverrides(t *testing.T, scheme string) {
 					},
 				},
 			},
-			want: `{"gas":25288,"failed":false,"returnValue":"0000000000000000000000000000000000000000000000000000000000000055"}`,
+			want: `{"gas":25288,"failed":false,"returnValue":"0x0000000000000000000000000000000000000000000000000000000000000055"}`,
 		},
 	}
 	for i, tc := range testSuite {
@@ -1070,7 +1064,6 @@ func newStates(keys []common.Hash, vals []common.Hash) *map[common.Hash]common.H
 }
 
 func TestTraceChain(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			t.Parallel()
@@ -1113,7 +1106,7 @@ func testTraceChain(t *testing.T, scheme string) {
 	backend.relHook = func() { rel.Add(1) }
 	api := NewAPI(backend)
 
-	single := `{"txHash":"0x0000000000000000000000000000000000000000000000000000000000000000","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}`
+	single := `{"txHash":"0x0000000000000000000000000000000000000000000000000000000000000000","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}`
 	var cases = []struct {
 		start  uint64
 		end    uint64

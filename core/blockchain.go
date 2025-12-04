@@ -302,6 +302,8 @@ type BlockChain struct {
 	chainConfig *params.ChainConfig // Chain & network configuration
 	cacheConfig *CacheConfig        // Cache configuration for pruning
 
+	consensusCtx context.Context // Consensus context with chain ID, network ID for warp
+
 	db           ethdb.Database   // Low level persistent database to store final content in
 	snaps        *snapshot.Tree   // Snapshot tree for fast trie leaf access
 	triedb       *triedb.Database // The database handler for maintaining trie nodes.
@@ -739,6 +741,17 @@ func (bc *BlockChain) SenderCacher() *TxSenderCacher {
 	return bc.senderCacher
 }
 
+// SetConsensusContext sets the consensus context for warp messages.
+// This should be called by the VM after creating the blockchain.
+func (bc *BlockChain) SetConsensusContext(ctx context.Context) {
+	bc.consensusCtx = ctx
+}
+
+// ConsensusContext returns the consensus context for warp messages.
+func (bc *BlockChain) ConsensusContext() context.Context {
+	return bc.consensusCtx
+}
+
 // loadLastState loads the last known chain state from the database. This method
 // assumes that the chain manager mutex is held.
 func (bc *BlockChain) loadLastState(lastAcceptedHash common.Hash) error {
@@ -792,7 +805,7 @@ func (bc *BlockChain) loadLastState(lastAcceptedHash common.Hash) error {
 func (bc *BlockChain) loadGenesisState() error {
 	// Prepare the genesis block and reinitialise the chain
 	batch := bc.db.NewBatch()
-	rawdb.WriteBlock(batch, bc.genesisBlock)
+	customrawdb.WriteBlock(batch, bc.genesisBlock)
 	if err := batch.Write(); err != nil {
 		log.Crit("Failed to write genesis block", "err", err)
 	}
@@ -1269,7 +1282,7 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, parentRoot common.
 	// Note all the components of block(hash->number map, header, body, receipts)
 	// should be written atomically. BlockBatch is used for containing all components.
 	blockBatch := bc.db.NewBatch()
-	rawdb.WriteBlock(blockBatch, block)
+	customrawdb.WriteBlock(blockBatch, block)
 	rawdb.WriteReceipts(blockBatch, block.Hash(), block.NumberU64(), receipts)
 	rawdb.WritePreimages(blockBatch, state.Preimages())
 	if err := blockBatch.Write(); err != nil {

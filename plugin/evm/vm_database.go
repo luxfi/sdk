@@ -50,34 +50,41 @@ type DatabaseConfig struct {
 // Otherwise, the chain will use the provided [avaDB] for its state.
 func (vm *VM) initializeDBs(avaDB luxdatabase.Database) error {
 	db := avaDB
-	// skip standalone database initialization if we are running in unit tests
-	if consensuscontext.GetNetworkID(vm.ctx) != constants.UnitTestID {
-		// first initialize the accepted block database to check if we need to use a standalone database
+	// Check if standalone database is explicitly enabled via config
+	// (this takes precedence over the UnitTestID check)
+	useStandAloneDB := false
+	if vm.config.UseStandaloneDatabase != nil && vm.config.UseStandaloneDatabase.Bool() {
+		useStandAloneDB = true
+	} else if consensuscontext.GetNetworkID(vm.ctx) != constants.UnitTestID {
+		// If not explicitly set, check if we should use standalone database
+		// based on the accepted block database state (skip for unit tests)
 		acceptedDB := prefixdb.New(acceptedPrefix, avaDB)
-		useStandAloneDB, err := vm.useStandaloneDatabase(acceptedDB)
+		var err error
+		useStandAloneDB, err = vm.useStandaloneDatabase(acceptedDB)
 		if err != nil {
 			return err
 		}
-		if useStandAloneDB {
-			// If we are using a standalone database, we need to create a new database
-			// for the chain state.
-			// TODO: Fix GetChainDataDir with new consensus interface
-			// Use the root path for chaindata
-			chainDataDir := filepath.Join("/tmp", "chaindata")
-			dbConfig, err := getDatabaseConfig(vm.config, chainDataDir)
-			if err != nil {
-				return err
-			}
-			log.Info("Using standalone database for the chain state", "DatabaseConfig", dbConfig)
-			// Create a logger adapter for newStandaloneDatabase
-			logger := log.NoLog{}
-			// Pass nil for metrics as it's optional
-			db, err = newStandaloneDatabase(dbConfig, nil, logger)
-			if err != nil {
-				return err
-			}
-			vm.usingStandaloneDB = true
+	}
+
+	if useStandAloneDB {
+		// If we are using a standalone database, we need to create a new database
+		// for the chain state.
+		// TODO: Fix GetChainDataDir with new consensus interface
+		// Use the root path for chaindata
+		chainDataDir := filepath.Join("/tmp", "chaindata")
+		dbConfig, err := getDatabaseConfig(vm.config, chainDataDir)
+		if err != nil {
+			return err
 		}
+		log.Info("Using standalone database for the chain state", "DatabaseConfig", dbConfig)
+		// Create a logger adapter for newStandaloneDatabase
+		logger := log.NoLog{}
+		// Pass nil for metrics as it's optional
+		db, err = newStandaloneDatabase(dbConfig, nil, logger)
+		if err != nil {
+			return err
+		}
+		vm.usingStandaloneDB = true
 	}
 	// Use NewNested rather than New so that the structure of the database
 	// remains the same regardless of the provided baseDB type.

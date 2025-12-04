@@ -695,13 +695,11 @@ func (pool *LegacyPool) validateTxBasics(tx *types.Transaction, local bool) erro
 // validateTx checks whether a transaction is valid according to the consensus
 // rules and adheres to some heuristic limits of the local node (price and size).
 func (pool *LegacyPool) validateTx(tx *types.Transaction, local bool) error {
+	head := pool.currentHead.Load()
 	opts := &txpool.ValidationOptionsWithState{
 		State: pool.currentState,
-		Rules: pool.chainconfig.Rules(
-			pool.currentHead.Load().Number,
-			params.IsMergeTODO,
-			pool.currentHead.Load().Time,
-		),
+		// Use RulesAt to properly set up the RulesExtra context for precompile checks
+		Rules: params.RulesAt(pool.chainconfig, head.Number, params.IsMergeTODO, head.Time),
 		MinimumFee: pool.minimumFee,
 
 		FirstNonceGap: nil, // Pool allows arbitrary arrival order, don't invalidate nonce gaps

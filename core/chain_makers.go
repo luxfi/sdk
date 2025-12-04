@@ -28,6 +28,7 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 
@@ -109,10 +110,11 @@ func (b *BlockGen) Difficulty() *big.Int {
 // block.
 func (b *BlockGen) SetParentBeaconRoot(root common.Hash) {
 	b.header.ParentBeaconRoot = &root
-	var (
-		blockContext = NewEVMBlockContext(b.header, b.cm, &b.header.Coinbase)
-		vmenv        = vm.NewEVM(blockContext, b.statedb, b.cm.config, vm.Config{})
-	)
+	blockContext := NewEVMBlockContext(b.header, b.cm, &b.header.Coinbase)
+	vmConfig := vm.Config{}
+	// TODO: StatefulPrecompileHook disabled - type not available in luxfi/geth
+	// vmConfig.StatefulPrecompileHook = NewStatefulPrecompileHook(b.cm.config, nil, b.cm.ConsensusContext())
+	vmenv := vm.NewEVM(blockContext, b.statedb, b.cm.config, vmConfig)
 	ProcessBeaconBlockRoot(root, vmenv, b.statedb)
 }
 
@@ -453,6 +455,11 @@ func (cm *chainMaker) Engine() consensus.Engine {
 		return nil
 	}
 	return cm.engine
+}
+
+// ConsensusContext returns nil for chainMaker (not needed for chain generation)
+func (cm *chainMaker) ConsensusContext() context.Context {
+	return nil
 }
 
 func newChainMaker(bottom *types.Block, config *params.ChainConfig, engine consensus.Engine) *chainMaker {

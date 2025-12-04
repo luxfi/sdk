@@ -32,12 +32,6 @@ import (
 var schemes = []string{rawdb.HashScheme, customrawdb.FirewoodScheme}
 
 func TestTraceBlockPrecompileActivation(t *testing.T) {
-	// TODO: This test is temporarily skipped because snapshot flattening fails
-	// during block acceptance. The error "cannot flatten missing snapshot" occurs
-	// because snapshot layers are not properly created when blocks are inserted
-	// and accepted in quick succession during testing. Requires investigation
-	// into snapshot/state management during block acceptance.
-	t.Skip("Temporarily disabled: snapshot flattening fails during block acceptance")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testTraceBlockPrecompileActivation(t, scheme)
@@ -108,32 +102,32 @@ func testTraceBlockPrecompileActivation(t *testing.T, scheme string) {
 		// Trace head block
 		{
 			blockNumber: rpc.BlockNumber(genBlocks),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHashes[genBlocks-1]),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHashes[genBlocks-1]),
 		},
 		// Trace block before activation
 		{
 			blockNumber: rpc.BlockNumber(activateAllowlistBlock - 1),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHashes[activateAllowlistBlock-2]),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHashes[activateAllowlistBlock-2]),
 		},
 		// Trace block activation
 		{
 			blockNumber: rpc.BlockNumber(activateAllowlistBlock),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHashes[activateAllowlistBlock-1]),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHashes[activateAllowlistBlock-1]),
 		},
 		// Trace block after activation
 		{
 			blockNumber: rpc.BlockNumber(activateAllowlistBlock + 1),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHashes[activateAllowlistBlock]),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHashes[activateAllowlistBlock]),
 		},
 		// Trace block deactivation
 		{
 			blockNumber: rpc.BlockNumber(deactivateAllowlistBlock),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHashes[deactivateAllowlistBlock-1]),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHashes[deactivateAllowlistBlock-1]),
 		},
 		// Trace block after deactivation
 		{
 			blockNumber: rpc.BlockNumber(deactivateAllowlistBlock + 1),
-			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}]`, txHashes[deactivateAllowlistBlock]),
+			want:        fmt.Sprintf(`[{"txHash":"%v","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}]`, txHashes[deactivateAllowlistBlock]),
 		},
 	}
 	for i, tc := range testSuite {
@@ -161,9 +155,6 @@ func testTraceBlockPrecompileActivation(t *testing.T, scheme string) {
 }
 
 func TestTraceTransactionPrecompileActivation(t *testing.T) {
-	// TODO: Same issue as TestTraceBlockPrecompileActivation - snapshot flattening
-	// fails during block acceptance.
-	t.Skip("Temporarily disabled: snapshot flattening fails during block acceptance")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testTraceTransactionPrecompileActivation(t, scheme)
@@ -244,9 +235,6 @@ func testTraceTransactionPrecompileActivation(t *testing.T, scheme string) {
 }
 
 func TestTraceChainPrecompileActivation(t *testing.T) {
-	// TODO: Same issue as TestTraceBlockPrecompileActivation - snapshot flattening
-	// fails during block acceptance.
-	t.Skip("Temporarily disabled: snapshot flattening fails during block acceptance")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testTraceChainPrecompileActivation(t, scheme)
@@ -312,7 +300,7 @@ func testTraceChainPrecompileActivation(t *testing.T, scheme string) {
 	backend.relHook = func() { rel.Add(1) }
 	api := NewAPI(backend)
 
-	single := `{"txHash":"0x0000000000000000000000000000000000000000000000000000000000000000","result":{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}}`
+	single := `{"txHash":"0x0000000000000000000000000000000000000000000000000000000000000000","result":{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}}`
 	cases := []struct {
 		start  uint64
 		end    uint64
@@ -357,9 +345,6 @@ func testTraceChainPrecompileActivation(t *testing.T, scheme string) {
 }
 
 func TestTraceCallWithOverridesStateUpgrade(t *testing.T) {
-	// TODO: Same issue as TestTraceBlockPrecompileActivation - snapshot flattening
-	// fails during block acceptance.
-	t.Skip("Temporarily disabled: snapshot flattening fails during block acceptance")
 	for _, scheme := range schemes {
 		t.Run(scheme, func(t *testing.T) {
 			testTraceCallWithOverridesStateUpgrade(t, scheme)
@@ -427,7 +412,7 @@ func testTraceCallWithOverridesStateUpgrade(t *testing.T, scheme string) {
 			},
 			config:    nil,
 			expectErr: nil,
-			expect:    `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
 		{
 			blockNumber: rpc.BlockNumber(activateStateUpgradeBlock - 1),
@@ -438,7 +423,7 @@ func testTraceCallWithOverridesStateUpgrade(t *testing.T, scheme string) {
 			},
 			config:    nil,
 			expectErr: nil,
-			expect:    `{"gas":21000,"failed":false,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":false,"returnValue":"0x","structLogs":[]}`,
 		},
 		{
 			blockNumber: rpc.BlockNumber(activateStateUpgradeBlock + 1),
@@ -449,7 +434,7 @@ func testTraceCallWithOverridesStateUpgrade(t *testing.T, scheme string) {
 			},
 			config:    nil,
 			expectErr: core.ErrInsufficientFunds,
-			expect:    `{"gas":21000,"failed":true,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":true,"returnValue":"0x","structLogs":[]}`,
 		},
 		{
 			blockNumber: rpc.BlockNumber(activateStateUpgradeBlock - 1),
@@ -464,7 +449,7 @@ func testTraceCallWithOverridesStateUpgrade(t *testing.T, scheme string) {
 				},
 			},
 			expectErr: core.ErrInsufficientFunds,
-			expect:    `{"gas":21000,"failed":true,"returnValue":"","structLogs":[]}`,
+			expect:    `{"gas":21000,"failed":true,"returnValue":"0x","structLogs":[]}`,
 		},
 	}
 	for i, testspec := range testSuite {

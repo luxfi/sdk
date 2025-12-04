@@ -323,10 +323,8 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 		Coinbase:   g.Coinbase,
 	}
 
-	// Set blockGasCost for genesis block (always 0)
-	customtypes.SetHeaderExtra(head, &customtypes.HeaderExtra{
-		BlockGasCost: big.NewInt(0),
-	})
+	// Note: BlockGasCost for genesis will be set after the header is finalized.
+	// This is required for hash-based storage to work correctly.
 
 	// Configure any stateful precompiles that should be enabled in the genesis.
 	blockContext := NewBlockContext(head.Number, head.Time)
@@ -369,17 +367,6 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 			}
 		}
 
-		// When Etna/Cancun is active, `BlockGasCost` are decoded to 0 if it's nil.
-		// This is because these fields come before the other optional Cancun fields in RLP order.
-		// This only occurs with a serialized and written genesis block, and then reading it back.
-		// While this does not affect anything (because we don't use `ToBlock` to retrieve the genesis block),
-		// it's still confusing and breaking few tests. So we set it here to 0 to make it consistent.
-		headerExtra := customtypes.GetHeaderExtra(head)
-		if confExtra.IsEtna(g.Timestamp) {
-			if headerExtra.BlockGasCost == nil {
-				headerExtra.BlockGasCost = new(big.Int)
-			}
-		}
 		// EIP-4895: Set empty withdrawals hash for Shanghai
 		if conf.IsShanghai(num, g.Timestamp) {
 			head.WithdrawalsHash = &types.EmptyWithdrawalsHash
@@ -404,6 +391,13 @@ func (g *Genesis) toBlock(db ethdb.Database, triedb *triedb.Database) *types.Blo
 
 	// Create the genesis block to use the block hash
 	block := types.NewBlock(head, &types.Body{Withdrawals: withdrawals}, nil, trie.NewStackTrie(nil))
+
+	// Set BlockGasCost for genesis block (always 0).
+	// This must be done AFTER NewBlock because NewBlock recomputes
+	// TxHash, ReceiptHash, etc., which changes the header hash.
+	customtypes.SetHeaderExtra(block.Header(), &customtypes.HeaderExtra{
+		BlockGasCost: big.NewInt(0),
+	})
 
 	root, err = statedb.Commit(0, false, false)
 	if err != nil {
@@ -436,12 +430,9 @@ func (g *Genesis) Commit(db ethdb.Database, triedb *triedb.Database) (*types.Blo
 	hash := block.Hash()
 	number := block.NumberU64()
 
-	// Critical: Write header number mapping first
-	rawdb.WriteHeaderNumber(db, hash, number)
-
-	// Write the actual block data
-	rawdb.WriteHeader(db, block.Header())
-	rawdb.WriteBody(db, hash, number, block.Body())
+	// Write the actual block data with our custom header encoding
+	// that preserves BlockGasCost
+	customrawdb.WriteBlock(db, block)
 	rawdb.WriteReceipts(db, hash, number, nil)
 
 	// Write canonical mappings

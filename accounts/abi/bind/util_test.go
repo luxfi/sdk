@@ -64,7 +64,6 @@ var waitDeployedTests = map[string]struct {
 }
 
 func TestWaitDeployed(t *testing.T) {
-	t.Skip("Temporarily disabled - simulated backend issues")
 	t.Parallel()
 	for name, test := range waitDeployedTests {
 		luxAddr := luxcrypto.PubkeyToAddress(testKey.PublicKey)
@@ -122,7 +121,6 @@ func TestWaitDeployed(t *testing.T) {
 }
 
 func TestWaitDeployedCornerCases(t *testing.T) {
-	t.Skip("Temporarily disabled - simulated backend issues")
 	luxAddr := luxcrypto.PubkeyToAddress(testKey.PublicKey)
 	var testAddr common.Address
 	copy(testAddr[:], luxAddr[:])

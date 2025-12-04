@@ -13,7 +13,6 @@ import (
 )
 
 func TestGenesisCancun(t *testing.T) {
-	t.Skip("Temporarily disabled: requires genesis blob handling fixes")
 	require := require.New(t)
 
 	// Test with Cancun enabled (default TestChainConfig)
@@ -59,11 +58,9 @@ func TestGenesisCancun(t *testing.T) {
 
 	// Test without Cancun
 	t.Run("WithoutCancun", func(t *testing.T) {
-		// Create a config without Cancun
-		configNoCancun := params.TestPreSubnetEVMChainConfig
-
+		// TestDurangoChainConfig has Shanghai enabled but no Cancun/blob features
 		gspec := &Genesis{
-			Config:    configNoCancun,
+			Config:    params.TestDurangoChainConfig,
 			Alloc:     GenesisAlloc{},
 			BaseFee:   big.NewInt(875000000),
 			Timestamp: 0,
@@ -75,11 +72,11 @@ func TestGenesisCancun(t *testing.T) {
 		genesisBlock, err := gspec.Commit(db, tdb)
 		require.NoError(err)
 
-		// Check if header has Cancun fields
+		// Check if header has Cancun fields (should NOT have them)
 		header := genesisBlock.Header()
-		t.Logf("Has ParentBeaconRoot: %v", header.ParentBeaconRoot != nil)
-		t.Logf("Has ExcessBlobGas: %v", header.ExcessBlobGas != nil)
-		t.Logf("Has BlobGasUsed: %v", header.BlobGasUsed != nil)
+		t.Logf("Has ParentBeaconRoot: %v (expected: false)", header.ParentBeaconRoot != nil)
+		t.Logf("Has ExcessBlobGas: %v (expected: false)", header.ExcessBlobGas != nil)
+		t.Logf("Has BlobGasUsed: %v (expected: false)", header.BlobGasUsed != nil)
 
 		// Try to read it back
 		hash := genesisBlock.Hash()

@@ -13,6 +13,7 @@ import (
 	"golang.org/x/sync/semaphore"
 
 	"github.com/luxfi/geth/log"
+	luxlog "github.com/luxfi/log"
 	"github.com/prometheus/client_golang/prometheus"
 
 	nodeCore "github.com/luxfi/consensus/engine/core"
@@ -146,8 +147,17 @@ func NewNetwork(
 	maxActiveAppRequests int64,
 	registerer prometheus.Registerer,
 ) (Network, error) {
-	// P2P network initialization skipped - logger interface handled separately
+	// Initialize P2P network with a no-op logger for compatibility
+	// The SDK network is used for routing SDK handlers (odd requestIDs)
 	var p2pNetwork *p2p.Network
+	if appSender != nil {
+		// Use luxfi/log.NewNoOpLogger() which implements the required Logger interface
+		var err error
+		p2pNetwork, err = p2p.NewNetwork(luxlog.NewNoOpLogger(), appSender, registerer, "evm")
+		if err != nil {
+			return nil, fmt.Errorf("failed to initialize p2p network: %w", err)
+		}
+	}
 
 	// For now, use empty node ID since GetNodeID doesn't exist in node's consensus package
 	// This would normally come from the VM's context
@@ -159,7 +169,7 @@ func NewNetwork(
 		self:                       nodeID,
 		outstandingRequestHandlers: make(map[uint32]message.ResponseHandler),
 		activeAppRequests:          semaphore.NewWeighted(maxActiveAppRequests),
-		sdkNetwork:                 p2pNetwork, // Will be nil for now
+		sdkNetwork:                 p2pNetwork,
 		appRequestHandler:          message.NoopRequestHandler{},
 		peers:                      NewPeerTracker(),
 		appStats:                   stats.NewRequestHandlerStats(),
@@ -196,9 +206,11 @@ func (n *network) SendAppRequestAny(ctx context.Context, minVersion *version.App
 		}
 	}
 	if nodeID, ok := n.peers.GetAnyPeer(nodeMinVersion); ok {
+		log.Info("SendAppRequestAny: found peer", "nodeID", nodeID, "minVersion", nodeMinVersion)
 		return nodeID, n.sendAppRequest(ctx, nodeID, request, handler)
 	}
 
+	log.Info("SendAppRequestAny: no peers found", "minVersion", nodeMinVersion, "peerCount", n.peers.Size())
 	n.activeAppRequests.Release(1)
 	return ids.EmptyNodeID, fmt.Errorf("no peers found matching version %s out of %d peers", minVersion, n.peers.Size())
 }
@@ -289,17 +301,16 @@ func (n *network) sendAppRequest(ctx context.Context, nodeID ids.NodeID, request
 // expects the deadline to not have been passed
 func (n *network) AppRequest(ctx context.Context, nodeID ids.NodeID, requestID uint32, deadline time.Time, request []byte) error {
 	if n.closed.Get() {
+		log.Info("AppRequest: network is closed, ignoring", "nodeID", nodeID, "requestID", requestID)
 		return nil
 	}
 
-	log.Debug("received AppRequest from node", "nodeID", nodeID, "requestID", requestID, "requestLen", len(request))
+	log.Info("AppRequest: received from node", "nodeID", nodeID, "requestID", requestID, "requestLen", len(request), "isNetworkRequest", IsNetworkRequest(requestID))
 
 	if !IsNetworkRequest(requestID) {
-		log.Debug("forwarding AppRequest to SDK network", "nodeID", nodeID, "requestID", requestID, "requestLen", len(request))
+		log.Info("AppRequest: forwarding to SDK network", "nodeID", nodeID, "requestID", requestID, "requestLen", len(request))
 		if n.sdkNetwork != nil {
-			// NodeID conversion handled when sdkNetwork is available
-			// For now, sdkNetwork is always nil
-			return nil
+			return n.sdkNetwork.AppRequest(ctx, nodeID, requestID, deadline, request)
 		}
 		return nil
 	}
@@ -344,10 +355,10 @@ func (n *network) AppResponse(ctx context.Context, nodeID ids.NodeID, requestID 
 	if !exists {
 		log.Debug("forwarding AppResponse to SDK network", "nodeID", nodeID, "requestID", requestID, "responseLen", len(response))
 		if n.sdkNetwork != nil {
-			// NodeID conversion handled when sdkNetwork is available
-			return nil
+			return n.sdkNetwork.AppResponse(ctx, nodeID, requestID, response)
 		}
-		return nil
+		// When there's no SDK network and request not found, return ErrUnrequestedResponse
+		return p2p.ErrUnrequestedResponse
 	}
 
 	// We must release the slot
@@ -427,20 +438,21 @@ func (n *network) markRequestFulfilled(requestID uint32) (message.ResponseHandle
 // engine.
 func (n *network) AppGossip(ctx context.Context, nodeID ids.NodeID, gossipBytes []byte) error {
 	if n.sdkNetwork != nil {
-		// TODO: Convert nodeID types when sdkNetwork is implemented
-		return nil
+		// Forward to SDK network which will route to the appropriate handler
+		return n.sdkNetwork.AppGossip(ctx, nodeID, gossipBytes)
 	}
 	return nil
 }
 
 // Connected adds the given nodeID to the peer list so that it can receive messages
 func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion *version.Application) error {
-	log.Debug("adding new peer", "nodeID", nodeID)
+	log.Info("network.Connected: adding new peer", "nodeID", nodeID, "nodeVersion", nodeVersion, "self", n.self)
 
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
 	if n.closed.Get() {
+		log.Info("network.Connected: network is closed, ignoring", "nodeID", nodeID)
 		return nil
 	}
 
@@ -455,8 +467,14 @@ func (n *network) Connected(ctx context.Context, nodeID ids.NodeID, nodeVersion 
 				Minor: nodeVersion.Minor,
 				Patch: nodeVersion.Patch,
 			}
+			log.Info("network.Connected: calling peers.Connected", "nodeID", nodeID, "nv", nv)
 			n.peers.Connected(nodeID, nv)
+			log.Info("network.Connected: peer added, peerCount", "count", n.peers.Size())
+		} else {
+			log.Info("network.Connected: nodeVersion is nil, NOT adding peer", "nodeID", nodeID)
 		}
+	} else {
+		log.Info("network.Connected: nodeID == self, NOT adding peer", "nodeID", nodeID)
 	}
 
 	// Version conversion handled for sdkNetwork compatibility

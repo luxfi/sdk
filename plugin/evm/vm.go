@@ -4,7 +4,7 @@
 package evm
 
 import (
-	"github.com/luxfi/crypto/bls"
+	warpbls "github.com/luxfi/warp/bls"
 	"context"
 	"encoding/json"
 	"errors"
@@ -52,12 +52,12 @@ import (
 	"github.com/luxfi/geth/triedb/hashdb"
 
 	warpcontract "github.com/luxfi/evm/precompile/contracts/warp"
+	"github.com/luxfi/evm/precompile/modules"
 	"github.com/luxfi/evm/rpc"
 	statesyncclient "github.com/luxfi/evm/sync/client"
 	"github.com/luxfi/evm/sync/client/stats"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/evm/warp"
-	nodeWarp "github.com/luxfi/node/vms/platformvm/warp"
 	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/signer"
 
@@ -86,6 +86,7 @@ import (
 	nodeConsensus "github.com/luxfi/consensus"
 	consensuscontext "github.com/luxfi/consensus/context"
 	consensusmockable "github.com/luxfi/consensus/utils/timer/mockable"
+	consensusversion "github.com/luxfi/consensus/version"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/codec"
@@ -205,7 +206,7 @@ func (w *warpSignerAdapter) Sign(msg []byte) ([]byte, error) {
 	}
 
 	// Return the signature bytes
-	return bls.SignatureToBytes(sig), nil
+	return warpbls.SignatureToBytes(sig), nil
 }
 
 func (w *warpSignerAdapter) PublicKey() []byte {
@@ -213,11 +214,29 @@ func (w *warpSignerAdapter) PublicKey() []byte {
 	if pk == nil {
 		return nil
 	}
-	return bls.PublicKeyToCompressedBytes(pk)
+	return warpbls.PublicKeyToBytes(pk)
 }
 
 func (w *warpSignerAdapter) NodeID() ids.NodeID {
 	return w.nodeID
+}
+
+// lp118SignerAdapter adapts a signer.Signer to lp118.Signer for lp118 handlers
+type lp118SignerAdapter struct {
+	signer signer.Signer
+}
+
+// Sign implements lp118.Signer interface
+// Receives *luxWarp.UnsignedMessage directly (LP118 handler uses external warp package)
+func (a *lp118SignerAdapter) Sign(msg *luxWarp.UnsignedMessage) ([]byte, error) {
+	// Sign using the underlying signer directly - no conversion needed
+	sig, err := a.signer.Sign(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the signature bytes
+	return warpbls.SignatureToBytes(sig), nil
 }
 
 // appSenderWrapper wraps a consensus AppSender to implement node's AppSender interface
@@ -393,9 +412,14 @@ func (vm *VM) Initialize(
 	if !ok {
 		return fmt.Errorf("dbManager is not database.Database")
 	}
-	typedAppSender, ok := appSender.(nodeCommonEng.AppSender)
-	if !ok {
-		return fmt.Errorf("appSender is not nodeCommonEng.AppSender")
+	// Handle nil appSender (used in some tests)
+	var typedAppSender nodeCommonEng.AppSender
+	if appSender != nil {
+		var ok bool
+		typedAppSender, ok = appSender.(nodeCommonEng.AppSender)
+		if !ok {
+			return fmt.Errorf("appSender is not nodeCommonEng.AppSender")
+		}
 	}
 
 	// Convert fxs from []interface{} to []*nodeCommonEng.Fx
@@ -617,13 +641,19 @@ func (vm *VM) initializeInternal(
 
 	vm.networkCodec = message.Codec
 	// Convert block.AppSender to appsender.AppSender - they should be compatible
-	coreAppSender, ok := appSender.(appsender.AppSender)
-	if !ok {
-		return fmt.Errorf("appSender does not implement appsender.AppSender")
+	// Handle nil appSender (used in some tests)
+	if appSender != nil {
+		coreAppSender, ok := appSender.(appsender.AppSender)
+		if !ok {
+			return fmt.Errorf("appSender does not implement appsender.AppSender")
+		}
+		// Wrap the consensus AppSender to match node's AppSender interface
+		wrappedAppSender := &appSenderWrapper{appSender: coreAppSender}
+		vm.Network, err = network.NewNetwork(context.Background(), wrappedAppSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
+	} else {
+		// Use nil network for tests without appSender
+		vm.Network, err = network.NewNetwork(context.Background(), nil, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
 	}
-	// Wrap the consensus AppSender to match node's AppSender interface
-	wrappedAppSender := &appSenderWrapper{appSender: coreAppSender}
-	vm.Network, err = network.NewNetwork(context.Background(), wrappedAppSender, vm.networkCodec, vm.config.MaxOutboundActiveRequests, vm.sdkMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
@@ -659,13 +689,11 @@ func (vm *VM) initializeInternal(
 	// VM implements warp.BlockClient directly
 
 	// Get warp signer from context
-	// Warp signer is not directly available in chainCtx, skip for now
-	var warpSignerInterface interface{}
 	var warpAdapter *warpSignerAdapter
-	if warpSignerInterface != nil {
-		warpSigner, ok := warpSignerInterface.(signer.Signer)
+	if chainCtx.WarpSigner != nil {
+		warpSigner, ok := chainCtx.WarpSigner.(signer.Signer)
 		if !ok {
-			return fmt.Errorf("invalid warp signer type: %T", warpSignerInterface)
+			return fmt.Errorf("invalid warp signer type: %T", chainCtx.WarpSigner)
 		}
 		// Create a wrapper that implements WarpSigner
 		warpAdapter = &warpSignerAdapter{
@@ -708,8 +736,12 @@ func (vm *VM) initializeInternal(
 	// Add p2p warp message warpHandler
 	// Create adapter to convert our warp backend to lp118.Verifier
 	warpVerifier := &warpVerifierAdapter{backend: vm.warpBackend}
-	// Pass nil for signer since lp118 doesn't use it the same way
-	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, nil)
+	// Create lp118 signer adapter if we have a warp signer
+	var lp118Signer lp118.Signer
+	if warpAdapter != nil {
+		lp118Signer = &lp118SignerAdapter{signer: warpAdapter.signer}
+	}
+	warpHandler := lp118.NewCachedHandler(meteredCache, warpVerifier, lp118Signer)
 	// Use built-in adapter to convert lp118.Handler to p2p.Handler
 	p2pHandler := lp118.NewHandlerAdapter(warpHandler)
 	vm.AddHandler(lp118.HandlerID, p2pHandler)
@@ -801,9 +833,15 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 				}
 			}
 			if val, ok := configData["durangoTimestamp"]; ok {
+				log.Info("DEBUG: Found durangoTimestamp in genesis", "val", val, "type", fmt.Sprintf("%T", val))
 				if ts, ok := val.(float64); ok {
+					log.Info("DEBUG: Setting DurangoTimestamp from float64", "ts", ts, "uint64", uint64(ts))
 					configExtra.DurangoTimestamp = utils.NewUint64(uint64(ts))
+				} else {
+					log.Info("DEBUG: durangoTimestamp is not float64")
 				}
+			} else {
+				log.Info("DEBUG: durangoTimestamp NOT found in genesis config")
 			}
 			if val, ok := configData["etnaTimestamp"]; ok {
 				if ts, ok := val.(float64); ok {
@@ -818,6 +856,50 @@ func parseGenesis(ctx context.Context, genesisBytes []byte, upgradeBytes []byte,
 			if val, ok := configData["graniteTimestamp"]; ok {
 				if ts, ok := val.(float64); ok {
 					configExtra.GraniteTimestamp = utils.NewUint64(uint64(ts))
+				}
+			}
+
+			// Parse genesis precompiles from config JSON
+			// They are stored at the top level of config, not under "genesisPrecompiles"
+			for _, module := range modules.RegisteredModules() {
+				key := module.ConfigKey
+				if val, ok := configData[key]; ok {
+					// Re-marshal the precompile config to parse it properly
+					precompileBytes, err := json.Marshal(val)
+					if err != nil {
+						return nil, fmt.Errorf("failed to marshal precompile config %s: %w", key, err)
+					}
+					conf := module.MakeConfig()
+					if err := json.Unmarshal(precompileBytes, conf); err != nil {
+						return nil, fmt.Errorf("failed to parse precompile config %s: %w", key, err)
+					}
+					if configExtra.GenesisPrecompiles == nil {
+						configExtra.GenesisPrecompiles = make(extras.Precompiles)
+					}
+					configExtra.GenesisPrecompiles[key] = conf
+					log.Info("DEBUG: Parsed genesis precompile from config", "key", key)
+				}
+			}
+
+			// Parse feeConfig from genesis JSON
+			if val, ok := configData["feeConfig"]; ok {
+				feeConfigBytes, err := json.Marshal(val)
+				if err != nil {
+					return nil, fmt.Errorf("failed to marshal feeConfig: %w", err)
+				}
+				var feeConfig commontype.FeeConfig
+				if err := json.Unmarshal(feeConfigBytes, &feeConfig); err != nil {
+					return nil, fmt.Errorf("failed to parse feeConfig: %w", err)
+				}
+				configExtra.FeeConfig = feeConfig
+				log.Info("DEBUG: Parsed feeConfig from genesis", "gasLimit", feeConfig.GasLimit)
+			}
+
+			// Parse allowFeeRecipients from genesis JSON
+			if val, ok := configData["allowFeeRecipients"]; ok {
+				if allow, ok := val.(bool); ok {
+					configExtra.AllowFeeRecipients = allow
+					log.Info("DEBUG: Parsed allowFeeRecipients from genesis", "value", allow)
 				}
 			}
 		}
@@ -901,6 +983,8 @@ func (vm *VM) initializeChain(lastAcceptedHash common.Hash, ethConfig ethconfig.
 	vm.eth.SetEtherbase(ethConfig.Miner.Etherbase)
 	vm.txPool = vm.eth.TxPool()
 	vm.blockChain = vm.eth.BlockChain()
+	// Set consensus context for warp message chain ID/network ID
+	vm.blockChain.SetConsensusContext(vm.ctx)
 	vm.miner = vm.eth.Miner()
 	lastAccepted := vm.blockChain.LastAcceptedBlock()
 	feeConfig, _, err := vm.blockChain.GetFeeConfigAt(lastAccepted.Header())
@@ -988,7 +1072,13 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 			if err := rlp.DecodeBytes(b, ethBlock); err != nil {
 				return nil, err
 			}
-			return vm.newBlock(ethBlock), nil
+			block := vm.newBlock(ethBlock)
+			// Performing syntactic verification in ParseBlock allows for
+			// short-circuiting bad blocks before they are processed by the VM.
+			if err := block.syntacticVerify(); err != nil {
+				return nil, fmt.Errorf("syntactic block verification failed: %w", err)
+			}
+			return block, nil
 		},
 		BuildBlock: func(ctx context.Context) (nodeblock.Block, error) {
 			// Call VM's buildBlock directly which returns the right type
@@ -1196,16 +1286,21 @@ func (vm *VM) onNormalOperationsStarted() error {
 	// Convert to node logging interface
 	nodeLogger := gossipHandler.NewLoggerAdapter(vm.logger.Logger)
 
-	vm.shutdownWg.Add(1)
-	go func() {
-		gossip.Every(ctx, nodeLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
-		vm.shutdownWg.Done()
-	}()
-	vm.shutdownWg.Add(1)
-	go func() {
-		gossip.Every(ctx, nodeLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
-		vm.shutdownWg.Done()
-	}()
+	// Only start gossip routines if gossipers are initialized (requires P2P validators)
+	if ethTxPushGossiper != nil {
+		vm.shutdownWg.Add(1)
+		go func() {
+			gossip.Every(ctx, nodeLogger, ethTxPushGossiper, vm.config.PushGossipFrequency.Duration)
+			vm.shutdownWg.Done()
+		}()
+	}
+	if vm.ethTxPullGossiper != nil {
+		vm.shutdownWg.Add(1)
+		go func() {
+			gossip.Every(ctx, nodeLogger, vm.ethTxPullGossiper, vm.config.PullGossipFrequency.Duration)
+			vm.shutdownWg.Done()
+		}()
+	}
 
 	return nil
 }
@@ -1248,12 +1343,12 @@ func (vm *VM) WaitForEvent(ctx context.Context) (interface{}, error) {
 	}
 
 	// Call builder's waitForEvent which returns commonEng.Message
-	_, err := builder.waitForEvent(ctx)
+	msg, err := builder.waitForEvent(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// Return nil for success
-	return nil, nil
+	// Return the message type for the caller to handle
+	return msg.Type, nil
 }
 
 // Shutdown implements the chain.ChainVM interface
@@ -1295,13 +1390,12 @@ func (vm *VM) Shutdown(context.Context) error {
 }
 
 // BuildBlock implements the ChainVM interface
+// Uses State.BuildBlock to ensure proper block tracking (for LastAccepted, etc.)
 func (vm *VM) BuildBlock(ctx context.Context) (nodeConsensusBlock.Block, error) {
-	blk, err := vm.buildBlock(ctx)
-	if err != nil {
-		return nil, err
-	}
-	// Adapt the consensus block to node block interface
-	return NewBlockAdapter(blk.(*Block)), nil
+	// Use State's BuildBlock which properly wraps and tracks blocks
+	// The State's BuildBlock callback calls vm.buildBlock() and wraps the result
+	// so Accept() updates the State's lastAccepted
+	return vm.State.BuildBlock(ctx)
 }
 
 // BuildBlockWithContext implements the BuildBlockWithContextChainVM interface
@@ -1333,7 +1427,7 @@ func (vm *VM) buildBlockWithContext(ctx context.Context, proposerVMBlockCtx *nod
 		log.Debug("Building block without context")
 	}
 	predicateCtx := &precompileconfig.PredicateContext{
-		ConsensusCtx:       context.Background(),
+		ConsensusCtx:       vm.ctx,
 		ProposerVMBlockCtx: proposerVMBlockCtx,
 	}
 
@@ -1472,7 +1566,12 @@ func (vm *VM) SetPreference(ctx context.Context, blkID ids.ID) error {
 // [database.ErrNotFound] will be returned. This indicates that the VM has state
 // synced and does not have all historical blocks available.
 func (vm *VM) GetBlockIDAtHeight(_ context.Context, height uint64) (ids.ID, error) {
-	lastAcceptedBlock := vm.blockChain.LastAcceptedBlock()
+	// Use LastConsensusAcceptedBlock() instead of LastAcceptedBlock() because
+	// the engine expects the block to be visible immediately after Accept() is called.
+	// LastAcceptedBlock() returns acceptorTip which is updated asynchronously by the
+	// acceptor queue, while LastConsensusAcceptedBlock() returns lastAccepted which
+	// is set synchronously by Accept().
+	lastAcceptedBlock := vm.blockChain.LastConsensusAcceptedBlock()
 	if lastAcceptedBlock.NumberU64() < height {
 		return ids.ID{}, database.ErrNotFound
 	}
@@ -1722,7 +1821,7 @@ func attachEthService(handler *rpc.Server, apis []rpc.API, names []string) error
 	return nil
 }
 
-func (vm *VM) Connected(ctx context.Context, nodeID ids.NodeID, version interface{}) error {
+func (vm *VM) Connected(ctx context.Context, nodeID ids.NodeID, ver interface{}) error {
 	vm.vmLock.Lock()
 	defer vm.vmLock.Unlock()
 
@@ -1730,8 +1829,15 @@ func (vm *VM) Connected(ctx context.Context, nodeID ids.NodeID, version interfac
 	// if err := vm.validatorsManager.Connect(nodeID); err != nil {
 	// 	return fmt.Errorf("uptime manager failed to connect node %s: %w", nodeID, err)
 	// }
-	// Network.Connected doesn't use version parameter in this implementation
-	return vm.Network.Connected(ctx, nodeID, nil)
+
+	// Convert the version interface to the correct type for the Network
+	var nodeVersion *consensusversion.Application
+	if ver != nil {
+		if v, ok := ver.(*consensusversion.Application); ok {
+			nodeVersion = v
+		}
+	}
+	return vm.Network.Connected(ctx, nodeID, nodeVersion)
 }
 
 func (vm *VM) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
@@ -1816,7 +1922,24 @@ func (s *stateSummaryWrapper) ID() ids.ID {
 
 // ParseStateSummary implements the StateSyncableVM interface
 func (vm *VM) ParseStateSummary(ctx context.Context, summaryBytes []byte) (nodeblock.StateSummary, error) {
-	// Parse the summary bytes
+	// Delegate to StateSyncClient which has the proper acceptImpl callback
+	if vm.StateSyncClient != nil {
+		summary, err := vm.StateSyncClient.ParseStateSummary(ctx, summaryBytes)
+		if err != nil {
+			return nil, err
+		}
+		// The StateSyncClient returns a message.SyncSummary which we need to wrap
+		if syncSummary, ok := summary.(message.SyncSummary); ok {
+			return &stateSummaryWrapper{summary: syncSummary}, nil
+		}
+		// If not a SyncSummary, try to cast directly to our wrapper
+		if wrapper, ok := summary.(*stateSummaryWrapper); ok {
+			return wrapper, nil
+		}
+		return nil, fmt.Errorf("unexpected summary type from StateSyncClient: %T", summary)
+	}
+
+	// Fallback: Parse without acceptImpl (for server-side parsing)
 	summary, err := message.NewSyncSummaryFromBytes(summaryBytes, nil)
 	if err != nil {
 		return nil, err
@@ -1842,17 +1965,11 @@ type warpVerifierAdapter struct {
 	backend warp.Backend
 }
 
-func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *nodeWarp.UnsignedMessage, justification []byte) *nodeCommonEng.AppError {
-	// Convert node warp message to consensus warp message
-	// Published luxfi/warp v0.1.1 uses []byte for SourceChainID, not ids.ID
-	luxMsg := &luxWarp.UnsignedMessage{
-		NetworkID:     msg.NetworkID,
-		SourceChainID: msg.SourceChainID[:], // Convert ids.ID to []byte
-		Payload:       msg.Payload,
-	}
-
-	if err := w.backend.Verify(ctx, luxMsg, justification); err != nil {
-		return &nodeCommonEng.AppError{
+// Verify implements lp118.Verifier interface
+// Now receives *luxWarp.UnsignedMessage directly (no conversion needed)
+func (w *warpVerifierAdapter) Verify(ctx context.Context, msg *luxWarp.UnsignedMessage, justification []byte) *commonEng.AppError {
+	if err := w.backend.Verify(ctx, msg, justification); err != nil {
+		return &commonEng.AppError{
 			Code:    1,
 			Message: err.Error(),
 		}

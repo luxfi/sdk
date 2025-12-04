@@ -11,9 +11,7 @@ import (
 	"testing"
 	"time"
 
-	// "github.com/luxfi/consensus"
 	consensuscore "github.com/luxfi/consensus/core"
-	nodeConsensus "github.com/luxfi/consensus"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
@@ -22,10 +20,8 @@ import (
 	"github.com/luxfi/node/network/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"
 
-	// "github.com/luxfi/node/upgrade/upgradetest" // not used after fixes
 	"github.com/luxfi/consensus/utils/set"
 	agoUtils "github.com/luxfi/node/utils"
-	luxdconstants "github.com/luxfi/node/utils/constants"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 
@@ -33,29 +29,14 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/plugin/evm/config"
-	"github.com/luxfi/evm/utils/utilstest"
 	"github.com/luxfi/geth/core/types"
 )
 
 func TestEthTxGossip(t *testing.T) {
-	// TODO: This test is temporarily skipped because it requires a complete ValidatorState
-	// implementation. The VM initialization expects ValidatorState to be non-nil and properly
-	// configured. A proper fix requires implementing a mock ValidatorState that satisfies
-	// all required interface methods.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
-
 	require := require.New(t)
 	ctx := context.Background()
-	// Create a valid context using the actual structure
-	// QuantumID must be UnitTestID (369) to skip standalone database initialization
-	// Note: GetNetworkID() returns QuantumID (not NetworkID), so we set QuantumID
-	consensusCtx := &nodeConsensus.Context{
-		QuantumID: luxdconstants.UnitTestID,
-		NetworkID: luxdconstants.UnitTestID,
-		ChainID:   ids.GenerateTestID(),
-		NodeID:    ids.GenerateTestNodeID(),
-	}
-	validatorState := utilstest.NewTestValidatorState()
+	// Use createTestConsensusContext to get properly configured ValidatorState
+	consensusCtx := createTestConsensusContext(t)
 
 	sentResponse := make(chan []byte, 1)
 	responseSender := &TestSender{
@@ -65,9 +46,6 @@ func TestEthTxGossip(t *testing.T) {
 			return nil
 		},
 	}
-
-	// Store the validator state for later use
-	_ = validatorState
 
 	vm := &VM{}
 
@@ -82,6 +60,11 @@ func TestEthTxGossip(t *testing.T) {
 		nil, // fxs parameter
 		responseSender,
 	))
+
+	// Set up gossip infrastructure before entering normal operations
+	requestingNodeID := ids.GenerateTestNodeID()
+	setupGossipInfrastructure(t, vm, requestingNodeID)
+
 	require.NoError(vm.SetState(ctx, uint32(consensuscore.VMNormalOp)))
 
 	defer func() {
@@ -100,13 +83,10 @@ func TestEthTxGossip(t *testing.T) {
 
 	network, err := p2p.NewNetwork(log.NewNoOpLogger(), peerSender, prometheus.NewRegistry(), "")
 	require.NoError(err)
-	client := network.NewClient(0) // Use 0 as a default handler ID
+	client := network.NewClient(TxGossipHandlerID)
 
 	// we only accept gossip requests from validators
-	requestingNodeID := ids.GenerateTestNodeID()
 	require.NoError(vm.Network.Connected(ctx, requestingNodeID, nil))
-	// Setup validator state using the existing validatorState variable
-	// This would need to be mocked properly in a real test
 
 	// Ask the VM for any new transactions. We should get nothing at first.
 	emptyBloomFilter, err := gossip.NewBloomFilter(prometheus.NewRegistry(), "", config.TxGossipBloomMinTargetElements, config.TxGossipBloomTargetFalsePositiveRate, config.TxGossipBloomResetFalsePositiveRate)
@@ -182,24 +162,13 @@ func TestEthTxGossip(t *testing.T) {
 
 // Tests that a tx is gossiped when it is issued
 func TestEthTxPushGossipOutbound(t *testing.T) {
-	// TODO: This test is temporarily skipped because it requires a complete ValidatorState
-	// implementation. The VM initialization expects ValidatorState to be non-nil and properly
-	// configured. A proper fix requires implementing a mock ValidatorState that satisfies
-	// all required interface methods.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
-
 	require := require.New(t)
 	ctx := context.Background()
-	// Create a valid context using the actual structure
-	// QuantumID must be UnitTestID (369) to skip standalone database initialization
-	// Note: GetNetworkID() returns QuantumID (not NetworkID), so we set QuantumID
-	consensusCtx := &nodeConsensus.Context{
-		QuantumID: luxdconstants.UnitTestID,
-		NetworkID: luxdconstants.UnitTestID,
-		ChainID:   ids.GenerateTestID(),
-		NodeID:    ids.GenerateTestNodeID(),
-	}
+	// Use createTestConsensusContext to get properly configured ValidatorState
+	consensusCtx := createTestConsensusContext(t)
+
 	sender := &TestSender{
+		T:             t,
 		SentAppGossip: make(chan []byte, 1),
 	}
 
@@ -218,6 +187,12 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 		nil, // fxs parameter
 		sender,
 	))
+
+	// Set up gossip infrastructure and push gossiper
+	testNodeID := ids.GenerateTestNodeID()
+	setupGossipInfrastructure(t, vm, testNodeID)
+	setupPushGossiper(t, vm, sender)
+
 	require.NoError(vm.SetState(ctx, uint32(consensuscore.VMNormalOp)))
 
 	defer func() {
@@ -254,25 +229,12 @@ func TestEthTxPushGossipOutbound(t *testing.T) {
 
 // Tests that a gossiped tx is added to the mempool and forwarded
 func TestEthTxPushGossipInbound(t *testing.T) {
-	// TODO: This test is temporarily skipped because it requires a complete ValidatorState
-	// implementation. The VM initialization expects ValidatorState to be non-nil and properly
-	// configured. A proper fix requires implementing a mock ValidatorState that satisfies
-	// all required interface methods.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
-
 	require := require.New(t)
 	ctx := context.Background()
-	// Create a valid context using the actual structure
-	// QuantumID must be UnitTestID (369) to skip standalone database initialization
-	// Note: GetNetworkID() returns QuantumID (not NetworkID), so we set QuantumID
-	consensusCtx := &nodeConsensus.Context{
-		QuantumID: luxdconstants.UnitTestID,
-		NetworkID: luxdconstants.UnitTestID,
-		ChainID:   ids.GenerateTestID(),
-		NodeID:    ids.GenerateTestNodeID(),
-	}
+	// Use createTestConsensusContext to get properly configured ValidatorState
+	consensusCtx := createTestConsensusContext(t)
 
-	sender := &TestSender{}
+	sender := &TestSender{T: t}
 	vm := &VM{
 		ethTxPullGossiper: gossip.NoOpGossiper{},
 	}
@@ -288,6 +250,11 @@ func TestEthTxPushGossipInbound(t *testing.T) {
 		nil, // fxs parameter
 		sender,
 	))
+
+	// Set up gossip infrastructure
+	testNodeID := ids.GenerateTestNodeID()
+	setupGossipInfrastructure(t, vm, testNodeID)
+
 	require.NoError(vm.SetState(ctx, uint32(consensuscore.VMNormalOp)))
 
 	defer func() {

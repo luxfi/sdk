@@ -12,26 +12,25 @@ import (
 
 	"go.uber.org/mock/gomock"
 
+	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	luxWarp "github.com/luxfi/warp"
-	"github.com/luxfi/warp/bls"
 )
 
-func newValidator(t testing.TB, weight uint64) (*bls.PrivateKey, *luxWarp.Validator) {
-	sk, err := bls.GeneratePrivateKey()
+func newValidator(t testing.TB, weight uint64) (*bls.SecretKey, *luxWarp.Validator) {
+	sk, err := bls.NewSecretKey()
 	require.NoError(t, err)
 	pk := sk.PublicKey()
 	nodeID := ids.GenerateTestNodeID()
 	return sk, &luxWarp.Validator{
 		PublicKey:      pk,
-		PublicKeyBytes: bls.PublicKeyToBytes(pk),
+		PublicKeyBytes: bls.PublicKeyToCompressedBytes(pk),
 		Weight:         weight,
 		NodeID:         nodeID[:],
 	}
 }
 
 func TestAggregateSignatures(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
 	errTest := errors.New("test error")
 	sourceChainID := ids.ID{'y', 'e', 'e', 't'}
 	unsignedMsg, err := luxWarp.NewUnsignedMessage(
@@ -46,36 +45,35 @@ func TestAggregateSignatures(t *testing.T) {
 	vdr1sk, vdr1 := newValidator(t, vdrWeight)
 	vdr2sk, vdr2 := newValidator(t, vdrWeight+1)
 	vdr3sk, vdr3 := newValidator(t, vdrWeight-1)
-	sig1, err := bls.Sign(vdr1sk, unsignedMsg.Bytes())
-	require.NoError(t, err)
-	sig2, err := bls.Sign(vdr2sk, unsignedMsg.Bytes())
-	require.NoError(t, err)
-	sig3, err := bls.Sign(vdr3sk, unsignedMsg.Bytes())
-	require.NoError(t, err)
+	sig1 := bls.Sign(vdr1sk, unsignedMsg.Bytes())
+	sig2 := bls.Sign(vdr2sk, unsignedMsg.Bytes())
+	sig3 := bls.Sign(vdr3sk, unsignedMsg.Bytes())
 	vdrToSig := map[*luxWarp.Validator]*bls.Signature{
 		vdr1: sig1,
 		vdr2: sig2,
 		vdr3: sig3,
 	}
-	nonVdrSk, err := bls.GeneratePrivateKey()
+	nonVdrSk, err := bls.NewSecretKey()
 	require.NoError(t, err)
-	nonVdrSig, err := bls.Sign(nonVdrSk, unsignedMsg.Bytes())
-	require.NoError(t, err)
+	nonVdrSig := bls.Sign(nonVdrSk, unsignedMsg.Bytes())
 	vdrs := []*luxWarp.Validator{
 		{
-			PublicKey: vdr1.PublicKey,
-			NodeID:    nodeID1[:],
-			Weight:    vdr1.Weight,
+			PublicKey:      vdr1.PublicKey,
+			PublicKeyBytes: vdr1.PublicKeyBytes,
+			NodeID:         nodeID1[:],
+			Weight:         vdr1.Weight,
 		},
 		{
-			PublicKey: vdr2.PublicKey,
-			NodeID:    nodeID2[:],
-			Weight:    vdr2.Weight,
+			PublicKey:      vdr2.PublicKey,
+			PublicKeyBytes: vdr2.PublicKeyBytes,
+			NodeID:         nodeID2[:],
+			Weight:         vdr2.Weight,
 		},
 		{
-			PublicKey: vdr3.PublicKey,
-			NodeID:    nodeID3[:],
-			Weight:    vdr3.Weight,
+			PublicKey:      vdr3.PublicKey,
+			PublicKeyBytes: vdr3.PublicKeyBytes,
+			NodeID:         nodeID3[:],
+			Weight:         vdr3.Weight,
 		},
 	}
 
@@ -364,7 +362,7 @@ func TestAggregateSignatures(t *testing.T) {
 				return
 			}
 
-			require.Equal(unsignedMsg, &res.Message.UnsignedMessage)
+			require.Equal(unsignedMsg, res.Message.UnsignedMessage)
 
 			expectedSigWeight := uint64(0)
 			for _, vdr := range tt.expectedSigners {

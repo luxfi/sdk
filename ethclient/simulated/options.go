@@ -51,3 +51,11 @@ func WithCallGasLimit(gaslimit uint64) func(nodeConf *node.Config, ethConf *ethc
 		ethConf.RPCGasCap = gaslimit
 	}
 }
+
+// WithChainConfig configures the simulated backend to use a custom chain config.
+// This is useful for testing with legacy bytecode that requires pre-Shanghai/Cancun EVM.
+func WithChainConfig(config *params.ChainConfig) func(nodeConf *node.Config, ethConf *ethconfig.Config) {
+	return func(nodeConf *node.Config, ethConf *ethconfig.Config) {
+		ethConf.Genesis.Config = config
+	}
+}

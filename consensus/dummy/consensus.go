@@ -159,20 +159,22 @@ func verifyHeaderGasFields(config *extras.ChainConfig, header *types.Header, par
 		}
 	}
 
-	// Enforce BlockGasCost constraints
-	expectedBlockGasCost := customheader.BlockGasCost(
-		config,
-		feeConfig,
-		parent,
-		header.Time,
-	)
-	headerExtra := customtypes.GetHeaderExtra(header)
-	// Accept nil or zero BlockGasCost as equivalent
-	if headerExtra.BlockGasCost == nil {
-		headerExtra.BlockGasCost = big.NewInt(0)
-	}
-	if !blockGasCostEqual(headerExtra.BlockGasCost, expectedBlockGasCost) {
-		return fmt.Errorf("invalid block gas cost: have %v, want %v", headerExtra.BlockGasCost, expectedBlockGasCost)
+	// Enforce BlockGasCost constraints (skip if ModeSkipBlockFee is set)
+	if !mode.ModeSkipBlockFee {
+		expectedBlockGasCost := customheader.BlockGasCost(
+			config,
+			feeConfig,
+			parent,
+			header.Time,
+		)
+		headerExtra := customtypes.GetHeaderExtra(header)
+		// Accept nil or zero BlockGasCost as equivalent
+		if headerExtra.BlockGasCost == nil {
+			headerExtra.BlockGasCost = big.NewInt(0)
+		}
+		if !blockGasCostEqual(headerExtra.BlockGasCost, expectedBlockGasCost) {
+			return fmt.Errorf("invalid block gas cost: have %v, want %v", headerExtra.BlockGasCost, expectedBlockGasCost)
+		}
 	}
 	return nil
 }
@@ -391,15 +393,16 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	config := params.GetExtra(chain.Config())
 
 	// Calculate the required block gas cost for this block.
-	headerExtra := customtypes.GetHeaderExtra(header)
-	headerExtra.BlockGasCost = customheader.BlockGasCost(
-		config,
-		feeConfig,
-		parent,
-		header.Time,
-	)
-	// Store the updated extras back to the header
-	customtypes.SetHeaderExtra(header, headerExtra)
+	// Note: We create a new HeaderExtra struct and store it AFTER the header
+	// is fully finalized (after Root is set) so the hash-based storage works.
+	headerExtra := &customtypes.HeaderExtra{
+		BlockGasCost: customheader.BlockGasCost(
+			config,
+			feeConfig,
+			parent,
+			header.Time,
+		),
+	}
 	if config.IsSubnetEVM(header.Time) {
 		// Verify that this block covers the block fee.
 		if err := eng.verifyBlockFee(
@@ -417,7 +420,12 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	if err != nil {
 		return nil, fmt.Errorf("failed to calculate new header.Extra: %w", err)
 	}
-	header.Extra = append(extraPrefix, header.Extra...)
+	// In the miner, predicate bytes are appended to an empty header.Extra (not after prefix).
+	// So header.Extra at this point IS the predicate bytes (if any were added).
+	// We need to preserve them and append after the computed prefix.
+	predicateBytes := header.Extra // The raw predicate bytes from miner
+	// Set header.Extra to prefix + predicate bytes
+	header.Extra = customheader.SetPredicateBytesInExtra(extraPrefix, predicateBytes)
 
 	// commit the final state root
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
@@ -431,9 +439,16 @@ func (eng *DummyEngine) FinalizeAndAssemble(chain consensus.ChainHeaderReader, h
 	if chain.Config().IsShanghai(header.Number, header.Time) {
 		body.Withdrawals = make([]*types.Withdrawal, 0)
 	}
-	return types.NewBlock(
+	block := types.NewBlock(
 		header, body, receipts, trie.NewStackTrie(nil),
-	), nil
+	)
+
+	// Store the header extras AFTER NewBlock because NewBlock recomputes
+	// TxHash, ReceiptHash, Bloom, etc., which changes the header hash.
+	// We must store using the block's final header hash for hash-based lookup to work.
+	customtypes.SetHeaderExtra(block.Header(), headerExtra)
+
+	return block, nil
 }
 
 func (*DummyEngine) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {

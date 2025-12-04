@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/luxfi/consensus"
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/validator/validatorstest"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
+	evmconsensus "github.com/luxfi/evm/consensus"
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/precompile/precompiletest"
 	"github.com/luxfi/evm/predicate"
@@ -24,31 +25,18 @@ import (
 	agoUtils "github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/constants"
 	luxWarp "github.com/luxfi/warp"
-	warpBls "github.com/luxfi/warp/bls"
 	"github.com/luxfi/warp/payload"
 	"github.com/stretchr/testify/require"
 )
 
 const pChainHeight uint64 = 1337
 
-// convertWarpToCryptoPublicKey converts a warp/bls.PublicKey to crypto/bls.PublicKey
-func convertWarpToCryptoPublicKey(warpPK *warpBls.PublicKey) (*bls.PublicKey, error) {
-	if warpPK == nil {
-		return nil, nil
-	}
-	// Convert the warp public key bytes to crypto public key
-	warpBytes := warpBls.PublicKeyToBytes(warpPK)
-	return bls.PublicKeyFromCompressedBytes(warpBytes)
-}
-
-// convertCryptoToWarpPublicKey converts a crypto/bls.PublicKey to warp/bls.PublicKey
-func convertCryptoToWarpPublicKey(cryptoPK *bls.PublicKey) (*warpBls.PublicKey, error) {
-	if cryptoPK == nil {
-		return nil, nil
-	}
-	// Convert the crypto public key bytes to warp public key
-	cryptoBytes := bls.PublicKeyToCompressedBytes(cryptoPK)
-	return warpBls.PublicKeyFromBytes(cryptoBytes)
+// convertCryptoToWarpPublicKey converts a crypto/bls.PublicKey to warp's expected format
+// Note: This is a stub for now since warp/bls package was removed
+func convertCryptoToWarpPublicKey(cryptoPK *bls.PublicKey) (*bls.PublicKey, error) {
+	// After warp refactoring, warp uses crypto/bls directly
+	// Return the same key since types are now unified
+	return cryptoPK, nil
 }
 
 var (
@@ -219,8 +207,8 @@ type testValidatorStateWrapper struct {
 	GetNetIDF         func(ids.ID) (ids.ID, error)
 }
 
-func (t *testValidatorStateWrapper) GetCurrentHeight() (uint64, error) {
-	return t.State.GetCurrentHeight(context.Background())
+func (t *testValidatorStateWrapper) GetCurrentHeight(ctx context.Context) (uint64, error) {
+	return t.State.GetCurrentHeight(ctx)
 }
 
 func (t *testValidatorStateWrapper) GetMinimumHeight(ctx context.Context) (uint64, error) {
@@ -231,15 +219,21 @@ func (t *testValidatorStateWrapper) GetMinimumHeight(ctx context.Context) (uint6
 }
 
 func (t *testValidatorStateWrapper) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.NodeID]uint64, error) {
-	validators, err := t.State.GetValidatorSet(context.Background(), height, subnetID)
+	validatorOutputs, err := t.State.GetValidatorSet(context.Background(), height, subnetID)
 	if err != nil {
 		return nil, err
 	}
-	result := make(map[ids.NodeID]uint64, len(validators))
-	for nodeID, output := range validators {
+	result := make(map[ids.NodeID]uint64, len(validatorOutputs))
+	for nodeID, output := range validatorOutputs {
 		result[nodeID] = output.Weight
 	}
 	return result, nil
+}
+
+// GetValidatorSetWithOutput returns the full validator output including public keys
+// This implements the ValidatorOutputGetter interface used by VerifyPredicate
+func (t *testValidatorStateWrapper) GetValidatorSetWithOutput(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+	return t.State.GetValidatorSet(ctx, height, subnetID)
 }
 
 func (t *testValidatorStateWrapper) GetSubnetID(chainID ids.ID) (ids.ID, error) {
@@ -286,14 +280,14 @@ func createConsensusCtx(tb testing.TB, validatorRanges []validatorRange) context
 			return getValidatorsOutput, nil
 		},
 	}
-	// Use consensus.WithValidatorState to add validator state to context
+	// Use consensuscontext.WithValidatorState to add validator state to context
 	wrappedState := &testValidatorStateWrapper{
 		State: state,
 		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			return sourceSubnetID, nil
 		},
 	}
-	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
+	consensusCtx = consensuscontext.WithValidatorState(consensusCtx, wrappedState)
 	return consensusCtx
 }
 
@@ -363,11 +357,13 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 	subnetID := ids.GenerateTestID()
 	chainID := ids.GenerateTestID()
 	// Use consensus helper functions to add values to context
-	consensusCtx = consensus.WithIDs(consensusCtx, consensus.IDs{
+	consensusCtx = consensuscontext.WithIDs(consensusCtx, consensuscontext.IDs{
 		NetworkID: 1,
 		NetID:     subnetID,
 		ChainID:   chainID,
 	})
+	// Also set subnet ID in evm consensus context (needed by evmconsensus.GetSubnetID)
+	consensusCtx = evmconsensus.WithSubnetID(consensusCtx, subnetID)
 
 	state := &validatorstest.State{
 		GetValidatorSetF: func(ctx context.Context, height uint64, requestedSubnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
@@ -385,10 +381,11 @@ func testWarpMessageFromPrimaryNetwork(t *testing.T, requirePrimaryNetworkSigner
 		State: state,
 		GetSubnetIDF: func(chainID ids.ID) (ids.ID, error) {
 			require.Equal(chainID, cChainID)
-			return constants.PrimaryNetworkID, nil // Return Primary Network SubnetID
+			// C-Chain is on the primary network, so return PrimaryNetworkID (ids.Empty)
+			return constants.PrimaryNetworkID, nil
 		},
 	}
-	consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
+	consensusCtx = consensuscontext.WithValidatorState(consensusCtx, wrappedState)
 
 	test := precompiletest.PredicateTest{
 		Config: NewConfig(utils.NewUint64(0), 0, requirePrimaryNetworkSigners),
@@ -527,7 +524,7 @@ func TestInvalidBitSet(t *testing.T) {
 		UnsignedMessage: unsignedMsg,
 		Signature: &luxWarp.BitSetSignature{
 			Signers:   make([]byte, 1),
-			Signature: [warpBls.SignatureLen]byte{},
+			Signature: [bls.SignatureLen]byte{},
 		},
 	}
 
@@ -793,7 +790,7 @@ func makeWarpPredicateTests(tb testing.TB) map[string]precompiletest.PredicateTe
 				return sourceSubnetID, nil
 			},
 		}
-		consensusCtx = consensus.WithValidatorState(consensusCtx, wrappedState)
+		consensusCtx = consensuscontext.WithValidatorState(consensusCtx, wrappedState)
 
 		predicateTests[testName] = createValidPredicateTest(consensusCtx, uint64(numSigners), predicateBytes)
 	}

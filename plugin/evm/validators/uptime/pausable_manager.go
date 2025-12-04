@@ -107,6 +107,9 @@ func (p *pausableManager) IsPaused(nodeID ids.NodeID) bool {
 // pause pauses uptime tracking for the node with the given ID
 // pause can disconnect the node from the uptime.Manager if it is connected.
 func (p *pausableManager) pause(nodeID ids.NodeID) error {
+	// Ensure the node exists in the manager even if not connected yet
+	// This allows pre-tracking uptime to be credited when StartTracking is called
+	p.Manager.EnsureExists(nodeID)
 	p.pausedVdrs.Add(nodeID)
 	if p.Manager.IsConnected(nodeID) {
 		// If the node is connected, then we need to disconnect it from

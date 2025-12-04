@@ -42,13 +42,6 @@ func (t *testUptimeState) SetUptime(nodeID ids.NodeID, netID ids.ID, uptime time
 }
 
 func TestPausableManager(t *testing.T) {
-	// TODO: This test is temporarily skipped because the uptime Manager implementation
-	// uses uptime.NewLockedCalculator() which returns a stub calculator that always returns
-	// zero values. A proper fix requires implementing a proper uptime Calculator that
-	// tracks actual uptime based on the state and clock. The current Manager does not
-	// pass state and clock to the underlying calculator.
-	t.Skip("Temporarily disabled: Manager uses stub LockedCalculator that returns zero uptime")
-
 	vID := ids.GenerateTestID()
 	nodeID0 := ids.GenerateTestNodeID()
 	startTime := time.Now()
