@@ -4,6 +4,7 @@ go 1.25.5
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.13.0
+	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/deckarep/golang-set/v2 v2.8.0
 	github.com/fjl/gencodec v0.1.1
@@ -26,7 +27,6 @@ require (
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/math v1.0.0
 	github.com/luxfi/metric v1.4.5
-	github.com/luxfi/node v1.20.6
 	github.com/luxfi/p2p v1.0.2
 	github.com/luxfi/timer v1.0.1
 	github.com/luxfi/trace v0.1.2
