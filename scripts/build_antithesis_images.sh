@@ -15,6 +15,7 @@ EVM_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # TODO(marun) Support use of a released node image if using a release version of luxd
 
 source "${EVM_PATH}"/scripts/constants.sh
+# shellcheck source=/dev/null
 source "${EVM_PATH}"/scripts/lib_luxd_clone.sh
 
 clone_luxd "${LUX_VERSION}"

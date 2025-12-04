@@ -8,8 +8,9 @@ echo "Go version:"
 go version
 
 # Configure GOPRIVATE for all luxfi packages
-export GOPRIVATE=github.com/luxfi/*
-export GONOSUMDB=github.com/luxfi/*
+# shellcheck disable=SC2125 # The asterisk is intentional Go module syntax, not a glob
+export GOPRIVATE='github.com/luxfi/*'
+export GONOSUMDB='github.com/luxfi/*'
 
 # Configure git to use GITHUB_TOKEN for authentication
 if [ -n "$GITHUB_TOKEN" ]; then
