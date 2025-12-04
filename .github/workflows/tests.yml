@@ -10,6 +10,7 @@ on:
   pull_request:
   merge_group:
     types: [checks_requested]
+  workflow_call:
 
 jobs:
   lint_test:
@@ -85,7 +86,7 @@ jobs:
   # See: https://github.com/luxfi/node/releases
   e2e_precompile:
     name: e2e precompile tests
-    if: false  # Disabled: requires pre-built node binaries
+    if: ${{ false }}  # Disabled: requires pre-built node binaries
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -127,7 +128,7 @@ jobs:
           retention-days: 5
   e2e_warp:
     name: e2e warp tests
-    if: false  # Disabled: requires pre-built node binaries
+    if: ${{ false }}  # Disabled: requires pre-built node binaries
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -169,7 +170,7 @@ jobs:
           loki_password: ${{ secrets.LOKI_PASSWORD || '' }}
   e2e_load:
     name: e2e load tests
-    if: false  # Disabled: requires pre-built node binaries
+    if: ${{ false }}  # Disabled: requires pre-built node binaries
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -198,7 +199,7 @@ jobs:
           loki_password: ${{ secrets.LOKI_PASSWORD || '' }}
   test_build_image:
     name: Image build
-    if: false  # Disabled: requires node docker image
+    if: ${{ false }}  # Disabled: requires node docker image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
