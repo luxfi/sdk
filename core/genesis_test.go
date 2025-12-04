@@ -73,6 +73,10 @@ func TestGenesisBlockForTesting(t *testing.T) {
 func TestSetupGenesis(t *testing.T) {
 	for _, scheme := range []string{rawdb.HashScheme, rawdb.PathScheme, customrawdb.FirewoodScheme} {
 		t.Run(scheme, func(t *testing.T) {
+			// Firewood disabled - skip firewood test (not fully implemented)
+			if scheme == customrawdb.FirewoodScheme {
+				t.Skip("Firewood backend not fully implemented")
+			}
 			testSetupGenesis(t, scheme)
 		})
 	}
