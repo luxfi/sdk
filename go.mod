@@ -14,25 +14,25 @@ require (
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
-	github.com/luxfi/cache v0.0.0
-	github.com/luxfi/codec v0.0.0
+	github.com/luxfi/cache v1.0.0
+	github.com/luxfi/codec v1.0.0
 	github.com/luxfi/consensus v1.22.2
-	github.com/luxfi/constants v0.0.0
+	github.com/luxfi/constants v1.0.0
 	github.com/luxfi/crypto v1.17.7
 	github.com/luxfi/database v1.2.7
 	github.com/luxfi/geth v1.16.40
 	github.com/luxfi/go-bip39 v1.1.1
 	github.com/luxfi/ids v1.1.2
 	github.com/luxfi/log v1.1.24
-	github.com/luxfi/math v0.1.5
+	github.com/luxfi/math v1.0.0
 	github.com/luxfi/metric v1.4.5
 	github.com/luxfi/node v1.20.7
-	github.com/luxfi/p2p v0.0.0-00010101000000-000000000000
-	github.com/luxfi/timer v0.0.0
-	github.com/luxfi/units v0.0.0
-	github.com/luxfi/upgrade v0.0.0-00010101000000-000000000000
-	github.com/luxfi/utils v0.0.0
-	github.com/luxfi/vms v0.0.0-00010101000000-000000000000
+	github.com/luxfi/p2p v1.0.2
+	github.com/luxfi/timer v1.0.1
+	github.com/luxfi/units v1.0.0
+	github.com/luxfi/upgrade v1.0.0
+	github.com/luxfi/utils v1.0.0
+	github.com/luxfi/vms v0.1.0
 	github.com/luxfi/warp v1.16.25
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
@@ -166,24 +166,13 @@ require (
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
 
 // Use local packages instead of node dependencies
-replace github.com/luxfi/cache => ../cache
 
-replace github.com/luxfi/codec => ../codec
 
-replace github.com/luxfi/constants => ../constants
 
-replace github.com/luxfi/timer => ../timer
 
-replace github.com/luxfi/units => ../units
 
-replace github.com/luxfi/utils => ../utils
 
-replace github.com/luxfi/math => ../math
 
-replace github.com/luxfi/p2p => ../p2p
 
-replace github.com/luxfi/upgrade => ../upgrade
 
-replace github.com/luxfi/vms => ../vms
 
-replace github.com/luxfi/netrunner-sdk => ../netrunner-sdk
