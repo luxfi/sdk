@@ -1792,7 +1792,9 @@ func StatefulPrecompiles(t *testing.T, create createFunc) {
 				storedConfig := feemanager.GetStoredFeeConfig(sdb)
 				assert.EqualValues(testFeeConfig, storedConfig)
 
-				feeConfig, _, err := blockchain.GetFeeConfigAt(blockchain.CurrentHeader())
+				// Use LastConsensusAcceptedBlock's header instead of CurrentHeader
+				// because verifyState is called with state from lastAcceptedBlock
+				feeConfig, _, err := blockchain.GetFeeConfigAt(blockchain.LastConsensusAcceptedBlock().Header())
 				assert.NoError(err)
 				assert.EqualValues(testFeeConfig, feeConfig)
 				return nil
