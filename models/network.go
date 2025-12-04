@@ -96,6 +96,10 @@ func NetworkFromNetworkID(networkID uint32) Network {
 		return Testnet
 	case sdk_constants.LocalNetworkID:
 		return Local
+	case sdk_constants.AvalancheLocalNetworkID:
+		return Local // Avalanche's local network ID (31337)
+	case sdk_constants.NetrunnerLocalNetworkID:
+		return Local // Netrunner local network ID (1337)
 	}
 	return Undefined
 }
@@ -222,7 +226,7 @@ func GetNetworkFromSidecarNetworkName(name string) Network {
 		return Mainnet
 	case "testnet", "Testnet":
 		return Testnet
-	case "local", "Local":
+	case "local", "Local", "Local Network":
 		return Local
 	case "devnet", "Devnet":
 		return Devnet
