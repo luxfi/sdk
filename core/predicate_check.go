@@ -31,9 +31,50 @@ func CheckPredicates(rules params.Rules, predicateContext *precompileconfig.Pred
 		return nil, fmt.Errorf("%w for predicate verification (%d) < intrinsic gas (%d)", ErrIntrinsicGas, tx.Gas(), intrinsicGas)
 	}
 
-	// This version cannot access extras.Rules without chainConfig and timestamp
-	// Use CheckPredicatesWithRules for full predicate support
 	predicateResults := make(map[common.Address][]byte)
+
+	// Get the RulesExtra which contains Predicaters
+	rulesExtra := params.GetRulesExtra(rules)
+
+	// Short circuit early if there are no precompile predicates to verify
+	if !rulesExtra.PredicatersExist {
+		return predicateResults, nil
+	}
+
+	// Build extrasRules for PreparePredicateStorageSlots
+	extrasRules := &extras.Rules{
+		Predicaters: rulesExtra.Predicaters,
+		LuxRules:    rulesExtra.LuxRules,
+	}
+
+	// Prepare the predicate storage slots from the transaction's access list
+	predicateArguments := predicate.PreparePredicateStorageSlots(extrasRules, tx.AccessList())
+
+	// If there are no predicates to verify, return early and skip requiring the proposervm block
+	// context to be populated.
+	if len(predicateArguments) == 0 {
+		return predicateResults, nil
+	}
+
+	if predicateContext == nil || predicateContext.ProposerVMBlockCtx == nil {
+		return nil, ErrMissingPredicateContext
+	}
+
+	for address, predicates := range predicateArguments {
+		// Since [address] is only added to [predicateArguments] when there's a valid predicate in the ruleset
+		// there's no need to check if the predicate exists here.
+		predicaterContract := rulesExtra.Predicaters[address]
+		bitset := set.NewBits()
+		for i, pred := range predicates {
+			if err := predicaterContract.VerifyPredicate(predicateContext, pred); err != nil {
+				log.Debug("predicate verification failed", "tx", tx.Hash(), "address", address, "index", i, "err", err)
+				bitset.Add(i)
+			}
+		}
+		res := bitset.Bytes()
+		log.Debug("predicate verify", "tx", tx.Hash(), "address", address, "res", res)
+		predicateResults[address] = res
+	}
 	return predicateResults, nil
 }
 

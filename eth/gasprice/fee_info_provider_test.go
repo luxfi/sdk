@@ -35,12 +35,6 @@ func makeTestHeader(number int64, parentHash common.Hash, gasUsed uint64) *types
 }
 
 func TestFeeInfoProvider(t *testing.T) {
-	// TODO: This test is temporarily skipped because HeaderExtra (BlockGasCost) is stored
-	// in an in-memory map keyed by header pointer. When blocks are serialized to DB and
-	// read back, the deserialized headers have new pointers, so the BlockGasCost is lost.
-	// A proper fix requires integrating HeaderSerializable RLP encoding into geth's
-	// rawdb.ReadHeader path.
-	t.Skip("Temporarily disabled: BlockGasCost lost on header RLP round-trip")
 	backend := newTestBackend(t, params.TestChainConfig, 2, testGenBlock(t, 55, 370))
 	f, err := newFeeInfoProvider(backend, 1, 2)
 	require.NoError(t, err)

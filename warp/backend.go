@@ -109,7 +109,7 @@ func (b *backend) initOffChainMessages(offchainMessages [][]byte) error {
 			return fmt.Errorf("wrong source chain ID at index %d", i)
 		}
 
-		_, err = payload.Parse(unsignedMsg.Payload)
+		_, err = payload.ParsePayload(unsignedMsg.Payload)
 		if err != nil {
 			return fmt.Errorf("%w at index %d as AddressedCall: %w", errParsingOffChainMessage, i, err)
 		}
@@ -157,7 +157,7 @@ func (b *backend) GetMessageSignature(ctx context.Context, unsignedMessage *luxW
 func (b *backend) GetBlockSignature(ctx context.Context, blockID ids.ID) ([]byte, error) {
 	log.Debug("Getting block from backend", "blockID", blockID)
 
-	blockHashPayload, err := payload.NewHash(blockID)
+	blockHashPayload, err := payload.NewHash(blockID[:])
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new block hash payload: %w", err)
 	}
@@ -208,9 +208,14 @@ func (b *backend) GetMessage(messageID ids.ID) (*luxWarp.UnsignedMessage, error)
 }
 
 func (b *backend) signMessage(unsignedMessage *luxWarp.UnsignedMessage) ([]byte, error) {
-	// TODO: implement signing with luxfi/warp
-	// For now, return empty signature
-	sig := make([]byte, 64)
+	if b.warpSigner == nil {
+		return nil, errors.New("warp signer not configured")
+	}
+
+	sig, err := b.warpSigner.Sign(unsignedMessage.Bytes())
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign message: %w", err)
+	}
 
 	messageIDBytes := unsignedMessage.ID()
 	messageID := ids.ID(crypto.Keccak256Hash(messageIDBytes[:]))

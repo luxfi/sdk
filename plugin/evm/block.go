@@ -205,7 +205,7 @@ func (b *Block) VerifyWithContext(ctx context.Context, proposerVMBlockCtx *block
 	}
 
 	return b.verify(&precompileconfig.PredicateContext{
-		ConsensusCtx:       context.Background(),
+		ConsensusCtx:       b.vm.ctx,
 		ProposerVMBlockCtx: consensusBlockCtx,
 	}, true)
 }
@@ -247,7 +247,8 @@ func (b *Block) verify(predicateContext *precompileconfig.PredicateContext, writ
 
 // verifyPredicates verifies the predicates in the block are valid according to predicateContext.
 func (b *Block) verifyPredicates(predicateContext *precompileconfig.PredicateContext) error {
-	rules := b.vm.chainConfig.Rules(b.ethBlock.Number(), params.IsMergeTODO, b.ethBlock.Time())
+	// Use RulesAt to properly set up the RulesExtra context for precompile checks
+	rules := params.RulesAt(b.vm.chainConfig, b.ethBlock.Number(), params.IsMergeTODO, b.ethBlock.Time())
 	rulesExtra := params.GetRulesExtra(rules)
 
 	switch {

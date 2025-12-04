@@ -12,6 +12,7 @@ import (
 	"github.com/luxfi/geth/common"
 	commonmath "github.com/luxfi/geth/common/math"
 	"github.com/luxfi/geth/core/vm"
+	"github.com/luxfi/log"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
@@ -63,7 +64,16 @@ func handleWarpMessage(accessibleState contract.AccessibleState, input []byte, s
 	state := accessibleState.GetStateDB()
 	predicateBytes, exists := state.GetPredicateStorageSlots(ContractAddress, warpIndex)
 	predicateResults := accessibleState.GetBlockContext().GetPredicateResults(state.GetTxHash(), ContractAddress)
-	valid := exists && !set.BitsFromBytes(predicateResults).Contains(warpIndex)
+	bitset := set.BitsFromBytes(predicateResults)
+	containsIndex := bitset.Contains(warpIndex)
+	valid := exists && !containsIndex
+	log.Info("DEBUG handleWarpMessage",
+		"warpIndex", warpIndex,
+		"exists", exists,
+		"predicateResultsLen", len(predicateResults),
+		"predicateResults", fmt.Sprintf("%x", predicateResults),
+		"containsIndex", containsIndex,
+		"valid", valid)
 	if !valid {
 		return handler.packFailed(), remainingGas, nil
 	}
@@ -101,7 +111,7 @@ func (addressedPayloadHandler) packFailed() []byte {
 }
 
 func (addressedPayloadHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
-	addressedPayload, err := payload.Parse(warpMessage.UnsignedMessage.Payload)
+	addressedPayload, err := payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidAddressedPayload, err)
 	}
@@ -127,7 +137,7 @@ func (blockHashHandler) packFailed() []byte {
 }
 
 func (blockHashHandler) handleMessage(warpMessage *warp.Message) ([]byte, error) {
-	parsedPayload, err := payload.Parse(warpMessage.UnsignedMessage.Payload)
+	parsedPayload, err := payload.ParsePayload(warpMessage.UnsignedMessage.Payload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", errInvalidBlockHashPayload, err)
 	}

@@ -1,0 +1,215 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package core
+
+import (
+	"context"
+	"math/big"
+
+	"github.com/holiman/uint256"
+	"github.com/luxfi/evm/commontype"
+	"github.com/luxfi/evm/params"
+	"github.com/luxfi/evm/precompile/contract"
+	"github.com/luxfi/evm/precompile/modules"
+	"github.com/luxfi/evm/precompile/precompileconfig"
+	"github.com/luxfi/evm/predicate"
+	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/geth/core/vm"
+)
+
+// statefulAccessibleState implements contract.AccessibleState for stateful precompiles
+type statefulAccessibleState struct {
+	stateDB               vm.StateDB
+	blockContext          *blockContextWrapper
+	consensusCtx          context.Context
+	chainConfig           *params.ChainConfig
+	predicateCtx          *precompileconfig.PredicateContext
+	predicateStorageSlots map[common.Address][][]byte
+}
+
+// blockContextWrapper wraps vm.BlockContext to implement contract.BlockContext
+type blockContextWrapper struct {
+	evmBlockCtx       vm.BlockContext
+	predicateCtx      *precompileconfig.PredicateContext
+	predicateResults  *predicate.Results
+}
+
+func (b *blockContextWrapper) Number() *big.Int {
+	return b.evmBlockCtx.BlockNumber
+}
+
+func (b *blockContextWrapper) Timestamp() uint64 {
+	return b.evmBlockCtx.Time
+}
+
+func (b *blockContextWrapper) GetPredicateResults(txHash common.Hash, precompileAddress common.Address) []byte {
+	if b.predicateResults == nil {
+		return nil
+	}
+	return b.predicateResults.GetPredicateResults(txHash, precompileAddress)
+}
+
+func (s *statefulAccessibleState) GetStateDB() contract.StateDB {
+	return &stateDBWrapper{
+		StateDB:               s.stateDB,
+		predicateStorageSlots: s.predicateStorageSlots,
+	}
+}
+
+func (s *statefulAccessibleState) GetBlockContext() contract.BlockContext {
+	return s.blockContext
+}
+
+func (s *statefulAccessibleState) GetConsensusContext() context.Context {
+	return s.consensusCtx
+}
+
+func (s *statefulAccessibleState) GetChainConfig() precompileconfig.ChainConfig {
+	return &chainConfigWrapper{s.chainConfig}
+}
+
+// stateDBWrapper wraps vm.StateDB to implement contract.StateDB
+type stateDBWrapper struct {
+	vm.StateDB
+	predicateStorageSlots map[common.Address][][]byte
+}
+
+func (s *stateDBWrapper) SetState(addr common.Address, key, value common.Hash) {
+	// The geth interface returns the original value, but contract.StateDB doesn't
+	s.StateDB.SetState(addr, key, value)
+}
+
+func (s *stateDBWrapper) AddBalance(addr common.Address, amount *uint256.Int) {
+	// Use zero reason for compatibility
+	s.StateDB.AddBalance(addr, amount, 0)
+}
+
+func (s *stateDBWrapper) SetNonce(addr common.Address, nonce uint64) {
+	// Use zero reason for compatibility
+	s.StateDB.SetNonce(addr, nonce, 0)
+}
+
+func (s *stateDBWrapper) GetPredicateStorageSlots(address common.Address, index int) ([]byte, bool) {
+	if s.predicateStorageSlots == nil {
+		return nil, false
+	}
+	slots, exists := s.predicateStorageSlots[address]
+	if !exists || index >= len(slots) {
+		return nil, false
+	}
+	return slots[index], true
+}
+
+func (s *stateDBWrapper) AddLog(log *types.Log) {
+	s.StateDB.AddLog(log)
+}
+
+// TxHashGetter is an interface for StateDB implementations that can return the current tx hash
+type TxHashGetter interface {
+	GetTxHash() common.Hash
+}
+
+func (s *stateDBWrapper) GetTxHash() common.Hash {
+	// Try to get the tx hash from the underlying StateDB
+	if thg, ok := s.StateDB.(TxHashGetter); ok {
+		return thg.GetTxHash()
+	}
+	return common.Hash{}
+}
+
+// chainConfigWrapper wraps params.ChainConfig to implement precompileconfig.ChainConfig
+type chainConfigWrapper struct {
+	*params.ChainConfig
+}
+
+func (c *chainConfigWrapper) IsDurango(timestamp uint64) bool {
+	return params.GetExtra(c.ChainConfig).IsDurango(timestamp)
+}
+
+func (c *chainConfigWrapper) GetFeeConfig() commontype.FeeConfig {
+	return params.GetExtra(c.ChainConfig).FeeConfig
+}
+
+func (c *chainConfigWrapper) AllowedFeeRecipients() bool {
+	return params.GetExtra(c.ChainConfig).AllowFeeRecipients
+}
+
+// NewStatefulPrecompileHook creates a hook function for handling stateful precompiles
+// consensusCtx should be the VM's context containing chain ID and network ID for warp messages
+func NewStatefulPrecompileHook(chainConfig *params.ChainConfig, predicateContext *precompileconfig.PredicateContext, consensusCtx context.Context) vm.StatefulPrecompileHook {
+	return NewStatefulPrecompileHookFull(chainConfig, predicateContext, consensusCtx, nil, nil)
+}
+
+// NewStatefulPrecompileHookWithSlots creates a hook function for handling stateful precompiles with predicate storage slots
+// consensusCtx should be the VM's context containing chain ID and network ID for warp messages
+// predicateStorageSlots contains the predicate data extracted from the transaction's access list
+func NewStatefulPrecompileHookWithSlots(chainConfig *params.ChainConfig, predicateContext *precompileconfig.PredicateContext, consensusCtx context.Context, predicateStorageSlots map[common.Address][][]byte) vm.StatefulPrecompileHook {
+	return NewStatefulPrecompileHookFull(chainConfig, predicateContext, consensusCtx, predicateStorageSlots, nil)
+}
+
+// NewStatefulPrecompileHookFull creates a hook function for handling stateful precompiles with all options
+// consensusCtx should be the VM's context containing chain ID and network ID for warp messages
+// predicateStorageSlots contains the predicate data extracted from the transaction's access list
+// predicateResults contains the verification results for predicates (bitset of failed indices)
+func NewStatefulPrecompileHookFull(chainConfig *params.ChainConfig, predicateContext *precompileconfig.PredicateContext, consensusCtx context.Context, predicateStorageSlots map[common.Address][][]byte, predicateResults *predicate.Results) vm.StatefulPrecompileHook {
+	return func(evmInterface interface{}, caller, addr common.Address, input []byte, gas uint64, value *uint256.Int, readOnly bool) vm.StatefulPrecompileResult {
+		evm, ok := evmInterface.(*vm.EVM)
+		if !ok {
+			return vm.StatefulPrecompileResult{Handled: false}
+		}
+
+		// Get active precompiles at this timestamp using GetExtrasRules
+		rules := chainConfig.Rules(evm.Context.BlockNumber, params.IsMergeTODO, evm.Context.Time)
+		extrasRules := params.GetExtrasRules(rules, chainConfig, evm.Context.Time)
+
+		// Check if this address is a stateful precompile
+		precompileConfig, isActive := extrasRules.Precompiles[addr]
+		if !isActive || precompileConfig == nil || precompileConfig.IsDisabled() {
+			return vm.StatefulPrecompileResult{Handled: false}
+		}
+
+		// Get the precompile module by address
+		var precompileContract contract.StatefulPrecompiledContract
+		for _, module := range modules.RegisteredModules() {
+			if module.Address == addr {
+				precompileContract = module.Contract
+				break
+			}
+		}
+
+		if precompileContract == nil {
+			return vm.StatefulPrecompileResult{Handled: false}
+		}
+
+		// Create accessible state for the precompile
+		// Use the passed consensus context if available, otherwise fallback to Background
+		ctxToUse := consensusCtx
+		if ctxToUse == nil {
+			ctxToUse = context.Background()
+		}
+		accessibleState := &statefulAccessibleState{
+			stateDB: evm.StateDB,
+			blockContext: &blockContextWrapper{
+				evmBlockCtx:      evm.Context,
+				predicateCtx:     predicateContext,
+				predicateResults: predicateResults,
+			},
+			consensusCtx:          ctxToUse,
+			chainConfig:           chainConfig,
+			predicateCtx:          predicateContext,
+			predicateStorageSlots: predicateStorageSlots,
+		}
+
+		// Run the precompile
+		ret, remainingGas, err := precompileContract.Run(accessibleState, caller, addr, input, gas, readOnly)
+
+		return vm.StatefulPrecompileResult{
+			Ret:          ret,
+			RemainingGas: remainingGas,
+			Err:          err,
+			Handled:      true,
+		}
+	}
+}

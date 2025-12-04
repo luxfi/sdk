@@ -115,6 +115,13 @@ var (
 			// Add Shanghai/Cancun so CheckCompatible test checks SubnetEVM fork, not Shanghai
 			ShanghaiTime: utils.TimeToNewUint64(InitiallyActiveTime),
 			CancunTime:   utils.TimeToNewUint64(InitiallyActiveTime),
+			BlobScheduleConfig: &ethparams.BlobScheduleConfig{
+				Cancun: &ethparams.BlobConfig{
+					Target:         3,
+					Max:            6,
+					UpdateFraction: 3338477,
+				},
+			},
 		},
 		extras.TestPreSubnetEVMChainConfig,
 	)

@@ -66,6 +66,7 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID ids.Nod
 
 	hash := blockRequest.Hash
 	height := blockRequest.Height
+	log.Info("BlockRequestHandler: processing request", "hash", hash, "height", height, "parents", parents)
 	for i := 0; i < int(parents); i++ {
 		// we return whatever we have until ctx errors, limit is exceeded, or we reach the genesis block
 		// this will happen either when the ctx is cancelled or we hit the ctx deadline
@@ -79,6 +80,7 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID ids.Nod
 
 		block := b.blockProvider.GetBlock(hash, height)
 		if block == nil {
+			log.Info("BlockRequestHandler: block not found", "hash", hash, "height", height)
 			b.stats.IncMissingBlockHash()
 			break
 		}

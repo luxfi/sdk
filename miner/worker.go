@@ -295,7 +295,7 @@ func (w *worker) createCurrentEnvironment(predicateContext *precompileconfig.Pre
 		header:           header,
 		tcount:           0,
 		gasPool:          new(core.GasPool).AddGas(capacity),
-		rules:            w.chainConfig.Rules(header.Number, params.IsMergeTODO, header.Time),
+		rules:            params.RulesAt(w.chainConfig, header.Number, params.IsMergeTODO, header.Time),
 		predicateContext: predicateContext,
 		predicateResults: predicate.NewResults(),
 		start:            tstart,
@@ -356,13 +356,13 @@ func (w *worker) applyTransaction(env *environment, tx *types.Transaction, coinb
 		}
 		env.predicateResults.SetTxResults(tx.Hash(), results)
 
-		// TODO: Handle predicate results
 		blockContext = core.NewEVMBlockContext(env.header, w.chain, &coinbase)
 	} else {
 		blockContext = core.NewEVMBlockContext(env.header, w.chain, &coinbase)
 	}
 
-	receipt, err := core.ApplyTransaction(w.chainConfig, w.chain, blockContext, env.gasPool, env.state, env.header, tx, &env.header.GasUsed, *w.chain.GetVMConfig())
+	// Pass predicate results to ApplyTransaction so EVM execution knows about failed predicates
+	receipt, err := core.ApplyTransactionWithResults(w.chainConfig, w.chain, blockContext, env.gasPool, env.state, env.header, tx, &env.header.GasUsed, *w.chain.GetVMConfig(), env.predicateResults)
 	if err != nil {
 		env.state.RevertToSnapshot(snap)
 		env.gasPool.SetGas(gp)
@@ -483,13 +483,23 @@ func (w *worker) commitTransactions(env *environment, plainTxs, blobTxs *transac
 // commit runs any post-transaction state modifications, assembles the final block
 // and commits new work if consensus engine is running.
 func (w *worker) commit(env *environment) (*types.Block, error) {
-	if params.GetRulesExtra(env.rules).IsDurango {
+	rulesExtra := params.GetRulesExtra(env.rules)
+	isDurango := rulesExtra.IsDurango
+	configExtra := params.GetExtra(w.chainConfig)
+	log.Info("DEBUG commit",
+		"isDurango", isDurango,
+		"header.Time", env.header.Time,
+		"DurangoTimestamp", configExtra.DurangoTimestamp,
+		"header.Extra before", len(env.header.Extra))
+	if isDurango {
 		predicateResultsBytes, err := env.predicateResults.Bytes()
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal predicate results: %w", err)
 		}
+		log.Info("DEBUG commit adding predicate results", "bytes", len(predicateResultsBytes))
 		env.header.Extra = append(env.header.Extra, predicateResultsBytes...)
 	}
+	log.Info("DEBUG commit after predicate", "header.Extra", len(env.header.Extra))
 	// Deep copy receipts here to avoid interaction between different tasks.
 	receipts := copyReceipts(env.receipts)
 	block, err := w.engine.FinalizeAndAssemble(w.chain, env.header, env.parent, env.state, env.txs, nil, receipts)

@@ -244,6 +244,7 @@ func TestEstimateRequiredTip(t *testing.T) {
 			subnetEVMTimestamp: utils.NewUint64(0),
 			header: &types.Header{
 				BaseFee: big.NewInt(1),
+				Number:  big.NewInt(1), // Ensure unique hash to avoid collision with no_gas_used test case
 			},
 			wantErr: errBlockGasCostNil,
 		},

@@ -14,7 +14,11 @@ import (
 )
 
 func TestE2E(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Skip if LUXD_PATH is not set - this is an E2E test that requires
+	// a full node environment with the luxd binary available
+	if os.Getenv("LUXD_PATH") == "" && os.Getenv("E2E_TEST") == "" {
+		t.Skip("Skipping E2E test: LUXD_PATH environment variable not set")
+	}
 	if basePath := os.Getenv("TEST_SOURCE_ROOT"); basePath != "" {
 		os.Chdir(basePath)
 	}

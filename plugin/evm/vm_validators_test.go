@@ -13,10 +13,8 @@ import (
 
 // Test basic validator state functionality
 func TestValidatorState(t *testing.T) {
-	// TODO: This test is temporarily skipped because the VM initialization requires
-	// a properly configured ValidatorState in the consensus context. The current test
-	// infrastructure doesn't set up ValidatorState.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
+	// NOTE: ValidatorState is now properly configured in createTestConsensusContext
+	// via mockValidatorState in vm_test.go
 
 	require := require.New(t)
 

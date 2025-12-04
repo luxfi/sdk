@@ -28,6 +28,7 @@
 package runtime
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"strings"
@@ -259,6 +260,11 @@ func (d *dummyChain) GetHeader(h common.Hash, n uint64) *types.Header {
 // Config returns the chain config.
 func (d *dummyChain) Config() *params.ChainConfig {
 	return params.TestChainConfig
+}
+
+// ConsensusContext returns the consensus context for warp messages.
+func (d *dummyChain) ConsensusContext() context.Context {
+	return nil
 }
 
 // TestBlockhash tests the blockhash operation. It's a bit special, since it internally

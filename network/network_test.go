@@ -57,24 +57,30 @@ var (
 )
 
 func TestNetworkDoesNotConnectToItself(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Test that the network doesn't count itself when its own nodeID connects
 	ctx := context.Background()
-	nodeID := ids.GenerateTestNodeID()
 	n, err := NewNetwork(ctx, nil, nil, 1, prometheus.NewRegistry())
 	require.NoError(t, err)
-	// Convert version.Application from node to consensus version
+
+	// The network's self is EmptyNodeID (set in NewNetwork)
+	// When EmptyNodeID connects, it should be ignored (size stays 0)
 	consVersion := &consensusVersion.Application{
 		Name:  defaultPeerVersion.Name,
 		Major: defaultPeerVersion.Major,
 		Minor: defaultPeerVersion.Minor,
 		Patch: defaultPeerVersion.Patch,
 	}
-	assert.NoError(t, n.Connected(context.Background(), nodeID, consVersion))
+	assert.NoError(t, n.Connected(context.Background(), ids.EmptyNodeID, consVersion))
 	assert.EqualValues(t, uint32(0), n.Size())
+
+	// But when a different nodeID connects, it should be counted
+	nodeID := ids.GenerateTestNodeID()
+	assert.NoError(t, n.Connected(context.Background(), nodeID, consVersion))
+	assert.EqualValues(t, uint32(1), n.Size())
 }
 
 func TestRequestAnyRequestsRoutingAndResponse(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing request routing to any peer with version matching
 	callNum := uint32(0)
 	senderWg := &sync.WaitGroup{}
 	var net Network
@@ -145,7 +151,7 @@ func TestRequestAnyRequestsRoutingAndResponse(t *testing.T) {
 }
 
 func TestAppRequestOnCtxCancellation(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing request behavior when context is cancelled
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
 	sender := testAppSender{
 		sendAppRequestFn: func(_ context.Context, nodeID ids.NodeID, requestID uint32, requestBytes []byte) error {
@@ -175,7 +181,7 @@ func TestAppRequestOnCtxCancellation(t *testing.T) {
 }
 
 func TestRequestRequestsRoutingAndResponse(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing request/response routing to specific peers
 	callNum := uint32(0)
 	senderWg := &sync.WaitGroup{}
 	var net Network
@@ -272,7 +278,7 @@ func TestRequestRequestsRoutingAndResponse(t *testing.T) {
 }
 
 func TestAppRequestOnShutdown(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing request handling during network shutdown
 	var (
 		net    Network
 		wg     sync.WaitGroup
@@ -315,7 +321,7 @@ func TestAppRequestOnShutdown(t *testing.T) {
 }
 
 func TestSyncedAppRequestAnyOnCtxCancellation(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing synced request with context cancellation
 	codecManager := buildCodec(t, HelloRequest{}, HelloResponse{})
 	type reqInfo struct {
 		nodeID    ids.NodeID
@@ -391,7 +397,7 @@ func TestSyncedAppRequestAnyOnCtxCancellation(t *testing.T) {
 }
 
 func TestRequestMinVersion(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing version matching for peer selection
 	callNum := uint32(0)
 	nodeID := ids.GenerateTestNodeID()
 	codecManager := buildCodec(t, TestMessage{})
@@ -461,7 +467,7 @@ func TestRequestMinVersion(t *testing.T) {
 }
 
 func TestOnRequestHonoursDeadline(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing request deadline handling
 	var net Network
 	responded := false
 	sender := testAppSender{
@@ -502,7 +508,7 @@ func TestOnRequestHonoursDeadline(t *testing.T) {
 }
 
 func TestHandleInvalidMessages(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing handling of malformed/invalid messages
 	codecManager := buildCodec(t, HelloGossip{}, TestMessage{})
 	nodeID := ids.GenerateTestNodeID()
 	requestID := peertest.TestSDKRequestID
@@ -547,15 +553,15 @@ func TestHandleInvalidMessages(t *testing.T) {
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), garbageResponse))
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), emptyResponse))
 	assert.NoError(t, clientNetwork.AppRequest(context.Background(), nodeID, requestID, time.Now().Add(time.Second), nilResponse))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, gossipMsg))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, requestMessage))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, garbageResponse))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, emptyResponse))
-	assert.ErrorIs(t, p2p.ErrUnrequestedResponse, clientNetwork.AppResponse(context.Background(), nodeID, requestID, nilResponse))
+	assert.ErrorIs(t, clientNetwork.AppResponse(context.Background(), nodeID, requestID, gossipMsg), p2p.ErrUnrequestedResponse)
+	assert.ErrorIs(t, clientNetwork.AppResponse(context.Background(), nodeID, requestID, requestMessage), p2p.ErrUnrequestedResponse)
+	assert.ErrorIs(t, clientNetwork.AppResponse(context.Background(), nodeID, requestID, garbageResponse), p2p.ErrUnrequestedResponse)
+	assert.ErrorIs(t, clientNetwork.AppResponse(context.Background(), nodeID, requestID, emptyResponse), p2p.ErrUnrequestedResponse)
+	assert.ErrorIs(t, clientNetwork.AppResponse(context.Background(), nodeID, requestID, nilResponse), p2p.ErrUnrequestedResponse)
 }
 
 func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing error propagation from request handlers
 	codecManager := buildCodec(t, TestMessage{})
 	nodeID := ids.GenerateTestNodeID()
 	requestID := peertest.TestPeerRequestID
@@ -579,7 +585,7 @@ func TestNetworkPropagatesRequestHandlerError(t *testing.T) {
 }
 
 func TestNetworkAppRequestAfterShutdown(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing requests after network shutdown are handled gracefully
 	require := require.New(t)
 
 	ctx := context.Background()
@@ -592,7 +598,7 @@ func TestNetworkAppRequestAfterShutdown(t *testing.T) {
 }
 
 func TestNetworkRouting(t *testing.T) {
-	t.Skip("Temporarily disabled for CI")
+	// Enabled - testing routing between SDK handlers and network handlers
 	require := require.New(t)
 	sender := &testAppSender{
 		sendAppRequestFn: func(_ context.Context, nodeID ids.NodeID, u uint32, bytes []byte) error {

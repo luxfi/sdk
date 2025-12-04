@@ -54,10 +54,30 @@ var (
 	syncPerformedKeyLength = len(syncPerformedPrefix) + wrappers.LongLen
 )
 
-// var FirewoodScheme = "firewood"
-var FirewoodScheme = "" // Disabled - use HashScheme instead
+// FirewoodScheme is the state scheme for Firewood (currently disabled).
+// To disable Firewood, the scheme value must still be "firewood" so that
+// comparisons like `provided == FirewoodScheme` don't accidentally match
+// when provided is empty string. Firewood is disabled by not requesting it.
+var FirewoodScheme = "firewood"
 
 // upgradeConfigKey = upgradeConfigPrefix + hash
 func upgradeConfigKey(hash common.Hash) []byte {
 	return append(upgradeConfigPrefix, hash.Bytes()...)
+}
+
+// blockGasCostPrefix is the prefix for storing BlockGasCost data
+// blockGasCostPrefix + num (8 bytes) + hash (32 bytes) -> BlockGasCost RLP encoded
+var blockGasCostPrefix = []byte("bgc")
+
+// blockGasCostKey returns the database key for storing BlockGasCost
+func blockGasCostKey(number uint64, hash common.Hash) []byte {
+	result := make([]byte, len(blockGasCostPrefix)+8+32)
+	copy(result, blockGasCostPrefix)
+	// Encode number as big-endian 8 bytes
+	for i := 7; i >= 0; i-- {
+		result[len(blockGasCostPrefix)+i] = byte(number)
+		number >>= 8
+	}
+	copy(result[len(blockGasCostPrefix)+8:], hash[:])
+	return result
 }

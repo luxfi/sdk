@@ -28,6 +28,7 @@
 package core
 
 import (
+	"context"
 	"math/big"
 
 	"github.com/holiman/uint256"
@@ -164,6 +165,10 @@ type ChainContext interface {
 
 	// Config returns the blockchain's chain configuration
 	Config() *params.ChainConfig
+
+	// ConsensusContext returns the consensus context for warp messages.
+	// May return nil if not set.
+	ConsensusContext() context.Context
 }
 
 func wrapStateDB(rules params.Rules, db vm.StateDB) vm.StateDB {

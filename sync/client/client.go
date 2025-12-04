@@ -321,7 +321,9 @@ func (c *client) get(ctx context.Context, request message.Request, parseFn parse
 			start    = time.Now()
 		)
 		if len(c.stateSyncNodes) == 0 {
+			log.Info("client.get: calling SendSyncedAppRequestAny", "stateSyncVersion", StateSyncVersion, "requestLen", len(requestBytes))
 			response, nodeID, err = c.networkClient.SendSyncedAppRequestAny(ctx, StateSyncVersion, requestBytes)
+			log.Info("client.get: SendSyncedAppRequestAny returned", "responseLen", len(response), "nodeID", nodeID, "err", err)
 		} else {
 			// get the next nodeID using the nodeIdx offset. If we're out of nodes, loop back to 0
 			// we do this every attempt to ensure we get a different node each time if possible.

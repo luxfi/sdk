@@ -6,6 +6,7 @@ package consensus
 import (
 	"context"
 
+	consensuscontext "github.com/luxfi/consensus/context"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 )
@@ -92,14 +93,13 @@ func WithWarpSigner(ctx context.Context, signer WarpSigner) context.Context {
 }
 
 // WithValidatorState adds a validator state to the context
-func WithValidatorState(ctx context.Context, state interface{}) context.Context {
-	return context.WithValue(ctx, "validatorState", state)
+// Delegates to the external consensus context package for consistency
+func WithValidatorState(ctx context.Context, state consensuscontext.ValidatorState) context.Context {
+	return consensuscontext.WithValidatorState(ctx, state)
 }
 
 // GetValidator retrieves the validator state from the context
-func GetValidator(ctx context.Context) interface{} {
-	if v := ctx.Value("validatorState"); v != nil {
-		return v
-	}
-	return nil
+// Delegates to the external consensus context package for consistency
+func GetValidator(ctx context.Context) consensuscontext.ValidatorState {
+	return consensuscontext.GetValidatorState(ctx)
 }

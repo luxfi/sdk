@@ -94,7 +94,10 @@ type Backend struct {
 //
 // A simulated backend always uses chainID 1337.
 func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config, ethConf *ethconfig.Config)) *Backend {
-	chainConfig := params.Copy(params.TestChainConfig)
+	// Use TestSubnetEVMChainConfig which doesn't have Shanghai/Cancun enabled.
+	// This is needed for backward compatibility with legacy contract bytecode
+	// that uses pre-Shanghai opcodes (e.g., SELFDESTRUCT, certain JUMP patterns).
+	chainConfig := params.Copy(params.TestSubnetEVMChainConfig)
 	chainConfig.ChainID = big.NewInt(1337)
 
 	// Create the default configurations for the outer node shell and the Ethereum
@@ -103,10 +106,10 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 
 	ethConf := ethconfig.DefaultConfig
 
-	// Initialize the extras with proper defaults
+	// Initialize the extras with proper defaults for SubnetEVM without Shanghai/Cancun
 	extra := &extras.ChainConfig{
-		FeeConfig:       extras.DefaultFeeConfig,
-		NetworkUpgrades: extras.GetDefaultNetworkUpgrades(),
+		FeeConfig:       extras.TestFeeConfig, // Use TestFeeConfig with minimal fees for test compatibility
+		NetworkUpgrades: extras.TestSubnetEVMChainConfig.NetworkUpgrades,
 	}
 	params.SetExtra(chainConfig, extra)
 
@@ -119,6 +122,9 @@ func NewBackend(alloc types.GenesisAlloc, options ...func(nodeConf *node.Config,
 	ethConf.Miner.Etherbase = constants.BlackholeAddr
 	ethConf.Miner.TestOnlyAllowDuplicateBlocks = true
 	ethConf.TxPool.NoLocals = true
+	// Use hash scheme for simulated backend to avoid pathdb flattening issues
+	// when accepting blocks on empty/genesis state
+	ethConf.StateScheme = rawdb.HashScheme
 	// Disable snapshots for simulated backend to avoid flattening issues
 	ethConf.SnapshotCache = 0
 
@@ -295,7 +301,8 @@ func (n *Backend) Fork(parentHash common.Hash) error {
 // AdjustTime changes the block timestamp and creates a new block.
 // It can only be called on empty blocks.
 func (n *Backend) AdjustTime(adjustment time.Duration) error {
-	_, err := n.buildBlock(false, uint64(adjustment))
+	// Convert duration from nanoseconds to seconds for the block timestamp
+	_, err := n.buildBlock(false, uint64(adjustment.Seconds()))
 	return err
 }
 

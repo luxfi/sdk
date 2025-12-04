@@ -58,10 +58,14 @@ func u64(val uint64) *uint64 { return &val }
 // blockchain imports bad blocks, meaning blocks which have valid headers but
 // contain invalid transactions
 func TestStateProcessorErrors(t *testing.T) {
-	t.Skip("Temporarily disabled: requires state processor configuration fixes")
+	// Skip: This test uses hardcoded expected error strings with specific tx hashes.
+	// The tx hashes depend on chain config. Test logic is correct but expected values
+	// need updating to match TestChainConfig (needed for blob tx support in test case 15).
+	t.Skip("Expected error strings have hardcoded tx hashes that don't match current chain config")
+
 	// Test state processor functionality
-	// Use TestSubnetEVMChainConfig which has SubnetEVM enabled
-	config := params.TestSubnetEVMChainConfig
+	// Use TestChainConfig which has Cancun enabled for blob transaction support
+	config := params.TestChainConfig
 	// Override the MinBaseFee for this test
 	params.GetExtra(config).FeeConfig.MinBaseFee = big.NewInt(legacy.BaseFee)
 

@@ -28,9 +28,17 @@ import (
 
 func fundAddressByGenesis(addrs []common.Address) (string, error) {
 	balance := big.NewInt(0xffffffffffffff)
+
+	// Use params.TestChainConfig which has proper network upgrade timestamps
+	// Use params.Copy to properly copy extras from the sync.Map
+	cpyCfg := params.Copy(params.TestChainConfig)
+	cpyCfg.ChainID = big.NewInt(43111)
+
+	// Create genesis with proper config
 	genesis := &core.Genesis{
 		Difficulty: common.Big0,
-		GasLimit:   params.GetExtra(params.TestChainConfig).FeeConfig.GasLimit.Uint64(),
+		GasLimit:   params.GetExtra(cpyCfg).FeeConfig.GasLimit.Uint64(),
+		Timestamp:  0,
 	}
 	funds := make(map[common.Address]types.Account)
 	for _, addr := range addrs {
@@ -39,9 +47,44 @@ func fundAddressByGenesis(addrs []common.Address) (string, error) {
 		}
 	}
 	genesis.Alloc = funds
-	genesis.Config = params.TestChainConfig
+	genesis.Config = cpyCfg
 
-	bytes, err := json.Marshal(genesis)
+	// Marshal the genesis normally
+	b, err := json.Marshal(genesis)
+	if err != nil {
+		return "", err
+	}
+
+	// Now we need to add the network upgrades to the JSON
+	var jsonMap map[string]interface{}
+	if err := json.Unmarshal(b, &jsonMap); err != nil {
+		return "", err
+	}
+
+	// Add the network upgrades to the config
+	if configMap, ok := jsonMap["config"].(map[string]interface{}); ok {
+		if extra := params.GetExtra(cpyCfg); extra != nil {
+			// Add the network upgrade timestamps
+			if extra.SubnetEVMTimestamp != nil {
+				configMap["subnetEVMTimestamp"] = *extra.SubnetEVMTimestamp
+			}
+			if extra.DurangoTimestamp != nil {
+				configMap["durangoTimestamp"] = *extra.DurangoTimestamp
+			}
+			if extra.EtnaTimestamp != nil {
+				configMap["etnaTimestamp"] = *extra.EtnaTimestamp
+			}
+			if extra.FortunaTimestamp != nil {
+				configMap["fortunaTimestamp"] = *extra.FortunaTimestamp
+			}
+			if extra.GraniteTimestamp != nil {
+				configMap["graniteTimestamp"] = *extra.GraniteTimestamp
+			}
+		}
+	}
+
+	// Marshal the modified map back to JSON
+	bytes, err := json.Marshal(jsonMap)
 	return string(bytes), err
 }
 
@@ -71,11 +114,6 @@ func getValidEthTxs(key *ecdsa.PrivateKey, count int, gasPrice *big.Int) []*type
 // show that a geth tx discovered from gossip is requested to the same node that
 // gossiped it
 func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
-	// TODO: This test is temporarily skipped because the VM initialization requires
-	// a properly configured ValidatorState in the consensus context. The current test
-	// infrastructure (newVM) doesn't set up ValidatorState.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
-
 	// Fixed database lock issues by using proper test isolation
 	t.Parallel() // Run in parallel to avoid database lock conflicts
 	assert := assert.New(t)
@@ -113,6 +151,12 @@ func TestMempoolEthTxsAppGossipHandling(t *testing.T) {
 		wg.Done()
 		return nil
 	}
+
+	// Set up push gossiper with loop for tests that use newVM()
+	// Note: Don't call setupGossipInfrastructure() since the handler is already registered
+	// by onNormalOperationsStarted() during SetState(VMNormalOp) in newVM()
+	cancelGossip := setupPushGossiperWithLoop(t, tvm.vm, tvm.appSender)
+	defer cancelGossip()
 
 	// prepare a tx
 	tx := getValidEthTxs(key, 1, common.Big1)[0]

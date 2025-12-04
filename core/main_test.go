@@ -19,6 +19,7 @@ func TestMain(m *testing.M) {
 		goleak.IgnoreTopFunction("github.com/luxfi/geth/metrics.(*meterArbiter).tick"),
 		goleak.IgnoreTopFunction("github.com/luxfi/evm/metrics.(*meterArbiter).tick"),
 		goleak.IgnoreTopFunction("github.com/syndtr/goleveldb/leveldb.(*DB).mpoolDrain"),
+		goleak.IgnoreTopFunction("github.com/luxfi/geth/triedb/pathdb.(*generator).generate"),
 	}
 	goleak.VerifyTestMain(m, opts...)
 }

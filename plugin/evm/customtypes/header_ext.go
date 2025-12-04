@@ -15,20 +15,24 @@ import (
 	"github.com/luxfi/geth/rlp"
 )
 
-// Map-based storage for header extras until extras package is available
+// Hash-based storage for header extras to survive RLP encoding/decoding.
+// Using header hash as key ensures extras are preserved when blocks are
+// serialized and deserialized (which creates new header pointers).
 var (
-	headerExtras      = make(map[*ethtypes.Header]*HeaderExtra)
-	headerExtrasMutex sync.RWMutex
+	headerExtrasByHash = make(map[common.Hash]*HeaderExtra)
+	headerExtrasMutex  sync.RWMutex
 )
 
 // GetHeaderExtra returns the [HeaderExtra] from the given [Header].
+// Looks up by header hash to survive RLP round-trips.
 func GetHeaderExtra(h *ethtypes.Header) *HeaderExtra {
 	if h == nil {
 		return nil
 	}
+	hash := h.Hash()
 	headerExtrasMutex.RLock()
 	defer headerExtrasMutex.RUnlock()
-	extra := headerExtras[h]
+	extra := headerExtrasByHash[hash]
 	if extra == nil {
 		// Return a default HeaderExtra with BlockGasCost set to nil
 		// This matches the expected behavior for blocks without gas cost set
@@ -38,13 +42,15 @@ func GetHeaderExtra(h *ethtypes.Header) *HeaderExtra {
 }
 
 // SetHeaderExtra sets the given [HeaderExtra] on the [Header].
+// Stores by header hash to survive RLP round-trips.
 func SetHeaderExtra(h *ethtypes.Header, extra *HeaderExtra) {
 	if h == nil {
 		return
 	}
+	hash := h.Hash()
 	headerExtrasMutex.Lock()
 	defer headerExtrasMutex.Unlock()
-	headerExtras[h] = extra
+	headerExtrasByHash[hash] = extra
 }
 
 // WithHeaderExtra sets the given [HeaderExtra] on the [Header]

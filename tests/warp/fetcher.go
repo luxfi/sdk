@@ -36,10 +36,16 @@ func (f *apiFetcher) GetSignature(ctx context.Context, nodeID ids.NodeID, unsign
 	}
 	switch p := parsedPayload.(type) {
 	case *payload.AddressedCall:
-		msgID := unsignedWarpMessage.ID()
+		msgIDBytes := unsignedWarpMessage.ID()
+		msgID, err := ids.ToID(msgIDBytes)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert message ID: %w", err)
+		}
 		signatureBytes, err = client.GetMessageSignature(ctx, msgID)
 	case *payload.Hash:
-		blockID, _ := ids.ToID(p.Hash)
+		// Convert []byte to ids.ID
+		var blockID ids.ID
+		copy(blockID[:], p.Hash)
 		signatureBytes, err = client.GetBlockSignature(ctx, blockID)
 	}
 	if err != nil {

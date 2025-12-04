@@ -31,6 +31,7 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/core/coretest"
 	"github.com/luxfi/evm/plugin/evm/customrawdb"
+	"github.com/luxfi/evm/plugin/evm/customtypes"
 	"github.com/luxfi/evm/plugin/evm/database"
 	"github.com/luxfi/evm/predicate"
 	statesyncclient "github.com/luxfi/evm/sync/client"
@@ -43,9 +44,8 @@ import (
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/consensus/version"
 )
 
 // Define testKeys for this test file if not available from vm_test.go
@@ -54,14 +54,6 @@ var (
 )
 
 func TestSkipStateSync(t *testing.T) {
-	// TODO: This test is temporarily skipped because it requires a complete ValidatorState
-	// implementation. The VM initialization expects ValidatorState to be non-nil and properly
-	// configured, and the test infrastructure (newVM/createSyncServerAndClientVMs) doesn't
-	// properly set up the ValidatorState in the consensus context.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
-
-	// Fixed database lock issues by using proper test isolation
-	t.Parallel() // Run in parallel to avoid database lock conflicts
 	rand.New(rand.NewSource(1))
 	test := syncTest{
 		syncableInterval:   256,
@@ -74,9 +66,6 @@ func TestSkipStateSync(t *testing.T) {
 }
 
 func TestStateSyncFromScratch(t *testing.T) {
-	t.Skip("Temporarily disabled: requires validator state infrastructure fixes")
-	// Fixed database lock issues by using proper test isolation
-	t.Parallel() // Run in parallel to avoid database lock conflicts
 	rand.New(rand.NewSource(1))
 	test := syncTest{
 		syncableInterval:   256,
@@ -89,9 +78,6 @@ func TestStateSyncFromScratch(t *testing.T) {
 }
 
 func TestStateSyncFromScratchExceedParent(t *testing.T) {
-	t.Skip("Temporarily disabled: requires state sync infrastructure fixes")
-	// Fixed database lock issues by using proper test isolation
-	t.Parallel() // Run in parallel to avoid database lock conflicts
 	rand.New(rand.NewSource(1))
 	numToGen := parentsToGet + uint64(32)
 	test := syncTest{
@@ -105,9 +91,11 @@ func TestStateSyncFromScratchExceedParent(t *testing.T) {
 }
 
 func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
-	t.Skip("Temporarily disabled: requires validator state infrastructure fixes")
-	// Fixed database lock issues by using proper test isolation
-	t.Parallel() // Run in parallel to avoid database lock conflicts
+	// SKIP: This test requires complex state sync infrastructure that has issues with
+	// the current VM lifecycle. The test fails silently during sync operations.
+	// This requires further investigation into state sync client configuration.
+	t.Skip("State sync test requires infrastructure fixes")
+
 	rand.New(rand.NewSource(1))
 
 	var lock sync.Mutex
@@ -276,12 +264,6 @@ func TestStateSyncToggleEnabledToDisabled(t *testing.T) {
 }
 
 func TestVMShutdownWhileSyncing(t *testing.T) {
-	// TODO: This test is temporarily skipped because it requires a complete ValidatorState
-	// implementation. The VM initialization expects ValidatorState to be non-nil and properly
-	// configured, and the test infrastructure (newVM/createSyncServerAndClientVMs) doesn't
-	// properly set up the ValidatorState in the consensus context.
-	t.Skip("Temporarily disabled: requires ValidatorState mock implementation")
-
 	var (
 		lock    sync.Mutex
 		vmSetup *syncVMSetup
@@ -314,14 +296,26 @@ func TestVMShutdownWhileSyncing(t *testing.T) {
 func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *syncVMSetup {
 	require := require.New(t)
 	// configure [serverVM]
+	// IMPORTANT: Use hash scheme to ensure compatibility with core.GenerateChain,
+	// which hardcodes triedb.HashDefaults. PATH and HASH schemes store trie nodes
+	// under different database keys and are incompatible with each other.
 	serverVM := newVM(t, testVMConfig{
 		genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
+		configJSON:  `{"state-scheme": "hash"}`,
 	})
 
 	t.Cleanup(func() {
 		log.Info("Shutting down server VM")
 		require.NoError(serverVM.vm.Shutdown(context.Background()))
 	})
+
+	// Commit the genesis trie nodes to disk before calling generateAndAcceptBlocks.
+	// core.GenerateChain creates its own triedb which reads from disk, so the genesis
+	// state must be persisted to disk first (not just cached in the blockchain's triedb).
+	genesisRoot := serverVM.vm.blockChain.Genesis().Root()
+	err := serverVM.vm.blockChain.TrieDB().Commit(genesisRoot, true)
+	require.NoError(err)
+
 	generateAndAcceptBlocks(t, serverVM.vm, numBlocks, func(i int, gen *core.BlockGen) {
 		b, err := predicate.NewResults().Bytes()
 		if err != nil {
@@ -340,14 +334,29 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	}, nil)
 
 	// make some accounts
-	trieDB := triedb.NewDatabase(serverVM.vm.chaindb, nil)
+	// IMPORTANT: Use the blockchain's TrieDB instead of creating a new one.
+	// Creating a new triedb.NewDatabase() results in a separate cache layer,
+	// which causes "missing trie node" errors because the trie nodes are
+	// committed to a different trieDB instance than the blockchain uses.
+	trieDB := serverVM.vm.blockChain.TrieDB()
 	root, accounts := statesynctest.FillAccountsWithOverlappingStorage(t, trieDB, types.EmptyRootHash, 1000, 16)
 
 	// patch serverVM's lastAcceptedBlock to have the new root
 	// and update the vm's state so the trie with accounts will
 	// be returned by StateSyncGetLastSummary
 	lastAccepted := serverVM.vm.blockChain.LastAcceptedBlock()
+	t.Logf("DEBUG: lastAccepted hash=%s number=%d", lastAccepted.Hash(), lastAccepted.NumberU64())
 	patchedBlock := patchBlock(lastAccepted, root, serverVM.vm.chaindb)
+	t.Logf("DEBUG: patchedBlock hash=%s number=%d", patchedBlock.Hash(), patchedBlock.NumberU64())
+
+	// Verify the patched block can be read back from the database
+	verifyBlock := rawdb.ReadBlock(serverVM.vm.chaindb, patchedBlock.Hash(), patchedBlock.NumberU64())
+	if verifyBlock == nil {
+		t.Logf("DEBUG: patchedBlock NOT found in rawdb!")
+	} else {
+		t.Logf("DEBUG: patchedBlock found in rawdb, hash=%s", verifyBlock.Hash())
+	}
+
 	blockBytes, err := rlp.EncodeToBytes(patchedBlock)
 	require.NoError(err)
 	internalBlock, err := serverVM.vm.parseBlock(context.Background(), blockBytes)
@@ -358,7 +367,8 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	serverVM.vm.StateSyncServer.(*stateSyncServer).syncableInterval = test.syncableInterval
 
 	// initialise [syncerVM] with blank genesis state
-	stateSyncEnabledJSON := fmt.Sprintf(`{"state-sync-enabled":true, "state-sync-min-blocks": %d, "tx-lookup-limit": %d}`, test.stateSyncMinBlocks, 4)
+	// Use hash scheme to match serverVM for consistency
+	stateSyncEnabledJSON := fmt.Sprintf(`{"state-sync-enabled":true, "state-sync-min-blocks": %d, "tx-lookup-limit": %d, "state-scheme": "hash"}`, test.stateSyncMinBlocks, 4)
 	syncerVM := newVM(t, testVMConfig{
 		genesisJSON: toGenesisJSON(forkToChainConfig["Latest"]),
 		configJSON:  stateSyncEnabledJSON,
@@ -369,9 +379,8 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	t.Cleanup(func() {
 		require.NoError(shutdownOnceSyncerVM.Shutdown(context.Background()))
 	})
-	// Set the state to syncing
-	// Use NormalOp state from node consensus
-	require.NoError(syncerVM.vm.SetState(context.Background(), uint32(consensuscore.VMNormalOp)))
+	// Set the state to syncing (not NormalOp, which would initialize the builder)
+	require.NoError(syncerVM.vm.SetState(context.Background(), uint32(consensuscore.VMStateSyncing)))
 	enabled, err := syncerVM.vm.StateSyncEnabled(context.Background())
 	require.NoError(err)
 	require.True(enabled)
@@ -396,6 +405,8 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 	}
 	// Use a test node ID for connection
 	testNodeID := ids.GenerateTestNodeID()
+	t.Logf("DEBUG: calling syncerVM.vm.Connected with testNodeID=%s, version=%v", testNodeID, stateSyncVersionForConnect)
+	t.Logf("DEBUG: syncerVM.vm.Network is nil? %v", syncerVM.vm.Network == nil)
 	require.NoError(
 		syncerVM.vm.Connected(
 			context.Background(),
@@ -403,13 +414,18 @@ func createSyncServerAndClientVMs(t *testing.T, test syncTest, numBlocks int) *s
 			stateSyncVersionForConnect,
 		),
 	)
+	t.Logf("DEBUG: Connected returned, checking network Size: %d", syncerVM.vm.Network.Size())
 
 	// override [syncerVM]'s SendAppRequest function to trigger AppRequest on [serverVM]
 	syncerVM.appSender.SendAppRequestF = func(ctx context.Context, nodeSet set.Set[ids.NodeID], requestID uint32, request []byte) error {
 		nodeID, hasItem := nodeSet.Pop()
 		require.True(hasItem, "expected nodeSet to contain at least 1 nodeID")
-		require.NoError(serverVM.vm.AppRequest(ctx, nodeID, requestID, time.Now().Add(1*time.Second), request))
-		return nil
+		t.Logf("DEBUG: SendAppRequestF called, routing to serverVM.AppRequest, nodeID=%s, requestID=%d, reqLen=%d", nodeID, requestID, len(request))
+		err := serverVM.vm.AppRequest(ctx, nodeID, requestID, time.Now().Add(1*time.Second), request)
+		if err != nil {
+			t.Logf("DEBUG: serverVM.AppRequest returned error: %v", err)
+		}
+		return err
 	}
 
 	return &syncVMSetup{
@@ -472,17 +488,20 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 	require.NoError(err, "error getting state sync summary at height")
 	require.Equal(summary, retrievedSummary)
 
+	t.Logf("DEBUG: Calling parsedSummary.Accept()")
 	syncMode, err := parsedSummary.Accept(context.Background())
+	t.Logf("DEBUG: Accept returned syncMode=%v, err=%v", syncMode, err)
 	require.NoError(err, "error accepting state summary")
 	require.Equal(test.syncMode, syncMode)
 	if syncMode == consensusBlock.StateSyncSkipped {
+		t.Logf("DEBUG: Sync mode is StateSyncSkipped, returning early")
 		return
 	}
 
-	msg, err := syncerVM.WaitForEvent(context.Background())
+	t.Logf("DEBUG: Calling syncerVM.WaitForEvent()")
+	_, err = syncerVM.WaitForEvent(context.Background())
 	require.NoError(err)
-	// StateSyncDone no longer exists, checking for specific message instead
-	require.NotNil(msg)
+	// WaitForEvent returns (nil, nil) when state sync completes successfully
 
 	// If the test is expected to error, assert the correct error is returned and finish the test.
 	err = syncerVM.Error()
@@ -591,6 +610,10 @@ func testSyncerVM(t *testing.T, vmSetup *syncVMSetup, test syncTest) {
 // [blk] does not necessarily define a state transition from its parent
 // state to the new state root.
 func patchBlock(blk *types.Block, root common.Hash, db ethdb.Database) *types.Block {
+	// Get the HeaderExtra from the original header BEFORE creating the new header
+	// (since HeaderExtra is keyed by header hash, and the hash will change)
+	oldExtra := customtypes.GetHeaderExtra(blk.Header())
+
 	header := blk.Header()
 	header.Root = root
 	receipts := rawdb.ReadRawReceipts(db, blk.Hash(), blk.NumberU64())
@@ -599,11 +622,20 @@ func patchBlock(blk *types.Block, root common.Hash, db ethdb.Database) *types.Bl
 		&types.Body{
 			Transactions: blk.Transactions(),
 			Uncles:       blk.Uncles(),
+			Withdrawals:  blk.Withdrawals(), // Required for post-Shanghai blocks
 		},
 		receipts,
 		trie.NewStackTrie(nil),
 	)
-	rawdb.WriteBlock(db, newBlk)
+
+	// Copy the HeaderExtra (including BlockGasCost) to the new header
+	// This is needed because the header hash changed when we modified the root
+	if oldExtra != nil && oldExtra.BlockGasCost != nil {
+		customtypes.SetHeaderExtra(newBlk.Header(), oldExtra)
+	}
+
+	// Use customrawdb.WriteBlock to persist both the block and its HeaderExtra
+	customrawdb.WriteBlock(db, newBlk)
 	rawdb.WriteCanonicalHash(db, newBlk.Hash(), newBlk.NumberU64())
 	return newBlk
 }

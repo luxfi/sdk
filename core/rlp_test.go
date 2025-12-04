@@ -77,7 +77,10 @@ func getBlock(transactions int, uncles int, dataSize int) *types.Block {
 // TestRlpIterator tests that individual transactions can be picked out
 // from blocks without full unmarshalling/marshalling
 func TestRlpIterator(t *testing.T) {
-	t.Skip("Temporarily disabled: requires RLP iterator fixes")
+	// Skip: Test assumes block body has exactly 2 elements (txs, uncles).
+	// Post-Shanghai/Cancun block bodies have 3 elements (txs, uncles, withdrawals).
+	t.Skip("Block body RLP structure changed post-Shanghai (3 elements, not 2)")
+
 	for _, tt := range []struct {
 		txs      int
 		uncles   int

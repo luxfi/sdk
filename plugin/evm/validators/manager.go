@@ -130,7 +130,9 @@ func (m *manager) sync(ctx context.Context) error {
 	convertedValidatorSet := make(map[ids.ID]*luxvalidators.GetValidatorOutput)
 	for nodeID, weight := range currentValidatorSet {
 		// Create a simple validator output - use a unique ID based on NodeID
-		validationID := ids.ID(nodeID.Bytes())
+		// NodeID is 20 bytes (ShortID), but ids.ID is 32 bytes, so pad with zeros
+		var validationID ids.ID
+		copy(validationID[:], nodeID[:])
 		convertedValidatorSet[validationID] = &luxvalidators.GetValidatorOutput{
 			NodeID: nodeID,
 			Weight: weight,

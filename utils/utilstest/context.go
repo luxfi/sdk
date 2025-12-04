@@ -36,16 +36,57 @@ func (t *testValidatorState) GetMinimumHeight(ctx context.Context) (uint64, erro
 }
 
 func (t *testValidatorState) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.NodeID]uint64, error) {
-	// Use GetValidatorSetSimple which matches the ValidatorState interface
-	return make(map[ids.NodeID]uint64), nil // TODO: Fix GetValidatorSetSimple
+	// Delegate to the underlying State's GetValidatorSetF and convert output
+	if t.State != nil && t.State.GetValidatorSetF != nil {
+		// GetValidatorSetF returns map[ids.NodeID]*validators.GetValidatorOutput
+		// Convert to map[ids.NodeID]uint64 (just weights)
+		fullOutput, err := t.State.GetValidatorSetF(context.Background(), height, subnetID)
+		if err != nil {
+			return nil, err
+		}
+		result := make(map[ids.NodeID]uint64, len(fullOutput))
+		for nodeID, output := range fullOutput {
+			result[nodeID] = output.Weight
+		}
+		return result, nil
+	}
+	return make(map[ids.NodeID]uint64), nil
+}
+
+// chainIDToSubnetID maps chain IDs to their subnet IDs for testing
+var chainIDToSubnetID = make(map[ids.ID]ids.ID)
+
+// SetChainSubnetMapping registers a chain ID to subnet ID mapping for tests
+func SetChainSubnetMapping(chainID, subnetID ids.ID) {
+	chainIDToSubnetID[chainID] = subnetID
+}
+
+// ClearChainSubnetMapping clears the chain to subnet mapping
+func ClearChainSubnetMapping() {
+	chainIDToSubnetID = make(map[ids.ID]ids.ID)
 }
 
 func (t *testValidatorState) GetSubnetID(chainID ids.ID) (ids.ID, error) {
-	return ids.Empty, nil // TODO: Fix GetSubnetID
+	// Check the global mapping first
+	if subnetID, ok := chainIDToSubnetID[chainID]; ok {
+		return subnetID, nil
+	}
+	// Default to empty (primary network) for any chain
+	return ids.Empty, nil
 }
 
 func (t *testValidatorState) GetChainID(subnetID ids.ID) (ids.ID, error) {
 	return ids.Empty, nil // TODO: Fix GetChainID
+}
+
+// GetValidatorSetWithOutput implements the ValidatorOutputGetter interface
+// This returns the full validator output including public keys
+func (t *testValidatorState) GetValidatorSetWithOutput(ctx context.Context, height uint64, subnetID ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
+	// Delegate to the underlying State's GetValidatorSetF
+	if t.State != nil && t.State.GetValidatorSetF != nil {
+		return t.State.GetValidatorSetF(ctx, height, subnetID)
+	}
+	return make(map[ids.NodeID]*validators.GetValidatorOutput), nil
 }
 
 func (t *testValidatorState) GetNetID(chainID ids.ID) (ids.ID, error) {
