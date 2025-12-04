@@ -164,27 +164,27 @@ func (ms *Multisig) GetAuthSigners() ([]ids.ShortID, error) {
 		return nil, err
 	}
 	unsignedTx := ms.PChainTx.Unsigned
-	var subnetAuth verify.Verifiable
+	var netAuth verify.Verifiable
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveNetValidatorTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.AddNetValidatorTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.CreateChainTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.TransformNetTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	case *txs.TransferNetOwnershipTx:
-		subnetAuth = unsignedTx.SubnetAuth
+		netAuth = unsignedTx.NetAuth
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
-	subnetInput, ok := subnetAuth.(*secp256k1fx.Input)
+	netInput, ok := netAuth.(*secp256k1fx.Input)
 	if !ok {
-		return nil, fmt.Errorf("expected subnetAuth of type *secp256k1fx.Input, got %T", subnetAuth)
+		return nil, fmt.Errorf("expected netAuth of type *secp256k1fx.Input, got %T", netAuth)
 	}
 	authSigners := []ids.ShortID{}
-	for _, sigIndex := range subnetInput.SigIndices {
+	for _, sigIndex := range netInput.SigIndices {
 		if sigIndex >= uint32(len(controlKeys)) {
 			return nil, fmt.Errorf("signer index %d exceeds number of control keys", sigIndex)
 		}
@@ -321,15 +321,15 @@ func (ms *Multisig) GetSubnetOwners() ([]ids.ShortID, uint32, error) {
 	return ms.controlKeys, ms.threshold, nil
 }
 
-func GetOwners(network network.LegacyNetwork, subnetID ids.ID) ([]ids.ShortID, uint32, error) {
+func GetOwners(network network.LegacyNetwork, netID ids.ID) ([]ids.ShortID, uint32, error) {
 	pClient := platformvm.NewClient(network.Endpoint)
 	ctx := context.Background()
-	subnetResponse, err := pClient.GetSubnet(ctx, subnetID)
+	netResponse, err := pClient.GetNet(ctx, netID)
 	if err != nil {
-		return nil, 0, fmt.Errorf("subnet tx %s query error: %w", subnetID, err)
+		return nil, 0, fmt.Errorf("net tx %s query error: %w", netID, err)
 	}
-	controlKeys := subnetResponse.ControlKeys
-	threshold := subnetResponse.Threshold
+	controlKeys := netResponse.ControlKeys
+	threshold := netResponse.Threshold
 	return controlKeys, threshold, nil
 }
 
