@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	// "github.com/luxfi/node/upgrade/upgradetest"
+	// "github.com/luxfi/upgrade/upgradetest"
 	"github.com/stretchr/testify/require"
 )
 

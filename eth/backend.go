@@ -61,7 +61,7 @@ import (
 	"github.com/luxfi/geth/ethdb"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/timer/mockable"
 )
 
 // Config contains the configuration options of the ETH protocol.

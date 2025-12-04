@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/validators/uptime"
 	uptimeinterfaces "github.com/luxfi/evm/plugin/evm/validators/uptime/interfaces"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/timer/mockable"
 
 	"github.com/luxfi/log"
 )

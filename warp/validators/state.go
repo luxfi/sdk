@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 )
 
 var _ validators.State = (*State)(nil)

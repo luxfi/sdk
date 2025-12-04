@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/geth/common/math"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 	luxwarp "github.com/luxfi/warp"
 	"github.com/luxfi/warp/payload"
 )

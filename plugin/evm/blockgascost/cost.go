@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"github.com/luxfi/evm/commontype"
-	safemath "github.com/luxfi/node/utils/math"
+	safemath "github.com/luxfi/math/math"
 )
 
 // BlockGasCost calculates the required block gas cost.

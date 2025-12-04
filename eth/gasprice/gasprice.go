@@ -44,7 +44,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/event"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/timer/mockable"
 	"golang.org/x/exp/slices"
 )
 

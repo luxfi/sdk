@@ -19,9 +19,9 @@ import (
 	nodeCore "github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/consensus/validator"
 	"github.com/luxfi/consensus/version"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/utils"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/p2p"
+	"github.com/luxfi/utils"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"

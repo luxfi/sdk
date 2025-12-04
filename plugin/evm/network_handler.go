@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/codec"
+	"github.com/luxfi/codec"
 )
 
 var _ message.RequestHandler = (*networkHandler)(nil)

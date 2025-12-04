@@ -11,7 +11,7 @@ import (
 	"math"
 
 	safemath "github.com/luxfi/geth/common/math"
-	"github.com/luxfi/node/utils/wrappers"
+	"github.com/luxfi/utils/wrappers"
 )
 
 const (

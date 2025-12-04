@@ -22,7 +22,7 @@ import (
 	"github.com/luxfi/geth/core/rawdb"
 	"github.com/luxfi/log"
 	metrics "github.com/luxfi/metric"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 )
 
 const (

@@ -16,11 +16,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/node/cache/lru"
-	"github.com/luxfi/node/cache/metercacher"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/gossip"
-	"github.com/luxfi/node/network/p2p/lp118"
+	"github.com/luxfi/cache/lru"
+	"github.com/luxfi/cache/metercacher"
+	"github.com/luxfi/p2p"
+	"github.com/luxfi/p2p/gossip"
+	"github.com/luxfi/p2p/lp118"
 
 	// "github.com/luxfi/firewood-go-ethhash/ffi"
 	"github.com/prometheus/client_golang/prometheus"
@@ -89,13 +89,13 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/database/versiondb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/upgrade"
-	"github.com/luxfi/node/utils/perms"
-	"github.com/luxfi/node/utils/profiler"
-	nodemockable "github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/node/utils/units"
-	nodeChain "github.com/luxfi/node/vms/components/chain"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/upgrade"
+	"github.com/luxfi/utils/perms"
+	"github.com/luxfi/utils/profiler"
+	nodemockable "github.com/luxfi/timer/mockable"
+	"github.com/luxfi/units"
+	nodeChain "github.com/luxfi/vms/components/chain"
 
 	commonEng "github.com/luxfi/consensus/core"
 	"github.com/luxfi/consensus/core/appsender"
@@ -103,8 +103,8 @@ import (
 	"github.com/luxfi/math/set"
 
 	"github.com/luxfi/database"
-	luxUtils "github.com/luxfi/node/utils"
-	luxJSON "github.com/luxfi/node/utils/json"
+	luxUtils "github.com/luxfi/utils"
+	luxJSON "github.com/luxfi/utils/json"
 )
 
 var (
@@ -222,21 +222,17 @@ func (w *warpSignerAdapter) NodeID() ids.NodeID {
 }
 
 // lp118SignerAdapter adapts a signer.Signer for lp118 handlers
-// Uses luxWarp.UnsignedMessage to match what lp118.NewCachedHandler expects
+// Uses luxWarp.UnsignedMessage - the ONE canonical warp package
 type lp118SignerAdapter struct {
 	signer signer.Signer
 }
 
-// Sign implements the signer interface for lp118
-// Receives *luxWarp.UnsignedMessage and signs using the underlying signer
+// Sign implements the Signer interface for lp118
 func (a *lp118SignerAdapter) Sign(msg *luxWarp.UnsignedMessage) ([]byte, error) {
-	// Sign using the underlying signer directly - types match
 	sig, err := a.signer.Sign(msg)
 	if err != nil {
 		return nil, err
 	}
-
-	// Return the signature bytes
 	return bls.SignatureToBytes(sig), nil
 }
 
@@ -1054,10 +1050,10 @@ func (vm *VM) initChainState(lastAcceptedBlock *types.Block) error {
 	block := vm.newBlock(lastAcceptedBlock)
 
 	config := &nodeChain.Config{
-		DecidedCacheSize:    decidedCacheSize,
+		DecidedCacheSize:    int(decidedCacheSize),
 		MissingCacheSize:    missingCacheSize,
-		UnverifiedCacheSize: unverifiedCacheSize,
-		BytesToIDCacheSize:  bytesToIDCacheSize,
+		UnverifiedCacheSize: int(unverifiedCacheSize),
+		BytesToIDCacheSize:  int(bytesToIDCacheSize),
 		// Our vm methods return *Block which needs to implement the node's chain.Block
 		GetBlock: func(ctx context.Context, id ids.ID) (nodeblock.Block, error) {
 			// getBlock returns our block
@@ -1221,7 +1217,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 			pushGossipParams,
 			pushRegossipParams,
 			config.PushGossipDiscardedElements,
-			config.TxGossipTargetMessageSize,
+			int(config.TxGossipTargetMessageSize),
 			vm.config.RegossipFrequency.Duration,
 		)
 		if err != nil {
@@ -1244,7 +1240,7 @@ func (vm *VM) onNormalOperationsStarted() error {
 			ethTxGossipMarshaller,
 			ethTxPool,
 			ethTxGossipMetrics,
-			config.TxGossipTargetMessageSize,
+			int(config.TxGossipTargetMessageSize),
 			config.TxGossipThrottlingPeriod,
 			float64(config.TxGossipThrottlingLimit),
 			p2pValidators,
@@ -1316,7 +1312,7 @@ func (vm *VM) setAppRequestHandlers() {
 		vm.chaindb,
 		&triedb.Config{
 			HashDB: &hashdb.Config{
-				CleanCacheSize: vm.config.StateSyncServerTrieCache * units.MiB,
+				CleanCacheSize: vm.config.StateSyncServerTrieCache * int(units.MiB),
 			},
 		},
 	)

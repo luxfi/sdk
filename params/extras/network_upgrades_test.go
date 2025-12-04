@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/luxfi/evm/utils"
-	"github.com/luxfi/node/upgrade"
-	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/upgrade"
+	"github.com/luxfi/upgrade/upgradetest"
 	"github.com/stretchr/testify/require"
 )
 

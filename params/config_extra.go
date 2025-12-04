@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/evm/precompile/precompileconfig"
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/upgrade"
 )
 
 const (

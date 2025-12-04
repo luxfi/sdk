@@ -14,7 +14,10 @@ require (
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db
 	github.com/holiman/bloomfilter/v2 v2.0.3
 	github.com/holiman/uint256 v1.3.2
+	github.com/luxfi/cache v0.0.0
+	github.com/luxfi/codec v0.0.0
 	github.com/luxfi/consensus v1.22.2
+	github.com/luxfi/constants v0.0.0
 	github.com/luxfi/crypto v1.17.7
 	github.com/luxfi/database v1.2.7
 	github.com/luxfi/geth v1.16.40
@@ -24,7 +27,13 @@ require (
 	github.com/luxfi/math v0.1.5
 	github.com/luxfi/metric v1.4.5
 	github.com/luxfi/node v1.20.7
-	github.com/luxfi/warp v1.16.19
+	github.com/luxfi/p2p v0.0.0-00010101000000-000000000000
+	github.com/luxfi/timer v0.0.0
+	github.com/luxfi/units v0.0.0
+	github.com/luxfi/upgrade v0.0.0-00010101000000-000000000000
+	github.com/luxfi/utils v0.0.0
+	github.com/luxfi/vms v0.0.0-00010101000000-000000000000
+	github.com/luxfi/warp v1.16.25
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/prometheus/client_golang v1.23.2
@@ -91,7 +100,6 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
 	github.com/google/pprof v0.0.0-20250820193118-f64d9cf942d6 // indirect
-	github.com/google/renameio/v2 v2.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.1 // indirect
@@ -122,7 +130,6 @@ require (
 	github.com/sagikazarmark/locafero v0.10.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/status-im/keycard-go v0.2.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -157,3 +164,26 @@ require (
 
 // Force tablewriter version for compatibility
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
+
+// Use local packages instead of node dependencies
+replace github.com/luxfi/cache => ../cache
+
+replace github.com/luxfi/codec => ../codec
+
+replace github.com/luxfi/constants => ../constants
+
+replace github.com/luxfi/timer => ../timer
+
+replace github.com/luxfi/units => ../units
+
+replace github.com/luxfi/utils => ../utils
+
+replace github.com/luxfi/math => ../math
+
+replace github.com/luxfi/p2p => ../p2p
+
+replace github.com/luxfi/upgrade => ../upgrade
+
+replace github.com/luxfi/vms => ../vms
+
+replace github.com/luxfi/netrunner-sdk => ../netrunner-sdk

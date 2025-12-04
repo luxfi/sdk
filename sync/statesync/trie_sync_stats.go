@@ -11,8 +11,8 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/metrics"
 	"github.com/luxfi/log"
-	utils_math "github.com/luxfi/node/utils/math"
-	"github.com/luxfi/node/utils/timer"
+	luxmath "github.com/luxfi/math/math"
+	"github.com/luxfi/timer"
 )
 
 const (
@@ -27,7 +27,7 @@ type trieSyncStats struct {
 	lock sync.Mutex
 
 	lastUpdated time.Time
-	leafsRate   utils_math.Averager
+	leafsRate   luxmath.Averager
 
 	triesRemaining   int
 	triesSynced      int
@@ -118,7 +118,7 @@ func (t *trieSyncStats) trieDone(root common.Hash) {
 func (t *trieSyncStats) updateETA(sinceUpdate time.Duration, now time.Time) time.Duration {
 	leafsRate := float64(t.leafsSinceUpdate) / sinceUpdate.Seconds()
 	if t.leafsRate == nil {
-		t.leafsRate = utils_math.NewAverager(leafsRate, leafRateHalfLife, now)
+		t.leafsRate = luxmath.NewAverager(leafsRate, leafRateHalfLife, now)
 	} else {
 		t.leafsRate.Observe(leafsRate, now)
 	}
