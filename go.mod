@@ -10,7 +10,7 @@ require (
 	github.com/luxfi/evm v0.8.1
 	github.com/luxfi/geth v1.16.38
 	github.com/luxfi/ids v1.1.2
-	github.com/luxfi/log v1.1.22
+	github.com/luxfi/log v1.1.24
 	github.com/luxfi/lpm v1.7.9
 	github.com/luxfi/netrunner v1.7.14
 	github.com/luxfi/node v1.20.1
