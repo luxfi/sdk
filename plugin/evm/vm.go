@@ -221,15 +221,16 @@ func (w *warpSignerAdapter) NodeID() ids.NodeID {
 	return w.nodeID
 }
 
-// lp118SignerAdapter adapts a signer.Signer to lp118.Signer for lp118 handlers
+// lp118SignerAdapter adapts a signer.Signer for lp118 handlers
+// Uses luxWarp.UnsignedMessage to match what lp118.NewCachedHandler expects
 type lp118SignerAdapter struct {
 	signer signer.Signer
 }
 
-// Sign implements lp118.Signer interface
-// Receives *luxWarp.UnsignedMessage directly (LP118 handler uses external warp package)
+// Sign implements the signer interface for lp118
+// Receives *luxWarp.UnsignedMessage and signs using the underlying signer
 func (a *lp118SignerAdapter) Sign(msg *luxWarp.UnsignedMessage) ([]byte, error) {
-	// Sign using the underlying signer directly - no conversion needed
+	// Sign using the underlying signer directly - types match
 	sig, err := a.signer.Sign(msg)
 	if err != nil {
 		return nil, err
@@ -737,7 +738,7 @@ func (vm *VM) initializeInternal(
 	// Create adapter to convert our warp backend to lp118.Verifier
 	warpVerifier := &warpVerifierAdapter{backend: vm.warpBackend}
 	// Create lp118 signer adapter if we have a warp signer
-	var lp118Signer lp118.Signer
+	var lp118Signer *lp118SignerAdapter
 	if warpAdapter != nil {
 		lp118Signer = &lp118SignerAdapter{signer: warpAdapter.signer}
 	}
