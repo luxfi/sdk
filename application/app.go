@@ -760,10 +760,10 @@ func (app *Lux) GetSnapshotPath(snapshotName string) string {
 }
 
 // BlockchainConfigExists checks if blockchain config exists
+// This checks for the sidecar.json file which is always created by `blockchain create`
 func (app *Lux) BlockchainConfigExists(blockchainName string) bool {
-	configPath := filepath.Join(app.GetSubnetDir(), blockchainName, "blockchain-config.json")
-	_, err := os.Stat(configPath)
-	return err == nil
+	// Check for sidecar.json which is the primary indicator that a blockchain was created
+	return app.SidecarExists(blockchainName)
 }
 
 // GetClusterNetwork returns the network for a given cluster

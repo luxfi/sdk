@@ -41,10 +41,10 @@ const (
 
 	SimulatePublicNetwork = "SIMULATE_PUBLIC_NETWORK"
 	TestnetAPIEndpoint    = "https://api.lux-test.network"
-	MainnetAPIEndpoint    = "https://api.lux.network"
+	MainnetAPIEndpoint    = "http://127.0.0.1:9630" // Local mainnet for development
 
 	// WebSocket endpoints
-	MainnetWSEndpoint = "wss://api.lux.network/ext/bc/C/ws"
+	MainnetWSEndpoint = "ws://127.0.0.1:9630/ext/bc/C/ws" // Local mainnet WS for development
 	TestnetWSEndpoint = "wss://api.lux-test.network/ext/bc/C/ws"
 	LocalWSEndpoint   = "ws://127.0.0.1:9630/ext/bc/C/ws"
 	DevnetWSEndpoint  = "wss://api.lux-dev.network/ext/bc/C/ws"
@@ -53,6 +53,10 @@ const (
 	MainnetID uint32 = 1
 	TestnetID uint32 = 5
 	LocalID   uint32 = 12345
+
+	// Lux Network IDs
+	LuxMainnetID uint32 = 96369 // Lux mainnet
+	LuxTestnetID uint32 = 96368 // Lux testnet
 
 	// Network Names
 	MainnetName = "mainnet"
@@ -94,7 +98,9 @@ const (
 	// this depends on bootstrap snapshot
 	LocalAPIEndpoint  = "http://127.0.0.1:9630"
 	DevnetAPIEndpoint = "https://api.lux-dev.network"
-	LocalNetworkID    = 1337
+	LocalNetworkID           = 96369 // Use Lux mainnet ID for local development
+	AvalancheLocalNetworkID  = 31337 // Avalanche's local network ID (used by netrunner in some configs)
+	NetrunnerLocalNetworkID  = 1337  // Network ID used by netrunner for local testing
 
 	DefaultTokenName = "TEST"
 
