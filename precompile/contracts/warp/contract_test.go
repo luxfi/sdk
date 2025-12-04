@@ -454,7 +454,7 @@ func TestGetVerifiedWarpBlockHash(t *testing.T) {
 	callerAddr := common.HexToAddress("0x0123")
 	sourceChainID := ids.GenerateTestID()
 	blockHash := ids.GenerateTestID()
-	blockHashPayload, err := payload.NewHash(blockHash)
+	blockHashPayload, err := payload.NewHash(blockHash[:])
 	require.NoError(t, err)
 	unsignedWarpMsg, err := luxWarp.NewUnsignedMessage(networkID, sourceChainID[:], blockHashPayload.Bytes())
 	require.NoError(t, err)

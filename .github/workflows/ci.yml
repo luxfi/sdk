@@ -32,9 +32,9 @@ jobs:
     - name: Setup CI environment
       run: ./ci_setup.sh
 
-    - name: Install golangci-lint
+    - name: Install golangci-lint v2
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+        go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
 
     - name: Run golangci-lint
       run: golangci-lint run --timeout=10m
