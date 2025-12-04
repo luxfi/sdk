@@ -82,7 +82,7 @@ func NewServer(maximumDuration time.Duration) *Server {
 	// Register the default service providing meta information about the RPC service such
 	// as the services and methods it offers.
 	rpcService := &RPCService{server}
-	server.RegisterName(MetadataApi, rpcService)
+	_ = server.RegisterName(MetadataApi, rpcService)
 	return server
 }
 
@@ -171,7 +171,7 @@ func (s *Server) serveSingleRequest(ctx context.Context, codec ServerCodec) {
 	if err != nil {
 		if err != io.EOF {
 			resp := errorMessage(&invalidMessageError{"parse error"})
-			codec.writeJSON(ctx, resp, true)
+			_ = codec.writeJSON(ctx, resp, true)
 		}
 		return
 	}

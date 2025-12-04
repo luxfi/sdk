@@ -259,7 +259,7 @@ func (h *HeaderSerializable) Hash() common.Hash {
 // rlpHash encodes x and hashes the encoded bytes.
 func rlpHash(x interface{}) (h common.Hash) {
 	hw := crypto.NewKeccakState()
-	rlp.Encode(hw, x)
+	_ = rlp.Encode(hw, x)
 	hw.Sum(h[:0])
 	return h
 }

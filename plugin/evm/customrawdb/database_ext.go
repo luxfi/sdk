@@ -49,7 +49,7 @@ func WriteBlockGasCost(db ethdb.KeyValueWriter, hash common.Hash, number uint64,
 	if err != nil {
 		return
 	}
-	db.Put(key, data)
+	_ = db.Put(key, data)
 }
 
 // ReadBlockGasCost reads the BlockGasCost for a header from its separate key.

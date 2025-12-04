@@ -88,7 +88,7 @@ func runTestScript(t *testing.T, file string) {
 	}
 
 	clientConn, serverConn := net.Pipe()
-	defer clientConn.Close()
+	defer func() { _ = clientConn.Close() }()
 	go server.ServeCodec(NewCodec(serverConn), 0, 0, 0, 0)
 	readbuf := bufio.NewReader(clientConn)
 	for _, line := range strings.Split(string(content), "\n") {
@@ -100,7 +100,7 @@ func runTestScript(t *testing.T, file string) {
 		case strings.HasPrefix(line, "--> "):
 			t.Log(line)
 			// write to connection
-			clientConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+			_ = clientConn.SetWriteDeadline(time.Now().Add(5 * time.Second))
 			if _, err := io.WriteString(clientConn, line[4:]+"\n"); err != nil {
 				t.Fatalf("write error: %v", err)
 			}
@@ -108,7 +108,7 @@ func runTestScript(t *testing.T, file string) {
 			t.Log(line)
 			want := line[4:]
 			// read line from connection and compare text
-			clientConn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			_ = clientConn.SetReadDeadline(time.Now().Add(5 * time.Second))
 			sent, err := readbuf.ReadString('\n')
 			if err != nil {
 				t.Fatalf("read error: %v", err)

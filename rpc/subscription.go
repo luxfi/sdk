@@ -316,7 +316,7 @@ func (sub *ClientSubscription) run() {
 
 	// Call the unsubscribe method on the server.
 	if unsubscribe {
-		sub.requestUnsubscribe()
+		_ = sub.requestUnsubscribe()
 	}
 
 	// Send the error.

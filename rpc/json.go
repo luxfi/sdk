@@ -273,7 +273,7 @@ func (c *jsonCodec) writeJSONSkipDeadline(ctx context.Context, v interface{}, is
 			deadline = deadlineCtx
 		}
 	}
-	c.conn.SetWriteDeadline(deadline)
+	_ = c.conn.SetWriteDeadline(deadline)
 	return c.encode(v, isErrorResponse)
 }
 
@@ -300,11 +300,11 @@ func parseMessage(raw json.RawMessage) ([]*jsonrpcMessage, bool) {
 		return msgs, false
 	}
 	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.Token() // skip '['
+	_, _ = dec.Token() // skip '['
 	var msgs []*jsonrpcMessage
 	for dec.More() {
 		msgs = append(msgs, new(jsonrpcMessage))
-		dec.Decode(&msgs[len(msgs)-1])
+		_ = dec.Decode(&msgs[len(msgs)-1])
 	}
 	return msgs, true
 }

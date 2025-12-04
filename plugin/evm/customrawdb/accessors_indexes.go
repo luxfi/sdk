@@ -51,7 +51,7 @@ func DeleteBloombits(db ethdb.Database, start, end uint64) {
 			binary.BigEndian.PutUint64(key[4:12], section)
 			copy(key[12:], head[:])
 
-			db.Delete(key)
+			_ = db.Delete(key)
 		}
 	}
 }
