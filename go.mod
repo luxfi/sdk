@@ -7,13 +7,13 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/bft v0.1.2
 	github.com/luxfi/crypto v1.17.6
-	github.com/luxfi/evm v1.16.19
-	github.com/luxfi/geth v1.16.39
+	github.com/luxfi/evm v0.8.1
+	github.com/luxfi/geth v1.16.38
 	github.com/luxfi/ids v1.1.2
 	github.com/luxfi/log v1.1.22
 	github.com/luxfi/lpm v1.7.9
 	github.com/luxfi/netrunner v1.7.14
-	github.com/luxfi/node v1.20.3
+	github.com/luxfi/node v1.20.1
 	github.com/luxfi/warp v1.16.16
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
@@ -173,9 +173,11 @@ require (
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ethereum/go-bigmodexpfix v0.0.0-20250911101455-f9e208c548ab // indirect
+	github.com/fjl/gencodec v0.1.1 // indirect
+	github.com/garslo/gogen v0.0.0-20170306192744-1d203ffc1f61 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
-	github.com/luxfi/consensus v1.21.3 // indirect
+	github.com/luxfi/consensus v1.21.1 // indirect
 	github.com/luxfi/math v0.1.4 // indirect
 	github.com/luxfi/metric v1.4.5 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
@@ -192,6 +194,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a // indirect
 	github.com/zondax/golem v0.27.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
+	golang.org/x/tools v0.37.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250811230008-5f3141c8851a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
 )
