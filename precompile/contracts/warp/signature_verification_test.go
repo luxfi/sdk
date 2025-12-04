@@ -21,11 +21,11 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	avalancheWarp "github.com/luxfi/node/vms/platformvm/warp"
+	avalancheWarp "github.com/luxfi/warp"
 )
 
 type signatureTest struct {

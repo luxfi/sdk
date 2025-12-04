@@ -16,8 +16,8 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/gossip"
+	"github.com/luxfi/p2p"
+	"github.com/luxfi/p2p/gossip"
 	"github.com/luxfi/node/proto/pb/sdk"
 
 	"github.com/luxfi/consensus/utils/set"

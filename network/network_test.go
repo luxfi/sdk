@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/node/network/p2p"
+	"github.com/luxfi/p2p"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/assert"
@@ -25,8 +25,8 @@ import (
 	consensusVersion "github.com/luxfi/consensus/version"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/node/version"
 )
 

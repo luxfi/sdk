@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/gossip"
+	"github.com/luxfi/p2p"
+	"github.com/luxfi/p2p/gossip"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 
@@ -126,7 +126,7 @@ func setupGossipInfrastructure(t *testing.T, vm *VM, testNodeID ids.NodeID) {
 		ethTxGossipMarshaller,
 		ethTxPool,
 		ethTxGossipMetrics,
-		config.TxGossipTargetMessageSize,
+		int(config.TxGossipTargetMessageSize),
 		config.TxGossipThrottlingPeriod,
 		float64(config.TxGossipThrottlingLimit),
 		mockValidators,
@@ -192,7 +192,7 @@ func setupPushGossiper(t *testing.T, vm *VM, sender *TestSender) {
 		pushGossipParams,
 		pushRegossipParams,
 		config.PushGossipDiscardedElements,
-		config.TxGossipTargetMessageSize,
+		int(config.TxGossipTargetMessageSize),
 		vm.config.RegossipFrequency.Duration,
 	)
 	require.NoError(err)
@@ -252,7 +252,7 @@ func setupPushGossiperWithLoop(t *testing.T, vm *VM, sender *TestSender) context
 		pushGossipParams,
 		pushRegossipParams,
 		config.PushGossipDiscardedElements,
-		config.TxGossipTargetMessageSize,
+		int(config.TxGossipTargetMessageSize),
 		vm.config.RegossipFrequency.Duration,
 	)
 	require.NoError(err)

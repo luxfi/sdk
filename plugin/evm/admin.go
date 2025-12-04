@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/log"
 	"github.com/luxfi/node/api"
-	"github.com/luxfi/node/utils/profiler"
+	"github.com/luxfi/utils/profiler"
 )
 
 // Admin is the API service for admin API calls

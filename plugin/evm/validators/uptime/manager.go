@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/consensus/validator/uptime"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/timer/mockable"
 )
 
 // nodeUptime tracks uptime information for a single node

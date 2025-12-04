@@ -6,9 +6,9 @@ package messages
 import (
 	"errors"
 
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/linearcodec"
+	"github.com/luxfi/units"
 )
 
 const (

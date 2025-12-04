@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/evm/utils"
 	"github.com/luxfi/geth/common"
 	ethparams "github.com/luxfi/geth/params"
-	"github.com/luxfi/node/upgrade"
+	"github.com/luxfi/upgrade"
 )
 
 var (

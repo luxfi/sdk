@@ -6,7 +6,7 @@ package config
 import (
 	"time"
 
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/units"
 )
 
 const (

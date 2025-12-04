@@ -9,10 +9,10 @@ import (
 
 	"github.com/luxfi/evm/plugin/evm/upgrade/subnetevm"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/codec/linearcodec"
-	"github.com/luxfi/node/utils/units"
-	"github.com/luxfi/node/utils/wrappers"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/linearcodec"
+	"github.com/luxfi/units"
+	"github.com/luxfi/utils/wrappers"
 )
 
 const (

@@ -4,7 +4,7 @@
 package paramstest
 
 import (
-	"github.com/luxfi/node/upgrade/upgradetest"
+	"github.com/luxfi/upgrade/upgradetest"
 
 	"github.com/luxfi/evm/params"
 )

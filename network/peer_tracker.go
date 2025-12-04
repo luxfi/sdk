@@ -10,8 +10,8 @@ import (
 
 	"github.com/luxfi/consensus/version"
 	"github.com/luxfi/ids"
+	luxmath "github.com/luxfi/math/math"
 	"github.com/luxfi/math/set"
-	utils_math "github.com/luxfi/node/utils/math"
 
 	"github.com/luxfi/log"
 
@@ -34,7 +34,7 @@ const (
 // information we track on a given peer
 type peerInfo struct {
 	version   *version.Application
-	bandwidth utils_math.Averager
+	bandwidth luxmath.Averager
 }
 
 // peerTracker tracks the bandwidth of responses coming from peers,
@@ -47,9 +47,9 @@ type peerTracker struct {
 	trackedPeers           set.Set[ids.NodeID] // peers that we have sent a request to
 	numResponsivePeers     *metrics.Gauge
 	responsivePeers        set.Set[ids.NodeID]     // peers that responded to the last request they were sent
-	bandwidthHeap          utils_math.AveragerHeap // tracks bandwidth peers are responding with
+	bandwidthHeap          luxmath.AveragerHeap // tracks bandwidth peers are responding with
 	averageBandwidthMetric *metrics.GaugeFloat64
-	averageBandwidth       utils_math.Averager
+	averageBandwidth       luxmath.Averager
 }
 
 func NewPeerTracker() *peerTracker {
@@ -59,9 +59,9 @@ func NewPeerTracker() *peerTracker {
 		trackedPeers:           make(set.Set[ids.NodeID]),
 		numResponsivePeers:     metrics.GetOrRegisterGauge("net_responsive_peers", nil),
 		responsivePeers:        make(set.Set[ids.NodeID]),
-		bandwidthHeap:          utils_math.NewMaxAveragerHeap(),
+		bandwidthHeap:          luxmath.NewMaxAveragerHeap(),
 		averageBandwidthMetric: metrics.GetOrRegisterGaugeFloat64("net_average_bandwidth", nil),
-		averageBandwidth:       utils_math.NewAverager(0, bandwidthHalflife, time.Now()),
+		averageBandwidth:       luxmath.NewAverager(0, bandwidthHalflife, time.Now()),
 	}
 }
 
@@ -82,7 +82,7 @@ func (p *peerTracker) shouldTrackNewPeer() bool {
 
 // getResponsivePeer returns a random [ids.NodeID] of a peer that has responded
 // to a request.
-func (p *peerTracker) getResponsivePeer() (ids.NodeID, utils_math.Averager, bool) {
+func (p *peerTracker) getResponsivePeer() (ids.NodeID, luxmath.Averager, bool) {
 	// Get an arbitrary element from the set (without removing it)
 	var nodeID ids.NodeID
 	var ok bool
@@ -125,7 +125,7 @@ func (p *peerTracker) GetAnyPeer(minVersion *version.Application) (ids.NodeID, b
 		nodeID   ids.NodeID
 		ok       bool
 		random   bool
-		averager utils_math.Averager
+		averager luxmath.Averager
 	)
 	if rand.Float64() < randomPeerProbability {
 		random = true
@@ -163,7 +163,7 @@ func (p *peerTracker) TrackBandwidth(nodeID ids.NodeID, bandwidth float64) {
 
 	now := time.Now()
 	if peer.bandwidth == nil {
-		peer.bandwidth = utils_math.NewAverager(bandwidth, bandwidthHalflife, now)
+		peer.bandwidth = luxmath.NewAverager(bandwidth, bandwidthHalflife, now)
 	} else {
 		peer.bandwidth.Observe(bandwidth, now)
 	}

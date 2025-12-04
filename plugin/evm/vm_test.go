@@ -33,7 +33,7 @@ import (
 	commonEng "github.com/luxfi/consensus/core"
 	nodeConsensusBlock "github.com/luxfi/consensus/engine/chain/block"
 	"github.com/luxfi/crypto/secp256k1"
-	nodeChain "github.com/luxfi/node/vms/components/chain"
+	nodeChain "github.com/luxfi/vms/components/chain"
 	"github.com/luxfi/database"
 	"github.com/luxfi/database/memdb"
 	"github.com/luxfi/database/prefixdb"
@@ -63,7 +63,7 @@ import (
 	nodeConsensus "github.com/luxfi/consensus"
 
 	"github.com/luxfi/consensus/utils/set"
-	luxdconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/constants"
 )
 
 var (

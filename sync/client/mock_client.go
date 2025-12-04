@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/codec"
+	"github.com/luxfi/codec"
 )
 
 var (

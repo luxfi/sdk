@@ -4,7 +4,7 @@
 package warp
 
 import (
-	platformWarp "github.com/luxfi/node/vms/platformvm/warp"
+	platformWarp "github.com/luxfi/warp"
 	luxWarp "github.com/luxfi/warp"
 )
 

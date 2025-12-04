@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/geth/consensus/misc/eip4844"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/trie"
-	"github.com/luxfi/node/utils/timer/mockable"
+	"github.com/luxfi/timer/mockable"
 
 	customheader "github.com/luxfi/evm/plugin/evm/header"
 )

@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/geth/rlp"
 	"github.com/luxfi/geth/triedb"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/units"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -54,8 +54,8 @@ import (
 	"github.com/luxfi/geth/event"
 	ethparams "github.com/luxfi/geth/params"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/utils/timer/mockable"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/timer/mockable"
+	"github.com/luxfi/units"
 )
 
 const (

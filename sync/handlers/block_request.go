@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/codec"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/units"
 
 	"github.com/luxfi/evm/plugin/evm/message"
 	"github.com/luxfi/evm/sync/handlers/stats"
@@ -91,7 +91,7 @@ func (b *BlockRequestHandler) OnBlockRequest(ctx context.Context, nodeID ids.Nod
 			return nil, nil
 		}
 
-		if buf.Len()+totalBytes > targetMessageByteSize && len(blocks) > 0 {
+		if uint64(buf.Len()+totalBytes) > targetMessageByteSize && len(blocks) > 0 {
 			log.Debug("Skipping block due to max total bytes size", "totalBlockDataSize", totalBytes, "blockSize", buf.Len(), "maxTotalBytesSize", targetMessageByteSize)
 			break
 		}

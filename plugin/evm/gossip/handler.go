@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/consensus/engine/core"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/network/p2p"
-	"github.com/luxfi/node/network/p2p/gossip"
+	"github.com/luxfi/p2p"
+	"github.com/luxfi/p2p/gossip"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -36,6 +36,7 @@ func NewTxGossipHandler[T gossip.Gossipable](
 		mempool,
 		metrics,
 		maxMessageSize,
+		nil, // bloomFilter - not used for tx gossip
 	)
 
 	// Create a sliding window throttler for rate limiting
