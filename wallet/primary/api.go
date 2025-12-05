@@ -91,8 +91,8 @@ type LUXState struct {
 	PCTX    *pbuilder.Context
 	XClient *XClient
 	XCTX    *xbuilder.Context
-	// CClient evm.Client // Implementation note
-	// CCTX    *c.Context
+	// CClient *ethclient.Client // Not yet implemented
+	// CCTX    *c.Context         // Not yet implemented
 	UTXOs walletcommon.UTXOs
 }
 
@@ -107,7 +107,11 @@ func FetchState(
 	infoClient := info.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
 	xClient := NewXClient(uri, "X")
-	// cClient := evm.NewCChainClient(uri) // Implementation note
+	// C-chain client disabled for now
+	// cClient, err := ethclient.Dial(uri + "/ext/bc/C/rpc")
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to connect to C-chain: %w", err)
+	// }
 
 	pCTX, err := p.NewContextFromClients(ctx, infoClient, pClient)
 	if err != nil {
@@ -125,7 +129,8 @@ func FetchState(
 		return nil, err
 	}
 
-	// cCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
+	// C-chain context disabled for now
+	// cCTX, err := c.NewContextFromClients(ctx, infoClient, pClient)
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -174,8 +179,8 @@ func FetchState(
 		PCTX:    pCTX,
 		XClient: xClient,
 		XCTX:    xCTX,
-		// CClient: cClient,
-		// CCTX:    cCTX,
+		// CClient: cClient, // Disabled
+		// CCTX:    cCTX,    // Disabled
 		UTXOs: utxos,
 	}, nil
 }

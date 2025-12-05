@@ -172,18 +172,19 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 	xBuilder := xbuilder.New(luxAddrs, luxState.XCTX, xBackend)
 	xSigner := xsigner.New(config.LUXKeychain, xBackend)
 
-	cChainID := luxState.CCTX.BlockchainID
-	cUTXOs := common.NewChainUTXOs(cChainID, luxState.UTXOs)
-	cBackend := c.NewBackend(cUTXOs, nil) // ethState.Accounts - disabled for now
-	cBuilder := c.NewBuilder(luxAddrs, config.EthKeychain.EthAddresses(), luxState.CCTX, cBackend)
-	cSigner := c.NewSigner(config.LUXKeychain, config.EthKeychain, cBackend)
+	// C-chain wallet disabled - requires full EVM client implementation
+	// cChainID := luxState.CCTX.BlockchainID
+	// cUTXOs := common.NewChainUTXOs(cChainID, luxState.UTXOs)
+	// cBackend := c.NewBackend(cUTXOs, nil)
+	// cBuilder := c.NewBuilder(luxAddrs, config.EthKeychain.EthAddresses(), luxState.CCTX, cBackend)
+	// cSigner := c.NewSigner(config.LUXKeychain, config.EthKeychain, cBackend)
 
 	pClient := p.NewClient(luxState.PClient, pBackend)
 
 	return NewWallet(
 		p.NewWallet(pClient, pBuilder, pSigner),
 		x.NewWallet(xBuilder, xSigner, xBackend),
-		c.NewWallet(cBuilder, cSigner, luxState.CClient, nil, cBackend),
+		nil, // C-chain wallet not yet implemented
 	), nil
 }
 
