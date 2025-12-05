@@ -1,0 +1,12 @@
+{
+  "pages": [
+    "index",
+    "getting-started",
+    "vm-development",
+    "bft-consensus",
+    "api-reference",
+    "examples",
+    "deployment"
+  ],
+  "title": "LuxSDK Documentation"
+}

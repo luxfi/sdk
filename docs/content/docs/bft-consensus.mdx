@@ -1,0 +1,792 @@
+---
+title: BFT Consensus Integration
+description: Integrate Byzantine Fault Tolerant consensus into your blockchain VM
+---
+
+# BFT Consensus Integration
+
+Byzantine Fault Tolerant (BFT) consensus enables your blockchain to achieve consensus even when up to 1/3 of validators are malicious or faulty. This guide shows how to integrate BFT consensus into your VM using LuxSDK.
+
+## Understanding BFT Consensus
+
+### Key Properties
+
+- **Byzantine Fault Tolerance**: Tolerates up to f faulty nodes in a network of 3f+1 nodes
+- **Finality**: Blocks are immediately final once accepted
+- **Safety**: No two honest nodes accept conflicting blocks
+- **Liveness**: The network makes progress as long as >2/3 nodes are honest
+
+### BFT vs Other Consensus Mechanisms
+
+| Property | BFT | Chain (PoW/PoS) | DAG |
+|----------|-----|-----------------|-----|
+| Finality | Immediate | Probabilistic | Eventual |
+| Throughput | High | Medium | Very High |
+| Latency | Low | High | Low |
+| Byzantine Tolerance | 33% | 51% | 33% |
+| Network Assumptions | Partial Synchrony | Synchronous | Asynchronous |
+
+## BFT Architecture in LuxSDK
+
+```
+┌────────────────────────────────────────┐
+│            Application Layer            │
+├────────────────────────────────────────┤
+│              BFT Engine                 │
+│  ┌──────────────────────────────────┐  │
+│  │     Consensus State Machine       │  │
+│  ├──────────────────────────────────┤  │
+│  │  Propose → Prevote → Precommit   │  │
+│  └──────────────────────────────────┘  │
+├────────────────────────────────────────┤
+│           Message Handler               │
+│  ┌──────────┬───────────┬──────────┐  │
+│  │ Proposal │  Votes    │ Timeouts  │  │
+│  └──────────┴───────────┴──────────┘  │
+├────────────────────────────────────────┤
+│         Cryptographic Layer             │
+│  ┌──────────┬───────────┬──────────┐  │
+│  │   BLS    │  Ed25519  │  ML-DSA   │  │
+│  └──────────┴───────────┴──────────┘  │
+└────────────────────────────────────────┘
+```
+
+## Basic BFT Implementation
+
+### Step 1: Configure BFT Engine
+
+```go
+package consensus
+
+import (
+    "time"
+
+    "github.com/luxfi/sdk/consensus/bft"
+    "github.com/luxfi/sdk/crypto/bls"
+)
+
+// BFTConfig defines BFT consensus configuration
+type BFTConfig struct {
+    // Timing parameters
+    ProposalTimeout    time.Duration
+    PrevoteTimeout     time.Duration
+    PrecommitTimeout   time.Duration
+    CommitTimeout      time.Duration
+
+    // Threshold parameters
+    ProposalThreshold  float64 // Typically 2/3 + 1
+    PrevoteThreshold   float64
+    PrecommitThreshold float64
+
+    // Optimization flags
+    BLSAggregation     bool    // Use BLS signature aggregation
+    PipelinedVoting    bool    // Pipeline voting rounds
+    AdaptiveTimeout    bool    // Adjust timeouts based on network conditions
+
+    // Security options
+    QuantumSafeMode    bool    // Use post-quantum signatures
+    DoubleSignSlashing bool    // Slash double-signing validators
+}
+
+// DefaultBFTConfig returns default BFT configuration
+func DefaultBFTConfig() *BFTConfig {
+    return &BFTConfig{
+        ProposalTimeout:    5 * time.Second,
+        PrevoteTimeout:     3 * time.Second,
+        PrecommitTimeout:   3 * time.Second,
+        CommitTimeout:      1 * time.Second,
+        ProposalThreshold:  0.67,
+        PrevoteThreshold:   0.67,
+        PrecommitThreshold: 0.67,
+        BLSAggregation:     true,
+        PipelinedVoting:    false,
+        AdaptiveTimeout:    true,
+        QuantumSafeMode:    false,
+        DoubleSignSlashing: true,
+    }
+}
+```
+
+### Step 2: Implement BFT Engine
+
+```go
+// BFTEngine implements Byzantine Fault Tolerant consensus
+type BFTEngine struct {
+    config     *BFTConfig
+    validators ValidatorSet
+    height     uint64
+    round      uint32
+    step       ConsensusStep
+
+    // Proposal tracking
+    proposal   *Proposal
+    lockedBlock *Block
+    validBlock  *Block
+
+    // Vote tracking
+    prevotes   *VoteSet
+    precommits *VoteSet
+
+    // Channels
+    proposalCh   chan *Proposal
+    voteCh       chan *Vote
+    timeoutCh    chan TimeoutInfo
+
+    // BLS aggregation
+    blsAggregator *bls.Aggregator
+}
+
+// ConsensusStep represents the current step in consensus
+type ConsensusStep uint8
+
+const (
+    StepNewHeight ConsensusStep = iota
+    StepPropose
+    StepPrevote
+    StepPrevoteWait
+    StepPrecommit
+    StepPrecommitWait
+    StepCommit
+)
+
+// Start starts the BFT consensus engine
+func (e *BFTEngine) Start() error {
+    go e.receiveRoutine()
+    go e.timeoutRoutine()
+
+    // Enter first round
+    e.enterNewRound(e.height, 0)
+
+    return nil
+}
+
+// Main consensus state machine
+func (e *BFTEngine) receiveRoutine() {
+    for {
+        select {
+        case proposal := <-e.proposalCh:
+            e.handleProposal(proposal)
+
+        case vote := <-e.voteCh:
+            e.handleVote(vote)
+
+        case ti := <-e.timeoutCh:
+            e.handleTimeout(ti)
+        }
+    }
+}
+```
+
+### Step 3: Implement Consensus State Machine
+
+```go
+// enterNewRound enters a new consensus round
+func (e *BFTEngine) enterNewRound(height uint64, round uint32) {
+    e.height = height
+    e.round = round
+    e.step = StepPropose
+    e.prevotes = NewVoteSet(height, round, PrevoteType, e.validators)
+    e.precommits = NewVoteSet(height, round, PrecommitType, e.validators)
+
+    // Schedule proposal timeout
+    e.scheduleTimeout(e.config.ProposalTimeout, height, round, StepPropose)
+
+    // If we're the proposer, create proposal
+    if e.isProposer() {
+        e.createProposal()
+    }
+}
+
+// createProposal creates a new block proposal
+func (e *BFTEngine) createProposal() error {
+    var block *Block
+
+    if e.validBlock != nil {
+        // Re-propose valid block from previous round
+        block = e.validBlock
+    } else {
+        // Create new block
+        var err error
+        block, err = e.blockBuilder.BuildBlock()
+        if err != nil {
+            return err
+        }
+    }
+
+    // Create proposal message
+    proposal := &Proposal{
+        Height:    e.height,
+        Round:     e.round,
+        Block:     block,
+        Timestamp: time.Now(),
+    }
+
+    // Sign proposal
+    if err := e.signProposal(proposal); err != nil {
+        return err
+    }
+
+    // Broadcast proposal
+    e.broadcast(proposal)
+
+    // Process our own proposal
+    e.proposalCh <- proposal
+
+    return nil
+}
+
+// handleProposal handles a block proposal
+func (e *BFTEngine) handleProposal(proposal *Proposal) {
+    // Verify proposal
+    if err := e.verifyProposal(proposal); err != nil {
+        e.logger.Error("Invalid proposal", zap.Error(err))
+        return
+    }
+
+    e.proposal = proposal
+
+    // Enter prevote step
+    e.enterPrevote(e.height, e.round)
+}
+
+// enterPrevote enters the prevote step
+func (e *BFTEngine) enterPrevote(height uint64, round uint32) {
+    e.step = StepPrevote
+
+    // Schedule prevote timeout
+    e.scheduleTimeout(e.config.PrevoteTimeout, height, round, StepPrevote)
+
+    // Decide what to prevote
+    var vote *Vote
+
+    if e.proposal != nil && e.lockedBlock == nil {
+        // Prevote for the proposal
+        vote = &Vote{
+            Type:      PrevoteType,
+            Height:    height,
+            Round:     round,
+            BlockID:   e.proposal.Block.ID(),
+            Timestamp: time.Now(),
+        }
+    } else if e.lockedBlock != nil {
+        // Prevote for locked block
+        vote = &Vote{
+            Type:      PrevoteType,
+            Height:    height,
+            Round:     round,
+            BlockID:   e.lockedBlock.ID(),
+            Timestamp: time.Now(),
+        }
+    } else {
+        // Prevote nil
+        vote = &Vote{
+            Type:      PrevoteType,
+            Height:    height,
+            Round:     round,
+            BlockID:   nil,
+            Timestamp: time.Now(),
+        }
+    }
+
+    // Sign and broadcast vote
+    e.signAndBroadcastVote(vote)
+}
+
+// enterPrecommit enters the precommit step
+func (e *BFTEngine) enterPrecommit(height uint64, round uint32) {
+    e.step = StepPrecommit
+
+    // Schedule precommit timeout
+    e.scheduleTimeout(e.config.PrecommitTimeout, height, round, StepPrecommit)
+
+    // Check if we have 2/3+ prevotes for a block
+    blockID, ok := e.prevotes.TwoThirdsMajority()
+    if !ok {
+        // No majority, precommit nil
+        e.precommitNil()
+        return
+    }
+
+    if blockID == nil {
+        // 2/3+ prevoted nil, unlock and precommit nil
+        e.lockedBlock = nil
+        e.precommitNil()
+        return
+    }
+
+    // We have 2/3+ prevotes for a block
+    if e.proposal != nil && e.proposal.Block.ID() == blockID {
+        // Lock on the block and precommit it
+        e.lockedBlock = e.proposal.Block
+        e.validBlock = e.proposal.Block
+
+        vote := &Vote{
+            Type:      PrecommitType,
+            Height:    height,
+            Round:     round,
+            BlockID:   blockID,
+            Timestamp: time.Now(),
+        }
+
+        e.signAndBroadcastVote(vote)
+    } else {
+        // We don't have the block, precommit nil
+        e.precommitNil()
+    }
+}
+
+// tryCommit attempts to commit a block
+func (e *BFTEngine) tryCommit() {
+    blockID, ok := e.precommits.TwoThirdsMajority()
+    if !ok || blockID == nil {
+        return
+    }
+
+    // We have 2/3+ precommits for a block
+    if e.proposal != nil && e.proposal.Block.ID() == blockID {
+        e.commitBlock(e.proposal.Block)
+    }
+}
+```
+
+### Step 4: Implement Vote Aggregation
+
+```go
+// VoteSet tracks votes for a specific height/round/type
+type VoteSet struct {
+    height     uint64
+    round      uint32
+    voteType   VoteType
+    validators ValidatorSet
+
+    votes      map[string]*Vote  // validator -> vote
+    votesByBlock map[string]int64 // blockID -> voting power
+    totalPower int64
+
+    // BLS aggregation
+    blsSignatures map[string]*bls.Signature // blockID -> aggregated signature
+}
+
+// AddVote adds a vote to the vote set
+func (vs *VoteSet) AddVote(vote *Vote) error {
+    // Verify vote signature
+    validator := vs.validators.GetByAddress(vote.ValidatorAddress)
+    if validator == nil {
+        return fmt.Errorf("unknown validator")
+    }
+
+    if err := vote.Verify(validator.PublicKey); err != nil {
+        return err
+    }
+
+    // Check for double voting
+    if existing, ok := vs.votes[vote.ValidatorAddress]; ok {
+        if existing.BlockID != vote.BlockID {
+            // Double vote detected - evidence of Byzantine behavior
+            return fmt.Errorf("double vote detected")
+        }
+        return nil // Duplicate vote, ignore
+    }
+
+    // Add vote
+    vs.votes[vote.ValidatorAddress] = vote
+    vs.votesByBlock[vote.BlockID] += validator.VotingPower
+
+    // Aggregate BLS signature if enabled
+    if vs.blsSignatures != nil && vote.BLSSignature != nil {
+        vs.aggregateBLSSignature(vote)
+    }
+
+    return nil
+}
+
+// TwoThirdsMajority returns the block ID with 2/3+ votes
+func (vs *VoteSet) TwoThirdsMajority() (string, bool) {
+    threshold := vs.totalPower * 2 / 3
+
+    for blockID, power := range vs.votesByBlock {
+        if power > threshold {
+            return blockID, true
+        }
+    }
+
+    return "", false
+}
+```
+
+## Advanced BFT Features
+
+### BLS Signature Aggregation
+
+BLS signatures allow aggregating multiple signatures into one, reducing message size:
+
+```go
+// BLSAggregator aggregates BLS signatures for efficiency
+type BLSAggregator struct {
+    publicKeys map[string]*bls.PublicKey
+    signatures map[string]*bls.Signature
+    messages   map[string][]byte
+}
+
+// AggregateVotes aggregates votes using BLS
+func (a *BLSAggregator) AggregateVotes(votes []*Vote) (*AggregatedVote, error) {
+    if len(votes) == 0 {
+        return nil, fmt.Errorf("no votes to aggregate")
+    }
+
+    // Group votes by block ID
+    votesByBlock := make(map[string][]*Vote)
+    for _, vote := range votes {
+        blockID := vote.BlockID
+        votesByBlock[blockID] = append(votesByBlock[blockID], vote)
+    }
+
+    // Find majority block
+    var majorityBlock string
+    var majorityVotes []*Vote
+
+    for blockID, blockVotes := range votesByBlock {
+        if len(blockVotes) > len(majorityVotes) {
+            majorityBlock = blockID
+            majorityVotes = blockVotes
+        }
+    }
+
+    // Aggregate signatures for majority block
+    sigs := make([]*bls.Signature, 0, len(majorityVotes))
+    pubKeys := make([]*bls.PublicKey, 0, len(majorityVotes))
+
+    for _, vote := range majorityVotes {
+        sig, err := bls.SignatureFromBytes(vote.BLSSignature)
+        if err != nil {
+            return nil, err
+        }
+        sigs = append(sigs, sig)
+
+        pubKey := a.publicKeys[vote.ValidatorAddress]
+        pubKeys = append(pubKeys, pubKey)
+    }
+
+    // Create aggregated signature
+    aggSig := bls.AggregateSignatures(sigs)
+
+    return &AggregatedVote{
+        Height:             votes[0].Height,
+        Round:              votes[0].Round,
+        BlockID:            majorityBlock,
+        AggregatedSignature: aggSig.Bytes(),
+        Validators:         getValidatorIndices(majorityVotes),
+    }, nil
+}
+```
+
+### Pipelined Voting
+
+Pipeline voting rounds to improve throughput:
+
+```go
+// PipelinedBFT implements pipelined BFT consensus
+type PipelinedBFT struct {
+    *BFTEngine
+
+    // Pipeline state
+    proposalPipeline   []*Proposal
+    votePipeline       map[uint64]*VoteSet
+    maxPipelineDepth   int
+}
+
+// ProcessPipelined processes multiple heights in parallel
+func (p *PipelinedBFT) ProcessPipelined() {
+    for i := 0; i < p.maxPipelineDepth; i++ {
+        height := p.height + uint64(i)
+
+        go func(h uint64) {
+            // Process height h in parallel
+            p.processHeight(h)
+        }(height)
+    }
+}
+
+func (p *PipelinedBFT) processHeight(height uint64) {
+    // Create proposal for height
+    proposal := p.createProposalForHeight(height)
+    p.proposalPipeline = append(p.proposalPipeline, proposal)
+
+    // Collect votes
+    votes := p.collectVotesForHeight(height)
+    p.votePipeline[height] = votes
+
+    // Try to commit when ready
+    if p.canCommit(height) {
+        p.commitHeight(height)
+    }
+}
+```
+
+### Adaptive Timeout
+
+Adjust timeouts based on network conditions:
+
+```go
+// AdaptiveTimeout adjusts timeouts based on network latency
+type AdaptiveTimeout struct {
+    baseTimeout   time.Duration
+    currentTimeout time.Duration
+
+    // Network metrics
+    avgRTT        time.Duration
+    successRate   float64
+
+    // Adjustment parameters
+    increaseRate  float64
+    decreaseRate  float64
+    maxTimeout    time.Duration
+    minTimeout    time.Duration
+}
+
+// CalculateTimeout calculates the next timeout duration
+func (at *AdaptiveTimeout) CalculateTimeout() time.Duration {
+    if at.successRate > 0.9 {
+        // Network is healthy, decrease timeout
+        at.currentTimeout = time.Duration(float64(at.currentTimeout) * at.decreaseRate)
+    } else if at.successRate < 0.7 {
+        // Network is struggling, increase timeout
+        at.currentTimeout = time.Duration(float64(at.currentTimeout) * at.increaseRate)
+    }
+
+    // Apply bounds
+    if at.currentTimeout < at.minTimeout {
+        at.currentTimeout = at.minTimeout
+    } else if at.currentTimeout > at.maxTimeout {
+        at.currentTimeout = at.maxTimeout
+    }
+
+    // Factor in network RTT
+    return at.currentTimeout + at.avgRTT*2
+}
+```
+
+### View Change Protocol
+
+Handle leader failures with view changes:
+
+```go
+// ViewChange handles leader failures
+type ViewChange struct {
+    height        uint64
+    currentView   uint32
+    newView       uint32
+    viewChangeMsgs map[string]*ViewChangeMsg
+}
+
+// InitiateViewChange starts a view change
+func (vc *ViewChange) InitiateViewChange() {
+    vc.newView = vc.currentView + 1
+
+    msg := &ViewChangeMsg{
+        Height:      vc.height,
+        NewView:     vc.newView,
+        LastCommit:  vc.getLastCommit(),
+        Prepared:    vc.getPrepared(),
+    }
+
+    // Sign and broadcast view change message
+    vc.signAndBroadcast(msg)
+}
+
+// ProcessViewChange processes view change messages
+func (vc *ViewChange) ProcessViewChange(msg *ViewChangeMsg) {
+    // Verify message
+    if err := vc.verifyViewChangeMsg(msg); err != nil {
+        return
+    }
+
+    // Store message
+    vc.viewChangeMsgs[msg.ValidatorAddress] = msg
+
+    // Check if we have 2f+1 view change messages
+    if len(vc.viewChangeMsgs) > 2*vc.getFaultyNodes()+1 {
+        // Enter new view
+        vc.enterNewView()
+    }
+}
+```
+
+## Testing BFT Consensus
+
+### Unit Tests
+
+```go
+func TestBFTConsensus(t *testing.T) {
+    // Create test network with 4 validators
+    validators := createTestValidators(4)
+
+    // Create BFT engines
+    engines := make([]*BFTEngine, 4)
+    for i := 0; i < 4; i++ {
+        engines[i] = NewBFTEngine(
+            DefaultBFTConfig(),
+            validators,
+            validators[i],
+        )
+    }
+
+    // Connect engines
+    connectEngines(engines)
+
+    // Start consensus
+    for _, engine := range engines {
+        engine.Start()
+    }
+
+    // Wait for block to be committed
+    timeout := time.After(10 * time.Second)
+    committed := make(chan *Block, 4)
+
+    for _, engine := range engines {
+        go func(e *BFTEngine) {
+            committed <- e.WaitForCommit()
+        }(engine)
+    }
+
+    // Verify all nodes committed the same block
+    var blocks []*Block
+    for i := 0; i < 4; i++ {
+        select {
+        case block := <-committed:
+            blocks = append(blocks, block)
+        case <-timeout:
+            t.Fatal("Consensus timeout")
+        }
+    }
+
+    // Check all blocks are the same
+    for i := 1; i < len(blocks); i++ {
+        assert.Equal(t, blocks[0].ID(), blocks[i].ID())
+    }
+}
+```
+
+### Byzantine Tests
+
+```go
+func TestByzantineValidator(t *testing.T) {
+    // Create network with 1 Byzantine validator (out of 4)
+    validators := createTestValidators(4)
+    byzantine := 0 // First validator is Byzantine
+
+    engines := make([]*BFTEngine, 4)
+    for i := 0; i < 4; i++ {
+        if i == byzantine {
+            // Create Byzantine engine that double-votes
+            engines[i] = NewByzantineEngine(validators[i])
+        } else {
+            engines[i] = NewBFTEngine(
+                DefaultBFTConfig(),
+                validators,
+                validators[i],
+            )
+        }
+    }
+
+    // Start consensus
+    for _, engine := range engines {
+        engine.Start()
+    }
+
+    // Despite Byzantine validator, consensus should succeed
+    var committed []*Block
+    for i, engine := range engines {
+        if i != byzantine {
+            block := engine.WaitForCommit()
+            committed = append(committed, block)
+        }
+    }
+
+    // Verify honest nodes agreed
+    for i := 1; i < len(committed); i++ {
+        assert.Equal(t, committed[0].ID(), committed[i].ID())
+    }
+}
+```
+
+## Performance Tuning
+
+### Configuration for Different Networks
+
+```go
+// MainnetBFTConfig - Conservative settings for mainnet
+func MainnetBFTConfig() *BFTConfig {
+    return &BFTConfig{
+        ProposalTimeout:    10 * time.Second,
+        PrevoteTimeout:     5 * time.Second,
+        PrecommitTimeout:   5 * time.Second,
+        ProposalThreshold:  0.67,
+        BLSAggregation:     true,
+        DoubleSignSlashing: true,
+        QuantumSafeMode:    true,
+    }
+}
+
+// TestnetBFTConfig - Faster settings for testnet
+func TestnetBFTConfig() *BFTConfig {
+    return &BFTConfig{
+        ProposalTimeout:    5 * time.Second,
+        PrevoteTimeout:     3 * time.Second,
+        PrecommitTimeout:   3 * time.Second,
+        ProposalThreshold:  0.67,
+        BLSAggregation:     true,
+        PipelinedVoting:    true,
+    }
+}
+
+// LocalBFTConfig - Fast settings for local development
+func LocalBFTConfig() *BFTConfig {
+    return &BFTConfig{
+        ProposalTimeout:    1 * time.Second,
+        PrevoteTimeout:     500 * time.Millisecond,
+        PrecommitTimeout:   500 * time.Millisecond,
+        ProposalThreshold:  0.67,
+        BLSAggregation:     false,
+        AdaptiveTimeout:    false,
+    }
+}
+```
+
+## Monitoring and Metrics
+
+```go
+// BFTMetrics tracks BFT consensus metrics
+type BFTMetrics struct {
+    // Timing metrics
+    RoundDuration     prometheus.Histogram
+    ProposalDuration  prometheus.Histogram
+    VotingDuration    prometheus.Histogram
+    CommitDuration    prometheus.Histogram
+
+    // Count metrics
+    ProposalsCreated  prometheus.Counter
+    VotesCast         prometheus.Counter
+    BlocksCommitted   prometheus.Counter
+    ViewChanges       prometheus.Counter
+
+    // State metrics
+    CurrentHeight     prometheus.Gauge
+    CurrentRound      prometheus.Gauge
+    ValidatorCount    prometheus.Gauge
+}
+
+// RecordBlockCommit records block commit metrics
+func (m *BFTMetrics) RecordBlockCommit(duration time.Duration, height uint64) {
+    m.BlocksCommitted.Inc()
+    m.CommitDuration.Observe(duration.Seconds())
+    m.CurrentHeight.Set(float64(height))
+}
+```
+
+## Next Steps
+
+- [Cross-Chain Messaging](./cross-chain) - Enable inter-blockchain communication
+- [Performance Optimization](./performance) - Optimize consensus performance
+- [Security Best Practices](./security) - Secure your BFT implementation
+- [Deployment Guide](./deployment) - Deploy BFT consensus to production

@@ -1,0 +1,824 @@
+---
+title: Deployment Guide
+description: Deploy your blockchain to testnet, mainnet, or sovereign networks
+---
+
+# Deployment Guide
+
+This guide covers deploying your blockchain VM to various network environments, from local testing to production mainnet deployment.
+
+## Deployment Overview
+
+### Deployment Types
+
+| Type | Purpose | Validators | Network | Persistence |
+|------|---------|------------|---------|-------------|
+| Local | Development | 1-5 | Local | Optional |
+| Testnet | Testing | 5-20 | Public | Required |
+| Mainnet | Production | 20+ | Public | Required |
+| Sovereign L1 | Independent | Custom | Private | Required |
+
+## Pre-Deployment Checklist
+
+### Code Requirements
+
+- [ ] VM implementation complete
+- [ ] Unit tests passing (>80% coverage)
+- [ ] Integration tests passing
+- [ ] Security audit completed
+- [ ] Performance benchmarks meet targets
+- [ ] Documentation complete
+
+### Configuration Requirements
+
+- [ ] Genesis configuration finalized
+- [ ] Network parameters set
+- [ ] Validator set configured
+- [ ] Token economics defined
+- [ ] Upgrade paths planned
+
+### Infrastructure Requirements
+
+- [ ] Node hardware provisioned
+- [ ] Network connectivity verified
+- [ ] Monitoring setup
+- [ ] Backup strategy defined
+- [ ] Incident response plan
+
+## Local Deployment
+
+### Quick Start
+
+```bash
+# Build your VM
+go build -o myvm ./cmd/myvm
+
+# Create local network
+luxcli network create local \
+  --num-nodes 5 \
+  --vm-binary ./myvm \
+  --vm-genesis genesis.json
+
+# Deploy blockchain
+luxcli blockchain deploy \
+  --network local \
+  --vm myvm \
+  --name "MyChain"
+
+# Get RPC endpoint
+luxcli blockchain describe MyChain --network local
+```
+
+### Local Network Configuration
+
+```json
+{
+  "network": {
+    "type": "local",
+    "numNodes": 5,
+    "nodePorts": {
+      "http": 9650,
+      "staking": 9651,
+      "p2p": 9652
+    },
+    "bootstrapNodes": [],
+    "enableStaking": false
+  },
+  "vm": {
+    "id": "myVM",
+    "binary": "./myvm",
+    "genesis": "genesis.json"
+  }
+}
+```
+
+### Docker Deployment
+
+```dockerfile
+# Dockerfile for VM
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+COPY . .
+
+RUN go mod download
+RUN go build -o myvm ./cmd/myvm
+
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates
+
+COPY --from=builder /app/myvm /usr/local/bin/
+COPY genesis.json /etc/myvm/
+
+ENTRYPOINT ["myvm"]
+```
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+
+services:
+  node1:
+    build: .
+    ports:
+      - "9650:9650"
+      - "9651:9651"
+    volumes:
+      - node1-data:/data
+    environment:
+      - NODE_ID=node1
+      - NETWORK_ID=local
+      - DATA_DIR=/data
+
+  node2:
+    build: .
+    ports:
+      - "9660:9650"
+      - "9661:9651"
+    volumes:
+      - node2-data:/data
+    environment:
+      - NODE_ID=node2
+      - NETWORK_ID=local
+      - DATA_DIR=/data
+      - BOOTSTRAP_NODES=node1:9651
+
+volumes:
+  node1-data:
+  node2-data:
+```
+
+## Testnet Deployment
+
+### Testnet Configuration
+
+```json
+{
+  "network": {
+    "id": 43113,
+    "name": "testnet",
+    "endpoint": "https://api.testnet.lux.network"
+  },
+  "validators": [
+    {
+      "nodeID": "NodeID-5mb46qwKDcFmJQrMt6dudGZbGW2sR8Ct3",
+      "weight": 100000
+    },
+    {
+      "nodeID": "NodeID-7Xhw2mDxuDS44j42TCB6U5yK8YtK9xKe2",
+      "weight": 100000
+    }
+  ],
+  "genesis": {
+    "startTime": 1704067200,
+    "initialStakeDuration": 31536000,
+    "initialStakers": [],
+    "cChainGenesis": "",
+    "message": "Testnet Genesis"
+  }
+}
+```
+
+### Deploy to Testnet
+
+```bash
+#!/bin/bash
+
+# Set testnet configuration
+export NETWORK_ID=43113
+export API_ENDPOINT=https://api.testnet.lux.network
+
+# Create subnet
+SUBNET_ID=$(luxcli subnet create MyChain \
+  --testnet \
+  --vm-id myVM \
+  --config vm-config.json)
+
+echo "Subnet created: $SUBNET_ID"
+
+# Add validators to subnet
+luxcli subnet validators add \
+  --testnet \
+  --subnet-id $SUBNET_ID \
+  --validator-list validators.json
+
+# Deploy VM to subnet
+luxcli vm deploy \
+  --testnet \
+  --subnet-id $SUBNET_ID \
+  --vm-binary ./myvm \
+  --vm-id myVM
+
+# Verify deployment
+luxcli subnet info --testnet --subnet-id $SUBNET_ID
+```
+
+### Testnet Monitoring
+
+```go
+// Monitor testnet deployment
+func monitorTestnet(client *rpc.Client) {
+    ticker := time.NewTicker(30 * time.Second)
+    defer ticker.Stop()
+
+    for range ticker.C {
+        // Check node health
+        health, err := client.Health()
+        if err != nil {
+            log.Printf("Health check failed: %v", err)
+            continue
+        }
+
+        // Get blockchain info
+        info, err := client.GetBlockchainInfo()
+        if err != nil {
+            log.Printf("Failed to get info: %v", err)
+            continue
+        }
+
+        log.Printf("Testnet Status: Height=%d, TPS=%d, Peers=%d",
+            info.Height, info.TPS, info.PeerCount)
+
+        // Alert on issues
+        if info.PeerCount < 3 {
+            alert("Low peer count on testnet")
+        }
+    }
+}
+```
+
+## Mainnet Deployment
+
+### Mainnet Requirements
+
+#### Hardware Requirements
+
+**Validator Node:**
+- CPU: 8+ cores (16+ recommended)
+- RAM: 32 GB minimum (64 GB recommended)
+- Storage: 1 TB NVMe SSD
+- Network: 100 Mbps dedicated (1 Gbps recommended)
+- Uptime: 99.9% SLA
+
+**API Node:**
+- CPU: 4+ cores
+- RAM: 16 GB minimum
+- Storage: 500 GB SSD
+- Network: 100 Mbps
+
+### Mainnet Configuration
+
+```json
+{
+  "network": {
+    "id": 1,
+    "name": "mainnet",
+    "endpoint": "https://api.mainnet.lux.network"
+  },
+  "staking": {
+    "minValidatorStake": 2000000000000000,
+    "maxValidatorStake": 100000000000000000,
+    "minDelegatorStake": 25000000000000,
+    "minDelegationFee": 20000,
+    "minStakeDuration": 1209600,
+    "maxStakeDuration": 31536000,
+    "stakeMintingPeriod": 31536000,
+    "rewardConfig": {
+      "maxConsumptionRate": 120000,
+      "minConsumptionRate": 100000,
+      "mintingCap": 7200000000000000,
+      "supplyModifier": 100000000
+    }
+  }
+}
+```
+
+### Mainnet Deployment Process
+
+#### Step 1: Validator Setup
+
+```bash
+#!/bin/bash
+
+# Install node software
+wget https://github.com/luxfi/node/releases/latest/luxd
+chmod +x luxd
+sudo mv luxd /usr/local/bin/
+
+# Create data directory
+sudo mkdir -p /var/lib/luxd
+sudo chown $USER:$USER /var/lib/luxd
+
+# Generate node certificate
+luxd --generate-staking-cert \
+  --staking-tls-cert-file=/var/lib/luxd/staking/cert.pem \
+  --staking-tls-key-file=/var/lib/luxd/staking/key.pem
+
+# Create systemd service
+sudo tee /etc/systemd/system/luxd.service > /dev/null <<EOF
+[Unit]
+Description=Lux Node
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+ExecStart=/usr/local/bin/luxd \
+  --network-id=1 \
+  --data-dir=/var/lib/luxd \
+  --api-admin-enabled=false \
+  --api-ipcs-enabled=false \
+  --api-keystore-enabled=false \
+  --http-host=0.0.0.0 \
+  --http-port=9650 \
+  --staking-port=9651 \
+  --public-ip=$(curl -s ifconfig.me) \
+  --snow-mixed-query-num-push-non-vdr=10 \
+  --log-level=info
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Start service
+sudo systemctl daemon-reload
+sudo systemctl enable luxd
+sudo systemctl start luxd
+```
+
+#### Step 2: Deploy Subnet
+
+```go
+// Deploy subnet to mainnet
+func deployToMainnet(config *MainnetConfig) error {
+    // Connect to mainnet
+    client, err := NewClient(config.Endpoint)
+    if err != nil {
+        return err
+    }
+
+    // Create subnet
+    subnetTx := &CreateSubnetTx{
+        Owner: config.Owner,
+        Threshold: config.Threshold,
+    }
+
+    subnetID, err := client.CreateSubnet(subnetTx)
+    if err != nil {
+        return fmt.Errorf("failed to create subnet: %w", err)
+    }
+
+    log.Printf("Subnet created: %s", subnetID)
+
+    // Add validators
+    for _, validator := range config.Validators {
+        addValidatorTx := &AddSubnetValidatorTx{
+            SubnetID: subnetID,
+            NodeID:   validator.NodeID,
+            Weight:   validator.Weight,
+            StartTime: time.Now(),
+            EndTime:   time.Now().Add(365 * 24 * time.Hour),
+        }
+
+        if err := client.AddSubnetValidator(addValidatorTx); err != nil {
+            return fmt.Errorf("failed to add validator %s: %w",
+                validator.NodeID, err)
+        }
+
+        log.Printf("Added validator: %s", validator.NodeID)
+    }
+
+    // Deploy blockchain
+    createChainTx := &CreateChainTx{
+        SubnetID:    subnetID,
+        ChainName:   config.ChainName,
+        VMID:        config.VMID,
+        FxIDs:       config.FxIDs,
+        GenesisData: config.Genesis,
+    }
+
+    chainID, err := client.CreateBlockchain(createChainTx)
+    if err != nil {
+        return fmt.Errorf("failed to create blockchain: %w", err)
+    }
+
+    log.Printf("Blockchain deployed: %s", chainID)
+
+    // Wait for validators to sync
+    if err := waitForValidatorSync(client, chainID); err != nil {
+        return err
+    }
+
+    log.Printf("Mainnet deployment complete!")
+    log.Printf("Chain ID: %s", chainID)
+    log.Printf("RPC Endpoint: %s/ext/bc/%s/rpc", config.Endpoint, chainID)
+
+    return nil
+}
+```
+
+### Security Hardening
+
+```bash
+#!/bin/bash
+
+# Firewall configuration
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp  # SSH
+sudo ufw allow 9650/tcp  # HTTP API
+sudo ufw allow 9651/tcp  # Staking
+sudo ufw enable
+
+# Fail2ban configuration
+sudo apt-get install fail2ban
+sudo tee /etc/fail2ban/jail.local > /dev/null <<EOF
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+
+[luxd]
+enabled = true
+port = 9650,9651
+logpath = /var/log/luxd/luxd.log
+EOF
+
+sudo systemctl restart fail2ban
+
+# SSL/TLS setup with Let's Encrypt
+sudo apt-get install certbot nginx
+sudo certbot certonly --nginx -d api.mychain.com
+
+# Nginx reverse proxy
+sudo tee /etc/nginx/sites-available/luxd > /dev/null <<EOF
+server {
+    listen 443 ssl http2;
+    server_name api.mychain.com;
+
+    ssl_certificate /etc/letsencrypt/live/api.mychain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.mychain.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:9650;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+
+sudo nginx -s reload
+```
+
+## Sovereign L1 Deployment
+
+### Sovereign Network Architecture
+
+```go
+// Sovereign L1 configuration
+type SovereignConfig struct {
+    // Network parameters
+    NetworkID       uint32
+    NetworkName     string
+    BootstrapNodes  []string
+
+    // Consensus parameters
+    ConsensusType   string
+    ValidatorSet    []Validator
+    MinStake        uint64
+
+    // Economic parameters
+    NativeToken     string
+    InitialSupply   uint64
+    RewardRate      float64
+
+    // Quantum safety
+    QuantumSafe     bool
+    CryptoAlgorithm string
+}
+```
+
+### Deploy Sovereign L1
+
+```go
+func deploySovereignL1(config *SovereignConfig) error {
+    // Initialize genesis
+    genesis := &Genesis{
+        NetworkID:     config.NetworkID,
+        Validators:    config.ValidatorSet,
+        InitialSupply: config.InitialSupply,
+        StartTime:     time.Now(),
+    }
+
+    // Create bootstrap nodes
+    bootstrapNodes := make([]*Node, len(config.BootstrapNodes))
+    for i, endpoint := range config.BootstrapNodes {
+        node, err := createBootstrapNode(endpoint, genesis)
+        if err != nil {
+            return err
+        }
+        bootstrapNodes[i] = node
+    }
+
+    // Deploy validator nodes
+    for _, validator := range config.ValidatorSet {
+        if err := deployValidatorNode(validator, genesis, bootstrapNodes); err != nil {
+            return fmt.Errorf("failed to deploy validator %s: %w",
+                validator.NodeID, err)
+        }
+    }
+
+    // Deploy API nodes
+    apiEndpoints := deployAPINodes(config, bootstrapNodes)
+
+    log.Printf("Sovereign L1 deployed successfully!")
+    log.Printf("Network ID: %d", config.NetworkID)
+    log.Printf("Validators: %d", len(config.ValidatorSet))
+    log.Printf("API Endpoints: %v", apiEndpoints)
+
+    return nil
+}
+```
+
+## Monitoring and Maintenance
+
+### Prometheus Metrics
+
+```yaml
+# prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'luxd'
+    static_configs:
+      - targets: ['localhost:9650']
+    metrics_path: '/ext/metrics'
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+```
+
+### Grafana Dashboard
+
+```json
+{
+  "dashboard": {
+    "title": "Lux Node Monitoring",
+    "panels": [
+      {
+        "title": "Block Height",
+        "targets": [{
+          "expr": "lux_chain_height"
+        }]
+      },
+      {
+        "title": "Transaction Rate",
+        "targets": [{
+          "expr": "rate(lux_chain_txs_accepted[1m])"
+        }]
+      },
+      {
+        "title": "Peer Count",
+        "targets": [{
+          "expr": "lux_network_peers"
+        }]
+      },
+      {
+        "title": "CPU Usage",
+        "targets": [{
+          "expr": "process_cpu_seconds_total"
+        }]
+      }
+    ]
+  }
+}
+```
+
+### Health Monitoring Script
+
+```go
+// Health monitoring service
+type HealthMonitor struct {
+    nodes    []*Node
+    interval time.Duration
+    alerter  Alerter
+}
+
+func (hm *HealthMonitor) Start() {
+    ticker := time.NewTicker(hm.interval)
+    defer ticker.Stop()
+
+    for range ticker.C {
+        for _, node := range hm.nodes {
+            if err := hm.checkNode(node); err != nil {
+                hm.alerter.Alert(AlertCritical,
+                    fmt.Sprintf("Node %s unhealthy: %v", node.ID, err))
+            }
+        }
+    }
+}
+
+func (hm *HealthMonitor) checkNode(node *Node) error {
+    // Check if node is reachable
+    health, err := node.HealthCheck()
+    if err != nil {
+        return err
+    }
+
+    // Check sync status
+    if !health.IsSynced {
+        return fmt.Errorf("node not synced")
+    }
+
+    // Check peer count
+    if health.PeerCount < 3 {
+        return fmt.Errorf("low peer count: %d", health.PeerCount)
+    }
+
+    // Check disk space
+    if health.DiskUsage > 90 {
+        return fmt.Errorf("high disk usage: %d%%", health.DiskUsage)
+    }
+
+    return nil
+}
+```
+
+## Backup and Recovery
+
+### Backup Strategy
+
+```bash
+#!/bin/bash
+
+# Backup script
+BACKUP_DIR="/backup/luxd"
+DATA_DIR="/var/lib/luxd"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Stop node
+sudo systemctl stop luxd
+
+# Create backup
+tar -czf "$BACKUP_DIR/luxd_backup_$DATE.tar.gz" \
+  "$DATA_DIR/db" \
+  "$DATA_DIR/staking" \
+  "$DATA_DIR/configs"
+
+# Start node
+sudo systemctl start luxd
+
+# Upload to S3
+aws s3 cp "$BACKUP_DIR/luxd_backup_$DATE.tar.gz" \
+  s3://mybackups/luxd/
+
+# Clean old backups (keep last 30 days)
+find "$BACKUP_DIR" -name "*.tar.gz" -mtime +30 -delete
+```
+
+### Disaster Recovery
+
+```go
+// Disaster recovery procedure
+func recoverNode(backupPath string) error {
+    // Stop node if running
+    if err := stopNode(); err != nil {
+        return err
+    }
+
+    // Restore from backup
+    if err := restoreBackup(backupPath); err != nil {
+        return err
+    }
+
+    // Verify database integrity
+    if err := verifyDatabase(); err != nil {
+        return err
+    }
+
+    // Resync with network
+    if err := startNode(ResyncMode); err != nil {
+        return err
+    }
+
+    // Wait for sync
+    if err := waitForSync(); err != nil {
+        return err
+    }
+
+    log.Println("Node recovered successfully")
+    return nil
+}
+```
+
+## Upgrade Procedures
+
+### Rolling Upgrade
+
+```bash
+#!/bin/bash
+
+# Rolling upgrade script
+NODES=("node1.example.com" "node2.example.com" "node3.example.com")
+NEW_VERSION="v1.2.0"
+
+for NODE in "${NODES[@]}"; do
+    echo "Upgrading $NODE to $NEW_VERSION"
+
+    # Drain node connections
+    ssh $NODE "luxcli node drain"
+
+    # Wait for drain
+    sleep 30
+
+    # Stop node
+    ssh $NODE "sudo systemctl stop luxd"
+
+    # Backup current version
+    ssh $NODE "cp /usr/local/bin/luxd /usr/local/bin/luxd.bak"
+
+    # Download new version
+    ssh $NODE "wget https://github.com/luxfi/node/releases/download/$NEW_VERSION/luxd"
+    ssh $NODE "chmod +x luxd && sudo mv luxd /usr/local/bin/"
+
+    # Start node
+    ssh $NODE "sudo systemctl start luxd"
+
+    # Wait for sync
+    echo "Waiting for $NODE to sync..."
+    sleep 120
+
+    # Verify health
+    if ! ssh $NODE "luxcli node health"; then
+        echo "ERROR: $NODE unhealthy after upgrade"
+        exit 1
+    fi
+
+    echo "$NODE upgraded successfully"
+done
+
+echo "Rolling upgrade complete!"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: Node not syncing
+```bash
+# Check peer connections
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"info.peers"
+}' -H 'content-type:application/json;' localhost:9650/ext/info
+
+# Check bootstrap status
+curl -X POST --data '{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"info.isBootstrapped",
+    "params": {"chain":"X"}
+}' -H 'content-type:application/json;' localhost:9650/ext/info
+```
+
+**Issue**: High memory usage
+```bash
+# Check memory stats
+cat /proc/$(pgrep luxd)/status | grep VmRSS
+
+# Restart with memory limit
+systemctl edit luxd
+# Add: MemoryMax=8G
+systemctl restart luxd
+```
+
+**Issue**: Database corruption
+```bash
+# Stop node
+systemctl stop luxd
+
+# Backup corrupted database
+mv /var/lib/luxd/db /var/lib/luxd/db.corrupted
+
+# Resync from network
+systemctl start luxd
+```
+
+## Next Steps
+
+- [Monitoring Guide](./monitoring) - Set up comprehensive monitoring
+- [Security Best Practices](./security) - Secure your deployment
+- [Performance Tuning](./performance) - Optimize node performance
+- [Maintenance Guide](./maintenance) - Ongoing maintenance procedures

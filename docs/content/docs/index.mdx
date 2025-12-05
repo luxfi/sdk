@@ -1,0 +1,247 @@
+---
+title: Introduction
+description: Complete framework for building blockchain VMs with BFT consensus support
+---
+
+# LuxSDK
+
+LuxSDK is the official software development kit for building high-performance blockchain virtual machines (VMs) on the Lux network with built-in BFT consensus support.
+
+## Features
+
+- **BFT Consensus Integration**: Built-in support for Byzantine Fault Tolerant consensus
+- **Multi-Consensus Support**: Chain, DAG, and Post-Quantum consensus engines
+- **VM Framework**: Complete framework for custom blockchain VMs
+- **Cross-Chain Support**: Warp messaging for inter-chain communication
+- **Deployment Flexibility**: Support for mainnet, testnet, and sovereign L1 chains
+- **Quantum-Safe**: Post-quantum cryptography with Quasar Protocol
+- **Developer Tools**: Testing, debugging, and performance monitoring
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "github.com/luxfi/sdk"
+    "github.com/luxfi/sdk/consensus"
+)
+
+func main() {
+    // Create new VM with BFT consensus
+    vm := sdk.NewVM(sdk.Config{
+        Consensus: consensus.BFT,
+        NetworkID: sdk.MainnetID,
+    })
+    
+    // Register your custom logic
+    vm.RegisterBlock BlockHandler(myBlockHandler)
+    vm.RegisterTransaction TxHandler(myTxHandler)
+    
+    // Start the VM
+    vm.Start()
+}
+```
+
+## Architecture
+
+### Core Components
+
+1. **VM Framework**: Base infrastructure for custom blockchain VMs
+2. **BFT Consensus Engine**: Byzantine Fault Tolerant consensus implementation
+3. **State Management**: Efficient state storage and retrieval
+4. **Transaction Processing**: Transaction validation and execution
+5. **Block Building**: Block creation and verification
+6. **Network Layer**: P2P communication and message passing
+7. **Storage Layer**: Persistent data storage with multiple backends
+
+### VM Lifecycle
+
+```
+┌──────────────┐
+│ Initialize   │  ← Configure VM and consensus
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ Bootstrap    │  ← Sync state from network
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ Start        │  ← Begin processing blocks/txs
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ Shutdown     │  ← Graceful shutdown
+└──────────────┘
+```
+
+## Deployment Types
+
+### Mainnet Deployment
+
+Production deployment on Lux mainnet with strict consensus parameters:
+
+```go
+config := &sdk.Config{
+    DeploymentType: sdk.MainnetDeployment,
+    Consensus: consensus.BFT,
+    BFTConfig: &bft.BFTConfig{
+        MaxProposalWait: 10 * time.Second,
+        BLSAggregation: true,
+    },
+}
+```
+
+### Testnet Deployment
+
+Faster timeouts for testing:
+
+```go
+config := &sdk.Config{
+    DeploymentType: sdk.TestnetDeployment,
+    Consensus: consensus.BFT,
+    BFTConfig: &bft.BFTConfig{
+        MaxProposalWait: 5 * time.Second,
+    },
+}
+```
+
+### Sovereign L1 (Quantum-Safe)
+
+Independent Layer 1 blockchain secured by Quasar Protocol:
+
+```go
+config := &sdk.Config{
+    DeploymentType: sdk.SovereignL1Deployment,
+    Consensus: consensus.BFT,
+    BFTConfig: &bft.BFTConfig{
+        QuantumSafeMode: true,
+        ReplicationEnabled: true,
+    },
+}
+```
+
+## Building Your First VM
+
+### Step 1: Define Your VM
+
+```go
+type MyVM struct {
+    sdk.BaseVM
+    state *State
+    txPool *TransactionPool
+}
+
+func (vm *MyVM) Initialize(ctx context.Context, config *sdk.Config) error {
+    // Initialize your custom logic
+    vm.state = NewState(config.DB)
+    vm.txPool = NewTransactionPool()
+    return nil
+}
+```
+
+### Step 2: Implement Block Handler
+
+```go
+func (vm *MyVM) BuildBlock(ctx context.Context) (sdk.Block, error) {
+    // Get pending transactions
+    txs := vm.txPool.GetPending()
+    
+    // Build block with transactions
+    block := &MyBlock{
+        Transactions: txs,
+        Parent: vm.state.GetLatestBlock(),
+    }
+    
+    return block, nil
+}
+
+func (vm *MyVM) VerifyBlock(ctx context.Context, block sdk.Block) error {
+    // Verify block is valid
+    myBlock := block.(*MyBlock)
+    return vm.state.VerifyBlock(myBlock)
+}
+```
+
+### Step 3: Configure Consensus
+
+```go
+vm.SetConsensusEngine(&bft.BFTConsensusEngine{
+    Config: config.BFTConfig,
+    Logger: logger,
+})
+```
+
+## API Reference
+
+### VM Interface
+
+```go
+type VM interface {
+    Initialize(context.Context, *Config) error
+    BuildBlock(context.Context) (Block, error)
+    VerifyBlock(context.Context, Block) error
+    AcceptBlock(context.Context, Block) error
+    Shutdown(context.Context) error
+}
+```
+
+### Block Interface
+
+```go
+type Block interface {
+    ID() ids.ID
+    Parent() ids.ID
+    Height() uint64
+    Timestamp() time.Time
+    Bytes() []byte
+    Verify(context.Context) error
+}
+```
+
+### Transaction Interface
+
+```go
+type Transaction interface {
+    ID() ids.ID
+    Bytes() []byte
+    Verify(context.Context) error
+    Execute(context.Context, *State) error
+}
+```
+
+## Testing
+
+```bash
+# Run all tests
+go test -v ./...
+
+# Run with race detector
+go test -race ./...
+
+# Integration tests
+go test -v -tags=integration ./...
+
+# Benchmarks
+go test -bench=. ./...
+```
+
+## Examples
+
+See the [examples](https://github.com/luxfi/sdk/tree/main/examples) directory for complete VM implementations:
+
+- **Simple VM**: Basic blockchain with transfers
+- **Smart Contract VM**: EVM-compatible VM
+- **DAG VM**: Directed acyclic graph consensus
+- **Cross-Chain VM**: Inter-chain messaging with Warp
+
+## Next Steps
+
+- [VM Development Guide](/docs/vm-development) - Build your first VM
+- [BFT Consensus](/docs/bft-consensus) - Understand BFT integration
+- [Cross-Chain Messaging](/docs/warp) - Inter-chain communication
+- [Deployment Guide](/docs/deployment) - Deploy to mainnet, testnet, or sovereign L1
+- [API Reference](/docs/api) - Complete API documentation

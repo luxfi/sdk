@@ -1,0 +1,680 @@
+---
+title: API Reference
+description: Complete API reference for LuxSDK
+---
+
+# API Reference
+
+Complete reference documentation for all LuxSDK APIs, interfaces, and types.
+
+## Core SDK
+
+### sdk.LuxSDK
+
+The main SDK interface providing comprehensive blockchain development capabilities.
+
+```go
+type LuxSDK struct {
+    // Contains filtered or unexported fields
+}
+```
+
+#### Methods
+
+##### New
+```go
+func New(cfg *config.Config) (*LuxSDK, error)
+```
+Creates a new instance of the Lux SDK.
+
+**Parameters:**
+- `cfg` - SDK configuration (uses default if nil)
+
+**Returns:**
+- `*LuxSDK` - SDK instance
+- `error` - Error if initialization fails
+
+**Example:**
+```go
+sdk, err := sdk.New(&config.Config{
+    Network: &config.NetworkConfig{
+        NetworkID: 31337,
+    },
+})
+```
+
+##### Networks
+```go
+func (sdk *LuxSDK) Networks() *network.NetworkManager
+```
+Returns the network manager for network operations.
+
+##### Blockchains
+```go
+func (sdk *LuxSDK) Blockchains() *blockchain.Builder
+```
+Returns the blockchain builder for blockchain operations.
+
+##### LaunchNetwork
+```go
+func (sdk *LuxSDK) LaunchNetwork(
+    ctx context.Context,
+    networkType string,
+    numNodes int,
+) (*network.Network, error)
+```
+Launches a network with specified parameters.
+
+**Parameters:**
+- `ctx` - Context for cancellation
+- `networkType` - Type of network ("local", "testnet", "mainnet")
+- `numNodes` - Number of nodes to launch
+
+##### CreateAndDeployBlockchain
+```go
+func (sdk *LuxSDK) CreateAndDeployBlockchain(
+    ctx context.Context,
+    params *BlockchainParams,
+) (*blockchain.Blockchain, error)
+```
+Creates and deploys a blockchain to a network.
+
+## Network Management
+
+### network.NetworkManager
+
+Manages blockchain networks and node operations.
+
+```go
+type NetworkManager struct {
+    // Contains filtered or unexported fields
+}
+```
+
+#### Methods
+
+##### CreateNetwork
+```go
+func (nm *NetworkManager) CreateNetwork(
+    ctx context.Context,
+    params *NetworkParams,
+) (*Network, error)
+```
+Creates a new network with specified parameters.
+
+**Parameters:**
+- `ctx` - Context for cancellation
+- `params` - Network configuration parameters
+
+**Example:**
+```go
+network, err := nm.CreateNetwork(ctx, &NetworkParams{
+    Name:     "mynetwork",
+    Type:     NetworkTypeLocal,
+    NumNodes: 5,
+})
+```
+
+##### StartNetwork
+```go
+func (nm *NetworkManager) StartNetwork(
+    ctx context.Context,
+    networkID string,
+) error
+```
+Starts an existing network.
+
+##### StopNetwork
+```go
+func (nm *NetworkManager) StopNetwork(
+    ctx context.Context,
+    networkID string,
+) error
+```
+Stops a running network.
+
+##### GetNetwork
+```go
+func (nm *NetworkManager) GetNetwork(networkID string) (*Network, error)
+```
+Gets network information by ID.
+
+##### ListNetworks
+```go
+func (nm *NetworkManager) ListNetworks() ([]*Network, error)
+```
+Lists all managed networks.
+
+### network.NetworkParams
+
+```go
+type NetworkParams struct {
+    Name             string
+    Type             NetworkType
+    NumNodes         int
+    EnableMonitoring bool
+    HTTPPort         int
+    StakingPort      int
+    EnableStaking    bool
+    CustomGenesis    []byte
+}
+```
+
+### network.Network
+
+```go
+type Network struct {
+    ID          string
+    Name        string
+    Type        NetworkType
+    Status      NetworkStatus
+    Nodes       []*Node
+    ChainIDs    []string
+    CreatedAt   time.Time
+}
+```
+
+### network.Node
+
+```go
+type Node struct {
+    NodeID      string
+    Status      NodeStatus
+    IPAddress   string
+    HTTPPort    int
+    StakingPort int
+    StakeAmount int64
+    PublicKey   []byte
+}
+```
+
+## Blockchain Builder
+
+### blockchain.Builder
+
+Builds and manages blockchain instances.
+
+```go
+type Builder struct {
+    // Contains filtered or unexported fields
+}
+```
+
+#### Methods
+
+##### CreateBlockchain
+```go
+func (b *Builder) CreateBlockchain(
+    ctx context.Context,
+    params *CreateParams,
+) (*Blockchain, error)
+```
+Creates a new blockchain configuration.
+
+**Example:**
+```go
+chain, err := builder.CreateBlockchain(ctx, &CreateParams{
+    Name:    "MyChain",
+    Type:    TypeL1,
+    VMType:  VMTypeEVM,
+    ChainID: big.NewInt(99999),
+})
+```
+
+##### Deploy
+```go
+func (b *Builder) Deploy(
+    ctx context.Context,
+    blockchain *Blockchain,
+    network *network.Network,
+) error
+```
+Deploys a blockchain to a network.
+
+##### Remove
+```go
+func (b *Builder) Remove(
+    ctx context.Context,
+    chainID string,
+) error
+```
+Removes a deployed blockchain.
+
+### blockchain.CreateParams
+
+```go
+type CreateParams struct {
+    Name         string
+    Type         BlockchainType
+    VMType       VMType
+    ChainID      *big.Int
+    Genesis      []byte
+    VMConfig     map[string]interface{}
+}
+```
+
+### blockchain.Blockchain
+
+```go
+type Blockchain struct {
+    ID           string
+    Name         string
+    Type         BlockchainType
+    VMType       VMType
+    ChainID      *big.Int
+    Status       BlockchainStatus
+    RPCEndpoint  string
+    WSEndpoint   string
+    CreatedAt    time.Time
+}
+```
+
+## VM Interfaces
+
+### vm.VM
+
+Base VM interface that all VMs must implement.
+
+```go
+type VM interface {
+    Initialize(
+        ctx context.Context,
+        config *Config,
+        db database.Database,
+        genesis []byte,
+    ) error
+
+    BuildBlock(ctx context.Context) (Block, error)
+    VerifyBlock(ctx context.Context, block Block) error
+    AcceptBlock(ctx context.Context, block Block) error
+    RejectBlock(ctx context.Context, block Block) error
+
+    GetBlock(ctx context.Context, id ids.ID) (Block, error)
+    SetPreference(ctx context.Context, id ids.ID) error
+
+    Shutdown(ctx context.Context) error
+    HealthCheck(ctx context.Context) error
+}
+```
+
+### vm.Block
+
+Block interface for VM blocks.
+
+```go
+type Block interface {
+    ID() ids.ID
+    ParentID() ids.ID
+    Height() uint64
+    Timestamp() int64
+    Bytes() []byte
+
+    Verify(ctx context.Context) error
+    Accept(ctx context.Context) error
+    Reject(ctx context.Context) error
+}
+```
+
+### vm.Transaction
+
+Transaction interface for VM transactions.
+
+```go
+type Transaction interface {
+    ID() ids.ID
+    Bytes() []byte
+    Size() int
+
+    Verify(ctx context.Context) error
+    Execute(ctx context.Context, state State) error
+}
+```
+
+## Consensus Interfaces
+
+### consensus.Engine
+
+Base consensus engine interface.
+
+```go
+type Engine interface {
+    Start(ctx context.Context, requestID uint32) error
+    Stop(ctx context.Context) error
+
+    HealthCheck(ctx context.Context) (interface{}, error)
+    IsBootstrapped() bool
+
+    // Block processing
+    BuildBlock(ctx context.Context) (Block, error)
+    VerifyBlock(ctx context.Context, block Block) error
+    AcceptBlock(ctx context.Context, block Block) error
+}
+```
+
+### consensus.BFTEngine
+
+Byzantine Fault Tolerant consensus engine.
+
+```go
+type BFTEngine interface {
+    Engine
+
+    // BFT-specific methods
+    Propose(ctx context.Context, block Block) error
+    Prevote(ctx context.Context, blockID ids.ID) error
+    Precommit(ctx context.Context, blockID ids.ID) error
+
+    // View change
+    InitiateViewChange(newView uint32) error
+    ProcessViewChange(msg *ViewChangeMsg) error
+}
+```
+
+## Database Interfaces
+
+### database.Database
+
+Core database interface.
+
+```go
+type Database interface {
+    Has(key []byte) (bool, error)
+    Get(key []byte) ([]byte, error)
+    Put(key []byte, value []byte) error
+    Delete(key []byte) error
+
+    NewBatch() Batch
+    Close() error
+
+    HealthCheck(context.Context) (interface{}, error)
+}
+```
+
+### database.Batch
+
+Batch operations interface.
+
+```go
+type Batch interface {
+    Put(key []byte, value []byte) error
+    Delete(key []byte) error
+
+    Size() int
+    Write() error
+    Reset()
+    Replay(w KeyValueWriterDeleter) error
+}
+```
+
+## Cryptographic APIs
+
+### crypto.PrivateKey
+
+```go
+type PrivateKey interface {
+    PublicKey() PublicKey
+    Sign(message []byte) ([]byte, error)
+    Bytes() []byte
+}
+```
+
+### crypto.PublicKey
+
+```go
+type PublicKey interface {
+    Verify(message, signature []byte) bool
+    Address() ids.ShortID
+    Bytes() []byte
+}
+```
+
+### crypto.BLSSignature
+
+```go
+type BLSSignature struct {
+    // Contains signature data
+}
+
+func AggregateSignatures(sigs []*BLSSignature) *BLSSignature
+func (s *BLSSignature) Verify(pubKey *BLSPublicKey, msg []byte) bool
+```
+
+## Configuration Types
+
+### config.Config
+
+Main SDK configuration.
+
+```go
+type Config struct {
+    Network     *NetworkConfig
+    VM          *VMConfig
+    Consensus   *ConsensusConfig
+    Storage     *StorageConfig
+    Monitoring  *MonitoringConfig
+    LogLevel    string
+}
+```
+
+### config.NetworkConfig
+
+```go
+type NetworkConfig struct {
+    NetworkID    uint32
+    APIEndpoint  string
+    HTTPPort     int
+    StakingPort  int
+    P2PPort      int
+    LogLevel     string
+    MaxPeers     int
+}
+```
+
+### config.VMConfig
+
+```go
+type VMConfig struct {
+    Type              string
+    EnableWarp        bool
+    EnableProposerVM  bool
+    TrackedChains     []string
+    StateSyncEnabled  bool
+}
+```
+
+### config.ConsensusConfig
+
+```go
+type ConsensusConfig struct {
+    Type              string
+    BFTConfig         *BFTConfig
+    ChainConfig       *ChainConfig
+    DAGConfig         *DAGConfig
+    PQConfig          *PQConfig
+}
+```
+
+## Utility Functions
+
+### utils.GeneratePrivateKey
+
+```go
+func GeneratePrivateKey() (crypto.PrivateKey, error)
+```
+Generates a new private key.
+
+### utils.LoadGenesisFromFile
+
+```go
+func LoadGenesisFromFile(path string) ([]byte, error)
+```
+Loads genesis configuration from file.
+
+### utils.CalculateChainID
+
+```go
+func CalculateChainID(name string) *big.Int
+```
+Calculates chain ID from chain name.
+
+## Error Types
+
+### Common Errors
+
+```go
+var (
+    ErrNotFound         = errors.New("not found")
+    ErrAlreadyExists    = errors.New("already exists")
+    ErrInvalidConfig    = errors.New("invalid configuration")
+    ErrNetworkOffline   = errors.New("network offline")
+    ErrInsufficientFunds = errors.New("insufficient funds")
+    ErrUnauthorized     = errors.New("unauthorized")
+    ErrTimeout          = errors.New("operation timeout")
+)
+```
+
+### Error Handling
+
+```go
+// Check specific error
+if errors.Is(err, ErrNotFound) {
+    // Handle not found
+}
+
+// Wrap errors with context
+if err != nil {
+    return fmt.Errorf("failed to create blockchain: %w", err)
+}
+```
+
+## Constants
+
+### Network Types
+
+```go
+const (
+    NetworkTypeLocal    NetworkType = "local"
+    NetworkTypeTestnet  NetworkType = "testnet"
+    NetworkTypeMainnet  NetworkType = "mainnet"
+)
+```
+
+### VM Types
+
+```go
+const (
+    VMTypeEVM      VMType = "evm"
+    VMTypeTokenVM  VMType = "tokenvm"
+    VMTypeQuantumVM VMType = "quantumvm"
+    VMTypeCustom   VMType = "custom"
+)
+```
+
+### Blockchain Types
+
+```go
+const (
+    TypeL1        BlockchainType = "l1"
+    TypeL2        BlockchainType = "l2"
+    TypeSovereign BlockchainType = "sovereign"
+)
+```
+
+### Status Values
+
+```go
+const (
+    StatusActive   Status = "active"
+    StatusInactive Status = "inactive"
+    StatusStopped  Status = "stopped"
+    StatusError    Status = "error"
+)
+```
+
+## Event System
+
+### Events
+
+```go
+type Event interface {
+    Type() EventType
+    Timestamp() time.Time
+    Data() interface{}
+}
+```
+
+### Event Types
+
+```go
+const (
+    EventBlockAccepted EventType = "block.accepted"
+    EventBlockRejected EventType = "block.rejected"
+    EventTxAccepted    EventType = "tx.accepted"
+    EventTxRejected    EventType = "tx.rejected"
+    EventNodeJoined    EventType = "node.joined"
+    EventNodeLeft      EventType = "node.left"
+)
+```
+
+### Event Subscription
+
+```go
+// Subscribe to events
+sub := sdk.Subscribe(EventBlockAccepted)
+defer sub.Unsubscribe()
+
+for event := range sub.Events() {
+    log.Printf("Block accepted: %v", event.Data())
+}
+```
+
+## Examples
+
+### Complete VM Implementation
+
+See [VM Development Guide](./vm-development) for a complete example.
+
+### BFT Consensus Integration
+
+See [BFT Consensus Guide](./bft-consensus) for implementation details.
+
+### Network Management
+
+```go
+// Create and manage a network
+nm := sdk.Networks()
+
+// Create local network
+network, err := nm.CreateNetwork(ctx, &NetworkParams{
+    Name:     "local-test",
+    Type:     NetworkTypeLocal,
+    NumNodes: 5,
+})
+
+// Deploy blockchain
+chain, err := sdk.CreateAndDeployBlockchain(ctx, &BlockchainParams{
+    Name:    "TestChain",
+    Network: network,
+})
+
+// Stop network
+err = nm.StopNetwork(ctx, network.ID)
+```
+
+## Migration Guide
+
+### From v0.x to v1.x
+
+Major changes in v1.x:
+- New consensus interface
+- Improved VM lifecycle
+- Enhanced network management
+- Better error handling
+
+See [Migration Guide](./migration) for detailed instructions.
+
+## Support
+
+- **GitHub Issues**: [github.com/luxfi/sdk/issues](https://github.com/luxfi/sdk/issues)
+- **Discord**: Join #sdk-support channel
+- **Documentation**: [docs.lux.network](https://docs.lux.network)
