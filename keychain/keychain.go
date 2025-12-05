@@ -47,9 +47,9 @@ func (la *ledgerAdapter) Disconnect() error {
 }
 
 type Keychain struct {
-	*keychain.LedgerKeychain
-	network network.Network
-	Ledger  *Ledger
+	keychain.Keychain // Use interface instead of concrete type
+	network           network.Network
+	Ledger            *Ledger
 }
 
 // LedgerParams is an input to NewKeyChain if a new keychain is to be created using Ledger
@@ -122,8 +122,8 @@ func NewKeychain(
 	// Create nil keychain for now
 	// TODO: Implement proper keychain loading from key path
 	kc := Keychain{
-		LedgerKeychain: nil,
-		network:        network,
+		Keychain: nil,
+		network:  network,
 	}
 	return &kc, nil
 }
@@ -141,7 +141,7 @@ func (kc *Keychain) AddLedgerIndices(indices []uint32) error {
 		if err != nil {
 			return err
 		}
-		kc.LedgerKeychain = newKc
+		kc.Keychain = newKc
 		return nil
 	}
 	return fmt.Errorf("keychain is not ledger enabled")
