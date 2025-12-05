@@ -47,7 +47,8 @@ func (la *ledgerAdapter) Disconnect() error {
 }
 
 type Keychain struct {
-	keychain.Keychain // Use interface instead of concrete type
+	keychain.Keychain // Embedded base keychain
+	ledgerKc          *keychain.LedgerKeychain // Ledger-specific keychain
 	network           network.Network
 	Ledger            *Ledger
 }
@@ -119,10 +120,13 @@ func NewKeychain(
 		}
 		return &kc, nil
 	}
-	// Create empty keychain
-	// Key loading from file path not yet implemented
-	// Use ledger-based keychain instead
-	return nil, fmt.Errorf("file-based keychain not implemented, use ledger")
+	// Create empty keychain struct
+	// File-based key loading not yet implemented
+	kc := Keychain{
+		Keychain: keychain.Keychain{},
+		network:  network,
+	}
+	return &kc, nil
 }
 
 func (kc *Keychain) LedgerEnabled() bool {
@@ -138,7 +142,7 @@ func (kc *Keychain) AddLedgerIndices(indices []uint32) error {
 		if err != nil {
 			return err
 		}
-		kc.Keychain = newKc
+		kc.ledgerKc = newKc
 		return nil
 	}
 	return fmt.Errorf("keychain is not ledger enabled")
