@@ -119,13 +119,10 @@ func NewKeychain(
 		}
 		return &kc, nil
 	}
-	// Create nil keychain for now
-	// TODO: Implement proper keychain loading from key path
-	kc := Keychain{
-		Keychain: nil,
-		network:  network,
-	}
-	return &kc, nil
+	// Create empty keychain
+	// Key loading from file path not yet implemented
+	// Use ledger-based keychain instead
+	return nil, fmt.Errorf("file-based keychain not implemented, use ledger")
 }
 
 func (kc *Keychain) LedgerEnabled() bool {
