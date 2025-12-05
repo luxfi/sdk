@@ -4,6 +4,8 @@
 package crypto
 
 import (
+	"crypto/rand"
+
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/ids"
 )
@@ -72,14 +74,10 @@ type KeyManager interface {
 
 // NewFactory creates a new crypto factory
 func NewFactory() Factory {
-	return &factory{
-		cryptoFactory: crypto.FactorySECP256K1R{}, // Default to secp256k1
-	}
+	return &factory{}
 }
 
-type factory struct {
-	cryptoFactory crypto.Factory
-}
+type factory struct{}
 
 func (f *factory) NewSigner(scheme SignatureScheme, privateKey []byte) (Signer, error) {
 	// Route to classic or PQC implementation based on scheme
@@ -103,9 +101,20 @@ func isPQCScheme(scheme SignatureScheme) bool {
 
 func (f *factory) GenerateKey(scheme SignatureScheme) ([]byte, error) {
 	// Generate key based on scheme
-	// For PQC schemes, use ml-dsa or ml-kem key generation
-	// For classic, use secp256k1 or BLS
-	return f.cryptoFactory.NewPrivateKey()
+	switch scheme {
+	case SECP256K1:
+		// Generate secp256k1 private key using luxfi/crypto
+		key, err := crypto.GenerateKey()
+		if err != nil {
+			return nil, err
+		}
+		return crypto.FromECDSA(key), nil
+	default:
+		// For other schemes, generate random bytes of appropriate length
+		privKey := make([]byte, 32)
+		_, err := rand.Read(privKey)
+		return privKey, err
+	}
 }
 
 // Helper functions to instantiate signers from sub-packages
