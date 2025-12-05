@@ -137,6 +137,7 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		return nil, err
 	}
 
+	// Eth state fetching disabled for now
 	// ethAddrs := config.EthKeychain.EthAddresses()
 	// ethState, err := FetchEthState(ctx, config.URI, ethAddrs)
 	// if err != nil {
@@ -171,18 +172,18 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 	xBuilder := xbuilder.New(luxAddrs, luxState.XCTX, xBackend)
 	xSigner := xsigner.New(config.LUXKeychain, xBackend)
 
-	// cChainID := luxState.CCTX.BlockchainID
-	// cUTXOs := common.NewChainUTXOs(cChainID, luxState.UTXOs)
-	// cBackend := c.NewBackend(cUTXOs, ethState.Accounts)
-	// cBuilder := c.NewBuilder(luxAddrs, ethAddrs, luxState.CCTX, cBackend)
-	// cSigner := c.NewSigner(config.LUXKeychain, config.EthKeychain, cBackend)
+	cChainID := luxState.CCTX.BlockchainID
+	cUTXOs := common.NewChainUTXOs(cChainID, luxState.UTXOs)
+	cBackend := c.NewBackend(cUTXOs, nil) // ethState.Accounts - disabled for now
+	cBuilder := c.NewBuilder(luxAddrs, config.EthKeychain.EthAddresses(), luxState.CCTX, cBackend)
+	cSigner := c.NewSigner(config.LUXKeychain, config.EthKeychain, cBackend)
 
 	pClient := p.NewClient(luxState.PClient, pBackend)
 
 	return NewWallet(
 		p.NewWallet(pClient, pBuilder, pSigner),
 		x.NewWallet(xBuilder, xSigner, xBackend),
-		nil, // c.NewWallet(cBuilder, cSigner, luxState.CClient, ethState.Client, cBackend),
+		c.NewWallet(cBuilder, cSigner, luxState.CClient, nil, cBackend),
 	), nil
 }
 
