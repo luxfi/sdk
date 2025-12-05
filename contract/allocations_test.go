@@ -40,7 +40,7 @@ func TestContractAddressIsInGenesisData(t *testing.T) {
 			genesisData:     []byte("{}"),
 			contractAddress: crypto.Address{},
 			expected:        false,
-			shouldErr:       false,
+			shouldErr:       true,
 		},
 		{
 			desc: "no allocs",
