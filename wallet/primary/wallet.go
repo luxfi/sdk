@@ -185,3 +185,9 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		nil, // c.NewWallet(cBuilder, cSigner, luxState.CClient, ethState.Client, cBackend),
 	), nil
 }
+
+// MakePChainWallet returns a wallet that only supports issuing P-chain transactions.
+// This is an alias for MakeWallet for backward compatibility.
+func MakePChainWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
+	return MakeWallet(ctx, config)
+}
