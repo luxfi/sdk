@@ -9,7 +9,7 @@ require (
 	github.com/luxfi/geth v1.16.40
 	github.com/luxfi/ids v1.1.3
 	github.com/luxfi/log v1.1.24
-	github.com/luxfi/warp v1.16.19
+	github.com/luxfi/warp v1.16.26
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -39,10 +39,10 @@ require (
 	github.com/luxfi/evm v1.16.20
 	github.com/luxfi/genesis v1.2.4
 	github.com/luxfi/ledger-lux-go v1.0.0
-	github.com/luxfi/lpm v1.0.4
+	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v0.1.5
-	github.com/luxfi/netrunner v1.14.3
-	github.com/luxfi/node v1.21.3
+	github.com/luxfi/netrunner v1.14.4
+	github.com/luxfi/node v1.21.2
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1
