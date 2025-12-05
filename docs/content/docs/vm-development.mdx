@@ -1,0 +1,680 @@
+---
+title: VM Development Guide
+description: Complete guide to building custom blockchain VMs with LuxSDK
+---
+
+# VM Development Guide
+
+This guide walks you through building a custom blockchain VM (Virtual Machine) using LuxSDK. VMs define the execution environment and rules for your blockchain.
+
+## VM Architecture
+
+### Core Components
+
+```
+┌─────────────────────────────────────┐
+│            Your Application          │
+├─────────────────────────────────────┤
+│              Your VM                 │
+│  ┌─────────┬──────────┬──────────┐  │
+│  │ State   │ Blocks   │ Txs      │  │
+│  │ Manager │ Handler  │ Processor│  │
+│  └─────────┴──────────┴──────────┘  │
+├─────────────────────────────────────┤
+│            LuxSDK Core               │
+│  ┌─────────┬──────────┬──────────┐  │
+│  │Consensus│ Network  │ Storage  │  │
+│  │ Engine  │ Layer    │ Layer    │  │
+│  └─────────┴──────────┴──────────┘  │
+└─────────────────────────────────────┘
+```
+
+## Building Your First VM
+
+### Step 1: Define VM Structure
+
+Create `vm/vm.go`:
+
+```go
+package vm
+
+import (
+    "context"
+    "time"
+
+    "github.com/luxfi/log"
+    "github.com/luxfi/sdk"
+    "github.com/luxfi/sdk/consensus"
+    "github.com/luxfi/sdk/database"
+    "github.com/luxfi/sdk/ids"
+)
+
+// MyVM implements a custom blockchain VM
+type MyVM struct {
+    sdk.BaseVM                    // Embed base VM functionality
+
+    // VM components
+    state      *StateManager      // State management
+    txPool     *TransactionPool   // Transaction pool
+    blockStore *BlockStore        // Block storage
+    consensus  consensus.Engine   // Consensus engine
+
+    // Configuration
+    config     *Config            // VM configuration
+    logger     log.Logger         // Logger
+    db         database.Database  // Database
+}
+
+// Config defines VM configuration
+type Config struct {
+    // Transaction fees
+    TxFee              uint64
+    CreateAssetTxFee   uint64
+
+    // Block parameters
+    MaxBlockSize       int
+    MaxBlockTxs        int
+    BlockProductionTime time.Duration
+
+    // Consensus
+    ConsensusType      string
+    ConsensusConfig    interface{}
+}
+```
+
+### Step 2: Implement VM Interface
+
+```go
+// Initialize initializes the VM
+func (vm *MyVM) Initialize(
+    ctx context.Context,
+    config *sdk.Config,
+    db database.Database,
+    genesis []byte,
+) error {
+    vm.logger = config.Logger
+    vm.db = db
+
+    // Parse VM configuration
+    vmConfig, err := parseConfig(config.VMConfig)
+    if err != nil {
+        return fmt.Errorf("failed to parse config: %w", err)
+    }
+    vm.config = vmConfig
+
+    // Initialize state manager
+    vm.state, err = NewStateManager(db, genesis)
+    if err != nil {
+        return fmt.Errorf("failed to create state manager: %w", err)
+    }
+
+    // Initialize transaction pool
+    vm.txPool = NewTransactionPool(vmConfig.MaxBlockTxs)
+
+    // Initialize block store
+    vm.blockStore = NewBlockStore(db)
+
+    // Initialize consensus engine
+    vm.consensus, err = consensus.NewEngine(
+        vmConfig.ConsensusType,
+        vmConfig.ConsensusConfig,
+        vm,
+    )
+    if err != nil {
+        return fmt.Errorf("failed to create consensus engine: %w", err)
+    }
+
+    vm.logger.Info("VM initialized successfully")
+    return nil
+}
+
+// BuildBlock builds a new block
+func (vm *MyVM) BuildBlock(ctx context.Context) (sdk.Block, error) {
+    // Get pending transactions
+    txs := vm.txPool.GetPending(vm.config.MaxBlockTxs)
+
+    // Get parent block
+    parent, err := vm.state.GetLatestBlock()
+    if err != nil {
+        return nil, err
+    }
+
+    // Create new block
+    block := &Block{
+        ParentID:     parent.ID(),
+        Height:       parent.Height() + 1,
+        Timestamp:    time.Now().Unix(),
+        Transactions: txs,
+    }
+
+    // Calculate block ID
+    block.ComputeID()
+
+    vm.logger.Debug("Built block",
+        zap.String("id", block.ID().String()),
+        zap.Uint64("height", block.Height()),
+        zap.Int("txs", len(txs)),
+    )
+
+    return block, nil
+}
+
+// VerifyBlock verifies a block
+func (vm *MyVM) VerifyBlock(ctx context.Context, block sdk.Block) error {
+    myBlock, ok := block.(*Block)
+    if !ok {
+        return fmt.Errorf("invalid block type")
+    }
+
+    // Verify block structure
+    if err := myBlock.Verify(); err != nil {
+        return fmt.Errorf("block verification failed: %w", err)
+    }
+
+    // Verify parent exists
+    parent, err := vm.blockStore.GetBlock(myBlock.ParentID)
+    if err != nil {
+        return fmt.Errorf("parent block not found: %w", err)
+    }
+
+    // Verify height
+    if myBlock.Height != parent.Height+1 {
+        return fmt.Errorf("invalid block height")
+    }
+
+    // Verify transactions
+    for _, tx := range myBlock.Transactions {
+        if err := vm.verifyTransaction(tx); err != nil {
+            return fmt.Errorf("invalid transaction %s: %w", tx.ID(), err)
+        }
+    }
+
+    return nil
+}
+
+// AcceptBlock accepts a verified block
+func (vm *MyVM) AcceptBlock(ctx context.Context, block sdk.Block) error {
+    myBlock, ok := block.(*Block)
+    if !ok {
+        return fmt.Errorf("invalid block type")
+    }
+
+    // Execute transactions
+    for _, tx := range myBlock.Transactions {
+        if err := vm.executeTransaction(tx); err != nil {
+            return fmt.Errorf("failed to execute tx %s: %w", tx.ID(), err)
+        }
+    }
+
+    // Store block
+    if err := vm.blockStore.PutBlock(myBlock); err != nil {
+        return fmt.Errorf("failed to store block: %w", err)
+    }
+
+    // Update state
+    if err := vm.state.SetLatestBlock(myBlock); err != nil {
+        return fmt.Errorf("failed to update state: %w", err)
+    }
+
+    // Remove executed transactions from pool
+    for _, tx := range myBlock.Transactions {
+        vm.txPool.Remove(tx.ID())
+    }
+
+    vm.logger.Info("Accepted block",
+        zap.String("id", myBlock.ID().String()),
+        zap.Uint64("height", myBlock.Height()),
+    )
+
+    return nil
+}
+```
+
+### Step 3: Implement Block Structure
+
+Create `vm/block.go`:
+
+```go
+package vm
+
+import (
+    "crypto/sha256"
+    "encoding/binary"
+    "time"
+
+    "github.com/luxfi/sdk/ids"
+)
+
+// Block represents a block in the blockchain
+type Block struct {
+    ParentID     ids.ID         // Parent block ID
+    Height       uint64         // Block height
+    Timestamp    int64          // Unix timestamp
+    Transactions []*Transaction // Block transactions
+    id           ids.ID         // Cached block ID
+}
+
+// ID returns the block ID
+func (b *Block) ID() ids.ID {
+    if b.id == ids.Empty {
+        b.ComputeID()
+    }
+    return b.id
+}
+
+// ComputeID computes and caches the block ID
+func (b *Block) ComputeID() {
+    h := sha256.New()
+    h.Write(b.ParentID[:])
+    binary.Write(h, binary.BigEndian, b.Height)
+    binary.Write(h, binary.BigEndian, b.Timestamp)
+
+    for _, tx := range b.Transactions {
+        h.Write(tx.ID()[:])
+    }
+
+    copy(b.id[:], h.Sum(nil))
+}
+
+// Verify verifies block structure
+func (b *Block) Verify() error {
+    // Check timestamp
+    if b.Timestamp > time.Now().Unix()+60 {
+        return fmt.Errorf("block timestamp too far in future")
+    }
+
+    // Check transactions
+    if len(b.Transactions) == 0 {
+        return fmt.Errorf("block has no transactions")
+    }
+
+    return nil
+}
+
+// Bytes serializes the block
+func (b *Block) Bytes() []byte {
+    // Implement serialization
+    return nil
+}
+```
+
+### Step 4: Implement Transaction Processing
+
+Create `vm/transaction.go`:
+
+```go
+package vm
+
+import (
+    "crypto/ed25519"
+    "fmt"
+
+    "github.com/luxfi/sdk/ids"
+)
+
+// Transaction types
+const (
+    TransferTx = iota
+    CreateAssetTx
+    MintTx
+)
+
+// Transaction represents a blockchain transaction
+type Transaction struct {
+    Type      uint8         // Transaction type
+    Nonce     uint64        // Account nonce
+    From      ids.ShortID   // Sender address
+    To        ids.ShortID   // Recipient address
+    Amount    uint64        // Transfer amount
+    Fee       uint64        // Transaction fee
+    Data      []byte        // Additional data
+    Signature []byte        // Transaction signature
+}
+
+// ID returns the transaction ID
+func (tx *Transaction) ID() ids.ID {
+    return ids.ComputeID(tx.Bytes())
+}
+
+// Verify verifies the transaction
+func (tx *Transaction) Verify() error {
+    // Verify signature
+    if !ed25519.Verify(tx.From[:], tx.UnsignedBytes(), tx.Signature) {
+        return fmt.Errorf("invalid signature")
+    }
+
+    // Verify transaction type
+    if tx.Type > MintTx {
+        return fmt.Errorf("unknown transaction type: %d", tx.Type)
+    }
+
+    // Verify fee
+    if tx.Fee == 0 {
+        return fmt.Errorf("transaction fee cannot be zero")
+    }
+
+    return nil
+}
+
+// Execute executes the transaction
+func (vm *MyVM) executeTransaction(tx *Transaction) error {
+    switch tx.Type {
+    case TransferTx:
+        return vm.executeTransfer(tx)
+    case CreateAssetTx:
+        return vm.executeCreateAsset(tx)
+    case MintTx:
+        return vm.executeMint(tx)
+    default:
+        return fmt.Errorf("unknown transaction type: %d", tx.Type)
+    }
+}
+
+func (vm *MyVM) executeTransfer(tx *Transaction) error {
+    // Get sender balance
+    senderBalance, err := vm.state.GetBalance(tx.From)
+    if err != nil {
+        return err
+    }
+
+    // Check sufficient balance
+    totalCost := tx.Amount + tx.Fee
+    if senderBalance < totalCost {
+        return fmt.Errorf("insufficient balance")
+    }
+
+    // Update balances
+    if err := vm.state.SetBalance(tx.From, senderBalance-totalCost); err != nil {
+        return err
+    }
+
+    recipientBalance, err := vm.state.GetBalance(tx.To)
+    if err != nil {
+        return err
+    }
+
+    if err := vm.state.SetBalance(tx.To, recipientBalance+tx.Amount); err != nil {
+        return err
+    }
+
+    return nil
+}
+```
+
+## Advanced Features
+
+### Adding BFT Consensus
+
+```go
+func (vm *MyVM) InitializeBFTConsensus() error {
+    bftConfig := &bft.Config{
+        MaxProposalWait:    10 * time.Second,
+        ProposalThreshold:  0.67,
+        BLSAggregation:     true,
+        QuantumSafeMode:    false,
+    }
+
+    consensus, err := bft.NewEngine(bftConfig, vm)
+    if err != nil {
+        return err
+    }
+
+    vm.consensus = consensus
+    return nil
+}
+```
+
+### State Management
+
+```go
+type StateManager struct {
+    db           database.Database
+    balances     map[ids.ShortID]uint64
+    assets       map[ids.ID]*Asset
+    latestBlock  *Block
+    mu           sync.RWMutex
+}
+
+func (s *StateManager) GetBalance(addr ids.ShortID) (uint64, error) {
+    s.mu.RLock()
+    defer s.mu.RUnlock()
+
+    balance, exists := s.balances[addr]
+    if !exists {
+        return 0, nil
+    }
+    return balance, nil
+}
+
+func (s *StateManager) SetBalance(addr ids.ShortID, balance uint64) error {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    s.balances[addr] = balance
+
+    // Persist to database
+    key := append([]byte("balance:"), addr[:]...)
+    value := binary.BigEndian.AppendUint64(nil, balance)
+    return s.db.Put(key, value)
+}
+```
+
+### Cross-Chain Communication
+
+```go
+// Enable Warp messaging for cross-chain communication
+func (vm *MyVM) EnableWarpMessaging() error {
+    warpConfig := &warp.Config{
+        NetworkID:    vm.config.NetworkID,
+        ChainID:      vm.config.ChainID,
+        MaxMessageSize: 1024 * 1024, // 1MB
+    }
+
+    warpHandler, err := warp.NewHandler(warpConfig, vm.state)
+    if err != nil {
+        return err
+    }
+
+    vm.warpHandler = warpHandler
+    return nil
+}
+
+// Send cross-chain message
+func (vm *MyVM) SendWarpMessage(destChainID ids.ID, payload []byte) error {
+    msg := &warp.Message{
+        SourceChainID: vm.config.ChainID,
+        DestChainID:   destChainID,
+        Payload:       payload,
+        Timestamp:     time.Now().Unix(),
+    }
+
+    return vm.warpHandler.SendMessage(msg)
+}
+```
+
+## Testing Your VM
+
+### Unit Tests
+
+```go
+func TestVMInitialize(t *testing.T) {
+    // Create test database
+    db := memdb.New()
+
+    // Create VM
+    vm := &MyVM{}
+
+    // Create config
+    config := &sdk.Config{
+        Logger: log.NewTestLogger(t),
+        VMConfig: map[string]interface{}{
+            "txFee": 1000,
+            "maxBlockSize": 100,
+        },
+    }
+
+    // Initialize VM
+    err := vm.Initialize(context.Background(), config, db, nil)
+    require.NoError(t, err)
+
+    // Verify initialization
+    assert.NotNil(t, vm.state)
+    assert.NotNil(t, vm.txPool)
+    assert.NotNil(t, vm.consensus)
+}
+```
+
+### Integration Tests
+
+```go
+func TestVMBlockProduction(t *testing.T) {
+    vm := setupTestVM(t)
+
+    // Add transactions to pool
+    for i := 0; i < 10; i++ {
+        tx := createTestTransaction(i)
+        vm.txPool.Add(tx)
+    }
+
+    // Build block
+    ctx := context.Background()
+    block, err := vm.BuildBlock(ctx)
+    require.NoError(t, err)
+
+    // Verify block
+    err = vm.VerifyBlock(ctx, block)
+    require.NoError(t, err)
+
+    // Accept block
+    err = vm.AcceptBlock(ctx, block)
+    require.NoError(t, err)
+
+    // Verify state update
+    latestBlock, err := vm.state.GetLatestBlock()
+    require.NoError(t, err)
+    assert.Equal(t, block.ID(), latestBlock.ID())
+}
+```
+
+## Performance Optimization
+
+### Parallel Transaction Processing
+
+```go
+func (vm *MyVM) executeTransactionsParallel(txs []*Transaction) error {
+    // Group independent transactions
+    groups := vm.groupIndependentTxs(txs)
+
+    var wg sync.WaitGroup
+    errCh := make(chan error, len(groups))
+
+    for _, group := range groups {
+        wg.Add(1)
+        go func(txGroup []*Transaction) {
+            defer wg.Done()
+
+            for _, tx := range txGroup {
+                if err := vm.executeTransaction(tx); err != nil {
+                    errCh <- err
+                    return
+                }
+            }
+        }(group)
+    }
+
+    wg.Wait()
+    close(errCh)
+
+    // Check for errors
+    for err := range errCh {
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+```
+
+### Caching
+
+```go
+type CachedStateManager struct {
+    *StateManager
+    balanceCache *lru.Cache // LRU cache for balances
+    blockCache   *lru.Cache // LRU cache for blocks
+}
+
+func NewCachedStateManager(db database.Database) (*CachedStateManager, error) {
+    balanceCache, _ := lru.New(10000)
+    blockCache, _ := lru.New(100)
+
+    return &CachedStateManager{
+        StateManager: &StateManager{db: db},
+        balanceCache: balanceCache,
+        blockCache:   blockCache,
+    }, nil
+}
+```
+
+## Deployment
+
+### Configuration
+
+```json
+{
+  "vm": {
+    "id": "myVM",
+    "alias": "X",
+    "config": {
+      "txFee": 1000,
+      "createAssetTxFee": 10000,
+      "maxBlockSize": 1048576,
+      "maxBlockTxs": 1000,
+      "blockProductionTime": "2s",
+      "consensusType": "bft",
+      "consensusConfig": {
+        "maxProposalWait": "10s",
+        "proposalThreshold": 0.67
+      }
+    }
+  }
+}
+```
+
+### Deployment Script
+
+```bash
+#!/bin/bash
+
+# Build VM binary
+go build -o myvm ./cmd/myvm
+
+# Deploy to node
+luxcli vm deploy \
+  --vm-id=myVM \
+  --binary=./myvm \
+  --config=vm-config.json \
+  --network=testnet
+
+# Verify deployment
+luxcli vm status --vm-id=myVM
+```
+
+## Best Practices
+
+1. **State Management**: Use atomic operations and proper locking
+2. **Error Handling**: Always return descriptive errors
+3. **Logging**: Use structured logging with appropriate levels
+4. **Testing**: Achieve >80% test coverage
+5. **Documentation**: Document all public APIs
+6. **Security**: Validate all inputs and use secure cryptography
+7. **Performance**: Profile and optimize hot paths
+8. **Upgradability**: Design for future upgrades
+
+## Next Steps
+
+- [BFT Consensus Integration](./bft-consensus) - Add Byzantine fault tolerance
+- [Cross-Chain Messaging](./cross-chain) - Enable Warp messaging
+- [API Development](./api-reference) - Build RPC/REST APIs
+- [Deployment Guide](./deployment) - Deploy to production

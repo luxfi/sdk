@@ -1,0 +1,256 @@
+---
+title: Getting Started
+description: Quick start guide to build with LuxSDK
+---
+
+# Getting Started with LuxSDK
+
+LuxSDK is the official software development kit for building high-performance blockchain virtual machines on the Lux network. This guide will help you get started quickly.
+
+## Installation
+
+### Prerequisites
+
+- Go 1.22.5 or higher
+- Git
+- Make
+- Node.js 18+ (for running documentation site)
+
+### Install from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/luxfi/sdk.git
+cd sdk
+
+# Install dependencies
+go mod download
+
+# Build the SDK
+go build ./...
+
+# Run tests to verify installation
+go test ./...
+```
+
+### Install as Go Module
+
+Add LuxSDK to your project:
+
+```bash
+go get github.com/luxfi/sdk
+```
+
+## Quick Start Example
+
+### 1. Initialize the SDK
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/luxfi/sdk"
+    "github.com/luxfi/sdk/config"
+)
+
+func main() {
+    // Create SDK configuration
+    cfg := &config.Config{
+        Network: &config.NetworkConfig{
+            NetworkID:   31337,  // Local network ID
+            APIEndpoint: "http://localhost:9650",
+            HTTPPort:    9650,
+            StakingPort: 9651,
+        },
+    }
+
+    // Initialize SDK
+    luxSDK, err := sdk.New(cfg)
+    if err != nil {
+        log.Fatalf("Failed to create SDK: %v", err)
+    }
+
+    // SDK is ready to use
+    log.Println("LuxSDK initialized successfully!")
+}
+```
+
+### 2. Create a Local Network
+
+```go
+func createLocalNetwork(luxSDK *sdk.LuxSDK) error {
+    ctx := context.Background()
+
+    // Launch a 5-node local network
+    network, err := luxSDK.LaunchNetwork(ctx, "local", 5)
+    if err != nil {
+        return err
+    }
+
+    log.Printf("Network launched: %s\n", network.ID)
+    log.Printf("Nodes: %d\n", len(network.Nodes))
+
+    // Network is now running
+    return nil
+}
+```
+
+### 3. Deploy a Simple Blockchain
+
+```go
+func deployBlockchain(luxSDK *sdk.LuxSDK) error {
+    ctx := context.Background()
+
+    // Define blockchain parameters
+    params := &sdk.BlockchainParams{
+        Name:    "MyChain",
+        Type:    blockchain.TypeL1,
+        VMType:  blockchain.VMTypeEVM,
+        ChainID: big.NewInt(99999),
+    }
+
+    // Create and deploy blockchain
+    chain, err := luxSDK.CreateAndDeployBlockchain(ctx, params)
+    if err != nil {
+        return err
+    }
+
+    log.Printf("Blockchain deployed: %s\n", chain.ID)
+    log.Printf("RPC Endpoint: %s\n", chain.RPCEndpoint)
+
+    return nil
+}
+```
+
+## Project Structure
+
+When building with LuxSDK, we recommend this project structure:
+
+```
+my-blockchain/
+├── cmd/
+│   └── node/           # Node binary
+│       └── main.go
+├── vm/                 # VM implementation
+│   ├── vm.go          # Main VM logic
+│   ├── state.go       # State management
+│   └── block.go       # Block handling
+├── genesis/           # Genesis configuration
+│   └── genesis.json
+├── tests/             # Test files
+│   └── vm_test.go
+├── scripts/           # Helper scripts
+│   └── deploy.sh
+├── go.mod
+└── README.md
+```
+
+## Environment Setup
+
+### For Development
+
+```bash
+# Set up development environment
+export LUX_NETWORK_ID=local
+export LUX_API_ENDPOINT=http://localhost:9650
+export LUX_LOG_LEVEL=debug
+
+# Run with debug logging
+go run cmd/node/main.go --log-level=debug
+```
+
+### For Testing
+
+```bash
+# Run unit tests
+go test ./vm/...
+
+# Run integration tests
+go test -tags=integration ./tests/...
+
+# Run with race detection
+go test -race ./...
+```
+
+### For Production
+
+```bash
+# Build optimized binary
+go build -o luxnode -ldflags="-s -w" cmd/node/main.go
+
+# Run with production settings
+./luxnode \
+  --network-id=1 \
+  --api-endpoint=https://api.mainnet.lux.network \
+  --log-level=info
+```
+
+## Common Patterns
+
+### Error Handling
+
+```go
+// Always handle errors explicitly
+chain, err := luxSDK.CreateAndDeployBlockchain(ctx, params)
+if err != nil {
+    return fmt.Errorf("failed to deploy blockchain: %w", err)
+}
+```
+
+### Context Usage
+
+```go
+// Use context for cancellation and timeouts
+ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+defer cancel()
+
+network, err := luxSDK.LaunchNetwork(ctx, "local", 5)
+if err != nil {
+    return err
+}
+```
+
+### Logging
+
+```go
+// Use the Lux logger
+import luxlog "github.com/luxfi/log"
+
+logger := luxlog.New("myapp")
+logger.Info("Starting application")
+logger.Debug("Debug information", zap.String("key", "value"))
+```
+
+## Next Steps
+
+Now that you have the basics:
+
+1. **[Build a VM](./vm-development)** - Create your first blockchain VM
+2. **[BFT Integration](./bft-consensus)** - Add Byzantine Fault Tolerance
+3. **[Deploy to Network](./deployment)** - Deploy to testnet or mainnet
+4. **[API Reference](./api-reference)** - Explore the complete API
+
+## Getting Help
+
+- **Documentation**: Full documentation at [docs.lux.network](https://docs.lux.network)
+- **GitHub**: [github.com/luxfi/sdk](https://github.com/luxfi/sdk)
+- **Discord**: Join our developer community
+- **Examples**: Check the `/examples` directory for complete examples
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: `go: module github.com/luxfi/sdk not found`
+- **Solution**: Ensure you're using the correct import path and have run `go mod download`
+
+**Issue**: Network fails to start
+- **Solution**: Check that ports 9650-9660 are available and not in use
+
+**Issue**: Transaction fails with "insufficient funds"
+- **Solution**: Ensure your account is funded on the network you're using
+
+For more troubleshooting help, see our [troubleshooting guide](./troubleshooting) or ask in Discord.

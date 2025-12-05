@@ -1,0 +1,885 @@
+---
+title: Examples and Patterns
+description: Real-world examples and best practices for building with LuxSDK
+---
+
+# Examples and Patterns
+
+This guide provides real-world examples and best practices for building blockchain applications with LuxSDK.
+
+## Complete Examples
+
+### 1. Token VM - Simple Asset Management
+
+A complete VM implementation for managing fungible tokens.
+
+```go
+// tokenvm/vm.go
+package tokenvm
+
+import (
+    "context"
+    "fmt"
+    "sync"
+
+    "github.com/luxfi/log"
+    "github.com/luxfi/sdk"
+    "github.com/luxfi/sdk/consensus/bft"
+    "github.com/luxfi/sdk/database"
+    "github.com/luxfi/sdk/ids"
+)
+
+// TokenVM implements a simple token management VM
+type TokenVM struct {
+    sdk.BaseVM
+
+    // State management
+    balances     map[ids.ShortID]uint64
+    totalSupply  uint64
+    mu           sync.RWMutex
+
+    // Components
+    db           database.Database
+    consensus    *bft.BFTEngine
+    logger       log.Logger
+}
+
+// Initialize the VM
+func (vm *TokenVM) Initialize(
+    ctx context.Context,
+    config *sdk.Config,
+    db database.Database,
+    genesis []byte,
+) error {
+    vm.db = db
+    vm.logger = config.Logger
+    vm.balances = make(map[ids.ShortID]uint64)
+
+    // Parse genesis
+    if genesis != nil {
+        if err := vm.parseGenesis(genesis); err != nil {
+            return fmt.Errorf("failed to parse genesis: %w", err)
+        }
+    }
+
+    // Initialize BFT consensus
+    bftConfig := bft.DefaultBFTConfig()
+    bftConfig.ProposalTimeout = 5 * time.Second
+
+    vm.consensus = bft.NewEngine(bftConfig, vm)
+
+    return nil
+}
+
+// Transfer tokens between accounts
+func (vm *TokenVM) Transfer(from, to ids.ShortID, amount uint64) error {
+    vm.mu.Lock()
+    defer vm.mu.Unlock()
+
+    // Check balance
+    balance, exists := vm.balances[from]
+    if !exists || balance < amount {
+        return fmt.Errorf("insufficient balance")
+    }
+
+    // Update balances
+    vm.balances[from] -= amount
+    vm.balances[to] += amount
+
+    // Persist to database
+    if err := vm.persistBalance(from); err != nil {
+        return err
+    }
+    if err := vm.persistBalance(to); err != nil {
+        return err
+    }
+
+    vm.logger.Info("Transfer completed",
+        zap.String("from", from.String()),
+        zap.String("to", to.String()),
+        zap.Uint64("amount", amount),
+    )
+
+    return nil
+}
+
+// Mint new tokens (only for authorized accounts)
+func (vm *TokenVM) Mint(to ids.ShortID, amount uint64) error {
+    vm.mu.Lock()
+    defer vm.mu.Unlock()
+
+    vm.balances[to] += amount
+    vm.totalSupply += amount
+
+    return vm.persistBalance(to)
+}
+
+// GetBalance returns account balance
+func (vm *TokenVM) GetBalance(addr ids.ShortID) uint64 {
+    vm.mu.RLock()
+    defer vm.mu.RUnlock()
+
+    return vm.balances[addr]
+}
+
+// persistBalance saves balance to database
+func (vm *TokenVM) persistBalance(addr ids.ShortID) error {
+    key := append([]byte("balance:"), addr[:]...)
+    value := binary.BigEndian.AppendUint64(nil, vm.balances[addr])
+    return vm.db.Put(key, value)
+}
+```
+
+### 2. NFT Marketplace VM
+
+A VM for minting and trading NFTs.
+
+```go
+// nftvm/vm.go
+package nftvm
+
+type NFT struct {
+    ID       ids.ID
+    Owner    ids.ShortID
+    Metadata string
+    Price    uint64 // 0 means not for sale
+}
+
+type NFTVM struct {
+    sdk.BaseVM
+
+    nfts        map[ids.ID]*NFT
+    userNFTs    map[ids.ShortID][]ids.ID
+    nextTokenID uint64
+    mu          sync.RWMutex
+}
+
+// Mint creates a new NFT
+func (vm *NFTVM) Mint(owner ids.ShortID, metadata string) (*NFT, error) {
+    vm.mu.Lock()
+    defer vm.mu.Unlock()
+
+    // Generate NFT ID
+    nftID := ids.GenerateID(vm.nextTokenID)
+    vm.nextTokenID++
+
+    // Create NFT
+    nft := &NFT{
+        ID:       nftID,
+        Owner:    owner,
+        Metadata: metadata,
+        Price:    0,
+    }
+
+    // Store NFT
+    vm.nfts[nftID] = nft
+    vm.userNFTs[owner] = append(vm.userNFTs[owner], nftID)
+
+    // Persist to database
+    if err := vm.persistNFT(nft); err != nil {
+        return nil, err
+    }
+
+    return nft, nil
+}
+
+// ListForSale lists an NFT for sale
+func (vm *NFTVM) ListForSale(nftID ids.ID, price uint64) error {
+    vm.mu.Lock()
+    defer vm.mu.Unlock()
+
+    nft, exists := vm.nfts[nftID]
+    if !exists {
+        return fmt.Errorf("NFT not found")
+    }
+
+    nft.Price = price
+    return vm.persistNFT(nft)
+}
+
+// Buy purchases a listed NFT
+func (vm *NFTVM) Buy(buyer ids.ShortID, nftID ids.ID) error {
+    vm.mu.Lock()
+    defer vm.mu.Unlock()
+
+    nft, exists := vm.nfts[nftID]
+    if !exists {
+        return fmt.Errorf("NFT not found")
+    }
+
+    if nft.Price == 0 {
+        return fmt.Errorf("NFT not for sale")
+    }
+
+    // Transfer ownership
+    oldOwner := nft.Owner
+    nft.Owner = buyer
+    nft.Price = 0
+
+    // Update user collections
+    vm.removeFromUserNFTs(oldOwner, nftID)
+    vm.userNFTs[buyer] = append(vm.userNFTs[buyer], nftID)
+
+    return vm.persistNFT(nft)
+}
+```
+
+### 3. DeFi Lending Protocol
+
+A decentralized lending protocol implementation.
+
+```go
+// defi/lending.go
+package defi
+
+type LendingPool struct {
+    sdk.BaseVM
+
+    // Pool state
+    totalDeposited  map[string]uint64 // asset -> amount
+    totalBorrowed   map[string]uint64
+    interestRates   map[string]uint64 // basis points
+
+    // User positions
+    deposits        map[ids.ShortID]map[string]uint64
+    borrows         map[ids.ShortID]map[string]uint64
+    collateral      map[ids.ShortID]map[string]uint64
+}
+
+// Deposit assets into the pool
+func (lp *LendingPool) Deposit(
+    user ids.ShortID,
+    asset string,
+    amount uint64,
+) error {
+    lp.mu.Lock()
+    defer lp.mu.Unlock()
+
+    // Update pool state
+    lp.totalDeposited[asset] += amount
+
+    // Update user position
+    if lp.deposits[user] == nil {
+        lp.deposits[user] = make(map[string]uint64)
+    }
+    lp.deposits[user][asset] += amount
+
+    // Calculate and distribute interest
+    lp.updateInterestRates(asset)
+
+    return nil
+}
+
+// Borrow assets from the pool
+func (lp *LendingPool) Borrow(
+    user ids.ShortID,
+    asset string,
+    amount uint64,
+) error {
+    lp.mu.Lock()
+    defer lp.mu.Unlock()
+
+    // Check collateral ratio
+    if !lp.hasEnoughCollateral(user, asset, amount) {
+        return fmt.Errorf("insufficient collateral")
+    }
+
+    // Check pool liquidity
+    available := lp.totalDeposited[asset] - lp.totalBorrowed[asset]
+    if available < amount {
+        return fmt.Errorf("insufficient liquidity")
+    }
+
+    // Update state
+    lp.totalBorrowed[asset] += amount
+    if lp.borrows[user] == nil {
+        lp.borrows[user] = make(map[string]uint64)
+    }
+    lp.borrows[user][asset] += amount
+
+    // Update interest rates
+    lp.updateInterestRates(asset)
+
+    return nil
+}
+
+// Liquidate under-collateralized position
+func (lp *LendingPool) Liquidate(
+    liquidator ids.ShortID,
+    borrower ids.ShortID,
+    asset string,
+) error {
+    lp.mu.Lock()
+    defer lp.mu.Unlock()
+
+    // Check if position is liquidatable
+    healthFactor := lp.calculateHealthFactor(borrower)
+    if healthFactor >= 1.0 {
+        return fmt.Errorf("position is healthy")
+    }
+
+    // Calculate liquidation amount (with bonus)
+    debt := lp.borrows[borrower][asset]
+    liquidationAmount := debt * 110 / 100 // 10% bonus
+
+    // Transfer collateral to liquidator
+    // ... liquidation logic ...
+
+    return nil
+}
+
+// Calculate health factor for a user
+func (lp *LendingPool) calculateHealthFactor(user ids.ShortID) float64 {
+    totalCollateralValue := lp.getTotalCollateralValue(user)
+    totalBorrowValue := lp.getTotalBorrowValue(user)
+
+    if totalBorrowValue == 0 {
+        return math.MaxFloat64
+    }
+
+    return totalCollateralValue * 0.75 / totalBorrowValue // 75% LTV
+}
+```
+
+## Design Patterns
+
+### 1. State Management Pattern
+
+Efficient state management with caching and persistence.
+
+```go
+type StateManager struct {
+    db    database.Database
+    cache *lru.Cache
+    mu    sync.RWMutex
+}
+
+func NewStateManager(db database.Database) (*StateManager, error) {
+    cache, err := lru.New(10000)
+    if err != nil {
+        return nil, err
+    }
+
+    return &StateManager{
+        db:    db,
+        cache: cache,
+    }, nil
+}
+
+func (sm *StateManager) Get(key []byte) ([]byte, error) {
+    // Check cache first
+    if val, ok := sm.cache.Get(string(key)); ok {
+        return val.([]byte), nil
+    }
+
+    // Load from database
+    value, err := sm.db.Get(key)
+    if err != nil {
+        return nil, err
+    }
+
+    // Update cache
+    sm.cache.Add(string(key), value)
+
+    return value, nil
+}
+
+func (sm *StateManager) Set(key, value []byte) error {
+    // Update database
+    if err := sm.db.Put(key, value); err != nil {
+        return err
+    }
+
+    // Update cache
+    sm.cache.Add(string(key), value)
+
+    return nil
+}
+```
+
+### 2. Event Emission Pattern
+
+Emit events for external monitoring and indexing.
+
+```go
+type EventEmitter struct {
+    subscribers map[EventType][]chan Event
+    mu          sync.RWMutex
+}
+
+func (e *EventEmitter) Emit(eventType EventType, data interface{}) {
+    e.mu.RLock()
+    defer e.mu.RUnlock()
+
+    event := Event{
+        Type:      eventType,
+        Timestamp: time.Now(),
+        Data:      data,
+    }
+
+    for _, ch := range e.subscribers[eventType] {
+        select {
+        case ch <- event:
+        default:
+            // Channel full, skip
+        }
+    }
+}
+
+func (e *EventEmitter) Subscribe(eventType EventType) <-chan Event {
+    e.mu.Lock()
+    defer e.mu.Unlock()
+
+    ch := make(chan Event, 100)
+    e.subscribers[eventType] = append(e.subscribers[eventType], ch)
+
+    return ch
+}
+
+// Usage in VM
+func (vm *MyVM) Transfer(from, to ids.ShortID, amount uint64) error {
+    // ... transfer logic ...
+
+    // Emit transfer event
+    vm.emitter.Emit(EventTransfer, TransferData{
+        From:   from,
+        To:     to,
+        Amount: amount,
+    })
+
+    return nil
+}
+```
+
+### 3. Batch Processing Pattern
+
+Process multiple operations efficiently.
+
+```go
+type BatchProcessor struct {
+    batch      []Operation
+    batchSize  int
+    flushTimer *time.Timer
+    mu         sync.Mutex
+}
+
+func (bp *BatchProcessor) Add(op Operation) error {
+    bp.mu.Lock()
+    defer bp.mu.Unlock()
+
+    bp.batch = append(bp.batch, op)
+
+    if len(bp.batch) >= bp.batchSize {
+        return bp.flush()
+    }
+
+    // Reset flush timer
+    if bp.flushTimer != nil {
+        bp.flushTimer.Stop()
+    }
+    bp.flushTimer = time.AfterFunc(100*time.Millisecond, func() {
+        bp.mu.Lock()
+        defer bp.mu.Unlock()
+        bp.flush()
+    })
+
+    return nil
+}
+
+func (bp *BatchProcessor) flush() error {
+    if len(bp.batch) == 0 {
+        return nil
+    }
+
+    // Process batch
+    dbBatch := bp.db.NewBatch()
+    for _, op := range bp.batch {
+        if err := op.Apply(dbBatch); err != nil {
+            return err
+        }
+    }
+
+    if err := dbBatch.Write(); err != nil {
+        return err
+    }
+
+    // Clear batch
+    bp.batch = bp.batch[:0]
+
+    return nil
+}
+```
+
+### 4. Upgradeable VM Pattern
+
+Support for VM upgrades without breaking state.
+
+```go
+type UpgradeableVM struct {
+    sdk.BaseVM
+
+    version      uint32
+    migrations   map[uint32]MigrationFunc
+    stateMutator StateMutator
+}
+
+type MigrationFunc func(oldState []byte) ([]byte, error)
+
+func (vm *UpgradeableVM) Initialize(
+    ctx context.Context,
+    config *sdk.Config,
+    db database.Database,
+    genesis []byte,
+) error {
+    // Load current version
+    version, err := vm.loadVersion()
+    if err != nil {
+        return err
+    }
+
+    // Run migrations if needed
+    if version < vm.version {
+        if err := vm.runMigrations(version, vm.version); err != nil {
+            return fmt.Errorf("migration failed: %w", err)
+        }
+    }
+
+    return vm.BaseVM.Initialize(ctx, config, db, genesis)
+}
+
+func (vm *UpgradeableVM) runMigrations(from, to uint32) error {
+    for v := from + 1; v <= to; v++ {
+        migration, exists := vm.migrations[v]
+        if !exists {
+            continue
+        }
+
+        vm.logger.Info("Running migration", zap.Uint32("version", v))
+
+        // Load state
+        state, err := vm.loadState()
+        if err != nil {
+            return err
+        }
+
+        // Run migration
+        newState, err := migration(state)
+        if err != nil {
+            return fmt.Errorf("migration %d failed: %w", v, err)
+        }
+
+        // Save new state
+        if err := vm.saveState(newState); err != nil {
+            return err
+        }
+
+        // Update version
+        if err := vm.saveVersion(v); err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+```
+
+## Testing Patterns
+
+### 1. Integration Test Suite
+
+```go
+type VMTestSuite struct {
+    suite.Suite
+    vm      *MyVM
+    db      database.Database
+    network *network.Network
+}
+
+func (s *VMTestSuite) SetupTest() {
+    // Create test database
+    s.db = memdb.New()
+
+    // Create VM
+    s.vm = &MyVM{}
+    config := &sdk.Config{
+        Logger: log.NewTestLogger(s.T()),
+    }
+
+    err := s.vm.Initialize(context.Background(), config, s.db, nil)
+    s.Require().NoError(err)
+
+    // Create test network
+    s.network = createTestNetwork(s.T(), 4)
+}
+
+func (s *VMTestSuite) TestTransfer() {
+    alice := ids.GenerateShortID()
+    bob := ids.GenerateShortID()
+
+    // Setup initial balance
+    s.vm.Mint(alice, 1000)
+
+    // Transfer
+    err := s.vm.Transfer(alice, bob, 100)
+    s.NoError(err)
+
+    // Verify balances
+    s.Equal(uint64(900), s.vm.GetBalance(alice))
+    s.Equal(uint64(100), s.vm.GetBalance(bob))
+}
+
+func TestVMSuite(t *testing.T) {
+    suite.Run(t, new(VMTestSuite))
+}
+```
+
+### 2. Benchmark Tests
+
+```go
+func BenchmarkTransfer(b *testing.B) {
+    vm := setupBenchmarkVM(b)
+    alice := ids.GenerateShortID()
+    bob := ids.GenerateShortID()
+
+    // Setup
+    vm.Mint(alice, uint64(b.N*100))
+
+    b.ResetTimer()
+
+    // Run benchmark
+    for i := 0; i < b.N; i++ {
+        err := vm.Transfer(alice, bob, 100)
+        if err != nil {
+            b.Fatal(err)
+        }
+    }
+
+    b.ReportMetric(float64(b.N)/b.Elapsed().Seconds(), "tx/s")
+}
+```
+
+### 3. Fuzzing Tests
+
+```go
+func FuzzTransfer(f *testing.F) {
+    vm := setupFuzzVM(f)
+
+    // Add seed corpus
+    f.Add(uint64(100), uint64(50))
+    f.Add(uint64(1000), uint64(999))
+    f.Add(uint64(0), uint64(0))
+
+    f.Fuzz(func(t *testing.T, balance uint64, transfer uint64) {
+        alice := ids.GenerateShortID()
+        bob := ids.GenerateShortID()
+
+        // Setup
+        vm.Mint(alice, balance)
+
+        // Try transfer
+        err := vm.Transfer(alice, bob, transfer)
+
+        // Verify invariants
+        if transfer > balance {
+            assert.Error(t, err)
+        } else {
+            assert.NoError(t, err)
+            assert.Equal(t, balance-transfer, vm.GetBalance(alice))
+            assert.Equal(t, transfer, vm.GetBalance(bob))
+        }
+
+        // Total supply should remain constant
+        assert.Equal(t, balance,
+            vm.GetBalance(alice)+vm.GetBalance(bob))
+    })
+}
+```
+
+## Production Deployment Patterns
+
+### 1. Multi-Network Deployment
+
+```go
+// Deploy to multiple networks
+func deployToNetworks(sdk *sdk.LuxSDK, networks []string) error {
+    for _, network := range networks {
+        params := &sdk.BlockchainParams{
+            Name:    "MyChain",
+            Network: getNetwork(network),
+        }
+
+        chain, err := sdk.CreateAndDeployBlockchain(
+            context.Background(),
+            params,
+        )
+        if err != nil {
+            return fmt.Errorf("failed to deploy to %s: %w",
+                network, err)
+        }
+
+        log.Printf("Deployed to %s: %s", network, chain.ID)
+    }
+
+    return nil
+}
+```
+
+### 2. Rolling Upgrade Pattern
+
+```go
+// Perform rolling upgrade of nodes
+func performRollingUpgrade(nodes []*Node, newVersion string) error {
+    for i, node := range nodes {
+        log.Printf("Upgrading node %d/%d", i+1, len(nodes))
+
+        // Drain connections
+        if err := node.Drain(); err != nil {
+            return err
+        }
+
+        // Stop old version
+        if err := node.Stop(); err != nil {
+            return err
+        }
+
+        // Deploy new version
+        if err := node.Deploy(newVersion); err != nil {
+            return err
+        }
+
+        // Start new version
+        if err := node.Start(); err != nil {
+            return err
+        }
+
+        // Health check
+        if err := waitForHealthy(node); err != nil {
+            return err
+        }
+
+        // Wait before next node
+        time.Sleep(30 * time.Second)
+    }
+
+    return nil
+}
+```
+
+### 3. Monitoring and Alerting
+
+```go
+// Setup monitoring for production VM
+func setupMonitoring(vm *MyVM) {
+    // Metrics
+    go func() {
+        ticker := time.NewTicker(10 * time.Second)
+        defer ticker.Stop()
+
+        for range ticker.C {
+            metrics.RecordGauge("vm.height", vm.Height())
+            metrics.RecordGauge("vm.tx_pool_size", vm.TxPoolSize())
+            metrics.RecordGauge("vm.state_size", vm.StateSize())
+        }
+    }()
+
+    // Health checks
+    go func() {
+        ticker := time.NewTicker(30 * time.Second)
+        defer ticker.Stop()
+
+        for range ticker.C {
+            if err := vm.HealthCheck(); err != nil {
+                alert.Send("VM health check failed", err)
+            }
+        }
+    }()
+
+    // Performance monitoring
+    go func() {
+        ticker := time.NewTicker(1 * time.Minute)
+        defer ticker.Stop()
+
+        for range ticker.C {
+            tps := vm.GetTPS()
+            if tps < 100 {
+                alert.Send("Low TPS", fmt.Sprintf("TPS: %d", tps))
+            }
+        }
+    }()
+}
+```
+
+## Security Best Practices
+
+### 1. Input Validation
+
+```go
+func (vm *MyVM) validateTransaction(tx *Transaction) error {
+    // Check transaction size
+    if len(tx.Bytes()) > MaxTxSize {
+        return fmt.Errorf("transaction too large")
+    }
+
+    // Validate addresses
+    if !isValidAddress(tx.From) || !isValidAddress(tx.To) {
+        return fmt.Errorf("invalid address")
+    }
+
+    // Check amount bounds
+    if tx.Amount == 0 || tx.Amount > MaxTransferAmount {
+        return fmt.Errorf("invalid amount")
+    }
+
+    // Verify signature
+    if !tx.VerifySignature() {
+        return fmt.Errorf("invalid signature")
+    }
+
+    // Check nonce
+    expectedNonce := vm.GetNonce(tx.From)
+    if tx.Nonce != expectedNonce {
+        return fmt.Errorf("invalid nonce")
+    }
+
+    return nil
+}
+```
+
+### 2. Rate Limiting
+
+```go
+type RateLimiter struct {
+    limits map[ids.ShortID]*rate.Limiter
+    mu     sync.RWMutex
+}
+
+func (rl *RateLimiter) Allow(addr ids.ShortID) bool {
+    rl.mu.Lock()
+    defer rl.mu.Unlock()
+
+    limiter, exists := rl.limits[addr]
+    if !exists {
+        // Create new limiter: 10 requests per second
+        limiter = rate.NewLimiter(10, 20)
+        rl.limits[addr] = limiter
+    }
+
+    return limiter.Allow()
+}
+
+// Use in VM
+func (vm *MyVM) SubmitTransaction(tx *Transaction) error {
+    if !vm.rateLimiter.Allow(tx.From) {
+        return fmt.Errorf("rate limit exceeded")
+    }
+
+    return vm.processTransaction(tx)
+}
+```
+
+## Next Steps
+
+- [Advanced Topics](./advanced) - Advanced SDK features
+- [Performance Tuning](./performance) - Optimize your blockchain
+- [Security Guide](./security) - Security best practices
+- [Deployment Guide](./deployment) - Production deployment
