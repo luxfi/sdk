@@ -400,10 +400,22 @@ func (vm *VM) Initialize(
 	fxs []interface{},
 	appSender interface{},
 ) error {
-	// Type assert the parameters
-	typedChainCtx, ok := chainCtx.(*nodeConsensus.Context)
-	if !ok {
-		return fmt.Errorf("chainCtx is not *nodeConsensus.Context")
+	// Write debug info to stderr for troubleshooting
+	fmt.Fprintf(os.Stderr, "[EVM] Initialize called with chainCtx type: %T\n", chainCtx)
+
+	// Type assert the parameters - try both the alias and the direct type
+	var typedChainCtx *nodeConsensus.Context
+	if ctxPtr, ok := chainCtx.(*nodeConsensus.Context); ok {
+		fmt.Fprintf(os.Stderr, "[EVM] Successfully asserted as *nodeConsensus.Context\n")
+		typedChainCtx = ctxPtr
+	} else if ctxPtr, ok := chainCtx.(*consensuscontext.Context); ok {
+		// Accept the direct type from rpcchainvm.VMServer
+		fmt.Fprintf(os.Stderr, "[EVM] Successfully asserted as *consensuscontext.Context, converting\n")
+		typedChainCtx = (*nodeConsensus.Context)(ctxPtr)
+	} else {
+		errMsg := fmt.Sprintf("chainCtx is not *nodeConsensus.Context or *consensuscontext.Context, got: %T", chainCtx)
+		fmt.Fprintf(os.Stderr, "[EVM] ERROR: %s\n", errMsg)
+		return fmt.Errorf("%s", errMsg)
 	}
 	typedDBManager, ok := dbManager.(database.Database)
 	if !ok {

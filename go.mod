@@ -27,6 +27,7 @@ require (
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/math v1.0.0
 	github.com/luxfi/metric v1.4.5
+	github.com/luxfi/node v1.21.5
 	github.com/luxfi/p2p v1.0.2
 	github.com/luxfi/timer v1.0.1
 	github.com/luxfi/trace v0.1.2
@@ -164,5 +165,3 @@ require (
 
 // Force tablewriter version for compatibility
 replace github.com/olekukonko/tablewriter => github.com/olekukonko/tablewriter v0.0.5
-
-// Use local packages instead of node dependencies
