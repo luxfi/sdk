@@ -8,12 +8,17 @@ import (
 	"github.com/luxfi/ids"
 )
 
-// ConvertSubnetToL1Validator contains validator information for subnet-to-L1 conversion
-type ConvertSubnetToL1Validator struct {
+// ConvertToL1Validator contains validator information for network-to-L1 conversion
+// As above, so below - validators are unified across all network layers
+type ConvertToL1Validator struct {
 	NodeID ids.NodeID `serialize:"true" json:"nodeID"`
 	Weight uint64     `serialize:"true" json:"weight"`
 	Signer Signer     `serialize:"true" json:"signer"`
 }
+
+// Backward compatibility aliases
+type ConvertNetToL1Validator = ConvertToL1Validator
+type ConvertSubnetToL1Validator = ConvertToL1Validator
 
 // Signer contains the BLS signature for a validator
 type Signer struct {
