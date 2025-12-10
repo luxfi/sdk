@@ -8,8 +8,9 @@ import (
 	"github.com/luxfi/ids"
 )
 
-type ElasticSubnetConfig struct {
-	SubnetID                 ids.ID
+type ElasticNetConfig struct {
+	NetID                    ids.ID
+	SubnetID                 ids.ID // Deprecated: use NetID
 	AssetID                  ids.ID
 	InitialSupply            uint64
 	MaxSupply                uint64
@@ -24,3 +25,6 @@ type ElasticSubnetConfig struct {
 	MaxValidatorWeightFactor byte
 	UptimeRequirement        uint32
 }
+
+// ElasticSubnetConfig is an alias for backward compatibility
+type ElasticSubnetConfig = ElasticNetConfig
