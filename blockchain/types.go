@@ -30,6 +30,7 @@ type Validator = GenesisValidator
 // As above, so below - unified across all network layers (primary, L1, L2, L3)
 type Net struct {
 	NetID               interface{} // ids.ID
+	SubnetID            interface{} // Deprecated: use NetID
 	BlockchainID        interface{} // ids.ID
 	OwnerAddress        *common.Address
 	RPC                 string
