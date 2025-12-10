@@ -131,7 +131,7 @@ func (app *Lux) GetConfigPath() string {
 }
 
 func (app *Lux) GetElasticSubnetConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.ElasticSubnetConfigFileName)
+	return filepath.Join(app.GetSubnetDir(), subnetName, constants.ElasticNetConfigFileName)
 }
 
 func (app *Lux) GetKeyDir() string {
