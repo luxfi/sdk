@@ -14,7 +14,8 @@ type TokenInfo struct {
 }
 
 type NetworkData struct {
-	SubnetID                   ids.ID
+	NetID                      ids.ID
+	SubnetID                   ids.ID // Deprecated: use NetID
 	BlockchainID               ids.ID
 	RPCVersion                 int
 	RPCEndpoints               []string // RPC endpoints for the network
@@ -33,8 +34,9 @@ type MultisigTxInfo struct {
 type PermissionlessValidators struct {
 	TxID ids.ID
 }
-type ElasticSubnet struct {
-	SubnetID    ids.ID
+type ElasticNet struct {
+	NetID       ids.ID
+	SubnetID    ids.ID // Deprecated: use NetID
 	AssetID     ids.ID
 	PChainTXID  ids.ID
 	TokenName   string
@@ -43,21 +45,27 @@ type ElasticSubnet struct {
 	Txs         map[string]ids.ID
 }
 
+// ElasticSubnet is an alias for backward compatibility
+type ElasticSubnet = ElasticNet
+
 type Sidecar struct {
 	Name            string
 	VM              VMType
 	VMID            string
 	VMVersion       string
 	RPCVersion      int
-	Subnet          string
-	SubnetID        ids.ID
+	Net             string
+	Subnet          string // Deprecated: use Net
+	NetID           ids.ID
+	SubnetID        ids.ID // Deprecated: use NetID
 	BlockchainID    ids.ID
 	TokenName       string
 	TokenSymbol     string
 	ChainID         string
 	Version         string
 	Networks        map[string]NetworkData
-	ElasticSubnet   map[string]ElasticSubnet
+	ElasticNet      map[string]ElasticNet
+	ElasticSubnet   map[string]ElasticNet // Deprecated: use ElasticNet
 	ImportedFromLPM bool
 	ImportedVMID    string
 
@@ -138,9 +146,10 @@ func (sc Sidecar) GetVMID() (string, error) {
 	return vmid, nil
 }
 
-// MigrationTx represents a subnet to L1 migration transaction
+// MigrationTx represents a net to L1 migration transaction
 type MigrationTx struct {
-	SubnetID            ids.ID `json:"subnetId"`
+	NetID               ids.ID `json:"netId"`
+	SubnetID            ids.ID `json:"subnetId,omitempty"` // Deprecated: use NetID
 	BlockchainID        ids.ID `json:"blockchainId"`
 	ValidatorManagement string `json:"validatorManagement"`
 	RentalPlan          string `json:"rentalPlan"`
