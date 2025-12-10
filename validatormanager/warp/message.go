@@ -15,31 +15,59 @@ type PChainOwner struct {
 	Addresses []ids.ShortID `serialize:"true" json:"addresses"`
 }
 
-// SubnetToL1ConversionValidatorData contains validator information for subnet-to-L1 conversion
-type SubnetToL1ConversionValidatorData struct {
+// L1ConversionValidatorData contains validator information for network-to-L1 conversion
+// As above, so below - validators are unified across all network layers
+type L1ConversionValidatorData struct {
 	NodeID       []byte                 `serialize:"true" json:"nodeID"`
 	BLSPublicKey [bls.PublicKeyLen]byte `serialize:"true" json:"blsPublicKey"`
 	Weight       uint64                 `serialize:"true" json:"weight"`
 }
 
-// SubnetToL1ConversionData contains the full subnet-to-L1 conversion payload
-type SubnetToL1ConversionData struct {
-	SubnetID       ids.ID                              `serialize:"true" json:"subnetID"`
-	ManagerChainID ids.ID                              `serialize:"true" json:"managerChainID"`
-	ManagerAddress []byte                              `serialize:"true" json:"managerAddress"`
-	Validators     []SubnetToL1ConversionValidatorData `serialize:"true" json:"validators"`
+// Backward compatibility aliases
+type NetToL1ConversionValidatorData = L1ConversionValidatorData
+type SubnetToL1ConversionValidatorData = L1ConversionValidatorData
+
+// L1ConversionData contains the full network-to-L1 conversion payload
+type L1ConversionData struct {
+	NetID          ids.ID                      `serialize:"true" json:"netID"`
+	SubnetID       ids.ID                      `serialize:"true" json:"subnetID"` // Deprecated: use NetID
+	ManagerChainID ids.ID                      `serialize:"true" json:"managerChainID"`
+	ManagerAddress []byte                      `serialize:"true" json:"managerAddress"`
+	Validators     []L1ConversionValidatorData `serialize:"true" json:"validators"`
 }
 
-// SubnetToL1ConversionID calculates the ID for a subnet-to-L1 conversion
-func SubnetToL1ConversionID(data SubnetToL1ConversionData) (ids.ID, error) {
+// Backward compatibility aliases
+type NetToL1ConversionData = L1ConversionData
+type SubnetToL1ConversionData = L1ConversionData
+
+// L1ConversionID calculates the ID for a network-to-L1 conversion
+func L1ConversionID(data L1ConversionData) (ids.ID, error) {
 	// TODO: Implement proper hashing of the conversion data
 	return ids.GenerateTestID(), nil
 }
 
-// NewSubnetToL1Conversion creates a new subnet-to-L1 conversion message
-func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
+// Backward compatibility aliases
+func NetToL1ConversionID(data NetToL1ConversionData) (ids.ID, error) {
+	return L1ConversionID(data)
+}
+
+func SubnetToL1ConversionID(data SubnetToL1ConversionData) (ids.ID, error) {
+	return L1ConversionID(data)
+}
+
+// NewL1Conversion creates a new network-to-L1 conversion message
+func NewL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
 	// TODO: Implement proper message creation
 	return &warpPayload.AddressedCall{}, nil
+}
+
+// Backward compatibility aliases
+func NewNetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
+	return NewL1Conversion(conversionID)
+}
+
+func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
+	return NewL1Conversion(conversionID)
 }
 
 // L1ValidatorRegistration represents an L1 validator registration
