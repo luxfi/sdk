@@ -16,23 +16,31 @@ type GenesisAccount struct {
 	Storage map[common.Hash]common.Hash `json:"storage,omitempty"`
 }
 
-// Validator defines a validator in the genesis
-type Validator struct {
+// GenesisValidator defines a validator in the genesis
+// Uses simplified fields for genesis configuration
+type GenesisValidator struct {
 	NodeID string `json:"nodeId"`
 	Weight uint64 `json:"weight"`
 }
 
-// Subnet represents a blockchain subnet with validator management capabilities
-type Subnet struct {
-	SubnetID            interface{} // ids.ID
+// Validator is an alias for backward compatibility
+type Validator = GenesisValidator
+
+// Net represents a blockchain network with validator management capabilities
+// As above, so below - unified across all network layers (primary, L1, L2, L3)
+type Net struct {
+	NetID               interface{} // ids.ID
 	BlockchainID        interface{} // ids.ID
 	OwnerAddress        *common.Address
 	RPC                 string
-	BootstrapValidators []interface{} // []sdktxs.Validator
+	BootstrapValidators []interface{} // []Validator
 }
 
+// Subnet is an alias for backward compatibility
+type Subnet = Net
+
 // InitializeProofOfAuthority initializes a PoA validator manager
-func (s *Subnet) InitializeProofOfAuthority(
+func (s *Net) InitializeProofOfAuthority(
 	log interface{}, // logging.Logger
 	network interface{}, // models.Network
 	privateKey string,
@@ -46,7 +54,7 @@ func (s *Subnet) InitializeProofOfAuthority(
 }
 
 // InitializeProofOfStake initializes a PoS validator manager
-func (s *Subnet) InitializeProofOfStake(
+func (s *Net) InitializeProofOfStake(
 	log interface{}, // logging.Logger
 	network interface{}, // models.Network
 	privateKey string,

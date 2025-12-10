@@ -21,7 +21,7 @@ const (
 	SuffixSeparator             = "_"
 	SidecarFileName             = "sidecar.json"
 	GenesisFileName             = "genesis.json"
-	ElasticSubnetConfigFileName = "elastic_subnet_config.json"
+	ElasticNetConfigFileName = "elastic_net_config.json"
 	NodeConfigJSONFile          = "node-config.json"
 	SidecarSuffix               = SuffixSeparator + SidecarFileName
 	GenesisSuffix               = SuffixSeparator + GenesisFileName
@@ -156,7 +156,8 @@ const (
 	EVMInstallDir   = "evm"
 
 	// Directories
-	SubnetDir        = "subnets"
+	NetDir           = "nets"
+	SubnetDir        = NetDir // Alias for backward compatibility
 	ReposDir         = "repos"
 	SnapshotsDirName = "snapshots"
 	CustomVMDir      = "customvms"
@@ -166,7 +167,7 @@ const (
 	LPMPluginDir     = "lpm-plugins"
 
 	// Cloud node paths
-	CloudNodeSubnetEvmBinaryPath = "/home/ubuntu/.cli/bin/subnet-evm"
+	CloudNodeEVMBinaryPath = "/home/ubuntu/.cli/bin/evm"
 
 	// File names
 	UpgradeBytesFileName         = "upgrade.json"
@@ -292,8 +293,10 @@ const (
 	VMDir          = "vms"
 	ChainConfigDir = "chains"
 
-	SubnetType                 = "subnet type"
-	SubnetConfigFileName       = "subnet.json"
+	NetType                    = "net type"
+	SubnetType                 = NetType // Alias for backward compatibility
+	NetConfigFileName          = "net.json"
+	SubnetConfigFileName       = NetConfigFileName // Alias for backward compatibility
 	ChainConfigFileName        = "chain.json"
 	PerNodeChainConfigFileName = "per-node-chain.json"
 
@@ -312,7 +315,7 @@ const (
 	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
 	CLILatestDependencyURL       = CLIMinVersionURL // Alias for backward compatibility
-	SubnetEVMRepoName            = EVMRepoName      // Alias for backward compatibility
+	SubnetEVMRepoName            = EVMRepoName // Alias for backward compatibility
 
 	YesLabel = "Yes"
 	NoLabel  = "No"
@@ -323,7 +326,8 @@ const (
 	// C-Chain Warp Registry Addresses
 	MainnetCChainWarpRegistryAddress = "0x0000000000000000000000000000000000000006"
 
-	SubnetIDLabel     = "SubnetID: "
+	NetIDLabel        = "NetID: "
+	SubnetIDLabel     = NetIDLabel // Alias for backward compatibility
 	BlockchainIDLabel = "BlockchainID: "
 
 	Network        = "network"
