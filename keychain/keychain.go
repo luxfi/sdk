@@ -47,10 +47,9 @@ func (la *ledgerAdapter) Disconnect() error {
 }
 
 type Keychain struct {
-	keychain.Keychain // Embedded base keychain
-	ledgerKc          *keychain.LedgerKeychain // Ledger-specific keychain
-	network           network.Network
-	Ledger            *Ledger
+	ledgerKc keychain.Keychain // Ledger keychain (interface from ledger-lux-go)
+	network  network.Network
+	Ledger   *Ledger
 }
 
 // LedgerParams is an input to NewKeyChain if a new keychain is to be created using Ledger
@@ -122,9 +121,9 @@ func NewKeychain(
 	}
 	// Create empty keychain struct
 	// File-based key loading not yet implemented
+	// ledgerKc remains nil for non-ledger keychains
 	kc := Keychain{
-		Keychain: keychain.Keychain{},
-		network:  network,
+		network: network,
 	}
 	return &kc, nil
 }

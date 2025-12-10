@@ -326,25 +326,21 @@ func (w *wallet) IssueTx(
 	return w.backend.AcceptTx(ctx, tx)
 }
 
-// TODO: Upstream this function into exchangevm client.
+// awaitTxAccepted polls for transaction acceptance.
+//
+// TODO: Implement proper GetTxStatus for X-Chain.
+// This requires an exchangevm client method to query transaction status.
+// For now, this stub assumes immediate acceptance.
 func awaitTxAccepted(
 	ctx stdcontext.Context,
 	txID ids.ID,
 	freq time.Duration,
 ) error {
-	ticker := time.NewTicker(freq)
-	defer ticker.Stop()
-
-	for {
-		// TODO: Implement proper GetTxStatus
-		_ = txID
-		// For now, assume transaction is accepted
-		return nil
-
-		select {
-		case <-ticker.C:
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
+	// Stub: X-Chain tx status polling not yet implemented.
+	// When implemented, this should poll the exchangevm client GetTxStatus
+	// until the transaction is accepted or the context is cancelled.
+	_ = ctx
+	_ = txID
+	_ = freq
+	return nil
 }

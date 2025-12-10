@@ -23,12 +23,12 @@ var ErrUndefinedTx = fmt.Errorf("tx is undefined")
 
 const (
 	Undefined TxKind = iota
-	PChainRemoveSubnetValidatorTx
-	PChainAddSubnetValidatorTx
+	PChainRemoveNetValidatorTx
+	PChainAddNetValidatorTx
 	PChainCreateChainTx
-	PChainTransformSubnetTx
+	PChainTransformNetTx
 	PChainAddPermissionlessValidatorTx
-	PChainTransferSubnetOwnershipTx
+	PChainTransferNetOwnershipTx
 )
 
 type Multisig struct {
@@ -159,7 +159,7 @@ func (ms *Multisig) GetAuthSigners() ([]ids.ShortID, error) {
 	if ms.Undefined() {
 		return nil, ErrUndefinedTx
 	}
-	controlKeys, _, err := ms.GetSubnetOwners()
+	controlKeys, _, err := ms.GetNetOwners()
 	if err != nil {
 		return nil, err
 	}
@@ -204,17 +204,17 @@ func (ms *Multisig) GetTxKind() (TxKind, error) {
 	unsignedTx := ms.PChainTx.Unsigned
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveNetValidatorTx:
-		return PChainRemoveSubnetValidatorTx, nil
+		return PChainRemoveNetValidatorTx, nil
 	case *txs.AddNetValidatorTx:
-		return PChainAddSubnetValidatorTx, nil
+		return PChainAddNetValidatorTx, nil
 	case *txs.CreateChainTx:
 		return PChainCreateChainTx, nil
 	case *txs.TransformNetTx:
-		return PChainTransformSubnetTx, nil
+		return PChainTransformNetTx, nil
 	case *txs.AddPermissionlessValidatorTx:
 		return PChainAddPermissionlessValidatorTx, nil
 	case *txs.TransferNetOwnershipTx:
-		return PChainTransferSubnetOwnershipTx, nil
+		return PChainTransferNetOwnershipTx, nil
 	default:
 		return Undefined, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
@@ -263,46 +263,46 @@ func (ms *Multisig) GetNetwork() (network.LegacyNetwork, error) {
 }
 
 // GetBlockchainID is deprecated - the transaction types in luxfi/node/vms/platformvm/txs
-// do not have BlockchainID fields. These transactions work with subnet/network IDs.
-// Use GetSubnetID() instead for subnet-related operations.
+// do not have BlockchainID fields. These transactions work with net IDs.
+// Use GetNetID() instead for net-related operations.
 //
 // TODO: Remove this function or implement it correctly if blockchain IDs are needed
 // func (ms *Multisig) GetBlockchainID() (ids.ID, error) {
 // 	return ids.Empty, fmt.Errorf("GetBlockchainID is not implemented - transaction types do not have BlockchainID fields")
 // }
 
-// GetSubnetID gets subnet id associated to tx
-func (ms *Multisig) GetSubnetID() (ids.ID, error) {
+// GetNetID gets net id associated to tx
+func (ms *Multisig) GetNetID() (ids.ID, error) {
 	if ms.Undefined() {
 		return ids.Empty, ErrUndefinedTx
 	}
 	unsignedTx := ms.PChainTx.Unsigned
-	var subnetID ids.ID
+	var netID ids.ID
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveNetValidatorTx:
-		subnetID = unsignedTx.Net
+		netID = unsignedTx.Net
 	case *txs.AddNetValidatorTx:
-		subnetID = unsignedTx.NetValidator.Net
+		netID = unsignedTx.NetValidator.Net
 	case *txs.CreateChainTx:
-		subnetID = unsignedTx.NetID
+		netID = unsignedTx.NetID
 	case *txs.TransformNetTx:
-		subnetID = unsignedTx.Net
+		netID = unsignedTx.Net
 	case *txs.AddPermissionlessValidatorTx:
-		subnetID = unsignedTx.Net
+		netID = unsignedTx.Net
 	case *txs.TransferNetOwnershipTx:
-		subnetID = unsignedTx.Net
+		netID = unsignedTx.Net
 	default:
 		return ids.Empty, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
-	return subnetID, nil
+	return netID, nil
 }
 
-func (ms *Multisig) GetSubnetOwners() ([]ids.ShortID, uint32, error) {
+func (ms *Multisig) GetNetOwners() ([]ids.ShortID, uint32, error) {
 	if ms.Undefined() {
 		return nil, 0, ErrUndefinedTx
 	}
 	if ms.controlKeys == nil {
-		subnetID, err := ms.GetSubnetID()
+		netID, err := ms.GetNetID()
 		if err != nil {
 			return nil, 0, err
 		}
@@ -311,7 +311,7 @@ func (ms *Multisig) GetSubnetOwners() ([]ids.ShortID, uint32, error) {
 		if err != nil {
 			return nil, 0, err
 		}
-		controlKeys, threshold, err := GetOwners(network, subnetID)
+		controlKeys, threshold, err := GetOwners(network, netID)
 		if err != nil {
 			return nil, 0, err
 		}
