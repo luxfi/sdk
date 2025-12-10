@@ -225,11 +225,13 @@ func GetBlockchainTx(endpoint string, blockchainID ids.ID) (interface{}, error) 
 	return createChainTx, nil
 }
 
-// GetKeyNames returns a list of key names
+// GetKeyNames returns a list of key names from the given directory.
+//
+// WARNING: This is a stub implementation that returns an empty list.
+// TODO: Implement proper directory listing to enumerate key files.
+// Expected behavior: scan keyDir for .key files and extract key names.
 func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
-	// This is a stub implementation
-	// In a real implementation, this would list all key files in the directory
-	// TODO: Implement directory listing and key name extraction
+	_ = keyDir // stub: directory not yet scanned
 	keys := []string{}
 	if includeEwoq {
 		keys = append(keys, "ewoq")
@@ -237,13 +239,15 @@ func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
 	return keys, nil
 }
 
-// GetBlockchainIDFromAlias gets a blockchain ID from its alias on the network
+// GetBlockchainIDFromAlias gets a blockchain ID from its alias on the network.
+//
+// WARNING: This is a stub implementation that returns a hardcoded dummy ID for "C".
+// TODO: Implement proper API call to info.getBlockchainID on the endpoint.
+// Expected behavior: query endpoint/ext/info with method getBlockchainID(alias).
 func GetBlockchainIDFromAlias(endpoint string, alias string) (ids.ID, error) {
-	// This is a stub implementation
-	// In a real implementation, this would make an API call to resolve the alias
-	// For now, return a special case for C-Chain
+	_ = endpoint // stub: API call not yet implemented
 	if alias == "C" {
-		// Return a dummy C-Chain ID
+		// Hardcoded dummy C-Chain ID for stub purposes
 		return ids.FromString("2q9e4r6Mu3U68nU1fYjgbR6JvwrRx36CohpAX5UQxse55eZ9Tc")
 	}
 	return ids.Empty, fmt.Errorf("GetBlockchainIDFromAlias not yet implemented for alias: %s", alias)
