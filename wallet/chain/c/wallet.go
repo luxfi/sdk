@@ -195,7 +195,11 @@ func (w *wallet) baseFee(options []common.Option) (*big.Int, error) {
 	return big.NewInt(25000000000), nil // 25 gwei
 }
 
-// TODO: Upstream this function into geth.
+// awaitTxAccepted polls for transaction acceptance.
+//
+// TODO: Implement proper GetAtomicTxStatus for C-Chain.
+// This requires querying the EVM for atomic transaction status.
+// For now, this stub assumes immediate acceptance.
 func awaitTxAccepted(
 	c client.Client,
 	ctx context.Context,
@@ -203,21 +207,12 @@ func awaitTxAccepted(
 	freq time.Duration,
 	options ...rpc.Option,
 ) error {
-	ticker := time.NewTicker(freq)
-	defer ticker.Stop()
-
-	for {
-		// GetAtomicTxStatus not yet implemented for C-Chain.
-		// Would require querying EVM for atomic transaction status.
-		_ = c
-		_ = txID
-		// For now, assume transaction is accepted
-		return nil
-
-		select {
-		case <-ticker.C:
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
+	// Stub: C-Chain atomic tx status polling not yet implemented.
+	// When implemented, this should poll c.GetAtomicTxStatus(ctx, txID)
+	// until the transaction is accepted or the context is cancelled.
+	_ = c
+	_ = txID
+	_ = freq
+	_ = options
+	return nil
 }
