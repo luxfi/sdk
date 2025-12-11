@@ -299,7 +299,7 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 // to set as the owner of the PoA manager
 func SetupPoA(
 	log luxlog.Logger,
-	subnet blockchainSDK.Subnet,
+	subnet blockchainSDK.Net,
 	network models.Network,
 	privateKey string,
 	aggregatorLogger luxlog.Logger,
@@ -325,7 +325,7 @@ func SetupPoA(
 // to set as the owner of the PoA manager
 func SetupPoS(
 	log luxlog.Logger,
-	subnet blockchainSDK.Subnet,
+	subnet blockchainSDK.Net,
 	network models.Network,
 	privateKey string,
 	aggregatorLogger luxlog.Logger,
