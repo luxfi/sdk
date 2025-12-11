@@ -29,15 +29,12 @@ type Validator = GenesisValidator
 // Net represents a blockchain network with validator management capabilities
 // As above, so below - unified across all network layers (primary, L1, L2, L3)
 type Net struct {
-	NetID               interface{} // ids.ID
+	NetID               interface{} `json:"netId"` // ids.ID
 	BlockchainID        interface{} // ids.ID
 	OwnerAddress        *common.Address
 	RPC                 string
 	BootstrapValidators []interface{} // []Validator
 }
-
-// Subnet is an alias for backward compatibility
-type Subnet = Net
 
 // InitializeProofOfAuthority initializes a PoA validator manager
 func (s *Net) InitializeProofOfAuthority(
