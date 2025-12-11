@@ -7,7 +7,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.17.7
 	github.com/luxfi/geth v1.16.41
-	github.com/luxfi/ids v1.1.3
+	github.com/luxfi/ids v1.2.0
 	github.com/luxfi/log v1.1.24
 	github.com/luxfi/warp v1.16.26
 	github.com/manifoldco/promptui v0.9.0
