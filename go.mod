@@ -5,10 +5,10 @@ go 1.25.5
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
-	github.com/luxfi/crypto v1.17.7
-	github.com/luxfi/geth v1.16.41
+	github.com/luxfi/crypto v1.17.15
+	github.com/luxfi/geth v1.16.46
 	github.com/luxfi/ids v1.2.2
-	github.com/luxfi/log v1.1.24
+	github.com/luxfi/log v1.2.0
 	github.com/luxfi/warp v1.16.26
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
@@ -34,15 +34,15 @@ require (
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/bft v0.1.0
-	github.com/luxfi/consensus v1.22.2
-	github.com/luxfi/database v1.2.7
-	github.com/luxfi/evm v0.8.8
-	github.com/luxfi/genesis v1.2.4
+	github.com/luxfi/consensus v1.22.5
+	github.com/luxfi/database v1.2.10
+	github.com/luxfi/evm v0.8.10
+	github.com/luxfi/genesis v1.2.10
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v1.0.0
 	github.com/luxfi/netrunner v1.14.4
-	github.com/luxfi/node v1.21.5
+	github.com/luxfi/node v1.22.2
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1
