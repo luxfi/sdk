@@ -47,7 +47,7 @@ func (la *ledgerAdapter) Disconnect() error {
 }
 
 type Keychain struct {
-	ledgerKc *keychain.LedgerKeychain // Ledger keychain from ledger-lux-go
+	ledgerKc keychain.Keychain // Ledger keychain from ledger-lux-go
 	network  network.Network
 	Ledger   *Ledger
 }
