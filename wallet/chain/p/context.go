@@ -34,6 +34,15 @@ func NewContextFromClients(
 		return nil, err
 	}
 
+	// Fetch the P-Chain blockchain ID from the node
+	// This is critical for transaction verification - the node validates that
+	// tx.BlockchainID matches ctx.ChainID in its consensus context
+	pChainID, err := infoClient.GetBlockchainID(ctx, "P")
+	if err != nil {
+		// Fall back to default PlatformChainID if the API call fails
+		pChainID = constants.PlatformChainID
+	}
+
 	luxAssetID, err := chainClient.GetStakingAssetID(ctx, constants.PrimaryNetworkID)
 	if err != nil {
 		return nil, err
@@ -51,6 +60,7 @@ func NewContextFromClients(
 
 	return &builder.Context{
 		NetworkID:         networkID,
+		ChainID:           pChainID,
 		XAssetID:          luxAssetID,
 		ComplexityWeights: dynamicFeeConfig.Weights,
 		GasPrice:          gasPriceMultiplier * gasPrice,
