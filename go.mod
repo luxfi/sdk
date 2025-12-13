@@ -38,6 +38,8 @@ require (
 	github.com/luxfi/database v1.2.10
 	github.com/luxfi/evm v0.8.10
 	github.com/luxfi/genesis v1.2.10
+	github.com/luxfi/go-bip32 v1.0.1
+	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v1.0.0
@@ -171,6 +173,8 @@ require (
 )
 
 require (
+	github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e // indirect
+	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6 // indirect
 	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
