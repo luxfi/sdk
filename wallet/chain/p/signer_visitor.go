@@ -56,7 +56,7 @@ func (s *signerVisitor) BaseTx(tx *txs.BaseTx) error {
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) AddValidatorTx(tx *txs.AddValidatorTx) error {
@@ -64,7 +64,7 @@ func (s *signerVisitor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) AddNetValidatorTx(tx *txs.AddNetValidatorTx) error {
@@ -77,7 +77,7 @@ func (s *signerVisitor) AddNetValidatorTx(tx *txs.AddNetValidatorTx) error {
 		return err
 	}
 	txSigners = append(txSigners, subnetAuthSigners)
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
@@ -85,7 +85,7 @@ func (s *signerVisitor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) CreateChainTx(tx *txs.CreateChainTx) error {
@@ -98,7 +98,7 @@ func (s *signerVisitor) CreateChainTx(tx *txs.CreateChainTx) error {
 		return err
 	}
 	txSigners = append(txSigners, subnetAuthSigners)
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) CreateNetTx(tx *txs.CreateNetTx) error {
@@ -106,7 +106,7 @@ func (s *signerVisitor) CreateNetTx(tx *txs.CreateNetTx) error {
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) ImportTx(tx *txs.ImportTx) error {
@@ -119,7 +119,7 @@ func (s *signerVisitor) ImportTx(tx *txs.ImportTx) error {
 		return err
 	}
 	txSigners = append(txSigners, txImportSigners...)
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) ExportTx(tx *txs.ExportTx) error {
@@ -127,7 +127,7 @@ func (s *signerVisitor) ExportTx(tx *txs.ExportTx) error {
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 func (s *signerVisitor) RemoveNetValidatorTx(tx *txs.RemoveNetValidatorTx) error {
@@ -358,7 +358,7 @@ func (s *signerVisitor) DisableL1ValidatorTx(tx *txs.DisableL1ValidatorTx) error
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 // IncreaseL1ValidatorBalanceTx signs an IncreaseL1ValidatorBalanceTx
@@ -367,7 +367,7 @@ func (s *signerVisitor) IncreaseL1ValidatorBalanceTx(tx *txs.IncreaseL1Validator
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 // RegisterL1ValidatorTx signs a RegisterL1ValidatorTx
@@ -376,7 +376,7 @@ func (s *signerVisitor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx) err
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 // SetL1ValidatorWeightTx signs a SetL1ValidatorWeightTx
@@ -385,7 +385,7 @@ func (s *signerVisitor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeightTx) e
 	if err != nil {
 		return err
 	}
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
 
 // ConvertNetToL1Tx signs a ConvertNetToL1Tx
@@ -399,5 +399,5 @@ func (s *signerVisitor) ConvertNetToL1Tx(tx *txs.ConvertNetToL1Tx) error {
 		return err
 	}
 	txSigners = append(txSigners, subnetAuthSigners)
-	return sign(s.tx, false, txSigners)
+	return sign(s.tx, true, txSigners)
 }
