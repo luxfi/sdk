@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/sdk/wallet/primary/common"
 )

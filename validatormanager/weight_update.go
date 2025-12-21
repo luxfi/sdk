@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxdconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	warpPayload "github.com/luxfi/warp/payload"
 	"github.com/luxfi/sdk/application"
@@ -155,7 +155,7 @@ func InitValidatorWeightChange(
 		if nodeWarpMsg != nil {
 			unsignedMessage, err = warp.NewUnsignedMessage(
 				nodeWarpMsg.NetworkID,
-				nodeWarpMsg.SourceChainID[:],
+				nodeWarpMsg.SourceChainID,
 				nodeWarpMsg.Payload,
 			)
 			if err != nil {
@@ -318,7 +318,7 @@ func GetL1ValidatorWeightMessage(
 		}
 		unsignedMessage, err = warp.NewUnsignedMessage(
 			network.ID(),
-			blockchainID[:],
+			blockchainID,
 			addressedCall.Bytes(),
 		)
 		if err != nil {
@@ -372,7 +372,7 @@ func GetPChainL1ValidatorWeightMessage(
 	}
 	unsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID(),
-		luxdconstants.PlatformChainID[:],
+		luxdconstants.PlatformChainID,
 		addressedCall.Bytes(),
 	)
 	if err != nil {
@@ -407,7 +407,7 @@ func GetL1ValidatorWeightMessageFromTx(
 					// Convert node warp message to standalone
 					standaloneMsg, err := warp.NewUnsignedMessage(
 						msg.NetworkID,
-						msg.SourceChainID[:],
+						msg.SourceChainID,
 						msg.Payload,
 					)
 					if err != nil {
@@ -469,7 +469,7 @@ func SearchForL1ValidatorWeightMessage(
 						// Convert node warp message to standalone
 						standaloneMsg, err := warp.NewUnsignedMessage(
 							msg.NetworkID,
-							msg.SourceChainID[:],
+							msg.SourceChainID,
 							msg.Payload,
 						)
 						if err != nil {

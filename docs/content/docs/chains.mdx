@@ -1,0 +1,117 @@
+---
+title: Chain Operations
+description: P-Chain, X-Chain, and C-Chain operations
+---
+
+# Chain Operations
+
+Complete operations for all Lux chains including Platform (P-Chain), Exchange (X-Chain), and Contract (C-Chain).
+
+## P-Chain (Platform Chain)
+
+The Platform Chain handles staking, validation, and subnet management.
+
+### Staking
+
+```go
+// Stake on primary network
+txID, err := chainManager.Stake(ctx,
+    big.NewInt(2000), // 2000 LUX
+    14 * 24 * time.Hour, // 14 days
+)
+
+// Delegate to validator
+txID, err := chainManager.Delegate(ctx, nodeID, amount, duration)
+```
+
+### Subnet Management
+
+```go
+// Create subnet
+subnetID, err := chainManager.P().CreateSubnet(ctx, &CreateSubnetParams{
+    ControlKeys: []ids.ShortID{key1, key2},
+    Threshold:   2,
+})
+
+// Add subnet validator
+txID, err := chainManager.P().AddSubnetValidator(ctx, &AddSubnetValidatorParams{
+    NodeID:   nodeID,
+    SubnetID: subnetID,
+    Weight:   100,
+})
+```
+
+## X-Chain (Exchange Chain)
+
+The Exchange Chain handles asset creation, trading, and transfers.
+
+### Asset Management
+
+```go
+// Create asset
+assetID, err := chainManager.CreateAsset(ctx, "MyToken", "MTK", totalSupply)
+
+// Send asset
+txID, err := chainManager.SendAsset(ctx, assetID, amount, recipient)
+```
+
+### NFT Operations
+
+```go
+// Create NFT collection
+nftID, err := chainManager.X().CreateNFT(ctx, &CreateNFTParams{
+    Name:   "LuxNFT",
+    Symbol: "LNFT",
+})
+
+// Trade assets
+orderID, err := chainManager.TradeAssets(ctx,
+    sellAsset, sellAmount,
+    buyAsset, buyAmount,
+)
+```
+
+## C-Chain (Contract Chain)
+
+The Contract Chain is EVM-compatible for smart contract deployment.
+
+### Contract Deployment
+
+```go
+// Deploy contract
+address, txHash, err := chainManager.C().DeployContract(ctx, &DeployContractParams{
+    Bytecode: contractBytecode,
+    GasLimit: 300000,
+})
+```
+
+### Contract Interaction
+
+```go
+// Call contract
+result, err := chainManager.C().CallContract(ctx, &CallContractParams{
+    To:   contractAddress,
+    Data: callData,
+})
+```
+
+### DeFi Operations
+
+```go
+// DeFi operations
+txHash, err := chainManager.C().SwapTokens(ctx, &SwapParams{
+    TokenIn:  USDC,
+    TokenOut: LUX,
+    Amount:   amount,
+})
+```
+
+## Getting Balances
+
+```go
+// Get balances across all chains
+balances, err := chainManager.GetBalance(ctx, address)
+for chain, balance := range balances.Chains {
+    fmt.Printf("%s-Chain: %s\n", chain, balance)
+}
+```

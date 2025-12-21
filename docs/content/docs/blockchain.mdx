@@ -1,0 +1,140 @@
+---
+title: Blockchain Building
+description: Build L1, L2, and L3 blockchains on Lux
+---
+
+# Blockchain Building
+
+Build any type of blockchain on Lux with support for sovereign L1 chains, rollups, and app-specific chains.
+
+## Create L1 (Sovereign Chain)
+
+```go
+// Create L1 (Sovereign Chain)
+l1, err := sdk.CreateL1(ctx, "my-l1", &blockchain.L1Params{
+    VMType:      blockchain.VMTypeEVM,
+    Genesis:     genesisBytes,
+    ChainConfig: configBytes,
+})
+```
+
+## Create L2 (Based Rollup)
+
+```go
+// Create L2 (Based Rollup)
+l2, err := sdk.CreateL2(ctx, "my-rollup", &blockchain.L2Params{
+    VMType:          blockchain.VMTypeEVM,
+    SequencerType:   "centralized",
+    DALayer:         "celestia",
+    SettlementChain: l1.ID,
+})
+```
+
+## Create L3 (App Chain)
+
+```go
+// Create L3 (App Chain)
+l3, err := sdk.CreateL3(ctx, "my-game", &blockchain.L3Params{
+    VMType:  blockchain.VMTypeWASM,
+    L2Chain: l2.ID,
+    AppType: "gaming",
+})
+```
+
+## Multi-Chain DApp Development
+
+```go
+// Build cross-chain DApp
+dapp := sdk.NewDApp(luxSDK)
+
+// Deploy contracts across multiple chains
+contracts := dapp.DeployContracts(ctx, map[string][]byte{
+    "c-chain": dexContract,
+    "nft-chain": nftContract,
+    "game-chain": gameContract,
+})
+
+// Set up cross-chain messaging
+bridge := dapp.CreateBridge(ctx, []string{"c-chain", "nft-chain", "game-chain"})
+
+// Monitor all chains
+monitor := dapp.Monitor(ctx)
+for event := range monitor.Events() {
+    log.Printf("Chain: %s, Event: %s", event.Chain, event.Type)
+}
+```
+
+## Custom VM Development
+
+```go
+// Create custom VM
+vm, err := sdk.CreateVM(ctx, &vm.CreateParams{
+    Name:     "MyVM",
+    Type:     vm.TypeWASM,
+    Runtime:  wasmRuntime,
+    Handlers: handlers,
+})
+
+// Register VM
+err = sdk.RegisterVM(ctx, vm)
+```
+
+## WASM Support
+
+```go
+// Deploy WASM contract
+wasmID, err := sdk.DeployWASM(ctx, &WASMDeployParams{
+    Code:     wasmBytes,
+    InitArgs: initParams,
+})
+
+// Execute WASM function
+result, err := sdk.ExecuteWASM(ctx, wasmID, "transfer", args)
+```
+
+## Production Deployment
+
+### Mainnet Launch
+
+```go
+// Production deployment with monitoring
+prod := sdk.NewProductionDeployment(luxSDK)
+
+// Deploy mainnet with 21 validators
+mainnet, err := prod.LaunchMainnet(ctx, &MainnetParams{
+    Validators:      21,
+    InitialStake:    big.NewInt(2000),
+    ConsensusParams: mainnetConsensus,
+})
+
+// Set up production monitoring
+prod.EnableMonitoring(ctx, &MonitoringParams{
+    MetricsEndpoint: "prometheus:9090",
+    LogAggregation:  "elasticsearch:9200",
+    AlertManager:    "alertmanager:9093",
+})
+
+// Enable automatic backups
+prod.EnableBackups(ctx, &BackupParams{
+    Interval: 6 * time.Hour,
+    Storage:  "s3://lux-backups",
+    Retention: 30 * 24 * time.Hour,
+})
+```
+
+## Custom Consensus Parameters
+
+```go
+// Fine-tune consensus for your use case
+consensus := &ConsensusParams{
+    SnowballParameters: SnowballParameters{
+        K:               21,  // Sample size
+        AlphaPreference: 15,  // Quorum size
+        AlphaConfidence: 19,  // Confidence threshold
+        Beta:            8,   // Decision rounds
+    },
+    OptimalProcessing: 9630 * time.Millisecond,
+}
+
+network, err := luxSDK.LaunchNetworkWithConsensus(ctx, consensus)
+```
