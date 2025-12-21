@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/node/utils/crypto/bls"
 	"github.com/luxfi/node/utils/math"
 	"github.com/luxfi/math/set"
@@ -84,22 +84,22 @@ type Builder interface {
 		options ...common.Option,
 	) (*txs.AddValidatorTx, error)
 
-	// NewAddNetValidatorTx creates a new validator of a subnet.
+	// NewAddChainValidatorTx creates a new validator of a chain.
 	//
 	// - [vdr] specifies all the details of the validation period such as the
-	//   startTime, endTime, sampling weight, nodeID, and netID.
-	NewAddNetValidatorTx(
-		vdr *txs.NetValidator,
+	//   startTime, endTime, sampling weight, nodeID, and chainID.
+	NewAddChainValidatorTx(
+		vdr *txs.ChainValidator,
 		options ...common.Option,
-	) (*txs.AddNetValidatorTx, error)
+	) (*txs.AddChainValidatorTx, error)
 
-	// NewRemoveNetValidatorTx removes [nodeID] from the validator
-	// set [netID].
-	NewRemoveNetValidatorTx(
+	// NewRemoveChainValidatorTx removes [nodeID] from the validator
+	// set [chainID].
+	NewRemoveChainValidatorTx(
 		nodeID ids.NodeID,
-		netID ids.ID,
+		chainID ids.ID,
 		options ...common.Option,
-	) (*txs.RemoveNetValidatorTx, error)
+	) (*txs.RemoveChainValidatorTx, error)
 
 	// NewAddDelegatorTx creates a new delegator to a validator on the primary
 	// network.
@@ -114,56 +114,56 @@ type Builder interface {
 		options ...common.Option,
 	) (*txs.AddDelegatorTx, error)
 
-	// NewCreateChainTx creates a new chain in the named subnet.
+	// NewCreateChainTx creates a new blockchain in the named chain.
 	//
-	// - [netID] specifies the net to launch the chain in.
-	// - [genesis] specifies the initial state of the new chain.
-	// - [vmID] specifies the vm that the new chain will run.
+	// - [chainID] specifies the chain to launch the blockchain in.
+	// - [genesis] specifies the initial state of the new blockchain.
+	// - [vmID] specifies the vm that the new blockchain will run.
 	// - [fxIDs] specifies all the feature extensions that the vm should be
 	//   running with.
-	// - [chainName] specifies a human readable name for the chain.
+	// - [blockchainName] specifies a human readable name for the blockchain.
 	NewCreateChainTx(
-		netID ids.ID,
+		chainID ids.ID,
 		genesis []byte,
 		vmID ids.ID,
 		fxIDs []ids.ID,
-		chainName string,
+		blockchainName string,
 		options ...common.Option,
 	) (*txs.CreateChainTx, error)
 
-	// NewCreateNetTx creates a new net with the specified owner.
+	// NewCreateSubnetTx creates a new subnet with the specified owner.
 	//
 	// - [owner] specifies who has the ability to create new chains and add new
-	//   validators to the subnet.
-	NewCreateNetTx(
+	//   validators to the chain.
+	NewCreateSubnetTx(
 		owner *secp256k1fx.OutputOwners,
 		options ...common.Option,
-	) (*txs.CreateNetTx, error)
+	) (*txs.CreateSubnetTx, error)
 
-	// NewTransferNetOwnershipTx changes the owner of the named subnet.
+	// NewTransferChainOwnershipTx changes the owner of the named chain.
 	//
-	// - [subnetID] specifies the subnet to be modified
-	// - [owner] specifies who has the ability to create new chains and add new
-	//   validators to the subnet.
-	NewTransferNetOwnershipTx(
-		subnetID ids.ID,
+	// - [chainID] specifies the chain to be modified
+	// - [owner] specifies who has the ability to create new blockchains and add new
+	//   validators to the chain.
+	NewTransferChainOwnershipTx(
+		chainID ids.ID,
 		owner *secp256k1fx.OutputOwners,
 		options ...common.Option,
-	) (*txs.TransferNetOwnershipTx, error)
+	) (*txs.TransferChainOwnershipTx, error)
 
-	// NewConvertNetToL1Tx converts the subnet to a Permissionless L1.
+	// NewConvertChainToL1Tx converts the chain to a Permissionless L1.
 	//
-	// - [subnetID] specifies the subnet to be converted
-	// - [chainID] specifies which chain the manager is deployed on
+	// - [chainID] specifies the chain to be converted
+	// - [managerChainID] specifies which chain the manager is deployed on
 	// - [address] specifies the address of the manager
 	// - [validators] specifies the initial L1 validators of the L1
-	NewConvertNetToL1Tx(
-		subnetID ids.ID,
+	NewConvertChainToL1Tx(
 		chainID ids.ID,
+		managerChainID ids.ID,
 		address []byte,
-		validators []*txs.ConvertNetToL1Validator,
+		validators []*txs.ConvertChainToL1Validator,
 		options ...common.Option,
-	) (*txs.ConvertNetToL1Tx, error)
+	) (*txs.ConvertChainToL1Tx, error)
 
 	// NewRegisterL1ValidatorTx adds a validator to an L1.
 	//
@@ -233,13 +233,13 @@ type Builder interface {
 	) (*txs.ExportTx, error)
 
 	// Removed in regenesis
-	// // NewTransformNetTx creates a transform net transaction that attempts
-	// // to convert the provided [netID] from a permissioned net to a
-	// // permissionless subnet. This transaction will convert
+	// // NewTransformChainTx creates a transform chain transaction that attempts
+	// // to convert the provided [chainID] from a permissioned chain to a
+	// // permissionless chain. This transaction will convert
 	// // [maxSupply] - [initialSupply] of [assetID] to staking rewards.
 	// //
-	// // - [netID] specifies the net to transform.
-	// // - [assetID] specifies the asset to use to reward stakers on the subnet.
+	// // - [chainID] specifies the chain to transform.
+	// // - [assetID] specifies the asset to use to reward stakers on the chain.
 	// // - [initialSupply] is the amount of [assetID] that will be in circulation
 	// //   after this transaction is accepted.
 	// // - [maxSupply] is the maximum total amount of [assetID] that should ever
@@ -263,8 +263,8 @@ type Builder interface {
 	// //   disables delegation.
 	// // - [uptimeRequirement] is the minimum percentage a validator must be
 	// //   online and responsive to receive a reward.
-	NewTransformNetTx(
-		netID ids.ID,
+	NewTransformChainTx(
+		chainID ids.ID,
 		assetID ids.ID,
 		initialSupply uint64,
 		maxSupply uint64,
@@ -279,13 +279,13 @@ type Builder interface {
 		maxValidatorWeightFactor byte,
 		uptimeRequirement uint32,
 		options ...common.Option,
-	) (*txs.TransformNetTx, error)
+	) (*txs.TransformChainTx, error)
 
 	// NewAddPermissionlessValidatorTx creates a new validator of the specified
-	// subnet.
+	// chain.
 	//
 	// - [vdr] specifies all the details of the validation period such as the
-	//   netID, startTime, endTime, stake weight, and nodeID.
+	//   chainID, startTime, endTime, stake weight, and nodeID.
 	// - [signer] if the netID is the primary network, this is the BLS key
 	//   for this validator. Otherwise, this value should be the empty signer.
 	// - [assetID] specifies the asset to stake.
@@ -297,7 +297,7 @@ type Builder interface {
 	//   will take from delegation rewards. If 1,000,000 is provided, 100% of
 	//   the delegation reward will be sent to the validator's [rewardsOwner].
 	NewAddPermissionlessValidatorTx(
-		vdr *txs.NetValidator,
+		vdr *txs.ChainValidator,
 		signer signer.Signer,
 		assetID ids.ID,
 		validationRewardsOwner *secp256k1fx.OutputOwners,
@@ -307,15 +307,15 @@ type Builder interface {
 	) (*txs.AddPermissionlessValidatorTx, error)
 
 	// NewAddPermissionlessDelegatorTx creates a new delegator of the specified
-	// net on the specified nodeID.
+	// chain on the specified nodeID.
 	//
 	// - [vdr] specifies all the details of the delegation period such as the
-	//   netID, startTime, endTime, stake weight, and nodeID.
+	//   chainID, startTime, endTime, stake weight, and nodeID.
 	// - [assetID] specifies the asset to stake.
 	// - [rewardsOwner] specifies the owner of all the rewards this delegator
 	//   earns during its delegation period.
 	NewAddPermissionlessDelegatorTx(
-		vdr *txs.NetValidator,
+		vdr *txs.ChainValidator,
 		assetID ids.ID,
 		rewardsOwner *secp256k1fx.OutputOwners,
 		options ...common.Option,
@@ -482,35 +482,35 @@ func (b *builder) NewAddValidatorTx(
 }
 
 // Removed in regenesis
-func (b *builder) NewAddNetValidatorTx(
-	vdr *txs.NetValidator,
+func (b *builder) NewAddChainValidatorTx(
+	vdr *txs.ChainValidator,
 	options ...common.Option,
-) (*txs.AddNetValidatorTx, error) {
+) (*txs.AddChainValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
 //
 	ops := common.NewOptions(options)
-	subnetAuth, err := b.authorize(vdr.Net, ops)
+	chainAuth, err := b.authorize(vdr.Chain, ops)
 	if err != nil {
 		return nil, err
 	}
-//
+
 	memo := ops.Memo()
 	memoComplexity := gas.Dimensions{
 		gas.Bandwidth: uint64(len(memo)),
 	}
-	authComplexity, err := fee.AuthComplexity(subnetAuth)
+	authComplexity, err := fee.AuthComplexity(chainAuth)
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicAddNetValidatorTxComplexities.Add(
+	complexity, err := fee.IntrinsicAddChainValidatorTxComplexities.Add(
 		&memoComplexity,
 		&authComplexity,
 	)
 	if err != nil {
 		return nil, err
 	}
-//
+
 	inputs, outputs, _, err := b.spend(
 		toBurn,
 		toStake,
@@ -522,8 +522,8 @@ func (b *builder) NewAddNetValidatorTx(
 	if err != nil {
 		return nil, err
 	}
-//
-	tx := &txs.AddNetValidatorTx{
+
+	tx := &txs.AddChainValidatorTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: b.getBlockchainID(),
@@ -531,43 +531,43 @@ func (b *builder) NewAddNetValidatorTx(
 			Outs:         outputs,
 			Memo:         memo,
 		}},
-		NetValidator: *vdr,
-		NetAuth:   subnetAuth,
+		ChainValidator: *vdr,
+		ChainAuth:      chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
 
 // Removed in regenesis
-func (b *builder) NewRemoveNetValidatorTx(
+func (b *builder) NewRemoveChainValidatorTx(
 	nodeID ids.NodeID,
-	netID ids.ID,
+	chainID ids.ID,
 	options ...common.Option,
-) (*txs.RemoveNetValidatorTx, error) {
+) (*txs.RemoveChainValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
 //
 	ops := common.NewOptions(options)
-	subnetAuth, err := b.authorize(netID, ops)
+	chainAuth, err := b.authorize(chainID, ops)
 	if err != nil {
 		return nil, err
 	}
-//
+
 	memo := ops.Memo()
 	memoComplexity := gas.Dimensions{
 		gas.Bandwidth: uint64(len(memo)),
 	}
-	authComplexity, err := fee.AuthComplexity(subnetAuth)
+	authComplexity, err := fee.AuthComplexity(chainAuth)
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicRemoveNetValidatorTxComplexities.Add(
+	complexity, err := fee.IntrinsicRemoveChainValidatorTxComplexities.Add(
 		&memoComplexity,
 		&authComplexity,
 	)
 	if err != nil {
 		return nil, err
 	}
-//
+
 	inputs, outputs, _, err := b.spend(
 		toBurn,
 		toStake,
@@ -579,8 +579,8 @@ func (b *builder) NewRemoveNetValidatorTx(
 	if err != nil {
 		return nil, err
 	}
-//
-	tx := &txs.RemoveNetValidatorTx{
+
+	tx := &txs.RemoveChainValidatorTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: b.getBlockchainID(),
@@ -588,9 +588,9 @@ func (b *builder) NewRemoveNetValidatorTx(
 			Outs:         outputs,
 			Memo:         ops.Memo(),
 		}},
-		Net:        netID,
-		NodeID:     nodeID,
-		NetAuth: subnetAuth,
+		Chain:     chainID,
+		NodeID:    nodeID,
+		ChainAuth: chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
@@ -635,18 +635,18 @@ func (b *builder) NewAddDelegatorTx(
 }
 
 func (b *builder) NewCreateChainTx(
-	netID ids.ID,
+	chainID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
-	chainName string,
+	blockchainName string,
 	options ...common.Option,
 ) (*txs.CreateChainTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
 
 	ops := common.NewOptions(options)
-	subnetAuth, err := b.authorize(netID, ops)
+	chainAuth, err := b.authorize(chainID, ops)
 	if err != nil {
 		return nil, err
 	}
@@ -656,7 +656,7 @@ func (b *builder) NewCreateChainTx(
 	if err != nil {
 		return nil, err
 	}
-	bandwidth, err = math.Add(bandwidth, uint64(len(chainName)))
+	bandwidth, err = math.Add(bandwidth, uint64(len(blockchainName)))
 	if err != nil {
 		return nil, err
 	}
@@ -671,7 +671,7 @@ func (b *builder) NewCreateChainTx(
 	dynamicComplexity := gas.Dimensions{
 		gas.Bandwidth: bandwidth,
 	}
-	authComplexity, err := fee.AuthComplexity(subnetAuth)
+	authComplexity, err := fee.AuthComplexity(chainAuth)
 	if err != nil {
 		return nil, err
 	}
@@ -704,21 +704,21 @@ func (b *builder) NewCreateChainTx(
 			Outs:         outputs,
 			Memo:         memo,
 		}},
-		NetID:       netID,
-		ChainName:   chainName,
-		VMID:        vmID,
-		FxIDs:       fxIDs,
-		GenesisData: genesis,
-		NetAuth:  subnetAuth,
+		ChainID:        chainID,
+		BlockchainName: blockchainName,
+		VMID:           vmID,
+		FxIDs:          fxIDs,
+		GenesisData:    genesis,
+		ChainAuth:      chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
 
 // Removed in regenesis
-func (b *builder) NewCreateNetTx(
+func (b *builder) NewCreateSubnetTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.CreateNetTx, error) {
+) (*txs.CreateSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
 //
@@ -731,7 +731,7 @@ func (b *builder) NewCreateNetTx(
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicCreateNetTxComplexities.Add(
+	complexity, err := fee.IntrinsicCreateSubnetTxComplexities.Add(
 		&memoComplexity,
 		&ownerComplexity,
 	)
@@ -752,7 +752,7 @@ func (b *builder) NewCreateNetTx(
 	}
 //
 	utils.Sort(owner.Addrs)
-	tx := &txs.CreateNetTx{
+	tx := &txs.CreateSubnetTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: b.getBlockchainID(),
@@ -766,25 +766,25 @@ func (b *builder) NewCreateNetTx(
 }
 
 // Removed in regenesis
-func (b *builder) NewTransferNetOwnershipTx(
-	subnetID ids.ID,
+func (b *builder) NewTransferChainOwnershipTx(
+	chainID ids.ID,
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.TransferNetOwnershipTx, error) {
+) (*txs.TransferChainOwnershipTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
-//
+
 	ops := common.NewOptions(options)
-	subnetAuth, err := b.authorize(subnetID, ops)
+	chainAuth, err := b.authorize(chainID, ops)
 	if err != nil {
 		return nil, err
 	}
-//
+
 	memo := ops.Memo()
 	memoComplexity := gas.Dimensions{
 		gas.Bandwidth: uint64(len(memo)),
 	}
-	authComplexity, err := fee.AuthComplexity(subnetAuth)
+	authComplexity, err := fee.AuthComplexity(chainAuth)
 	if err != nil {
 		return nil, err
 	}
@@ -792,7 +792,7 @@ func (b *builder) NewTransferNetOwnershipTx(
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicTransferNetOwnershipTxComplexities.Add(
+	complexity, err := fee.IntrinsicTransferChainOwnershipTxComplexities.Add(
 		&memoComplexity,
 		&authComplexity,
 		&ownerComplexity,
@@ -800,7 +800,7 @@ func (b *builder) NewTransferNetOwnershipTx(
 	if err != nil {
 		return nil, err
 	}
-//
+
 	inputs, outputs, _, err := b.spend(
 		toBurn,
 		toStake,
@@ -812,9 +812,9 @@ func (b *builder) NewTransferNetOwnershipTx(
 	if err != nil {
 		return nil, err
 	}
-//
+
 	utils.Sort(owner.Addrs)
-	tx := &txs.TransferNetOwnershipTx{
+	tx := &txs.TransferChainOwnershipTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: b.getBlockchainID(),
@@ -822,20 +822,20 @@ func (b *builder) NewTransferNetOwnershipTx(
 			Outs:         outputs,
 			Memo:         memo,
 		}},
-		Net:        subnetID,
-		Owner:      owner,
-		NetAuth: subnetAuth,
+		Chain:     chainID,
+		Owner:     owner,
+		ChainAuth: chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
 
-func (b *builder) NewConvertNetToL1Tx(
-	subnetID ids.ID,
+func (b *builder) NewConvertChainToL1Tx(
 	chainID ids.ID,
+	managerChainID ids.ID,
 	address []byte,
-	validators []*txs.ConvertNetToL1Validator,
+	validators []*txs.ConvertChainToL1Validator,
 	options ...common.Option,
-) (*txs.ConvertNetToL1Tx, error) {
+) (*txs.ConvertChainToL1Tx, error) {
 	var luxToBurn uint64
 	for _, vdr := range validators {
 		var err error
@@ -852,7 +852,7 @@ func (b *builder) NewConvertNetToL1Tx(
 		toStake = map[ids.ID]uint64{}
 		ops     = common.NewOptions(options)
 	)
-	subnetAuth, err := b.authorize(subnetID, ops)
+	chainAuth, err := b.authorize(chainID, ops)
 	if err != nil {
 		return nil, err
 	}
@@ -865,15 +865,15 @@ func (b *builder) NewConvertNetToL1Tx(
 	bytesComplexity := gas.Dimensions{
 		gas.Bandwidth: additionalBytes,
 	}
-	validatorComplexity, err := fee.ConvertNetToL1ValidatorComplexity(validators...)
+	validatorComplexity, err := fee.ConvertChainToL1ValidatorComplexity(validators...)
 	if err != nil {
 		return nil, err
 	}
-	authComplexity, err := fee.AuthComplexity(subnetAuth)
+	authComplexity, err := fee.AuthComplexity(chainAuth)
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicConvertNetToL1TxComplexities.Add(
+	complexity, err := fee.IntrinsicConvertChainToL1TxComplexities.Add(
 		&bytesComplexity,
 		&validatorComplexity,
 		&authComplexity,
@@ -895,7 +895,7 @@ func (b *builder) NewConvertNetToL1Tx(
 	}
 
 	utils.Sort(validators)
-	tx := &txs.ConvertNetToL1Tx{
+	tx := &txs.ConvertChainToL1Tx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: constants.PlatformChainID,
@@ -903,11 +903,11 @@ func (b *builder) NewConvertNetToL1Tx(
 			Outs:         outputs,
 			Memo:         memo,
 		}},
-		Net:        subnetID,
-		ChainID:    chainID,
-		Address:    address,
-		Validators: validators,
-		NetAuth:    subnetAuth,
+		Chain:          chainID,
+		ManagerChainID: managerChainID,
+		Address:        address,
+		Validators:     validators,
+		ChainAuth:      chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
@@ -1315,8 +1315,8 @@ func (b *builder) NewExportTx(
 }
 
 // Removed in regenesis
-func (b *builder) NewTransformNetTx(
-	netID ids.ID,
+func (b *builder) NewTransformChainTx(
+	chainID ids.ID,
 	assetID ids.ID,
 	initialSupply uint64,
 	maxSupply uint64,
@@ -1331,18 +1331,18 @@ func (b *builder) NewTransformNetTx(
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
-) (*txs.TransformNetTx, error) {
+) (*txs.TransformChainTx, error) {
 	toBurn := map[ids.ID]uint64{
 		assetID: maxSupply - initialSupply,
 	}
 	toStake := map[ids.ID]uint64{}
-//
+
 	ops := common.NewOptions(options)
-	subnetAuth, err := b.authorize(netID, ops)
+	chainAuth, err := b.authorize(chainID, ops)
 	if err != nil {
 		return nil, err
 	}
-//
+
 	inputs, outputs, _, err := b.spend(
 		toBurn,
 		toStake,
@@ -1354,8 +1354,8 @@ func (b *builder) NewTransformNetTx(
 	if err != nil {
 		return nil, err
 	}
-//
-	tx := &txs.TransformNetTx{
+
+	tx := &txs.TransformChainTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: b.getBlockchainID(),
@@ -1363,7 +1363,7 @@ func (b *builder) NewTransformNetTx(
 			Outs:         outputs,
 			Memo:         ops.Memo(),
 		}},
-		Net:                      netID,
+		Chain:                    chainID,
 		AssetID:                  assetID,
 		InitialSupply:            initialSupply,
 		MaximumSupply:            maxSupply,
@@ -1377,13 +1377,13 @@ func (b *builder) NewTransformNetTx(
 		MinDelegatorStake:        minDelegatorStake,
 		MaxValidatorWeightFactor: maxValidatorWeightFactor,
 		UptimeRequirement:        uptimeRequirement,
-		NetAuth:               subnetAuth,
+		ChainAuth:                chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
 
 func (b *builder) NewAddPermissionlessValidatorTx(
-	vdr *txs.NetValidator,
+	vdr *txs.ChainValidator,
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
@@ -1446,7 +1446,7 @@ func (b *builder) NewAddPermissionlessValidatorTx(
 			Memo:         memo,
 		}},
 		Validator:             vdr.Validator,
-		Net:                   vdr.Net,
+		Chain:                 vdr.Chain,
 		Signer:                signer,
 		StakeOuts:             stakeOutputs,
 		ValidatorRewardsOwner: validationRewardsOwner,
@@ -1457,7 +1457,7 @@ func (b *builder) NewAddPermissionlessValidatorTx(
 }
 
 func (b *builder) NewAddPermissionlessDelegatorTx(
-	vdr *txs.NetValidator,
+	vdr *txs.ChainValidator,
 	assetID ids.ID,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
@@ -1506,7 +1506,7 @@ func (b *builder) NewAddPermissionlessDelegatorTx(
 			Memo:         memo,
 		}},
 		Validator:              vdr.Validator,
-		Net:                    vdr.Net,
+		Chain:                  vdr.Chain,
 		StakeOuts:              stakeOutputs,
 		DelegationRewardsOwner: rewardsOwner,
 	}
@@ -1906,7 +1906,7 @@ func (b *builder) authorize(ownerID ids.ID, options *common.Options) (*secp256k1
 	minIssuanceTime := options.MinIssuanceTime()
 	inputSigIndices, ok := common.MatchOwners(owner, addrs, minIssuanceTime)
 	if !ok {
-		// We can't authorize the subnet
+		// We can't authorize the chain
 		return nil, ErrInsufficientAuthorization
 	}
 	return &secp256k1fx.Input{

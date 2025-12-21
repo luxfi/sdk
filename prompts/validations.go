@@ -16,7 +16,7 @@ import (
 
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	lux_constants "github.com/luxfi/node/utils/constants"
+	lux_constants "github.com/luxfi/constants"
 	"github.com/luxfi/node/utils/formatting/address"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"

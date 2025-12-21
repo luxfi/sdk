@@ -47,7 +47,7 @@ require (
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v1.1.0
 	github.com/luxfi/netrunner v1.14.19
-	github.com/luxfi/node v1.22.21
+	github.com/luxfi/node v1.22.23
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1

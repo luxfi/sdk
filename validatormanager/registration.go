@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxdconstants "github.com/luxfi/node/utils/constants"
+	luxdconstants "github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
@@ -65,13 +65,13 @@ func InitializeValidatorRegistrationPoSNative(
 	balanceOwnersAux := PChainOwner{
 		Threshold: balanceOwners.Threshold,
 		Addresses: sdkutils.Map(balanceOwners.Addresses, func(addr ids.ShortID) crypto.Address {
-			return crypto.BytesToAddress(addr[:])
+			return crypto.Address(addr)
 		}),
 	}
 	disableOwnersAux := PChainOwner{
 		Threshold: disableOwners.Threshold,
 		Addresses: sdkutils.Map(disableOwners.Addresses, func(addr ids.ShortID) crypto.Address {
-			return crypto.BytesToAddress(addr[:])
+			return crypto.Address(addr)
 		}),
 	}
 
@@ -140,13 +140,13 @@ func InitializeValidatorRegistrationPoA(
 	balanceOwnersAux := PChainOwner{
 		Threshold: balanceOwners.Threshold,
 		Addresses: sdkutils.Map(balanceOwners.Addresses, func(addr ids.ShortID) crypto.Address {
-			return crypto.BytesToAddress(addr[:])
+			return crypto.Address(addr)
 		}),
 	}
 	disableOwnersAux := PChainOwner{
 		Threshold: disableOwners.Threshold,
 		Addresses: sdkutils.Map(disableOwners.Addresses, func(addr ids.ShortID) crypto.Address {
-			return crypto.BytesToAddress(addr[:])
+			return crypto.Address(addr)
 		}),
 	}
 	if useACP99 {
@@ -271,7 +271,7 @@ func GetRegisterL1ValidatorMessage(
 			}
 			registerSubnetValidatorUnsignedMessage, err = warp.NewUnsignedMessage(
 				network.ID(),
-				blockchainID[:],
+				blockchainID,
 				registerSubnetValidatorAddressedCall.Bytes(),
 			)
 			if err != nil {
@@ -331,7 +331,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID(),
-		luxdconstants.PlatformChainID[:],
+		luxdconstants.PlatformChainID,
 		subnetValidatorRegistrationAddressedCall.Bytes(),
 	)
 	if err != nil {
