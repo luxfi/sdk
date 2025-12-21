@@ -1,0 +1,60 @@
+---
+title: Wallet Management
+description: HD wallets, multisig, and hardware wallet integration
+---
+
+# Wallet Management
+
+Comprehensive wallet management including HD wallets, multisig support, and hardware wallet integration.
+
+## Create Wallet
+
+```go
+// Create wallet
+wallet, err := chainManager.CreateWallet(ctx, "my-wallet")
+```
+
+## Multisig Wallet
+
+```go
+// Create multisig wallet
+multisig, err := chainManager.CreateMultisigWallet(ctx, "treasury",
+    []ids.ShortID{owner1, owner2, owner3},
+    2, // threshold
+)
+```
+
+## List Wallets
+
+```go
+// List wallets
+wallets, err := chainManager.ListWallets(ctx)
+```
+
+## Hardware Security Module (HSM) Integration
+
+```go
+// Use HSM for validator keys
+hsm := sdk.NewHSMIntegration(luxSDK, &HSMConfig{
+    Provider: "thales",
+    Endpoint: "hsm.internal:9999",
+})
+
+// Generate validator keys in HSM
+validatorKey, err := hsm.GenerateValidatorKey(ctx, "validator-01")
+
+// Sign transactions with HSM
+signedTx, err := hsm.SignTransaction(ctx, tx, validatorKey)
+```
+
+## Key Management via CLI
+
+```go
+// Use CLI for key management
+cli := luxSDK.CLI()
+if cli != nil {
+    // Key management
+    keys, err := cli.ListKeys(ctx)
+    key, err := cli.CreateKey(ctx, "validator-key")
+}
+```
