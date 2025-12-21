@@ -1,0 +1,151 @@
+---
+title: Network Management
+description: Launch and manage Lux networks with the SDK
+---
+
+# Network Management
+
+The SDK uses netrunner for comprehensive network management, providing full control over local, testnet, and mainnet networks.
+
+## Creating a Network
+
+```go
+// Create a network
+network, err := sdk.CreateNetwork(ctx, &network.NetworkParams{
+    Name:             "test-network",
+    Type:             network.NetworkTypeLocal,
+    NumNodes:         5,
+    EnableStaking:    true,
+    EnableMonitoring: true,
+})
+```
+
+## Adding Nodes
+
+```go
+// Add nodes
+node, err := sdk.AddNode(ctx, network.ID, &network.NodeParams{
+    Name:        "validator-01",
+    Type:        network.NodeTypeValidator,
+    StakeAmount: 2000,
+})
+```
+
+## Network Lifecycle
+
+```go
+// Manage network lifecycle
+err = sdk.StartNetwork(ctx, networkID)
+err = sdk.StopNetwork(ctx, networkID)
+```
+
+## Netrunner Integration
+
+Full network orchestration capabilities with direct netrunner access:
+
+```go
+// Direct netrunner access for advanced scenarios
+netrunner := luxSDK.Netrunner()
+if netrunner != nil {
+    // Start netrunner server
+    err := netrunner.StartServer(ctx)
+
+    // Create complex network topology
+    network, err := netrunner.CreateNetwork(ctx, "testnet", 11)
+
+    // Deploy blockchain with specific configuration
+    err = netrunner.DeployBlockchain(ctx, networkID, &BlockchainSpec{
+        Name:   "my-blockchain",
+        VMType: "evm",
+        Genesis: customGenesis,
+    })
+}
+```
+
+## CLI Wrapper
+
+Programmatic access to all CLI commands:
+
+```go
+// Use CLI commands directly
+cli := luxSDK.CLI()
+if cli != nil {
+    // Execute any CLI command
+    output, err := cli.Execute(ctx, "network", "status")
+
+    // Type-safe wrappers for common operations
+    err = cli.CreateBlockchain(ctx, "my-chain", "evm")
+    err = cli.DeployBlockchain(ctx, "my-chain", "local")
+
+    // Key management
+    keys, err := cli.ListKeys(ctx)
+    key, err := cli.CreateKey(ctx, "validator-key")
+}
+```
+
+## Node API Client
+
+Direct node communication for high-performance operations:
+
+```go
+// Access node APIs directly
+node := luxSDK.Node()
+if node != nil {
+    // Get node information
+    info, err := node.GetNodeInfo(ctx)
+
+    // Platform chain operations
+    validators, err := node.GetCurrentValidators(ctx, constants.PrimaryNetworkID)
+
+    // Keystore operations
+    addresses, err := node.ListAddresses(ctx, "my-user")
+}
+```
+
+## Infrastructure Automation
+
+Define infrastructure as code:
+
+```go
+// Define infrastructure as code
+infrastructure := &NetworkDefinition{
+    Networks: []NetworkSpec{
+        {Name: "prod-mainnet", Type: "mainnet", Nodes: 21},
+        {Name: "staging", Type: "testnet", Nodes: 11},
+        {Name: "dev", Type: "local", Nodes: 5},
+    },
+    Blockchains: []BlockchainSpec{
+        {Name: "defi-chain", VM: "evm", Network: "prod-mainnet"},
+        {Name: "nft-chain", VM: "evm", Network: "prod-mainnet"},
+        {Name: "game-chain", VM: "wasm", Network: "staging"},
+    },
+}
+
+// Deploy entire infrastructure
+deployer := sdk.NewInfrastructureDeployer(luxSDK)
+err := deployer.Deploy(ctx, infrastructure)
+```
+
+## Network Testing & Simulation
+
+```go
+// Create test scenarios
+tester := sdk.NewNetworkTester(luxSDK)
+
+// Simulate network partitions
+tester.SimulatePartition(ctx, []string{"node1", "node2"}, []string{"node3", "node4", "node5"})
+
+// Test consensus under load
+results := tester.StressTest(ctx, &StressTestParams{
+    TPS:      10000,
+    Duration: 5 * time.Minute,
+    Scenario: "high-value-transfers",
+})
+
+// Chaos testing
+tester.ChaosTest(ctx, &ChaosParams{
+    RandomlyKillNodes: true,
+    NetworkLatency:    100 * time.Millisecond,
+    PacketLoss:        0.1,
+})
+```

@@ -30,7 +30,7 @@ func TestGetWarpMessagesFromLogs(t *testing.T) {
 	chainID := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		chainID[:],
+		chainID,
 		[]byte{},
 	)
 	require.NoError(t, err)
@@ -73,7 +73,7 @@ func TestExtractWarpMessageFromLogs(t *testing.T) {
 	chainID := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		chainID[:],
+		chainID,
 		[]byte{},
 	)
 	require.NoError(t, err)
@@ -127,7 +127,7 @@ func TestExtractWarpMessageFromReceipt(t *testing.T) {
 	chainID2 := ids.ID{}
 	unsignedWarpMessage, err := warp.NewUnsignedMessage(
 		0,
-		chainID2[:],
+		chainID2,
 		[]byte{},
 	)
 	require.NoError(t, err)

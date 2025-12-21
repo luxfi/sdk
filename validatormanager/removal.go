@@ -162,7 +162,7 @@ func GetUptimeProofMessage(
 	}
 	uptimeProofUnsignedMessage, err := standaloneWarp.NewUnsignedMessage(
 		network.ID(),
-		blockchainID[:],
+		blockchainID,
 		addressedCall.Bytes(),
 	)
 	if err != nil {
@@ -308,7 +308,7 @@ func InitValidatorRemoval(
 	if unsignedMessage != nil {
 		standaloneUnsignedMsg, err = standaloneWarp.NewUnsignedMessage(
 			unsignedMessage.NetworkID,
-			unsignedMessage.SourceChainID[:],
+			unsignedMessage.SourceChainID,
 			unsignedMessage.Payload,
 		)
 		if err != nil {

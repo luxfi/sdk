@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/luxfi/crypto"
+	"github.com/luxfi/crypto/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"
@@ -367,7 +368,7 @@ func (*realPrompter) CaptureAddress(promptStr string) (crypto.Address, error) {
 		addr = addressStr[2:]
 	}
 	b, _ := hex.DecodeString(addr)
-	addressHex := crypto.BytesToAddress(b)
+	addressHex := common.BytesToAddress(b)
 	return addressHex, nil
 }
 

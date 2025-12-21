@@ -67,22 +67,22 @@ func (b *builderWithOptions) NewAddValidatorTx(
 	)
 }
 
-func (b *builderWithOptions) NewAddNetValidatorTx(
-	vdr *txs.NetValidator,
+func (b *builderWithOptions) NewAddChainValidatorTx(
+	vdr *txs.ChainValidator,
 	options ...common.Option,
-) (*txs.AddNetValidatorTx, error) {
-	return b.Builder.NewAddNetValidatorTx(
+) (*txs.AddChainValidatorTx, error) {
+	return b.Builder.NewAddChainValidatorTx(
 		vdr,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
-func (b *builderWithOptions) RemoveNetValidatorTx(
+func (b *builderWithOptions) RemoveChainValidatorTx(
 	nodeID ids.NodeID,
 	netID ids.ID,
 	options ...common.Option,
-) (*txs.RemoveNetValidatorTx, error) {
-	return b.Builder.NewRemoveNetValidatorTx(
+) (*txs.RemoveChainValidatorTx, error) {
+	return b.Builder.NewRemoveChainValidatorTx(
 		nodeID,
 		netID,
 		common.UnionOptions(b.options, options)...,
@@ -119,11 +119,11 @@ func (b *builderWithOptions) NewCreateChainTx(
 	)
 }
 
-func (b *builderWithOptions) NewCreateNetTx(
+func (b *builderWithOptions) NewCreateSubnetTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.CreateNetTx, error) {
-	return b.Builder.NewCreateNetTx(
+) (*txs.CreateSubnetTx, error) {
+	return b.Builder.NewCreateSubnetTx(
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)
@@ -153,7 +153,7 @@ func (b *builderWithOptions) NewExportTx(
 	)
 }
 
-func (b *builderWithOptions) NewTransformNetTx(
+func (b *builderWithOptions) NewTransformChainTx(
 	netID ids.ID,
 	assetID ids.ID,
 	initialSupply uint64,
@@ -169,8 +169,8 @@ func (b *builderWithOptions) NewTransformNetTx(
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
-) (*txs.TransformNetTx, error) {
-	return b.Builder.NewTransformNetTx(
+) (*txs.TransformChainTx, error) {
+	return b.Builder.NewTransformChainTx(
 		netID,
 		assetID,
 		initialSupply,
@@ -190,7 +190,7 @@ func (b *builderWithOptions) NewTransformNetTx(
 }
 
 func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
-	vdr *txs.NetValidator,
+	vdr *txs.ChainValidator,
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
@@ -210,7 +210,7 @@ func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
 }
 
 func (b *builderWithOptions) NewAddPermissionlessDelegatorTx(
-	vdr *txs.NetValidator,
+	vdr *txs.ChainValidator,
 	assetID ids.ID,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,

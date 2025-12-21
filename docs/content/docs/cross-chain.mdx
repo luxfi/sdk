@@ -1,0 +1,77 @@
+---
+title: Cross-Chain Operations
+description: Cross-chain transfers and atomic operations
+---
+
+# Cross-Chain Operations
+
+Seamless asset transfers and atomic operations across Lux chains.
+
+## Cross-Chain Transfers
+
+```go
+// Transfer between chains
+txID, err := chainManager.TransferCrossChain(ctx, &CrossChainTransferParams{
+    SourceChain: "C",
+    TargetChain: "P",
+    AssetID:     luxAssetID,
+    Amount:      amount,
+    To:          recipient,
+})
+```
+
+## Multi-Chain Balances
+
+```go
+// Get balances across all chains
+balances, err := chainManager.GetBalance(ctx, address)
+for chain, balance := range balances.Chains {
+    fmt.Printf("%s-Chain: %s\n", chain, balance)
+}
+```
+
+## Cross-Chain Messaging
+
+Set up bridges for cross-chain communication:
+
+```go
+// Build cross-chain DApp
+dapp := sdk.NewDApp(luxSDK)
+
+// Set up cross-chain messaging
+bridge := dapp.CreateBridge(ctx, []string{"c-chain", "nft-chain", "game-chain"})
+
+// Monitor all chains
+monitor := dapp.Monitor(ctx)
+for event := range monitor.Events() {
+    log.Printf("Chain: %s, Event: %s", event.Chain, event.Type)
+}
+```
+
+## Migration from Other Platforms
+
+```go
+// Migrate from Ethereum/Polygon/BSC
+migrator := sdk.NewMigrator(luxSDK)
+
+// Analyze existing deployment
+analysis := migrator.Analyze(ctx, &MigrationSource{
+    Type:     "ethereum",
+    Endpoint: "https://mainnet.infura.io/v3/YOUR_KEY",
+    Contracts: []string{
+        "0x...", // Your contract addresses
+    },
+})
+
+// Generate migration plan
+plan := migrator.Plan(ctx, analysis, &MigrationTarget{
+    Network: "lux-mainnet",
+    VMType:  "evm",
+    OptimizeFor: []string{"lower-fees", "faster-finality"},
+})
+
+// Execute migration
+result := migrator.Execute(ctx, plan)
+log.Printf("Migration complete: %d contracts, %d users migrated",
+    result.ContractsMigrated, result.UsersMigrated)
+```

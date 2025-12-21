@@ -53,25 +53,24 @@ type Client struct {
 	URL       string
 }
 
-// indicates if the given rpc url has schema or not
-// HexToAddress converts hex string to crypto.Address
-func HexToAddress(s string) crypto.Address {
+// HexToAddress converts hex string to common.Address (geth type)
+func HexToAddress(s string) common.Address {
 	// Remove 0x prefix if present
 	if len(s) >= 2 && s[0:2] == "0x" {
 		s = s[2:]
 	}
 	b, _ := hex.DecodeString(s)
-	return crypto.BytesToAddress(b)
+	return common.BytesToAddress(b)
 }
 
-// toCommon converts crypto.Address to common.Address for geth compatibility
-func toCommon(addr crypto.Address) common.Address {
+// cryptoToCommon converts crypto.Address to geth common.Address
+func cryptoToCommon(addr crypto.Address) common.Address {
 	return common.BytesToAddress(addr[:])
 }
 
-// toCommonPtr converts crypto.Address to *common.Address for geth compatibility
-func toCommonPtr(addr crypto.Address) *common.Address {
-	a := toCommon(addr)
+// cryptoToCommonPtr converts crypto.Address to *common.Address
+func cryptoToCommonPtr(addr crypto.Address) *common.Address {
+	a := cryptoToCommon(addr)
 	return &a
 }
 
@@ -188,7 +187,7 @@ func (client Client) GetContractBytecode(
 	code, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) ([]byte, error) {
-			return client.EthClient.CodeAt(ctx, toCommon(contractAddress), nil)
+			return client.EthClient.CodeAt(ctx, contractAddress, nil)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -225,7 +224,7 @@ func (client Client) GetAddressBalance(
 	balance, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) (*big.Int, error) {
-			return client.EthClient.BalanceAt(ctx, toCommon(address), nil)
+			return client.EthClient.BalanceAt(ctx, address, nil)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -245,7 +244,7 @@ func (client Client) NonceAt(
 	nonce, err := utils.RetryWithContextGen(
 		utils.GetAPILargeContext,
 		func(ctx context.Context) (uint64, error) {
-			return client.EthClient.NonceAt(ctx, toCommon(address), nil)
+			return client.EthClient.NonceAt(ctx, address, nil)
 		},
 		repeatsOnFailure,
 		sleepBetweenRepeats,
@@ -430,7 +429,7 @@ func (client Client) FundAddress(
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:   chainID,
 		Nonce:     nonce,
-		To:        toCommonPtr(targetAddress),
+		To:        &targetAddress,
 		Gas:       nativeTransferGas,
 		GasFeeCap: gasFeeCap,
 		GasTipCap: gasTipCap,
@@ -559,8 +558,8 @@ func (client Client) TransactWithWarpMessage(
 		},
 	}
 	msg := ethereum.CallMsg{
-		From:       toCommon(from),
-		To:         toCommonPtr(contract),
+		From:       cryptoToCommon(from),
+		To:         cryptoToCommonPtr(contract),
 		GasPrice:   nil,
 		GasTipCap:  gasTipCap,
 		GasFeeCap:  gasFeeCap,
@@ -578,7 +577,7 @@ func (client Client) TransactWithWarpMessage(
 	tx := types.NewTx(&types.DynamicFeeTx{
 		ChainID:    chainID,
 		Nonce:      nonce,
-		To:         toCommonPtr(contract),
+		To:         cryptoToCommonPtr(contract),
 		Gas:        gasLimit,
 		GasFeeCap:  gasFeeCap,
 		GasTipCap:  gasTipCap,
@@ -726,7 +725,7 @@ func (client Client) CreateDummyBlocks(
 			nonce = nonceFromAPI
 		}
 		// send Big1 to himself
-		tx := types.NewTransaction(nonce, toCommon(addr), common.Big1, params.TxGas, gasPrice, nil)
+		tx := types.NewTransaction(nonce, cryptoToCommon(addr), common.Big1, params.TxGas, gasPrice, nil)
 		triggerTx, err := types.SignTx(tx, txSigner, privKey)
 		if err != nil {
 			return fmt.Errorf("types.SignTx failure at step %d: %w", i, err)
