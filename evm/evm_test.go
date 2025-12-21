@@ -1807,7 +1807,7 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	sourceChainID := ids.ID{1, 2, 3}
 	unsignedMessage, err := luxWarp.NewUnsignedMessage(
 		0, // NetworkID
-		sourceChainID[:],
+		sourceChainID,
 		[]byte{4, 5, 6},
 	)
 	require.NoError(t, err)

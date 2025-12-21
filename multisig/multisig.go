@@ -23,12 +23,12 @@ var ErrUndefinedTx = fmt.Errorf("tx is undefined")
 
 const (
 	Undefined TxKind = iota
-	PChainRemoveNetValidatorTx
-	PChainAddNetValidatorTx
+	PChainRemoveChainValidatorTx
+	PChainAddChainValidatorTx
 	PChainCreateChainTx
-	PChainTransformNetTx
+	PChainTransformChainTx
 	PChainAddPermissionlessValidatorTx
-	PChainTransferNetOwnershipTx
+	PChainTransferChainOwnershipTx
 )
 
 type Multisig struct {
@@ -84,7 +84,7 @@ func (ms *Multisig) IsReadyToCommit() (bool, error) {
 	}
 	unsignedTx := ms.PChainTx.Unsigned
 	switch unsignedTx.(type) {
-	case *txs.CreateNetTx:
+	case *txs.CreateSubnetTx:
 		return true, nil
 	default:
 	}
@@ -166,16 +166,16 @@ func (ms *Multisig) GetAuthSigners() ([]ids.ShortID, error) {
 	unsignedTx := ms.PChainTx.Unsigned
 	var netAuth verify.Verifiable
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveNetValidatorTx:
-		netAuth = unsignedTx.NetAuth
-	case *txs.AddNetValidatorTx:
-		netAuth = unsignedTx.NetAuth
+	case *txs.RemoveChainValidatorTx:
+		netAuth = unsignedTx.ChainAuth
+	case *txs.AddChainValidatorTx:
+		netAuth = unsignedTx.ChainAuth
 	case *txs.CreateChainTx:
-		netAuth = unsignedTx.NetAuth
-	case *txs.TransformNetTx:
-		netAuth = unsignedTx.NetAuth
-	case *txs.TransferNetOwnershipTx:
-		netAuth = unsignedTx.NetAuth
+		netAuth = unsignedTx.ChainAuth
+	case *txs.TransformChainTx:
+		netAuth = unsignedTx.ChainAuth
+	case *txs.TransferChainOwnershipTx:
+		netAuth = unsignedTx.ChainAuth
 	default:
 		return nil, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
@@ -203,18 +203,18 @@ func (ms *Multisig) GetTxKind() (TxKind, error) {
 	}
 	unsignedTx := ms.PChainTx.Unsigned
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveNetValidatorTx:
-		return PChainRemoveNetValidatorTx, nil
-	case *txs.AddNetValidatorTx:
-		return PChainAddNetValidatorTx, nil
+	case *txs.RemoveChainValidatorTx:
+		return PChainRemoveChainValidatorTx, nil
+	case *txs.AddChainValidatorTx:
+		return PChainAddChainValidatorTx, nil
 	case *txs.CreateChainTx:
 		return PChainCreateChainTx, nil
-	case *txs.TransformNetTx:
-		return PChainTransformNetTx, nil
+	case *txs.TransformChainTx:
+		return PChainTransformChainTx, nil
 	case *txs.AddPermissionlessValidatorTx:
 		return PChainAddPermissionlessValidatorTx, nil
-	case *txs.TransferNetOwnershipTx:
-		return PChainTransferNetOwnershipTx, nil
+	case *txs.TransferChainOwnershipTx:
+		return PChainTransferChainOwnershipTx, nil
 	default:
 		return Undefined, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
@@ -228,17 +228,17 @@ func (ms *Multisig) GetNetworkID() (uint32, error) {
 	unsignedTx := ms.PChainTx.Unsigned
 	var networkID uint32
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveNetValidatorTx:
+	case *txs.RemoveChainValidatorTx:
 		networkID = unsignedTx.NetworkID
-	case *txs.AddNetValidatorTx:
+	case *txs.AddChainValidatorTx:
 		networkID = unsignedTx.NetworkID
 	case *txs.CreateChainTx:
 		networkID = unsignedTx.NetworkID
-	case *txs.TransformNetTx:
+	case *txs.TransformChainTx:
 		networkID = unsignedTx.NetworkID
 	case *txs.AddPermissionlessValidatorTx:
 		networkID = unsignedTx.NetworkID
-	case *txs.TransferNetOwnershipTx:
+	case *txs.TransferChainOwnershipTx:
 		networkID = unsignedTx.NetworkID
 	default:
 		return 0, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
@@ -279,18 +279,18 @@ func (ms *Multisig) GetNetID() (ids.ID, error) {
 	unsignedTx := ms.PChainTx.Unsigned
 	var netID ids.ID
 	switch unsignedTx := unsignedTx.(type) {
-	case *txs.RemoveNetValidatorTx:
-		netID = unsignedTx.Net
-	case *txs.AddNetValidatorTx:
-		netID = unsignedTx.NetValidator.Net
+	case *txs.RemoveChainValidatorTx:
+		netID = unsignedTx.Chain
+	case *txs.AddChainValidatorTx:
+		netID = unsignedTx.ChainValidator.Chain
 	case *txs.CreateChainTx:
-		netID = unsignedTx.NetID
-	case *txs.TransformNetTx:
-		netID = unsignedTx.Net
+		netID = unsignedTx.ChainID
+	case *txs.TransformChainTx:
+		netID = unsignedTx.Chain
 	case *txs.AddPermissionlessValidatorTx:
-		netID = unsignedTx.Net
-	case *txs.TransferNetOwnershipTx:
-		netID = unsignedTx.Net
+		netID = unsignedTx.Chain
+	case *txs.TransferChainOwnershipTx:
+		netID = unsignedTx.Chain
 	default:
 		return ids.Empty, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}

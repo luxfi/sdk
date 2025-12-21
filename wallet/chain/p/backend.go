@@ -7,9 +7,9 @@ import (
 	"context"
 	"sync"
 
+	"github.com/luxfi/constants"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm/fx"
@@ -40,19 +40,19 @@ type backend struct {
 
 func NewBackend(context *builder.Context, utxos common.ChainUTXOs, subnetTxs map[ids.ID]*txs.Tx) Backend {
 	subnetOwner := make(map[ids.ID]fx.Owner)
-	for txID, tx := range subnetTxs { // first get owners from the CreateNetTx
-		createNetTx, ok := tx.Unsigned.(*txs.CreateNetTx)
+	for txID, tx := range subnetTxs { // first get owners from the CreateSubnetTx
+		createSubnetTx, ok := tx.Unsigned.(*txs.CreateSubnetTx)
 		if !ok {
 			continue
 		}
-		subnetOwner[txID] = createNetTx.Owner
+		subnetOwner[txID] = createSubnetTx.Owner
 	}
-	for _, tx := range subnetTxs { // then check for TransferNetOwnershipTx
-		transferNetOwnershipTx, ok := tx.Unsigned.(*txs.TransferNetOwnershipTx)
+	for _, tx := range subnetTxs { // then check for TransferChainOwnershipTx
+		transferChainOwnershipTx, ok := tx.Unsigned.(*txs.TransferChainOwnershipTx)
 		if !ok {
 			continue
 		}
-		subnetOwner[transferNetOwnershipTx.Net] = transferNetOwnershipTx.Owner
+		subnetOwner[transferChainOwnershipTx.Chain] = transferChainOwnershipTx.Owner
 	}
 	return &backend{
 		ChainUTXOs:  utxos,
@@ -96,7 +96,7 @@ func (v *backendVisitor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 	return v.baseTx(&tx.BaseTx)
 }
 
-func (v *backendVisitor) AddNetValidatorTx(tx *txs.AddNetValidatorTx) error {
+func (v *backendVisitor) AddChainValidatorTx(tx *txs.AddChainValidatorTx) error {
 	return v.baseTx(&tx.BaseTx)
 }
 
@@ -108,8 +108,8 @@ func (v *backendVisitor) CreateChainTx(tx *txs.CreateChainTx) error {
 	return v.baseTx(&tx.BaseTx)
 }
 
-func (v *backendVisitor) CreateNetTx(tx *txs.CreateNetTx) error {
-	v.b.setNetOwner(v.txID, tx.Owner)
+func (v *backendVisitor) CreateSubnetTx(tx *txs.CreateSubnetTx) error {
+	v.b.setChainOwner(v.txID, tx.Owner)
 	return v.baseTx(&tx.BaseTx)
 }
 
@@ -142,11 +142,11 @@ func (v *backendVisitor) ExportTx(tx *txs.ExportTx) error {
 	return v.baseTx(&tx.BaseTx)
 }
 
-func (v *backendVisitor) RemoveNetValidatorTx(tx *txs.RemoveNetValidatorTx) error {
+func (v *backendVisitor) RemoveChainValidatorTx(tx *txs.RemoveChainValidatorTx) error {
 	return v.baseTx(&tx.BaseTx)
 }
 
-func (v *backendVisitor) TransformNetTx(tx *txs.TransformNetTx) error {
+func (v *backendVisitor) TransformChainTx(tx *txs.TransformChainTx) error {
 	return v.baseTx(&tx.BaseTx)
 }
 
@@ -158,8 +158,8 @@ func (v *backendVisitor) AddPermissionlessDelegatorTx(tx *txs.AddPermissionlessD
 	return v.baseTx(&tx.BaseTx)
 }
 
-func (v *backendVisitor) TransferNetOwnershipTx(tx *txs.TransferNetOwnershipTx) error {
-	v.b.setNetOwner(tx.Net, tx.Owner)
+func (v *backendVisitor) TransferChainOwnershipTx(tx *txs.TransferChainOwnershipTx) error {
+	v.b.setChainOwner(tx.Chain, tx.Owner)
 	return v.baseTx(&tx.BaseTx)
 }
 
@@ -167,7 +167,7 @@ func (v *backendVisitor) BaseTx(tx *txs.BaseTx) error {
 	return v.baseTx(tx)
 }
 
-func (v *backendVisitor) ConvertNetToL1Tx(*txs.ConvertNetToL1Tx) error {
+func (v *backendVisitor) ConvertChainToL1Tx(*txs.ConvertChainToL1Tx) error {
 	return nil
 }
 
@@ -224,9 +224,9 @@ func (b *backend) GetNetOwner(_ context.Context, netID ids.ID) (fx.Owner, error)
 	return b.GetOwner(context.Background(), netID)
 }
 
-func (b *backend) setNetOwner(netID ids.ID, owner fx.Owner) {
+func (b *backend) setChainOwner(chainID ids.ID, owner fx.Owner) {
 	b.subnetOwnerLock.Lock()
 	defer b.subnetOwnerLock.Unlock()
 
-	b.subnetOwner[netID] = owner
+	b.subnetOwner[chainID] = owner
 }

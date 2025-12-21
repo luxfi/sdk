@@ -102,25 +102,14 @@ func (c *Client) URIs(ctx context.Context) ([]string, error) {
 	return c.client.URIs(ctx)
 }
 
-// CreateBlockchains creates new blockchains with the given specifications
-func (c *Client) CreateBlockchains(ctx context.Context, specs []*rpcpb.BlockchainSpec) (*rpcpb.CreateBlockchainsResponse, error) {
+// CreateChains creates new blockchains with the given specifications
+func (c *Client) CreateChains(ctx context.Context, specs []*rpcpb.BlockchainSpec) (*rpcpb.CreateBlockchainsResponse, error) {
 	c.logger.Info("creating blockchains", "count", len(specs))
-	resp, err := c.client.CreateBlockchains(ctx, specs)
+	resp, err := c.client.CreateChains(ctx, specs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create blockchains: %w", err)
 	}
 	c.logger.Info("blockchains created")
-	return resp, nil
-}
-
-// CreateSubnets creates new subnets
-func (c *Client) CreateSubnets(ctx context.Context, specs []*rpcpb.SubnetSpec) (*rpcpb.CreateSubnetsResponse, error) {
-	c.logger.Info("creating subnets")
-	resp, err := c.client.CreateSubnets(ctx, specs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create subnets: %w", err)
-	}
-	c.logger.Info("subnets created")
 	return resp, nil
 }
 
