@@ -342,7 +342,7 @@ func TxToMethod(
 		// Convert signer function signature
 		gethSigner := func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
 			// Convert back to crypto.Address for the original signer
-			cryptoAddr := crypto.BytesToAddress(address.Bytes())
+			cryptoAddr := crypto.Address(address)
 			return idempotentSigner(cryptoAddr, tx)
 		}
 		txOpts = &bind.TransactOpts{
@@ -655,7 +655,7 @@ func DeployContract(
 		return crypto.Address{}, ErrFailedReceiptStatus
 	}
 	// Convert geth common.Address to crypto.Address
-	return crypto.BytesToAddress(address.Bytes()), nil
+	return crypto.Address(address), nil
 }
 
 func UnpackLog(

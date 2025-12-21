@@ -21,5 +21,5 @@ type Validator struct {
 }
 
 // Backward compatibility aliases
-type NetValidator = Validator
+type ChainValidator = Validator
 type SubnetValidator = Validator
