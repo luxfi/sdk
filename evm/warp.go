@@ -5,7 +5,7 @@ package evm
 import (
 	"fmt"
 
-	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/warp"
 )
@@ -16,7 +16,7 @@ func GetWarpMessagesFromLogs(
 ) []*warp.UnsignedMessage {
 	messages := []*warp.UnsignedMessage{}
 	for _, txLog := range logs {
-		msg, err := subnetEvmWarp.UnpackSendWarpEventDataToMessage(txLog.Data)
+		msg, err := evmWarp.UnpackSendWarpEventDataToMessage(txLog.Data)
 		if err == nil {
 			messages = append(messages, msg)
 		}
