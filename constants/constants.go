@@ -314,8 +314,6 @@ const (
 	LuxdCompatibilityURL         = LuxCompatibilityURL // Alias for backward compatibility
 	EVMRPCCompatibilityURL       = "https://raw.githubusercontent.com/luxfi/evm/main/compatibility.json"
 	CLIMinVersionURL             = "https://raw.githubusercontent.com/luxfi/cli/main/min-version.json"
-	CLILatestDependencyURL       = CLIMinVersionURL // Alias for backward compatibility
-	SubnetEVMRepoName            = EVMRepoName // Alias for backward compatibility
 
 	YesLabel = "Yes"
 	NoLabel  = "No"

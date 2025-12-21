@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/upgrade/legacy"
 	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/evm/predicate"
-	subnetEvmUtils "github.com/luxfi/evm/utils"
+	evmUtils "github.com/luxfi/evm/utils"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
@@ -554,7 +554,7 @@ func (client Client) TransactWithWarpMessage(
 	accessList := types.AccessList{
 		types.AccessTuple{
 			Address:     evmWarp.ContractAddress,
-			StorageKeys: subnetEvmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessage.Bytes())),
+			StorageKeys: evmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessage.Bytes())),
 		},
 	}
 	msg := ethereum.CallMsg{
