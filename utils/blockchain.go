@@ -110,8 +110,8 @@ func (a *Account) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// SubnetEvmGenesis represents a subnet EVM genesis configuration
-type SubnetEvmGenesis struct {
+// EVMGenesis represents a EVM genesis configuration
+type EVMGenesis struct {
 	Config     map[string]interface{} `json:"config"`
 	Alloc      map[string]Account     `json:"alloc"`
 	Timestamp  interface{}            `json:"timestamp,omitempty"` // Can be string (hex) or uint64
@@ -127,8 +127,8 @@ type SubnetEvmGenesis struct {
 }
 
 // UnmarshalJSON custom unmarshaler to handle hex string or numeric values
-func (g *SubnetEvmGenesis) UnmarshalJSON(data []byte) error {
-	type Alias SubnetEvmGenesis
+func (g *EVMGenesis) UnmarshalJSON(data []byte) error {
+	type Alias EVMGenesis
 	aux := &struct {
 		Timestamp  interface{} `json:"timestamp,omitempty"`
 		GasLimit   interface{} `json:"gasLimit"`
@@ -188,18 +188,18 @@ func (g *SubnetEvmGenesis) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// ByteSliceToSubnetEvmGenesis converts a byte slice to a SubnetEVM genesis
-func ByteSliceToSubnetEvmGenesis(bytes []byte) (*SubnetEvmGenesis, error) {
-	var genesis SubnetEvmGenesis
+// ByteSliceToEVMGenesis converts a byte slice to a EVM genesis
+func ByteSliceToEVMGenesis(bytes []byte) (*EVMGenesis, error) {
+	var genesis EVMGenesis
 	if err := json.Unmarshal(bytes, &genesis); err != nil {
 		return nil, err
 	}
 	return &genesis, nil
 }
 
-// ByteSliceIsSubnetEvmGenesis checks if a byte slice is a SubnetEVM genesis
-func ByteSliceIsSubnetEvmGenesis(bytes []byte) bool {
-	var genesis SubnetEvmGenesis
+// ByteSliceIsEVMGenesis checks if a byte slice is a EVM genesis
+func ByteSliceIsEVMGenesis(bytes []byte) bool {
+	var genesis EVMGenesis
 	err := json.Unmarshal(bytes, &genesis)
 	return err == nil && genesis.Config != nil
 }
@@ -255,7 +255,7 @@ func GetBlockchainIDFromAlias(endpoint string, alias string) (ids.ID, error) {
 
 // GetChainID extracts the chain ID from genesis data
 func GetChainID(genesisData []byte) (*big.Int, error) {
-	genesis, err := ByteSliceToSubnetEvmGenesis(genesisData)
+	genesis, err := ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,7 @@ import (
 	"context"
 	"math/big"
 
-	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	"github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
@@ -46,7 +46,7 @@ func GetValidatorNonce(
 		logs, err := client.FilterLogs(ethereum.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []common.Address{subnetEvmWarp.Module.Address},
+			Addresses: []common.Address{evmWarp.Module.Address},
 		})
 		if err != nil {
 			return 0, err
