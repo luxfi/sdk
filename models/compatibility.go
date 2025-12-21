@@ -16,7 +16,7 @@ type LuxdCompatiblity = LuxCompatiblity
 type CLIDependencyMap struct {
 	RPC       int                        `json:"rpc"`
 	Luxd      map[string]NetworkVersions `json:"luxd"`
-	SubnetEVM string                     `json:"subnetevm"`
+	EVM string `json:"evm"`
 }
 
 // NetworkVersions represents versions for a network

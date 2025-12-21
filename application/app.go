@@ -67,13 +67,17 @@ func (app *Lux) GetBaseDir() string {
 	return app.baseDir
 }
 
+func (app *Lux) GetChainsDir() string {
+	return filepath.Join(app.baseDir, constants.ChainsDir)
+}
+
 func (app *Lux) GetNetDir() string {
 	return filepath.Join(app.baseDir, constants.NetDir)
 }
 
-// GetSubnetDir is deprecated, use GetNetDir instead
+// GetSubnetDir is deprecated, use GetChainsDir instead
 func (app *Lux) GetSubnetDir() string {
-	return app.GetNetDir()
+	return app.GetChainsDir()
 }
 
 func (app *Lux) GetReposDir() string {
