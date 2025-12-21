@@ -102,8 +102,8 @@ type Sidecar struct {
 	// Chain layer (1=L1, 2=L2, 3=L3)
 	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
 
-	// SubnetEVM specific fields
-	SubnetEVMMainnetChainID uint32 `json:"subnetEVMMainnetChainID,omitempty"`
+	// EVM specific fields
+	EVMMainnetChainID uint32 `json:"evmMainnetChainID,omitempty"`
 
 	// Teleporter
 	TeleporterReady            bool   `json:"teleporterReady,omitempty"` // Whether teleporter is deployed

@@ -8,7 +8,7 @@ require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.17.26
-	github.com/luxfi/geth v1.16.56
+	github.com/luxfi/geth v1.16.57
 	github.com/luxfi/ids v1.2.4
 	github.com/luxfi/log v1.1.26
 	github.com/luxfi/warp v1.16.37
@@ -36,7 +36,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/bft v0.1.0
-	github.com/luxfi/consensus v1.22.32
+	github.com/luxfi/consensus v1.22.35
 	github.com/luxfi/constants v1.2.3
 	github.com/luxfi/database v1.2.12
 	github.com/luxfi/evm v0.16.4
@@ -46,8 +46,8 @@ require (
 	github.com/luxfi/ledger-lux-go v1.0.0
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v1.1.0
-	github.com/luxfi/netrunner v1.14.19
-	github.com/luxfi/node v1.22.23
+	github.com/luxfi/netrunner v1.14.21
+	github.com/luxfi/node v1.22.32
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1

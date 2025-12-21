@@ -118,6 +118,10 @@ func FetchState(
 		return nil, err
 	}
 
+	// Set the network ID on the pClient for proper bech32 address formatting
+	// Without this, the client uses networkID=0 which maps to "custom" HRP fallback
+	pClient.SetNetworkID(pCTX.NetworkID)
+
 	// For X-chain, we need to get the LUX asset ID and fees
 	// TODO: Get these from the xClient or infoClient
 	luxAssetID := pCTX.XAssetID
