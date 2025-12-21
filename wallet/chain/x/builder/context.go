@@ -6,7 +6,7 @@ package builder
 import (
 	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/constants"
+	"github.com/luxfi/constants"
 )
 
 const Alias = "X"

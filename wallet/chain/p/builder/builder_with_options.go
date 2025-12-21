@@ -82,25 +82,25 @@ func (b *builderWithOptions) NewAddValidatorTx(
 }
 
 // Removed in regenesis
-func (b *builderWithOptions) NewAddNetValidatorTx(
-	vdr *txs.NetValidator,
+func (b *builderWithOptions) NewAddChainValidatorTx(
+	vdr *txs.ChainValidator,
 	options ...common.Option,
-) (*txs.AddNetValidatorTx, error) {
-	return b.builder.NewAddNetValidatorTx(
+) (*txs.AddChainValidatorTx, error) {
+	return b.builder.NewAddChainValidatorTx(
 		vdr,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
 // Removed in regenesis
-func (b *builderWithOptions) NewRemoveNetValidatorTx(
+func (b *builderWithOptions) NewRemoveChainValidatorTx(
 	nodeID ids.NodeID,
-	netID ids.ID,
+	chainID ids.ID,
 	options ...common.Option,
-) (*txs.RemoveNetValidatorTx, error) {
-	return b.builder.NewRemoveNetValidatorTx(
+) (*txs.RemoveChainValidatorTx, error) {
+	return b.builder.NewRemoveChainValidatorTx(
 		nodeID,
-		netID,
+		chainID,
 		common.UnionOptions(b.options, options)...,
 	)
 }
@@ -118,42 +118,42 @@ func (b *builderWithOptions) NewAddDelegatorTx(
 }
 
 func (b *builderWithOptions) NewCreateChainTx(
-	netID ids.ID,
+	chainID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
-	chainName string,
+	blockchainName string,
 	options ...common.Option,
 ) (*txs.CreateChainTx, error) {
 	return b.builder.NewCreateChainTx(
-		netID,
+		chainID,
 		genesis,
 		vmID,
 		fxIDs,
-		chainName,
+		blockchainName,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
 // Removed in regenesis
-func (b *builderWithOptions) NewCreateNetTx(
+func (b *builderWithOptions) NewCreateSubnetTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.CreateNetTx, error) {
-	return b.builder.NewCreateNetTx(
+) (*txs.CreateSubnetTx, error) {
+	return b.builder.NewCreateSubnetTx(
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
 // Removed in regenesis
-func (b *builderWithOptions) NewTransferNetOwnershipTx(
-	subnetID ids.ID,
+func (b *builderWithOptions) NewTransferChainOwnershipTx(
+	chainID ids.ID,
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.TransferNetOwnershipTx, error) {
-	return b.builder.NewTransferNetOwnershipTx(
-		subnetID,
+) (*txs.TransferChainOwnershipTx, error) {
+	return b.builder.NewTransferChainOwnershipTx(
+		chainID,
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)
@@ -184,8 +184,8 @@ func (b *builderWithOptions) NewExportTx(
 }
 
 // Removed in regenesis
-func (b *builderWithOptions) NewTransformNetTx(
-	netID ids.ID,
+func (b *builderWithOptions) NewTransformChainTx(
+	chainID ids.ID,
 	assetID ids.ID,
 	initialSupply uint64,
 	maxSupply uint64,
@@ -200,9 +200,9 @@ func (b *builderWithOptions) NewTransformNetTx(
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
-) (*txs.TransformNetTx, error) {
-	return b.builder.NewTransformNetTx(
-		netID,
+) (*txs.TransformChainTx, error) {
+	return b.builder.NewTransformChainTx(
+		chainID,
 		assetID,
 		initialSupply,
 		maxSupply,
@@ -221,7 +221,7 @@ func (b *builderWithOptions) NewTransformNetTx(
 }
 
 func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
-	vdr *txs.NetValidator,
+	vdr *txs.ChainValidator,
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
@@ -241,7 +241,7 @@ func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
 }
 
 func (b *builderWithOptions) NewAddPermissionlessDelegatorTx(
-	vdr *txs.NetValidator,
+	vdr *txs.ChainValidator,
 	assetID ids.ID,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
@@ -254,16 +254,16 @@ func (b *builderWithOptions) NewAddPermissionlessDelegatorTx(
 	)
 }
 
-func (b *builderWithOptions) NewConvertNetToL1Tx(
-	subnetID ids.ID,
+func (b *builderWithOptions) NewConvertChainToL1Tx(
 	chainID ids.ID,
+	managerChainID ids.ID,
 	address []byte,
-	validators []*txs.ConvertNetToL1Validator,
+	validators []*txs.ConvertChainToL1Validator,
 	options ...common.Option,
-) (*txs.ConvertNetToL1Tx, error) {
-	return b.builder.NewConvertNetToL1Tx(
-		subnetID,
+) (*txs.ConvertChainToL1Tx, error) {
+	return b.builder.NewConvertChainToL1Tx(
 		chainID,
+		managerChainID,
 		address,
 		validators,
 		common.UnionOptions(b.options, options)...,
