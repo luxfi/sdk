@@ -13,14 +13,14 @@ import (
 // ChainConfigBuilder helps construct EVM chain configurations
 type ChainConfigBuilder struct {
 	config *params.ChainConfig
-	// Additional fields for SubnetEVM specific features
+	// Additional fields for EVM specific features
 	feeConfig          interface{}
 	allowFeeRecipients bool
 	precompiles        map[string]interface{}
 	networkUpgrades    map[string]interface{}
 }
 
-// NewChainConfigBuilder creates a new chain config builder with subnet EVM defaults
+// NewChainConfigBuilder creates a new chain config builder with EVM defaults
 func NewChainConfigBuilder() *ChainConfigBuilder {
 	// Start with standard EVM configuration
 	config := &params.ChainConfig{
@@ -100,7 +100,7 @@ func (b *ChainConfigBuilder) GetNetworkUpgrades() map[string]interface{} {
 	return b.networkUpgrades
 }
 
-// DefaultChainConfig returns the default SubnetEVM chain configuration
+// DefaultChainConfig returns the default EVM chain configuration
 func DefaultChainConfig() *params.ChainConfig {
 	return NewChainConfigBuilder().Build()
 }

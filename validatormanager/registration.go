@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/crypto"
-	subnetEvmWarp "github.com/luxfi/evm/precompile/contracts/warp"
+	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
@@ -640,7 +640,7 @@ func SearchForRegisterL1ValidatorMessage(
 		logs, err := client.FilterLogs(ethereum.FilterQuery{
 			FromBlock: fromBlock,
 			ToBlock:   toBlock,
-			Addresses: []common.Address{subnetEvmWarp.Module.Address},
+			Addresses: []common.Address{evmWarp.Module.Address},
 		})
 		if err != nil {
 			return nil, err
