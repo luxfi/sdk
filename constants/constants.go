@@ -156,8 +156,9 @@ const (
 	EVMInstallDir   = "evm"
 
 	// Directories
-	NetDir   = "nets"
-	ReposDir = "repos"
+	ChainsDir = "chains" // Canonical chain definitions (genesis, sidecar)
+	NetDir    = "nets"   // Deprecated: use ChainsDir instead
+	ReposDir  = "repos"
 	SnapshotsDirName = "snapshots"
 	CustomVMDir      = "customvms"
 	PluginDir        = "plugins"
