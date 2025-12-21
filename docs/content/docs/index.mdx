@@ -1,0 +1,156 @@
+---
+title: Introduction
+description: The official Go SDK for building and managing Lux-compatible networks and blockchains
+---
+
+# Lux SDK
+
+The official Go SDK for building and managing Lux-compatible networks and blockchains. This SDK provides a unified interface integrating the full Lux ecosystem - netrunner for network orchestration, the CLI for user-friendly operations, and direct node APIs for high-performance applications.
+
+## Key Capabilities
+
+### Network Orchestration
+- **Multi-Network Management**: Launch and manage mainnet, testnet, or custom local networks
+- **Dynamic Scaling**: Add/remove nodes on-the-fly with automatic rebalancing
+- **Network Simulation**: Test network behaviors and consensus under various conditions
+- **Performance Testing**: Built-in benchmarking and stress testing capabilities
+
+### Blockchain Development
+- **Multi-Layer Architecture**: Build L1 sovereign chains, L2 rollups, or L3 app-specific chains
+- **VM Flexibility**: Deploy EVM, WASM, or custom VMs with full language support
+- **Rapid Prototyping**: Go from idea to deployed blockchain in minutes
+- **Migration Tools**: Seamlessly migrate from subnets to independent L1s
+
+### Developer Experience
+- **Unified API**: Single SDK interface for all Lux operations
+- **Smart Defaults**: Automatic selection of best method (CLI -> netrunner -> native)
+- **Type Safety**: Full Go type safety with comprehensive error handling
+- **Extensive Examples**: Production-ready code samples for common use cases
+
+## Features
+
+- **Network Management**: Full netrunner integration for complex network orchestration
+- **Blockchain Building**: Build L1/L2/L3 chains with any VM type
+- **Staking & Validation**: Complete P-Chain operations for network security
+- **Asset Management**: Create, trade, and manage assets on X-Chain
+- **Smart Contracts**: Deploy and interact with contracts on C-Chain
+- **Cross-Chain Operations**: Atomic swaps and seamless asset transfers
+- **Wallet Integration**: HD wallets, multisig, and hardware wallet support
+- **Quantum-Resistant**: Q-Chain integration for post-quantum cryptography
+- **WASM Support**: Run any language via WebAssembly
+- **CLI Integration**: Programmatic access to all CLI commands
+- **Monitoring & Telemetry**: Built-in metrics and observability
+- **Infrastructure as Code**: Define entire networks declaratively
+
+## Installation
+
+```bash
+go get github.com/luxfi/sdk
+```
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/luxfi/sdk"
+    "github.com/luxfi/sdk/config"
+)
+
+func main() {
+    // Initialize SDK with auto-detection of available tools
+    cfg := config.Default()
+    cfg.NodeEndpoint = "http://localhost:9650" // Optional: connect to existing node
+
+    luxSDK, err := sdk.New(cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Launch a network (uses CLI or netrunner automatically)
+    network, err := luxSDK.LaunchNetwork(ctx, "local", 5)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create and deploy blockchain with best available method
+    blockchain, err := luxSDK.CreateAndDeployBlockchain(ctx, &sdk.BlockchainParams{
+        Name:    "my-chain",
+        Type:    blockchain.BlockchainTypeL1,
+        VMType:  blockchain.VMTypeEVM,
+        Network: network,
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Blockchain %s deployed on network %s", blockchain.Name, network.Name)
+}
+```
+
+## Architecture
+
+The SDK provides a unified interface to the entire Lux ecosystem:
+
+```
++-------------------------------------------------+
+|                    Lux SDK                      |
+|         Unified API with Smart Defaults         |
++-------------------------------------------------+
+|              Integration Layer                  |
+|  +-------------+-------------+-------------+    |
+|  |    CLI      |  Netrunner  |    Node     |    |
+|  | Integration | Integration |    APIs     |    |
+|  +-------------+-------------+-------------+    |
++-------------------------------------------------+
+|              Core SDK Components                |
+|  +-------------+-------------+-------------+    |
+|  |   Network   | Blockchain  |     VM      |    |
+|  |   Manager   |   Builder   |   Manager   |    |
+|  +-------------+-------------+-------------+    |
++-------------------------------------------------+
+|              Chain Operations                   |
+|  +-------+-------+-------+-------+-------+      |
+|  |   P   |   X   |   C   |   M   |   Q   |      |
+|  | Chain | Chain | Chain | Chain | Chain |      |
+|  +-------+-------+-------+-------+-------+      |
++-------------------------------------------------+
+|         External Lux Components                 |
+|  +-------------+-------------+-------------+    |
+|  |   luxd/cli  |  netrunner  | lux/node    |    |
+|  |  (wrapper)  |  (network)  |   (APIs)    |    |
+|  +-------------+-------------+-------------+    |
++-------------------------------------------------+
+```
+
+### Integration Strategy
+
+The SDK intelligently selects the best available method for each operation:
+
+1. **CLI First**: For user-friendly operations with good defaults
+2. **Netrunner**: For complex network orchestration and testing
+3. **Node APIs**: For high-performance direct node communication
+4. **Built-in**: Fallback implementation when external tools unavailable
+
+This ensures your code works in any environment - from development laptops to production clusters.
+
+## Requirements
+
+- Go 1.22 or higher
+- Access to a Lux node endpoint (optional)
+- For local development: Docker (optional, for netrunner)
+- For production: Linux/macOS/Windows
+
+## Next Steps
+
+- [Network Management](/docs/network) - Launch and manage networks
+- [Blockchain Building](/docs/blockchain) - Create L1/L2/L3 chains
+- [Chain Operations](/docs/chains) - P-Chain, X-Chain, C-Chain operations
+- [Cross-Chain](/docs/cross-chain) - Cross-chain transfers and operations
+- [Wallet](/docs/wallet) - Wallet management and integration
