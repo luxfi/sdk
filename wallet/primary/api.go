@@ -245,10 +245,17 @@ func AddAllUTXOs(
 	destinationChainID ids.ID,
 	addrs []ids.ShortID,
 ) error {
-	var (
+	// When sourceChainID == destinationChainID, we're fetching regular UTXOs
+	// on the same chain, not atomic UTXOs from cross-chain transfers.
+	// The platformvm service expects empty string for regular UTXO fetches,
+	// because at runtime the VM's chainID may differ from the constant.
+	var sourceChainIDStr string
+	if sourceChainID != destinationChainID {
 		sourceChainIDStr = sourceChainID.String()
-		startAddr        ids.ShortID
-		startUTXO        ids.ID
+	}
+	var (
+		startAddr ids.ShortID
+		startUTXO ids.ID
 	)
 	for {
 		utxosBytes, endAddr, endUTXO, err := client.GetAtomicUTXOs(
