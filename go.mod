@@ -36,7 +36,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/bft v0.1.0
-	github.com/luxfi/consensus v1.22.35
+	github.com/luxfi/consensus v1.22.37
 	github.com/luxfi/constants v1.2.3
 	github.com/luxfi/database v1.2.12
 	github.com/luxfi/evm v0.16.4
