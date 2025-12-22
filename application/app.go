@@ -139,7 +139,7 @@ func (app *Lux) GetConfigPath() string {
 	return filepath.Join(app.baseDir, constants.ConfigDir)
 }
 
-func (app *Lux) GetElasticSubnetConfigPath(subnetName string) string {
+func (app *Lux) GetElasticChainConfigPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.ElasticNetConfigFileName)
 }
 
@@ -362,7 +362,7 @@ func (app *Lux) UpdateSidecarNetworks(
 	return nil
 }
 
-func (app *Lux) UpdateSidecarElasticSubnet(
+func (app *Lux) UpdateSidecarElasticChain(
 	sc *models.Sidecar,
 	network models.Network,
 	subnetID ids.ID,
@@ -371,11 +371,11 @@ func (app *Lux) UpdateSidecarElasticSubnet(
 	tokenName string,
 	tokenSymbol string,
 ) error {
-	if sc.ElasticSubnet == nil {
-		sc.ElasticSubnet = make(map[string]models.ElasticSubnet)
+	if sc.ElasticChain == nil {
+		sc.ElasticChain = make(map[string]models.ElasticChain)
 	}
-	partialTxs := sc.ElasticSubnet[network.String()].Txs
-	sc.ElasticSubnet[network.String()] = models.ElasticSubnet{
+	partialTxs := sc.ElasticChain[network.String()].Txs
+	sc.ElasticChain[network.String()] = models.ElasticChain{
 		SubnetID:    subnetID,
 		AssetID:     assetID,
 		PChainTXID:  pchainTXID,
@@ -395,33 +395,33 @@ func (app *Lux) UpdateSidecarPermissionlessValidator(
 	nodeID string,
 	txID ids.ID,
 ) error {
-	elasticSubnet := sc.ElasticSubnet[network.String()]
+	elasticSubnet := sc.ElasticChain[network.String()]
 	if elasticSubnet.Validators == nil {
 		elasticSubnet.Validators = make(map[string]models.PermissionlessValidators)
 	}
 	elasticSubnet.Validators[nodeID] = models.PermissionlessValidators{TxID: txID}
-	sc.ElasticSubnet[network.String()] = elasticSubnet
+	sc.ElasticChain[network.String()] = elasticSubnet
 	if err := app.UpdateSidecar(sc); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (app *Lux) UpdateSidecarElasticSubnetPartialTx(
+func (app *Lux) UpdateSidecarElasticChainPartialTx(
 	sc *models.Sidecar,
 	network models.Network,
 	txName string,
 	txID ids.ID,
 ) error {
-	if sc.ElasticSubnet == nil {
-		sc.ElasticSubnet = make(map[string]models.ElasticSubnet)
+	if sc.ElasticChain == nil {
+		sc.ElasticChain = make(map[string]models.ElasticChain)
 	}
 	partialTxs := make(map[string]ids.ID)
-	if sc.ElasticSubnet[network.String()].Txs != nil {
-		partialTxs = sc.ElasticSubnet[network.String()].Txs
+	if sc.ElasticChain[network.String()].Txs != nil {
+		partialTxs = sc.ElasticChain[network.String()].Txs
 	}
 	partialTxs[txName] = txID
-	sc.ElasticSubnet[network.String()] = models.ElasticSubnet{
+	sc.ElasticChain[network.String()] = models.ElasticChain{
 		Txs: partialTxs,
 	}
 	return app.UpdateSidecar(sc)
@@ -508,8 +508,8 @@ func (app *Lux) CaptureYesNo(prompt string) (bool, error) {
 	return app.Prompt.CaptureYesNo(prompt)
 }
 
-func (app *Lux) CreateElasticSubnetConfig(subnetName string, es *models.ElasticSubnetConfig) error {
-	elasticSubetConfigPath := app.GetElasticSubnetConfigPath(subnetName)
+func (app *Lux) CreateElasticChainConfig(subnetName string, es *models.ElasticChainConfig) error {
+	elasticSubetConfigPath := app.GetElasticChainConfigPath(subnetName)
 	if err := os.MkdirAll(filepath.Dir(elasticSubetConfigPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -522,14 +522,14 @@ func (app *Lux) CreateElasticSubnetConfig(subnetName string, es *models.ElasticS
 	return os.WriteFile(elasticSubetConfigPath, esBytes, WriteReadReadPerms)
 }
 
-func (app *Lux) LoadElasticSubnetConfig(subnetName string) (models.ElasticSubnetConfig, error) {
-	elasticSubnetConfigPath := app.GetElasticSubnetConfigPath(subnetName)
+func (app *Lux) LoadElasticChainConfig(subnetName string) (models.ElasticChainConfig, error) {
+	elasticSubnetConfigPath := app.GetElasticChainConfigPath(subnetName)
 	jsonBytes, err := os.ReadFile(elasticSubnetConfigPath)
 	if err != nil {
-		return models.ElasticSubnetConfig{}, err
+		return models.ElasticChainConfig{}, err
 	}
 
-	var esc models.ElasticSubnetConfig
+	var esc models.ElasticChainConfig
 	err = json.Unmarshal(jsonBytes, &esc)
 
 	return esc, err
