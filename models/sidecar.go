@@ -45,8 +45,8 @@ type ElasticNet struct {
 	Txs         map[string]ids.ID
 }
 
-// ElasticSubnet is an alias for backward compatibility
-type ElasticSubnet = ElasticNet
+// ElasticChain is an alias for ElasticNet
+type ElasticChain = ElasticNet
 
 type Sidecar struct {
 	Name            string
@@ -54,10 +54,10 @@ type Sidecar struct {
 	VMID            string
 	VMVersion       string
 	RPCVersion      int
-	Net             string
-	Subnet          string // Deprecated: use Net
-	NetID           ids.ID
-	SubnetID        ids.ID // Deprecated: use NetID
+	Net             string // Network name
+	Subnet          string `json:"subnet,omitempty"` // Deprecated: use Net
+	NetID           ids.ID // Network ID
+	SubnetID        ids.ID `json:"subnetID,omitempty"` // Deprecated: use NetID
 	BlockchainID    ids.ID
 	TokenName       string
 	TokenSymbol     string
@@ -65,7 +65,7 @@ type Sidecar struct {
 	Version         string
 	Networks        map[string]NetworkData
 	ElasticNet      map[string]ElasticNet
-	ElasticSubnet   map[string]ElasticNet // Deprecated: use ElasticNet
+	ElasticChain    map[string]ElasticNet // Alias for ElasticNet
 	ImportedFromLPM bool
 	ImportedVMID    string
 
