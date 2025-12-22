@@ -26,5 +26,5 @@ type ElasticNetConfig struct {
 	UptimeRequirement        uint32
 }
 
-// ElasticSubnetConfig is an alias for backward compatibility
-type ElasticSubnetConfig = ElasticNetConfig
+// ElasticChainConfig is an alias for backward compatibility
+type ElasticChainConfig = ElasticNetConfig
