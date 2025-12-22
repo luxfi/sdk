@@ -10,7 +10,6 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 	"github.com/luxfi/node/api/info"
-	"github.com/luxfi/constants"
 )
 
 const Alias = "C"
@@ -52,7 +51,6 @@ func newConsensusContext(c *Context) (*consensusctx.Context, error) {
 	lookup := ids.NewAliaser()
 	return &consensusctx.Context{
 		NetworkID:   c.NetworkID,
-		NetID:       constants.PrimaryNetworkID,
 		ChainID:     c.BlockchainID,
 		XAssetID:  c.XAssetID,
 		Log:         log.NoLog{},
