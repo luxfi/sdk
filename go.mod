@@ -8,10 +8,10 @@ require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.17.26
-	github.com/luxfi/geth v1.16.57
-	github.com/luxfi/ids v1.2.4
+	github.com/luxfi/geth v1.16.60
+	github.com/luxfi/ids v1.2.5
 	github.com/luxfi/log v1.1.26
-	github.com/luxfi/warp v1.16.37
+	github.com/luxfi/warp v1.16.39
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -36,18 +36,18 @@ require (
 	github.com/go-git/go-git/v5 v5.13.1
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/bft v0.1.0
-	github.com/luxfi/consensus v1.22.37
-	github.com/luxfi/constants v1.2.3
-	github.com/luxfi/database v1.2.12
-	github.com/luxfi/evm v0.16.4
-	github.com/luxfi/genesis v1.5.7
-	github.com/luxfi/go-bip32 v1.0.1
+	github.com/luxfi/consensus v1.22.39
+	github.com/luxfi/constants v1.2.5
+	github.com/luxfi/database v1.2.14
+	github.com/luxfi/evm v0.8.17
+	github.com/luxfi/genesis v1.5.9
+	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
-	github.com/luxfi/ledger-lux-go v1.0.0
+	github.com/luxfi/ledger-lux-go v1.0.2
 	github.com/luxfi/lpm v1.0.3
-	github.com/luxfi/math v1.1.0
+	github.com/luxfi/math v1.1.1
 	github.com/luxfi/netrunner v1.14.21
-	github.com/luxfi/node v1.22.32
+	github.com/luxfi/node v1.22.44
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1
@@ -176,8 +176,6 @@ require (
 )
 
 require (
-	github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e // indirect
-	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251211224604-2e727cd2e6fe // indirect
 	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
@@ -189,11 +187,11 @@ require (
 	github.com/luxfi/codec v1.0.4 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
-	github.com/luxfi/p2p v1.4.7 // indirect
+	github.com/luxfi/p2p v1.4.9 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
 	github.com/luxfi/upgrade v1.0.0 // indirect
 	github.com/luxfi/utils v1.1.0 // indirect
-	github.com/luxfi/vm v1.0.0 // indirect
+	github.com/luxfi/vm v1.0.1 // indirect
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/otiai10/copy v1.14.1 // indirect
