@@ -103,6 +103,12 @@ func (app *Lux) GetPluginsDir() string {
 	return filepath.Join(app.baseDir, constants.PluginDir)
 }
 
+// GetCurrentPluginsDir returns the directory for active plugin symlinks
+// Plugins are linked at ~/.lux/plugins/current/<vmid>
+func (app *Lux) GetCurrentPluginsDir() string {
+	return filepath.Join(app.baseDir, constants.PluginDir, constants.CurrentPluginDir)
+}
+
 func (app *Lux) GetLuxBinDir() string {
 	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.LuxInstallDir)
 }
@@ -754,13 +760,14 @@ func (app *Lux) GetMonitoringInventoryDir(clusterName string) string {
 	return filepath.Join(app.GetLocalClusterDir(clusterName), "monitoring", "inventory")
 }
 
-// ResetPluginsDir resets the plugins directory
+// ResetPluginsDir resets the plugins directory and creates the current/ subdirectory
 func (app *Lux) ResetPluginsDir() error {
 	pluginsDir := filepath.Join(app.baseDir, constants.PluginDir)
 	if err := os.RemoveAll(pluginsDir); err != nil {
 		return err
 	}
-	return os.MkdirAll(pluginsDir, constants.DefaultPerms755)
+	// Create both the base plugins dir and current/ subdirectory
+	return os.MkdirAll(app.GetCurrentPluginsDir(), constants.DefaultPerms755)
 }
 
 // GetSnapshotPath returns the path to a snapshot
