@@ -162,6 +162,7 @@ const (
 	SnapshotsDirName = "snapshots"
 	CustomVMDir      = "customvms"
 	PluginDir        = "plugins"
+	CurrentPluginDir = "current" // Active plugins symlinked here
 	ConfigDir        = "config"
 	KeyDir           = "keys"
 	LPMPluginDir     = "lpm-plugins"
