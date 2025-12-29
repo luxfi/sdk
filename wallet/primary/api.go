@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/btcsuite/btcutil/bech32"
 	gethcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 
@@ -57,7 +58,9 @@ type UTXOClient interface {
 
 // XClient is a client for interacting with the X-Chain
 type XClient struct {
-	requester rpc.EndpointRequester
+	requester   rpc.EndpointRequester
+	networkID   uint32
+	blockchainID ids.ID
 }
 
 // NewXClient returns a new X-Chain client
@@ -69,9 +72,26 @@ func NewXClient(uri, chainAlias string) *XClient {
 	}
 }
 
+// NewXClientWithContext returns a new X-Chain client with context information
+// required for proper address formatting and UTXO queries
+func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *XClient {
+	return &XClient{
+		requester: rpc.NewEndpointRequester(
+			fmt.Sprintf("%s/ext/bc/%s", uri, blockchainID.String()),
+		),
+		networkID:   networkID,
+		blockchainID: blockchainID,
+	}
+}
+
+// SetContext sets the network context for address formatting
+func (c *XClient) SetContext(networkID uint32, blockchainID ids.ID) {
+	c.networkID = networkID
+	c.blockchainID = blockchainID
+}
+
 // GetAtomicUTXOs implements UTXOClient.
-// For local/dev networks where X-chain atomic operations aren't needed,
-// this returns empty to allow P-chain operations to proceed.
+// Queries the X-chain for UTXOs controlled by the given addresses.
 func (c *XClient) GetAtomicUTXOs(
 	ctx context.Context,
 	addrs []ids.ShortID,
@@ -81,9 +101,90 @@ func (c *XClient) GetAtomicUTXOs(
 	startUTXOID ids.ID,
 	options ...rpc.Option,
 ) ([][]byte, ids.ShortID, ids.ID, error) {
-	// Return empty for X-chain since atomic UTXOs are rarely needed
-	// for subnet deployments. This enables local network compatibility.
-	return nil, ids.ShortEmpty, ids.Empty, nil
+	// Format addresses using blockchain ID prefix for local networks
+	formattedAddrs := make([]string, len(addrs))
+	hrp := constants.GetHRP(c.networkID)
+	for i, addr := range addrs {
+		// Use blockchain ID as chain prefix for proper address formatting
+		chainPrefix := c.blockchainID.String()
+		if chainPrefix == "" || c.blockchainID == ids.Empty {
+			chainPrefix = "X" // fallback to "X" for compatibility
+		}
+		addrStr, err := formatAddressWithChain(chainPrefix, hrp, addr[:])
+		if err != nil {
+			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to format address: %w", err)
+		}
+		formattedAddrs[i] = addrStr
+	}
+
+	// Query xvm.getUTXOs
+	res := &getUTXOsReply{}
+	err := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
+		Addresses:   formattedAddrs,
+		SourceChain: sourceChain,
+		Limit:       limit,
+		Encoding:    "hex",
+	}, res, options...)
+	if err != nil {
+		// If xvm service not available, try avm for compatibility
+		err2 := c.requester.SendRequest(ctx, "avm.getUTXOs", &getUTXOsArgs{
+			Addresses:   formattedAddrs,
+			SourceChain: sourceChain,
+			Limit:       limit,
+			Encoding:    "hex",
+		}, res, options...)
+		if err2 != nil {
+			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: xvm error: %w, avm error: %v", err, err2)
+		}
+	}
+
+	// Decode UTXOs from hex
+	utxos := make([][]byte, len(res.UTXOs))
+	for i, utxo := range res.UTXOs {
+		utxoBytes, err := hexDecode(utxo)
+		if err != nil {
+			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to decode UTXO %d: %w", i, err)
+		}
+		utxos[i] = utxoBytes
+	}
+
+	// Parse end index for pagination
+	var endAddr ids.ShortID
+	var endUTXO ids.ID
+	if res.EndIndex.Address != "" {
+		_, _, addrBytes, err := parseAddress(res.EndIndex.Address)
+		if err == nil && len(addrBytes) == 20 {
+			copy(endAddr[:], addrBytes)
+		}
+	}
+	if res.EndIndex.UTXO != "" {
+		endUTXO, _ = ids.FromString(res.EndIndex.UTXO)
+	}
+
+	return utxos, endAddr, endUTXO, nil
+}
+
+// getUTXOsArgs are the arguments to xvm.getUTXOs
+type getUTXOsArgs struct {
+	Addresses   []string `json:"addresses"`
+	SourceChain string   `json:"sourceChain,omitempty"`
+	Limit       uint32   `json:"limit,omitempty"`
+	StartIndex  struct {
+		Address string `json:"address,omitempty"`
+		UTXO    string `json:"utxo,omitempty"`
+	} `json:"startIndex,omitempty"`
+	Encoding string `json:"encoding,omitempty"`
+}
+
+// getUTXOsReply is the response from xvm.getUTXOs
+type getUTXOsReply struct {
+	NumFetched string   `json:"numFetched"`
+	UTXOs      []string `json:"utxos"`
+	EndIndex   struct {
+		Address string `json:"address"`
+		UTXO    string `json:"utxo"`
+	} `json:"endIndex"`
+	Encoding string `json:"encoding"`
 }
 
 type LUXState struct {
@@ -106,7 +207,6 @@ func FetchState(
 ) {
 	infoClient := info.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
-	xClient := NewXClient(uri, "X")
 	// C-chain client disabled for now
 	// cClient, err := ethclient.Dial(uri + "/ext/bc/C/rpc")
 	// if err != nil {
@@ -132,6 +232,9 @@ func FetchState(
 	if err != nil {
 		return nil, err
 	}
+
+	// Create X-chain client with context for proper address formatting
+	xClient := NewXClientWithContext(uri, pCTX.NetworkID, xCTX.BlockchainID)
 
 	// C-chain context disabled for now
 	// cCTX, err := c.NewContextFromClients(ctx, infoClient, pClient)
@@ -291,4 +394,95 @@ func AddAllUTXOs(
 		startUTXO = endUTXO
 	}
 	return nil
+}
+
+// formatAddressWithChain formats an address with chain prefix and bech32 encoding
+func formatAddressWithChain(chainPrefix, hrp string, addrBytes []byte) (string, error) {
+	// Convert to bech32 with 5-bit groups
+	conv, err := bech32.ConvertBits(addrBytes, 8, 5, true)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert address bits: %w", err)
+	}
+	encoded, err := bech32.Encode(hrp, conv)
+	if err != nil {
+		return "", fmt.Errorf("failed to bech32 encode: %w", err)
+	}
+	return fmt.Sprintf("%s-%s", chainPrefix, encoded), nil
+}
+
+// parseAddress parses a formatted address like "X-lux1..." into its components
+func parseAddress(addr string) (chainPrefix, hrp string, addrBytes []byte, err error) {
+	// Split on "-" to get chain prefix
+	parts := make([]string, 0, 2)
+	idx := 0
+	for i, c := range addr {
+		if c == '-' {
+			parts = append(parts, addr[idx:i])
+			idx = i + 1
+			if len(parts) == 1 {
+				break
+			}
+		}
+	}
+	if idx < len(addr) {
+		parts = append(parts, addr[idx:])
+	}
+	
+	if len(parts) != 2 {
+		return "", "", nil, fmt.Errorf("invalid address format: %s", addr)
+	}
+	chainPrefix = parts[0]
+	bech32Addr := parts[1]
+	
+	// Decode bech32
+	hrp, data, err := bech32.Decode(bech32Addr)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("failed to decode bech32: %w", err)
+	}
+	
+	// Convert from 5-bit to 8-bit groups
+	addrBytes, err = bech32.ConvertBits(data, 5, 8, false)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("failed to convert address bits: %w", err)
+	}
+	
+	return chainPrefix, hrp, addrBytes, nil
+}
+
+// hexDecode decodes a hex string (with or without 0x prefix)
+func hexDecode(s string) ([]byte, error) {
+	if len(s) >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X') {
+		s = s[2:]
+	}
+	return hexDecodeString(s)
+}
+
+// hexDecodeString decodes a hex string without 0x prefix
+func hexDecodeString(s string) ([]byte, error) {
+	if len(s)%2 != 0 {
+		s = "0" + s
+	}
+	b := make([]byte, len(s)/2)
+	for i := 0; i < len(b); i++ {
+		h := hexValue(s[i*2])
+		l := hexValue(s[i*2+1])
+		if h == 255 || l == 255 {
+			return nil, fmt.Errorf("invalid hex character at position %d", i*2)
+		}
+		b[i] = h<<4 | l
+	}
+	return b, nil
+}
+
+func hexValue(c byte) byte {
+	switch {
+	case '0' <= c && c <= '9':
+		return c - '0'
+	case 'a' <= c && c <= 'f':
+		return c - 'a' + 10
+	case 'A' <= c && c <= 'F':
+		return c - 'A' + 10
+	default:
+		return 255
+	}
 }

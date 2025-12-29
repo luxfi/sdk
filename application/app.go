@@ -105,8 +105,17 @@ func (app *Lux) GetPluginsDir() string {
 
 // GetCurrentPluginsDir returns the directory for active plugin symlinks
 // Plugins are linked at ~/.lux/plugins/current/<vmid>
+// DEPRECATED: Use GetNetworkPluginsDir for network-isolated plugins
 func (app *Lux) GetCurrentPluginsDir() string {
 	return filepath.Join(app.baseDir, constants.PluginDir, constants.CurrentPluginDir)
+}
+
+// GetNetworkPluginsDir returns the network-specific plugin directory
+// Each network (mainnet, testnet, devnet, custom) has isolated plugins
+// to prevent interference between different networks.
+// Returns ~/.lux/plugins/{mainnet,testnet,devnet,custom}/
+func (app *Lux) GetNetworkPluginsDir(networkType string) string {
+	return filepath.Join(app.baseDir, constants.PluginDir, networkType)
 }
 
 func (app *Lux) GetLuxBinDir() string {

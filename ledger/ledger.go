@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/sdk/utils"
 
 	"github.com/luxfi/ids"
-	luxledger "github.com/luxfi/ledger-lux-go"
+	luxledger "github.com/luxfi/ledger"
 	"github.com/luxfi/node/version"
 	"github.com/luxfi/node/vms/platformvm"
 )
