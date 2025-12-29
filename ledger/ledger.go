@@ -195,25 +195,9 @@ func (dev *LedgerDevice) SignHash(hash []byte, indices []uint32) ([][]byte, erro
 func (dev *LedgerDevice) Sign(hash []byte, indices []uint32) ([][]byte, error) {
 	signatures := make([][]byte, len(indices))
 	for i, index := range indices {
-		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
-		// For Lux ledger, we need signing paths and change paths
-		signingPaths := []string{path}
-		changePaths := []string{} // No change paths for simple signature
-
-		resp, err := dev.device.Sign(path, signingPaths, hash, changePaths)
+		sig, err := dev.device.Sign(hash, index)
 		if err != nil {
 			return nil, fmt.Errorf("failed to sign with ledger at index %d: %w", index, err)
-		}
-
-		// Extract the signature from response map
-		if len(resp.Signature) == 0 {
-			return nil, fmt.Errorf("no signature returned from ledger for index %d", index)
-		}
-
-		// Get the signature for the requested path
-		sig, ok := resp.Signature[path]
-		if !ok {
-			return nil, fmt.Errorf("signature not found for path %s", path)
 		}
 		signatures[i] = sig
 	}
