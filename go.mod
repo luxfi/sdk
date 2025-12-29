@@ -37,18 +37,18 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/bft v0.1.0
 	github.com/luxfi/consensus v1.22.46
-	github.com/luxfi/constants v1.3.1
+	github.com/luxfi/const v1.4.0
 	github.com/luxfi/database v1.2.17
-	github.com/luxfi/evm v0.8.21
-	github.com/luxfi/genesis v1.5.16
+	github.com/luxfi/evm v0.8.24
+	github.com/luxfi/genesis v1.5.17
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/keychain v1.0.1
 	github.com/luxfi/ledger v1.1.2
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v1.2.0
-	github.com/luxfi/netrunner v1.14.34
-	github.com/luxfi/node v1.22.72
+	github.com/luxfi/netrunner v1.14.35
+	github.com/luxfi/node v1.22.73
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/posthog/posthog-go v1.6.1
@@ -186,8 +186,9 @@ require (
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/codec v1.1.0 // indirect
 	github.com/luxfi/config v1.0.0 // indirect
+	github.com/luxfi/constants v1.3.1 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
-	github.com/luxfi/keys v1.0.3 // indirect
+	github.com/luxfi/keys v1.0.5 // indirect
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/p2p v1.18.2 // indirect
