@@ -7,7 +7,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/luxfi/constants"
+	"github.com/luxfi/const"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
