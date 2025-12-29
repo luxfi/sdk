@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	luxdconstants "github.com/luxfi/constants"
+	luxdconstants "github.com/luxfi/const"
 	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/sdk/models"
 
