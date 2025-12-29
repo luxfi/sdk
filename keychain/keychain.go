@@ -6,40 +6,54 @@ import (
 	"fmt"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/ledger-lux-go/keychain"
+	"github.com/luxfi/keychain"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
 	"golang.org/x/exp/maps"
 )
 
-// ledgerAdapter adapts sdk/ledger.LedgerDevice to ledger-lux-go/keychain.Ledger interface
+// ledgerAdapter adapts sdk/ledger.LedgerDevice to keychain.Ledger interface
 type ledgerAdapter struct {
 	device *ledger.LedgerDevice
-}
-
-func (la *ledgerAdapter) Version() (major, minor, patch uint32, err error) {
-	v, err := la.device.Version()
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	return uint32(v.Major), uint32(v.Minor), uint32(v.Patch), nil
 }
 
 func (la *ledgerAdapter) Address(displayHRP string, addressIndex uint32) (ids.ShortID, error) {
 	return la.device.Address(displayHRP, addressIndex)
 }
 
-func (la *ledgerAdapter) Addresses(addressIndices []uint32) ([]ids.ShortID, error) {
+// GetAddresses returns addresses for the given indices (implements keychain.Ledger)
+func (la *ledgerAdapter) GetAddresses(addressIndices []uint32) ([]ids.ShortID, error) {
 	return la.device.Addresses(addressIndices)
 }
 
-func (la *ledgerAdapter) SignHash(hash []byte, addressIndices []uint32) ([][]byte, error) {
-	return la.device.SignHash(hash, addressIndices)
+// SignHash signs a hash with a single address index (implements keychain.Ledger)
+func (la *ledgerAdapter) SignHash(hash []byte, addressIndex uint32) ([]byte, error) {
+	sigs, err := la.device.SignHash(hash, []uint32{addressIndex})
+	if err != nil {
+		return nil, err
+	}
+	if len(sigs) == 0 {
+		return nil, fmt.Errorf("no signature returned")
+	}
+	return sigs[0], nil
 }
 
-func (la *ledgerAdapter) Sign(unsignedTxBytes []byte, addressIndices []uint32) ([][]byte, error) {
-	return la.device.Sign(unsignedTxBytes, addressIndices)
+// Sign signs data with a single address index (implements keychain.Ledger)
+func (la *ledgerAdapter) Sign(data []byte, addressIndex uint32) ([]byte, error) {
+	sigs, err := la.device.Sign(data, []uint32{addressIndex})
+	if err != nil {
+		return nil, err
+	}
+	if len(sigs) == 0 {
+		return nil, fmt.Errorf("no signature returned")
+	}
+	return sigs[0], nil
+}
+
+// SignTransaction signs a transaction with multiple address indices (implements keychain.Ledger)
+func (la *ledgerAdapter) SignTransaction(rawUnsignedHash []byte, addressIndices []uint32) ([][]byte, error) {
+	return la.device.Sign(rawUnsignedHash, addressIndices)
 }
 
 func (la *ledgerAdapter) Disconnect() error {
