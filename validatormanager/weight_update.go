@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxdconstants "github.com/luxfi/constants"
+	luxdconstants "github.com/luxfi/const"
 	luxlog "github.com/luxfi/log"
 	warpPayload "github.com/luxfi/warp/payload"
 	"github.com/luxfi/sdk/application"
