@@ -68,3 +68,69 @@ func TestDirExists(t *testing.T) {
 	// Test that a non-existent directory does not exist
 	require.False(t, DirExists("non_existent_dir"))
 }
+
+func TestIsSubPath(t *testing.T) {
+	tests := []struct {
+		name       string
+		childPath  string
+		parentPath string
+		expected   bool
+	}{
+		{
+			name:       "child inside parent",
+			childPath:  "/home/user/.lux/chains/zoo",
+			parentPath: "/home/user/.lux/chains",
+			expected:   true,
+		},
+		{
+			name:       "deeply nested child",
+			childPath:  "/home/user/.lux/chains/zoo/config.json",
+			parentPath: "/home/user/.lux/chains",
+			expected:   true,
+		},
+		{
+			name:       "same path (not a subpath)",
+			childPath:  "/home/user/.lux/chains",
+			parentPath: "/home/user/.lux/chains",
+			expected:   false,
+		},
+		{
+			name:       "child outside parent",
+			childPath:  "/home/user/.lux/snapshots",
+			parentPath: "/home/user/.lux/chains",
+			expected:   false,
+		},
+		{
+			name:       "parent inside would-be child",
+			childPath:  "/home/user/.lux",
+			parentPath: "/home/user/.lux/chains",
+			expected:   false,
+		},
+		{
+			name:       "sibling path",
+			childPath:  "/home/user/.lux/plugins",
+			parentPath: "/home/user/.lux/chains",
+			expected:   false,
+		},
+		{
+			name:       "with trailing slash",
+			childPath:  "/home/user/.lux/chains/zoo/",
+			parentPath: "/home/user/.lux/chains/",
+			expected:   true,
+		},
+		{
+			name:       "relative path traversal attempt",
+			childPath:  "/home/user/.lux/chains/../keys",
+			parentPath: "/home/user/.lux/chains",
+			expected:   false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := IsSubPath(tc.childPath, tc.parentPath)
+			require.Equal(t, tc.expected, result, "IsSubPath(%q, %q) = %v, expected %v",
+				tc.childPath, tc.parentPath, result, tc.expected)
+		})
+	}
+}

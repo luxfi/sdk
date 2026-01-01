@@ -150,8 +150,10 @@ func (app *Lux) GetSidecarPath(subnetName string) string {
 	return filepath.Join(app.GetSubnetDir(), subnetName, constants.SidecarFileName)
 }
 
+// GetConfigPath returns the SDK config file path (~/.lux/sdk.json)
+// Note: CLI should override this to return ~/.lux/cli.json
 func (app *Lux) GetConfigPath() string {
-	return filepath.Join(app.baseDir, constants.ConfigDir)
+	return filepath.Join(app.baseDir, "sdk.json")
 }
 
 func (app *Lux) GetElasticChainConfigPath(subnetName string) string {
@@ -772,11 +774,72 @@ func (app *Lux) GetMonitoringInventoryDir(clusterName string) string {
 // ResetPluginsDir resets the plugins directory and creates the current/ subdirectory
 func (app *Lux) ResetPluginsDir() error {
 	pluginsDir := filepath.Join(app.baseDir, constants.PluginDir)
-	if err := os.RemoveAll(pluginsDir); err != nil {
+	// Safety check: never delete critical directories
+	if err := app.SafeRemoveAll(pluginsDir); err != nil {
 		return err
 	}
 	// Create both the base plugins dir and current/ subdirectory
 	return os.MkdirAll(app.GetCurrentPluginsDir(), constants.DefaultPerms755)
+}
+
+// ProtectedDirectories returns the list of directories that should NEVER be deleted
+// These contain user-created chain configurations that are NOT ephemeral
+func (app *Lux) ProtectedDirectories() []string {
+	return []string{
+		app.GetChainsDir(),  // ~/.lux/chains/ - chain configurations
+		app.GetKeyDir(),     // ~/.lux/keys/ - key material
+		app.baseDir,         // ~/.lux/ - the entire base directory
+	}
+}
+
+// SafeRemoveAll wraps os.RemoveAll with safety checks to prevent accidental deletion
+// of protected directories. Returns an error if the path would delete a protected directory.
+func (app *Lux) SafeRemoveAll(path string) error {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for %s: %w", path, err)
+	}
+
+	// Check against protected directories
+	for _, protectedDir := range app.ProtectedDirectories() {
+		protectedAbs, err := filepath.Abs(protectedDir)
+		if err != nil {
+			continue
+		}
+
+		// Prevent deletion of the protected directory itself
+		if absPath == protectedAbs {
+			return fmt.Errorf("SAFETY: refusing to delete protected directory: %s", absPath)
+		}
+
+		// Prevent deletion of parent directories that would delete the protected directory
+		// e.g., deleting ~/.lux when ~/.lux/chains is protected
+		if utils.IsSubPath(protectedAbs, absPath) {
+			return fmt.Errorf("SAFETY: refusing to delete %s as it would delete protected directory: %s", absPath, protectedAbs)
+		}
+	}
+
+	return os.RemoveAll(path)
+}
+
+// IsPathProtected checks if a path is protected or would delete a protected directory
+func (app *Lux) IsPathProtected(path string) bool {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return true // err on the side of caution
+	}
+
+	for _, protectedDir := range app.ProtectedDirectories() {
+		protectedAbs, err := filepath.Abs(protectedDir)
+		if err != nil {
+			continue
+		}
+
+		if absPath == protectedAbs || utils.IsSubPath(protectedAbs, absPath) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetSnapshotPath returns the path to a snapshot
