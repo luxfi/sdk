@@ -5,9 +5,9 @@ package common
 
 import (
 	"context"
+	"maps"
+	"slices"
 	"sync"
-
-	"golang.org/x/exp/maps"
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
@@ -105,7 +105,7 @@ func (u *utxos) UTXOs(_ context.Context, sourceChainID, destinationChainID ids.I
 
 	destToUTXOIDToUTXO := u.sourceToDestToUTXOIDToUTXO[sourceChainID]
 	utxoIDToUTXO := destToUTXOIDToUTXO[destinationChainID]
-	return maps.Values(utxoIDToUTXO), nil
+	return slices.Collect(maps.Values(utxoIDToUTXO)), nil
 }
 
 func (u *utxos) GetUTXO(_ context.Context, sourceChainID, destinationChainID, utxoID ids.ID) (*lux.UTXO, error) {
