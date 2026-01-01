@@ -4,13 +4,14 @@ package keychain
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/sdk/utils"
-	"golang.org/x/exp/maps"
 )
 
 // ledgerAdapter adapts sdk/ledger.LedgerDevice to keychain.Ledger interface
@@ -167,7 +168,7 @@ func (kc *Keychain) AddLedgerAddresses(addresses []string) error {
 		if err != nil {
 			return err
 		}
-		return kc.AddLedgerIndices(maps.Values(indices))
+		return kc.AddLedgerIndices(slices.Collect(maps.Values(indices)))
 	}
 	return fmt.Errorf("keychain is not ledger enabled")
 }

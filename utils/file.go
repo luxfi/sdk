@@ -37,3 +37,22 @@ func ExpandHome(path string) string {
 	}
 	return path
 }
+
+// IsSubPath checks if childPath is inside parentPath.
+// Both paths should be absolute paths.
+// Returns true if childPath is a subdirectory or file inside parentPath.
+func IsSubPath(childPath, parentPath string) bool {
+	// Clean and normalize paths
+	child := filepath.Clean(childPath)
+	parent := filepath.Clean(parentPath)
+
+	// Get relative path from parent to child
+	rel, err := filepath.Rel(parent, child)
+	if err != nil {
+		return false
+	}
+
+	// If the relative path starts with "..", child is not inside parent
+	// Also, if rel equals ".", they're the same path
+	return rel != "." && len(rel) > 0 && rel[0] != '.'
+}

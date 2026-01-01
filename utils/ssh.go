@@ -7,12 +7,12 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/luxfi/sdk/constants"
 
 	"golang.org/x/crypto/ssh/agent"
-	"golang.org/x/exp/slices"
 )
 
 // GetSSHConnectionString returns the SSH connection string for the given public IP and certificate file path.
