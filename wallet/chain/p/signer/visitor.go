@@ -8,10 +8,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/luxfi/database"
-	"github.com/luxfi/ids"
 	"github.com/luxfi/const"
 	"github.com/luxfi/crypto/secp256k1"
+	"github.com/luxfi/database"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/node/utils/hashing"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
@@ -398,4 +398,3 @@ func sign(tx *txs.Tx, signHash bool, txSigners [][]keychain.Signer) error {
 	tx.SetBytes(unsignedBytes, signedBytes)
 	return nil
 }
-

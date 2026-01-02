@@ -17,9 +17,9 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/sdk/constants"
 	mockethclient "github.com/luxfi/sdk/mocks/ethclient"
+	luxWarp "github.com/luxfi/warp"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

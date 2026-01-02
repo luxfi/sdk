@@ -797,9 +797,9 @@ func (app *Lux) ResetPluginsDir() error {
 // These contain user-created chain configurations that are NOT ephemeral
 func (app *Lux) ProtectedDirectories() []string {
 	return []string{
-		app.GetChainsDir(),  // ~/.lux/chains/ - chain configurations
-		app.GetKeyDir(),     // ~/.lux/keys/ - key material
-		app.baseDir,         // ~/.lux/ - the entire base directory
+		app.GetChainsDir(), // ~/.lux/chains/ - chain configurations
+		app.GetKeyDir(),    // ~/.lux/keys/ - key material
+		app.baseDir,        // ~/.lux/ - the entire base directory
 	}
 }
 
