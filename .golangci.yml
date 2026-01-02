@@ -7,7 +7,6 @@ linters:
     - errcheck
     - staticcheck
     - ineffassign
-    - typecheck
   disable:
     - gosec # We'll handle security separately
 
