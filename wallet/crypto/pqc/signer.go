@@ -15,11 +15,11 @@ import (
 
 // signer implements post-quantum cryptography using ML-DSA and SLH-DSA
 type signer struct {
-	scheme      walletcrypto.SignatureScheme
-	mldsaKey    *mldsa.PrivateKey
-	slhdsaKey   *slhdsa.PrivateKey
-	publicKey   []byte
-	address     ids.ShortID
+	scheme    walletcrypto.SignatureScheme
+	mldsaKey  *mldsa.PrivateKey
+	slhdsaKey *slhdsa.PrivateKey
+	publicKey []byte
+	address   ids.ShortID
 }
 
 // NewSigner creates a new PQC signer

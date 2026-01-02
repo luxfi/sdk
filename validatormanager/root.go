@@ -13,12 +13,12 @@ import (
 
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/warp"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/sdk/validatormanager/txs"
 	"github.com/luxfi/sdk/validatormanager/validatormanagertypes"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
+	"github.com/luxfi/warp"
 
 	"github.com/luxfi/crypto"
 )

@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/ids"
 	"github.com/luxfi/genesis/pkg/genesis"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/stretchr/testify/require"
@@ -1234,7 +1234,7 @@ func TestValidateHexa(t *testing.T) {
 // 			wantErr: true,
 // 		},
 // 	}
-// 
+//
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			err := ValidateRepoBranch(tt.repo, tt.branch)
@@ -1319,7 +1319,7 @@ func TestValidateHexa(t *testing.T) {
 // 			wantErr: false,
 // 		},
 // 	}
-// 
+//
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			err := ValidateRepoFile(tt.repo, tt.branch, tt.file)
@@ -1389,7 +1389,7 @@ func TestValidateHexa(t *testing.T) {
 // 			wantErr: true,
 // 		},
 // 	}
-// 
+//
 // 	// Test without extra validation
 // 	t.Run("without extra validation", func(t *testing.T) {
 // 		validator := validateWeightFunc(nil)
@@ -1404,14 +1404,14 @@ func TestValidateHexa(t *testing.T) {
 // 			})
 // 		}
 // 	})
-// 
+//
 // 	// Test with extra validation that always passes
 // 	t.Run("with extra validation that passes", func(t *testing.T) {
 // 		extraValidation := func(uint64) error {
 // 			return nil // Always pass
 // 		}
 // 		validator := validateWeightFunc(extraValidation)
-// 
+//
 // 		for _, tt := range tests {
 // 			t.Run(tt.name, func(t *testing.T) {
 // 				err := validator(tt.input)
@@ -1423,7 +1423,7 @@ func TestValidateHexa(t *testing.T) {
 // 			})
 // 		}
 // 	})
-// 
+//
 // 	// Test with extra validation that fails for values > 100
 // 	t.Run("with extra validation max 100", func(t *testing.T) {
 // 		extraValidation := func(val uint64) error {
@@ -1433,7 +1433,7 @@ func TestValidateHexa(t *testing.T) {
 // 			return nil
 // 		}
 // 		validator := validateWeightFunc(extraValidation)
-// 
+//
 // 		// Test cases specific to this extra validation
 // 		extraTests := []struct {
 // 			name    string
@@ -1461,7 +1461,7 @@ func TestValidateHexa(t *testing.T) {
 // 				wantErr: true,
 // 			},
 // 		}
-// 
+//
 // 		for _, tt := range extraTests {
 // 			t.Run(tt.name, func(t *testing.T) {
 // 				err := validator(tt.input)
@@ -1474,7 +1474,7 @@ func TestValidateHexa(t *testing.T) {
 // 			})
 // 		}
 // 	})
-// 
+//
 // 	// Test with extra validation that fails for even numbers
 // 	t.Run("with extra validation odd numbers only", func(t *testing.T) {
 // 		extraValidation := func(val uint64) error {
@@ -1484,7 +1484,7 @@ func TestValidateHexa(t *testing.T) {
 // 			return nil
 // 		}
 // 		validator := validateWeightFunc(extraValidation)
-// 
+//
 // 		// Test cases specific to this extra validation
 // 		extraTests := []struct {
 // 			name    string
@@ -1512,7 +1512,7 @@ func TestValidateHexa(t *testing.T) {
 // 				wantErr: true,
 // 			},
 // 		}
-// 
+//
 // 		for _, tt := range extraTests {
 // 			t.Run(tt.name, func(t *testing.T) {
 // 				err := validator(tt.input)

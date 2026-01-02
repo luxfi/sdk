@@ -2,6 +2,7 @@
 // See the file LICENSE for licensing terms.
 
 //go:build skip
+
 package prompts
 
 import (
@@ -1834,5 +1835,3 @@ func TestCaptureWeightWithMonkeyPatch(t *testing.T) {
 		})
 	}
 }
-
-

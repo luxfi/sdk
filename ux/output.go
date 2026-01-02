@@ -93,7 +93,7 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	table := tablewriter.NewWriter(os.Stdout)
 	// In v1.0.9, headers are added as the first row via Append
 	header := []string{"node", "VM", "URL", "ALIAS_URL"}
-	table.Append(header)
+	_ = table.Append(header) //nolint:errcheck
 
 	nodeInfos := map[string]*rpcpb.NodeInfo{}
 	for _, nodeInfo := range clusterInfo.NodeInfos {
@@ -102,18 +102,18 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	for _, nodeName := range clusterInfo.NodeNames {
 		nodeInfo := nodeInfos[nodeName]
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			table.Append([]string{nodeInfo.Name, chainInfo.ChainName, fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.ChainName)})
+			_ = table.Append([]string{nodeInfo.Name, chainInfo.ChainName, fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.ChainName)}) //nolint:errcheck
 		}
 	}
-	table.Render()
+	_ = table.Render() //nolint:errcheck
 }
 
 // DefaultTable creates a default table with the given title and headers
 func DefaultTable(title string, headers []string) *tablewriter.Table {
 	table := tablewriter.NewWriter(os.Stdout)
 	// In v1.0.9, headers are added as the first row via Append
-	if headers != nil && len(headers) > 0 {
-		table.Append(headers)
+	if len(headers) > 0 {
+		_ = table.Append(headers) //nolint:errcheck
 	}
 	// Note: Title, border, and other formatting options are defaults in v1.0.9
 	return table

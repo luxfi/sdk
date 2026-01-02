@@ -10,11 +10,11 @@ import (
 
 	"github.com/luxfi/geth/common"
 
+	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/crypto/secp256k1"
-	"github.com/luxfi/node/utils/hashing"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/node/utils/hashing"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/secp256k1fx"

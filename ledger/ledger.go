@@ -59,13 +59,13 @@ func (dev *LedgerDevice) Address(hrp string, index uint32) (ids.ShortID, error) 
 	if err != nil {
 		return ids.ShortEmpty, err
 	}
-	
+
 	// Parse address to ID
 	addrID, err := ids.ShortFromString(resp.Address)
 	if err != nil {
 		return ids.ShortEmpty, fmt.Errorf("failed to parse address: %w", err)
 	}
-	
+
 	return addrID, nil
 }
 

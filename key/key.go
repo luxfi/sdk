@@ -435,12 +435,11 @@ func LoadSoft(networkID uint32, keyPath string) (*Key, error) {
 	// Try to parse as hex-encoded private key (64 chars)
 	keyStr := strings.TrimSpace(string(keyBytes))
 
-	// Check if it's a prefixed key (like "PrivateKey-...")
+	// Strip prefix if present (like "PrivateKey-...")
+	// TrimPrefix returns the original string if prefix is not found
 	const privKeyPrefix = "PrivateKey-"
-	if strings.HasPrefix(keyStr, privKeyPrefix) {
-		keyStr = strings.TrimPrefix(keyStr, privKeyPrefix)
-		// TODO: decode CB58 format if needed
-	}
+	keyStr = strings.TrimPrefix(keyStr, privKeyPrefix)
+	// TODO: decode CB58 format if needed
 
 	// Try hex decoding
 	privateKeyBytes, err := hex.DecodeString(keyStr)
