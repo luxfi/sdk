@@ -22,7 +22,7 @@ func GetDefaultBlockchainAirdropKeyName(blockchainName string) string {
 
 // Account represents an account in the genesis allocation
 type Account struct {
-	Balance interface{}       `json:"balance"`      // Can be string (hex) or number
+	Balance interface{}       `json:"balance"`        // Can be string (hex) or number
 	Code    interface{}       `json:"code,omitempty"` // Can be string (hex) or []byte
 	Storage map[string]string `json:"storage,omitempty"`
 	Nonce   interface{}       `json:"nonce,omitempty"` // Can be string (hex) or uint64
@@ -115,7 +115,7 @@ type EVMGenesis struct {
 	Config     map[string]interface{} `json:"config"`
 	Alloc      map[string]Account     `json:"alloc"`
 	Timestamp  interface{}            `json:"timestamp,omitempty"` // Can be string (hex) or uint64
-	GasLimit   interface{}            `json:"gasLimit"`             // Can be string (hex) or uint64
+	GasLimit   interface{}            `json:"gasLimit"`            // Can be string (hex) or uint64
 	Difficulty string                 `json:"difficulty,omitempty"`
 	MixHash    string                 `json:"mixHash,omitempty"`
 	Coinbase   string                 `json:"coinbase,omitempty"`
@@ -130,8 +130,8 @@ type EVMGenesis struct {
 func (g *EVMGenesis) UnmarshalJSON(data []byte) error {
 	type Alias EVMGenesis
 	aux := &struct {
-		Timestamp  interface{} `json:"timestamp,omitempty"`
-		GasLimit   interface{} `json:"gasLimit"`
+		Timestamp interface{} `json:"timestamp,omitempty"`
+		GasLimit  interface{} `json:"gasLimit"`
 		*Alias
 	}{
 		Alias: (*Alias)(g),

@@ -8,11 +8,10 @@ import (
 	"errors"
 	"math/big"
 
-
 	"github.com/luxfi/ids"
+	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/utils/math"
-	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/primary/common"
@@ -255,7 +254,7 @@ func (b *builder) NewImportTx(
 		return nil, errInsufficientFunds
 	}
 
-	tx.Outs = []*EVMOutput{&EVMOutput{
+	tx.Outs = []*EVMOutput{{
 		Address: to,
 		Amount:  importedAmount - txFee,
 	}}

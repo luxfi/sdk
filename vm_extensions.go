@@ -28,16 +28,16 @@ type Context struct {
 // DEXVM, AIVM, FHEVM, MPCVM, QuantumVM, and more
 type VMBuilder struct {
 	// Core SDK components (existing)
-	Context    *Context
-	DB         database.Database
-	State      StateDB
-	Consensus  ConsensusEngine
-	Network    NetworkManager
-	
+	Context   *Context
+	DB        database.Database
+	State     StateDB
+	Consensus ConsensusEngine
+	Network   NetworkManager
+
 	// Extended components for various VMs
 	Extensions map[string]VMExtension
 	Features   *FeatureSet
-	
+
 	mu sync.RWMutex
 }
 
@@ -52,29 +52,29 @@ type VMExtension interface {
 // FeatureSet defines features a VM can enable
 type FeatureSet struct {
 	// Consensus features
-	QuantumResistant  bool // Corona lattice-based
-	BLSAggregation    bool // BLS signature aggregation
-	VerkleWitnesses   bool // Verkle tree witnesses
-	FPC               bool // Fast Probabilistic Consensus
-	
+	QuantumResistant bool // Corona lattice-based
+	BLSAggregation   bool // BLS signature aggregation
+	VerkleWitnesses  bool // Verkle tree witnesses
+	FPC              bool // Fast Probabilistic Consensus
+
 	// Cryptographic features
-	FHE               bool // Fully Homomorphic Encryption
-	MPC               bool // Multi-Party Computation
-	ZKProofs          bool // Zero-Knowledge Proofs
-	PostQuantum       bool // Post-quantum cryptography
-	
+	FHE         bool // Fully Homomorphic Encryption
+	MPC         bool // Multi-Party Computation
+	ZKProofs    bool // Zero-Knowledge Proofs
+	PostQuantum bool // Post-quantum cryptography
+
 	// Execution features
-	GPU               bool // GPU acceleration
-	FPGA              bool // FPGA acceleration
-	DPDK              bool // Kernel bypass networking
-	RDMA              bool // Remote Direct Memory Access
-	
+	GPU  bool // GPU acceleration
+	FPGA bool // FPGA acceleration
+	DPDK bool // Kernel bypass networking
+	RDMA bool // Remote Direct Memory Access
+
 	// Application features
-	DEX               bool // Decentralized exchange
-	AI                bool // AI/ML capabilities
-	Oracle            bool // Oracle functionality
-	Privacy           bool // Privacy features
-	Storage           bool // Decentralized storage
+	DEX     bool // Decentralized exchange
+	AI      bool // AI/ML capabilities
+	Oracle  bool // Oracle functionality
+	Privacy bool // Privacy features
+	Storage bool // Decentralized storage
 }
 
 // =============================================================================
@@ -82,13 +82,13 @@ type FeatureSet struct {
 // =============================================================================
 
 type DEXExtension struct {
-	OrderBooks     map[string]*OrderBook
-	Clearinghouse  *Clearinghouse
-	FundingEngine  *FundingEngine
-	Bridge         *CrossChainBridge
-	Vaults         *VaultManager
-	StakingPools   *StakingManager
-	Multisig       *MultisigManager
+	OrderBooks    map[string]*OrderBook
+	Clearinghouse *Clearinghouse
+	FundingEngine *FundingEngine
+	Bridge        *CrossChainBridge
+	Vaults        *VaultManager
+	StakingPools  *StakingManager
+	Multisig      *MultisigManager
 }
 
 func (e *DEXExtension) Name() string { return "dex" }
@@ -102,11 +102,11 @@ func (e *DEXExtension) Initialize(builder *VMBuilder) error {
 	e.Vaults = NewVaultManager()
 	e.StakingPools = NewStakingManager()
 	e.Multisig = NewMultisigManager()
-	
+
 	// Register DEX-specific state handlers
-	builder.State.RegisterHandler("orderbook", e.handleOrderBookState)
-	builder.State.RegisterHandler("positions", e.handlePositionState)
-	
+	_ = builder.State.RegisterHandler("orderbook", e.handleOrderBookState) //nolint:errcheck
+	_ = builder.State.RegisterHandler("positions", e.handlePositionState)  //nolint:errcheck
+
 	return nil
 }
 
@@ -150,11 +150,11 @@ func (e *DEXExtension) runFunding(ctx context.Context) {
 // =============================================================================
 
 type AIExtension struct {
-	ModelRegistry    *ModelRegistry
-	InferenceEngine  *InferenceEngine
-	AttestationGen   *AttestationGenerator
-	ProofVerifier    *ProofVerifier
-	TrainingManager  *TrainingManager
+	ModelRegistry   *ModelRegistry
+	InferenceEngine *InferenceEngine
+	AttestationGen  *AttestationGenerator
+	ProofVerifier   *ProofVerifier
+	TrainingManager *TrainingManager
 }
 
 type ModelRegistry struct {
@@ -173,9 +173,9 @@ type AIModel struct {
 }
 
 type ModelPerformance struct {
-	Accuracy    float64
-	Latency     time.Duration
-	Throughput  float64
+	Accuracy   float64
+	Latency    time.Duration
+	Throughput float64
 }
 
 func (e *AIExtension) Name() string { return "ai" }
@@ -188,12 +188,12 @@ func (e *AIExtension) Initialize(builder *VMBuilder) error {
 	e.AttestationGen = NewAttestationGenerator()
 	e.ProofVerifier = NewProofVerifier()
 	e.TrainingManager = NewTrainingManager()
-	
+
 	// Enable GPU if available
 	if builder.Features.GPU {
 		e.InferenceEngine.EnableGPU()
 	}
-	
+
 	return nil
 }
 
@@ -219,18 +219,18 @@ func (e *AIExtension) runAttestationService(ctx context.Context) {
 // =============================================================================
 
 type FHEExtension struct {
-	Scheme          FHEScheme
-	KeyManager      *FHEKeyManager
-	EncryptedState  map[string]*EncryptedValue
-	Computer        *HomomorphicComputer
+	Scheme         FHEScheme
+	KeyManager     *FHEKeyManager
+	EncryptedState map[string]*EncryptedValue
+	Computer       *HomomorphicComputer
 }
 
 type FHEScheme string
 
 const (
-	SchemeCKKS  FHEScheme = "ckks"  // For approximate arithmetic
-	SchemeBFV   FHEScheme = "bfv"   // For exact arithmetic
-	SchemeTFHE  FHEScheme = "tfhe"  // For boolean circuits
+	SchemeCKKS FHEScheme = "ckks" // For approximate arithmetic
+	SchemeBFV  FHEScheme = "bfv"  // For exact arithmetic
+	SchemeTFHE FHEScheme = "tfhe" // For boolean circuits
 )
 
 type EncryptedValue struct {
@@ -267,31 +267,31 @@ func (e *FHEExtension) Initialize(builder *VMBuilder) error {
 	e.KeyManager = NewFHEKeyManager()
 	e.EncryptedState = make(map[string]*EncryptedValue)
 	e.Computer = &HomomorphicComputer{scheme: e.Scheme}
-	
+
 	return nil
 }
 
 func (e *FHEExtension) Start(ctx context.Context) error { return nil }
-func (e *FHEExtension) Stop() error { return nil }
+func (e *FHEExtension) Stop() error                     { return nil }
 
 // =============================================================================
 // MPC Extension - For MPCVM (Multi-Party Computation VM)
 // =============================================================================
 
 type MPCExtension struct {
-	Protocol      MPCProtocol
-	Parties       map[string]*Party
-	SecretShares  map[string][]*SecretShare
-	Computer      *MPCComputer
+	Protocol     MPCProtocol
+	Parties      map[string]*Party
+	SecretShares map[string][]*SecretShare
+	Computer     *MPCComputer
 }
 
 type MPCProtocol string
 
 const (
-	ProtocolGMW   MPCProtocol = "gmw"   // Goldreich-Micali-Wigderson
-	ProtocolBGW   MPCProtocol = "bgw"   // Ben-Or-Goldwasser-Wigderson
-	ProtocolSPDZ  MPCProtocol = "spdz"  // Fast MPC with preprocessing
-	ProtocolABY   MPCProtocol = "aby"   // Mixed protocol
+	ProtocolGMW  MPCProtocol = "gmw"  // Goldreich-Micali-Wigderson
+	ProtocolBGW  MPCProtocol = "bgw"  // Ben-Or-Goldwasser-Wigderson
+	ProtocolSPDZ MPCProtocol = "spdz" // Fast MPC with preprocessing
+	ProtocolABY  MPCProtocol = "aby"  // Mixed protocol
 )
 
 type Party struct {
@@ -318,12 +318,12 @@ func (e *MPCExtension) Initialize(builder *VMBuilder) error {
 	e.Parties = make(map[string]*Party)
 	e.SecretShares = make(map[string][]*SecretShare)
 	e.Computer = &MPCComputer{protocol: e.Protocol}
-	
+
 	return nil
 }
 
 func (e *MPCExtension) Start(ctx context.Context) error { return nil }
-func (e *MPCExtension) Stop() error { return nil }
+func (e *MPCExtension) Stop() error                     { return nil }
 
 // =============================================================================
 // Quantum Extension - For QuantumVM (Post-Quantum Security)
@@ -349,11 +349,11 @@ type CoronaConsensus struct {
 }
 
 type QuantumCertificate struct {
-	BlockID        ids.ID
-	Round          int
-	LatticeProof   []byte
-	BLSSignature   []byte
-	VerkleWitness  []byte
+	BlockID       ids.ID
+	Round         int
+	LatticeProof  []byte
+	BLSSignature  []byte
+	VerkleWitness []byte
 }
 
 type QuantumProofSystem struct {
@@ -370,26 +370,26 @@ func (e *QuantumExtension) Initialize(builder *VMBuilder) error {
 		StandardDeviation: 3.2,
 		SecurityLevel:     256,
 	}
-	
+
 	e.Corona = &CoronaConsensus{
 		Rounds:       2,
 		Threshold:    0.67,
 		Certificates: make(map[ids.ID]*QuantumCertificate),
 	}
-	
+
 	e.QuantumProofs = &QuantumProofSystem{
 		ProofType: "lattice",
 	}
-	
+
 	// Enable quantum features
 	builder.Features.QuantumResistant = true
 	builder.Features.PostQuantum = true
-	
+
 	return nil
 }
 
 func (e *QuantumExtension) Start(ctx context.Context) error { return nil }
-func (e *QuantumExtension) Stop() error { return nil }
+func (e *QuantumExtension) Stop() error                     { return nil }
 
 // =============================================================================
 // Helper Functions for SDK Extensions
@@ -427,17 +427,17 @@ type NetworkManager interface {
 }
 
 // Factory functions for extensions
-func NewClearinghouse() *Clearinghouse { return &Clearinghouse{} }
-func NewFundingEngine() *FundingEngine { return &FundingEngine{} }
-func NewCrossChainBridge() *CrossChainBridge { return &CrossChainBridge{} }
-func NewVaultManager() *VaultManager { return &VaultManager{} }
-func NewStakingManager() *StakingManager { return &StakingManager{} }
-func NewMultisigManager() *MultisigManager { return &MultisigManager{} }
-func NewInferenceEngine() *InferenceEngine { return &InferenceEngine{} }
+func NewClearinghouse() *Clearinghouse               { return &Clearinghouse{} }
+func NewFundingEngine() *FundingEngine               { return &FundingEngine{} }
+func NewCrossChainBridge() *CrossChainBridge         { return &CrossChainBridge{} }
+func NewVaultManager() *VaultManager                 { return &VaultManager{} }
+func NewStakingManager() *StakingManager             { return &StakingManager{} }
+func NewMultisigManager() *MultisigManager           { return &MultisigManager{} }
+func NewInferenceEngine() *InferenceEngine           { return &InferenceEngine{} }
 func NewAttestationGenerator() *AttestationGenerator { return &AttestationGenerator{} }
-func NewProofVerifier() *ProofVerifier { return &ProofVerifier{} }
-func NewTrainingManager() *TrainingManager { return &TrainingManager{} }
-func NewFHEKeyManager() *FHEKeyManager { return &FHEKeyManager{} }
+func NewProofVerifier() *ProofVerifier               { return &ProofVerifier{} }
+func NewTrainingManager() *TrainingManager           { return &TrainingManager{} }
+func NewFHEKeyManager() *FHEKeyManager               { return &FHEKeyManager{} }
 
 // Stub types for extensions
 type OrderBook struct{}
@@ -448,7 +448,9 @@ type VaultManager struct{}
 type StakingManager struct{}
 type MultisigManager struct{}
 type InferenceEngine struct{ gpuEnabled bool }
+
 func (e *InferenceEngine) EnableGPU() { e.gpuEnabled = true }
+
 type AttestationGenerator struct{}
 type ProofVerifier struct{}
 type TrainingManager struct{}
@@ -471,7 +473,7 @@ func NewVMBuilder(ctx *Context, db database.Database) *VMBuilder {
 func (b *VMBuilder) WithExtension(ext VMExtension) *VMBuilder {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	
+
 	b.Extensions[ext.Name()] = ext
 	return b
 }
@@ -490,7 +492,7 @@ func (b *VMBuilder) Build() error {
 			return fmt.Errorf("failed to initialize %s: %w", ext.Name(), err)
 		}
 	}
-	
+
 	// Configure consensus based on features
 	if b.Features.QuantumResistant {
 		b.Consensus.SetQuantumMode(true)
@@ -501,29 +503,29 @@ func (b *VMBuilder) Build() error {
 	if b.Features.VerkleWitnesses {
 		b.Consensus.SetVerkleWitnesses(true)
 	}
-	
+
 	// Configure network based on features
 	if b.Features.DPDK {
-		b.Network.EnableDPDK()
+		_ = b.Network.EnableDPDK() //nolint:errcheck
 	}
 	if b.Features.RDMA {
-		b.Network.EnableRDMA()
+		_ = b.Network.EnableRDMA() //nolint:errcheck
 	}
-	
+
 	return nil
 }
 
 // Start starts the VM
 func (b *VMBuilder) Start() error {
 	ctx := context.Background()
-	
+
 	// Start all extensions
 	for _, ext := range b.Extensions {
 		if err := ext.Start(ctx); err != nil {
 			return fmt.Errorf("failed to start %s: %w", ext.Name(), err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -535,6 +537,6 @@ func (b *VMBuilder) Stop() error {
 			log.Warn("failed to stop extension", "name", ext.Name(), "error", err)
 		}
 	}
-	
+
 	return nil
 }

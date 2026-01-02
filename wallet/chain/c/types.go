@@ -152,7 +152,7 @@ func init() {
 	// Initialize codec
 	Codec = codec.NewDefaultManager()
 	lcodec := linearcodec.NewDefault()
-	Codec.RegisterCodec(codecVersion, lcodec)
+	_ = Codec.RegisterCodec(codecVersion, lcodec) //nolint:errcheck // init only fails on invalid version
 }
 
 // CalculateDynamicFee calculates the dynamic fee based on EIP-1559
