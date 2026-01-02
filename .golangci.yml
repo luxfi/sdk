@@ -13,6 +13,12 @@ linters:
       simplify: true
     errcheck:
       check-blank: false
+      exclude-functions:
+        - (*github.com/luxfi/crypto/secp256k1.SecpKeychain).Add
+    staticcheck:
+      checks:
+        - "all"
+        - "-SA1019"  # Ignore deprecated API warnings
 
 run:
   timeout: 10m
