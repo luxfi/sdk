@@ -15,10 +15,11 @@ import (
 
 // NetworkManager handles all network operations using netrunner
 type NetworkManager struct {
-	config          *config.NetworkConfig
-	logger          log.Logger
-	networks        map[string]*Network
-	netrunnerClient *netrunner.Client
+	config   *config.NetworkConfig
+	logger   log.Logger
+	networks map[string]*Network
+	// TODO: netrunnerClient will be used for network orchestration
+	_ *netrunner.Client
 }
 
 // Network represents a managed Lux network
