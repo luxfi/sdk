@@ -11,6 +11,7 @@ import (
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/math"
+	"github.com/luxfi/geth/core/types"
 )
 
 // GenesisBuilder helps construct EVM genesis configurations
@@ -25,7 +26,7 @@ func NewGenesisBuilder() *GenesisBuilder {
 			Config:     DefaultChainConfig(),
 			Difficulty: big.NewInt(0),
 			GasLimit:   8_000_000,
-			Alloc:      make(core.GenesisAlloc),
+			Alloc:      make(types.GenesisAlloc),
 		},
 	}
 }
@@ -57,9 +58,9 @@ func (b *GenesisBuilder) WithExtraData(extraData []byte) *GenesisBuilder {
 // WithAllocation adds an account allocation
 func (b *GenesisBuilder) WithAllocation(address common.Address, balance *big.Int) *GenesisBuilder {
 	if b.genesis.Alloc == nil {
-		b.genesis.Alloc = make(core.GenesisAlloc)
+		b.genesis.Alloc = make(types.GenesisAlloc)
 	}
-	b.genesis.Alloc[address] = core.GenesisAccount{
+	b.genesis.Alloc[address] = types.Account{
 		Balance: balance,
 	}
 	return b
@@ -68,10 +69,10 @@ func (b *GenesisBuilder) WithAllocation(address common.Address, balance *big.Int
 // WithAllocations adds multiple account allocations
 func (b *GenesisBuilder) WithAllocations(allocations map[common.Address]*big.Int) *GenesisBuilder {
 	if b.genesis.Alloc == nil {
-		b.genesis.Alloc = make(core.GenesisAlloc)
+		b.genesis.Alloc = make(types.GenesisAlloc)
 	}
 	for address, balance := range allocations {
-		b.genesis.Alloc[address] = core.GenesisAccount{
+		b.genesis.Alloc[address] = types.Account{
 			Balance: balance,
 		}
 	}
@@ -81,9 +82,9 @@ func (b *GenesisBuilder) WithAllocations(allocations map[common.Address]*big.Int
 // WithContract adds a contract with code and storage
 func (b *GenesisBuilder) WithContract(address common.Address, balance *big.Int, code []byte, storage map[common.Hash]common.Hash) *GenesisBuilder {
 	if b.genesis.Alloc == nil {
-		b.genesis.Alloc = make(core.GenesisAlloc)
+		b.genesis.Alloc = make(types.GenesisAlloc)
 	}
-	b.genesis.Alloc[address] = core.GenesisAccount{
+	b.genesis.Alloc[address] = types.Account{
 		Balance: balance,
 		Code:    code,
 		Storage: storage,

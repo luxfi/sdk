@@ -22,9 +22,6 @@ linters:
     staticcheck:
       checks:
         - "all"
-        - "-SA1019"   # Ignore deprecated API warnings
-        - "-ST*"      # Ignore all style checks
-        - "-QF*"      # Ignore quick fix suggestions
 
 run:
   timeout: 10m
