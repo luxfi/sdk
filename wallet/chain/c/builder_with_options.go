@@ -6,7 +6,6 @@ package c
 import (
 	"math/big"
 
-
 	"github.com/luxfi/ids"
 	"github.com/luxfi/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/primary/common"

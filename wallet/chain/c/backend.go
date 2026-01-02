@@ -10,7 +10,6 @@ import (
 	"math/big"
 	"sync"
 
-
 	"github.com/luxfi/database"
 	"github.com/luxfi/node/utils/math"
 	"github.com/luxfi/node/vms/components/lux"

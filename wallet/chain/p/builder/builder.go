@@ -9,14 +9,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils"
 	"github.com/luxfi/const"
 	"github.com/luxfi/crypto/bls"
-	"github.com/luxfi/node/utils/math"
+	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/vms/components/lux"
+	"github.com/luxfi/node/utils"
+	"github.com/luxfi/node/utils/math"
 	"github.com/luxfi/node/vms/components/gas"
+	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
 	"github.com/luxfi/node/vms/platformvm/fx"
 	"github.com/luxfi/node/vms/platformvm/signer"
@@ -488,7 +488,7 @@ func (b *builder) NewAddChainValidatorTx(
 ) (*txs.AddChainValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
-//
+	//
 	ops := common.NewOptions(options)
 	chainAuth, err := b.authorize(vdr.Chain, ops)
 	if err != nil {
@@ -545,7 +545,7 @@ func (b *builder) NewRemoveChainValidatorTx(
 ) (*txs.RemoveChainValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
-//
+	//
 	ops := common.NewOptions(options)
 	chainAuth, err := b.authorize(chainID, ops)
 	if err != nil {
@@ -721,7 +721,7 @@ func (b *builder) NewCreateSubnetTx(
 ) (*txs.CreateSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
-//
+	//
 	ops := common.NewOptions(options)
 	memo := ops.Memo()
 	memoComplexity := gas.Dimensions{
@@ -738,7 +738,7 @@ func (b *builder) NewCreateSubnetTx(
 	if err != nil {
 		return nil, err
 	}
-//
+	//
 	inputs, outputs, _, err := b.spend(
 		toBurn,
 		toStake,
@@ -750,7 +750,7 @@ func (b *builder) NewCreateSubnetTx(
 	if err != nil {
 		return nil, err
 	}
-//
+	//
 	utils.Sort(owner.Addrs)
 	tx := &txs.CreateSubnetTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
@@ -1139,7 +1139,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID     = b.context.XAssetID
+		luxAssetID      = b.context.XAssetID
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
 		importedAmounts = make(map[ids.ID]uint64)
@@ -1882,7 +1882,7 @@ func (b *builder) spend(
 	// If excessLUX <= feeWithChange, we don't add the change output
 	// and we don't modify s.complexity (it stays without the change output)
 
-	utils.Sort(s.inputs)                                     // sort inputs
+	utils.Sort(s.inputs)                                    // sort inputs
 	lux.SortTransferableOutputs(s.changeOutputs, txs.Codec) // sort the change outputs
 	lux.SortTransferableOutputs(s.stakeOutputs, txs.Codec)  // sort stake outputs
 	return s.inputs, s.changeOutputs, s.stakeOutputs, nil

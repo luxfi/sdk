@@ -9,10 +9,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/geth/accounts/abi/bind"
-	"github.com/luxfi/geth/ethclient"
 	"github.com/luxfi/evm/core"
+	"github.com/luxfi/geth/accounts/abi/bind"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/ethclient"
 	luxlog "github.com/luxfi/log"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/contract"

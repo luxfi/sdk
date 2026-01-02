@@ -50,9 +50,9 @@ func NewContextFromClients(
 func newConsensusContext(c *Context) (*consensusctx.Context, error) {
 	lookup := ids.NewAliaser()
 	return &consensusctx.Context{
-		NetworkID:   c.NetworkID,
-		ChainID:     c.BlockchainID,
+		NetworkID: c.NetworkID,
+		ChainID:   c.BlockchainID,
 		XAssetID:  c.XAssetID,
-		Log:         log.NoLog{},
+		Log:       log.NoLog{},
 	}, lookup.Alias(c.BlockchainID, Alias)
 }

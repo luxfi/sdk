@@ -22,6 +22,10 @@ issues:
     - path: _test\.go
       linters:
         - errcheck
+    # Exclude deprecated API warnings - we track these separately
+    - linters:
+        - staticcheck
+      text: "SA1019"
 
 run:
   timeout: 10m
