@@ -1,3 +1,5 @@
+version: "2"
+
 linters:
   enable:
     - gofmt
@@ -8,7 +10,6 @@ linters:
     - typecheck
   disable:
     - gosec # We'll handle security separately
-    - unused # Too strict for SDK development
 
 linters-settings:
   gofmt:
@@ -17,6 +18,9 @@ linters-settings:
     check-blank: false
 
 issues:
+  exclude-dirs:
+    - .archive
+    - examples
   exclude-rules:
     # Exclude some linters from running on tests files
     - path: _test\.go
@@ -29,6 +33,3 @@ issues:
 
 run:
   timeout: 10m
-  skip-dirs:
-    - .archive
-    - examples
