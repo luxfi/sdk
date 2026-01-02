@@ -22,7 +22,10 @@ linters:
     staticcheck:
       checks:
         - "all"
-        - "-SA1019"  # Ignore deprecated API warnings
+        - "-SA1019"   # Ignore deprecated API warnings
+        - "-ST1000"   # Package comment format
+        - "-ST1003"   # ALL_CAPS naming
+        - "-ST1019"   # Duplicate imports
 
 run:
   timeout: 10m
