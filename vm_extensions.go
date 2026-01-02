@@ -159,7 +159,8 @@ type AIExtension struct {
 
 type ModelRegistry struct {
 	Models map[string]*AIModel
-	mu     sync.RWMutex
+	// TODO: mu will be used for concurrent access
+	_ sync.RWMutex
 }
 
 type AIModel struct {
