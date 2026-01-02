@@ -1,16 +1,20 @@
 version: "2"
 
+formatters:
+  enable:
+    - gofmt
+  settings:
+    gofmt:
+      simplify: true
+
 linters:
   default: none
   enable:
-    - gofmt
     - govet
     - errcheck
     - staticcheck
     - ineffassign
   settings:
-    gofmt:
-      simplify: true
     errcheck:
       check-blank: false
       exclude-functions:
