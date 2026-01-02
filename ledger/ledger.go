@@ -191,13 +191,27 @@ func (dev *LedgerDevice) SignHash(hash []byte, indices []uint32) ([][]byte, erro
 	return dev.Sign(hash, indices)
 }
 
-// Sign signs a transaction with the ledger device for multiple indices
+// Sign signs a hash with the ledger device for multiple indices
 func (dev *LedgerDevice) Sign(hash []byte, indices []uint32) ([][]byte, error) {
-	signatures := make([][]byte, len(indices))
+	// Convert indices to BIP44 paths
+	pathPrefix := "m/44'/9000'/0'/0"
+	signingPaths := make([]string, len(indices))
 	for i, index := range indices {
-		sig, err := dev.device.Sign(hash, index)
-		if err != nil {
-			return nil, fmt.Errorf("failed to sign with ledger at index %d: %w", index, err)
+		signingPaths[i] = fmt.Sprintf("%d", index)
+	}
+
+	// Use SignHashFull which takes paths as strings
+	resp, err := dev.device.SignHashFull(pathPrefix, signingPaths, hash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign with ledger: %w", err)
+	}
+
+	// Extract signatures in order of the signing paths
+	signatures := make([][]byte, len(signingPaths))
+	for i, path := range signingPaths {
+		sig, ok := resp.Signature[path]
+		if !ok {
+			return nil, fmt.Errorf("missing signature for path %s", path)
 		}
 		signatures[i] = sig
 	}
