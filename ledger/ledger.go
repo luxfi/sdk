@@ -11,7 +11,6 @@ import (
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
 	"github.com/luxfi/node/version"
-	"github.com/luxfi/node/vms/platformvm"
 )
 
 const (
@@ -124,7 +123,6 @@ func (dev *LedgerDevice) FindFunds(
 	if len(network.Nodes) > 0 && network.Nodes[0] != nil {
 		endpoint = network.Nodes[0].Endpoint
 	}
-	pClient := platformvm.NewClient(endpoint)
 	totalBalance := uint64(0)
 	indices := []uint32{}
 	if maxIndex == 0 {
@@ -144,14 +142,13 @@ func (dev *LedgerDevice) FindFunds(
 			return nil, fmt.Errorf("failed to parse address: %w", err)
 		}
 
-		ctx, cancel := utils.GetAPIContext()
-		balanceResp, err := pClient.GetBalance(ctx, []ids.ShortID{addrID})
-		cancel()
+		// Get balance using UTXO-based approach
+		balance, err := utils.GetAddressBalance(addrID, endpoint)
 		if err != nil {
 			return nil, err
 		}
-		if balanceResp.Balance > 0 {
-			totalBalance += uint64(balanceResp.Balance)
+		if balance > 0 {
+			totalBalance += balance
 			indices = append(indices, index)
 		}
 		if totalBalance >= amount {
