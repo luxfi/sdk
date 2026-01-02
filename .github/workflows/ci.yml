@@ -29,12 +29,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Install golangci-lint
-      run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.6
-
     - name: Run golangci-lint
-      run: golangci-lint run --timeout=10m
+      uses: golangci/golangci-lint-action@v8
+      with:
+        version: v2.0.2
+        args: --timeout=10m
 
   test:
     name: Test
@@ -152,7 +151,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
