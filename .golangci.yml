@@ -13,6 +13,11 @@ linters:
     - govet
     - staticcheck
     - ineffassign
+  exclusions:
+    generated: lax
+    paths:
+      - .archive
+      - examples
   settings:
     staticcheck:
       checks:
@@ -23,9 +28,3 @@ linters:
 
 run:
   timeout: 10m
-  exclude-dirs:
-    - .archive
-    - examples
-
-issues:
-  exclude-generated: lax
