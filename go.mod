@@ -44,7 +44,7 @@ require (
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/keychain v1.0.1
-	github.com/luxfi/ledger v1.1.2
+	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/lpm v1.0.3
 	github.com/luxfi/math v1.2.0
 	github.com/luxfi/netrunner v1.14.35
