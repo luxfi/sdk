@@ -75,6 +75,17 @@ func (app *Lux) GetNetDir() string {
 	return filepath.Join(app.baseDir, constants.NetDir)
 }
 
+// GetDevDir returns the dev mode data directory (~/.lux/dev/)
+func (app *Lux) GetDevDir() string {
+	return filepath.Join(app.baseDir, constants.DevDir)
+}
+
+// GetChainConfigDir returns the chain config directory for luxd's --chain-config-dir
+// This is the same as GetChainsDir - chain configs live alongside chain definitions
+func (app *Lux) GetChainConfigDir() string {
+	return app.GetChainsDir()
+}
+
 // GetSubnetDir is deprecated, use GetChainsDir instead
 func (app *Lux) GetSubnetDir() string {
 	return app.GetChainsDir()
