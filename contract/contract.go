@@ -16,10 +16,10 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/common/hexutil"
 	"github.com/luxfi/geth/core/types"
-	luxWarp "github.com/luxfi/warp"
 	"github.com/luxfi/sdk/evm"
 	sdkUtils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/ux"
+	luxWarp "github.com/luxfi/warp"
 )
 
 var ErrFailedReceiptStatus = fmt.Errorf("failed receipt status")

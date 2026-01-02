@@ -16,7 +16,6 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/warp"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
@@ -24,12 +23,12 @@ import (
 	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/ux"
 	"github.com/luxfi/sdk/validator"
+	"github.com/luxfi/warp"
 	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/crypto"
 )
-
 
 func InitializeValidatorRemoval(
 	rpcURL string,

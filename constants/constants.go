@@ -18,14 +18,14 @@ const (
 	LuxCliBinDir  = "bin"
 	RunDir        = "runs"
 
-	SuffixSeparator             = "_"
-	SidecarFileName             = "sidecar.json"
-	GenesisFileName             = "genesis.json"
+	SuffixSeparator          = "_"
+	SidecarFileName          = "sidecar.json"
+	GenesisFileName          = "genesis.json"
 	ElasticNetConfigFileName = "elastic_net_config.json"
-	NodeConfigJSONFile          = "node-config.json"
-	SidecarSuffix               = SuffixSeparator + SidecarFileName
-	GenesisSuffix               = SuffixSeparator + GenesisFileName
-	NodeFileName                = "node.json"
+	NodeConfigJSONFile       = "node-config.json"
+	SidecarSuffix            = SuffixSeparator + SidecarFileName
+	GenesisSuffix            = SuffixSeparator + GenesisFileName
+	NodeFileName             = "node.json"
 
 	SidecarVersion = "1.4.0"
 
@@ -96,11 +96,11 @@ const (
 	AWSCloudServerRunningState = "running"
 
 	// this depends on bootstrap snapshot
-	LocalAPIEndpoint  = "http://127.0.0.1:9630"
-	DevnetAPIEndpoint = "https://api.lux-dev.network"
-	LocalNetworkID           = 96369 // Use Lux mainnet ID for local development
-	AvalancheLocalNetworkID  = 31337 // Avalanche's local network ID (used by netrunner in some configs)
-	NetrunnerLocalNetworkID  = 1337  // Network ID used by netrunner for local testing
+	LocalAPIEndpoint        = "http://127.0.0.1:9630"
+	DevnetAPIEndpoint       = "https://api.lux-dev.network"
+	LocalNetworkID          = 96369 // Use Lux mainnet ID for local development
+	AvalancheLocalNetworkID = 31337 // Avalanche's local network ID (used by netrunner in some configs)
+	NetrunnerLocalNetworkID = 1337  // Network ID used by netrunner for local testing
 
 	DefaultTokenName = "TEST"
 
@@ -156,10 +156,10 @@ const (
 	EVMInstallDir   = "evm"
 
 	// Directories
-	ChainsDir = "chains" // Canonical chain definitions (genesis, sidecar, config)
-	NetDir    = "nets"   // Deprecated: use ChainsDir instead
-	DevDir    = "dev"    // Dev mode data directory
-	ReposDir  = "repos"
+	ChainsDir        = "chains" // Canonical chain definitions (genesis, sidecar, config)
+	NetDir           = "nets"   // Deprecated: use ChainsDir instead
+	DevDir           = "dev"    // Dev mode data directory
+	ReposDir         = "repos"
 	SnapshotsDirName = "snapshots"
 	CustomVMDir      = "customvms"
 	PluginDir        = "plugins"

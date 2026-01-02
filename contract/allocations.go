@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/geth/common"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/geth/common"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"

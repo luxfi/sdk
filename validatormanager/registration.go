@@ -11,16 +11,14 @@ import (
 	"math/big"
 	"time"
 
+	luxdconstants "github.com/luxfi/const"
 	"github.com/luxfi/crypto"
 	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
-	luxdconstants "github.com/luxfi/const"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/warp"
-	warpPayload "github.com/luxfi/warp/payload"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
@@ -32,6 +30,8 @@ import (
 	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	sdkwarp "github.com/luxfi/sdk/warp"
+	"github.com/luxfi/warp"
+	warpPayload "github.com/luxfi/warp/payload"
 )
 
 func InitializeValidatorRegistrationPoSNative(
