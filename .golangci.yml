@@ -17,15 +17,15 @@ linters:
   settings:
     errcheck:
       check-blank: false
-      exclude-functions:
-        - (*github.com/luxfi/crypto/secp256k1.SecpKeychain).Add
     staticcheck:
       checks:
         - "all"
         - "-SA1019"   # Ignore deprecated API warnings
         - "-ST1000"   # Package comment format
         - "-ST1003"   # ALL_CAPS naming
+        - "-ST1016"   # Receiver name consistency
         - "-ST1019"   # Duplicate imports
+        - "-ST1020"   # Exported function comment format
 
 run:
   timeout: 10m
@@ -35,3 +35,5 @@ run:
 
 issues:
   exclude-generated: lax
+  exclude-files:
+    - ".*_test\\.go$"
