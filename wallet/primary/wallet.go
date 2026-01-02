@@ -8,15 +8,15 @@ import (
 
 	gethcommon "github.com/luxfi/geth/common"
 
+	"github.com/luxfi/const"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/const"
 	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
-	"github.com/luxfi/node/wallet/keychain"
 	"github.com/luxfi/sdk/wallet/primary/common"
 
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
@@ -116,7 +116,7 @@ type WalletConfig struct {
 	URI string // required
 	// Keys to use for signing all transactions.
 	LUXKeychain keychain.Keychain // required
-	EthKeychain c.EthKeychain      // required
+	EthKeychain c.EthKeychain     // required
 	// Set of P-chain transactions that the wallet should know about to be able
 	// to generate transactions.
 	PChainTxs map[ids.ID]*txs.Tx // optional

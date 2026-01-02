@@ -15,10 +15,10 @@ import (
 	"github.com/luxfi/node/utils"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/components/verify"
+	"github.com/luxfi/node/vms/exchangevm/txs"
 	"github.com/luxfi/node/vms/nftfx"
 	"github.com/luxfi/node/vms/propertyfx"
 	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/vms/exchangevm/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
 )
@@ -153,7 +153,7 @@ type Builder interface {
 type Context struct {
 	NetworkID        uint32
 	BlockchainID     ids.ID
-	XAssetID       ids.ID
+	XAssetID         ids.ID
 	BaseTxFee        uint64
 	CreateAssetTxFee uint64
 }

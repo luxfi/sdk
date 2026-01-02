@@ -11,11 +11,11 @@ import (
 	gethcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 
+	"github.com/luxfi/const"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/node/api/info"
 	"github.com/luxfi/node/codec"
-	"github.com/luxfi/const"
 	"github.com/luxfi/node/utils/rpc"
 	"github.com/luxfi/node/vms/components/lux"
 	"github.com/luxfi/node/vms/platformvm"
@@ -24,8 +24,8 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/x"
 
 	ethcommon "github.com/luxfi/geth/common"
-	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	ptxs "github.com/luxfi/node/vms/platformvm/txs"
+	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
 )
@@ -58,8 +58,8 @@ type UTXOClient interface {
 
 // XClient is a client for interacting with the X-Chain
 type XClient struct {
-	requester   rpc.EndpointRequester
-	networkID   uint32
+	requester    rpc.EndpointRequester
+	networkID    uint32
 	blockchainID ids.ID
 }
 
@@ -79,7 +79,7 @@ func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *X
 		requester: rpc.NewEndpointRequester(
 			fmt.Sprintf("%s/ext/bc/%s", uri, blockchainID.String()),
 		),
-		networkID:   networkID,
+		networkID:    networkID,
 		blockchainID: blockchainID,
 	}
 }
@@ -225,7 +225,7 @@ func FetchState(
 	// For X-chain, we need to get the LUX asset ID and fees
 	// TODO: Get these from the xClient or infoClient
 	luxAssetID := pCTX.XAssetID
-	baseTxFee := uint64(1000000)        // 0.001 LUX
+	baseTxFee := uint64(1000000)         // 0.001 LUX
 	createAssetTxFee := uint64(10000000) // 0.01 LUX
 
 	xCTX, err := x.NewContextFromClients(ctx, infoClient, luxAssetID, baseTxFee, createAssetTxFee)
@@ -427,25 +427,25 @@ func parseAddress(addr string) (chainPrefix, hrp string, addrBytes []byte, err e
 	if idx < len(addr) {
 		parts = append(parts, addr[idx:])
 	}
-	
+
 	if len(parts) != 2 {
 		return "", "", nil, fmt.Errorf("invalid address format: %s", addr)
 	}
 	chainPrefix = parts[0]
 	bech32Addr := parts[1]
-	
+
 	// Decode bech32
 	hrp, data, err := bech32.Decode(bech32Addr)
 	if err != nil {
 		return "", "", nil, fmt.Errorf("failed to decode bech32: %w", err)
 	}
-	
+
 	// Convert from 5-bit to 8-bit groups
 	addrBytes, err = bech32.ConvertBits(data, 5, 8, false)
 	if err != nil {
 		return "", "", nil, fmt.Errorf("failed to convert address bits: %w", err)
 	}
-	
+
 	return chainPrefix, hrp, addrBytes, nil
 }
 
