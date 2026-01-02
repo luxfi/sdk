@@ -69,7 +69,7 @@ jobs:
     - name: Upload coverage
       uses: codecov/codecov-action@v5
       with:
-        file: ./coverage.out
+        files: ./coverage.out
         flags: unittests
         name: codecov-umbrella
 
@@ -124,13 +124,15 @@ jobs:
 
     - name: Run benchmarks
       run: |
-        go test -bench=. -benchmem -run=^$ ./...
+        go test -bench=. -benchmem -run=^$ ./... | tee benchmark.txt
 
     - name: Upload benchmark results
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: benchmark-results
         path: benchmark.txt
+        if-no-files-found: ignore
 
   security:
     name: Security Scan
