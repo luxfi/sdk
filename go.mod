@@ -37,7 +37,7 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/bft v0.1.0
 	github.com/luxfi/consensus v1.22.46
-	github.com/luxfi/const v1.4.0
+	github.com/luxfi/const v1.4.1
 	github.com/luxfi/database v1.2.17
 	github.com/luxfi/evm v0.8.24
 	github.com/luxfi/genesis v1.5.17
