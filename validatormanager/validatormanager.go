@@ -9,9 +9,9 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/luxfi/evm/core"
 	"github.com/luxfi/geth/accounts/abi/bind"
 	"github.com/luxfi/geth/common"
+	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/ethclient"
 	luxlog "github.com/luxfi/log"
 	blockchainSDK "github.com/luxfi/sdk/blockchain"
@@ -25,10 +25,10 @@ import (
 var deployedValidatorMessagesV2_0_0Bytecode []byte
 
 func AddValidatorMessagesV2_0_0ContractToAllocations(
-	allocs core.GenesisAlloc,
+	allocs types.GenesisAlloc,
 ) {
 	deployedValidatorMessagesBytes := common.FromHex(strings.TrimSpace(string(deployedValidatorMessagesV2_0_0Bytecode)))
-	allocs[common.Address(luxcrypto.HexToAddress(ValidatorMessagesContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(ValidatorMessagesContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedValidatorMessagesBytes,
 		Nonce:   1,
@@ -47,12 +47,12 @@ func fillValidatorMessagesAddressPlaceholder(contract string) string {
 var deployedPoAValidatorManagerV1_0_0Bytecode []byte
 
 func AddPoAValidatorManagerV1_0_0ContractToAllocations(
-	allocs core.GenesisAlloc,
+	allocs types.GenesisAlloc,
 ) {
 	deployedPoaValidatorManagerString := strings.TrimSpace(string(deployedPoAValidatorManagerV1_0_0Bytecode))
 	deployedPoaValidatorManagerString = fillValidatorMessagesAddressPlaceholder(deployedPoaValidatorManagerString)
 	deployedPoaValidatorManagerBytes := common.FromHex(deployedPoaValidatorManagerString)
-	allocs[common.Address(luxcrypto.HexToAddress(ValidatorContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(ValidatorContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedPoaValidatorManagerBytes,
 		Nonce:   1,
@@ -63,12 +63,12 @@ func AddPoAValidatorManagerV1_0_0ContractToAllocations(
 var deployedValidatorManagerV2_0_0Bytecode []byte
 
 func AddValidatorManagerV2_0_0ContractToAllocations(
-	allocs core.GenesisAlloc,
+	allocs types.GenesisAlloc,
 ) {
 	deployedValidatorManagerString := strings.TrimSpace(string(deployedValidatorManagerV2_0_0Bytecode))
 	deployedValidatorManagerString = fillValidatorMessagesAddressPlaceholder(deployedValidatorManagerString)
 	deployedValidatorManagerBytes := common.FromHex(deployedValidatorManagerString)
-	allocs[common.Address(luxcrypto.HexToAddress(ValidatorContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(ValidatorContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedValidatorManagerBytes,
 		Nonce:   1,
@@ -205,18 +205,18 @@ var deployedTransparentProxyBytecode []byte
 var deployedProxyAdminBytecode []byte
 
 func AddValidatorTransparentProxyContractToAllocations(
-	allocs core.GenesisAlloc,
+	allocs types.GenesisAlloc,
 	proxyManager string,
 ) {
 	if _, found := allocs[common.Address(luxcrypto.HexToAddress(proxyManager))]; !found {
 		ownerBalance := big.NewInt(0).Mul(big.NewInt(1e18), big.NewInt(1))
-		allocs[common.Address(luxcrypto.HexToAddress(proxyManager))] = core.GenesisAccount{
+		allocs[common.Address(luxcrypto.HexToAddress(proxyManager))] = types.Account{
 			Balance: ownerBalance,
 		}
 	}
 	// proxy admin
 	deployedProxyAdmin := common.FromHex(strings.TrimSpace(string(deployedProxyAdminBytecode)))
-	allocs[common.Address(luxcrypto.HexToAddress(ValidatorProxyAdminContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(ValidatorProxyAdminContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedProxyAdmin,
 		Nonce:   1,
@@ -227,7 +227,7 @@ func AddValidatorTransparentProxyContractToAllocations(
 
 	// transparent proxy
 	deployedTransparentProxy := common.FromHex(strings.TrimSpace(string(deployedTransparentProxyBytecode)))
-	allocs[common.Address(luxcrypto.HexToAddress(ValidatorProxyContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(ValidatorProxyContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedTransparentProxy,
 		Nonce:   1,
@@ -240,18 +240,18 @@ func AddValidatorTransparentProxyContractToAllocations(
 }
 
 func AddSpecializationTransparentProxyContractToAllocations(
-	allocs core.GenesisAlloc,
+	allocs types.GenesisAlloc,
 	proxyManager string,
 ) {
 	if _, found := allocs[common.Address(luxcrypto.HexToAddress(proxyManager))]; !found {
 		ownerBalance := big.NewInt(0).Mul(big.NewInt(1e18), big.NewInt(1))
-		allocs[common.Address(luxcrypto.HexToAddress(proxyManager))] = core.GenesisAccount{
+		allocs[common.Address(luxcrypto.HexToAddress(proxyManager))] = types.Account{
 			Balance: ownerBalance,
 		}
 	}
 	// proxy admin
 	deployedProxyAdmin := common.FromHex(strings.TrimSpace(string(deployedProxyAdminBytecode)))
-	allocs[common.Address(luxcrypto.HexToAddress(SpecializationProxyAdminContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(SpecializationProxyAdminContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedProxyAdmin,
 		Nonce:   1,
@@ -262,7 +262,7 @@ func AddSpecializationTransparentProxyContractToAllocations(
 
 	// transparent proxy
 	deployedTransparentProxy := common.FromHex(strings.TrimSpace(string(deployedTransparentProxyBytecode)))
-	allocs[common.Address(luxcrypto.HexToAddress(SpecializationProxyContractAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(SpecializationProxyContractAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedTransparentProxy,
 		Nonce:   1,
@@ -278,11 +278,11 @@ func AddSpecializationTransparentProxyContractToAllocations(
 var deployedRewardCalculatorV2_0_0Bytecode []byte
 
 func AddRewardCalculatorV2_0_0ToAllocations(
-	allocs core.GenesisAlloc,
+	allocs types.GenesisAlloc,
 	rewardBasisPoints uint64,
 ) {
 	deployedRewardCalculatorBytes := common.FromHex(strings.TrimSpace(string(deployedRewardCalculatorV2_0_0Bytecode)))
-	allocs[common.Address(luxcrypto.HexToAddress(RewardCalculatorAddress))] = core.GenesisAccount{
+	allocs[common.Address(luxcrypto.HexToAddress(RewardCalculatorAddress))] = types.Account{
 		Balance: big.NewInt(0),
 		Code:    deployedRewardCalculatorBytes,
 		Nonce:   1,

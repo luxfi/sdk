@@ -298,7 +298,7 @@ func (b *txBuilder) NewBaseTx(
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
-		amountToBurn, err := math.Add64(toBurn[assetID], out.Out.Amount())
+		amountToBurn, err := math.Add(toBurn[assetID], out.Out.Amount())
 		if err != nil {
 			return nil, err
 		}
@@ -573,7 +573,7 @@ func (b *txBuilder) NewImportTx(
 		})
 
 		assetID := utxo.AssetID()
-		newImportedAmount, err := math.Add64(importedAmounts[assetID], out.Amt)
+		newImportedAmount, err := math.Add(importedAmounts[assetID], out.Amt)
 		if err != nil {
 			return nil, err
 		}
@@ -644,7 +644,7 @@ func (b *txBuilder) NewExportTx(
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
-		amountToBurn, err := math.Add64(toBurn[assetID], out.Out.Amount())
+		amountToBurn, err := math.Add(toBurn[assetID], out.Out.Amount())
 		if err != nil {
 			return nil, err
 		}
@@ -854,7 +854,7 @@ func (b *txBuilder) getBalance(
 		}
 
 		assetID := utxo.AssetID()
-		balance[assetID], err = math.Add64(balance[assetID], out.Amt)
+		balance[assetID], err = math.Add(balance[assetID], out.Amt)
 		if err != nil {
 			return nil, err
 		}

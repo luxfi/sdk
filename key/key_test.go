@@ -206,7 +206,7 @@ func TestKeychain_Sign(t *testing.T) {
 
 	// Create keychain
 	keychain := NewKeychain()
-	keychain.Add(key.PrivateKey)
+	require.NoError(t, keychain.Add(key.PrivateKey))
 
 	// Sign a message
 	message := []byte("test message")
@@ -226,7 +226,7 @@ func TestKeychain_Addresses(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		priv, err := crypto.GeneratePrivateKey()
 		require.NoError(t, err)
-		keychain.Add(priv)
+		require.NoError(t, keychain.Add(priv))
 	}
 
 	// Get addresses
