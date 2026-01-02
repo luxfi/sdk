@@ -444,7 +444,8 @@ func nodeIDToBFT(id ids.NodeID) bft.NodeID {
 }
 
 // bftToNodeID converts bft.NodeID to ids.NodeID
-func bftToNodeID(id bft.NodeID) ids.NodeID {
+// TODO: Will be used for consensus message handling
+var _ = func(id bft.NodeID) ids.NodeID {
 	var nodeID ids.NodeID
 	copy(nodeID[:], id)
 	return nodeID
