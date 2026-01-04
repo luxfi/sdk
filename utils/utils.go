@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -41,17 +42,17 @@ func Uint32Sort(arr []uint32) {
 	slices.Sort(arr)
 }
 
-// Context for API requests
+// GetAPIContext returns a context for API requests.
 func GetAPIContext() (context.Context, context.CancelFunc) {
 	return GetTimedContext(constants.APIRequestTimeout)
 }
 
-// Context for API requests with large timeout
+// GetAPILargeContext returns a context for API requests with large timeout.
 func GetAPILargeContext() (context.Context, context.CancelFunc) {
 	return GetTimedContext(constants.APIRequestLargeTimeout)
 }
 
-// Timed Context
+// GetTimedContext returns a context with the given timeout.
 func GetTimedContext(timeout time.Duration) (context.Context, context.CancelFunc) {
 	parent, sigCancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	ctx, timeCancel := context.WithTimeout(parent, timeout)

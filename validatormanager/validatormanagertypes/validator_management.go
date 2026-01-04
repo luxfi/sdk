@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package validatormanagertypes provides type definitions for validator management.
 package validatormanagertypes
 
 type ValidatorManagementType string

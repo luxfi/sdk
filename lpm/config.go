@@ -1,5 +1,5 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
-// Placeholder for LPM config
+
 package lpm
 
 type Config struct {

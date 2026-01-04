@@ -1,6 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package wallet provides P-Chain wallet implementation.
 package wallet
 
 import (

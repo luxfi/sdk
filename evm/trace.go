@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package evm
 
 import (
@@ -20,10 +21,10 @@ var (
 	rpcDialContext = rpc.DialContext
 )
 
-// wraps over rpc.Client for calls used by SDK. used to make evm calls not available in ethclient:
+// RawClient wraps over rpc.Client for calls used by SDK. Used to make evm calls not available in ethclient:
 // - debug trace call
 // - debug trace transaction
-// features:
+// Features:
 // - finds out url scheme in case it is missing, to connect to ws/wss/http/https
 // - repeats to try to recover from failures, generating its own context for each call
 // - logs rpc url in case of failure
@@ -34,8 +35,8 @@ type RawClient struct {
 	CallContext func(context.Context, interface{}, string, ...interface{}) error
 }
 
-// connects a raw evm rpc client to the given [rpcURL]
-// supports [repeatsOnFailure] failures
+// GetRawClient connects a raw evm rpc client to the given [rpcURL].
+// Supports [repeatsOnFailure] failures.
 func GetRawClient(rpcURL string) (RawClient, error) {
 	client := RawClient{
 		URL: rpcURL,
@@ -67,13 +68,13 @@ func GetRawClient(rpcURL string) (RawClient, error) {
 	return client, err
 }
 
-// closes underlying rpc connection
+// Close closes underlying rpc connection.
 func (client RawClient) Close() {
 	client.RPCClient.Close()
 }
 
-// returns a trace for the given [txID] on [client]
-// supports [repeatsOnFailure] failures
+// DebugTraceTransaction returns a trace for the given [txID] on [client].
+// Supports [repeatsOnFailure] failures.
 func (client RawClient) DebugTraceTransaction(
 	txID string,
 ) (map[string]interface{}, error) {
@@ -99,8 +100,8 @@ func (client RawClient) DebugTraceTransaction(
 	return trace, err
 }
 
-// returns a trace for making a call on [client] with the given [data]
-// supports [repeatsOnFailure] failures
+// DebugTraceCall returns a trace for making a call on [client] with the given [data].
+// Supports [repeatsOnFailure] failures.
 func (client RawClient) DebugTraceCall(
 	data map[string]string,
 ) (map[string]interface{}, error) {
@@ -132,8 +133,8 @@ func (client RawClient) DebugTraceCall(
 	return trace, err
 }
 
-// returns a trace for the given [txID] on [rpcURL]
-// supports [repeatsOnFailure] failures
+// GetTxTrace returns a trace for the given [txID] on [rpcURL].
+// Supports [repeatsOnFailure] failures.
 func GetTxTrace(rpcURL string, txID string) (map[string]interface{}, error) {
 	client, err := GetRawClient(rpcURL)
 	if err != nil {
@@ -142,16 +143,16 @@ func GetTxTrace(rpcURL string, txID string) (map[string]interface{}, error) {
 	return client.DebugTraceTransaction(txID)
 }
 
-// returns evm function selector code for the given function signature
-// evm maps function and error signatures into codes that are then used in traces
+// GetFunctionSelector returns evm function selector code for the given function signature.
+// EVM maps function and error signatures into codes that are then used in traces.
 func GetFunctionSelector(functionSignature string) string {
 	return "0x" + hex.EncodeToString(crypto.Keccak256([]byte(functionSignature))[:4])
 }
 
-// returns golang error associated with [trace] by using [functionSignatureToError]
-// to map function signatures to evm function selectors in [trace], and then to golang errors
-// first returned error is the mapped error, second error is for errors obtained
-// executing this function
+// GetErrorFromTrace returns golang error associated with [trace] by using [functionSignatureToError]
+// to map function signatures to evm function selectors in [trace], and then to golang errors.
+// First returned error is the mapped error, second error is for errors obtained
+// executing this function.
 func GetErrorFromTrace(
 	trace map[string]interface{},
 	functionSignatureToError map[string]error,

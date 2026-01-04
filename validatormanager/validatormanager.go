@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package validatormanager provides L1 validator lifecycle management.
 package validatormanager
 
 import (
@@ -292,11 +294,11 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 	}
 }
 
-// setups PoA manager after a successful execution of
-// ConvertSubnetToL1Tx on P-Chain
-// needs the list of validators for that tx,
+// SetupPoA sets up PoA manager after a successful execution of
+// ConvertSubnetToL1Tx on P-Chain.
+// Needs the list of validators for that tx,
 // [convertSubnetValidators], together with an evm [ownerAddress]
-// to set as the owner of the PoA manager
+// to set as the owner of the PoA manager.
 func SetupPoA(
 	log luxlog.Logger,
 	subnet blockchainSDK.Net,
@@ -318,11 +320,11 @@ func SetupPoA(
 	)
 }
 
-// setups PoA manager after a successful execution of
-// ConvertSubnetToL1Tx on P-Chain
-// needs the list of validators for that tx,
+// SetupPoS sets up PoS manager after a successful execution of
+// ConvertSubnetToL1Tx on P-Chain.
+// Needs the list of validators for that tx,
 // [convertSubnetValidators], together with an evm [ownerAddress]
-// to set as the owner of the PoA manager
+// to set as the owner of the PoS manager.
 func SetupPoS(
 	log luxlog.Logger,
 	subnet blockchainSDK.Net,

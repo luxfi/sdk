@@ -427,18 +427,38 @@ type NetworkManager interface {
 	EnableRDMA() error
 }
 
-// Factory functions for extensions
-func NewClearinghouse() *Clearinghouse               { return &Clearinghouse{} }
-func NewFundingEngine() *FundingEngine               { return &FundingEngine{} }
-func NewCrossChainBridge() *CrossChainBridge         { return &CrossChainBridge{} }
-func NewVaultManager() *VaultManager                 { return &VaultManager{} }
-func NewStakingManager() *StakingManager             { return &StakingManager{} }
-func NewMultisigManager() *MultisigManager           { return &MultisigManager{} }
-func NewInferenceEngine() *InferenceEngine           { return &InferenceEngine{} }
+// NewClearinghouse creates a new Clearinghouse instance.
+func NewClearinghouse() *Clearinghouse { return &Clearinghouse{} }
+
+// NewFundingEngine creates a new FundingEngine instance.
+func NewFundingEngine() *FundingEngine { return &FundingEngine{} }
+
+// NewCrossChainBridge creates a new CrossChainBridge instance.
+func NewCrossChainBridge() *CrossChainBridge { return &CrossChainBridge{} }
+
+// NewVaultManager creates a new VaultManager instance.
+func NewVaultManager() *VaultManager { return &VaultManager{} }
+
+// NewStakingManager creates a new StakingManager instance.
+func NewStakingManager() *StakingManager { return &StakingManager{} }
+
+// NewMultisigManager creates a new MultisigManager instance.
+func NewMultisigManager() *MultisigManager { return &MultisigManager{} }
+
+// NewInferenceEngine creates a new InferenceEngine instance.
+func NewInferenceEngine() *InferenceEngine { return &InferenceEngine{} }
+
+// NewAttestationGenerator creates a new AttestationGenerator instance.
 func NewAttestationGenerator() *AttestationGenerator { return &AttestationGenerator{} }
-func NewProofVerifier() *ProofVerifier               { return &ProofVerifier{} }
-func NewTrainingManager() *TrainingManager           { return &TrainingManager{} }
-func NewFHEKeyManager() *FHEKeyManager               { return &FHEKeyManager{} }
+
+// NewProofVerifier creates a new ProofVerifier instance.
+func NewProofVerifier() *ProofVerifier { return &ProofVerifier{} }
+
+// NewTrainingManager creates a new TrainingManager instance.
+func NewTrainingManager() *TrainingManager { return &TrainingManager{} }
+
+// NewFHEKeyManager creates a new FHEKeyManager instance.
+func NewFHEKeyManager() *FHEKeyManager { return &FHEKeyManager{} }
 
 // Stub types for extensions
 type OrderBook struct{}
