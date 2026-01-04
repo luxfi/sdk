@@ -1,6 +1,7 @@
 // Copyright (C) 2020-2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package key provides cryptographic key generation and management.
 package key
 
 import (
@@ -93,12 +94,14 @@ func GenerateMnemonic(bitSize int) ([]string, error) {
 		"absorb", "abstract", "absurd", "abuse", "access", "accident",
 	}
 
-	if bitSize == 128 {
+	switch bitSize {
+	case 128:
 		return words[:12], nil
-	} else if bitSize == 256 {
+	case 256:
 		return append(words, words...)[:24], nil
+	default:
+		return nil, fmt.Errorf("unsupported bit size: %d", bitSize)
 	}
-	return nil, fmt.Errorf("unsupported bit size: %d", bitSize)
 }
 
 // DeriveKey derives a key from a mnemonic at the given index

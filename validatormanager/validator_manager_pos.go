@@ -13,8 +13,8 @@ import (
 	"github.com/luxfi/crypto"
 )
 
-// initializes contract [managerAddress] at [rpcURL], to
-// manage validators on [subnetID] using PoS specific settings
+// PoSValidatorManagerInitialize initializes contract [managerAddress] at [rpcURL], to
+// manage validators on [subnetID] using PoS specific settings.
 func PoSValidatorManagerInitialize(
 	rpcURL string,
 	managerAddress crypto.Address,

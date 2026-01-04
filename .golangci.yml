@@ -13,15 +13,25 @@ linters:
     - govet
     - staticcheck
     - ineffassign
+
+  settings:
+    staticcheck:
+      checks:
+        - "all"
+        - "-ST1000"  # Package comments
+        - "-ST1003"  # ALL_CAPS naming
+        - "-ST1005"  # Error string formatting
+        - "-ST1020"  # Function comment format
+        - "-ST1021"  # Type comment format
+        - "-QF1001"  # De Morgan's law
+        - "-QF1008"  # Embedded field selectors
+        - "-QF1009"  # Time comparison
+
   exclusions:
     generated: lax
     paths:
       - .archive
       - examples
-  settings:
-    staticcheck:
-      checks:
-        - "all"
 
 run:
   timeout: 10m

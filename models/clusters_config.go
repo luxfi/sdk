@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package models
 
 import (
@@ -49,14 +50,14 @@ type ClustersConfig struct {
 	GCPConfig GCPConfig                // stores GCP project name and filepath to service account JSON key
 }
 
-// GetAPINodes returns a filtered list of API nodes based on the ClusterConfig and given hosts.
+// GetAPIHosts returns a filtered list of API nodes based on the ClusterConfig and given hosts.
 func (cc *ClusterConfig) GetAPIHosts(hosts []*Host) []*Host {
 	return filter(hosts, func(h *Host) bool {
 		return slices.Contains(cc.APINodes, h.NodeID)
 	})
 }
 
-// GetValidatorNodes returns the validator nodes from the ClusterConfig.
+// GetValidatorHosts returns the validator nodes from the ClusterConfig.
 func (cc *ClusterConfig) GetValidatorHosts(hosts []*Host) []*Host {
 	return filter(hosts, func(h *Host) bool {
 		return !slices.Contains(cc.APINodes, h.GetCloudID())

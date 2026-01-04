@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package evm
 
 import (
@@ -10,7 +11,7 @@ import (
 	"github.com/luxfi/warp"
 )
 
-// get all unsigned warp messages contained in [logs]
+// GetWarpMessagesFromLogs gets all unsigned warp messages contained in [logs].
 func GetWarpMessagesFromLogs(
 	logs []*types.Log,
 ) []*warp.UnsignedMessage {
@@ -24,7 +25,7 @@ func GetWarpMessagesFromLogs(
 	return messages
 }
 
-// get first unsigned warp message contained in [logs]
+// ExtractWarpMessageFromLogs gets first unsigned warp message contained in [logs].
 func ExtractWarpMessageFromLogs(
 	logs []*types.Log,
 ) (*warp.UnsignedMessage, error) {
@@ -35,7 +36,7 @@ func ExtractWarpMessageFromLogs(
 	return messages[0], nil
 }
 
-// get first unsigned warp message contained in [receipt]
+// ExtractWarpMessageFromReceipt gets first unsigned warp message contained in [receipt].
 func ExtractWarpMessageFromReceipt(
 	receipt *types.Receipt,
 ) (*warp.UnsignedMessage, error) {
