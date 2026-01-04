@@ -1,6 +1,7 @@
 // Copyright (C) 2020-2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package network provides network configuration and management utilities.
 package network
 
 import (

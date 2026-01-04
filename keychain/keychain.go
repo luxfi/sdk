@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package keychain provides key management and keychain utilities.
 package keychain
 
 import (

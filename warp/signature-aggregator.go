@@ -1,5 +1,7 @@
-// // Copyright (C) 2025, Lux Partners Limited All rights reserved
+// Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package warp provides warp message signing and aggregation utilities.
 package warp
 
 import (

@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package validatormanager
 
 import (
@@ -24,7 +25,6 @@ import (
 	"github.com/luxfi/sdk/ux"
 	"github.com/luxfi/sdk/validator"
 	"github.com/luxfi/warp"
-	standaloneWarp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
 	"github.com/luxfi/crypto"
@@ -38,7 +38,7 @@ func InitializeValidatorRemoval(
 	privateKey string,
 	validationID ids.ID,
 	isPoS bool,
-	uptimeProofSignedMessage *standaloneWarp.Message,
+	uptimeProofSignedMessage *warp.Message,
 	force bool,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -150,7 +150,7 @@ func GetUptimeProofMessage(
 	validationID ids.ID,
 	uptime uint64,
 	signatureAggregatorEndpoint string,
-) (*standaloneWarp.Message, error) {
+) (*warp.Message, error) {
 	uptimePayload, err := messages.NewValidatorUptime(validationID, uptime)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func GetUptimeProofMessage(
 	if err != nil {
 		return nil, err
 	}
-	uptimeProofUnsignedMessage, err := standaloneWarp.NewUnsignedMessage(
+	uptimeProofUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID(),
 		blockchainID,
 		addressedCall.Bytes(),
@@ -190,7 +190,7 @@ func InitValidatorRemoval(
 	useACP99 bool,
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
-) (*standaloneWarp.Message, ids.ID, *types.Transaction, error) {
+) (*warp.Message, ids.ID, *types.Transaction, error) {
 	subnetID, err := contract.GetSubnetID(
 		app,
 		network,
@@ -236,7 +236,7 @@ func InitValidatorRemoval(
 
 	var receipt *types.Receipt
 	if unsignedMessage == nil {
-		signedUptimeProof := &standaloneWarp.Message{}
+		signedUptimeProof := &warp.Message{}
 		if isPoS {
 			if uptimeSec == 0 {
 				uptimeSec, err = utils.GetL1ValidatorUptimeSeconds(rpcURL, nodeID)
@@ -303,9 +303,9 @@ func InitValidatorRemoval(
 	}
 
 	// Convert node warp message back to standalone for GetL1ValidatorWeightMessage
-	var standaloneUnsignedMsg *standaloneWarp.UnsignedMessage
+	var standaloneUnsignedMsg *warp.UnsignedMessage
 	if unsignedMessage != nil {
-		standaloneUnsignedMsg, err = standaloneWarp.NewUnsignedMessage(
+		standaloneUnsignedMsg, err = warp.NewUnsignedMessage(
 			unsignedMessage.NetworkID,
 			unsignedMessage.SourceChainID,
 			unsignedMessage.Payload,

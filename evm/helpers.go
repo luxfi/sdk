@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package evm
 
 import (
@@ -12,7 +13,7 @@ import (
 	"github.com/luxfi/node/utils/units"
 )
 
-// Returns the first log in 'logs' that is successfully parsed by 'parser'
+// GetEventFromLogs returns the first log in 'logs' that is successfully parsed by 'parser'.
 func GetEventFromLogs[T any](logs []*types.Log, parser func(log types.Log) (T, error)) (T, error) {
 	cumErrMsg := ""
 	for i, log := range logs {
@@ -28,10 +29,10 @@ func GetEventFromLogs[T any](logs []*types.Log, parser func(log types.Log) (T, e
 	return *new(T), fmt.Errorf("failed to find %T event in receipt logs: [%s]", *new(T), cumErrMsg)
 }
 
-// transform a tx operation error into an error that contains:
+// TransactionError transforms a tx operation error into an error that contains:
 // - the [err] itself
 // - the [tx] hash (or information on the tx not being submitted)
-// - another descriptive [msg], together with formated [args]
+// - another descriptive [msg], together with formatted [args]
 func TransactionError(tx *types.Transaction, err error, msg string, args ...interface{}) error {
 	msgSuffix := ": %w"
 	if tx != nil {
@@ -43,7 +44,7 @@ func TransactionError(tx *types.Transaction, err error, msg string, args ...inte
 	return fmt.Errorf(msg+msgSuffix, args...)
 }
 
-// dumps a [tx] hexa description, for it to be separately issued using external tools
+// TxDump dumps a [tx] hexa description, for it to be separately issued using external tools.
 func TxDump(description string, tx *types.Transaction) (string, error) {
 	if tx == nil {
 		return "", fmt.Errorf("can't dump nil tx")
@@ -69,7 +70,7 @@ func TxDump(description string, tx *types.Transaction) (string, error) {
 	return txDump, nil
 }
 
-// returns the public address associated with [privateKey]
+// PrivateKeyToAddress returns the public address associated with [privateKey].
 func PrivateKeyToAddress(privateKey string) (crypto.Address, error) {
 	pk, err := crypto.HexToECDSA(privateKey)
 	if err != nil {

@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package fees provides fee calculation and configuration utilities.
 package fees
 
 import (

@@ -1,5 +1,7 @@
 // Copyright (C) 2022, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package prompts provides interactive user prompts for CLI applications.
 package prompts
 
 import (
@@ -111,7 +113,7 @@ type Prompter interface {
 
 type realPrompter struct{}
 
-// NewProcessChecker creates a new process checker which can respond if the server is running
+// NewPrompter creates a new prompter instance for interactive user input.
 func NewPrompter() Prompter {
 	return &realPrompter{}
 }
@@ -573,13 +575,13 @@ func (*realPrompter) CaptureFutureDate(promptStr string, minDate time.Time) (tim
 	return time.Parse(constants.TimeParseLayout, timestampStr)
 }
 
-// returns true [resp. false] if user chooses stored key [resp. ledger] option
-func (prompter *realPrompter) ChooseKeyOrLedger(goal string) (bool, error) {
+// ChooseKeyOrLedger returns true [resp. false] if user chooses stored key [resp. ledger] option.
+func (rp *realPrompter) ChooseKeyOrLedger(goal string) (bool, error) {
 	const (
 		keyOption    = "Use stored key"
 		ledgerOption = "Use ledger"
 	)
-	option, err := prompter.CaptureList(
+	option, err := rp.CaptureList(
 		fmt.Sprintf("Which key source should be used to %s?", goal),
 		[]string{keyOption, ledgerOption},
 	)
@@ -623,7 +625,7 @@ func getIndexInSlice[T comparable](list []T, element T) (int, error) {
 	return 0, fmt.Errorf("element not found")
 }
 
-// check subnet authorization criteria:
+// CheckSubnetAuthKeys checks subnet authorization criteria:
 // - [subnetAuthKeys] satisfy subnet's [threshold]
 // - [subnetAuthKeys] is a subset of subnet's [controlKeys]
 func CheckSubnetAuthKeys(subnetAuthKeys []string, controlKeys []string, threshold uint32) error {
@@ -645,8 +647,8 @@ func CheckSubnetAuthKeys(subnetAuthKeys []string, controlKeys []string, threshol
 	return nil
 }
 
-// get subnet authorization keys from the user, as a subset of the subnet's [controlKeys]
-// with a len equal to the subnet's [threshold]
+// GetSubnetAuthKeys gets subnet authorization keys from the user, as a subset of the subnet's [controlKeys]
+// with a len equal to the subnet's [threshold].
 func GetSubnetAuthKeys(prompt Prompter, controlKeys []string, threshold uint32) ([]string, error) {
 	if len(controlKeys) == int(threshold) {
 		return controlKeys, nil
@@ -854,8 +856,8 @@ func CaptureKeyAddress(
 	return keyPath, nil
 }
 
-// CaptureListWithSize allows selection of multiple items from a list
-func (p realPrompter) CaptureListWithSize(prompt string, options []string, size int) ([]string, error) {
+// CaptureListWithSize allows selection of multiple items from a list.
+func (rp realPrompter) CaptureListWithSize(prompt string, options []string, size int) ([]string, error) {
 	if len(options) == 0 {
 		return nil, errors.New("no options provided")
 	}
@@ -869,7 +871,7 @@ func (p realPrompter) CaptureListWithSize(prompt string, options []string, size 
 			prompt = fmt.Sprintf("Select item %d of %d", i+1, size)
 		}
 
-		choice, err := p.CaptureList(prompt, append(remaining, Done))
+		choice, err := rp.CaptureList(prompt, append(remaining, Done))
 		if err != nil {
 			return nil, err
 		}

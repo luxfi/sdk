@@ -1,6 +1,6 @@
+// Package mocks provides mock implementations for testing prompts.
 package mocks
 
-// Mock implementations for prompts
 type MockPrompt struct {
 	// Add mock fields as needed
 }
