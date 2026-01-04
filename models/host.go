@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package models
 
 import (
@@ -561,7 +562,7 @@ func consumeOutput(ctx context.Context, output io.Reader) error {
 	return scanner.Err()
 }
 
-// HasSystemDAvaliable checks if systemd is available on a remote host.
+// IsSystemD checks if systemd is available on a remote host.
 func (h *Host) IsSystemD() bool {
 	// check for the folder
 	if _, err := h.FileExists("/run/systemd/system"); err != nil {

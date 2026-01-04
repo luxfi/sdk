@@ -1,6 +1,7 @@
 // Copyright (C) 2022-2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package chainconfig provides chain configuration utilities.
 package chainconfig
 
 import (

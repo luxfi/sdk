@@ -1,6 +1,7 @@
 // Copyright (C) 2020-2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package heap provides heap data structure implementations.
 package heap
 
 import (
@@ -10,7 +11,7 @@ import (
 	"github.com/luxfi/ids"
 )
 
-// Heap[I,V] is used to track objects of [I] by [Val].
+// Heap is used to track objects of [I] by [Val].
 //
 // This data structure does not perform any synchronization and is not
 // safe to use concurrently without external locking.

@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package contract
 
 import (
@@ -16,9 +17,8 @@ import (
 	"github.com/luxfi/sdk/utils"
 )
 
-// returns information for the blockchain default allocation key
-// if found, returns
-// key name, address, private key
+// GetDefaultBlockchainAirdropKeyInfo returns information for the blockchain default allocation key.
+// If found, returns key name, address, private key.
 func GetDefaultBlockchainAirdropKeyInfo(
 	app *application.Lux,
 	blockchainName string,
@@ -35,13 +35,13 @@ func GetDefaultBlockchainAirdropKeyInfo(
 	return "", "", "", nil
 }
 
-// from a given genesis, look for known private keys inside it, giving
-// preference to the ones expected to be default
-// it searches for:
+// GetBlockchainAirdropKeyInfo looks for known private keys inside a given genesis,
+// giving preference to the ones expected to be default.
+// It searches for:
 // 1) default CLI allocation key for blockchains
 // 2) ewoq
 // 3) all other stored keys managed by CLI
-// returns address + private key when found
+// Returns address + private key when found.
 func GetBlockchainAirdropKeyInfo(
 	app *application.Lux,
 	network models.Network,
@@ -120,9 +120,9 @@ func SearchForManagedKey(
 	return false, "", "", "", nil
 }
 
-// get the deployed blockchain genesis, and then look for known
-// private keys inside it
-// returns address + private key when found
+// GetEVMSubnetPrefundedKey gets the deployed blockchain genesis, and then looks for known
+// private keys inside it.
+// Returns address + private key when found.
 func GetEVMSubnetPrefundedKey(
 	app *application.Lux,
 	network models.Network,
@@ -151,7 +151,7 @@ func GetEVMSubnetPrefundedKey(
 	return genesisAddress, genesisPrivateKey, nil
 }
 
-// get the deployed blockchain genesis
+// GetBlockchainGenesis gets the deployed blockchain genesis.
 func GetBlockchainGenesis(
 	app *application.Lux,
 	network models.Network,
@@ -267,10 +267,10 @@ func getGenesisNativeMinterManager(
 	if false { // Placeholder - GenesisPrecompiles not accessible from params.ChainConfig
 		var allowListCfg *nativeminter.Config
 		_ = allowListCfg
-		if len(allowListCfg.AllowListConfig.ManagerAddresses) == 0 {
+		if len(allowListCfg.ManagerAddresses) == 0 {
 			return false, false, "", "", "", nil
 		}
-		for _, admin := range allowListCfg.AllowListConfig.ManagerAddresses {
+		for _, admin := range allowListCfg.ManagerAddresses {
 			// Convert address to string
 			adminStr := fmt.Sprintf("0x%x", admin.Bytes())
 			found, keyName, addressStr, privKey, err := SearchForManagedKey(app, network, adminStr, true)
@@ -281,7 +281,7 @@ func getGenesisNativeMinterManager(
 				return true, true, keyName, addressStr, privKey, nil
 			}
 		}
-		return true, false, "", allowListCfg.AllowListConfig.ManagerAddresses[0].Hex(), "", nil
+		return true, false, "", allowListCfg.ManagerAddresses[0].Hex(), "", nil
 	}
 	return false, false, "", "", "", nil
 }

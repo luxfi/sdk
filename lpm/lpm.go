@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
-// LPM (Lux Plugin Manager) client wrapper for CLI integration
+
+// Package lpm provides Lux Plugin Manager client wrapper for CLI integration.
 package lpm
 
 import (

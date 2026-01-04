@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package multisig provides multi-signature transaction support.
 package multisig
 
 import (
@@ -220,7 +222,7 @@ func (ms *Multisig) GetTxKind() (TxKind, error) {
 	}
 }
 
-// get network id associated to tx
+// GetNetworkID gets network id associated to tx.
 func (ms *Multisig) GetNetworkID() (uint32, error) {
 	if ms.Undefined() {
 		return 0, ErrUndefinedTx
@@ -246,7 +248,7 @@ func (ms *Multisig) GetNetworkID() (uint32, error) {
 	return networkID, nil
 }
 
-// get network model associated to tx
+// GetNetwork gets network model associated to tx.
 func (ms *Multisig) GetNetwork() (network.LegacyNetwork, error) {
 	if ms.Undefined() {
 		return network.UndefinedNetwork, ErrUndefinedTx
@@ -282,7 +284,7 @@ func (ms *Multisig) GetNetID() (ids.ID, error) {
 	case *txs.RemoveChainValidatorTx:
 		netID = unsignedTx.Chain
 	case *txs.AddChainValidatorTx:
-		netID = unsignedTx.ChainValidator.Chain
+		netID = unsignedTx.Chain
 	case *txs.CreateChainTx:
 		netID = unsignedTx.ChainID
 	case *txs.TransformChainTx:
