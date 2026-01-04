@@ -1,5 +1,7 @@
 // Copyright (C) 2022, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package ux provides user experience utilities for CLI output formatting.
 package ux
 
 import (

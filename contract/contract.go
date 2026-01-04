@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package contract provides smart contract interaction utilities.
 package contract
 
 import (
@@ -295,9 +297,9 @@ func idempotentSigner(
 	return tx, nil
 }
 
-// get method name and types from [methodsSpec], then call it
+// TxToMethod gets method name and types from [methodsSpec], then calls it
 // at the smart contract [contractAddress] with the given [params].
-// also send [payment] tokens to it
+// Also sends [payment] tokens to it.
 func TxToMethod(
 	rpcURL string,
 	generateRawTxOnly bool,
@@ -400,11 +402,11 @@ func TxToMethod(
 	return tx, receipt, nil
 }
 
-// get method name and types from [methodsSpec], then call it
+// TxToMethodWithWarpMessage gets method name and types from [methodsSpec], then calls it
 // at the smart contract [contractAddress] with the given [params].
-// send [warpMessage] on the same call, whose signature is
-// going to be verified previously to pass it to the method
-// also send [payment] tokens to it
+// Sends [warpMessage] on the same call, whose signature is
+// going to be verified previously to pass it to the method.
+// Also sends [payment] tokens to it.
 func TxToMethodWithWarpMessage(
 	rpcURL string,
 	generateRawTxOnly bool,

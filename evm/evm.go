@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package evm provides EVM chain interaction and transaction utilities.
 package evm
 
 import (
@@ -43,7 +45,7 @@ var (
 	sleepBetweenRepeats  = 1 * time.Second
 )
 
-// wraps over ethclient for calls used by SDK. featues:
+// Client wraps over ethclient for calls used by SDK. Features:
 // - finds out url scheme in case it is missing, to connect to ws/wss/http/https
 // - repeats to try to recover from failures, generating its own context for each call
 // - logs rpc url in case of failure
@@ -85,7 +87,7 @@ func HasScheme(rpcURL string) (bool, error) {
 	}
 }
 
-// tries to connect an ethclient to a rpc url without scheme,
+// GetClientWithoutScheme tries to connect an ethclient to a rpc url without scheme,
 // by trying out different possible schemes: ws, wss, https, http
 func GetClientWithoutScheme(rpcURL string) (ethclient.Client, string, error) {
 	if b, err := HasScheme(rpcURL); err != nil {
@@ -132,7 +134,7 @@ func GetClientWithoutScheme(rpcURL string) (ethclient.Client, string, error) {
 	return nil, "", notDeterminedErr
 }
 
-// connects an evm client to the given [rpcURL]
+// GetClient connects an evm client to the given [rpcURL]
 // supports [repeatsOnFailure] failures
 func GetClient(rpcURL string) (Client, error) {
 	client := Client{
@@ -161,12 +163,12 @@ func GetClient(rpcURL string) (Client, error) {
 	return client, err
 }
 
-// closes underlying ethclient connection
+// Close closes underlying ethclient connection
 func (client Client) Close() {
 	client.EthClient.Close()
 }
 
-// indicates wether a contract is deployed on [contractAddress]
+// ContractAlreadyDeployed indicates wether a contract is deployed on [contractAddress]
 // supports [repeatsOnFailure] failures
 func (client Client) ContractAlreadyDeployed(
 	contractAddress string,
@@ -178,7 +180,7 @@ func (client Client) ContractAlreadyDeployed(
 	}
 }
 
-// returns the contract bytecode at [contractAddress]
+// GetContractBytecode returns the contract bytecode at [contractAddress]
 // supports [repeatsOnFailure] failures
 func (client Client) GetContractBytecode(
 	contractAddressStr string,
@@ -203,7 +205,7 @@ func (client Client) GetContractBytecode(
 	return code, err
 }
 
-// returns the balance for [privateKey]
+// GetPrivateKeyBalance returns the balance for [privateKey]
 // supports [repeatsOnFailure] failures
 func (client Client) GetPrivateKeyBalance(
 	privateKey string,
@@ -215,7 +217,7 @@ func (client Client) GetPrivateKeyBalance(
 	return client.GetAddressBalance(addr.Hex())
 }
 
-// returns the balance for [address]
+// GetAddressBalance returns the balance for [address]
 // supports [repeatsOnFailure] failures
 func (client Client) GetAddressBalance(
 	addressStr string,
@@ -235,7 +237,7 @@ func (client Client) GetAddressBalance(
 	return balance, err
 }
 
-// returns the nonce at [address]
+// NonceAt returns the nonce at [address]
 // supports [repeatsOnFailure] failures
 func (client Client) NonceAt(
 	addressStr string,
@@ -255,7 +257,7 @@ func (client Client) NonceAt(
 	return nonce, err
 }
 
-// returns the suggested gas tip
+// SuggestGasTipCap returns the suggested gas tip
 // supports [repeatsOnFailure] failures
 func (client Client) SuggestGasTipCap() (*big.Int, error) {
 	gasTipCap, err := utils.RetryWithContextGen(
@@ -272,7 +274,7 @@ func (client Client) SuggestGasTipCap() (*big.Int, error) {
 	return gasTipCap, err
 }
 
-// returns the estimated base fee
+// EstimateBaseFee returns the estimated base fee
 // supports [repeatsOnFailure] failures
 func (client Client) EstimateBaseFee() (*big.Int, error) {
 	baseFee, err := utils.RetryWithContextGen(
@@ -289,7 +291,7 @@ func (client Client) EstimateBaseFee() (*big.Int, error) {
 	return baseFee, err
 }
 
-// Returns gasFeeCap, gasTipCap, and nonce to be used when constructing a transaction
+// CalculateTxParams returns gasFeeCap, gasTipCap, and nonce to be used when constructing a transaction
 // supports [repeatsOnFailure] failures on each step
 func (client Client) CalculateTxParams(
 	address string,
@@ -311,7 +313,7 @@ func (client Client) CalculateTxParams(
 	return gasFeeCap, gasTipCap, nonce, nil
 }
 
-// returns the estimated gas limit
+// EstimateGasLimit returns the estimated gas limit
 // supports [repeatsOnFailure] failures
 func (client Client) EstimateGasLimit(
 	msg ethereum.CallMsg,
@@ -330,7 +332,7 @@ func (client Client) EstimateGasLimit(
 	return gasLimit, err
 }
 
-// returns the chain ID
+// GetChainID returns the chain ID
 // supports [repeatsOnFailure] failures
 func (client Client) GetChainID() (*big.Int, error) {
 	chainID, err := utils.RetryWithContextGen(
@@ -347,7 +349,7 @@ func (client Client) GetChainID() (*big.Int, error) {
 	return chainID, err
 }
 
-// returns the chain conf
+// ChainConfig returns the chain conf
 // supports [repeatsOnFailure] failures
 func (client Client) ChainConfig() (*evmParams.ChainConfigWithUpgradesJSON, error) {
 	conf, err := utils.RetryWithContextGen(
@@ -364,7 +366,7 @@ func (client Client) ChainConfig() (*evmParams.ChainConfigWithUpgradesJSON, erro
 	return conf, err
 }
 
-// sends [tx]
+// SendTransaction sends [tx]
 // supports [repeatsOnFailure] failures
 func (client Client) SendTransaction(
 	tx *types.Transaction,
@@ -383,7 +385,7 @@ func (client Client) SendTransaction(
 	return err
 }
 
-// waits for [tx]'s receipt to have successful state
+// WaitForTransaction waits for [tx]'s receipt to have successful state
 // supports [repeatsOnFailure] failures
 func (client Client) WaitForTransaction(
 	tx *types.Transaction,
@@ -405,7 +407,7 @@ func (client Client) WaitForTransaction(
 	return nil, false, fmt.Errorf("timeout of %d seconds while waiting for tx %#v on %s: %w", steps, tx, client.URL, cumErr)
 }
 
-// transfers [amount] to [targetAddressStr] using [sourceAddressPrivateKeyStr]
+// FundAddress transfers [amount] to [targetAddressStr] using [sourceAddressPrivateKeyStr]
 // supports [repeatsOnFailure] failures on each step
 func (client Client) FundAddress(
 	sourceAddressPrivateKeyStr string,
@@ -452,7 +454,7 @@ func (client Client) FundAddress(
 	return receipt, nil
 }
 
-// encode [txStr] to binary, sends and waits for it
+// IssueTx encodes [txStr] to binary, sends and waits for it
 // supports [repeatsOnFailure] failures on each step
 func (client Client) IssueTx(
 	txStr string,
@@ -476,7 +478,7 @@ func (client Client) IssueTx(
 	return nil
 }
 
-// returns tx options that include signer for [prefundedPrivateKeyStr]
+// GetTxOptsWithSigner returns tx options that include signer for [prefundedPrivateKeyStr]
 // supports [repeatsOnFailure] failures when gathering chain info
 func (client Client) GetTxOptsWithSigner(
 	prefundedPrivateKeyStr string,
@@ -492,7 +494,7 @@ func (client Client) GetTxOptsWithSigner(
 	return bind.NewKeyedTransactorWithChainID(prefundedPrivateKey, chainID)
 }
 
-// waits for [timeout] until evm is bootstrapped
+// WaitForEVMBootstrapped waits for [timeout] until evm is bootstrapped
 // considers evm is bootstrapped if it responds to an evm call (ChainID)
 func (client Client) WaitForEVMBootstrapped(timeout time.Duration) error {
 	if timeout == 0 {
@@ -511,7 +513,7 @@ func (client Client) WaitForEVMBootstrapped(timeout time.Duration) error {
 	return fmt.Errorf("client at %s not bootstrapped after %.2f seconds: %w", client.URL, timeout.Seconds(), cumErr)
 }
 
-// generates a transaction signed with [privateKeyStr], calling a [contract] method using [callData]
+// TransactWithWarpMessage generates a transaction signed with [privateKeyStr], calling a [contract] method using [callData]
 // including [warpMessage] in the tx accesslist
 // if [generateRawTxOnly] is set, it generates a similar, unsigned tx, with given [from] address
 func (client Client) TransactWithWarpMessage(
@@ -592,7 +594,7 @@ func (client Client) TransactWithWarpMessage(
 	return types.SignTx(tx, txSigner, privateKey)
 }
 
-// gets block [n]
+// BlockByNumber gets block [n]
 // supports [repeatsOnFailure] failures
 func (client Client) BlockByNumber(n *big.Int) (*types.Block, error) {
 	block, err := utils.RetryWithContextGen(
@@ -609,7 +611,7 @@ func (client Client) BlockByNumber(n *big.Int) (*types.Block, error) {
 	return block, err
 }
 
-// get logs as given by [query]
+// FilterLogs gets logs as given by [query]
 // supports [repeatsOnFailure] failures
 func (client Client) FilterLogs(query ethereum.FilterQuery) ([]types.Log, error) {
 	logs, err := utils.RetryWithContextGen(
@@ -626,7 +628,7 @@ func (client Client) FilterLogs(query ethereum.FilterQuery) ([]types.Log, error)
 	return logs, err
 }
 
-// get tx receipt for [hash]
+// TransactionReceipt gets tx receipt for [hash]
 // supports [repeatsOnFailure] failures
 func (client Client) TransactionReceipt(hash common.Hash) (*types.Receipt, error) {
 	receipt, err := utils.RetryWithContextGen(
@@ -643,7 +645,7 @@ func (client Client) TransactionReceipt(hash common.Hash) (*types.Receipt, error
 	return receipt, err
 }
 
-// gets current height
+// BlockNumber gets current height
 // supports [repeatsOnFailure] failures
 func (client Client) BlockNumber() (uint64, error) {
 	blockNumber, err := utils.RetryWithContextGen(
@@ -660,7 +662,7 @@ func (client Client) BlockNumber() (uint64, error) {
 	return blockNumber, err
 }
 
-// waits until current height is bigger than the given previous height at [prevBlockNumber]
+// WaitForNewBlock waits until current height is bigger than the given previous height at [prevBlockNumber]
 // supports [repeatsOnFailure] failures on each step
 func (client Client) WaitForNewBlock(
 	prevBlockNumber uint64,
@@ -683,7 +685,7 @@ func (client Client) WaitForNewBlock(
 	return fmt.Errorf("no new block produced on %s in %d seconds", client.URL, steps)
 }
 
-// issue dummy txs to create the given number of blocks
+// CreateDummyBlocks issues dummy txs to create the given number of blocks
 func (client Client) CreateDummyBlocks(
 	numBlocks int,
 	privKeyStr string,
@@ -743,7 +745,7 @@ func (client Client) CreateDummyBlocks(
 	return nil
 }
 
-// issue transactions on [client] so as to activate Proposer VM Fork
+// SetupProposerVM issues transactions on [client] so as to activate Proposer VM Fork
 // this should generate a PostForkBlock because its parent block
 // (genesis) has a timestamp (0) that is greater than or equal to the fork
 // activation time of 0. Therefore, subsequent blocks should be built with

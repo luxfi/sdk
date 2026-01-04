@@ -16,7 +16,7 @@ import (
 
 const githubVersionTagName = "tag_name"
 
-// This is a generic interface for performing highly testable downloads. All methods here involve
+// Downloader is a generic interface for performing highly testable downloads. All methods here involve
 // external http requests. To write tests using these functions, provide a mocked version of this
 // interface to your application object.
 type Downloader interface {

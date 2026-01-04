@@ -1,6 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package crypto provides cryptographic interfaces for wallet signing.
 package crypto
 
 import (

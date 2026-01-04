@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package validatormanager
 
 import (
@@ -23,11 +24,9 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
 	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/ux"
 	"github.com/luxfi/sdk/validator"
-	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	sdkwarp "github.com/luxfi/sdk/warp"
 	"github.com/luxfi/warp"
@@ -41,8 +40,8 @@ func InitializeValidatorRegistrationPoSNative(
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
-	balanceOwners localWarpMessage.PChainOwner,
-	disableOwners localWarpMessage.PChainOwner,
+	balanceOwners warpMessage.PChainOwner,
+	disableOwners warpMessage.PChainOwner,
 	delegationFeeBips uint16,
 	minStakeDuration time.Duration,
 	stakeAmount *big.Int,
@@ -118,7 +117,7 @@ func InitializeValidatorRegistrationPoSNative(
 	)
 }
 
-// step 1 of flow for adding a new validator
+// InitializeValidatorRegistrationPoA is step 1 of flow for adding a new validator.
 func InitializeValidatorRegistrationPoA(
 	rpcURL string,
 	managerAddress crypto.Address,
@@ -128,8 +127,8 @@ func InitializeValidatorRegistrationPoA(
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
-	balanceOwners localWarpMessage.PChainOwner,
-	disableOwners localWarpMessage.PChainOwner,
+	balanceOwners warpMessage.PChainOwner,
+	disableOwners warpMessage.PChainOwner,
 	weight uint64,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -207,8 +206,8 @@ func GetRegisterL1ValidatorMessage(
 	nodeID ids.NodeID,
 	blsPublicKey [48]byte,
 	expiry uint64,
-	balanceOwners localWarpMessage.PChainOwner,
-	disableOwners localWarpMessage.PChainOwner,
+	balanceOwners warpMessage.PChainOwner,
+	disableOwners warpMessage.PChainOwner,
 	weight uint64,
 	alreadyInitialized bool,
 	initiateTxHash string,
@@ -357,7 +356,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	return nodeWarpMsg.(*warp.Message), nil
 }
 
-// last step of flow for adding a new validator
+// CompleteValidatorRegistration is the last step of flow for adding a new validator.
 func CompleteValidatorRegistration(
 	rpcURL string,
 	managerAddress crypto.Address,
@@ -393,8 +392,8 @@ func InitValidatorRegistration(
 	nodeID ids.NodeID,
 	blsPublicKey []byte,
 	expiry uint64,
-	balanceOwners localWarpMessage.PChainOwner,
-	disableOwners localWarpMessage.PChainOwner,
+	balanceOwners warpMessage.PChainOwner,
+	disableOwners warpMessage.PChainOwner,
 	weight uint64,
 	aggregatorLogger luxlog.Logger,
 	isPos bool,
@@ -645,7 +644,7 @@ func SearchForRegisterL1ValidatorMessage(
 		if err != nil {
 			return nil, err
 		}
-		msgs := evm.GetWarpMessagesFromLogs(utils.PointersSlice(logs))
+		msgs := evm.GetWarpMessagesFromLogs(sdkutils.PointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
 			addressedCall, err := warpPayload.ParseAddressedCall(payload)

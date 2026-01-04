@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package validator provides validator management and configuration utilities.
 package validator
 
 import (
@@ -26,7 +28,7 @@ const (
 	NonSovereignValidator
 )
 
-// To enable querying validation IDs from P-Chain
+// CurrentValidatorInfo enables querying validation IDs from P-Chain.
 type CurrentValidatorInfo struct {
 	Weight       luxdjson.Uint64 `json:"weight"`
 	NodeID       ids.NodeID      `json:"nodeID"`
@@ -102,8 +104,8 @@ func GetValidatorInfo(net models.Network, validationID ids.ID) (platformvm.Clien
 	return platformvm.ClientPermissionlessValidator{}, fmt.Errorf("validator with ID %s not found", validationID)
 }
 
-// Returns the validation ID for the Node ID, as registered at the validator manager
-// Will return ids.Empty in case it is not registered
+// GetValidationID returns the validation ID for the Node ID, as registered at the validator manager.
+// Will return ids.Empty in case it is not registered.
 func GetValidationID(
 	rpcURL string,
 	managerAddress crypto.Address,
@@ -157,7 +159,7 @@ func GetValidatorKind(
 	return NonValidator, nil
 }
 
-// Enables querying the validation IDs from P-Chain
+// GetCurrentValidators enables querying the validation IDs from P-Chain.
 func GetCurrentValidators(network models.Network, subnetID ids.ID) ([]CurrentValidatorInfo, error) {
 	ctx, cancel := utils.GetAPIContext()
 	defer cancel()
