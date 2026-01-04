@@ -1,6 +1,7 @@
 // Copyright (C) 2019-2025, Lux Industries Inc All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package primary provides primary network wallet operations.
 package primary
 
 import (
@@ -8,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcutil/bech32"
-	gethcommon "github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/ethclient"
 
 	"github.com/luxfi/const"
@@ -23,7 +23,7 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
 
-	ethcommon "github.com/luxfi/geth/common"
+	gethcommon "github.com/luxfi/geth/common"
 	ptxs "github.com/luxfi/node/vms/platformvm/txs"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
@@ -294,13 +294,13 @@ func FetchState(
 
 type EthState struct {
 	Client   *ethclient.Client
-	Accounts map[ethcommon.Address]*c.Account
+	Accounts map[gethcommon.Address]*c.Account
 }
 
 func FetchEthState(
 	ctx context.Context,
 	uri string,
-	addrs set.Set[ethcommon.Address],
+	addrs set.Set[gethcommon.Address],
 ) (*EthState, error) {
 	path := fmt.Sprintf(
 		"%s/ext/%s/C/rpc",
@@ -312,7 +312,7 @@ func FetchEthState(
 		return nil, err
 	}
 
-	accounts := make(map[ethcommon.Address]*c.Account, addrs.Len())
+	accounts := make(map[gethcommon.Address]*c.Account, addrs.Len())
 	for addr := range addrs {
 		// Convert ethereum address to geth address
 		gethAddr := gethcommon.Address(addr)

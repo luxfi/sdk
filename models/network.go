@@ -1,5 +1,7 @@
 // Copyright (C) 2022, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package models provides data structures and types used throughout the SDK.
 package models
 
 import (
@@ -21,7 +23,7 @@ const (
 	Devnet
 )
 
-// Aliases for compatibility
+// UndefinedNetwork is an alias for compatibility.
 const UndefinedNetwork = Undefined
 
 func (s Network) String() string {

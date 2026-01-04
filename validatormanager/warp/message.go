@@ -1,6 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
 
+// Package warp provides warp message types for validator management.
 package warp
 
 import (
@@ -23,7 +24,7 @@ type L1ConversionValidatorData struct {
 	Weight       uint64                 `serialize:"true" json:"weight"`
 }
 
-// Backward compatibility aliases
+// NetToL1ConversionValidatorData is a backward compatibility alias for L1ConversionValidatorData.
 type NetToL1ConversionValidatorData = L1ConversionValidatorData
 type SubnetToL1ConversionValidatorData = L1ConversionValidatorData
 
@@ -36,7 +37,7 @@ type L1ConversionData struct {
 	Validators     []L1ConversionValidatorData `serialize:"true" json:"validators"`
 }
 
-// Backward compatibility aliases
+// NetToL1ConversionData is a backward compatibility alias for L1ConversionData.
 type NetToL1ConversionData = L1ConversionData
 type SubnetToL1ConversionData = L1ConversionData
 
@@ -46,7 +47,7 @@ func L1ConversionID(data L1ConversionData) (ids.ID, error) {
 	return ids.GenerateTestID(), nil
 }
 
-// Backward compatibility aliases
+// NetToL1ConversionID is a backward compatibility alias for L1ConversionID.
 func NetToL1ConversionID(data NetToL1ConversionData) (ids.ID, error) {
 	return L1ConversionID(data)
 }
@@ -61,7 +62,7 @@ func NewL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
 	return &warpPayload.AddressedCall{}, nil
 }
 
-// Backward compatibility aliases
+// NewNetToL1Conversion is a backward compatibility alias for NewL1Conversion.
 func NewNetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
 	return NewL1Conversion(conversionID)
 }

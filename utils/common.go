@@ -1,5 +1,7 @@
 // Copyright (C) 2025, Lux Partners Limited All rights reserved.
 // See the file LICENSE for licensing terms.
+
+// Package utils provides common utility functions used throughout the SDK.
 package utils
 
 import (
@@ -52,8 +54,8 @@ func Retry[T any](
 	)
 }
 
-// RetryWithContext retries the given function until it succeeds or the maximum number of attempts is reached.
-// For each retry, it generates a fresh context to be used on the call
+// RetryWithContextGen retries the given function until it succeeds or the maximum number of attempts is reached.
+// For each retry, it generates a fresh context to be used on the call.
 func RetryWithContextGen[T any](
 	ctxGen func() (context.Context, context.CancelFunc),
 	fn func(context.Context) (T, error),

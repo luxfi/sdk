@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package models
 
 // Validator represents a validator on any network layer (primary, L1, L2, L3)
@@ -20,6 +21,6 @@ type Validator struct {
 	ValidationID string `json:"ValidationID"`
 }
 
-// Backward compatibility aliases
+// ChainValidator is a backward compatibility alias for Validator.
 type ChainValidator = Validator
 type SubnetValidator = Validator

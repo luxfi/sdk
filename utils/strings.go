@@ -1,5 +1,6 @@
 // Copyright (C) 2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
+
 package utils
 
 import (
@@ -23,7 +24,7 @@ func SplitComaSeparatedInt(s string) []int {
 	})
 }
 
-// SplitStringWithQuotes split string with a rune comma ignore quoted
+// SplitStringWithQuotes splits a string by the given rune, ignoring quoted segments.
 func SplitStringWithQuotes(str string, r rune) []string {
 	quoted := false
 	return strings.FieldsFunc(str, func(r1 rune) bool {
@@ -53,7 +54,7 @@ func AddSingleQuotes(s []string) []string {
 	})
 }
 
-// Cleans up a string by trimming \r and \n characters.
+// CleanupString cleans up a string by trimming \r and \n characters.
 func CleanupString(s string) string {
 	return strings.Trim(strings.Trim(s, "\n"), "\r")
 }
@@ -63,8 +64,8 @@ func CleanupStrings(s []string) []string {
 	return Map(s, CleanupString)
 }
 
-// Formats an amount of base units as a string representing the amount in the given denomination.
-// (i.e. An amount of 54321 with a decimals value of 3 results in the stirng "54.321")
+// FormatAmount formats an amount of base units as a string representing the amount in the given denomination.
+// (i.e. An amount of 54321 with a decimals value of 3 results in the string "54.321")
 func FormatAmount(amount *big.Int, decimals uint8) string {
 	amountFloat := new(big.Float).SetInt(amount)
 	divisor := new(big.Float).SetFloat64(math.Pow10(int(decimals)))
@@ -72,7 +73,7 @@ func FormatAmount(amount *big.Int, decimals uint8) string {
 	return fmt.Sprintf("%.*f", decimals, val)
 }
 
-// Removes the leading 0x/0X part of a hexadecimal string representation
+// TrimHexa removes the leading 0x/0X part of a hexadecimal string representation.
 func TrimHexa(s string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(s, "0x"), "0X")
 }
