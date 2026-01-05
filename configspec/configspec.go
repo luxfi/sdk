@@ -2,6 +2,11 @@
 // See the file LICENSE for licensing terms.
 
 // Package configspec provides the embedded luxd configuration specification.
+//
+// Deprecated: Use github.com/luxfi/config/spec instead. This package will be
+// removed in a future release. The canonical location for configspec is now
+// github.com/luxfi/config/spec.
+//
 // This is a snapshot of the node's configuration spec for use by SDK consumers
 // without requiring a dependency on the node package.
 //

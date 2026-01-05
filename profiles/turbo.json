@@ -1,29 +1,30 @@
 {
   "name": "turbo",
-  "description": "Aggressive 5-node local network with 3/5 quorum",
+  "description": "Ultra-fast 5-node local network with K=3, Alpha=2/3, Beta=2",
   "consensus": {
-    "sample-size": 5,
-    "preference-quorum-size": 3,
-    "confidence-quorum-size": 3,
-    "commit-threshold": 4,
-    "concurrent-repolls": 64,
-    "optimal-processing": 4096,
-    "max-processing": 32768,
-    "frontier-poll-frequency": "20ms"
+    "sample-size": 3,
+    "preference-quorum-size": 2,
+    "confidence-quorum-size": 2,
+    "commit-threshold": 2,
+    "concurrent-repolls": 128,
+    "optimal-processing": 8192,
+    "max-processing": 65536,
+    "frontier-poll-frequency": "10ms",
+    "proposer-min-block-delay": "0s"
   },
   "health": {
-    "check-frequency": "250ms",
-    "averager-halflife": "1s"
+    "check-frequency": "100ms",
+    "averager-halflife": "500ms"
   },
   "network": {
-    "max-reconnect-delay": "100ms",
-    "initial-reconnect-delay": "25ms",
-    "initial-timeout": "250ms",
-    "minimum-timeout": "100ms",
-    "maximum-timeout": "1s",
-    "timeout-halflife": "1s",
-    "read-handshake-timeout": "250ms",
-    "ping-timeout": "3s",
-    "ping-frequency": "1s"
+    "max-reconnect-delay": "50ms",
+    "initial-reconnect-delay": "10ms",
+    "initial-timeout": "100ms",
+    "minimum-timeout": "25ms",
+    "maximum-timeout": "500ms",
+    "timeout-halflife": "500ms",
+    "read-handshake-timeout": "100ms",
+    "ping-timeout": "1s",
+    "ping-frequency": "500ms"
   }
 }
