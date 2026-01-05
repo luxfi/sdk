@@ -34,14 +34,15 @@ type Profile struct {
 
 // ConsensusConfig holds consensus tuning parameters.
 type ConsensusConfig struct {
-	SampleSize           int    `json:"sample-size"`
-	PreferenceQuorumSize int    `json:"preference-quorum-size"`
-	ConfidenceQuorumSize int    `json:"confidence-quorum-size"`
-	CommitThreshold      int    `json:"commit-threshold"`
-	ConcurrentRepolls    int    `json:"concurrent-repolls"`
-	OptimalProcessing    int    `json:"optimal-processing"`
-	MaxProcessing        int    `json:"max-processing"`
-	FrontierPollFreq     string `json:"frontier-poll-frequency"`
+	SampleSize            int    `json:"sample-size"`
+	PreferenceQuorumSize  int    `json:"preference-quorum-size"`
+	ConfidenceQuorumSize  int    `json:"confidence-quorum-size"`
+	CommitThreshold       int    `json:"commit-threshold"`
+	ConcurrentRepolls     int    `json:"concurrent-repolls"`
+	OptimalProcessing     int    `json:"optimal-processing"`
+	MaxProcessing         int    `json:"max-processing"`
+	FrontierPollFreq      string `json:"frontier-poll-frequency"`
+	ProposerMinBlockDelay string `json:"proposer-min-block-delay,omitempty"`
 }
 
 // HealthConfig holds health check tuning parameters.
@@ -188,47 +189,55 @@ func ValidateProfile(data map[string]interface{}) error {
 }
 
 // DefaultProfileForNetwork returns the default profile name for a network type.
+// For local development, all networks use turbo for ultra-fast consensus.
 func DefaultProfileForNetwork(networkName string) string {
 	switch networkName {
 	case "mainnet":
-		return "standard"
+		return "turbo" // Ultra-fast for local 5-node mainnet
 	case "testnet":
-		return "fast"
+		return "turbo" // Ultra-fast for local 5-node testnet
 	case "devnet", "local":
 		return "turbo"
 	case "dev":
 		return "ultra"
 	default:
-		return "standard"
+		return "turbo" // Default to turbo for local development
 	}
 }
 
 // ToNodeConfig converts a profile to luxd node configuration flags.
 // Returns a map of flag keys to values suitable for JSON config.
 func (p *Profile) ToNodeConfig() map[string]interface{} {
-	return map[string]interface{}{
+	cfg := map[string]interface{}{
 		// Consensus
-		"snow-sample-size":               p.Consensus.SampleSize,
-		"snow-quorum-size":               p.Consensus.PreferenceQuorumSize,
-		"snow-preference-quorum-size":    p.Consensus.PreferenceQuorumSize,
-		"snow-confidence-quorum-size":    p.Consensus.ConfidenceQuorumSize,
-		"snow-commit-threshold":          p.Consensus.CommitThreshold,
-		"snow-concurrent-repolls":        p.Consensus.ConcurrentRepolls,
-		"snow-optimal-processing":        p.Consensus.OptimalProcessing,
-		"snow-max-processing":            p.Consensus.MaxProcessing,
+		"snow-sample-size":                  p.Consensus.SampleSize,
+		"snow-quorum-size":                  p.Consensus.PreferenceQuorumSize,
+		"snow-preference-quorum-size":       p.Consensus.PreferenceQuorumSize,
+		"snow-confidence-quorum-size":       p.Consensus.ConfidenceQuorumSize,
+		"snow-commit-threshold":             p.Consensus.CommitThreshold,
+		"snow-concurrent-repolls":           p.Consensus.ConcurrentRepolls,
+		"snow-optimal-processing":           p.Consensus.OptimalProcessing,
+		"snow-max-processing":               p.Consensus.MaxProcessing,
 		"consensus-frontier-poll-frequency": p.Consensus.FrontierPollFreq,
 		// Health
-		"health-check-frequency":           p.Health.CheckFrequency,
-		"health-check-averager-halflife":   p.Health.AveragerHalflife,
+		"health-check-frequency":         p.Health.CheckFrequency,
+		"health-check-averager-halflife": p.Health.AveragerHalflife,
 		// Network
-		"network-max-reconnect-delay":      p.Network.MaxReconnectDelay,
-		"network-initial-reconnect-delay":  p.Network.InitialReconnectDelay,
-		"network-initial-timeout":          p.Network.InitialTimeout,
-		"network-minimum-timeout":          p.Network.MinimumTimeout,
-		"network-maximum-timeout":          p.Network.MaximumTimeout,
-		"network-timeout-halflife":         p.Network.TimeoutHalflife,
-		"network-read-handshake-timeout":   p.Network.ReadHandshakeTimeout,
-		"network-ping-timeout":             p.Network.PingTimeout,
-		"network-ping-frequency":           p.Network.PingFrequency,
+		"network-max-reconnect-delay":     p.Network.MaxReconnectDelay,
+		"network-initial-reconnect-delay": p.Network.InitialReconnectDelay,
+		"network-initial-timeout":         p.Network.InitialTimeout,
+		"network-minimum-timeout":         p.Network.MinimumTimeout,
+		"network-maximum-timeout":         p.Network.MaximumTimeout,
+		"network-timeout-halflife":        p.Network.TimeoutHalflife,
+		"network-read-handshake-timeout":  p.Network.ReadHandshakeTimeout,
+		"network-ping-timeout":            p.Network.PingTimeout,
+		"network-ping-frequency":          p.Network.PingFrequency,
 	}
+
+	// Add proposer delay if specified
+	if p.Consensus.ProposerMinBlockDelay != "" {
+		cfg["proposervm-min-block-delay"] = p.Consensus.ProposerMinBlockDelay
+	}
+
+	return cfg
 }
