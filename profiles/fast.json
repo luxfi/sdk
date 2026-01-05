@@ -1,0 +1,29 @@
+{
+  "name": "fast",
+  "description": "Balanced testnet settings for development",
+  "consensus": {
+    "sample-size": 5,
+    "preference-quorum-size": 4,
+    "confidence-quorum-size": 4,
+    "commit-threshold": 4,
+    "concurrent-repolls": 48,
+    "optimal-processing": 3072,
+    "max-processing": 24576,
+    "frontier-poll-frequency": "35ms"
+  },
+  "health": {
+    "check-frequency": "350ms",
+    "averager-halflife": "1.5s"
+  },
+  "network": {
+    "max-reconnect-delay": "175ms",
+    "initial-reconnect-delay": "40ms",
+    "initial-timeout": "375ms",
+    "minimum-timeout": "175ms",
+    "maximum-timeout": "1.5s",
+    "timeout-halflife": "1.5s",
+    "read-handshake-timeout": "500ms",
+    "ping-timeout": "4s",
+    "ping-frequency": "1.5s"
+  }
+}
