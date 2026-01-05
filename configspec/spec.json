@@ -1,0 +1,1619 @@
+{
+  "version": "1.0.0",
+  "node_version": "1.22.18",
+  "generated_at": "2026-01-05T05:36:59Z",
+  "flags": [
+    {
+      "key": "version",
+      "type": "bool",
+      "default": false,
+      "description": "If true, print version and quit",
+      "category": "process"
+    },
+    {
+      "key": "version-json",
+      "type": "bool",
+      "default": false,
+      "description": "If true, print version in JSON format and quit",
+      "category": "process"
+    },
+    {
+      "key": "dev",
+      "type": "bool",
+      "default": false,
+      "description": "Enables development mode with single-node consensus, no sybil protection, and other dev-friendly settings",
+      "category": "dev"
+    },
+    {
+      "key": "data-dir",
+      "type": "string",
+      "default": "$HOME/.lux",
+      "description": "Sets the base data directory where default sub-directories will be placed unless otherwise specified",
+      "category": "node"
+    },
+    {
+      "key": "fd-limit",
+      "type": "uint64",
+      "default": 32768,
+      "description": "Attempts to raise the process file descriptor limit to at least this value and error if the value is above the system max",
+      "category": "node"
+    },
+    {
+      "key": "plugin-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/plugins/current",
+      "description": "Path to the plugin directory",
+      "category": "node"
+    },
+    {
+      "key": "config-file",
+      "type": "string",
+      "default": "",
+      "description": "Specifies a config file. Ignored if config-file-content is specified",
+      "category": "node"
+    },
+    {
+      "key": "config-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded config content",
+      "category": "node",
+      "sensitive": true
+    },
+    {
+      "key": "config-file-content-type",
+      "type": "string",
+      "default": "json",
+      "description": "Specifies the format of the base64 encoded config content. Available values: 'json', 'yaml', 'toml'",
+      "category": "node",
+      "constraints": {
+        "enum": [
+          "json",
+          "yaml",
+          "toml"
+        ]
+      }
+    },
+    {
+      "key": "genesis-file",
+      "type": "string",
+      "default": "",
+      "description": "Specifies a genesis config file path. Ignored when running standard networks or if genesis-file-content is specified",
+      "category": "genesis"
+    },
+    {
+      "key": "genesis-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded genesis content",
+      "category": "genesis"
+    },
+    {
+      "key": "genesis-db",
+      "type": "string",
+      "default": "",
+      "description": "Path to existing genesis database for replay. Cannot be used with genesis-file or genesis-file-content",
+      "category": "genesis",
+      "constraints": {
+        "conflicts_with": [
+          "genesis-file",
+          "genesis-file-content"
+        ]
+      }
+    },
+    {
+      "key": "genesis-db-type",
+      "type": "string",
+      "default": "badgerdb",
+      "description": "Database type to use for genesis database. Must be one of {pebbledb, badgerdb}",
+      "category": "genesis",
+      "constraints": {
+        "enum": [
+          "pebbledb",
+          "badgerdb"
+        ]
+      }
+    },
+    {
+      "key": "genesis-block-limit",
+      "type": "uint64",
+      "default": 0,
+      "description": "Limit number of blocks to replay during genesis (0 = all blocks)",
+      "category": "genesis"
+    },
+    {
+      "key": "allow-custom-genesis",
+      "type": "bool",
+      "default": true,
+      "description": "Allow custom genesis for mainnet/testnet (default: true for development, set false for production)",
+      "category": "genesis"
+    },
+    {
+      "key": "upgrade-file",
+      "type": "string",
+      "default": "",
+      "description": "Specifies an upgrade config file path. Ignored when running standard networks or if upgrade-file-content is specified",
+      "category": "genesis"
+    },
+    {
+      "key": "upgrade-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded upgrade content",
+      "category": "genesis"
+    },
+    {
+      "key": "network-id",
+      "type": "string",
+      "default": "mainnet",
+      "description": "Network ID this node will connect to",
+      "category": "network"
+    },
+    {
+      "key": "lp-support",
+      "type": "int-slice",
+      "description": "LPs to support adoption",
+      "category": "dev"
+    },
+    {
+      "key": "lp-object",
+      "type": "int-slice",
+      "description": "LPs to object adoption",
+      "category": "dev"
+    },
+    {
+      "key": "validator-fees-capacity",
+      "type": "uint64",
+      "default": 20000,
+      "description": "Maximum number of validators",
+      "category": "fees"
+    },
+    {
+      "key": "validator-fees-target",
+      "type": "uint64",
+      "default": 10000,
+      "description": "Target number of validators",
+      "category": "fees"
+    },
+    {
+      "key": "validator-fees-min-price",
+      "type": "uint64",
+      "default": 512,
+      "description": "Minimum validator price in nLUX per second",
+      "category": "fees"
+    },
+    {
+      "key": "validator-fees-excess-conversion-constant",
+      "type": "uint64",
+      "default": 107411168183,
+      "description": "Constant to convert validator excess price",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-bandwidth-weight",
+      "type": "uint64",
+      "default": 1,
+      "description": "Complexity multiplier used to convert Bandwidth into Gas",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-db-read-weight",
+      "type": "uint64",
+      "default": 1,
+      "description": "Complexity multiplier used to convert DB Reads into Gas",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-db-write-weight",
+      "type": "uint64",
+      "default": 1,
+      "description": "Complexity multiplier used to convert DB Writes into Gas",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-compute-weight",
+      "type": "uint64",
+      "default": 1,
+      "description": "Complexity multiplier used to convert Compute into Gas",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-max-gas-capacity",
+      "type": "uint64",
+      "default": 1000000,
+      "description": "Maximum amount of Gas the chain is allowed to store for future use",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-max-gas-per-second",
+      "type": "uint64",
+      "default": 1000,
+      "description": "Rate at which Gas is stored for future use",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-target-gas-per-second",
+      "type": "uint64",
+      "default": 500,
+      "description": "Target rate of Gas usage",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-min-gas-price",
+      "type": "uint64",
+      "default": 1,
+      "description": "Minimum Gas price",
+      "category": "fees"
+    },
+    {
+      "key": "dynamic-fees-excess-conversion-constant",
+      "type": "uint64",
+      "default": 5761920000000,
+      "description": "Constant to convert excess Gas to the Gas price",
+      "category": "fees"
+    },
+    {
+      "key": "tx-fee",
+      "type": "uint64",
+      "default": 1000000,
+      "description": "Transaction fee, in nLUX",
+      "category": "fees"
+    },
+    {
+      "key": "create-asset-tx-fee",
+      "type": "uint64",
+      "default": 10000000,
+      "description": "Transaction fee, in nLUX, for transactions that create new assets",
+      "category": "fees"
+    },
+    {
+      "key": "db-type",
+      "type": "string",
+      "default": "badgerdb",
+      "description": "Default database type to use for all chains. Must be one of {badgerdb, pebbledb, memdb}",
+      "category": "database",
+      "constraints": {
+        "enum": [
+          "badgerdb",
+          "pebbledb",
+          "memdb"
+        ]
+      }
+    },
+    {
+      "key": "db-read-only",
+      "type": "bool",
+      "default": false,
+      "description": "If true, database writes are to memory and never persisted. May still initialize database directory/files on disk if they don't exist",
+      "category": "database"
+    },
+    {
+      "key": "db-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/db",
+      "description": "Path to database directory",
+      "category": "database"
+    },
+    {
+      "key": "db-config-file",
+      "type": "string",
+      "default": "",
+      "description": "Path to database config file. Ignored if db-config-file-content is specified",
+      "category": "database"
+    },
+    {
+      "key": "db-config-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded database config content",
+      "category": "database"
+    },
+    {
+      "key": "p-chain-db-type",
+      "type": "string",
+      "default": "",
+      "description": "Database type for P-Chain. If not specified, uses default db-type",
+      "category": "database"
+    },
+    {
+      "key": "x-chain-db-type",
+      "type": "string",
+      "default": "",
+      "description": "Database type for X-Chain. If not specified, uses default db-type",
+      "category": "database"
+    },
+    {
+      "key": "c-chain-db-type",
+      "type": "string",
+      "default": "",
+      "description": "Database type for C-Chain. If not specified, uses default db-type",
+      "category": "database"
+    },
+    {
+      "key": "log-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/logs",
+      "description": "Logging directory for Lux",
+      "category": "logging"
+    },
+    {
+      "key": "log-level",
+      "type": "string",
+      "default": "info",
+      "description": "The log level. Should be one of {verbo, debug, trace, info, warn, error, fatal, off}",
+      "category": "logging",
+      "constraints": {
+        "enum": [
+          "verbo",
+          "debug",
+          "trace",
+          "info",
+          "warn",
+          "error",
+          "fatal",
+          "off"
+        ]
+      }
+    },
+    {
+      "key": "log-display-level",
+      "type": "string",
+      "default": "",
+      "description": "The log display level. If left blank, will inherit the value of log-level. Otherwise, should be one of {verbo, debug, trace, info, warn, error, fatal, off}",
+      "category": "logging"
+    },
+    {
+      "key": "log-rotater-max-size",
+      "type": "uint",
+      "default": 8,
+      "description": "The maximum file size in megabytes of the log file before it gets rotated",
+      "category": "logging"
+    },
+    {
+      "key": "log-rotater-max-files",
+      "type": "uint",
+      "default": 7,
+      "description": "The maximum number of old log files to retain. 0 means retain all old log files",
+      "category": "logging"
+    },
+    {
+      "key": "log-rotater-max-age",
+      "type": "uint",
+      "default": 0,
+      "description": "The maximum number of days to retain old log files based on the timestamp encoded in their filename. 0 means retain all old log files",
+      "category": "logging"
+    },
+    {
+      "key": "log-rotater-compress-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "Enables the compression of rotated log files through gzip",
+      "category": "logging"
+    },
+    {
+      "key": "log-disable-display-plugin-logs",
+      "type": "bool",
+      "default": false,
+      "description": "Disables displaying plugin logs in stdout",
+      "category": "logging"
+    },
+    {
+      "key": "network-peer-list-num-validator-ips",
+      "type": "uint",
+      "default": 15,
+      "description": "Number of validator IPs to gossip to other nodes",
+      "category": "network"
+    },
+    {
+      "key": "network-peer-list-pull-gossip-frequency",
+      "type": "duration",
+      "default": 1000000000,
+      "description": "Frequency to request peers from other nodes",
+      "category": "network"
+    },
+    {
+      "key": "network-peer-list-bloom-reset-frequency",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Frequency to recalculate the bloom filter used to request new peers from other nodes",
+      "category": "network"
+    },
+    {
+      "key": "public-ip",
+      "type": "string",
+      "default": "",
+      "description": "Public IP of this node for P2P communication",
+      "category": "network"
+    },
+    {
+      "key": "public-ip-resolution-frequency",
+      "type": "duration",
+      "default": 300000000000,
+      "description": "Frequency at which this node resolves/updates its public IP and renew NAT mappings, if applicable",
+      "category": "network"
+    },
+    {
+      "key": "public-ip-resolution-service",
+      "type": "string",
+      "default": "",
+      "description": "Only acceptable values are 'opendns', 'ifconfigco' or 'ifconfigme'. When provided, the node will use that service to periodically resolve/update its public IP",
+      "category": "network",
+      "constraints": {
+        "enum": [
+          "",
+          "opendns",
+          "ifconfigco",
+          "ifconfigme"
+        ]
+      }
+    },
+    {
+      "key": "network-inbound-connection-throttling-cooldown",
+      "type": "duration",
+      "default": 10000000000,
+      "description": "Upgrade an inbound connection from a given IP at most once per this duration. If 0, don't rate-limit inbound connection upgrades",
+      "category": "throttler"
+    },
+    {
+      "key": "network-inbound-connection-throttling-max-conns-per-sec",
+      "type": "float64",
+      "default": 256,
+      "description": "Max number of inbound connections to accept (from all peers) per second",
+      "category": "throttler"
+    },
+    {
+      "key": "network-outbound-connection-throttling-rps",
+      "type": "uint",
+      "default": 50,
+      "description": "Make at most this number of outgoing peer connection attempts per second",
+      "category": "throttler"
+    },
+    {
+      "key": "network-outbound-connection-timeout",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Timeout when dialing a peer",
+      "category": "network"
+    },
+    {
+      "key": "network-initial-timeout",
+      "type": "duration",
+      "default": 5000000000,
+      "description": "Initial timeout value of the adaptive timeout manager",
+      "category": "network"
+    },
+    {
+      "key": "network-minimum-timeout",
+      "type": "duration",
+      "default": 2000000000,
+      "description": "Minimum timeout value of the adaptive timeout manager",
+      "category": "network"
+    },
+    {
+      "key": "network-maximum-timeout",
+      "type": "duration",
+      "default": 10000000000,
+      "description": "Maximum timeout value of the adaptive timeout manager",
+      "category": "network"
+    },
+    {
+      "key": "network-maximum-inbound-timeout",
+      "type": "duration",
+      "default": 10000000000,
+      "description": "Maximum timeout value of an inbound message. Defines duration within which an incoming message must be fulfilled. Incoming messages containing deadline higher than this value will be overridden with this value",
+      "category": "network"
+    },
+    {
+      "key": "network-timeout-halflife",
+      "type": "duration",
+      "default": 300000000000,
+      "description": "Halflife of average network response time. Higher value --\u003e network timeout is less volatile. Can't be 0",
+      "category": "network"
+    },
+    {
+      "key": "network-timeout-coefficient",
+      "type": "float64",
+      "default": 2,
+      "description": "Multiplied by average network response time to get the network timeout. Must be \u003e= 1",
+      "category": "network",
+      "constraints": {
+        "min": 1
+      }
+    },
+    {
+      "key": "network-read-handshake-timeout",
+      "type": "duration",
+      "default": 15000000000,
+      "description": "Timeout value for reading handshake messages",
+      "category": "network"
+    },
+    {
+      "key": "network-ping-timeout",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Timeout value for Ping-Pong with a peer",
+      "category": "network"
+    },
+    {
+      "key": "network-ping-frequency",
+      "type": "duration",
+      "default": 22500000000,
+      "description": "Frequency of pinging other peers",
+      "category": "network"
+    },
+    {
+      "key": "network-no-ingress-connections-grace-period",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Time after which nodes are expected to be connected to us if we are a primary network validator, otherwise a health check fails",
+      "category": "network"
+    },
+    {
+      "key": "network-compression-type",
+      "type": "string",
+      "default": "zstd",
+      "description": "Compression type for outbound messages. Must be one of [zstd, none]",
+      "category": "network",
+      "constraints": {
+        "enum": [
+          "zstd",
+          "none"
+        ]
+      }
+    },
+    {
+      "key": "network-max-clock-difference",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Max allowed clock difference value between this node and peers",
+      "category": "network"
+    },
+    {
+      "key": "network-allow-private-ips",
+      "type": "bool",
+      "default": true,
+      "description": "Allows the node to initiate outbound connection attempts to peers with private IPs. Default is true. Set to false to prohibit for security-sensitive production deployments",
+      "category": "network"
+    },
+    {
+      "key": "network-require-validator-to-connect",
+      "type": "bool",
+      "default": false,
+      "description": "If true, this node will only maintain a connection with another node if this node is a validator, the other node is a validator, or the other node is a beacon",
+      "category": "network"
+    },
+    {
+      "key": "network-peer-read-buffer-size",
+      "type": "uint",
+      "default": 8192,
+      "description": "Size, in bytes, of the buffer that we read peer messages into (there is one buffer per peer)",
+      "category": "network"
+    },
+    {
+      "key": "network-peer-write-buffer-size",
+      "type": "uint",
+      "default": 8192,
+      "description": "Size, in bytes, of the buffer that we write peer messages into (there is one buffer per peer)",
+      "category": "network"
+    },
+    {
+      "key": "network-tcp-proxy-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "Require all P2P connections to be initiated with a TCP proxy header",
+      "category": "network"
+    },
+    {
+      "key": "network-tcp-proxy-read-timeout",
+      "type": "duration",
+      "default": 3000000000,
+      "description": "Maximum duration to wait for a TCP proxy header",
+      "category": "network"
+    },
+    {
+      "key": "network-tls-key-log-file-unsafe",
+      "type": "string",
+      "default": "",
+      "description": "TLS key log file path. Should only be specified for debugging",
+      "category": "network",
+      "sensitive": true
+    },
+    {
+      "key": "benchlist-fail-threshold",
+      "type": "int",
+      "default": 10,
+      "description": "Number of consecutive failed queries before benchlisting a node",
+      "category": "network"
+    },
+    {
+      "key": "benchlist-duration",
+      "type": "duration",
+      "default": 900000000000,
+      "description": "Max amount of time a peer is benchlisted after surpassing the threshold",
+      "category": "network"
+    },
+    {
+      "key": "benchlist-min-failing-duration",
+      "type": "duration",
+      "default": 150000000000,
+      "description": "Minimum amount of time messages to a peer must be failing before the peer is benched",
+      "category": "network"
+    },
+    {
+      "key": "consensus-app-concurrency",
+      "type": "uint",
+      "default": 2,
+      "description": "Maximum number of goroutines to use when handling App messages on a chain",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-shutdown-timeout",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Timeout before killing an unresponsive chain",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-frontier-poll-frequency",
+      "type": "duration",
+      "default": 100000000,
+      "description": "Frequency of polling for new consensus frontiers",
+      "category": "consensus"
+    },
+    {
+      "key": "throttler-inbound-at-large-alloc-size",
+      "type": "uint64",
+      "default": 6291456,
+      "description": "Size, in bytes, of at-large byte allocation in inbound message throttler",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-validator-alloc-size",
+      "type": "uint64",
+      "default": 33554432,
+      "description": "Size, in bytes, of validator byte allocation in inbound message throttler",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-node-max-at-large-bytes",
+      "type": "uint64",
+      "default": 2097152,
+      "description": "Max number of bytes a node can take from the inbound message throttler's at-large allocation. Must be at least the max message size",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-node-max-processing-msgs",
+      "type": "uint64",
+      "default": 1024,
+      "description": "Max number of messages currently processing from a given node",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-bandwidth-refill-rate",
+      "type": "uint64",
+      "default": 524288,
+      "description": "Max average inbound bandwidth usage of a peer, in bytes per second. See BandwidthThrottler",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-bandwidth-max-burst-size",
+      "type": "uint64",
+      "default": 2097152,
+      "description": "Max inbound bandwidth a node can use at once. Must be at least the max message size. See BandwidthThrottler",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-cpu-max-recheck-delay",
+      "type": "duration",
+      "default": 5000000000,
+      "description": "In the CPU-based network throttler, check at least this often whether the node's CPU usage has fallen to an acceptable level",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-disk-max-recheck-delay",
+      "type": "duration",
+      "default": 5000000000,
+      "description": "In the disk-based network throttler, check at least this often whether the node's disk usage has fallen to an acceptable level",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-outbound-at-large-alloc-size",
+      "type": "uint64",
+      "default": 6291456,
+      "description": "Size, in bytes, of at-large byte allocation in outbound message throttler",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-outbound-validator-alloc-size",
+      "type": "uint64",
+      "default": 33554432,
+      "description": "Size, in bytes, of validator byte allocation in outbound message throttler",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-outbound-node-max-at-large-bytes",
+      "type": "uint64",
+      "default": 2097152,
+      "description": "Max number of bytes a node can take from the outbound message throttler's at-large allocation. Must be at least the max message size",
+      "category": "throttler"
+    },
+    {
+      "key": "http-host",
+      "type": "string",
+      "default": "127.0.0.1",
+      "description": "Address of the HTTP server. If the address is empty or a literal unspecified IP address, the server will bind on all available unicast and anycast IP addresses of the local system",
+      "category": "http"
+    },
+    {
+      "key": "http-port",
+      "type": "uint",
+      "default": 9630,
+      "description": "Port of the HTTP server. If the port is 0 a port number is automatically chosen",
+      "category": "http"
+    },
+    {
+      "key": "http-tls-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "Upgrade the HTTP server to HTTPs",
+      "category": "http"
+    },
+    {
+      "key": "http-tls-key-file",
+      "type": "string",
+      "default": "",
+      "description": "TLS private key file for the HTTPs server. Ignored if http-tls-key-file-content is specified",
+      "category": "http",
+      "sensitive": true
+    },
+    {
+      "key": "http-tls-key-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded TLS private key for the HTTPs server",
+      "category": "http",
+      "sensitive": true
+    },
+    {
+      "key": "http-tls-cert-file",
+      "type": "string",
+      "default": "",
+      "description": "TLS certificate file for the HTTPs server. Ignored if http-tls-cert-file-content is specified",
+      "category": "http"
+    },
+    {
+      "key": "http-tls-cert-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded TLS certificate for the HTTPs server",
+      "category": "http"
+    },
+    {
+      "key": "http-allowed-origins",
+      "type": "string",
+      "default": "*",
+      "description": "Origins to allow on the HTTP port. Defaults to * which allows all origins. Example: https://*.lux.network https://*.lux-test.network",
+      "category": "http"
+    },
+    {
+      "key": "http-allowed-hosts",
+      "type": "string-slice",
+      "default": [
+        "localhost"
+      ],
+      "description": "List of acceptable host names in API requests. Provide the wildcard ('*') to accept requests from all hosts. API requests where the Host field is empty or an IP address will always be accepted. An API call whose HTTP Host field isn't acceptable will receive a 403 error code",
+      "category": "http"
+    },
+    {
+      "key": "http-shutdown-wait",
+      "type": "duration",
+      "default": 0,
+      "description": "Duration to wait after receiving SIGTERM or SIGINT before initiating shutdown. The /health endpoint will return unhealthy during this duration",
+      "category": "http"
+    },
+    {
+      "key": "http-shutdown-timeout",
+      "type": "duration",
+      "default": 10000000000,
+      "description": "Maximum duration to wait for existing connections to complete during node shutdown",
+      "category": "http"
+    },
+    {
+      "key": "http-read-timeout",
+      "type": "duration",
+      "default": 3600000000000,
+      "description": "Maximum duration for reading the entire request, including the body. A zero or negative value means there will be no timeout",
+      "category": "http"
+    },
+    {
+      "key": "http-read-header-timeout",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Maximum duration to read request headers. The connection's read deadline is reset after reading the headers. If http-read-timeout is zero, the value of http-read-header-timeout is used. If both are zero, there is no timeout",
+      "category": "http"
+    },
+    {
+      "key": "http-write-timeout",
+      "type": "duration",
+      "default": 3600000000000,
+      "description": "Maximum duration before timing out writes of the response. It is reset whenever a new request's header is read. A zero or negative value means there will be no timeout",
+      "category": "http"
+    },
+    {
+      "key": "http-idle-timeout",
+      "type": "duration",
+      "default": 120000000000,
+      "description": "Maximum duration to wait for the next request when keep-alives are enabled. If http-read-timeout is zero, the value of http-idle-timeout is used. If both are zero, there is no timeout",
+      "category": "http"
+    },
+    {
+      "key": "api-admin-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "If true, this node exposes the Admin API",
+      "category": "api"
+    },
+    {
+      "key": "api-info-enabled",
+      "type": "bool",
+      "default": true,
+      "description": "If true, this node exposes the Info API",
+      "category": "api"
+    },
+    {
+      "key": "api-keystore-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "If true, this node exposes the Keystore API",
+      "category": "api"
+    },
+    {
+      "key": "api-metrics-enabled",
+      "type": "bool",
+      "default": true,
+      "description": "If true, this node exposes the Metrics API",
+      "category": "api"
+    },
+    {
+      "key": "api-health-enabled",
+      "type": "bool",
+      "default": true,
+      "description": "If true, this node exposes the Health API",
+      "category": "api"
+    },
+    {
+      "key": "health-check-frequency",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Time between health checks",
+      "category": "health"
+    },
+    {
+      "key": "health-check-averager-halflife",
+      "type": "duration",
+      "default": 10000000000,
+      "description": "Halflife of averager when calculating a running average in a health check",
+      "category": "health"
+    },
+    {
+      "key": "network-health-max-time-since-msg-sent",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Network layer returns unhealthy if haven't sent a message for at least this much time",
+      "category": "health"
+    },
+    {
+      "key": "network-health-max-time-since-msg-received",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Network layer returns unhealthy if haven't received a message for at least this much time",
+      "category": "health"
+    },
+    {
+      "key": "network-health-max-portion-send-queue-full",
+      "type": "float64",
+      "default": 0.9,
+      "description": "Network layer returns unhealthy if more than this portion of the pending send queue is full",
+      "category": "health"
+    },
+    {
+      "key": "network-health-min-conn-peers",
+      "type": "uint",
+      "default": 1,
+      "description": "Network layer returns unhealthy if connected to less than this many peers",
+      "category": "health"
+    },
+    {
+      "key": "network-health-max-send-fail-rate",
+      "type": "float64",
+      "default": 0.25,
+      "description": "Network layer reports unhealthy if more than this portion of attempted message sends fail",
+      "category": "health"
+    },
+    {
+      "key": "router-health-max-drop-rate",
+      "type": "float64",
+      "default": 1,
+      "description": "Node reports unhealthy if the router drops more than this portion of messages",
+      "category": "health"
+    },
+    {
+      "key": "router-health-max-outstanding-requests",
+      "type": "uint",
+      "default": 1024,
+      "description": "Node reports unhealthy if there are more than this many outstanding consensus requests (Get, PullQuery, etc.) over all chains",
+      "category": "health"
+    },
+    {
+      "key": "network-health-max-outstanding-request-duration",
+      "type": "duration",
+      "default": 300000000000,
+      "description": "Node reports unhealthy if there has been a request outstanding for this duration",
+      "category": "health"
+    },
+    {
+      "key": "staking-host",
+      "type": "string",
+      "default": "",
+      "description": "Address of the consensus server. If the address is empty or a literal unspecified IP address, the server will bind on all available unicast and anycast IP addresses of the local system",
+      "category": "staking"
+    },
+    {
+      "key": "staking-port",
+      "type": "uint",
+      "default": 9631,
+      "description": "Port of the consensus server. If the port is 0 a port number is automatically chosen",
+      "category": "staking"
+    },
+    {
+      "key": "staking-ephemeral-cert-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "If true, the node uses an ephemeral staking TLS key and certificate, and has an ephemeral node ID",
+      "category": "staking"
+    },
+    {
+      "key": "staking-tls-key-file",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/staking/staker.key",
+      "description": "Path to the TLS private key for staking. Ignored if staking-tls-key-file-content is specified",
+      "category": "staking",
+      "sensitive": true
+    },
+    {
+      "key": "staking-tls-key-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded TLS private key for staking",
+      "category": "staking",
+      "sensitive": true
+    },
+    {
+      "key": "staking-tls-cert-file",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/staking/staker.crt",
+      "description": "Path to the TLS certificate for staking. Ignored if staking-tls-cert-file-content is specified",
+      "category": "staking"
+    },
+    {
+      "key": "staking-tls-cert-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded TLS certificate for staking",
+      "category": "staking"
+    },
+    {
+      "key": "staking-ephemeral-signer-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "If true, the node uses an ephemeral staking signer key",
+      "category": "staking"
+    },
+    {
+      "key": "staking-signer-key-file",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/staking/signer.key",
+      "description": "Path to the signer private key for staking. Ignored if staking-signer-key-file-content is specified",
+      "category": "staking",
+      "sensitive": true
+    },
+    {
+      "key": "staking-signer-key-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded signer private key for staking",
+      "category": "staking",
+      "sensitive": true
+    },
+    {
+      "key": "sybil-protection-enabled",
+      "type": "bool",
+      "default": true,
+      "description": "Enables sybil protection. If enabled, Network TLS is required",
+      "category": "staking"
+    },
+    {
+      "key": "sybil-protection-disabled-weight",
+      "type": "uint64",
+      "default": 100,
+      "description": "Weight to provide to each peer when sybil protection is disabled",
+      "category": "staking"
+    },
+    {
+      "key": "partial-sync-primary-network",
+      "type": "bool",
+      "default": false,
+      "description": "Only sync the P-chain on the Primary Network. If the node is a Primary Network validator, it will report unhealthy",
+      "category": "staking"
+    },
+    {
+      "key": "uptime-requirement",
+      "type": "float64",
+      "default": 0.8,
+      "description": "Fraction of time a validator must be online to receive rewards",
+      "category": "staking"
+    },
+    {
+      "key": "min-validator-stake",
+      "type": "uint64",
+      "default": 2000000000000,
+      "description": "Minimum stake, in nLUX, required to validate the primary network",
+      "category": "staking"
+    },
+    {
+      "key": "max-validator-stake",
+      "type": "uint64",
+      "default": 3000000000000000,
+      "description": "Maximum stake, in nLUX, that can be placed on a validator on the primary network",
+      "category": "staking"
+    },
+    {
+      "key": "min-delegator-stake",
+      "type": "uint64",
+      "default": 25000000000,
+      "description": "Minimum stake, in nLUX, that can be delegated on the primary network",
+      "category": "staking"
+    },
+    {
+      "key": "min-delegation-fee",
+      "type": "uint64",
+      "default": 20000,
+      "description": "Minimum delegation fee, in the range [0, 1000000], that can be charged for delegation on the primary network",
+      "category": "staking"
+    },
+    {
+      "key": "min-stake-duration",
+      "type": "duration",
+      "default": 86400000000000,
+      "description": "Minimum staking duration",
+      "category": "staking"
+    },
+    {
+      "key": "max-stake-duration",
+      "type": "duration",
+      "default": 31536000000000000,
+      "description": "Maximum staking duration",
+      "category": "staking"
+    },
+    {
+      "key": "stake-max-consumption-rate",
+      "type": "uint64",
+      "default": 120000,
+      "description": "Maximum consumption rate of the remaining tokens to mint in the staking function",
+      "category": "staking"
+    },
+    {
+      "key": "stake-min-consumption-rate",
+      "type": "uint64",
+      "default": 100000,
+      "description": "Minimum consumption rate of the remaining tokens to mint in the staking function",
+      "category": "staking"
+    },
+    {
+      "key": "stake-minting-period",
+      "type": "duration",
+      "default": 31536000000000000,
+      "description": "Consumption period of the staking function",
+      "category": "staking"
+    },
+    {
+      "key": "stake-supply-cap",
+      "type": "uint64",
+      "default": 2000000000000000000,
+      "description": "Supply cap of the staking function",
+      "category": "staking"
+    },
+    {
+      "key": "track-chains",
+      "type": "string",
+      "default": "",
+      "description": "Comma-separated list of chain IDs to track. A node tracking chains will sync those chains and track validator uptimes. Use --track-all-chains for development networks",
+      "category": "chain"
+    },
+    {
+      "key": "track-all-chains",
+      "type": "bool",
+      "default": false,
+      "description": "If true, track all chains automatically. Useful for development and testing networks where you want to sync all deployed chains without specifying each one",
+      "category": "chain"
+    },
+    {
+      "key": "state-sync-ips",
+      "type": "string",
+      "default": "",
+      "description": "Comma separated list of state sync peer ips to connect to. Example: 127.0.0.1:9630,127.0.0.1:9631",
+      "category": "bootstrap"
+    },
+    {
+      "key": "state-sync-ids",
+      "type": "string",
+      "default": "",
+      "description": "Comma separated list of state sync peer ids to connect to. Example: NodeID-JR4dVmy6ffUGAKCBDkyCbeZbyHQBeDsET,NodeID-8CrVPQZ4VSqgL8zTdvL14G8HqAfrBr4z",
+      "category": "bootstrap"
+    },
+    {
+      "key": "bootstrap-ips",
+      "type": "string",
+      "default": "",
+      "description": "Comma separated list of bootstrap peer ips to connect to. Example: 127.0.0.1:9630,127.0.0.1:9631",
+      "category": "bootstrap"
+    },
+    {
+      "key": "bootstrap-ids",
+      "type": "string",
+      "default": "",
+      "description": "Comma separated list of bootstrap peer ids to connect to. Example: NodeID-JR4dVmy6ffUGAKCBDkyCbeZbyHQBeDsET,NodeID-8CrVPQZ4VSqgL8zTdvL14G8HqAfrBr4z",
+      "category": "bootstrap"
+    },
+    {
+      "key": "skip-bootstrap",
+      "type": "bool",
+      "default": false,
+      "description": "If true, skip the bootstrapping phase and start processing immediately",
+      "category": "bootstrap"
+    },
+    {
+      "key": "enable-automining",
+      "type": "bool",
+      "default": false,
+      "description": "If true, enable automining in POA mode",
+      "category": "bootstrap"
+    },
+    {
+      "key": "bootstrap-beacon-connection-timeout",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Timeout before emitting a warn log when connecting to bootstrapping beacons",
+      "category": "bootstrap"
+    },
+    {
+      "key": "bootstrap-max-time-get-ancestors",
+      "type": "duration",
+      "default": 50000000,
+      "description": "Max Time to spend fetching a container and its ancestors when responding to a GetAncestors",
+      "category": "bootstrap"
+    },
+    {
+      "key": "bootstrap-ancestors-max-containers-sent",
+      "type": "uint",
+      "default": 2000,
+      "description": "Max number of containers in an Ancestors message sent by this node",
+      "category": "bootstrap"
+    },
+    {
+      "key": "bootstrap-ancestors-max-containers-received",
+      "type": "uint",
+      "default": 2000,
+      "description": "This node reads at most this many containers from an incoming Ancestors message",
+      "category": "bootstrap"
+    },
+    {
+      "key": "consensus-sample-size",
+      "type": "int",
+      "default": 20,
+      "description": "Number of nodes to query for each network poll",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-quorum-size",
+      "type": "int",
+      "default": 15,
+      "description": "Threshold of nodes required to update this node's preference and increase its confidence in a network poll",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-preference-quorum-size",
+      "type": "int",
+      "default": 15,
+      "description": "Threshold of nodes required to update this node's preference in a network poll. Ignored if consensus-quorum-size is provided",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-confidence-quorum-size",
+      "type": "int",
+      "default": 15,
+      "description": "Threshold of nodes required to increase this node's confidence in a network poll. Ignored if consensus-quorum-size is provided",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-commit-threshold",
+      "type": "int",
+      "default": 20,
+      "description": "Beta value to use for consensus",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-concurrent-repolls",
+      "type": "int",
+      "default": 4,
+      "description": "Minimum number of concurrent polls for finalizing consensus",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-optimal-processing",
+      "type": "int",
+      "default": 50,
+      "description": "Optimal number of processing containers in consensus",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-max-processing",
+      "type": "int",
+      "default": 1024,
+      "description": "Maximum number of processing items to be considered healthy",
+      "category": "consensus"
+    },
+    {
+      "key": "consensus-max-time-processing",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Maximum amount of time an item should be processing and still be healthy",
+      "category": "consensus"
+    },
+    {
+      "key": "proposervm-use-current-height",
+      "type": "bool",
+      "default": false,
+      "description": "Have the ProposerVM always report the last accepted P-chain block height",
+      "category": "consensus"
+    },
+    {
+      "key": "proposervm-min-block-delay",
+      "type": "duration",
+      "default": 1000000000,
+      "description": "Minimum delay to enforce when building a chain++ block for the primary network chains and the default minimum delay for subnets",
+      "category": "consensus"
+    },
+    {
+      "key": "meter-vms-enabled",
+      "type": "bool",
+      "default": true,
+      "description": "Enable Meter VMs to track VM performance with more granularity",
+      "category": "metrics"
+    },
+    {
+      "key": "uptime-metric-freq",
+      "type": "duration",
+      "default": 30000000000,
+      "description": "Frequency of renewing this node's average uptime metric",
+      "category": "metrics"
+    },
+    {
+      "key": "index-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "If true, index all accepted containers and transactions and expose them via an API",
+      "category": "index"
+    },
+    {
+      "key": "index-allow-incomplete",
+      "type": "bool",
+      "default": false,
+      "description": "If true, allow running the node in such a way that could cause an index to miss transactions. Ignored if index is disabled",
+      "category": "index"
+    },
+    {
+      "key": "chain-config-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/configs/chains",
+      "description": "Chain specific configurations parent directory. Ignored if chain-config-content is specified",
+      "category": "chain"
+    },
+    {
+      "key": "chain-config-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded chains configurations",
+      "category": "chain"
+    },
+    {
+      "key": "subnet-config-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/configs/subnets",
+      "description": "Net specific configurations parent directory. Ignored if net-config-content is specified",
+      "category": "chain"
+    },
+    {
+      "key": "net-config-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded subnets configurations",
+      "category": "chain"
+    },
+    {
+      "key": "chain-data-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/chainData",
+      "description": "Chain specific data directory",
+      "category": "chain"
+    },
+    {
+      "key": "import-chain-data",
+      "type": "string",
+      "default": "",
+      "description": "Path to import blockchain data from another chain into C-Chain",
+      "category": "chain"
+    },
+    {
+      "key": "profile-dir",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/profiles",
+      "description": "Path to the profile directory",
+      "category": "profile"
+    },
+    {
+      "key": "profile-continuous-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "Whether the app should continuously produce performance profiles",
+      "category": "profile"
+    },
+    {
+      "key": "profile-continuous-freq",
+      "type": "duration",
+      "default": 900000000000,
+      "description": "How frequently to rotate performance profiles",
+      "category": "profile"
+    },
+    {
+      "key": "profile-continuous-max-files",
+      "type": "int",
+      "default": 5,
+      "description": "Maximum number of historical profiles to keep",
+      "category": "profile"
+    },
+    {
+      "key": "vm-aliases-file",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/configs/vms/aliases.json",
+      "description": "Specifies a JSON file that maps vmIDs with custom aliases. Ignored if vm-aliases-file-content is specified",
+      "category": "chain"
+    },
+    {
+      "key": "vm-aliases-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded maps vmIDs with custom aliases",
+      "category": "chain"
+    },
+    {
+      "key": "chain-aliases-file",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/configs/chains/aliases.json",
+      "description": "Specifies a JSON file that maps blockchainIDs with custom aliases. Ignored if chain-config-content is specified",
+      "category": "chain"
+    },
+    {
+      "key": "chain-aliases-file-content",
+      "type": "string",
+      "default": "",
+      "description": "Specifies base64 encoded map from blockchainID to custom aliases",
+      "category": "chain"
+    },
+    {
+      "key": "network-initial-reconnect-delay",
+      "type": "duration",
+      "default": 1000000000,
+      "description": "Initial delay duration must be waited before attempting to reconnect a peer",
+      "category": "network"
+    },
+    {
+      "key": "network-max-reconnect-delay",
+      "type": "duration",
+      "default": 3600000000000,
+      "description": "Maximum delay duration must be waited before attempting to reconnect a peer",
+      "category": "network"
+    },
+    {
+      "key": "system-tracker-frequency",
+      "type": "duration",
+      "default": 500000000,
+      "description": "Frequency to check the real system usage of tracked processes. More frequent checks --\u003e usage metrics are more accurate, but more expensive to track",
+      "category": "system"
+    },
+    {
+      "key": "system-tracker-processing-halflife",
+      "type": "duration",
+      "default": 15000000000,
+      "description": "Halflife to use for the processing requests tracker. Larger halflife --\u003e usage metrics change more slowly",
+      "category": "system"
+    },
+    {
+      "key": "system-tracker-cpu-halflife",
+      "type": "duration",
+      "default": 15000000000,
+      "description": "Halflife to use for the cpu tracker. Larger halflife --\u003e cpu usage metrics change more slowly",
+      "category": "system"
+    },
+    {
+      "key": "system-tracker-disk-halflife",
+      "type": "duration",
+      "default": 60000000000,
+      "description": "Halflife to use for the disk tracker. Larger halflife --\u003e disk usage metrics change more slowly",
+      "category": "system"
+    },
+    {
+      "key": "system-tracker-disk-required-available-space",
+      "type": "uint64",
+      "default": 536870912,
+      "description": "Minimum number of available bytes on disk, under which the node will shutdown",
+      "category": "system"
+    },
+    {
+      "key": "system-tracker-disk-warning-threshold-available-space",
+      "type": "uint64",
+      "default": 1073741824,
+      "description": "Warning threshold for the number of available bytes on disk, under which the node will be considered unhealthy. Must be \u003e= system-tracker-disk-required-available-space",
+      "category": "system"
+    },
+    {
+      "key": "throttler-inbound-cpu-validator-alloc",
+      "type": "float64",
+      "default": 10,
+      "description": "Maximum number of CPUs to allocate for use by validators. Value should be in range [0, total core count]",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-cpu-max-non-validator-usage",
+      "type": "float64",
+      "default": 8,
+      "description": "Number of CPUs that if fully utilized, will rate limit all non-validators. Value should be in range [0, total core count]",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-cpu-max-non-validator-node-usage",
+      "type": "float64",
+      "default": 1.25,
+      "description": "Maximum number of CPUs that a non-validator can utilize. Value should be in range [0, total core count]",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-disk-validator-alloc",
+      "type": "float64",
+      "default": 1073741824000,
+      "description": "Maximum number of disk reads/writes per second to allocate for use by validators. Must be \u003e 0",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-disk-max-non-validator-usage",
+      "type": "float64",
+      "default": 1073741824000,
+      "description": "Number of disk reads/writes per second that, if fully utilized, will rate limit all non-validators. Must be \u003e= 0",
+      "category": "throttler"
+    },
+    {
+      "key": "throttler-inbound-disk-max-non-validator-node-usage",
+      "type": "float64",
+      "default": 1073741824000,
+      "description": "Maximum number of disk reads/writes per second that a non-validator can utilize. Must be \u003e= 0",
+      "category": "throttler"
+    },
+    {
+      "key": "tracing-exporter-type",
+      "type": "string",
+      "default": "disabled",
+      "description": "Type of exporter to use for tracing. Options are [disabled, grpc, http]",
+      "category": "tracing",
+      "constraints": {
+        "enum": [
+          "disabled",
+          "grpc",
+          "http"
+        ]
+      }
+    },
+    {
+      "key": "tracing-endpoint",
+      "type": "string",
+      "default": "",
+      "description": "The endpoint to send trace data to. If unspecified, the default endpoint will be used; depending on the exporter type",
+      "category": "tracing"
+    },
+    {
+      "key": "tracing-insecure",
+      "type": "bool",
+      "default": true,
+      "description": "If true, don't use TLS when sending trace data",
+      "category": "tracing"
+    },
+    {
+      "key": "tracing-sample-rate",
+      "type": "float64",
+      "default": 0.1,
+      "description": "The fraction of traces to sample. If \u003e= 1, always sample. If \u003c= 0, never sample",
+      "category": "tracing"
+    },
+    {
+      "key": "tracing-headers",
+      "type": "string-to-string",
+      "default": {},
+      "description": "The headers to provide the trace indexer",
+      "category": "tracing"
+    },
+    {
+      "key": "process-context-file",
+      "type": "string",
+      "default": "$LUXD_DATA_DIR/process.json",
+      "description": "The path to write process context to (including PID, API URI, and staking address)",
+      "category": "node"
+    },
+    {
+      "key": "poa-mode-enabled",
+      "type": "bool",
+      "default": false,
+      "description": "Enable Proof of Authority mode for subnets",
+      "category": "poa"
+    },
+    {
+      "key": "poa-single-node-mode",
+      "type": "bool",
+      "default": false,
+      "description": "Enable single node POA mode (no consensus required)",
+      "category": "poa"
+    },
+    {
+      "key": "poa-min-block-time",
+      "type": "duration",
+      "default": 1000000000,
+      "description": "Minimum time between blocks in POA mode",
+      "category": "poa"
+    },
+    {
+      "key": "poa-authorized-nodes",
+      "type": "string-slice",
+      "description": "List of authorized nodes for POA mode",
+      "category": "poa"
+    },
+    {
+      "key": "force-ignore-checksum",
+      "type": "bool",
+      "default": false,
+      "description": "Force ignore checksum validation errors (use with caution)",
+      "category": "dev"
+    }
+  ],
+  "categories": {
+    "api": "API enablement (admin, info, keystore, metrics)",
+    "bootstrap": "Bootstrap and state sync configuration",
+    "chain": "Chain-specific configuration directories",
+    "consensus": "Consensus parameters (sample size, quorum, thresholds)",
+    "database": "Database configuration (type, path, per-chain)",
+    "dev": "Development and testing flags",
+    "fees": "Transaction fee configuration",
+    "genesis": "Genesis file and upgrade configuration",
+    "health": "Health check configuration (frequency, thresholds)",
+    "http": "HTTP server configuration (host, port, TLS)",
+    "index": "Indexer configuration",
+    "logging": "Logging configuration (level, format, rotation)",
+    "metrics": "Metrics collection and reporting",
+    "network": "P2P networking (timeouts, throttling, peers)",
+    "node": "Node configuration (data directory, plugins)",
+    "poa": "Proof of Authority mode configuration",
+    "process": "Process-level flags (version, help)",
+    "profile": "Performance profiling configuration",
+    "staking": "Staking configuration (keys, sybil protection)",
+    "system": "System resource tracking (CPU, disk, memory)",
+    "throttler": "Rate limiting and resource throttling",
+    "tracing": "OpenTelemetry tracing configuration"
+  }
+}
