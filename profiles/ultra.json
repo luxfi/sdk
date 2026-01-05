@@ -1,0 +1,29 @@
+{
+  "name": "ultra",
+  "description": "Maximum aggression for single-node dev mode with K=1 consensus",
+  "consensus": {
+    "sample-size": 1,
+    "preference-quorum-size": 1,
+    "confidence-quorum-size": 1,
+    "commit-threshold": 1,
+    "concurrent-repolls": 128,
+    "optimal-processing": 8192,
+    "max-processing": 65536,
+    "frontier-poll-frequency": "10ms"
+  },
+  "health": {
+    "check-frequency": "100ms",
+    "averager-halflife": "500ms"
+  },
+  "network": {
+    "max-reconnect-delay": "50ms",
+    "initial-reconnect-delay": "10ms",
+    "initial-timeout": "100ms",
+    "minimum-timeout": "50ms",
+    "maximum-timeout": "500ms",
+    "timeout-halflife": "500ms",
+    "read-handshake-timeout": "100ms",
+    "ping-timeout": "1s",
+    "ping-frequency": "500ms"
+  }
+}
