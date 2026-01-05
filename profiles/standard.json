@@ -1,0 +1,29 @@
+{
+  "name": "standard",
+  "description": "Conservative mainnet settings for production-safe operation",
+  "consensus": {
+    "sample-size": 5,
+    "preference-quorum-size": 4,
+    "confidence-quorum-size": 4,
+    "commit-threshold": 4,
+    "concurrent-repolls": 32,
+    "optimal-processing": 2048,
+    "max-processing": 16384,
+    "frontier-poll-frequency": "50ms"
+  },
+  "health": {
+    "check-frequency": "500ms",
+    "averager-halflife": "2s"
+  },
+  "network": {
+    "max-reconnect-delay": "250ms",
+    "initial-reconnect-delay": "50ms",
+    "initial-timeout": "500ms",
+    "minimum-timeout": "250ms",
+    "maximum-timeout": "2s",
+    "timeout-halflife": "2s",
+    "read-handshake-timeout": "750ms",
+    "ping-timeout": "5s",
+    "ping-frequency": "2s"
+  }
+}

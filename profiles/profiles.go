@@ -1,0 +1,234 @@
+// Copyright (C) 2022-2025, Lux Industries Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+// Package profiles provides embedded network tuning profiles for the Lux SDK.
+// These profiles configure consensus, health, and network parameters for different
+// deployment scenarios (mainnet, testnet, devnet, dev mode).
+//
+// Available profiles:
+//   - standard: Conservative mainnet settings for production-safe operation
+//   - fast:     Balanced testnet settings for development
+//   - turbo:    Aggressive 5-node local network with 3/5 quorum
+//   - ultra:    Maximum aggression for single-node dev mode with K=1 consensus
+package profiles
+
+import (
+	"embed"
+	"encoding/json"
+	"fmt"
+	"sort"
+	"strings"
+)
+
+//go:embed *.json
+var profileFS embed.FS
+
+// Profile represents a network tuning profile.
+type Profile struct {
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Consensus   ConsensusConfig `json:"consensus"`
+	Health      HealthConfig    `json:"health"`
+	Network     NetworkConfig   `json:"network"`
+}
+
+// ConsensusConfig holds consensus tuning parameters.
+type ConsensusConfig struct {
+	SampleSize           int    `json:"sample-size"`
+	PreferenceQuorumSize int    `json:"preference-quorum-size"`
+	ConfidenceQuorumSize int    `json:"confidence-quorum-size"`
+	CommitThreshold      int    `json:"commit-threshold"`
+	ConcurrentRepolls    int    `json:"concurrent-repolls"`
+	OptimalProcessing    int    `json:"optimal-processing"`
+	MaxProcessing        int    `json:"max-processing"`
+	FrontierPollFreq     string `json:"frontier-poll-frequency"`
+}
+
+// HealthConfig holds health check tuning parameters.
+type HealthConfig struct {
+	CheckFrequency   string `json:"check-frequency"`
+	AveragerHalflife string `json:"averager-halflife"`
+}
+
+// NetworkConfig holds network tuning parameters.
+type NetworkConfig struct {
+	MaxReconnectDelay     string `json:"max-reconnect-delay"`
+	InitialReconnectDelay string `json:"initial-reconnect-delay"`
+	InitialTimeout        string `json:"initial-timeout"`
+	MinimumTimeout        string `json:"minimum-timeout"`
+	MaximumTimeout        string `json:"maximum-timeout"`
+	TimeoutHalflife       string `json:"timeout-halflife"`
+	ReadHandshakeTimeout  string `json:"read-handshake-timeout"`
+	PingTimeout           string `json:"ping-timeout"`
+	PingFrequency         string `json:"ping-frequency"`
+}
+
+// GetProfile loads a profile by name.
+// Returns error if profile not found or invalid.
+func GetProfile(name string) (*Profile, error) {
+	name = strings.ToLower(name)
+	filename := name + ".json"
+
+	data, err := profileFS.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("profile %q not found: %w", name, err)
+	}
+
+	var profile Profile
+	if err := json.Unmarshal(data, &profile); err != nil {
+		return nil, fmt.Errorf("invalid profile %q: %w", name, err)
+	}
+
+	return &profile, nil
+}
+
+// MustGetProfile loads a profile by name or panics on error.
+func MustGetProfile(name string) *Profile {
+	p, err := GetProfile(name)
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
+
+// GetProfileMap loads a profile and returns it as map[string]interface{}.
+// Useful for direct JSON manipulation.
+func GetProfileMap(name string) (map[string]interface{}, error) {
+	name = strings.ToLower(name)
+	filename := name + ".json"
+
+	data, err := profileFS.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("profile %q not found: %w", name, err)
+	}
+
+	var m map[string]interface{}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, fmt.Errorf("invalid profile %q: %w", name, err)
+	}
+
+	return m, nil
+}
+
+// ListProfiles returns names of all available profiles, sorted alphabetically.
+func ListProfiles() []string {
+	entries, err := profileFS.ReadDir(".")
+	if err != nil {
+		return nil
+	}
+
+	var names []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if strings.HasSuffix(name, ".json") {
+			names = append(names, strings.TrimSuffix(name, ".json"))
+		}
+	}
+	sort.Strings(names)
+	return names
+}
+
+// ValidateProfile checks that a profile has required fields.
+func ValidateProfile(data map[string]interface{}) error {
+	required := []string{"name", "description", "consensus", "health", "network"}
+	for _, field := range required {
+		if _, ok := data[field]; !ok {
+			return fmt.Errorf("missing required field: %s", field)
+		}
+	}
+
+	// Validate consensus section
+	consensus, ok := data["consensus"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("consensus must be an object")
+	}
+	consensusRequired := []string{
+		"sample-size", "preference-quorum-size", "confidence-quorum-size",
+		"commit-threshold", "concurrent-repolls", "optimal-processing",
+		"max-processing", "frontier-poll-frequency",
+	}
+	for _, field := range consensusRequired {
+		if _, ok := consensus[field]; !ok {
+			return fmt.Errorf("consensus missing required field: %s", field)
+		}
+	}
+
+	// Validate health section
+	health, ok := data["health"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("health must be an object")
+	}
+	healthRequired := []string{"check-frequency", "averager-halflife"}
+	for _, field := range healthRequired {
+		if _, ok := health[field]; !ok {
+			return fmt.Errorf("health missing required field: %s", field)
+		}
+	}
+
+	// Validate network section
+	network, ok := data["network"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("network must be an object")
+	}
+	networkRequired := []string{
+		"max-reconnect-delay", "initial-reconnect-delay", "initial-timeout",
+		"minimum-timeout", "maximum-timeout", "timeout-halflife",
+		"read-handshake-timeout", "ping-timeout", "ping-frequency",
+	}
+	for _, field := range networkRequired {
+		if _, ok := network[field]; !ok {
+			return fmt.Errorf("network missing required field: %s", field)
+		}
+	}
+
+	return nil
+}
+
+// DefaultProfileForNetwork returns the default profile name for a network type.
+func DefaultProfileForNetwork(networkName string) string {
+	switch networkName {
+	case "mainnet":
+		return "standard"
+	case "testnet":
+		return "fast"
+	case "devnet", "local":
+		return "turbo"
+	case "dev":
+		return "ultra"
+	default:
+		return "standard"
+	}
+}
+
+// ToNodeConfig converts a profile to luxd node configuration flags.
+// Returns a map of flag keys to values suitable for JSON config.
+func (p *Profile) ToNodeConfig() map[string]interface{} {
+	return map[string]interface{}{
+		// Consensus
+		"snow-sample-size":               p.Consensus.SampleSize,
+		"snow-quorum-size":               p.Consensus.PreferenceQuorumSize,
+		"snow-preference-quorum-size":    p.Consensus.PreferenceQuorumSize,
+		"snow-confidence-quorum-size":    p.Consensus.ConfidenceQuorumSize,
+		"snow-commit-threshold":          p.Consensus.CommitThreshold,
+		"snow-concurrent-repolls":        p.Consensus.ConcurrentRepolls,
+		"snow-optimal-processing":        p.Consensus.OptimalProcessing,
+		"snow-max-processing":            p.Consensus.MaxProcessing,
+		"consensus-frontier-poll-frequency": p.Consensus.FrontierPollFreq,
+		// Health
+		"health-check-frequency":           p.Health.CheckFrequency,
+		"health-check-averager-halflife":   p.Health.AveragerHalflife,
+		// Network
+		"network-max-reconnect-delay":      p.Network.MaxReconnectDelay,
+		"network-initial-reconnect-delay":  p.Network.InitialReconnectDelay,
+		"network-initial-timeout":          p.Network.InitialTimeout,
+		"network-minimum-timeout":          p.Network.MinimumTimeout,
+		"network-maximum-timeout":          p.Network.MaximumTimeout,
+		"network-timeout-halflife":         p.Network.TimeoutHalflife,
+		"network-read-handshake-timeout":   p.Network.ReadHandshakeTimeout,
+		"network-ping-timeout":             p.Network.PingTimeout,
+		"network-ping-frequency":           p.Network.PingFrequency,
+	}
+}
