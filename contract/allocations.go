@@ -10,7 +10,6 @@ import (
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
@@ -162,13 +161,9 @@ func GetBlockchainGenesis(
 		return nil, err
 	}
 	// Retrieve the blockchain creation transaction to get the genesis data
-	createChainTxIntf, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
+	createChainTx, err := GetBlockchainTx(network.Endpoint(), blockchainID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get blockchain tx: %w", err)
-	}
-	createChainTx, ok := createChainTxIntf.(*txs.CreateChainTx)
-	if !ok {
-		return nil, fmt.Errorf("expected CreateChainTx, got %T", createChainTxIntf)
 	}
 	return createChainTx.GenesisData, nil
 }

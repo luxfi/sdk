@@ -6,8 +6,8 @@ package p
 import (
 	"time"
 
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/node/vms/platformvm"
+	"github.com/luxfi/sdk/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
 	"github.com/luxfi/sdk/wallet/primary/common"

@@ -1,0 +1,31 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package verify
+
+type Verifiable interface {
+	Verify() error
+}
+
+type State interface {
+	Verifiable
+	IsState
+}
+
+type IsState interface {
+	isState()
+}
+
+type IsNotState interface {
+	isState() error
+}
+
+// All returns nil if all the verifiables were verified with no errors
+func All(verifiables ...Verifiable) error {
+	for _, verifiable := range verifiables {
+		if err := verifiable.Verify(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
