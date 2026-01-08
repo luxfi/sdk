@@ -10,16 +10,16 @@ import (
 	stdcontext "context"
 
 	"github.com/luxfi/const"
+	hashing "github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/node/utils/hashing"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/components/verify"
-	"github.com/luxfi/node/vms/platformvm/stakeable"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/node/vms/components/lux"
+	"github.com/luxfi/sdk/node/vms/components/verify"
+	"github.com/luxfi/sdk/node/vms/platformvm/stakeable"
+	"github.com/luxfi/sdk/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 )
 
 var (

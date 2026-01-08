@@ -9,7 +9,7 @@ import (
 	consensusctx "github.com/luxfi/consensus/context"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
-	"github.com/luxfi/node/api/info"
+	"github.com/luxfi/sdk/api/info"
 )
 
 const Alias = "C"

@@ -12,8 +12,8 @@ import (
 	"github.com/luxfi/geth/ethclient"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/rpc"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/primary/common"
 
 	ethcommon "github.com/luxfi/geth/common"

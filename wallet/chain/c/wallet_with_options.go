@@ -5,7 +5,7 @@ package c
 
 import (
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/primary/common"
 
 	ethcommon "github.com/luxfi/geth/common"

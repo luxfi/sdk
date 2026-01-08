@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/go-bip32"
 	"github.com/luxfi/go-bip39"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 )
 
 const (

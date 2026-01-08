@@ -1,0 +1,138 @@
+{
+  "xchain": {
+    "transport": {
+      "type": "hybrid",
+      "description": "X-Chain uses hybrid transport: gRPC (default) + QZMQ (DEX operations)",
+      
+      "grpc": {
+        "enabled": true,
+        "port": 9090,
+        "maxMessageSize": 104857600,
+        "tls": {
+          "enabled": true,
+          "certFile": "/path/to/cert.pem",
+          "keyFile": "/path/to/key.pem"
+        },
+        "usedFor": [
+          "consensus",
+          "blockPropagation",
+          "stateSync",
+          "regularTransactions",
+          "peerDiscovery"
+        ]
+      },
+      
+      "qzmq": {
+        "enabled": true,
+        "description": "QZMQ is enabled ONLY for X-Chain DEX operations",
+        "consensusPort": 5000,
+        "dexPort": 6000,
+        "security": {
+          "mode": "conservative",
+          "quantumEnabled": true,
+          "keyRotation": "5m",
+          "algorithms": {
+            "kem": "ML-KEM-768",
+            "signature": "ML-DSA-87",
+            "aead": "AES-256-GCM",
+            "hash": "SHA-384"
+          }
+        },
+        "usedFor": [
+          "dexOrders",
+          "dexTrades",
+          "marketData",
+          "settlement",
+          "orderbook"
+        ]
+      },
+      
+      "networkPipes": {
+        "description": "Both gRPC and QZMQ share the same network infrastructure",
+        "listenAddr": "0.0.0.0",
+        "advertiseAddr": "auto",
+        "p2pPort": 9651,
+        "rpcPort": 9630,
+        "maxConnections": 256,
+        "bandwidthLimit": 1000,
+        "comment": "All traffic flows through the same network pipes, protocols are selected based on message type"
+      },
+      
+      "routing": {
+        "description": "Message routing rules determine which protocol to use",
+        "rules": [
+          {
+            "messageType": "consensus.*",
+            "protocol": "grpc",
+            "reason": "Consensus remains on gRPC for compatibility"
+          },
+          {
+            "messageType": "dex.order.*",
+            "protocol": "qzmq",
+            "reason": "DEX orders need quantum security"
+          },
+          {
+            "messageType": "dex.trade.*",
+            "protocol": "qzmq",
+            "reason": "Trade execution requires quantum-secure settlement"
+          },
+          {
+            "messageType": "dex.marketdata.*",
+            "protocol": "qzmq",
+            "reason": "Market data distribution via secure multicast"
+          },
+          {
+            "messageType": "block.*",
+            "protocol": "grpc",
+            "reason": "Block propagation uses existing gRPC infrastructure"
+          },
+          {
+            "messageType": "tx.*",
+            "protocol": "grpc",
+            "reason": "Regular transactions use standard gRPC"
+          }
+        ]
+      }
+    },
+    
+    "dex": {
+      "enabled": true,
+      "quantumSecure": true,
+      "markets": [
+        "LUX-USDC",
+        "LUX-USDT",
+        "LUX-ETH",
+        "LUX-BTC"
+      ],
+      "orderTypes": [
+        "limit",
+        "market",
+        "stop",
+        "stopLimit"
+      ]
+    }
+  },
+  
+  "otherChains": {
+    "qchain": {
+      "transport": "grpc",
+      "description": "Q-Chain uses only gRPC (default)"
+    },
+    "cchain": {
+      "transport": "grpc",
+      "description": "C-Chain (EVM) uses only gRPC (default)"
+    }
+  },
+  
+  "migration": {
+    "description": "QZMQ can be enabled/disabled without disrupting the network",
+    "steps": [
+      "1. Deploy with qzmq.enabled=false (gRPC only)",
+      "2. Test QZMQ on testnet",
+      "3. Enable QZMQ for specific validators",
+      "4. Gradually roll out to all X-Chain validators",
+      "5. DEX operations automatically use QZMQ when available"
+    ],
+    "fallback": "If QZMQ is unavailable, all operations fall back to gRPC"
+  }
+}
