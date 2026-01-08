@@ -12,8 +12,8 @@ import (
 	"sync"
 
 	"github.com/luxfi/database"
-	"github.com/luxfi/node/utils/math"
-	"github.com/luxfi/node/vms/components/lux"
+	"github.com/luxfi/math"
+	"github.com/luxfi/sdk/node/vms/components/lux"
 	"github.com/luxfi/sdk/wallet/primary/common"
 
 	ethcommon "github.com/luxfi/geth/common"

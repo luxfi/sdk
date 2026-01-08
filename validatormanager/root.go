@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	luxdconstants "github.com/luxfi/const"
-	warpPayload "github.com/luxfi/node/vms/platformvm/warp/payload"
+	warpPayload "github.com/luxfi/sdk/node/vms/platformvm/warp/payload"
 	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/geth/core/types"
