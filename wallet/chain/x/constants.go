@@ -4,11 +4,11 @@
 package x
 
 import (
-	"github.com/luxfi/node/vms/exchangevm/block"
-	"github.com/luxfi/node/vms/exchangevm/fxs"
-	"github.com/luxfi/node/vms/nftfx"
-	"github.com/luxfi/node/vms/propertyfx"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/node/vms/exchangevm/block"
+	"github.com/luxfi/sdk/node/vms/exchangevm/fxs"
+	"github.com/luxfi/sdk/node/vms/nftfx"
+	"github.com/luxfi/sdk/node/vms/propertyfx"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 )
 
 const (

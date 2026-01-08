@@ -86,10 +86,8 @@ require (
 	github.com/luxfi/node v1.22.73 // indirect
 	github.com/luxfi/p2p v1.18.2 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
-	github.com/luxfi/staking v1.0.0 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
-	github.com/luxfi/utils v1.1.0 // indirect
 	github.com/luxfi/vm v1.0.1 // indirect
 	github.com/luxfi/warp v1.18.2 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect

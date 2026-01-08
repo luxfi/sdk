@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/node/utils/units"
+	"github.com/luxfi/sdk/utils/units"
 )
 
 // GetEventFromLogs returns the first log in 'logs' that is successfully parsed by 'parser'.

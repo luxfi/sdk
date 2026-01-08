@@ -8,9 +8,9 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/exchangevm/txs"
-	"github.com/luxfi/node/wallet/keychain"
+	"github.com/luxfi/sdk/node/vms/components/lux"
+	"github.com/luxfi/sdk/node/vms/exchangevm/txs"
+	"github.com/luxfi/sdk/node/wallet/keychain"
 )
 
 var _ Signer = (*signer)(nil)

@@ -21,9 +21,9 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/ux"
 	"github.com/luxfi/sdk/validator"
+	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
