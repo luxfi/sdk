@@ -12,7 +12,6 @@ import (
 	"github.com/luxfi/sdk/flags"
 	// "github.com/luxfi/sdk/localnet" // TODO: Add localnet package
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/utils"
@@ -293,13 +292,9 @@ func GetSubnetID(
 			return ids.Empty, fmt.Errorf("failure parsing %s as id: %w", chainSpec.BlockchainID, err)
 		}
 		// Retrieve the blockchain creation transaction to get the subnet ID
-		createChainTxIntf, err := utils.GetBlockchainTx(network.Endpoint(), blockchainID)
+		createChainTx, err := GetBlockchainTx(network.Endpoint(), blockchainID)
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failed to get blockchain tx: %w", err)
-		}
-		createChainTx, ok := createChainTxIntf.(*txs.CreateChainTx)
-		if !ok {
-			return ids.Empty, fmt.Errorf("expected CreateChainTx, got %T", createChainTxIntf)
 		}
 		subnetID = createChainTx.ChainID
 	default:

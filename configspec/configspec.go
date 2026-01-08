@@ -12,7 +12,7 @@
 //
 // The spec.json file is generated from the node using:
 //
-//	go run github.com/luxfi/node/cmd/config dump-spec --format=json > spec.json
+//	go run github.com/luxfi/sdk/node/cmd/config dump-spec --format=json > spec.json
 //
 // To regenerate, run:
 //

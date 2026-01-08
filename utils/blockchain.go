@@ -8,12 +8,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/platformvm"
-	"github.com/luxfi/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/utils/rpc"
 )
 
 // GetDefaultBlockchainAirdropKeyName returns the default key name for blockchain airdrops
@@ -205,35 +206,23 @@ func ByteSliceIsEVMGenesis(bytes []byte) bool {
 	return err == nil && genesis.Config != nil
 }
 
-// GetBlockchainTx retrieves a blockchain transaction from the network
-func GetBlockchainTx(endpoint string, blockchainID ids.ID) (interface{}, error) {
-	// Use platformvm client to fetch the transaction
-	pClient := platformvm.NewClient(endpoint)
-	ctx, cancel := GetAPIContext()
-	defer cancel()
-	txBytes, err := pClient.GetTx(ctx, blockchainID)
+// GetKeyNames returns a list of key names from the given directory.
+func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
+	entries, err := os.ReadDir(keyDir)
 	if err != nil {
 		return nil, err
 	}
-	var tx txs.Tx
-	if _, err = txs.Codec.Unmarshal(txBytes, &tx); err != nil {
-		return nil, fmt.Errorf("failed unmarshaling the createChainTx: %w", err)
+	keys := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if filepath.Ext(name) != ".pk" {
+			continue
+		}
+		keys = append(keys, strings.TrimSuffix(name, ".pk"))
 	}
-	createChainTx, ok := tx.Unsigned.(*txs.CreateChainTx)
-	if !ok {
-		return nil, fmt.Errorf("expected a CreateChainTx, got %T", tx.Unsigned)
-	}
-	return createChainTx, nil
-}
-
-// GetKeyNames returns a list of key names from the given directory.
-//
-// WARNING: This is a stub implementation that returns an empty list.
-// TODO: Implement proper directory listing to enumerate key files.
-// Expected behavior: scan keyDir for .key files and extract key names.
-func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
-	_ = keyDir // stub: directory not yet scanned
-	keys := []string{}
 	if includeEwoq {
 		keys = append(keys, "ewoq")
 	}
@@ -241,17 +230,23 @@ func GetKeyNames(keyDir string, includeEwoq bool) ([]string, error) {
 }
 
 // GetBlockchainIDFromAlias gets a blockchain ID from its alias on the network.
-//
-// WARNING: This is a stub implementation that returns a hardcoded dummy ID for "C".
-// TODO: Implement proper API call to info.getBlockchainID on the endpoint.
-// Expected behavior: query endpoint/ext/info with method getBlockchainID(alias).
 func GetBlockchainIDFromAlias(endpoint string, alias string) (ids.ID, error) {
-	_ = endpoint // stub: API call not yet implemented
-	if alias == "C" {
-		// Hardcoded dummy C-Chain ID for stub purposes
-		return ids.FromString("2q9e4r6Mu3U68nU1fYjgbR6JvwrRx36CohpAX5UQxse55eZ9Tc")
+	type getBlockchainIDArgs struct {
+		Alias string `json:"alias"`
 	}
-	return ids.Empty, fmt.Errorf("GetBlockchainIDFromAlias not yet implemented for alias: %s", alias)
+	type getBlockchainIDReply struct {
+		BlockchainID ids.ID `json:"blockchainID"`
+	}
+	requester := rpc.NewEndpointRequester(endpoint + "/ext/info")
+	ctx, cancel := GetAPIContext()
+	defer cancel()
+	reply := &getBlockchainIDReply{}
+	if err := requester.SendRequest(ctx, "info.getBlockchainID", &getBlockchainIDArgs{
+		Alias: alias,
+	}, reply); err != nil {
+		return ids.Empty, err
+	}
+	return reply.BlockchainID, nil
 }
 
 // GetChainID extracts the chain ID from genesis data
