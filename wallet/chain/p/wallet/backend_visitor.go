@@ -9,12 +9,12 @@ import (
 
 	"github.com/luxfi/const"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/platformvm/txs"
-	"github.com/luxfi/node/vms/platformvm/warp"
-	"github.com/luxfi/node/vms/platformvm/warp/message"
-	"github.com/luxfi/node/vms/platformvm/warp/payload"
-	"github.com/luxfi/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/node/vms/components/lux"
+	"github.com/luxfi/sdk/node/vms/platformvm/txs"
+	"github.com/luxfi/sdk/node/vms/platformvm/warp"
+	"github.com/luxfi/sdk/node/vms/platformvm/warp/message"
+	"github.com/luxfi/sdk/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 )
 
 var (

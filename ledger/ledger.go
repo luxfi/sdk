@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
-	"github.com/luxfi/node/version"
+	"github.com/luxfi/version"
 )
 
 const (

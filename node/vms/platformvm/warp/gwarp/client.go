@@ -1,0 +1,34 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package gwarp
+
+import (
+	"context"
+
+	"github.com/luxfi/sdk/node/vms/platformvm/warp"
+
+	pb "github.com/luxfi/sdk/node/proto/pb/warp"
+)
+
+var _ warp.Signer = (*Client)(nil)
+
+type Client struct {
+	client pb.SignerClient
+}
+
+func NewClient(client pb.SignerClient) *Client {
+	return &Client{client: client}
+}
+
+func (c *Client) Sign(unsignedMsg *warp.UnsignedMessage) ([]byte, error) {
+	resp, err := c.client.Sign(context.Background(), &pb.SignRequest{
+		NetworkId:     unsignedMsg.NetworkID,
+		SourceChainId: unsignedMsg.SourceChainID[:],
+		Payload:       unsignedMsg.Payload,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.Signature, nil
+}

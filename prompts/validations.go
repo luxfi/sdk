@@ -18,7 +18,7 @@ import (
 	"github.com/luxfi/const"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/utils/formatting/address"
+	"github.com/luxfi/sdk/utils/formatting/address"
 	sdkconstants "github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/ux"

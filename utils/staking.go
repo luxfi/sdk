@@ -5,19 +5,15 @@ package utils
 
 import (
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/crypto/bls/signer/localsigner"
-	evmclient "github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/staking"
-	"github.com/luxfi/node/vms/platformvm"
 	"github.com/luxfi/sdk/constants"
+	luxtls "github.com/luxfi/tls"
 )
 
 func NewBlsSecretKeyBytes() ([]byte, error) {
@@ -33,7 +29,7 @@ func ToNodeID(certBytes []byte) (ids.NodeID, error) {
 	if block == nil {
 		return ids.EmptyNodeID, fmt.Errorf("failed to decode certificate")
 	}
-	cert, err := staking.ParseCertificate(block.Bytes)
+	cert, err := luxtls.ParseCertificate(block.Bytes)
 	if err != nil {
 		return ids.EmptyNodeID, err
 	}
@@ -89,45 +85,4 @@ func GetNodeParams(nodeDir string) (
 		return ids.EmptyNodeID, nil, nil, err
 	}
 	return nodeID, blsPub, blsPoP, nil
-}
-
-func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, subnetID ids.ID, startTime time.Time) (time.Duration, error) {
-	ctx, cancel := GetAPIContext()
-	defer cancel()
-	platformCli := platformvm.NewClient(networkEndpoint)
-	vs, err := platformCli.GetCurrentValidators(ctx, subnetID, nil)
-	cancel()
-	if err != nil {
-		return 0, err
-	}
-	for _, v := range vs {
-		if v.NodeID == nodeID {
-			return time.Unix(int64(v.EndTime), 0).Sub(startTime), nil
-		}
-	}
-	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
-}
-
-// GetL1ValidatorUptimeSeconds returns the uptime of the L1 validator
-func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, error) {
-	ctx, cancel := GetAPIContext()
-	defer cancel()
-	networkEndpoint, blockchainID, err := SplitLuxgoRPCURI(rpcURL)
-	if err != nil {
-		return 0, err
-	}
-	evmCli := evmclient.NewClient(networkEndpoint, blockchainID)
-	validators, err := evmCli.GetCurrentValidators(ctx, []ids.NodeID{nodeID})
-	if err != nil {
-		return 0, err
-	}
-	if len(validators) > 0 {
-		deductibleSeconds := uint64(constants.ValidatorUptimeDeductible.Seconds())
-		if validators[0].UptimeSeconds > deductibleSeconds {
-			return validators[0].UptimeSeconds - deductibleSeconds, nil
-		}
-		return 0, nil
-	}
-
-	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
 }

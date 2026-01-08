@@ -10,15 +10,15 @@ import (
 
 	"github.com/luxfi/geth/common"
 
+	hashing "github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/node/utils/hashing"
-	"github.com/luxfi/node/vms/components/lux"
-	"github.com/luxfi/node/vms/components/verify"
-	"github.com/luxfi/node/vms/secp256k1fx"
-	"github.com/luxfi/node/wallet/keychain"
+	"github.com/luxfi/sdk/node/vms/components/lux"
+	"github.com/luxfi/sdk/node/vms/components/verify"
+	"github.com/luxfi/sdk/node/vms/secp256k1fx"
+	"github.com/luxfi/sdk/node/wallet/keychain"
 )
 
 const version = 0

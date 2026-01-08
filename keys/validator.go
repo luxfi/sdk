@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/go-bip39"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/node/staking"
+	luxtls "github.com/luxfi/tls"
 )
 
 // ValidatorBundle contains all cryptographic materials for a validator node.
@@ -144,7 +144,7 @@ func formatBech32Address(hrp, chainPrefix string, shortID ids.ShortID) string {
 	return fmt.Sprintf("%s-%s", chainPrefix, shortID.String())
 }
 
-// generateStakingCert generates a deterministic TLS certificate for staking.
+// generateStakingCert generates a deterministic TLS certificate for luxtls.
 // The certificate is derived from the SECP key to ensure reproducibility.
 func generateStakingCert(secpKey []byte, index uint32) (certPEM, keyPEM []byte, err error) {
 	// Create a deterministic ECDSA key for TLS from the secp key
@@ -154,7 +154,7 @@ func generateStakingCert(secpKey []byte, index uint32) (certPEM, keyPEM []byte, 
 	copy(seed, h)
 
 	// Use the staking package to generate the certificate
-	tlsCert, err := staking.NewTLSCert()
+	tlsCert, err := luxtls.NewTLSCert()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create TLS cert: %w", err)
 	}
@@ -241,7 +241,7 @@ func ValidatorBundlesToCAddresses(bundles []ValidatorBundle) []common.Address {
 
 // GenerateNodeID creates a new random NodeID (for non-deterministic use cases)
 func GenerateNodeID() (ids.NodeID, []byte, []byte, error) {
-	tlsCert, err := staking.NewTLSCert()
+	tlsCert, err := luxtls.NewTLSCert()
 	if err != nil {
 		return ids.EmptyNodeID, nil, nil, err
 	}
