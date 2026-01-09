@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/vm/vms/exchangevm/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/vms/exchangevm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 var _ Wallet = (*wallet)(nil)
@@ -41,7 +41,7 @@ type Wallet interface {
 	// - [symbol] specifies a human readable abbreviation for this asset.
 	// - [denomination] specifies how many times the asset can be split. For
 	//   example, a denomination of [4] would mean that the smallest unit of the
-	//   asset would be 0.001 units.
+	//   asset would be 0.001 constants.
 	// - [initialState] specifies the supported feature extensions for this
 	//   asset as well as the initial outputs for the asset.
 	IssueCreateAssetTx(
