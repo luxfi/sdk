@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/params"
 	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 	"github.com/luxfi/warp"
 )
 

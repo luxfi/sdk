@@ -6,7 +6,7 @@ package iterator
 import (
 	"github.com/google/btree"
 
-	"github.com/luxfi/sdk/utils/heap"
+	"github.com/luxfi/vm/utils/heap"
 )
 
 var _ Iterator[any] = (*merged[any])(nil)

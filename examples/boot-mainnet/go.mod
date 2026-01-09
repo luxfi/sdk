@@ -64,7 +64,6 @@ require (
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/luxfi/address v1.0.0 // indirect
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/config v1.0.0 // indirect
 	github.com/luxfi/consensus v1.22.46 // indirect

@@ -14,10 +14,10 @@ import (
 	_ "embed"
 
 	"github.com/luxfi/constants"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
-const maxMessageSize = 2 * units.MiB // Max message size. Can't import due to cycle.
+const maxMessageSize = 2 * constants.MiB // Max message size. Can't import due to cycle.
 
 var (
 	newCompressorFuncs = map[Type]func(maxSize int64) (Compressor, error){
@@ -188,8 +188,8 @@ func BenchmarkCompress(b *testing.B) {
 	sizes := []int{
 		0,
 		256,
-		units.KiB,
-		units.MiB,
+		constants.KiB,
+		constants.MiB,
 		maxMessageSize,
 	}
 	for compressionType, newCompressorFunc := range newCompressorFuncs {
@@ -216,8 +216,8 @@ func BenchmarkDecompress(b *testing.B) {
 	sizes := []int{
 		0,
 		256,
-		units.KiB,
-		units.MiB,
+		constants.KiB,
+		constants.MiB,
 		maxMessageSize,
 	}
 	for compressionType, newCompressorFunc := range newCompressorFuncs {

@@ -15,7 +15,7 @@ import (
 func TestCollisionResistance(t *testing.T) {
 	require := require.New(t)
 
-	f, err := New(8, 16*units.KiB)
+	f, err := New(8, 16*constants.KiB)
 	require.NoError(err)
 
 	Add(f, []byte("hello world?"), []byte("so salty"))

@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/evm/plugin/evm/client"
 	"github.com/luxfi/ids"
 	sdkconstants "github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 // GetL1ValidatorUptimeSeconds returns the uptime of the L1 validator

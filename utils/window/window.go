@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/utils/buffer"
+	"github.com/luxfi/vm/utils"
+	"github.com/luxfi/vm/utils/buffer"
 	"github.com/luxfi/vm/utils/timer/mockable"
 )
 
