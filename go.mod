@@ -204,7 +204,6 @@ require (
 	github.com/ethereum/go-bigmodexpfix v0.0.0-20250911101455-f9e208c548ab // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
-	github.com/luxfi/address v1.0.0 // indirect
 	github.com/luxfi/cache v1.1.0
 	github.com/luxfi/codec v1.1.0 // indirect
 	github.com/luxfi/config v1.0.0 // indirect

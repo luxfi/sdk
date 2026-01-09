@@ -11,7 +11,7 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 var ErrUnknownErrorSelector = fmt.Errorf("unknown error selector")

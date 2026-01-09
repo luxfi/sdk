@@ -7,7 +7,7 @@ import (
 	"container/list"
 	"sync"
 
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 var _ LinkedHashmap[int, struct{}] = (*linkedHashmap[int, struct{}])(nil)

@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/vms/platformvm/signer"
 	"github.com/luxfi/vm/vms/platformvm/txs"
 	"github.com/luxfi/vm/vms/secp256k1fx"

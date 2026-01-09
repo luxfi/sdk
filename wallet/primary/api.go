@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
-	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/vms/platformvm"
 
 	gethcommon "github.com/luxfi/geth/common"

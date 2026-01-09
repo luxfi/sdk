@@ -6,7 +6,7 @@ package linkedhashmap
 import (
 	"container/list"
 
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 var _ Iter[int, struct{}] = (*iterator[int, struct{}])(nil)
