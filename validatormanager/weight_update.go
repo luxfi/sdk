@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"

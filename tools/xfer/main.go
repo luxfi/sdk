@@ -12,7 +12,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/keys"
 	"github.com/luxfi/sdk/wallet/primary"

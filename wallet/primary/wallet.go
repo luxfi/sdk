@@ -8,7 +8,7 @@ import (
 
 	gethcommon "github.com/luxfi/geth/common"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"

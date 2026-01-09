@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 )
 
 func BenchmarkEncodings(b *testing.B) {

@@ -9,8 +9,8 @@ import (
 
 	hashing "github.com/luxfi/crypto/hash"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/wrappers"
 	luxtls "github.com/luxfi/tls"
+	"github.com/luxfi/vm/utils/wrappers"
 )
 
 const (

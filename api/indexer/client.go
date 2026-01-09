@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/codec/jsonrpc"
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/rpc"
 )
 
 type Client struct {

@@ -11,9 +11,9 @@ import (
 )
 
 type mockReadCloser struct {
-	reader   io.Reader
-	closed   bool
-	readAll  bool
+	reader  io.Reader
+	closed  bool
+	readAll bool
 }
 
 func (m *mockReadCloser) Read(p []byte) (n int, err error) {
@@ -131,7 +131,7 @@ func TestCleanlyCloseBody_PartiallyReadBody(t *testing.T) {
 
 func BenchmarkCleanlyCloseBody_Small(b *testing.B) {
 	data := []byte("small response body")
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		mock := &mockReadCloser{
@@ -144,7 +144,7 @@ func BenchmarkCleanlyCloseBody_Small(b *testing.B) {
 func BenchmarkCleanlyCloseBody_Large(b *testing.B) {
 	// 1MB response
 	data := bytes.Repeat([]byte("x"), 1024*1024)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		mock := &mockReadCloser{
