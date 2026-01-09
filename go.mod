@@ -208,7 +208,6 @@ require (
 	github.com/luxfi/cache v1.1.0
 	github.com/luxfi/codec v1.1.0 // indirect
 	github.com/luxfi/config v1.0.0 // indirect
-	github.com/luxfi/constants v1.4.2 // indirect
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.5 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect

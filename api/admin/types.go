@@ -55,9 +55,9 @@ type GetLoggerLevelArgs struct {
 
 // LoadVMsReply is the response from loading VMs.
 type LoadVMsReply struct {
-	NewVMs         map[ids.ID][]string `json:"newVMs"`
-	FailedVMs      map[ids.ID]string   `json:"failedVMs,omitempty"`
-	ChainsRetried int `json:"chainsRetried,omitempty"`
+	NewVMs        map[ids.ID][]string `json:"newVMs"`
+	FailedVMs     map[ids.ID]string   `json:"failedVMs,omitempty"`
+	ChainsRetried int                 `json:"chainsRetried,omitempty"`
 }
 
 // DBGetArgs are the arguments for dbGet.

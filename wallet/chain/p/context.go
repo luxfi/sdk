@@ -6,7 +6,7 @@ package p
 import (
 	"context"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/vm/vms/platformvm"
