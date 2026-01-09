@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/luxfi/codec/jsonrpc"
-	"github.com/luxfi/crypto/address/formatting"
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 )
 
