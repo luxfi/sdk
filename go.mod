@@ -9,10 +9,10 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.17.38
 	github.com/luxfi/geth v1.16.69
-	github.com/luxfi/ids v1.2.8
+	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/log v1.2.1
 	github.com/luxfi/version v1.0.1
-	github.com/luxfi/warp v1.18.2
+	github.com/luxfi/warp v1.18.4
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -39,7 +39,7 @@ require (
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/bft v0.1.0
 	github.com/luxfi/consensus v1.22.51
-	github.com/luxfi/constants v1.4.2
+	github.com/luxfi/constants v1.4.3
 	github.com/luxfi/database v1.17.35
 	github.com/luxfi/evm v0.8.30
 	github.com/luxfi/genesis v1.5.21
@@ -48,7 +48,7 @@ require (
 	github.com/luxfi/keychain v1.0.1
 	github.com/luxfi/ledger v1.1.6
 	github.com/luxfi/lpm v1.0.5
-	github.com/luxfi/math v1.2.2
+	github.com/luxfi/math v1.2.3
 	github.com/luxfi/math/safe v0.0.1
 	github.com/luxfi/metric v1.4.10
 	github.com/luxfi/mock v0.1.0
@@ -72,14 +72,13 @@ require (
 	github.com/ALTree/bigfloat v0.2.0 // indirect
 	github.com/crate-crypto/go-kzg-4844 v1.1.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/luxfi/const v1.4.1 // indirect
+	github.com/luxfi/container v0.0.2 // indirect
 	github.com/luxfi/fhe v1.7.6-0.20260106060801-28e308e4c2f8 // indirect
 	github.com/luxfi/gpu v0.30.0 // indirect
 	github.com/luxfi/lattice/v7 v7.0.0 // indirect
-	github.com/luxfi/node v1.22.83 // indirect
 	github.com/luxfi/pubsub v1.0.0 // indirect
 	github.com/luxfi/ringtail v0.2.0 // indirect
-	github.com/luxfi/staking v1.0.0 // indirect
+	github.com/luxfi/staking v1.1.0 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 )
@@ -208,20 +207,19 @@ require (
 	github.com/ethereum/go-bigmodexpfix v0.0.0-20250911101455-f9e208c548ab // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
-	github.com/luxfi/cache v1.1.0 // indirect
+	github.com/luxfi/cache v1.2.0 // indirect
 	github.com/luxfi/codec v1.1.2
-	github.com/luxfi/config v1.0.0 // indirect
+	github.com/luxfi/config v1.1.1 // indirect
 	github.com/luxfi/formatting v1.0.0
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.0.7 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/p2p v1.18.7 // indirect
-	github.com/luxfi/precompile v0.4.2-0.20260106060917-a71a62021cde // indirect
+	github.com/luxfi/precompile v0.4.3 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
-	github.com/luxfi/tls v1.0.0
+	github.com/luxfi/tls v1.0.2
 	github.com/luxfi/upgrade v1.0.0 // indirect
-	github.com/luxfi/utils v1.1.0 // indirect
-	github.com/luxfi/vm v1.0.15
+	github.com/luxfi/vm v1.0.16
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/otiai10/copy v1.14.1 // indirect
