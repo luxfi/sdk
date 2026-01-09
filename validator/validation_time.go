@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/utils"
 	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/vm/utils"
 )
 
 // GetRemainingValidationTime returns the time remaining for [nodeID] on [subnetID].

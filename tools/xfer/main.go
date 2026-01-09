@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/sdk/keys"
 	"github.com/luxfi/sdk/wallet/primary"
 	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 func main() {

@@ -26,7 +26,6 @@ require (
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/luxfi/consensus v1.22.51 // indirect
-	github.com/luxfi/const v1.4.1 // indirect
 	github.com/luxfi/constants v1.4.2 // indirect
 	github.com/luxfi/metric v1.4.9 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect

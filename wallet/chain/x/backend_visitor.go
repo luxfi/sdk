@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/vms/exchangevm/txs"
+	"github.com/luxfi/vm/components/lux"
 )
 
 var _ txs.Visitor = (*backendVisitor)(nil)
