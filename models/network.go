@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	sdk_constants "github.com/luxfi/sdk/constants"
 )
 

@@ -4,6 +4,11 @@
 package validatormanager
 
 import (
+	"errors"
+
+	"github.com/luxfi/evm/plugin/evm/client"
+	"github.com/luxfi/ids"
+	sdkconstants "github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/utils"
 )
 
@@ -15,37 +20,13 @@ func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, erro
 	if err != nil {
 		return 0, err
 	}
-	evmCli := evmclient.NewClient(networkEndpoint, blockchainID)
+	evmCli := client.NewClient(networkEndpoint, blockchainID)
 	validators, err := evmCli.GetCurrentValidators(ctx, []ids.NodeID{nodeID})
 	if err != nil {
 		return 0, err
 	}
 	if len(validators) > 0 {
-		deductibleSeconds := uint64(constants.ValidatorUptimeDeductible.Seconds())
-		if validators[0].UptimeSeconds > deductibleSeconds {
-			return validators[0].UptimeSeconds - deductibleSeconds, nil
-		}
-		return 0, nil
-	}
-
-	return 0, errors.New("nodeID not found in validator set: " + nodeID.String())
-}
-
-// GetL1ValidatorUptimeSeconds returns the uptime of the L1 validator
-func GetL1ValidatorUptimeSeconds(rpcURL string, nodeID ids.NodeID) (uint64, error) {
-	ctx, cancel := utils.GetAPIContext()
-	defer cancel()
-	networkEndpoint, blockchainID, err := utils.SplitLuxgoRPCURI(rpcURL)
-	if err != nil {
-		return 0, err
-	}
-	evmCli := evmclient.NewClient(networkEndpoint, blockchainID)
-	validators, err := evmCli.GetCurrentValidators(ctx, []ids.NodeID{nodeID})
-	if err != nil {
-		return 0, err
-	}
-	if len(validators) > 0 {
-		deductibleSeconds := uint64(constants.ValidatorUptimeDeductible.Seconds())
+		deductibleSeconds := uint64(sdkconstants.ValidatorUptimeDeductible.Seconds())
 		if validators[0].UptimeSeconds > deductibleSeconds {
 			return validators[0].UptimeSeconds - deductibleSeconds, nil
 		}

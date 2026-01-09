@@ -5,10 +5,10 @@ package builder
 
 import (
 	consensusctx "github.com/luxfi/consensus/context"
-	"github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/node/vms/components/gas"
-	"github.com/luxfi/sdk/node/vms/platformvm/txs/fee"
+	"github.com/luxfi/vm/vms/components/gas"
+	"github.com/luxfi/vm/vms/platformvm/txs/fee"
 )
 
 const Alias = "P"

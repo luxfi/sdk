@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/node/vms/components/lux"
-	"github.com/luxfi/sdk/node/vms/components/verify"
-	"github.com/luxfi/sdk/node/vms/exchangevm/txs"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/components/verify"
+	"github.com/luxfi/vm/vms/exchangevm/txs"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 var _ Wallet = (*wallet)(nil)

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/node/vms/platformvm/state"
+	"github.com/luxfi/vm/vms/platformvm/state"
 
 	. "github.com/luxfi/sdk/utils/iterator"
 )

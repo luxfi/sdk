@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"math/big"
 
-	luxdconstants "github.com/luxfi/const"
-	warpPayload "github.com/luxfi/sdk/node/vms/platformvm/warp/payload"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/sdk/models"
+	warpPayload "github.com/luxfi/vm/vms/platformvm/warp/payload"
 
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/ids"
@@ -233,7 +233,7 @@ func GetPChainSubnetToL1ConversionUnsignedMessage(
 	}
 	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		net.ID(),
-		luxdconstants.PlatformChainID,
+		constants.PlatformChainID,
 		subnetConversionAddressedCall.Bytes(),
 	)
 	if err != nil {

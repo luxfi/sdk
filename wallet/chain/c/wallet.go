@@ -13,8 +13,8 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/utils/rpc"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 
 	ethcommon "github.com/luxfi/geth/common"
 )
