@@ -14,7 +14,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 
 	"github.com/luxfi/log"
-	"github.com/luxfi/sdk/utils/storage"
+	"github.com/luxfi/vm/utils/storage"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 
 	metric "github.com/luxfi/metric"
 
-	"github.com/luxfi/sdk/utils/wrappers"
+	"github.com/luxfi/vm/utils/wrappers"
 )
 
 var ErrFailedRegistering = errors.New("failed registering metric")

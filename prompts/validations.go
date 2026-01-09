@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/address"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/address"
 	sdkconstants "github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/ux"
