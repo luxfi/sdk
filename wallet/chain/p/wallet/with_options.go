@@ -15,7 +15,7 @@ import (
 	"github.com/luxfi/vm/secp256k1fx"
 
 	walletsigner "github.com/luxfi/sdk/wallet/chain/p/signer"
-	vmsigner "github.com/luxfi/vm/platformvm/signer"
+	vmsigner "github.com/luxfi/vm/vms/platformvm/signer"
 )
 
 var _ Wallet = (*withOptions)(nil)
