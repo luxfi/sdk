@@ -3,7 +3,7 @@
 
 package iterator
 
-import "github.com/luxfi/sdk/utils"
+import "github.com/luxfi/vm/utils"
 
 var _ Iterator[any] = Empty[any]{}
 

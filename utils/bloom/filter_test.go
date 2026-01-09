@@ -76,7 +76,7 @@ func TestNormalUsage(t *testing.T) {
 }
 
 func BenchmarkAdd(b *testing.B) {
-	f, err := New(8, 16*units.KiB)
+	f, err := New(8, 16*constants.KiB)
 	require.NoError(b, err)
 
 	b.ResetTimer()

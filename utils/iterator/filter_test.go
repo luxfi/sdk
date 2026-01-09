@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/vm/vms/platformvm/state"
 
-	. "github.com/luxfi/sdk/utils/iterator"
+	. "github.com/luxfi/vm/utils/iterator"
 )
 
 func TestFilter(t *testing.T) {

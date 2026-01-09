@@ -6,7 +6,7 @@ package heap
 import (
 	"container/heap"
 
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 var _ heap.Interface = (*indexedQueue[int, int])(nil)

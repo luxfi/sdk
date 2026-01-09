@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 	"github.com/luxfi/vm/vms/platformvm"
 
 	"github.com/luxfi/crypto"

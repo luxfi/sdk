@@ -24,11 +24,11 @@ import (
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/models"
-	sdkutils "github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/ux"
 	"github.com/luxfi/sdk/validator"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	sdkwarp "github.com/luxfi/sdk/warp"
+	sdkutils "github.com/luxfi/vm/utils"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 )
