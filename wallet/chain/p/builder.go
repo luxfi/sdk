@@ -10,7 +10,7 @@ import (
 
 	stdcontext "context"
 
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/math/set"

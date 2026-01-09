@@ -8,9 +8,9 @@ import (
 	"net/netip"
 	"time"
 
+	"github.com/luxfi/log"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/log"
 )
 
 const ipResolutionTimeout = 10 * time.Second

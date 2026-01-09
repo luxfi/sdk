@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/rpc"
 )
 
 // GetDefaultBlockchainAirdropKeyName returns the default key name for blockchain airdrops

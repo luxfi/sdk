@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/geth/ethclient"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/vm/vms/secp256k1fx"
 

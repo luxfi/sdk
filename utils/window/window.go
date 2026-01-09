@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/sdk/utils/buffer"
-	"github.com/luxfi/sdk/utils/timer/mockable"
+	"github.com/luxfi/vm/utils/timer/mockable"
 )
 
 var _ Window[struct{}] = (*window[struct{}])(nil)

@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/rpc"
 )
 
 type mockClient struct {

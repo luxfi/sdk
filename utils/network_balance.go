@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/codec/jsonrpc"
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/models"
 )
 
 // GetNetworkBalance returns the balance of an address on the P-chain

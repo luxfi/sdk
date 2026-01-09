@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
+	"github.com/luxfi/rpc"
 	"github.com/luxfi/upgrade"
-	"github.com/luxfi/sdk/utils/rpc"
 )
 
 type Client struct {

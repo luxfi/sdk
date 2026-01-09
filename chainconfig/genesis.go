@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/evm/params"
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/math"
 	"github.com/luxfi/geth/core/types"
+	"github.com/luxfi/math"
 )
 
 // GenesisBuilder helps construct EVM genesis configurations
