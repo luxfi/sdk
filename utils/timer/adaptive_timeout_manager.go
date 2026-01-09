@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/metric"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/heap"
+	"github.com/luxfi/vm/utils/heap"
 	"github.com/luxfi/vm/utils/timer/mockable"
 )
 

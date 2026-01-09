@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/luxfi/address"
 	"github.com/luxfi/constants"
+	"github.com/luxfi/crypto/address"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	sdkconstants "github.com/luxfi/sdk/constants"

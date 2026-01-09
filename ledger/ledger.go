@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/sdk/network"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
