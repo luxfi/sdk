@@ -7,14 +7,14 @@ import (
 	"context"
 	"errors"
 
-	"github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/node/vms/components/lux"
-	"github.com/luxfi/sdk/node/vms/platformvm/txs"
-	"github.com/luxfi/sdk/node/vms/platformvm/warp"
-	"github.com/luxfi/sdk/node/vms/platformvm/warp/message"
-	"github.com/luxfi/sdk/node/vms/platformvm/warp/payload"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/vm/vms/platformvm/warp"
+	"github.com/luxfi/vm/vms/platformvm/warp/message"
+	"github.com/luxfi/vm/vms/platformvm/warp/payload"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 var (

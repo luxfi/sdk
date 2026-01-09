@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/p2p/peer"
-	"github.com/luxfi/sdk/utils/json"
+	"github.com/luxfi/codec/jsonrpc"
 )
 
 // ProofOfPossession is a JSON-friendly representation of a BLS PoP.

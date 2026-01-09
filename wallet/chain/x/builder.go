@@ -13,14 +13,14 @@ import (
 	math "github.com/luxfi/math/safe"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/node/vms/components/lux"
-	"github.com/luxfi/sdk/node/vms/components/verify"
-	"github.com/luxfi/sdk/node/vms/exchangevm/txs"
-	"github.com/luxfi/sdk/node/vms/nftfx"
-	"github.com/luxfi/sdk/node/vms/propertyfx"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/components/verify"
+	"github.com/luxfi/vm/vms/exchangevm/txs"
+	"github.com/luxfi/vm/vms/nftfx"
+	"github.com/luxfi/vm/vms/propertyfx"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 var (

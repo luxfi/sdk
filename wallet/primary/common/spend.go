@@ -6,7 +6,7 @@ package common
 import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 // MatchOwners attempts to match a list of addresses up to the provided

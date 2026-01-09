@@ -12,12 +12,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/node/vms/components/lux"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
 	"github.com/luxfi/sdk/keys"
 	"github.com/luxfi/sdk/wallet/primary"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 func main() {
