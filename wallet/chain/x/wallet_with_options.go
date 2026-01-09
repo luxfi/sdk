@@ -5,13 +5,13 @@ package x
 
 import (
 	"github.com/luxfi/ids"
+	"github.com/luxfi/vm/vms/exchangevm/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/vms/exchangevm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 var _ Wallet = (*walletWithOptions)(nil)

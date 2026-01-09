@@ -9,8 +9,8 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/vms/exchangevm/txs"
+	"github.com/luxfi/vm/components/lux"
 )
 
 var _ Signer = (*signer)(nil)
