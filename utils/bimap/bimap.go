@@ -10,7 +10,7 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 var (

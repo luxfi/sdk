@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 // GetDefaultBlockchainAirdropKeyInfo returns information for the blockchain default allocation key.

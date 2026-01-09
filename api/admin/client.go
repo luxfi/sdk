@@ -6,7 +6,7 @@ package admin
 import (
 	"context"
 
-	"github.com/luxfi/formatting"
+	"github.com/luxfi/crypto/address/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
 	"github.com/luxfi/rpc"

@@ -20,39 +20,39 @@ func BenchmarkEncodings(b *testing.B) {
 	}{
 		{
 			encoding: Hex,
-			size:     1 * units.KiB, // 1kb
+			size:     1 * constants.KiB, // 1kb
 		},
 		{
 			encoding: Hex,
-			size:     4 * units.KiB, // 4kb
+			size:     4 * constants.KiB, // 4kb
 		},
 		{
 			encoding: Hex,
-			size:     32 * units.KiB, // 32kb
+			size:     32 * constants.KiB, // 32kb
 		},
 		{
 			encoding: Hex,
-			size:     128 * units.KiB, // 128kb
+			size:     128 * constants.KiB, // 128kb
 		},
 		{
 			encoding: Hex,
-			size:     256 * units.KiB, // 256kb
+			size:     256 * constants.KiB, // 256kb
 		},
 		{
 			encoding: Hex,
-			size:     512 * units.KiB, // 512kb
+			size:     512 * constants.KiB, // 512kb
 		},
 		{
 			encoding: Hex,
-			size:     1 * units.MiB, // 1mb
+			size:     1 * constants.MiB, // 1mb
 		},
 		{
 			encoding: Hex,
-			size:     2 * units.MiB, // 2mb
+			size:     2 * constants.MiB, // 2mb
 		},
 		{
 			encoding: Hex,
-			size:     4 * units.MiB, // 4mb
+			size:     4 * constants.MiB, // 4mb
 		},
 	}
 	for _, benchmark := range benchmarks {

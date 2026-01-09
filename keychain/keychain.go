@@ -13,7 +13,7 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 // ledgerAdapter adapts sdk/ledger.LedgerDevice to keychain.Ledger interface
