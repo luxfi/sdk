@@ -6,9 +6,9 @@ package builder
 import (
 	"github.com/luxfi/vm/vms/exchangevm/block"
 	"github.com/luxfi/vm/vms/exchangevm/fxs"
-	"github.com/luxfi/vm/vms/nftfx"
-	"github.com/luxfi/vm/vms/propertyfx"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/vm/nftfx"
+	"github.com/luxfi/vm/propertyfx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 const (

@@ -7,9 +7,9 @@ import (
 	"context"
 
 	"github.com/luxfi/constants"
+	"github.com/luxfi/vm/vms/platformvm"
 	"github.com/luxfi/sdk/api/info"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
-	"github.com/luxfi/vm/vms/platformvm"
 )
 
 // gasPriceMultiplier increases the gas price to support multiple transactions
