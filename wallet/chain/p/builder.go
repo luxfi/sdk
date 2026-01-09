@@ -19,7 +19,7 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/platformvm/signer"
+	"github.com/luxfi/vm/vms/platformvm/signer"
 	"github.com/luxfi/vm/secp256k1fx"
 	"github.com/luxfi/vm/utils"
 )
