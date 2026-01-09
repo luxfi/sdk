@@ -5,7 +5,7 @@ package builder
 
 import (
 	consensusctx "github.com/luxfi/consensus/context"
-	"github.com/luxfi/constantsants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/vm/vms/components/gas"
 	"github.com/luxfi/vm/vms/platformvm/txs/fee"

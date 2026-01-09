@@ -9,8 +9,8 @@ import (
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/log"
+	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/api"
-	"github.com/luxfi/sdk/utils/rpc"
 )
 
 type Client struct {

@@ -7,7 +7,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/luxfi/sdk/utils/rpc"
+	"github.com/luxfi/rpc"
 )
 
 type Client struct {

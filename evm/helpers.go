@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/constantsants"
 )
 
 // GetEventFromLogs returns the first log in 'logs' that is successfully parsed by 'parser'.
