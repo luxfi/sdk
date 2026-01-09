@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 
 	avajson "github.com/luxfi/codec"
-	"github.com/luxfi/crypto/address/formatting"
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 )
 
