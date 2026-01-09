@@ -11,23 +11,23 @@ import (
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/luxfi/geth/ethclient"
 
-	"github.com/luxfi/const"
+	"github.com/luxfi/codec"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
+	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/api/info"
-	"github.com/luxfi/sdk/node/codec"
-	"github.com/luxfi/sdk/utils/rpc"
-	"github.com/luxfi/sdk/node/vms/components/lux"
-	"github.com/luxfi/sdk/node/vms/platformvm"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/platformvm"
 
 	gethcommon "github.com/luxfi/geth/common"
-	ptxs "github.com/luxfi/sdk/node/vms/platformvm/txs"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
+	ptxs "github.com/luxfi/vm/vms/platformvm/txs"
 )
 
 const (

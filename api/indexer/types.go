@@ -6,9 +6,9 @@ package indexer
 import (
 	"time"
 
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/formatting"
-	"github.com/luxfi/sdk/utils/json"
+	"github.com/luxfi/codec/jsonrpc"
 )
 
 type FormattedContainer struct {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/sdk/utils/json"
+	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/sdk/utils/rpc"
 )
 

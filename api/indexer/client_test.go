@@ -11,8 +11,8 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/utils"
-	"github.com/luxfi/sdk/utils/formatting"
-	"github.com/luxfi/sdk/utils/json"
+	"github.com/luxfi/address"
+	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/sdk/utils/rpc"
 )
 
