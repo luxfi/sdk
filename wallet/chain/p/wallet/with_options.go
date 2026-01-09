@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/vms/platformvm/txs"
 	"github.com/luxfi/vm/vms/secp256k1fx"
 

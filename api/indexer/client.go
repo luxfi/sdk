@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/luxfi/codec/jsonrpc"
-	"github.com/luxfi/formatting"
+	"github.com/luxfi/crypto/address/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
 )

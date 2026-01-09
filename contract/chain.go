@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 	"github.com/spf13/cobra"
 )
 

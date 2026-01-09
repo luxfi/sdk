@@ -7,7 +7,7 @@ import (
 	"cmp"
 
 	"github.com/luxfi/math"
-	"github.com/luxfi/sdk/utils"
+	"github.com/luxfi/vm/utils"
 )
 
 var (

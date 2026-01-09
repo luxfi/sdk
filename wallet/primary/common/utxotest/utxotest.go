@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/components/lux"
 )
 
 func NewDeterministicChainUTXOs(t *testing.T, utxoSets map[ids.ID][]*lux.UTXO) *DeterministicChainUTXOs {
