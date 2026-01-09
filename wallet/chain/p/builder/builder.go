@@ -22,8 +22,8 @@ import (
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/platformvm/fx"
-	"github.com/luxfi/vm/platformvm/signer"
+	"github.com/luxfi/vm/vms/platformvm/fx"
+	"github.com/luxfi/vm/vms/platformvm/signer"
 	"github.com/luxfi/vm/secp256k1fx"
 	"github.com/luxfi/vm/utils"
 )

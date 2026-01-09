@@ -11,7 +11,7 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/vm/vms/platformvm/txs"
 	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/platformvm/fx"
+	"github.com/luxfi/vm/vms/platformvm/fx"
 )
 
 var _ Signer = (*txSigner)(nil)
