@@ -12,14 +12,14 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
+	"github.com/luxfi/vm/vms/exchangevm/fxs"
+	"github.com/luxfi/vm/vms/exchangevm/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/vms/exchangevm/fxs"
-	"github.com/luxfi/vm/vms/exchangevm/txs"
-	"github.com/luxfi/vm/vms/nftfx"
-	"github.com/luxfi/vm/vms/propertyfx"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/vm/nftfx"
+	"github.com/luxfi/vm/propertyfx"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 var (

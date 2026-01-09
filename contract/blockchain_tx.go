@@ -6,11 +6,11 @@ package contract
 import (
 	"fmt"
 
-	"github.com/luxfi/crypto/address/formatting"
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/vm/utils"
-	"github.com/luxfi/vm/vms/platformvm/txs"
 )
 
 type getTxArgs struct {
