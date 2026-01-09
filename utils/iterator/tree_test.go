@@ -12,7 +12,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/utils/iterator"
-	"github.com/luxfi/sdk/node/vms/platformvm/state"
+	"github.com/luxfi/vm/vms/platformvm/state"
 )
 
 var defaultTreeDegree = 2

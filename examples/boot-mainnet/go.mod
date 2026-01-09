@@ -68,8 +68,8 @@ require (
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/config v1.0.0 // indirect
 	github.com/luxfi/consensus v1.22.46 // indirect
-	github.com/luxfi/const v1.4.1 // indirect
-	github.com/luxfi/constants v1.3.1 // indirect
+	github.com/luxfi/constants v1.4.2 // indirect
+	github.com/luxfi/constants v1.4.2 // indirect
 	github.com/luxfi/crypto v1.17.27 // indirect
 	github.com/luxfi/database v1.2.17 // indirect
 	github.com/luxfi/genesis v1.5.17 // indirect
@@ -83,7 +83,6 @@ require (
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/netrunner v1.14.35 // indirect
-	github.com/luxfi/node v1.22.73 // indirect
 	github.com/luxfi/p2p v1.18.2 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect

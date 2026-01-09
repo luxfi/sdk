@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"math/big"
 
-	luxdconstants "github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
@@ -373,7 +373,7 @@ func GetPChainL1ValidatorWeightMessage(
 	}
 	unsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID(),
-		luxdconstants.PlatformChainID,
+		constants.PlatformChainID,
 		addressedCall.Bytes(),
 	)
 	if err != nil {

@@ -6,11 +6,11 @@ package p
 import (
 	"time"
 
-	"github.com/luxfi/sdk/node/vms/platformvm"
-	"github.com/luxfi/sdk/node/vms/platformvm/txs"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/vm/vms/platformvm/txs"
 )
 
 var _ wallet.Client = (*Client)(nil)

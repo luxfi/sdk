@@ -8,16 +8,16 @@ import (
 
 	gethcommon "github.com/luxfi/geth/common"
 
-	"github.com/luxfi/const"
+	"github.com/luxfi/constantsants"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/sdk/node/vms/platformvm/txs"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
-	"github.com/luxfi/sdk/node/wallet/keychain"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	psigner "github.com/luxfi/sdk/wallet/chain/p/signer"

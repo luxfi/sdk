@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/units"
+	"github.com/luxfi/constantsants"
 )
 
 func TestCollisionResistance(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/formatting"
-	"github.com/luxfi/sdk/utils/json"
+	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/sdk/utils/rpc"
 )
 

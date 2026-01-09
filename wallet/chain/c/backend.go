@@ -13,8 +13,8 @@ import (
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/math"
-	"github.com/luxfi/sdk/node/vms/components/lux"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/vm/vms/components/lux"
 
 	ethcommon "github.com/luxfi/geth/common"
 )
