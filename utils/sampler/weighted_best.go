@@ -8,7 +8,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/luxfi/sdk/utils/timer/mockable"
+	"github.com/luxfi/vm/utils/timer/mockable"
 
 	safemath "github.com/luxfi/math"
 )

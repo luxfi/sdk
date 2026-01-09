@@ -14,7 +14,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/utils/heap"
-	"github.com/luxfi/sdk/utils/timer/mockable"
+	"github.com/luxfi/vm/utils/timer/mockable"
 )
 
 var (

@@ -15,7 +15,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/luxfi/sdk/utils/perms"
+	"github.com/luxfi/vm/utils/perms"
 )
 
 const (
