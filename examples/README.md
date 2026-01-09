@@ -1,11 +1,11 @@
 # examples
 This folder is dedicated to all "example" `luxvms` that we build to showcase
-the capability of the `vmsdk`. If you are interested in writing your own
+the capability of the `sdk`. If you are interested in writing your own
 `luxvm`, this is usally the right place to start.
 
 ## Beginner: `tokenvm`
 We created the [`tokenvm`](./tokenvm) to showcase how to use the
-`vmsdk` in an application most readers are already familiar with, token minting
+`sdk` in an application most readers are already familiar with, token minting
 and token trading. The `tokenvm` lets anyone create any asset, mint more of
 their asset, modify the metadata of their asset (if they reveal some info), and
 burn their asset. Additionally, there is an embedded on-chain exchange that
@@ -16,16 +16,16 @@ maintains by syncing blocks. If you are interested in the intersection of
 exchanges and blockchains, it is definitely worth a read (the logic for filling
 orders is < 100 lines of code!).
 
-To ensure the `vmsdk` stays reliable as we optimize and evolve the codebase,
-we also run E2E tests in the `tokenvm` on each PR to the `vmsdk` core modules.
+To ensure the `sdk` stays reliable as we optimize and evolve the codebase,
+we also run E2E tests in the `tokenvm` on each PR to the `sdk` core modules.
 
 ## Expert: `indexvm`
 The [`indexvm`](https://github.com/luxfi/indexvm) is much more complex than
 the `tokenvm` (more elaborate mechanisms and a new use case you may not be
-familiar with). It was built during the design of the `vmsdk` to test out the
+familiar with). It was built during the design of the `sdk` to test out the
 limits of the abstractions for building complex on-chain mechanisms. We recommend
-taking a look at this `luxvm` once you already have familiarity with the `vmsdk` to gain an
-even deeper understanding of how you can build a complex runtime on top of the `vmsdk`.
+taking a look at this `luxvm` once you already have familiarity with the `sdk` to gain an
+even deeper understanding of how you can build a complex runtime on top of the `sdk`.
 
 The `indexvm` is dedicated to increasing the usefulness of the world's
 content-addressable data (like IPFS) by enabling anyone to "index it" by

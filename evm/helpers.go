@@ -10,7 +10,7 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/geth/core/types"
-	"github.com/luxfi/sdk/utils/units"
+	"github.com/luxfi/constantsants"
 )
 
 // GetEventFromLogs returns the first log in 'logs' that is successfully parsed by 'parser'.
@@ -83,7 +83,7 @@ func PrivateKeyToAddress(privateKey string) (crypto.Address, error) {
 // It adds 0.5 to the balance before dividing by 1e9 to round
 // it to the nearest whole number.
 func ConvertToNanoLux(balance *big.Int) *big.Int {
-	divisor := big.NewInt(int64(units.Lux))
+	divisor := big.NewInt(int64(constants.Lux))
 	half := new(big.Int).Div(divisor, big.NewInt(2))
 	adjusted := new(big.Int).Add(balance, half)
 	return new(big.Int).Div(adjusted, divisor)
@@ -96,5 +96,5 @@ func CalculateEvmFeeInLux(gasUsed uint64, gasPrice *big.Int) float64 {
 	totalCostInNanoLux := ConvertToNanoLux(totalCost)
 
 	result, _ := new(big.Float).SetInt(totalCostInNanoLux).Float64()
-	return result / float64(units.Lux)
+	return result / float64(constants.Lux)
 }

@@ -23,7 +23,6 @@ import (
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/ux"
 	"github.com/luxfi/sdk/validator"
-	"github.com/luxfi/sdk/utils"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 
@@ -239,7 +238,7 @@ func InitValidatorRemoval(
 		signedUptimeProof := &warp.Message{}
 		if isPoS {
 			if uptimeSec == 0 {
-				uptimeSec, err = utils.GetL1ValidatorUptimeSeconds(rpcURL, nodeID)
+				uptimeSec, err = GetL1ValidatorUptimeSeconds(rpcURL, nodeID)
 				if err != nil {
 					return nil, ids.Empty, nil, evm.TransactionError(nil, err, "failure getting uptime data for nodeID: %s via %s ", nodeID, rpcURL)
 				}

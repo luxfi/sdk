@@ -13,13 +13,13 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/sdk/node/vms/components/lux"
-	"github.com/luxfi/sdk/node/vms/components/verify"
-	"github.com/luxfi/sdk/node/vms/exchangevm/fxs"
-	"github.com/luxfi/sdk/node/vms/exchangevm/txs"
-	"github.com/luxfi/sdk/node/vms/nftfx"
-	"github.com/luxfi/sdk/node/vms/propertyfx"
-	"github.com/luxfi/sdk/node/vms/secp256k1fx"
+	"github.com/luxfi/vm/vms/components/lux"
+	"github.com/luxfi/vm/vms/components/verify"
+	"github.com/luxfi/vm/vms/exchangevm/fxs"
+	"github.com/luxfi/vm/vms/exchangevm/txs"
+	"github.com/luxfi/vm/vms/nftfx"
+	"github.com/luxfi/vm/vms/propertyfx"
+	"github.com/luxfi/vm/vms/secp256k1fx"
 )
 
 var (
