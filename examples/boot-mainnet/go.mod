@@ -64,10 +64,10 @@ require (
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/luxfi/address v1.0.0 // indirect
 	github.com/luxfi/cache v1.1.0 // indirect
 	github.com/luxfi/config v1.0.0 // indirect
 	github.com/luxfi/consensus v1.22.46 // indirect
-	github.com/luxfi/constants v1.4.2 // indirect
 	github.com/luxfi/constants v1.4.2 // indirect
 	github.com/luxfi/crypto v1.17.27 // indirect
 	github.com/luxfi/database v1.2.17 // indirect
@@ -82,10 +82,13 @@ require (
 	github.com/luxfi/metric v1.4.8 // indirect
 	github.com/luxfi/mock v0.1.0 // indirect
 	github.com/luxfi/netrunner v1.14.35 // indirect
+	github.com/luxfi/node v1.22.73 // indirect
 	github.com/luxfi/p2p v1.18.2 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
+	github.com/luxfi/staking v1.0.0 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/units v1.0.0 // indirect
+	github.com/luxfi/utils v1.1.0 // indirect
 	github.com/luxfi/vm v1.0.1 // indirect
 	github.com/luxfi/warp v1.18.2 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
@@ -102,7 +105,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.67.4 // indirect
+	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/rs/cors v1.11.1 // indirect
@@ -129,6 +132,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect

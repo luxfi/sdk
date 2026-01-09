@@ -14,11 +14,11 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/vm/vms/platformvm/stakeable"
 	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/secp256k1fx"
+	"github.com/luxfi/vm/components/lux"
+	"github.com/luxfi/vm/components/verify"
+	"github.com/luxfi/vm/secp256k1fx"
 )
 
 var (
