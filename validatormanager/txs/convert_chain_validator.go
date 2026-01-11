@@ -19,7 +19,7 @@ type ConvertToL1Validator struct {
 
 // Backward compatibility aliases
 type ConvertNetToL1Validator = ConvertToL1Validator
-type ConvertSubnetToL1Validator = ConvertToL1Validator
+type ConvertChainToL1Validator = ConvertToL1Validator
 
 // Signer contains the BLS signature for a validator
 type Signer struct {
