@@ -23,4 +23,3 @@ type Validator struct {
 
 // ChainValidator is a backward compatibility alias for Validator.
 type ChainValidator = Validator
-type SubnetValidator = Validator

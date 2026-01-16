@@ -12,14 +12,14 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/vm/vms/exchangevm/txs"
+	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
+	"github.com/luxfi/utils"
+	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/nftfx"
-	"github.com/luxfi/vm/propertyfx"
-	"github.com/luxfi/vm/secp256k1fx"
-	"github.com/luxfi/vm/utils"
+	"github.com/luxfi/utxo/nftfx"
+	"github.com/luxfi/utxo/propertyfx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var (
@@ -640,7 +640,7 @@ func (b *builder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                   // sort inputs
+	utils.Sort(inputs)                                       // sort inputs
 	lux.SortTransferableOutputs(outputs, Parser.Codec()) // sort the change outputs
 	return inputs, outputs, nil
 }

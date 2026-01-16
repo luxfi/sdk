@@ -9,9 +9,8 @@ import (
 	"github.com/luxfi/ids"
 )
 
-type ElasticNetConfig struct {
-	NetID                    ids.ID
-	SubnetID                 ids.ID // Deprecated: use NetID
+type ElasticChainConfig struct {
+	ChainID                  ids.ID // Chain identifier
 	AssetID                  ids.ID
 	InitialSupply            uint64
 	MaxSupply                uint64
@@ -27,5 +26,5 @@ type ElasticNetConfig struct {
 	UptimeRequirement        uint32
 }
 
-// ElasticChainConfig is an alias for backward compatibility
-type ElasticChainConfig = ElasticNetConfig
+// ElasticNetConfig is an alias for backward compatibility (deprecated)
+type ElasticNetConfig = ElasticChainConfig

@@ -14,7 +14,7 @@ wallet/
 │   ├── p/              # P-Chain (Platform) wallet
 │   ├── x/              # X-Chain (Exchange) wallet
 │   ├── c/              # C-Chain (Contract) wallet
-│   └── evm/            # Generic EVM wallet (for subnets like Zoo)
+│   └── evm/            # Generic EVM wallet (for L1 chains like Zoo)
 └── primary/            # Unified wallet managing all chains
 ```
 

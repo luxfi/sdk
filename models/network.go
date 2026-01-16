@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/luxfi/constants"
-	sdk_constants "github.com/luxfi/sdk/constants"
 )
 
 type Network int64
@@ -47,7 +46,7 @@ func (s Network) NetworkID() (uint32, error) {
 	case Testnet:
 		return constants.TestnetID, nil
 	case Local:
-		return sdk_constants.LocalNetworkID, nil
+		return constants.LocalNetworkID, nil
 	}
 	return 0, fmt.Errorf("unsupported network")
 }
@@ -96,12 +95,10 @@ func NetworkFromNetworkID(networkID uint32) Network {
 		return Mainnet
 	case constants.TestnetID:
 		return Testnet
-	case sdk_constants.LocalNetworkID:
+	case constants.LocalNetworkID:
 		return Local
-	case sdk_constants.AvalancheLocalNetworkID:
+	case constants.AvalancheLocalNetworkID:
 		return Local // Avalanche's local network ID (31337)
-	case sdk_constants.NetrunnerLocalNetworkID:
-		return Local // Netrunner local network ID (1337)
 	}
 	return Undefined
 }
@@ -154,15 +151,15 @@ func (s Network) BootstrappingContext() (context.Context, func()) {
 func (s Network) Endpoint() string {
 	switch s {
 	case Mainnet:
-		return sdk_constants.MainnetAPIEndpoint
+		return constants.MainnetAPIEndpoint
 	case Testnet:
-		return sdk_constants.TestnetAPIEndpoint
+		return constants.TestnetAPIEndpoint
 	case Local:
-		return sdk_constants.LocalAPIEndpoint
+		return constants.LocalAPIEndpoint
 	case Devnet:
-		return sdk_constants.DevnetAPIEndpoint
+		return constants.DevnetAPIEndpoint
 	default:
-		return sdk_constants.LocalAPIEndpoint
+		return constants.LocalAPIEndpoint
 	}
 }
 
@@ -180,15 +177,15 @@ func (s Network) ClusterName() string {
 func (s Network) WSEndpoints() []string {
 	switch s {
 	case Mainnet:
-		return []string{sdk_constants.MainnetWSEndpoint}
+		return []string{constants.MainnetWSEndpoint}
 	case Testnet:
-		return []string{sdk_constants.TestnetWSEndpoint}
+		return []string{constants.TestnetWSEndpoint}
 	case Local:
-		return []string{sdk_constants.LocalWSEndpoint}
+		return []string{constants.LocalWSEndpoint}
 	case Devnet:
-		return []string{sdk_constants.DevnetWSEndpoint}
+		return []string{constants.DevnetWSEndpoint}
 	default:
-		return []string{sdk_constants.LocalWSEndpoint}
+		return []string{constants.LocalWSEndpoint}
 	}
 }
 

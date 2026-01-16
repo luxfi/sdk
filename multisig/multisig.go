@@ -8,15 +8,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/sdk/platformvm"
 
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 )
 
 type TxKind int64
@@ -86,7 +86,7 @@ func (ms *Multisig) IsReadyToCommit() (bool, error) {
 	}
 	unsignedTx := ms.PChainTx.Unsigned
 	switch unsignedTx.(type) {
-	case *txs.CreateSubnetTx:
+	case *txs.CreateChainTx:
 		return true, nil
 	default:
 	}
@@ -97,11 +97,11 @@ func (ms *Multisig) IsReadyToCommit() (bool, error) {
 	return len(remainingSigners) == 0, nil
 }
 
-// GetRemainingAuthSigners gets subnet auth addresses that have not signed a given tx
+// GetRemainingAuthSigners gets chain auth addresses that have not signed a given tx
 //   - get the string slice of auth signers for the tx (GetAuthSigners)
 //   - verifies that all creds in tx.Creds, except the last one, are fully signed
 //     (a cred is fully signed if all the signatures in cred.Sigs are non-empty)
-//   - computes remaining signers by iterating the last cred in tx.Creds, associated to subnet auth signing
+//   - computes remaining signers by iterating the last cred in tx.Creds, associated to chain auth signing
 //   - for each sig in cred.Sig: if sig is empty, then add the associated auth signer address (obtained from
 //     authSigners by using the index) to the remaining signers list
 //
@@ -116,9 +116,9 @@ func (ms *Multisig) GetRemainingAuthSigners() ([]ids.ShortID, []ids.ShortID, err
 	}
 	emptySig := [secp256k1.SignatureLen]byte{}
 	numCreds := len(ms.PChainTx.Creds)
-	// we should have at least 1 cred for output owners and 1 cred for subnet auth
+	// we should have at least 1 cred for output owners and 1 cred for chain auth
 	if numCreds < 2 {
-		return nil, nil, fmt.Errorf("expected tx.Creds of len 2, got %d. doesn't seem to be a multisig tx with subnet auth requirements", numCreds)
+		return nil, nil, fmt.Errorf("expected tx.Creds of len 2, got %d. doesn't seem to be a multisig tx with chain auth requirements", numCreds)
 	}
 	// signatures for output owners should be filled (all creds except last one)
 	for credIndex := range ms.PChainTx.Creds[:numCreds-1] {
@@ -132,7 +132,7 @@ func (ms *Multisig) GetRemainingAuthSigners() ([]ids.ShortID, []ids.ShortID, err
 			}
 		}
 	}
-	// signatures for subnet auth (last cred)
+	// signatures for chain auth (last cred)
 	cred, ok := ms.PChainTx.Creds[numCreds-1].(*secp256k1fx.Credential)
 	if !ok {
 		return nil, nil, fmt.Errorf("expected cred to be of type *secp256k1fx.Credential, got %T", ms.PChainTx.Creds[1])
@@ -152,10 +152,10 @@ func (ms *Multisig) GetRemainingAuthSigners() ([]ids.ShortID, []ids.ShortID, err
 	return authSigners, remainingSigners, nil
 }
 
-// GetAuthSigners gets all subnet auth addresses that are required to sign a given tx
-//   - get subnet control keys as string slice using P-Chain API (GetOwners)
-//   - get subnet auth indices from the tx, field tx.UnsignedTx.SubnetAuth
-//   - creates the string slice of required subnet auth addresses by applying
+// GetAuthSigners gets all chain auth addresses that are required to sign a given tx
+//   - get chain control keys as string slice using P-Chain API (GetOwners)
+//   - get chain auth indices from the tx, field tx.UnsignedTx.ChainAuth
+//   - creates the string slice of required chain auth addresses by applying
 //     the indices to the control keys slice
 func (ms *Multisig) GetAuthSigners() ([]ids.ShortID, error) {
 	if ms.Undefined() {
@@ -266,37 +266,37 @@ func (ms *Multisig) GetNetwork() (network.LegacyNetwork, error) {
 
 // GetBlockchainID is deprecated - the transaction types in luxfi/node/vms/platformvm/txs
 // do not have BlockchainID fields. These transactions work with net IDs.
-// Use GetNetID() instead for net-related operations.
+// Use GetChainID() instead for net-related operations.
 //
 // TODO: Remove this function or implement it correctly if blockchain IDs are needed
 // func (ms *Multisig) GetBlockchainID() (ids.ID, error) {
 // 	return ids.Empty, fmt.Errorf("GetBlockchainID is not implemented - transaction types do not have BlockchainID fields")
 // }
 
-// GetNetID gets net id associated to tx
-func (ms *Multisig) GetNetID() (ids.ID, error) {
+// GetChainID gets net id associated to tx
+func (ms *Multisig) GetChainID() (ids.ID, error) {
 	if ms.Undefined() {
 		return ids.Empty, ErrUndefinedTx
 	}
 	unsignedTx := ms.PChainTx.Unsigned
-	var netID ids.ID
+	var chainID ids.ID
 	switch unsignedTx := unsignedTx.(type) {
 	case *txs.RemoveChainValidatorTx:
-		netID = unsignedTx.Chain
+		chainID = unsignedTx.Chain
 	case *txs.AddChainValidatorTx:
-		netID = unsignedTx.Chain
+		chainID = unsignedTx.Chain
 	case *txs.CreateChainTx:
-		netID = unsignedTx.ChainID
+		chainID = unsignedTx.ValidateNetworkID
 	case *txs.TransformChainTx:
-		netID = unsignedTx.Chain
+		chainID = unsignedTx.Chain
 	case *txs.AddPermissionlessValidatorTx:
-		netID = unsignedTx.Chain
+		chainID = unsignedTx.Chain
 	case *txs.TransferChainOwnershipTx:
-		netID = unsignedTx.Chain
+		chainID = unsignedTx.Chain
 	default:
 		return ids.Empty, fmt.Errorf("unexpected unsigned tx type %T", unsignedTx)
 	}
-	return netID, nil
+	return chainID, nil
 }
 
 func (ms *Multisig) GetNetOwners() ([]ids.ShortID, uint32, error) {
@@ -304,7 +304,7 @@ func (ms *Multisig) GetNetOwners() ([]ids.ShortID, uint32, error) {
 		return nil, 0, ErrUndefinedTx
 	}
 	if ms.controlKeys == nil {
-		netID, err := ms.GetNetID()
+		chainID, err := ms.GetChainID()
 		if err != nil {
 			return nil, 0, err
 		}
@@ -313,7 +313,7 @@ func (ms *Multisig) GetNetOwners() ([]ids.ShortID, uint32, error) {
 		if err != nil {
 			return nil, 0, err
 		}
-		controlKeys, threshold, err := GetOwners(network, netID)
+		controlKeys, threshold, err := GetOwners(network, chainID)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -323,12 +323,12 @@ func (ms *Multisig) GetNetOwners() ([]ids.ShortID, uint32, error) {
 	return ms.controlKeys, ms.threshold, nil
 }
 
-func GetOwners(network network.LegacyNetwork, netID ids.ID) ([]ids.ShortID, uint32, error) {
+func GetOwners(network network.LegacyNetwork, chainID ids.ID) ([]ids.ShortID, uint32, error) {
 	pClient := platformvm.NewClient(network.Endpoint)
 	ctx := context.Background()
-	netResponse, err := pClient.GetNet(ctx, netID)
+	netResponse, err := pClient.GetNet(ctx, chainID)
 	if err != nil {
-		return nil, 0, fmt.Errorf("net tx %s query error: %w", netID, err)
+		return nil, 0, fmt.Errorf("net tx %s query error: %w", chainID, err)
 	}
 	controlKeys := netResponse.ControlKeys
 	threshold := netResponse.Threshold

@@ -8,12 +8,11 @@ import (
 	"math/big"
 
 	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
-	"github.com/luxfi/geth"
+	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/evm"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
-	"github.com/luxfi/vm/utils"
 )
 
 func GetValidatorNonce(
@@ -52,7 +51,7 @@ func GetValidatorNonce(
 		if err != nil {
 			return 0, err
 		}
-		msgs := evm.GetWarpMessagesFromLogs(utils.PointersSlice(logs))
+		msgs := evm.GetWarpMessagesFromLogs(pointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
 			addressedCall, err := warpMessage.ParseAddressedCall(payload)

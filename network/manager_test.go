@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/sdk/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

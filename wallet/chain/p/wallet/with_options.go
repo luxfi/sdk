@@ -8,14 +8,14 @@ import (
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 
+	vmsigner "github.com/luxfi/protocol/p/signer"
 	walletsigner "github.com/luxfi/sdk/wallet/chain/p/signer"
-	vmsigner "github.com/luxfi/vm/vms/platformvm/signer"
 )
 
 var _ Wallet = (*withOptions)(nil)
@@ -125,11 +125,11 @@ func (w *withOptions) IssueCreateChainTx(
 }
 
 // Removed in regenesis
-func (w *withOptions) IssueCreateSubnetTx(
+func (w *withOptions) IssueCreateNetworkTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.Tx, error) {
-	return w.wallet.IssueCreateSubnetTx(
+	return w.wallet.IssueCreateNetworkTx(
 		owner,
 		common.UnionOptions(w.options, options)...,
 	)

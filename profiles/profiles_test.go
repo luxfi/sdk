@@ -29,7 +29,7 @@ func TestGetProfile(t *testing.T) {
 	}{
 		{"standard", 5, "Conservative mainnet settings for production-safe operation"},
 		{"fast", 5, "Balanced testnet settings for development"},
-		{"turbo", 5, "Aggressive 5-node local network with 3/5 quorum"},
+		{"turbo", 3, "Ultra-fast 5-node local network with K=3, Alpha=2/3, Beta=2"},
 		{"ultra", 1, "Maximum aggression for single-node dev mode with K=1 consensus"},
 	}
 
@@ -116,12 +116,12 @@ func TestDefaultProfileForNetwork(t *testing.T) {
 		network  string
 		expected string
 	}{
-		{"mainnet", "standard"},
-		{"testnet", "fast"},
+		{"mainnet", "turbo"},
+		{"testnet", "turbo"},
 		{"devnet", "turbo"},
 		{"local", "turbo"},
 		{"dev", "ultra"},
-		{"unknown", "standard"},
+		{"unknown", "turbo"},
 	}
 
 	for _, tt := range tests {
@@ -139,16 +139,16 @@ func TestToNodeConfig(t *testing.T) {
 	config := p.ToNodeConfig()
 
 	// Check a few key values
-	if config["snow-sample-size"] != 5 {
-		t.Errorf("expected snow-sample-size=5, got %v", config["snow-sample-size"])
+	if config["snow-sample-size"] != 3 {
+		t.Errorf("expected snow-sample-size=3, got %v", config["snow-sample-size"])
 	}
-	if config["snow-quorum-size"] != 3 {
-		t.Errorf("expected snow-quorum-size=3, got %v", config["snow-quorum-size"])
+	if config["snow-quorum-size"] != 2 {
+		t.Errorf("expected snow-quorum-size=2, got %v", config["snow-quorum-size"])
 	}
-	if config["consensus-frontier-poll-frequency"] != "20ms" {
-		t.Errorf("expected consensus-frontier-poll-frequency=20ms, got %v", config["consensus-frontier-poll-frequency"])
+	if config["consensus-frontier-poll-frequency"] != "10ms" {
+		t.Errorf("expected consensus-frontier-poll-frequency=10ms, got %v", config["consensus-frontier-poll-frequency"])
 	}
-	if config["network-ping-timeout"] != "3s" {
-		t.Errorf("expected network-ping-timeout=3s, got %v", config["network-ping-timeout"])
+	if config["network-ping-timeout"] != "1s" {
+		t.Errorf("expected network-ping-timeout=1s, got %v", config["network-ping-timeout"])
 	}
 }
