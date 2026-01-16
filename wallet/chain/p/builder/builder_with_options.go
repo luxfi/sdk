@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/vms/platformvm/signer"
-	"github.com/luxfi/vm/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var _ Builder = (*builderWithOptions)(nil)
@@ -135,12 +135,11 @@ func (b *builderWithOptions) NewCreateChainTx(
 	)
 }
 
-// Removed in regenesis
-func (b *builderWithOptions) NewCreateSubnetTx(
+func (b *builderWithOptions) NewCreateNetworkTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.CreateSubnetTx, error) {
-	return b.builder.NewCreateSubnetTx(
+) (*txs.CreateNetworkTx, error) {
+	return b.builder.NewCreateNetworkTx(
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)

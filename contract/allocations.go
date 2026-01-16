@@ -9,11 +9,12 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
+	"github.com/luxfi/genesis/pkg/genesis"
+	"github.com/luxfi/sdk/utils/fs"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
-	"github.com/luxfi/vm/utils"
 )
 
 // GetDefaultBlockchainAirdropKeyInfo returns information for the blockchain default allocation key.
@@ -22,9 +23,9 @@ func GetDefaultBlockchainAirdropKeyInfo(
 	app *application.Lux,
 	blockchainName string,
 ) (string, string, string, error) {
-	keyName := utils.GetDefaultBlockchainAirdropKeyName(blockchainName)
+	keyName := genesis.GetDefaultBlockchainAirdropKeyName(blockchainName)
 	keyPath := app.GetKeyPath(keyName)
-	if utils.FileExists(keyPath) {
+	if fs.FileExists(keyPath) {
 		k, err := key.LoadSoft(models.NewLocalNetwork().ID(), keyPath)
 		if err != nil {
 			return "", "", "", err
@@ -47,7 +48,7 @@ func GetBlockchainAirdropKeyInfo(
 	blockchainName string,
 	genesisData []byte,
 ) (string, string, string, error) {
-	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
+	genesis, err := genesis.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -64,7 +65,7 @@ func GetBlockchainAirdropKeyInfo(
 	}
 	// Try to load ewoq key
 	ewoqPath := app.GetKeyPath("ewoq")
-	if utils.FileExists(ewoqPath) {
+	if fs.FileExists(ewoqPath) {
 		ewoq, err := key.LoadSoft(network.ID(), ewoqPath)
 		if err == nil {
 			for address := range genesis.Alloc {
@@ -104,7 +105,7 @@ func SearchForManagedKey(
 	address string,
 	includeEwoq bool,
 ) (bool, string, string, string, error) {
-	keyNames, err := utils.GetKeyNames(app.GetKeyDir(), includeEwoq)
+	keyNames, err := genesis.GetKeyNames(app.GetKeyDir(), includeEwoq)
 	if err != nil {
 		return false, "", "", "", err
 	}
@@ -119,10 +120,10 @@ func SearchForManagedKey(
 	return false, "", "", "", nil
 }
 
-// GetEVMSubnetPrefundedKey gets the deployed blockchain genesis, and then looks for known
+// GetEVMChainPrefundedKey gets the deployed blockchain genesis, and then looks for known
 // private keys inside it.
 // Returns address + private key when found.
-func GetEVMSubnetPrefundedKey(
+func GetEVMChainPrefundedKey(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -135,7 +136,7 @@ func GetEVMSubnetPrefundedKey(
 	if err != nil {
 		return "", "", err
 	}
-	if !utils.ByteSliceIsEVMGenesis(genesisData) {
+	if !genesis.ByteSliceIsEVMGenesis(genesisData) {
 		return "", "", fmt.Errorf("search for prefunded key is only supported on EVM based vms")
 	}
 	_, genesisAddress, genesisPrivateKey, err := GetBlockchainAirdropKeyInfo(
@@ -172,7 +173,7 @@ func sumGenesisSupply(
 	genesisData []byte,
 ) (*big.Int, error) {
 	sum := new(big.Int)
-	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
+	genesis, err := genesis.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return sum, err
 	}
@@ -182,7 +183,7 @@ func sumGenesisSupply(
 	return sum, nil
 }
 
-func GetEVMSubnetGenesisSupply(
+func GetEVMChainGenesisSupply(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -195,7 +196,7 @@ func GetEVMSubnetGenesisSupply(
 	if err != nil {
 		return nil, err
 	}
-	if !utils.ByteSliceIsEVMGenesis(genesisData) {
+	if !genesis.ByteSliceIsEVMGenesis(genesisData) {
 		return nil, fmt.Errorf("genesis supply calculation is only supported on EVM based vms")
 	}
 	return sumGenesisSupply(genesisData)
@@ -206,7 +207,7 @@ func getGenesisNativeMinterAdmin(
 	network models.Network,
 	genesisData []byte,
 ) (bool, bool, string, string, string, error) {
-	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
+	genesis, err := genesis.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return false, false, "", "", "", err
 	}
@@ -253,7 +254,7 @@ func getGenesisNativeMinterManager(
 	network models.Network,
 	genesisData []byte,
 ) (bool, bool, string, string, string, error) {
-	_, err := utils.ByteSliceToEVMGenesis(genesisData)
+	_, err := genesis.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return false, false, "", "", "", err
 	}
@@ -281,7 +282,7 @@ func getGenesisNativeMinterManager(
 	return false, false, "", "", "", nil
 }
 
-func GetEVMSubnetGenesisNativeMinterAdmin(
+func GetEVMChainGenesisNativeMinterAdmin(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -294,13 +295,13 @@ func GetEVMSubnetGenesisNativeMinterAdmin(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	if !utils.ByteSliceIsEVMGenesis(genesisData) {
+	if !genesis.ByteSliceIsEVMGenesis(genesisData) {
 		return false, false, "", "", "", fmt.Errorf("genesis native minter admin query is only supported on EVM based vms")
 	}
 	return getGenesisNativeMinterAdmin(app, network, genesisData)
 }
 
-func GetEVMSubnetGenesisNativeMinterManager(
+func GetEVMChainGenesisNativeMinterManager(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
@@ -313,7 +314,7 @@ func GetEVMSubnetGenesisNativeMinterManager(
 	if err != nil {
 		return false, false, "", "", "", err
 	}
-	if !utils.ByteSliceIsEVMGenesis(genesisData) {
+	if !genesis.ByteSliceIsEVMGenesis(genesisData) {
 		return false, false, "", "", "", fmt.Errorf("genesis native minter manager query is only supported on EVM based vms")
 	}
 	return getGenesisNativeMinterManager(app, network, genesisData)
@@ -323,7 +324,7 @@ func ContractAddressIsInGenesisData(
 	genesisData []byte,
 	contractAddress crypto.Address,
 ) (bool, error) {
-	genesis, err := utils.ByteSliceToEVMGenesis(genesisData)
+	genesis, err := genesis.ByteSliceToEVMGenesis(genesisData)
 	if err != nil {
 		return false, err
 	}

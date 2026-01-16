@@ -1,0 +1,143 @@
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package admin
+
+import (
+	"context"
+
+	apiadmin "github.com/luxfi/api/admin"
+	apitypes "github.com/luxfi/api/types"
+	"github.com/luxfi/formatting"
+	"github.com/luxfi/ids"
+	"github.com/luxfi/rpc"
+)
+
+type Client struct {
+	Requester rpc.EndpointRequester
+}
+
+func NewClient(uri string) *Client {
+	return &Client{Requester: rpc.NewEndpointRequester(
+		uri + "/ext/admin",
+	)}
+}
+
+func (c *Client) StartCPUProfiler(ctx context.Context, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.startCPUProfiler", struct{}{}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) StopCPUProfiler(ctx context.Context, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.stopCPUProfiler", struct{}{}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) MemoryProfile(ctx context.Context, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.memoryProfile", struct{}{}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) LockProfile(ctx context.Context, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.lockProfile", struct{}{}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) Alias(ctx context.Context, endpoint, alias string, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.alias", &apiadmin.AliasArgs{
+		Endpoint: endpoint,
+		Alias:    alias,
+	}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) AliasChain(ctx context.Context, chain, alias string, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.aliasChain", &apiadmin.AliasChainArgs{
+		Chain: chain,
+		Alias: alias,
+	}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) GetChainAliases(ctx context.Context, chain string, options ...rpc.Option) ([]string, error) {
+	res := &apiadmin.GetChainAliasesReply{}
+	err := c.Requester.SendRequest(ctx, "admin.getChainAliases", &apiadmin.GetChainAliasesArgs{
+		Chain: chain,
+	}, res, options...)
+	return res.Aliases, err
+}
+
+func (c *Client) Stacktrace(ctx context.Context, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.stacktrace", struct{}{}, &apitypes.EmptyReply{}, options...)
+}
+
+func (c *Client) LoadVMs(ctx context.Context, options ...rpc.Option) (map[ids.ID][]string, map[ids.ID]string, error) {
+	res := &apiadmin.LoadVMsReply{}
+	err := c.Requester.SendRequest(ctx, "admin.loadVMs", struct{}{}, res, options...)
+	return res.NewVMs, res.FailedVMs, err
+}
+
+func (c *Client) SetLoggerLevel(
+	ctx context.Context,
+	loggerName,
+	logLevel,
+	displayLevel string,
+	options ...rpc.Option,
+) (map[string]apiadmin.LogAndDisplayLevels, error) {
+	res := &apiadmin.LoggerLevelReply{}
+	err := c.Requester.SendRequest(ctx, "admin.setLoggerLevel", &apiadmin.SetLoggerLevelArgs{
+		LoggerName:   loggerName,
+		LogLevel:     logLevel,
+		DisplayLevel: displayLevel,
+	}, res, options...)
+	return res.LoggerLevels, err
+}
+
+func (c *Client) GetLoggerLevel(
+	ctx context.Context,
+	loggerName string,
+	options ...rpc.Option,
+) (map[string]apiadmin.LogAndDisplayLevels, error) {
+	res := &apiadmin.LoggerLevelReply{}
+	err := c.Requester.SendRequest(ctx, "admin.getLoggerLevel", &apiadmin.GetLoggerLevelArgs{
+		LoggerName: loggerName,
+	}, res, options...)
+	return res.LoggerLevels, err
+}
+
+func (c *Client) GetConfig(ctx context.Context, options ...rpc.Option) (interface{}, error) {
+	var res interface{}
+	err := c.Requester.SendRequest(ctx, "admin.getConfig", struct{}{}, &res, options...)
+	return res, err
+}
+
+func (c *Client) DBGet(ctx context.Context, key []byte, options ...rpc.Option) ([]byte, error) {
+	keyStr, err := formatting.Encode(formatting.HexNC, key)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &apiadmin.DBGetReply{}
+	err = c.Requester.SendRequest(ctx, "admin.dbGet", &apiadmin.DBGetArgs{
+		Key: keyStr,
+	}, res, options...)
+	if err != nil {
+		return nil, err
+	}
+	return formatting.Decode(formatting.HexNC, res.Value)
+}
+
+func (c *Client) ListVMs(ctx context.Context, options ...rpc.Option) (map[string]apiadmin.VMInfo, error) {
+	res := &apiadmin.ListVMsReply{}
+	err := c.Requester.SendRequest(ctx, "admin.listVMs", struct{}{}, res, options...)
+	return res.VMs, err
+}
+
+func (c *Client) Snapshot(ctx context.Context, path string, since uint64, options ...rpc.Option) (uint64, error) {
+	reply := &apiadmin.SnapshotReply{}
+	err := c.Requester.SendRequest(ctx, "admin.snapshot", &apiadmin.SnapshotArgs{
+		Path:  path,
+		Since: since,
+	}, reply, options...)
+	return reply.Version, err
+}
+
+func (c *Client) Load(ctx context.Context, path string, options ...rpc.Option) error {
+	return c.Requester.SendRequest(ctx, "admin.load", &apiadmin.LoadArgs{
+		Path: path,
+	}, &apitypes.EmptyReply{}, options...)
+}

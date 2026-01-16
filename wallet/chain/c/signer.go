@@ -10,15 +10,15 @@ import (
 
 	"github.com/luxfi/geth/common"
 
-	hashing "github.com/luxfi/crypto/hash"
+	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/vm/components/lux"
+	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 const version = 0
@@ -161,7 +161,7 @@ func sign(tx *Tx, signHash bool, txSigners [][]keychain.Signer) error {
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
-	unsignedHash := hashing.ComputeHash256(unsignedBytes)
+	unsignedHash := hash.ComputeHash256(unsignedBytes)
 
 	if expectedLen := len(txSigners); expectedLen != len(tx.Creds) {
 		tx.Creds = make([]verify.Verifiable, expectedLen)

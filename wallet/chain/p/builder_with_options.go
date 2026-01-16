@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/vms/platformvm/signer"
-	"github.com/luxfi/vm/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var _ Builder = (*builderWithOptions)(nil)
@@ -79,12 +79,12 @@ func (b *builderWithOptions) NewAddChainValidatorTx(
 
 func (b *builderWithOptions) RemoveChainValidatorTx(
 	nodeID ids.NodeID,
-	netID ids.ID,
+	chainID ids.ID,
 	options ...common.Option,
 ) (*txs.RemoveChainValidatorTx, error) {
 	return b.Builder.NewRemoveChainValidatorTx(
 		nodeID,
-		netID,
+		chainID,
 		common.UnionOptions(b.options, options)...,
 	)
 }
@@ -102,7 +102,7 @@ func (b *builderWithOptions) NewAddDelegatorTx(
 }
 
 func (b *builderWithOptions) NewCreateChainTx(
-	netID ids.ID,
+	chainID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
@@ -110,7 +110,7 @@ func (b *builderWithOptions) NewCreateChainTx(
 	options ...common.Option,
 ) (*txs.CreateChainTx, error) {
 	return b.Builder.NewCreateChainTx(
-		netID,
+		chainID,
 		genesis,
 		vmID,
 		fxIDs,
@@ -119,11 +119,11 @@ func (b *builderWithOptions) NewCreateChainTx(
 	)
 }
 
-func (b *builderWithOptions) NewCreateSubnetTx(
+func (b *builderWithOptions) NewCreateNetworkTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.CreateSubnetTx, error) {
-	return b.Builder.NewCreateSubnetTx(
+) (*txs.CreateNetworkTx, error) {
+	return b.Builder.NewCreateNetworkTx(
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)
@@ -154,7 +154,7 @@ func (b *builderWithOptions) NewExportTx(
 }
 
 func (b *builderWithOptions) NewTransformChainTx(
-	netID ids.ID,
+	chainID ids.ID,
 	assetID ids.ID,
 	initialSupply uint64,
 	maxSupply uint64,
@@ -171,7 +171,7 @@ func (b *builderWithOptions) NewTransformChainTx(
 	options ...common.Option,
 ) (*txs.TransformChainTx, error) {
 	return b.Builder.NewTransformChainTx(
-		netID,
+		chainID,
 		assetID,
 		initialSupply,
 		maxSupply,

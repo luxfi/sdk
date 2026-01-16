@@ -12,13 +12,12 @@ import (
 
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 )
 
 // Context represents VM context
 type Context struct {
 	NetworkID uint32
-	SubnetID  ids.ID
 	ChainID   ids.ID
 	NodeID    ids.NodeID
 }

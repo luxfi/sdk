@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/constants"
 	"golang.org/x/mod/semver"
 )
 

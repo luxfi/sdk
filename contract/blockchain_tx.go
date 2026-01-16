@@ -8,9 +8,8 @@ import (
 
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/rpc"
-	"github.com/luxfi/vm/utils"
 )
 
 type getTxArgs struct {
@@ -26,7 +25,7 @@ type formattedTx struct {
 // GetBlockchainTx retrieves a blockchain CreateChainTx from the network.
 func GetBlockchainTx(endpoint string, blockchainID ids.ID) (*txs.CreateChainTx, error) {
 	requester := rpc.NewEndpointRequester(endpoint + "/ext/P")
-	ctx, cancel := utils.GetAPIContext()
+	ctx, cancel := apiRequestContext()
 	defer cancel()
 
 	reply := &formattedTx{}

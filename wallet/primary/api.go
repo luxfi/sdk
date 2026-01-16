@@ -7,6 +7,9 @@ package primary
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
+	"time"
 
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/luxfi/geth/ethclient"
@@ -15,16 +18,16 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/vm/vms/platformvm"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/rpc"
-	"github.com/luxfi/sdk/api/info"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
-	"github.com/luxfi/vm/components/lux"
+	lux "github.com/luxfi/utxo"
 
 	gethcommon "github.com/luxfi/geth/common"
-	ptxs "github.com/luxfi/vm/vms/platformvm/txs"
+	ptxs "github.com/luxfi/protocol/p/txs"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
@@ -36,6 +39,10 @@ const (
 	LocalAPIURI   = "http://localhost:9630"
 
 	fetchLimit = 1024
+
+	// Retry configuration for transient network errors
+	maxRetries    = 5
+	retryBaseWait = 100 * time.Millisecond
 )
 
 // perform their own assertions.
@@ -73,11 +80,13 @@ func NewXClient(uri, chainAlias string) *XClient {
 }
 
 // NewXClientWithContext returns a new X-Chain client with context information
-// required for proper address formatting and UTXO queries
+// required for proper address formatting and UTXO queries.
+// Note: Uses "X" alias for the endpoint (more reliable) but keeps blockchainID
+// for address formatting in UTXO queries.
 func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/ext/bc/%s", uri, blockchainID.String()),
+			fmt.Sprintf("%s/ext/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
 		),
 		networkID:    networkID,
 		blockchainID: blockchainID,
@@ -117,24 +126,24 @@ func (c *XClient) GetAtomicUTXOs(
 		formattedAddrs[i] = addrStr
 	}
 
-	// Query xvm.getUTXOs
+	// Query exchangevm.getUTXOs (Lux X-chain uses exchangevm service prefix)
 	res := &getUTXOsReply{}
-	err := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
+	err := c.requester.SendRequest(ctx, "exchangevm.getUTXOs", &getUTXOsArgs{
 		Addresses:   formattedAddrs,
 		SourceChain: sourceChain,
 		Limit:       limit,
 		Encoding:    "hex",
 	}, res, options...)
 	if err != nil {
-		// If xvm service not available, try avm for compatibility
-		err2 := c.requester.SendRequest(ctx, "avm.getUTXOs", &getUTXOsArgs{
+		// If exchangevm service not available, try xvm for compatibility
+		err2 := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
 			Addresses:   formattedAddrs,
 			SourceChain: sourceChain,
 			Limit:       limit,
 			Encoding:    "hex",
 		}, res, options...)
 		if err2 != nil {
-			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: xvm error: %w, avm error: %v", err, err2)
+			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: exchangevm error: %w, xvm error: %v", err, err2)
 		}
 	}
 
@@ -205,7 +214,7 @@ func FetchState(
 	*LUXState,
 	error,
 ) {
-	infoClient := info.NewClient(uri)
+	infoClient := sdkinfo.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
 	// C-chain client disabled for now
 	// cClient, err := ethclient.Dial(uri + "/ext/bc/C/rpc")
@@ -244,42 +253,20 @@ func FetchState(
 
 	utxos := walletcommon.NewUTXOs()
 	addrList := addrs.List()
-	chains := []struct {
-		id     ids.ID
-		client UTXOClient
-		codec  codec.Manager
-	}{
-		{
-			id:     constants.PlatformChainID,
-			client: pClient,
-			codec:  ptxs.Codec,
-		},
-		{
-			id:     xCTX.BlockchainID,
-			client: xClient,
-			codec:  codec.NewDefaultManager(),
-		},
-		// {
-		// 	id:     cCTX.BlockchainID,
-		// 	client: cClient,
-		// 	codec:  evm.Codec,
-		// },
-	}
-	for _, destinationChain := range chains {
-		for _, sourceChain := range chains {
-			err = AddAllUTXOs(
-				ctx,
-				utxos,
-				destinationChain.client,
-				destinationChain.codec,
-				sourceChain.id,
-				destinationChain.id,
-				addrList,
-			)
-			if err != nil {
-				return nil, err
-			}
-		}
+
+	// For now, only fetch P-chain UTXOs since that's what's needed for blockchain creation.
+	// X-chain UTXO fetching has codec issues that need further investigation.
+	err = AddAllUTXOs(
+		ctx,
+		utxos,
+		pClient,
+		ptxs.Codec,
+		constants.PlatformChainID,
+		constants.PlatformChainID,
+		addrList,
+	)
+	if err != nil {
+		return nil, err
 	}
 	return &LUXState{
 		PClient: pClient,
@@ -335,6 +322,27 @@ func FetchEthState(
 	}, nil
 }
 
+// isRetryableError checks if an error is transient and should be retried
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	// Check for EOF errors (connection closed by server)
+	if err == io.EOF || strings.Contains(errStr, "EOF") {
+		return true
+	}
+	// Check for connection reset
+	if strings.Contains(errStr, "connection reset") {
+		return true
+	}
+	// Check for temporary network errors
+	if strings.Contains(errStr, "temporary failure") {
+		return true
+	}
+	return false
+}
+
 // AddAllUTXOs fetches all the UTXOs referenced by [addresses] that were sent
 // from [sourceChainID] to [destinationChainID] from the [client]. It then uses
 // [codec] to parse the returned UTXOs and it adds them into [utxos]. If [ctx]
@@ -361,16 +369,38 @@ func AddAllUTXOs(
 		startUTXO ids.ID
 	)
 	for {
-		utxosBytes, endAddr, endUTXO, err := client.GetAtomicUTXOs(
-			ctx,
-			addrs,
-			sourceChainIDStr,
-			fetchLimit,
-			startAddr,
-			startUTXO,
-		)
-		if err != nil {
-			return err
+		var utxosBytes [][]byte
+		var endAddr ids.ShortID
+		var endUTXO ids.ID
+		var err error
+
+		// Retry loop for transient network errors
+		for retry := 0; retry <= maxRetries; retry++ {
+			utxosBytes, endAddr, endUTXO, err = client.GetAtomicUTXOs(
+				ctx,
+				addrs,
+				sourceChainIDStr,
+				fetchLimit,
+				startAddr,
+				startUTXO,
+			)
+			if err == nil {
+				break
+			}
+			if !isRetryableError(err) {
+				return fmt.Errorf("GetAtomicUTXOs: %w", err)
+			}
+			if retry == maxRetries {
+				return fmt.Errorf("GetAtomicUTXOs failed after %d retries: %w", maxRetries, err)
+			}
+			// Wait with exponential backoff before retrying
+			wait := retryBaseWait * time.Duration(1<<uint(retry))
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(wait):
+				// Continue to next retry
+			}
 		}
 
 		for _, utxoBytes := range utxosBytes {
