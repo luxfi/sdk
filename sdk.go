@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/sdk/network"

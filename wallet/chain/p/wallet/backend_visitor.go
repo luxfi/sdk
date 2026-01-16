@@ -9,12 +9,12 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/platformvm/warp"
-	"github.com/luxfi/vm/vms/platformvm/warp/message"
-	"github.com/luxfi/vm/vms/platformvm/warp/payload"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/protocol/p/warp"
+	"github.com/luxfi/protocol/p/warp/message"
+	"github.com/luxfi/protocol/p/warp/payload"
+	"github.com/luxfi/protocol/p/txs"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var (
@@ -54,7 +54,7 @@ func (b *backendVisitor) CreateChainTx(tx *txs.CreateChainTx) error {
 	return b.baseTx(&tx.BaseTx)
 }
 
-func (b *backendVisitor) CreateSubnetTx(tx *txs.CreateSubnetTx) error {
+func (b *backendVisitor) CreateNetworkTx(tx *txs.CreateNetworkTx) error {
 	b.b.setOwner(
 		b.txID,
 		tx.Owner,

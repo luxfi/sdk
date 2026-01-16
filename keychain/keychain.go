@@ -13,7 +13,6 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/sdk/ledger"
 	"github.com/luxfi/sdk/network"
-	"github.com/luxfi/vm/utils"
 )
 
 // ledgerAdapter adapts sdk/ledger.LedgerDevice to keychain.Ledger interface
@@ -151,8 +150,9 @@ func (kc *Keychain) LedgerEnabled() bool {
 
 func (kc *Keychain) AddLedgerIndices(indices []uint32) error {
 	if kc.LedgerEnabled() {
-		kc.Ledger.LedgerIndices = utils.Unique(append(kc.Ledger.LedgerIndices, indices...))
-		utils.Uint32Sort(kc.Ledger.LedgerIndices)
+		kc.Ledger.LedgerIndices = append(kc.Ledger.LedgerIndices, indices...)
+		slices.Sort(kc.Ledger.LedgerIndices)
+		kc.Ledger.LedgerIndices = slices.Compact(kc.Ledger.LedgerIndices)
 		adapter := &ledgerAdapter{device: kc.Ledger.LedgerDevice}
 		newKc, err := keychain.NewLedgerKeychainFromIndices(adapter, kc.Ledger.LedgerIndices)
 		if err != nil {

@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/cavaliergopher/grab/v3"
+	"github.com/luxfi/constants"
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/network"
 	"go.uber.org/zap"
 )

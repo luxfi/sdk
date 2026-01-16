@@ -28,7 +28,7 @@ const (
 // AggregateSignatureRequest defines the request structure for signature aggregation
 type AggregateSignatureRequest struct {
 	Message          string
-	SigningSubnetID  string
+	SigningChainID   string
 	QuorumPercentage uint64
 	Justification    string
 }
@@ -40,7 +40,7 @@ type AggregateSignatureResponse struct {
 
 // SignMessage sends a request to the signature aggregator to sign a message.
 // It returns the signed warp message or an error if the operation fails.
-func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, message, justification, signingSubnetID string, quorumPercentage uint64) (*warp.Message, error) {
+func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, message, justification, signingChainID string, quorumPercentage uint64) (*warp.Message, error) {
 	if quorumPercentage == 0 {
 		quorumPercentage = DefaultQuorumPercentage
 	} else if quorumPercentage > 100 {
@@ -48,7 +48,7 @@ func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, messa
 	}
 	request := AggregateSignatureRequest{
 		Message:          message,
-		SigningSubnetID:  signingSubnetID,
+		SigningChainID:   signingChainID,
 		QuorumPercentage: quorumPercentage,
 		Justification:    justification,
 	}

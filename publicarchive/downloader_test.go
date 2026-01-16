@@ -17,8 +17,7 @@ import (
 	"github.com/cavaliergopher/grab/v3"
 	"github.com/stretchr/testify/require"
 
-	"github.com/luxfi/log"
-	"github.com/luxfi/log/level"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 )
 
@@ -38,8 +37,7 @@ func TestNewDownloader(t *testing.T) {
 		Name: "testnet",
 		Type: network.NetworkTypeTestnet,
 	}
-	core := log.NewWrappedCore(level.Info, os.Stdout, log.JSON.ConsoleEncoder())
-	downloader, err := NewDownloader(net, log.NewLogger("public-archive-downloader", *core))
+	downloader, err := NewDownloader(net, log.NewNoOpLogger())
 	require.NoError(t, err, "NewDownloader should not return an error")
 	require.NotNil(t, downloader.logger, "downloader logger should not be nil")
 	require.NotNil(t, downloader.getter.client, "downloader getter client should not be nil")
@@ -176,10 +174,10 @@ func TestDownloader_EndToEnd(t *testing.T) {
 	getter, err := newGetter(server.URL, tmpFile.Name())
 	require.NoError(t, err)
 
-	core := log.NewWrappedCore(level.Debug, os.Stdout, log.JSON.ConsoleEncoder())
+	coreLogger := log.NewNoOpLogger()
 	downloader := Downloader{
 		getter:    getter,
-		logger:    log.NewLogger("public-archive-downloader", *core),
+		logger:    coreLogger,
 		currentOp: &sync.Mutex{},
 	}
 

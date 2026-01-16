@@ -78,7 +78,7 @@ export default function HomePage() {
             </h2>
             <p className="mx-auto max-w-2xl text-fd-muted-foreground">
               A comprehensive toolkit for interacting with all Lux chains including
-              P-Chain, X-Chain, C-Chain, and custom subnets.
+              P-Chain, X-Chain, C-Chain, and custom L1 networks.
             </p>
           </div>
           <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -159,7 +159,7 @@ export default function HomePage() {
               </h3>
               <p className="text-sm text-fd-muted-foreground">
                 Connect to Mainnet, Testnet, or custom networks. Full support for
-                subnets and cross-chain operations via Warp.
+                L1 networks and cross-chain operations via Warp.
               </p>
             </div>
 
@@ -187,7 +187,7 @@ export default function HomePage() {
                 Contracts
               </h3>
               <p className="text-sm text-fd-muted-foreground">
-                Interact with smart contracts on C-Chain and EVM subnets. Deploy,
+                Interact with smart contracts on C-Chain and EVM L1 chains. Deploy,
                 call, and encode/decode contract data.
               </p>
             </div>

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/sdk/network"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

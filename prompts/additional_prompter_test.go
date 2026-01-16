@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts/comparator"
 	"github.com/manifoldco/promptui"
