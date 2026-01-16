@@ -19,7 +19,6 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	sdkconstants "github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/ux"
 )
@@ -54,22 +53,22 @@ func validateStakingDuration(input string) error {
 	if err != nil {
 		return err
 	}
-	if d > sdkconstants.MaxStakeDuration {
-		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(sdkconstants.MaxStakeDuration))
+	if d > constants.MaxStakeDuration {
+		return fmt.Errorf("exceeds maximum staking duration of %s", ux.FormatDuration(constants.MaxStakeDuration))
 	}
-	if d < sdkconstants.MinStakeDuration {
-		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(sdkconstants.MinStakeDuration))
+	if d < constants.MinStakeDuration {
+		return fmt.Errorf("below the minimum staking duration of %s", ux.FormatDuration(constants.MinStakeDuration))
 	}
 	return nil
 }
 
 func validateTime(input string) error {
-	t, err := time.Parse(sdkconstants.TimeParseLayout, input)
+	t, err := time.Parse(constants.TimeParseLayout, input)
 	if err != nil {
 		return err
 	}
-	if t.Before(time.Now().Add(sdkconstants.StakingStartLeadTime)) {
-		return fmt.Errorf("time should be at least start from now + %s", sdkconstants.StakingStartLeadTime)
+	if t.Before(time.Now().Add(constants.StakingStartLeadTime)) {
+		return fmt.Errorf("time should be at least start from now + %s", constants.StakingStartLeadTime)
 	}
 	return err
 }
@@ -98,7 +97,7 @@ func validateWeight(input string) error {
 	if err != nil {
 		return err
 	}
-	if val < sdkconstants.MinStakeWeight {
+	if val < constants.MinStakeWeight {
 		return errors.New("the weight must be an integer between 1 and 100")
 	}
 	return nil

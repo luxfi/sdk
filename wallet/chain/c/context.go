@@ -6,10 +6,10 @@ package c
 import (
 	"context"
 
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
-	"github.com/luxfi/sdk/api/info"
+	log "github.com/luxfi/log"
+	sdkinfo "github.com/luxfi/sdk/info"
 )
 
 const Alias = "C"
@@ -21,13 +21,13 @@ type Context struct {
 }
 
 func NewContextFromURI(ctx context.Context, uri string, luxAssetID ids.ID) (*Context, error) {
-	infoClient := info.NewClient(uri)
+	infoClient := sdkinfo.NewClient(uri)
 	return NewContextFromClients(ctx, infoClient, luxAssetID)
 }
 
 func NewContextFromClients(
 	ctx context.Context,
-	infoClient *info.Client,
+	infoClient *sdkinfo.Client,
 	luxAssetID ids.ID,
 ) (*Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
@@ -47,12 +47,13 @@ func NewContextFromClients(
 	}, nil
 }
 
-func newConsensusContext(c *Context) (*consensusctx.Context, error) {
+func newConsensusRuntime(c *Context) (*runtime.Runtime, error) {
 	lookup := ids.NewAliaser()
-	return &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: c.NetworkID,
 		ChainID:   c.BlockchainID,
 		XAssetID:  c.XAssetID,
 		Log:       log.NoLog{},
-	}, lookup.Alias(c.BlockchainID, Alias)
+	}
+	return rt, lookup.Alias(c.BlockchainID, Alias)
 }

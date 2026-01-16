@@ -16,7 +16,7 @@ The Lux SDK is your complete toolkit for blockchain development, offering:
 - **Multi-Layer Architecture**: Build L1 sovereign chains, L2 rollups, or L3 app-specific chains
 - **VM Flexibility**: Deploy EVM, WASM, or custom VMs with full language support
 - **Rapid Prototyping**: Go from idea to deployed blockchain in minutes
-- **Migration Tools**: Seamlessly migrate from subnets to independent L1s
+- **Migration Tools**: Seamlessly migrate from legacy networks to sovereign L1s
 
 ### Developer Experience
 - **Unified API**: Single SDK interface for all Lux operations
@@ -317,17 +317,17 @@ txID, err := chainManager.Stake(ctx,
 // Delegate to validator
 txID, err := chainManager.Delegate(ctx, nodeID, amount, duration)
 
-// Create subnet
-subnetID, err := chainManager.P().CreateSubnet(ctx, &CreateSubnetParams{
+// Create network
+networkID, err := chainManager.P().CreateNetwork(ctx, &CreateNetworkParams{
     ControlKeys: []ids.ShortID{key1, key2},
     Threshold:   2,
 })
 
-// Add subnet validator
-txID, err := chainManager.P().AddSubnetValidator(ctx, &AddSubnetValidatorParams{
-    NodeID:   nodeID,
-    SubnetID: subnetID,
-    Weight:   100,
+// Add network validator
+txID, err := chainManager.P().AddNetworkValidator(ctx, &AddNetworkValidatorParams{
+    NodeID:    nodeID,
+    NetworkID: networkID,
+    Weight:    100,
 })
 ```
 
@@ -457,7 +457,7 @@ The SDK wraps the Lux CLI for seamless command execution:
 output, err := sdk.ExecuteCommand(ctx, "network", "status")
 
 // Use CLI commands with Go types
-result, err := sdk.ExecuteCommand(ctx, "subnet", "create",
+result, err := sdk.ExecuteCommand(ctx, "network", "create",
     "--control-keys", strings.Join(keys, ","),
     "--threshold", "2",
 )

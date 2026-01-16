@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/luxfi/constants"
-	"github.com/luxfi/vm/vms/platformvm"
-	"github.com/luxfi/sdk/api/info"
+	"github.com/luxfi/sdk/platformvm"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 )
 
@@ -19,14 +19,14 @@ import (
 const gasPriceMultiplier = 2
 
 func NewContextFromURI(ctx context.Context, uri string) (*builder.Context, error) {
-	infoClient := info.NewClient(uri)
+	infoClient := sdkinfo.NewClient(uri)
 	chainClient := platformvm.NewClient(uri)
 	return NewContextFromClients(ctx, infoClient, chainClient)
 }
 
 func NewContextFromClients(
 	ctx context.Context,
-	infoClient *info.Client,
+	infoClient *sdkinfo.Client,
 	chainClient *platformvm.Client,
 ) (*builder.Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)

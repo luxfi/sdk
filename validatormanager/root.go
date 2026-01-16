@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/constants"
-	warpPayload "github.com/luxfi/vm/vms/platformvm/warp/payload"
+	warpPayload "github.com/luxfi/protocol/p/warp/payload"
 	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/geth/core/types"
@@ -25,13 +25,13 @@ import (
 
 type ACP99ValidatorManagerSettings struct {
 	Admin                  crypto.Address
-	SubnetID               [32]byte
+	ChainID                [32]byte
 	ChurnPeriodSeconds     uint64
 	MaximumChurnPercentage uint8
 }
 
 type ValidatorManagerSettings struct {
-	SubnetID               [32]byte
+	ChainID                [32]byte
 	ChurnPeriodSeconds     uint64
 	MaximumChurnPercentage uint8
 }
@@ -89,7 +89,7 @@ var (
 	ErrInvalidValidatorManagerBlockchainID = fmt.Errorf("invalid validator manager blockchain ID")
 	ErrInvalidValidatorManagerAddress      = fmt.Errorf("invalid validator manager address")
 	ErrNodeAlreadyRegistered               = fmt.Errorf("node already registered")
-	ErrInvalidSubnetConversionID           = fmt.Errorf("invalid subnet conversion id")
+	ErrInvalidChainConversionID            = fmt.Errorf("invalid chain conversion id")
 	ErrInvalidRegistrationExpiry           = fmt.Errorf("invalid registration expiry")
 	ErrInvalidBLSKeyLength                 = fmt.Errorf("invalid BLS key length")
 	ErrInvalidNodeID                       = fmt.Errorf("invalid node id")
@@ -129,7 +129,7 @@ var (
 		"InvalidValidatorManagerBlockchainID(bytes32)": ErrInvalidValidatorManagerBlockchainID,
 		"InvalidValidatorManagerAddress(address)":      ErrInvalidValidatorManagerAddress,
 		"NodeAlreadyRegistered(bytes)":                 ErrNodeAlreadyRegistered,
-		"InvalidSubnetConversionID(bytes32,bytes32)":   ErrInvalidSubnetConversionID,
+		"InvalidChainConversionID(bytes32,bytes32)":    ErrInvalidChainConversionID,
 		"InvalidRegistrationExpiry(uint64)":            ErrInvalidRegistrationExpiry,
 		"InvalidBLSKeyLength(uint256)":                 ErrInvalidBLSKeyLength,
 		"InvalidNodeID(bytes)":                         ErrInvalidNodeID,
@@ -195,93 +195,93 @@ func (p PoSParams) Verify() error {
 	return nil
 }
 
-func GetPChainSubnetToL1ConversionUnsignedMessage(
+func GetPChainChainToL1ConversionUnsignedMessage(
 	net models.Network,
-	subnetID ids.ID,
+	chainID ids.ID,
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
-	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
+	convertChainValidators []*txs.ConvertChainToL1Validator,
 ) (*warp.UnsignedMessage, error) {
-	validators := []warpMessage.SubnetToL1ConversionValidatorData{}
-	for _, convertSubnetValidator := range convertSubnetValidators {
-		validators = append(validators, warpMessage.SubnetToL1ConversionValidatorData{
-			NodeID:       convertSubnetValidator.NodeID[:],
-			BLSPublicKey: convertSubnetValidator.Signer.PublicKey,
-			Weight:       convertSubnetValidator.Weight,
+	validators := []warpMessage.ChainToL1ConversionValidatorData{}
+	for _, convertChainValidator := range convertChainValidators {
+		validators = append(validators, warpMessage.ChainToL1ConversionValidatorData{
+			NodeID:       convertChainValidator.NodeID[:],
+			BLSPublicKey: convertChainValidator.Signer.PublicKey,
+			Weight:       convertChainValidator.Weight,
 		})
 	}
-	subnetConversionData := warpMessage.SubnetToL1ConversionData{
-		SubnetID:       subnetID,
+	chainConversionData := warpMessage.ChainToL1ConversionData{
+		ChainID:        chainID,
 		ManagerChainID: managerBlockchainID,
 		ManagerAddress: managerAddress.Bytes(),
 		Validators:     validators,
 	}
-	subnetConversionID, err := warpMessage.SubnetToL1ConversionID(subnetConversionData)
+	chainConversionID, err := warpMessage.ChainToL1ConversionID(chainConversionData)
 	if err != nil {
 		return nil, err
 	}
-	addressedCallPayload, err := warpMessage.NewSubnetToL1Conversion(subnetConversionID)
+	addressedCallPayload, err := warpMessage.NewChainToL1Conversion(chainConversionID)
 	if err != nil {
 		return nil, err
 	}
-	subnetConversionAddressedCall, err := warpPayload.NewAddressedCall(
+	chainConversionAddressedCall, err := warpPayload.NewAddressedCall(
 		nil,
 		addressedCallPayload.Bytes(),
 	)
 	if err != nil {
 		return nil, err
 	}
-	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
+	chainConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		net.ID(),
 		constants.PlatformChainID,
-		subnetConversionAddressedCall.Bytes(),
+		chainConversionAddressedCall.Bytes(),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return subnetConversionUnsignedMessage, nil
+	return chainConversionUnsignedMessage, nil
 }
 
 // InitializeValidatorsSet calls poa manager validators set init method,
-// passing to it the p-chain signed [subnetConversionSignedMessage]
-// to verify p-chain already processed the associated ConvertSubnetToL1Tx
+// passing to it the p-chain signed [chainConversionSignedMessage]
+// to verify p-chain already processed the associated ConvertChainToL1Tx
 func InitializeValidatorsSet(
 	rpcURL string,
 	managerAddress crypto.Address,
 	privateKey string,
-	subnetID ids.ID,
+	chainID ids.ID,
 	managerBlockchainID ids.ID,
-	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
-	subnetConversionSignedMessage *warp.Message,
+	convertChainValidators []*txs.ConvertChainToL1Validator,
+	chainConversionSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
 	type InitialValidator struct {
 		NodeID       []byte
 		BlsPublicKey []byte
 		Weight       uint64
 	}
-	type SubnetConversionData struct {
-		SubnetID                     [32]byte
+	type ChainConversionData struct {
+		ChainID                      [32]byte
 		ValidatorManagerBlockchainID [32]byte
 		ValidatorManagerAddress      crypto.Address
 		InitialValidators            []InitialValidator
 	}
 	validators := []InitialValidator{}
-	for _, convertSubnetValidator := range convertSubnetValidators {
+	for _, convertChainValidator := range convertChainValidators {
 		validators = append(validators, InitialValidator{
-			NodeID:       convertSubnetValidator.NodeID[:],
-			BlsPublicKey: convertSubnetValidator.Signer.PublicKey[:],
-			Weight:       convertSubnetValidator.Weight,
+			NodeID:       convertChainValidator.NodeID[:],
+			BlsPublicKey: convertChainValidator.Signer.PublicKey[:],
+			Weight:       convertChainValidator.Weight,
 		})
 	}
-	subnetConversionData := SubnetConversionData{
-		SubnetID:                     subnetID,
+	chainConversionData := ChainConversionData{
+		ChainID:                      chainID,
 		ValidatorManagerBlockchainID: managerBlockchainID,
 		ValidatorManagerAddress:      managerAddress,
 		InitialValidators:            validators,
 	}
 	// No conversion needed - already using the right warp type
-	nodeWarpMsg := subnetConversionSignedMessage
+	nodeWarpMsg := chainConversionSignedMessage
 
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
@@ -294,7 +294,7 @@ func InitializeValidatorsSet(
 		"initialize validator set",
 		ErrorSignatureToError,
 		"initializeValidatorSet((bytes32,bytes32,address,[(bytes,bytes,uint64)]),uint32)",
-		subnetConversionData,
+		chainConversionData,
 		uint32(0),
 	)
 }

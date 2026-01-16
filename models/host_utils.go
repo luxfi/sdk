@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/constants"
 )
 
 // timedFunction executes a function and returns its result with error

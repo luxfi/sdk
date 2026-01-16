@@ -1281,7 +1281,7 @@
       "key": "proposervm-min-block-delay",
       "type": "duration",
       "default": 1000000000,
-      "description": "Minimum delay to enforce when building a chain++ block for the primary network chains and the default minimum delay for subnets",
+      "description": "Minimum delay to enforce when building a chain++ block for the primary network chains and the default minimum delay for L2 chains",
       "category": "consensus"
     },
     {
@@ -1327,17 +1327,17 @@
       "category": "chain"
     },
     {
-      "key": "subnet-config-dir",
+      "key": "chain-config-dir-l2",
       "type": "string",
-      "default": "$LUXD_DATA_DIR/configs/subnets",
-      "description": "Net specific configurations parent directory. Ignored if net-config-content is specified",
+      "default": "$LUXD_DATA_DIR/configs/chains-l2",
+      "description": "L2 chain specific configurations parent directory. Ignored if chain-config-content-l2 is specified",
       "category": "chain"
     },
     {
-      "key": "net-config-content",
+      "key": "chain-config-content-l2",
       "type": "string",
       "default": "",
-      "description": "Specifies base64 encoded subnets configurations",
+      "description": "Specifies base64 encoded L2 chain configurations",
       "category": "chain"
     },
     {
@@ -1561,7 +1561,7 @@
       "key": "poa-mode-enabled",
       "type": "bool",
       "default": false,
-      "description": "Enable Proof of Authority mode for subnets",
+      "description": "Enable Proof of Authority mode for L2 chains",
       "category": "poa"
     },
     {

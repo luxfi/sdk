@@ -295,13 +295,13 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 }
 
 // SetupPoA sets up PoA manager after a successful execution of
-// ConvertSubnetToL1Tx on P-Chain.
+// ConvertChainToL1Tx on P-Chain.
 // Needs the list of validators for that tx,
-// [convertSubnetValidators], together with an evm [ownerAddress]
+// [convertChainValidators], together with an evm [ownerAddress]
 // to set as the owner of the PoA manager.
 func SetupPoA(
 	log luxlog.Logger,
-	subnet blockchainSDK.Net,
+	chain blockchainSDK.Net,
 	network models.Network,
 	privateKey string,
 	aggregatorLogger luxlog.Logger,
@@ -309,7 +309,7 @@ func SetupPoA(
 	v2_0_0 bool,
 	signatureAggregatorEndpoint string,
 ) error {
-	return subnet.InitializeProofOfAuthority(
+	return chain.InitializeProofOfAuthority(
 		log,
 		network.SDKNetwork(),
 		privateKey,
@@ -321,13 +321,13 @@ func SetupPoA(
 }
 
 // SetupPoS sets up PoS manager after a successful execution of
-// ConvertSubnetToL1Tx on P-Chain.
+// ConvertChainToL1Tx on P-Chain.
 // Needs the list of validators for that tx,
-// [convertSubnetValidators], together with an evm [ownerAddress]
+// [convertChainValidators], together with an evm [ownerAddress]
 // to set as the owner of the PoS manager.
 func SetupPoS(
 	log luxlog.Logger,
-	subnet blockchainSDK.Net,
+	chain blockchainSDK.Net,
 	network models.Network,
 	privateKey string,
 	aggregatorLogger luxlog.Logger,
@@ -342,7 +342,7 @@ func SetupPoS(
 	log.Info("Initializing Proof of Stake validator manager")
 
 	// Connect to the blockchain RPC
-	client, err := ethclient.Dial(subnet.RPC)
+	client, err := ethclient.Dial(chain.RPC)
 	if err != nil {
 		return fmt.Errorf("failed to connect to RPC: %w", err)
 	}

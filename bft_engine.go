@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/bft"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 )
 
 // BFTConfig contains configuration for BFT consensus engine
@@ -391,7 +391,11 @@ type loggerAdapter struct {
 }
 
 func (l *loggerAdapter) Fatal(msg string, fields ...log.Field) {
-	l.logger.Fatal(msg, fields...)
+	ctx := make([]interface{}, len(fields))
+	for i, f := range fields {
+		ctx[i] = f
+	}
+	l.logger.Fatal(msg, ctx...)
 }
 
 func (l *loggerAdapter) Error(msg string, fields ...log.Field) {
@@ -435,7 +439,11 @@ func (l *loggerAdapter) Debug(msg string, fields ...log.Field) {
 }
 
 func (l *loggerAdapter) Verbo(msg string, fields ...log.Field) {
-	l.logger.Verbo(msg, fields...)
+	ctx := make([]interface{}, len(fields))
+	for i, f := range fields {
+		ctx[i] = f
+	}
+	l.logger.Verbo(msg, ctx...)
 }
 
 // nodeIDToBFT converts ids.NodeID to bft.NodeID

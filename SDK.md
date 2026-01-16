@@ -26,39 +26,39 @@
 #### New
 
 ```go
-func New(subnetParams *SubnetParams) (*Subnet, error)
+func New(networkParams *NetworkParams) (*Network, error)
 ```
 
-#### TestSubnetDeploy
+#### TestNetworkDeploy
 
 ```go
-func TestSubnetDeploy(t *testing.T)
+func TestNetworkDeploy(t *testing.T)
 ```
 
-#### TestSubnetDeployLedger
+#### TestNetworkDeployLedger
 
 ```go
-func TestSubnetDeployLedger(t *testing.T)
+func TestNetworkDeployLedger(t *testing.T)
 ```
 
-#### TestSubnetDeployMultiSig
+#### TestNetworkDeployMultiSig
 
 ```go
-func TestSubnetDeployMultiSig(t *testing.T)
+func TestNetworkDeployMultiSig(t *testing.T)
 ```
 
 #### createEvmGenesis
 
 ```go
 func createEvmGenesis(
-	subnetEVMParams *SubnetEVMParams,
+	evmParams *EVMParams,
 ) ([]byte, error)
 ```
 
-#### getDefaultSubnetEVMGenesis
+#### getDefaultEVMGenesis
 
 ```go
-func getDefaultSubnetEVMGenesis() (SubnetParams)
+func getDefaultEVMGenesis() (NetworkParams)
 ```
 
 #### vmID
@@ -85,7 +85,7 @@ func vmID(vmName string) (ids.ID, error)
 func NewSignatureAggregator(
 	network network.Network,
 	logger logging.Logger,
-	subnetID ids.ID,
+	networkID ids.ID,
 	quorumPercentage uint64,
 	allowPrivatePeers bool,
 	extraPeerEndpoints []info.Peer,
@@ -117,7 +117,7 @@ func initSignatureAggregator(
 	network peers.AppRequestNetwork,
 	logger logging.Logger,
 	registerer prometheus.Registerer,
-	subnetID ids.ID,
+	networkID ids.ID,
 	quorumPercentage uint64,
 ) (*SignatureAggregator, error)
 ```
@@ -253,7 +253,7 @@ func New() (*LedgerDevice, error)
 #### GetOwners
 
 ```go
-func GetOwners(network network.Network, subnetID ids.ID) ([]ids.ShortID, uint32, error)
+func GetOwners(network network.Network, networkID ids.ID) ([]ids.ShortID, uint32, error)
 ```
 
 #### New
@@ -434,7 +434,7 @@ func GetRegisteredValidator(
 #### GetTotalWeight
 
 ```go
-func GetTotalWeight(net network.Network, subnetID ids.ID) (uint64, error)
+func GetTotalWeight(net network.Network, networkID ids.ID) (uint64, error)
 ```
 
 #### GetValidationID
@@ -458,7 +458,7 @@ func GetValidatorInfo(net network.Network, validationID ids.ID) (platformvm.L1Va
 #### IsValidator
 
 ```go
-func IsValidator(net network.Network, subnetID ids.ID, nodeID ids.NodeID) (bool, error)
+func IsValidator(net network.Network, networkID ids.ID, nodeID ids.NodeID) (bool, error)
 ```
 
 ---
@@ -467,19 +467,19 @@ func IsValidator(net network.Network, subnetID ids.ID, nodeID ids.NodeID) (bool,
 
 ### Functions
 
-#### GetPChainSubnetToL1ConversionMessage
+#### GetPChainNetworkToL1ConversionMessage
 
 ```go
-func GetPChainSubnetToL1ConversionMessage(
+func GetPChainNetworkToL1ConversionMessage(
 	network network.Network,
 	aggregatorLogger logging.Logger,
 	aggregatorQuorumPercentage uint64,
 	aggregatorAllowPrivateIPs bool,
 	aggregatorExtraPeerEndpoints []info.Peer,
-	subnetID ids.ID,
+	networkID ids.ID,
 	managerBlockchainID ids.ID,
 	managerAddress common.Address,
-	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
+	convertNetworkValidators []*txs.ConvertNetworkToL1Validator,
 ) (*warp.Message, error)
 ```
 
@@ -490,10 +490,10 @@ func InitializeValidatorsSet(
 	rpcURL string,
 	managerAddress common.Address,
 	privateKey string,
-	subnetID ids.ID,
+	networkID ids.ID,
 	managerBlockchainID ids.ID,
-	convertSubnetValidators []*txs.ConvertSubnetToL1Validator,
-	subnetConversionSignedMessage *warp.Message,
+	convertNetworkValidators []*txs.ConvertNetworkToL1Validator,
+	networkConversionSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error)
 ```
 
@@ -504,7 +504,7 @@ func PoAValidatorManagerInitialize(
 	rpcURL string,
 	managerAddress common.Address,
 	privateKey string,
-	subnetID ids.ID,
+	networkID ids.ID,
 	ownerAddress common.Address,
 ) (*types.Transaction, *types.Receipt, error)
 ```
@@ -516,7 +516,7 @@ func PoSValidatorManagerInitialize(
 	rpcURL string,
 	managerAddress common.Address,
 	privateKey string,
-	subnetID [32]byte,
+	networkID [32]byte,
 	posParams PoSParams,
 ) (*types.Transaction, *types.Receipt, error)
 ```

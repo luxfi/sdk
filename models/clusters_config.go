@@ -6,7 +6,7 @@ package models
 import (
 	"slices"
 
-	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/constants"
 )
 
 // filter is a helper function to filter slices based on a predicate
@@ -37,7 +37,7 @@ type ClusterConfig struct {
 	MonitoringInstance string            // instance ID of the separate monitoring instance (if any)
 	LoadTestInstance   map[string]string // maps load test name to load test cloud instance ID of the separate load test instance (if any)
 	ExtraNetworkData   ExtraNetworkData
-	Subnets            []string
+	Chains             []string
 	External           bool
 	Local              bool
 	HTTPAccess         constants.HTTPAccess

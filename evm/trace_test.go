@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	subnetethclient "github.com/luxfi/evm/ethclient"
+	chainethclient "github.com/luxfi/evm/ethclient"
 	"github.com/luxfi/evm/rpc"
 	"github.com/stretchr/testify/require"
 )
@@ -35,7 +35,7 @@ func TestGetRawClient(t *testing.T) {
 		name            string
 		rpcURL          string
 		mockRPCDialFunc func(context.Context, string) (*rpc.Client, error)
-		mockDialFunc    func(context.Context, string) (subnetethclient.Client, error)
+		mockDialFunc    func(context.Context, string) (chainethclient.Client, error)
 		expectError     bool
 	}{
 		{
@@ -78,7 +78,7 @@ func TestGetRawClient(t *testing.T) {
 		{
 			name:   "without scheme, can't get scheme",
 			rpcURL: "localhost:8545",
-			mockDialFunc: func(_ context.Context, _ string) (subnetethclient.Client, error) {
+			mockDialFunc: func(_ context.Context, _ string) (chainethclient.Client, error) {
 				return nil, errors.New("invalid")
 			},
 			expectError: true,

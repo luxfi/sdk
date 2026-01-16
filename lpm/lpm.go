@@ -64,9 +64,9 @@ func (c *Client) ListRepositories() error {
 	return c.lpm.ListRepositories()
 }
 
-// JoinSubnet installs all VMs required for a subnet
-func (c *Client) JoinSubnet(alias string) error {
-	return c.lpm.JoinSubnet(alias)
+// JoinChain installs all VMs required for a chain
+func (c *Client) JoinChain(alias string) error {
+	return c.lpm.JoinChain(alias)
 }
 
 // Placeholder methods to maintain compatibility with existing LPM interface

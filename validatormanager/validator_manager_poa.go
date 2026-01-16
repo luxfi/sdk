@@ -12,13 +12,13 @@ import (
 )
 
 // PoAValidatorManagerInitialize initializes contract [managerAddress] at [rpcURL], to
-// manage validators on [subnetID], with
+// manage validators on [chainID], with
 // owner given by [ownerAddress]
 func PoAValidatorManagerInitialize(
 	rpcURL string,
 	managerAddress crypto.Address,
 	privateKey string,
-	subnetID ids.ID,
+	chainID ids.ID,
 	ownerAddress crypto.Address,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -39,7 +39,7 @@ func PoAValidatorManagerInitialize(
 			"initialize((address, bytes32,uint64,uint8))",
 			ACP99ValidatorManagerSettings{
 				Admin:                  ownerAddress,
-				SubnetID:               subnetID,
+				ChainID:                chainID,
 				ChurnPeriodSeconds:     defaultChurnPeriodSeconds,
 				MaximumChurnPercentage: defaultMaximumChurnPercentage,
 			},
@@ -56,7 +56,7 @@ func PoAValidatorManagerInitialize(
 		ErrorSignatureToError,
 		"initialize((bytes32,uint64,uint8),address)",
 		ValidatorManagerSettings{
-			SubnetID:               subnetID,
+			ChainID:                chainID,
 			ChurnPeriodSeconds:     defaultChurnPeriodSeconds,
 			MaximumChurnPercentage: defaultMaximumChurnPercentage,
 		},
