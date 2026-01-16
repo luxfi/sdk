@@ -10,16 +10,16 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/sdk/utils/fs"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/config"
-	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/sdk/lpm"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/types"
-	"github.com/luxfi/vm/utils"
 )
 
 // Prompter is an alias for the prompts.Prompter interface
@@ -88,8 +88,8 @@ func (app *Lux) GetChainConfigDir() string {
 	return app.GetChainsDir()
 }
 
-// GetSubnetDir is deprecated, use GetChainsDir instead
-func (app *Lux) GetSubnetDir() string {
+// GetChainDir is deprecated, use GetChainsDir instead
+func (app *Lux) GetChainDir() string {
 	return app.GetChainsDir()
 }
 
@@ -143,24 +143,24 @@ func (app *Lux) GetEVMBinDir() string {
 	return filepath.Join(app.baseDir, constants.LuxCliBinDir, constants.EVMInstallDir)
 }
 
-func (app *Lux) GetUpgradeBytesFilepath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.UpgradeBytesFileName)
+func (app *Lux) GetUpgradeBytesFilepath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, constants.UpgradeBytesFileName)
 }
 
-func (app *Lux) GetCustomVMPath(subnetName string) string {
-	return filepath.Join(app.GetCustomVMDir(), subnetName)
+func (app *Lux) GetCustomVMPath(chainName string) string {
+	return filepath.Join(app.GetCustomVMDir(), chainName)
 }
 
 func (app *Lux) GetLPMVMPath(vmid string) string {
 	return filepath.Join(app.GetLPMPluginDir(), vmid)
 }
 
-func (app *Lux) GetGenesisPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.GenesisFileName)
+func (app *Lux) GetGenesisPath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, constants.GenesisFileName)
 }
 
-func (app *Lux) GetSidecarPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.SidecarFileName)
+func (app *Lux) GetSidecarPath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, constants.SidecarFileName)
 }
 
 // GetConfigPath returns the SDK config file path (~/.lux/sdk.json)
@@ -169,8 +169,8 @@ func (app *Lux) GetConfigPath() string {
 	return filepath.Join(app.baseDir, "sdk.json")
 }
 
-func (app *Lux) GetElasticChainConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.ElasticNetConfigFileName)
+func (app *Lux) GetElasticChainConfigPath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, constants.ElasticNetConfigFileName)
 }
 
 func (app *Lux) GetKeyDir() string {
@@ -197,8 +197,8 @@ func (app *Lux) GetKeyPath(keyName string) string {
 	return filepath.Join(app.baseDir, constants.KeyDir, keyName+constants.KeySuffix)
 }
 
-func (app *Lux) GetUpgradeBytesFilePath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, constants.UpgradeBytesFileName)
+func (app *Lux) GetUpgradeBytesFilePath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, constants.UpgradeBytesFileName)
 }
 
 func (app *Lux) GetDownloader() Downloader {
@@ -209,51 +209,51 @@ func (*Lux) GetLuxCompatibilityURL() string {
 	return constants.LuxCompatibilityURL
 }
 
-func (app *Lux) ReadUpgradeFile(subnetName string) ([]byte, error) {
-	upgradeBytesFilePath := app.GetUpgradeBytesFilePath(subnetName)
+func (app *Lux) ReadUpgradeFile(chainName string) ([]byte, error) {
+	upgradeBytesFilePath := app.GetUpgradeBytesFilePath(chainName)
 
 	return app.readFile(upgradeBytesFilePath)
 }
 
-func (app *Lux) ReadLockUpgradeFile(subnetName string) ([]byte, error) {
-	upgradeBytesLockFilePath := app.GetUpgradeBytesFilePath(subnetName) + constants.UpgradeBytesLockExtension
+func (app *Lux) ReadLockUpgradeFile(chainName string) ([]byte, error) {
+	upgradeBytesLockFilePath := app.GetUpgradeBytesFilePath(chainName) + constants.UpgradeBytesLockExtension
 
 	return app.readFile(upgradeBytesLockFilePath)
 }
 
-func (app *Lux) WriteUpgradeFile(subnetName string, bytes []byte) error {
-	upgradeBytesFilePath := app.GetUpgradeBytesFilePath(subnetName)
+func (app *Lux) WriteUpgradeFile(chainName string, bytes []byte) error {
+	upgradeBytesFilePath := app.GetUpgradeBytesFilePath(chainName)
 
 	return app.writeFile(upgradeBytesFilePath, bytes)
 }
 
-func (app *Lux) WriteLockUpgradeFile(subnetName string, bytes []byte) error {
-	upgradeBytesLockFilePath := app.GetUpgradeBytesFilePath(subnetName) + constants.UpgradeBytesLockExtension
+func (app *Lux) WriteLockUpgradeFile(chainName string, bytes []byte) error {
+	upgradeBytesLockFilePath := app.GetUpgradeBytesFilePath(chainName) + constants.UpgradeBytesLockExtension
 
 	return app.writeFile(upgradeBytesLockFilePath, bytes)
 }
 
-func (app *Lux) WriteGenesisFile(subnetName string, genesisBytes []byte) error {
-	genesisPath := app.GetGenesisPath(subnetName)
+func (app *Lux) WriteGenesisFile(chainName string, genesisBytes []byte) error {
+	genesisPath := app.GetGenesisPath(chainName)
 
 	return app.writeFile(genesisPath, genesisBytes)
 }
 
-func (app *Lux) GenesisExists(subnetName string) bool {
-	genesisPath := app.GetGenesisPath(subnetName)
+func (app *Lux) GenesisExists(chainName string) bool {
+	genesisPath := app.GetGenesisPath(chainName)
 	_, err := os.Stat(genesisPath)
 	return err == nil
 }
 
-func (app *Lux) SidecarExists(subnetName string) bool {
-	sidecarPath := app.GetSidecarPath(subnetName)
+func (app *Lux) SidecarExists(chainName string) bool {
+	sidecarPath := app.GetSidecarPath(chainName)
 	_, err := os.Stat(sidecarPath)
 	return err == nil
 }
 
-func (app *Lux) SubnetConfigExists(subnetName string) bool {
-	// There's always a sidecar, but imported subnets don't have a genesis right now
-	return app.SidecarExists(subnetName)
+func (app *Lux) ChainConfigExists(chainName string) bool {
+	// There's always a sidecar, but imported chains don't have a genesis right now
+	return app.SidecarExists(chainName)
 }
 
 func (app *Lux) KeyExists(keyName string) bool {
@@ -262,12 +262,12 @@ func (app *Lux) KeyExists(keyName string) bool {
 	return err == nil
 }
 
-func (app *Lux) CopyGenesisFile(inputFilename string, subnetName string) error {
+func (app *Lux) CopyGenesisFile(inputFilename string, chainName string) error {
 	genesisBytes, err := os.ReadFile(inputFilename)
 	if err != nil {
 		return err
 	}
-	genesisPath := app.GetGenesisPath(subnetName)
+	genesisPath := app.GetGenesisPath(chainName)
 	if err := os.MkdirAll(filepath.Dir(genesisPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -275,12 +275,12 @@ func (app *Lux) CopyGenesisFile(inputFilename string, subnetName string) error {
 	return os.WriteFile(genesisPath, genesisBytes, WriteReadReadPerms)
 }
 
-func (app *Lux) CopyVMBinary(inputFilename string, subnetName string) error {
+func (app *Lux) CopyVMBinary(inputFilename string, chainName string) error {
 	vmBytes, err := os.ReadFile(inputFilename)
 	if err != nil {
 		return err
 	}
-	vmPath := app.GetCustomVMPath(subnetName)
+	vmPath := app.GetCustomVMPath(chainName)
 	return os.WriteFile(vmPath, vmBytes, WriteReadReadPerms)
 }
 
@@ -293,8 +293,8 @@ func (app *Lux) CopyKeyFile(inputFilename string, keyName string) error {
 	return os.WriteFile(keyPath, keyBytes, WriteReadReadPerms)
 }
 
-func (app *Lux) LoadEvmGenesis(subnetName string) (core.Genesis, error) {
-	genesisPath := app.GetGenesisPath(subnetName)
+func (app *Lux) LoadEvmGenesis(chainName string) (core.Genesis, error) {
+	genesisPath := app.GetGenesisPath(chainName)
 	jsonBytes, err := os.ReadFile(genesisPath)
 	if err != nil {
 		return core.Genesis{}, err
@@ -305,8 +305,8 @@ func (app *Lux) LoadEvmGenesis(subnetName string) (core.Genesis, error) {
 	return gen, err
 }
 
-func (app *Lux) LoadRawGenesis(subnetName string) ([]byte, error) {
-	genesisPath := app.GetGenesisPath(subnetName)
+func (app *Lux) LoadRawGenesis(chainName string) ([]byte, error) {
+	genesisPath := app.GetGenesisPath(chainName)
 	genesisBytes, err := os.ReadFile(genesisPath)
 	if err != nil {
 		return nil, err
@@ -335,8 +335,8 @@ func (app *Lux) CreateSidecar(sc *models.Sidecar) error {
 	return os.WriteFile(sidecarPath, scBytes, WriteReadReadPerms)
 }
 
-func (app *Lux) LoadSidecar(subnetName string) (models.Sidecar, error) {
-	sidecarPath := app.GetSidecarPath(subnetName)
+func (app *Lux) LoadSidecar(chainName string) (models.Sidecar, error) {
+	sidecarPath := app.GetSidecarPath(chainName)
 	jsonBytes, err := os.ReadFile(sidecarPath)
 	if err != nil {
 		return models.Sidecar{}, err
@@ -375,19 +375,19 @@ func (app *Lux) UpdateSidecar(sc *models.Sidecar) error {
 func (app *Lux) UpdateSidecarNetworks(
 	sc *models.Sidecar,
 	network models.Network,
-	subnetID ids.ID,
+	chainID ids.ID,
 	blockchainID ids.ID,
 ) error {
 	if sc.Networks == nil {
 		sc.Networks = make(map[string]models.NetworkData)
 	}
 	sc.Networks[network.String()] = models.NetworkData{
-		SubnetID:     subnetID,
+		ChainID:      chainID,
 		BlockchainID: blockchainID,
 		RPCVersion:   sc.RPCVersion,
 	}
 	if err := app.UpdateSidecar(sc); err != nil {
-		return fmt.Errorf("creation of chains and subnet was successful, but failed to update sidecar: %w", err)
+		return fmt.Errorf("creation of chains and chain was successful, but failed to update sidecar: %w", err)
 	}
 	return nil
 }
@@ -395,7 +395,7 @@ func (app *Lux) UpdateSidecarNetworks(
 func (app *Lux) UpdateSidecarElasticChain(
 	sc *models.Sidecar,
 	network models.Network,
-	subnetID ids.ID,
+	chainID ids.ID,
 	assetID ids.ID,
 	pchainTXID ids.ID,
 	tokenName string,
@@ -406,7 +406,7 @@ func (app *Lux) UpdateSidecarElasticChain(
 	}
 	partialTxs := sc.ElasticChain[network.String()].Txs
 	sc.ElasticChain[network.String()] = models.ElasticChain{
-		SubnetID:    subnetID,
+		ChainID:     chainID,
 		AssetID:     assetID,
 		PChainTXID:  pchainTXID,
 		TokenName:   tokenName,
@@ -425,12 +425,12 @@ func (app *Lux) UpdateSidecarPermissionlessValidator(
 	nodeID string,
 	txID ids.ID,
 ) error {
-	elasticSubnet := sc.ElasticChain[network.String()]
-	if elasticSubnet.Validators == nil {
-		elasticSubnet.Validators = make(map[string]models.PermissionlessValidators)
+	elasticChain := sc.ElasticChain[network.String()]
+	if elasticChain.Validators == nil {
+		elasticChain.Validators = make(map[string]models.PermissionlessValidators)
 	}
-	elasticSubnet.Validators[nodeID] = models.PermissionlessValidators{TxID: txID}
-	sc.ElasticChain[network.String()] = elasticSubnet
+	elasticChain.Validators[nodeID] = models.PermissionlessValidators{TxID: txID}
+	sc.ElasticChain[network.String()] = elasticChain
 	if err := app.UpdateSidecar(sc); err != nil {
 		return err
 	}
@@ -457,8 +457,8 @@ func (app *Lux) UpdateSidecarElasticChainPartialTx(
 	return app.UpdateSidecar(sc)
 }
 
-func (app *Lux) GetTokenName(subnetName string) string {
-	sidecar, err := app.LoadSidecar(subnetName)
+func (app *Lux) GetTokenName(chainName string) string {
+	sidecar, err := app.LoadSidecar(chainName)
 	if err != nil {
 		return constants.DefaultTokenName
 	}
@@ -466,7 +466,7 @@ func (app *Lux) GetTokenName(subnetName string) string {
 }
 
 func (app *Lux) GetSidecarNames() ([]string, error) {
-	matches, err := os.ReadDir(app.GetSubnetDir())
+	matches, err := os.ReadDir(app.GetChainDir())
 	if err != nil {
 		return nil, err
 	}
@@ -476,8 +476,8 @@ func (app *Lux) GetSidecarNames() ([]string, error) {
 		if !m.IsDir() {
 			continue
 		}
-		// a subnet dir could theoretically exist without a sidecar yet...
-		if _, err := os.Stat(filepath.Join(app.GetSubnetDir(), m.Name(), constants.SidecarFileName)); err == nil {
+		// a chain dir could theoretically exist without a sidecar yet...
+		if _, err := os.Stat(filepath.Join(app.GetChainDir(), m.Name(), constants.SidecarFileName)); err == nil {
 			names = append(names, m.Name())
 		}
 	}
@@ -538,8 +538,8 @@ func (app *Lux) CaptureYesNo(prompt string) (bool, error) {
 	return app.Prompt.CaptureYesNo(prompt)
 }
 
-func (app *Lux) CreateElasticChainConfig(subnetName string, es *models.ElasticChainConfig) error {
-	elasticSubetConfigPath := app.GetElasticChainConfigPath(subnetName)
+func (app *Lux) CreateElasticChainConfig(chainName string, es *models.ElasticChainConfig) error {
+	elasticSubetConfigPath := app.GetElasticChainConfigPath(chainName)
 	if err := os.MkdirAll(filepath.Dir(elasticSubetConfigPath), constants.DefaultPerms755); err != nil {
 		return err
 	}
@@ -552,9 +552,9 @@ func (app *Lux) CreateElasticChainConfig(subnetName string, es *models.ElasticCh
 	return os.WriteFile(elasticSubetConfigPath, esBytes, WriteReadReadPerms)
 }
 
-func (app *Lux) LoadElasticChainConfig(subnetName string) (models.ElasticChainConfig, error) {
-	elasticSubnetConfigPath := app.GetElasticChainConfigPath(subnetName)
-	jsonBytes, err := os.ReadFile(elasticSubnetConfigPath)
+func (app *Lux) LoadElasticChainConfig(chainName string) (models.ElasticChainConfig, error) {
+	elasticChainConfigPath := app.GetElasticChainConfigPath(chainName)
+	jsonBytes, err := os.ReadFile(elasticChainConfigPath)
 	if err != nil {
 		return models.ElasticChainConfig{}, err
 	}
@@ -608,7 +608,7 @@ func (app *Lux) GetLocalRelayerStorageDir(network models.Network) string {
 // GetKey returns the key for a given name
 func (app *Lux) GetKey(keyName string) (string, error) {
 	keyPath := app.GetKeyPath(keyName)
-	if !utils.FileExists(keyPath) {
+	if !fs.FileExists(keyPath) {
 		return "", fmt.Errorf("key %s not found", keyName)
 	}
 	keyBytes, err := os.ReadFile(keyPath)
@@ -623,69 +623,69 @@ func (app *Lux) GetBasePath() string {
 	return app.baseDir
 }
 
-// GetLuxdNodeConfigPath returns the node config path for a subnet
-func (app *Lux) GetLuxdNodeConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, "node-config.json")
+// GetLuxdNodeConfigPath returns the node config path for a chain
+func (app *Lux) GetLuxdNodeConfigPath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, "node-config.json")
 }
 
-// LuxdSubnetConfigExists checks if subnet config exists
-func (app *Lux) LuxdSubnetConfigExists(subnetName string) bool {
-	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "subnet-config.json")
+// LuxdChainConfigExists checks if chain config exists
+func (app *Lux) LuxdChainConfigExists(chainName string) bool {
+	configPath := filepath.Join(app.GetChainDir(), chainName, "chain-config.json")
 	_, err := os.Stat(configPath)
 	return err == nil
 }
 
-// LoadRawLuxdSubnetConfig loads raw subnet config
-func (app *Lux) LoadRawLuxdSubnetConfig(subnetName string) ([]byte, error) {
-	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "subnet-config.json")
+// LoadRawLuxdChainConfig loads raw chain config
+func (app *Lux) LoadRawLuxdChainConfig(chainName string) ([]byte, error) {
+	configPath := filepath.Join(app.GetChainDir(), chainName, "chain-config.json")
 	return os.ReadFile(configPath)
 }
 
-// ChainConfigExists checks if chain config exists
-func (app *Lux) ChainConfigExists(subnetName string) bool {
-	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "chain-config.json")
+// ChainConfigFileExists checks if chain config file exists
+func (app *Lux) ChainConfigFileExists(chainName string) bool {
+	configPath := filepath.Join(app.GetChainDir(), chainName, "chain-config.json")
 	_, err := os.Stat(configPath)
 	return err == nil
 }
 
 // LoadRawChainConfig loads raw chain config
-func (app *Lux) LoadRawChainConfig(subnetName string) ([]byte, error) {
-	configPath := filepath.Join(app.GetSubnetDir(), subnetName, "chain-config.json")
+func (app *Lux) LoadRawChainConfig(chainName string) ([]byte, error) {
+	configPath := filepath.Join(app.GetChainDir(), chainName, "chain-config.json")
 	return os.ReadFile(configPath)
 }
 
 // NetworkUpgradeExists checks if network upgrade file exists
-func (app *Lux) NetworkUpgradeExists(subnetName string) bool {
-	upgradePath := filepath.Join(app.GetSubnetDir(), subnetName, "upgrade.json")
+func (app *Lux) NetworkUpgradeExists(chainName string) bool {
+	upgradePath := filepath.Join(app.GetChainDir(), chainName, "upgrade.json")
 	_, err := os.Stat(upgradePath)
 	return err == nil
 }
 
 // LoadRawNetworkUpgrades loads raw network upgrades
-func (app *Lux) LoadRawNetworkUpgrades(subnetName string) ([]byte, error) {
-	upgradePath := filepath.Join(app.GetSubnetDir(), subnetName, "upgrade.json")
+func (app *Lux) LoadRawNetworkUpgrades(chainName string) ([]byte, error) {
+	upgradePath := filepath.Join(app.GetChainDir(), chainName, "upgrade.json")
 	return os.ReadFile(upgradePath)
 }
 
-// GetChainConfigPath returns the chain config path for a subnet
-func (app *Lux) GetChainConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, "chain-config.json")
+// GetChainConfigPath returns the chain config path for a chain
+func (app *Lux) GetChainConfigPath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, "chain-config.json")
 }
 
-// GetLuxdSubnetConfigPath returns the luxd subnet config path for a subnet
-func (app *Lux) GetLuxdSubnetConfigPath(subnetName string) string {
-	return filepath.Join(app.GetSubnetDir(), subnetName, "subnet-config.json")
+// GetLuxdChainConfigPath returns the luxd chain config path for a chain
+func (app *Lux) GetLuxdChainConfigPath(chainName string) string {
+	return filepath.Join(app.GetChainDir(), chainName, "chain-config.json")
 }
 
 // GetPerNodeBlockchainConfig returns per-node blockchain config
-func (app *Lux) GetPerNodeBlockchainConfig(subnetName string) map[string]interface{} {
+func (app *Lux) GetPerNodeBlockchainConfig(chainName string) map[string]interface{} {
 	// Return empty config for now, can be extended later
 	return make(map[string]interface{})
 }
 
 // LuxdNodeConfigExists checks if luxd node config exists
-func (app *Lux) LuxdNodeConfigExists(subnetName string) bool {
-	configPath := app.GetLuxdNodeConfigPath(subnetName)
+func (app *Lux) LuxdNodeConfigExists(chainName string) bool {
+	configPath := app.GetLuxdNodeConfigPath(chainName)
 	_, err := os.Stat(configPath)
 	return err == nil
 }
@@ -827,7 +827,7 @@ func (app *Lux) SafeRemoveAll(path string) error {
 
 		// Prevent deletion of parent directories that would delete the protected directory
 		// e.g., deleting ~/.lux when ~/.lux/chains is protected
-		if utils.IsSubPath(protectedAbs, absPath) {
+		if fs.IsSubPath(protectedAbs, absPath) {
 			return fmt.Errorf("SAFETY: refusing to delete %s as it would delete protected directory: %s", absPath, protectedAbs)
 		}
 	}
@@ -848,7 +848,7 @@ func (app *Lux) IsPathProtected(path string) bool {
 			continue
 		}
 
-		if absPath == protectedAbs || utils.IsSubPath(protectedAbs, absPath) {
+		if absPath == protectedAbs || fs.IsSubPath(protectedAbs, absPath) {
 			return true
 		}
 	}
@@ -888,8 +888,8 @@ func (app *Lux) GetBlockchainNamesOnNetwork(network models.Network, onlySOV bool
 	// Get all blockchain names from sidecar files
 	blockchainNames := []string{}
 
-	subnetDir := app.GetSubnetDir()
-	entries, err := os.ReadDir(subnetDir)
+	chainDir := app.GetChainDir()
+	entries, err := os.ReadDir(chainDir)
 	if err != nil {
 		return nil, err
 	}
@@ -897,7 +897,7 @@ func (app *Lux) GetBlockchainNamesOnNetwork(network models.Network, onlySOV bool
 	for _, entry := range entries {
 		if entry.IsDir() {
 			// Check if sidecar exists for this blockchain
-			sidecarPath := filepath.Join(subnetDir, entry.Name(), "sidecar.json")
+			sidecarPath := filepath.Join(chainDir, entry.Name(), "sidecar.json")
 			if _, err := os.Stat(sidecarPath); err == nil {
 				// Load sidecar to check if it's deployed on this network
 				sc, err := app.LoadSidecar(entry.Name())

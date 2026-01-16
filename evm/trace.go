@@ -11,7 +11,6 @@ import (
 
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/rpc"
-	"github.com/luxfi/vm/utils"
 )
 
 var ErrUnknownErrorSelector = fmt.Errorf("unknown error selector")
@@ -45,8 +44,8 @@ func GetRawClient(rpcURL string) (RawClient, error) {
 	if err != nil {
 		return RawClient{}, err
 	}
-	client.RPCClient, err = utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	client.RPCClient, err = retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*rpc.Client, error) {
 			if hasScheme {
 				return rpcDialContext(ctx, rpcURL)
@@ -78,8 +77,8 @@ func (client RawClient) Close() {
 func (client RawClient) DebugTraceTransaction(
 	txID string,
 ) (map[string]interface{}, error) {
-	trace, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	trace, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (map[string]interface{}, error) {
 			var trace map[string]interface{}
 			err := client.CallContext(
@@ -105,8 +104,8 @@ func (client RawClient) DebugTraceTransaction(
 func (client RawClient) DebugTraceCall(
 	data map[string]string,
 ) (map[string]interface{}, error) {
-	trace, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	trace, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (map[string]interface{}, error) {
 			var trace map[string]interface{}
 			err := client.CallContext(

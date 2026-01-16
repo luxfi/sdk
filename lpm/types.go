@@ -20,11 +20,11 @@ type VMUpload struct {
 	GenesisPath     string
 	ReadmePath      string
 	LicensePath     string
-	SubnetPath      string
+	ChainPath       string
 	Versions        []string
 }
 
-type Subnet struct {
+type Chain struct {
 	ID          string
 	Alias       string
 	VM          string
@@ -39,7 +39,7 @@ type VM struct {
 	VMType      string
 	Binary      string
 	ChainConfig string
-	Subnet      string
+	Chain       string
 	Genesis     string
 	Version     string
 	URL         string

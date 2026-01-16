@@ -280,7 +280,7 @@ if err := core.Start(ctx); err != nil {
 }
 
 // Register additional chains (auto-registers P, X, C chains)
-core.RegisterChain("my-subnet")
+core.RegisterChain("my-l1-chain")
 
 // Submit blocks for quantum finality
 block := &quasar.Block{

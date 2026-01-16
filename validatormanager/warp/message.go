@@ -26,12 +26,11 @@ type L1ConversionValidatorData struct {
 
 // NetToL1ConversionValidatorData is a backward compatibility alias for L1ConversionValidatorData.
 type NetToL1ConversionValidatorData = L1ConversionValidatorData
-type SubnetToL1ConversionValidatorData = L1ConversionValidatorData
+type ChainToL1ConversionValidatorData = L1ConversionValidatorData
 
 // L1ConversionData contains the full network-to-L1 conversion payload
 type L1ConversionData struct {
-	NetID          ids.ID                      `serialize:"true" json:"netID"`
-	SubnetID       ids.ID                      `serialize:"true" json:"subnetID"` // Deprecated: use NetID
+	ChainID        ids.ID                      `serialize:"true" json:"chainID"`
 	ManagerChainID ids.ID                      `serialize:"true" json:"managerChainID"`
 	ManagerAddress []byte                      `serialize:"true" json:"managerAddress"`
 	Validators     []L1ConversionValidatorData `serialize:"true" json:"validators"`
@@ -39,7 +38,7 @@ type L1ConversionData struct {
 
 // NetToL1ConversionData is a backward compatibility alias for L1ConversionData.
 type NetToL1ConversionData = L1ConversionData
-type SubnetToL1ConversionData = L1ConversionData
+type ChainToL1ConversionData = L1ConversionData
 
 // L1ConversionID calculates the ID for a network-to-L1 conversion
 func L1ConversionID(data L1ConversionData) (ids.ID, error) {
@@ -52,7 +51,7 @@ func NetToL1ConversionID(data NetToL1ConversionData) (ids.ID, error) {
 	return L1ConversionID(data)
 }
 
-func SubnetToL1ConversionID(data SubnetToL1ConversionData) (ids.ID, error) {
+func ChainToL1ConversionID(data ChainToL1ConversionData) (ids.ID, error) {
 	return L1ConversionID(data)
 }
 
@@ -67,7 +66,7 @@ func NewNetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, erro
 	return NewL1Conversion(conversionID)
 }
 
-func NewSubnetToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
+func NewChainToL1Conversion(conversionID ids.ID) (*warpPayload.AddressedCall, error) {
 	return NewL1Conversion(conversionID)
 }
 
@@ -118,7 +117,7 @@ func (p *L1ValidatorRegistrationPayload) ValidationID() ids.ID {
 }
 
 // NewRegisterL1Validator creates a new L1 validator registration payload
-func NewRegisterL1Validator(subnetID ids.ID, nodeID ids.NodeID, blsPublicKey []byte, expiry uint64, balanceOwners PChainOwner, disableOwners PChainOwner, weight uint64) (*L1ValidatorRegistrationPayload, error) {
+func NewRegisterL1Validator(chainID ids.ID, nodeID ids.NodeID, blsPublicKey []byte, expiry uint64, balanceOwners PChainOwner, disableOwners PChainOwner, weight uint64) (*L1ValidatorRegistrationPayload, error) {
 	// TODO: Implement proper message creation
 	// Generate a validation ID based on the parameters
 	validationID := ids.GenerateTestID()

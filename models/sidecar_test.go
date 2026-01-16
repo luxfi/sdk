@@ -24,7 +24,7 @@ func TestGetVMID_imported(t *testing.T) {
 
 func TestGetVMID_derived(t *testing.T) {
 	assert := require.New(t)
-	testVMName := "subnet"
+	testVMName := "chain"
 	testVMID := "test-vm-id"
 	sc := Sidecar{
 		ImportedFromLPM: false,

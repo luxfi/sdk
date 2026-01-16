@@ -4,19 +4,26 @@
 package contract
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
-	"github.com/luxfi/sdk/application"
-	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/sdk/flags"
-	// "github.com/luxfi/sdk/localnet" // TODO: Add localnet package
+	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
+	sdkinfo "github.com/luxfi/sdk/info"
+	"github.com/luxfi/sdk/application"
+	"github.com/luxfi/sdk/flags"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
-	"github.com/luxfi/vm/utils"
 	"github.com/spf13/cobra"
 )
+
+// GetBlockchainIDFromAlias retrieves a blockchain ID from its alias using the info API.
+func GetBlockchainIDFromAlias(endpoint string, alias string) (ids.ID, error) {
+	infoClient := sdkinfo.NewClient(endpoint)
+	ctx := context.Background()
+	return infoClient.GetBlockchainID(ctx, alias)
+}
 
 type ChainSpec struct {
 	BlockchainName            string
@@ -242,14 +249,14 @@ func GetBlockchainID(
 		blockchainID, err = ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			// it should be an alias at this point
-			blockchainID, err = utils.GetBlockchainIDFromAlias(network.Endpoint(), chainSpec.BlockchainID)
+			blockchainID, err = GetBlockchainIDFromAlias(network.Endpoint(), chainSpec.BlockchainID)
 			if err != nil {
 				return ids.Empty, err
 			}
 		}
 	case chainSpec.CChain:
 		var err error
-		blockchainID, err = utils.GetBlockchainIDFromAlias(network.Endpoint(), "C")
+		blockchainID, err = GetBlockchainIDFromAlias(network.Endpoint(), "C")
 		if err != nil {
 			return ids.Empty, err
 		}
@@ -268,15 +275,15 @@ func GetBlockchainID(
 	return blockchainID, nil
 }
 
-func GetSubnetID(
+func GetNetworkID(
 	app *application.Lux,
 	network models.Network,
 	chainSpec ChainSpec,
 ) (ids.ID, error) {
-	var subnetID ids.ID
+	var networkID ids.ID
 	switch {
 	case chainSpec.CChain:
-		subnetID = ids.Empty
+		networkID = ids.Empty
 	case chainSpec.BlockchainName != "":
 		sc, err := app.LoadSidecar(chainSpec.BlockchainName)
 		if err != nil {
@@ -285,22 +292,22 @@ func GetSubnetID(
 		if sc.Networks[network.Name()].BlockchainID == ids.Empty {
 			return ids.Empty, fmt.Errorf("blockchain has not been deployed to %s", network.Name())
 		}
-		subnetID = sc.Networks[network.Name()].SubnetID
+		networkID = sc.Networks[network.Name()].ChainID
 	case chainSpec.BlockchainID != "":
 		blockchainID, err := ids.FromString(chainSpec.BlockchainID)
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failure parsing %s as id: %w", chainSpec.BlockchainID, err)
 		}
-		// Retrieve the blockchain creation transaction to get the subnet ID
+		// Retrieve the blockchain creation transaction to get the network ID
 		createChainTx, err := GetBlockchainTx(network.Endpoint(), blockchainID)
 		if err != nil {
 			return ids.Empty, fmt.Errorf("failed to get blockchain tx: %w", err)
 		}
-		subnetID = createChainTx.ChainID
+		networkID = createChainTx.ValidateNetworkID
 	default:
 		return ids.Empty, fmt.Errorf("blockchain is not defined")
 	}
-	return subnetID, nil
+	return networkID, nil
 }
 
 func GetBlockchainDesc(

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/accounts/abi/bind"
 	"github.com/luxfi/evm/ethclient"
@@ -27,8 +28,6 @@ import (
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/geth/params"
-	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/vm/utils"
 	"github.com/luxfi/warp"
 )
 
@@ -98,7 +97,7 @@ func GetClientWithoutScheme(rpcURL string) (ethclient.Client, string, error) {
 	notDeterminedErr := fmt.Errorf("url %s has no scheme and protocol could not be determined", rpcURL)
 	// let's start with ws it always give same error for http/https/wss
 	scheme := "ws://"
-	ctx, cancel := utils.GetAPILargeContext()
+	ctx, cancel := apiLargeContext()
 	defer cancel()
 	client, err := ethclientDialContext(ctx, scheme+rpcURL)
 	if err == nil {
@@ -144,8 +143,8 @@ func GetClient(rpcURL string) (Client, error) {
 	if err != nil {
 		return client, fmt.Errorf("failure determining the scheme of url %s: %w", rpcURL, err)
 	}
-	client.EthClient, err = utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	client.EthClient, err = retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (ethclient.Client, error) {
 			if hasScheme {
 				return ethclientDialContext(ctx, rpcURL)
@@ -186,8 +185,8 @@ func (client Client) GetContractBytecode(
 	contractAddressStr string,
 ) ([]byte, error) {
 	contractAddress := HexToAddress(contractAddressStr)
-	code, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	code, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) ([]byte, error) {
 			return client.EthClient.CodeAt(ctx, contractAddress, nil)
 		},
@@ -223,8 +222,8 @@ func (client Client) GetAddressBalance(
 	addressStr string,
 ) (*big.Int, error) {
 	address := HexToAddress(addressStr)
-	balance, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	balance, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*big.Int, error) {
 			return client.EthClient.BalanceAt(ctx, address, nil)
 		},
@@ -243,8 +242,8 @@ func (client Client) NonceAt(
 	addressStr string,
 ) (uint64, error) {
 	address := HexToAddress(addressStr)
-	nonce, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	nonce, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (uint64, error) {
 			return client.EthClient.NonceAt(ctx, address, nil)
 		},
@@ -260,8 +259,8 @@ func (client Client) NonceAt(
 // SuggestGasTipCap returns the suggested gas tip
 // supports [repeatsOnFailure] failures
 func (client Client) SuggestGasTipCap() (*big.Int, error) {
-	gasTipCap, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	gasTipCap, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*big.Int, error) {
 			return client.EthClient.SuggestGasTipCap(ctx)
 		},
@@ -277,8 +276,8 @@ func (client Client) SuggestGasTipCap() (*big.Int, error) {
 // EstimateBaseFee returns the estimated base fee
 // supports [repeatsOnFailure] failures
 func (client Client) EstimateBaseFee() (*big.Int, error) {
-	baseFee, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	baseFee, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*big.Int, error) {
 			return client.EthClient.EstimateBaseFee(ctx)
 		},
@@ -318,8 +317,8 @@ func (client Client) CalculateTxParams(
 func (client Client) EstimateGasLimit(
 	msg ethereum.CallMsg,
 ) (uint64, error) {
-	gasLimit, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	gasLimit, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (uint64, error) {
 			return client.EthClient.EstimateGas(ctx, msg)
 		},
@@ -335,8 +334,8 @@ func (client Client) EstimateGasLimit(
 // GetChainID returns the chain ID
 // supports [repeatsOnFailure] failures
 func (client Client) GetChainID() (*big.Int, error) {
-	chainID, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	chainID, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*big.Int, error) {
 			return client.EthClient.ChainID(ctx)
 		},
@@ -352,8 +351,8 @@ func (client Client) GetChainID() (*big.Int, error) {
 // ChainConfig returns the chain conf
 // supports [repeatsOnFailure] failures
 func (client Client) ChainConfig() (*evmParams.ChainConfigWithUpgradesJSON, error) {
-	conf, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	conf, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*evmParams.ChainConfigWithUpgradesJSON, error) {
 			return client.EthClient.ChainConfig(ctx)
 		},
@@ -371,8 +370,8 @@ func (client Client) ChainConfig() (*evmParams.ChainConfigWithUpgradesJSON, erro
 func (client Client) SendTransaction(
 	tx *types.Transaction,
 ) error {
-	_, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	_, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (any, error) {
 			return nil, client.EthClient.SendTransaction(ctx, tx)
 		},
@@ -597,8 +596,8 @@ func (client Client) TransactWithWarpMessage(
 // BlockByNumber gets block [n]
 // supports [repeatsOnFailure] failures
 func (client Client) BlockByNumber(n *big.Int) (*types.Block, error) {
-	block, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	block, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*types.Block, error) {
 			return client.EthClient.BlockByNumber(ctx, n)
 		},
@@ -614,8 +613,8 @@ func (client Client) BlockByNumber(n *big.Int) (*types.Block, error) {
 // FilterLogs gets logs as given by [query]
 // supports [repeatsOnFailure] failures
 func (client Client) FilterLogs(query ethereum.FilterQuery) ([]types.Log, error) {
-	logs, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	logs, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) ([]types.Log, error) {
 			return client.EthClient.FilterLogs(ctx, query)
 		},
@@ -631,8 +630,8 @@ func (client Client) FilterLogs(query ethereum.FilterQuery) ([]types.Log, error)
 // TransactionReceipt gets tx receipt for [hash]
 // supports [repeatsOnFailure] failures
 func (client Client) TransactionReceipt(hash common.Hash) (*types.Receipt, error) {
-	receipt, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	receipt, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (*types.Receipt, error) {
 			return client.EthClient.TransactionReceipt(ctx, hash)
 		},
@@ -648,8 +647,8 @@ func (client Client) TransactionReceipt(hash common.Hash) (*types.Receipt, error
 // BlockNumber gets current height
 // supports [repeatsOnFailure] failures
 func (client Client) BlockNumber() (uint64, error) {
-	blockNumber, err := utils.RetryWithContextGen(
-		utils.GetAPILargeContext,
+	blockNumber, err := retryWithContextGen(
+		apiLargeContext,
 		func(ctx context.Context) (uint64, error) {
 			return client.EthClient.BlockNumber(ctx)
 		},
@@ -756,7 +755,7 @@ func (client Client) SetupProposerVM(
 	privKey string,
 ) error {
 	const numBlocks = 2 // Number of blocks needed to activate the proposer VM fork
-	_, err := utils.Retry(
+	_, err := retry(
 		func() (any, error) {
 			return nil, client.CreateDummyBlocks(numBlocks, privKey)
 		},

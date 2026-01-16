@@ -8,16 +8,15 @@ import (
 	"time"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm"
-	"github.com/luxfi/vm/utils"
+	"github.com/luxfi/sdk/platformvm"
 )
 
-// GetRemainingValidationTime returns the time remaining for [nodeID] on [subnetID].
-func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, subnetID ids.ID, startTime time.Time) (time.Duration, error) {
-	ctx, cancel := utils.GetAPIContext()
+// GetRemainingValidationTime returns the time remaining for [nodeID] on [chainID].
+func GetRemainingValidationTime(networkEndpoint string, nodeID ids.NodeID, chainID ids.ID, startTime time.Time) (time.Duration, error) {
+	ctx, cancel := apiRequestContext()
 	defer cancel()
 	platformCli := platformvm.NewClient(networkEndpoint)
-	vs, err := platformCli.GetCurrentValidators(ctx, subnetID, nil)
+	vs, err := platformCli.GetCurrentValidators(ctx, chainID, nil)
 	if err != nil {
 		return 0, err
 	}

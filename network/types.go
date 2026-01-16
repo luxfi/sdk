@@ -6,7 +6,7 @@ package network
 import (
 	"fmt"
 
-	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/constants"
 )
 
 // NetworkKind represents the kind of network

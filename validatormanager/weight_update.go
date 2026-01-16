@@ -11,6 +11,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/constants"
+	"github.com/luxfi/crypto"
 	evmWarp "github.com/luxfi/evm/precompile/contracts/warp"
 	ethereum "github.com/luxfi/geth"
 	"github.com/luxfi/geth/common"
@@ -25,11 +26,8 @@ import (
 	"github.com/luxfi/sdk/validator"
 	localWarpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	sdkwarp "github.com/luxfi/sdk/warp"
-	"github.com/luxfi/vm/utils"
 	warp "github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
-
-	"github.com/luxfi/crypto"
 )
 
 func InitializeValidatorWeightChange(
@@ -73,7 +71,7 @@ func InitValidatorWeightChange(
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, ids.ID, *types.Transaction, error) {
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app,
 		network,
 		chainSpec,
@@ -177,7 +175,7 @@ func InitValidatorWeightChange(
 		network,
 		aggregatorLogger,
 		unsignedMessage,
-		subnetID,
+		chainID,
 		blockchainID,
 		managerAddress,
 		validationID,
@@ -231,7 +229,7 @@ func FinishValidatorWeightChange(
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
 	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app,
 		network,
 		chainSpec,
@@ -250,7 +248,7 @@ func FinishValidatorWeightChange(
 		network,
 		aggregatorLogger,
 		0,
-		subnetID,
+		chainID,
 		l1ValidatorRegistrationSignedMessage,
 		validationID,
 		nonce,
@@ -293,7 +291,7 @@ func GetL1ValidatorWeightMessage(
 	aggregatorLogger luxlog.Logger,
 	// message is given
 	unsignedMessage *warp.UnsignedMessage,
-	subnetID ids.ID,
+	chainID ids.ID,
 	blockchainID ids.ID,
 	managerAddress crypto.Address,
 	validationID ids.ID,
@@ -327,14 +325,14 @@ func GetL1ValidatorWeightMessage(
 		}
 	}
 	messageHexStr := hex.EncodeToString(unsignedMessage.Bytes())
-	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), 0)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", chainID.String(), 0)
 }
 
 func GetPChainL1ValidatorWeightMessage(
 	network models.Network,
 	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
-	subnetID ids.ID,
+	chainID ids.ID,
 	// message is given
 	l1SignedMessage *warp.Message,
 	// needed to generate full message contents
@@ -380,7 +378,7 @@ func GetPChainL1ValidatorWeightMessage(
 		return nil, err
 	}
 	messageHexStr := hex.EncodeToString(unsignedMessage.Bytes())
-	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", chainID.String(), aggregatorQuorumPercentage)
 }
 
 func GetL1ValidatorWeightMessageFromTx(
@@ -459,7 +457,7 @@ func SearchForL1ValidatorWeightMessage(
 		if err != nil {
 			return nil, err
 		}
-		msgs := evm.GetWarpMessagesFromLogs(utils.PointersSlice(logs))
+		msgs := evm.GetWarpMessagesFromLogs(pointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
 			addressedCall, err := warpPayload.ParseAddressedCall(payload)

@@ -15,17 +15,17 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/vm/vms/platformvm/stakeable"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/vms/platformvm/txs/fee"
+	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/protocol/p/stakeable"
+	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/protocol/p/txs/fee"
 	"github.com/luxfi/sdk/wallet/primary/common"
+	"github.com/luxfi/utils"
+	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/gas"
-	"github.com/luxfi/vm/components/lux"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/vms/platformvm/fx"
-	"github.com/luxfi/vm/vms/platformvm/signer"
-	"github.com/luxfi/vm/secp256k1fx"
-	"github.com/luxfi/vm/utils"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var (
@@ -132,14 +132,14 @@ type Builder interface {
 		options ...common.Option,
 	) (*txs.CreateChainTx, error)
 
-	// NewCreateSubnetTx creates a new subnet with the specified owner.
+	// NewCreateNetworkTx creates a new network with the specified owner.
 	//
 	// - [owner] specifies who has the ability to create new chains and add new
-	//   validators to the chain.
-	NewCreateSubnetTx(
+	//   validators to the network.
+	NewCreateNetworkTx(
 		owner *secp256k1fx.OutputOwners,
 		options ...common.Option,
-	) (*txs.CreateSubnetTx, error)
+	) (*txs.CreateNetworkTx, error)
 
 	// NewTransferChainOwnershipTx changes the owner of the named chain.
 	//
@@ -287,7 +287,7 @@ type Builder interface {
 	//
 	// - [vdr] specifies all the details of the validation period such as the
 	//   chainID, startTime, endTime, stake weight, and nodeID.
-	// - [signer] if the netID is the primary network, this is the BLS key
+	// - [signer] if the chainID is the primary network, this is the BLS key
 	//   for this validator. Otherwise, this value should be the empty signer.
 	// - [assetID] specifies the asset to stake.
 	// - [validationRewardsOwner] specifies the owner of all the rewards this
@@ -705,21 +705,20 @@ func (b *builder) NewCreateChainTx(
 			Outs:         outputs,
 			Memo:         memo,
 		}},
-		ChainID:        chainID,
-		BlockchainName: blockchainName,
-		VMID:           vmID,
-		FxIDs:          fxIDs,
-		GenesisData:    genesis,
-		ChainAuth:      chainAuth,
+		ValidateNetworkID: chainID,
+		BlockchainName:    blockchainName,
+		VMID:              vmID,
+		FxIDs:             fxIDs,
+		GenesisData:       genesis,
+		ChainAuth:         chainAuth,
 	}
 	return tx, b.initCtx(tx)
 }
 
-// Removed in regenesis
-func (b *builder) NewCreateSubnetTx(
+func (b *builder) NewCreateNetworkTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.CreateSubnetTx, error) {
+) (*txs.CreateNetworkTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{}
 	//
@@ -732,7 +731,7 @@ func (b *builder) NewCreateSubnetTx(
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicCreateSubnetTxComplexities.Add(
+	complexity, err := fee.IntrinsicCreateNetworkTxComplexities.Add(
 		&memoComplexity,
 		&ownerComplexity,
 	)
@@ -753,7 +752,7 @@ func (b *builder) NewCreateSubnetTx(
 	}
 	//
 	utils.Sort(owner.Addrs)
-	tx := &txs.CreateSubnetTx{
+	tx := &txs.CreateNetworkTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: b.getBlockchainID(),
@@ -1883,7 +1882,7 @@ func (b *builder) spend(
 	// If excessLUX <= feeWithChange, we don't add the change output
 	// and we don't modify s.complexity (it stays without the change output)
 
-	utils.Sort(s.inputs)                                    // sort inputs
+	utils.Sort(s.inputs)                                       // sort inputs
 	lux.SortTransferableOutputs(s.changeOutputs, txs.Codec) // sort the change outputs
 	lux.SortTransferableOutputs(s.stakeOutputs, txs.Codec)  // sort stake outputs
 	return s.inputs, s.changeOutputs, s.stakeOutputs, nil
@@ -1916,12 +1915,12 @@ func (b *builder) authorize(ownerID ids.ID, options *common.Options) (*secp256k1
 }
 
 func (b *builder) initCtx(tx txs.UnsignedTx) error {
-	ctx, err := NewConsensusContext(b.context.NetworkID, b.context.XAssetID)
+	ctx, err := NewConsensusRuntime(b.context.NetworkID, b.context.XAssetID)
 	if err != nil {
 		return err
 	}
 
-	tx.InitCtx(ctx)
+	tx.InitRuntime(ctx)
 	return nil
 }
 

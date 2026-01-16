@@ -8,8 +8,8 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/components/lux"
+	"github.com/luxfi/protocol/p/txs"
+	lux "github.com/luxfi/utxo"
 )
 
 var _ Signer = (*txSigner)(nil)

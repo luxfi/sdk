@@ -11,12 +11,12 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/fx"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/chain/p/signer"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/vms/platformvm/fx"
+	lux "github.com/luxfi/utxo"
 )
 
 var _ Backend = (*backend)(nil)
@@ -33,7 +33,7 @@ type backend struct {
 	common.ChainUTXOs
 
 	ownersLock sync.RWMutex
-	owners     map[ids.ID]fx.Owner // subnetID or validationID -> owner
+	owners     map[ids.ID]fx.Owner // chainID or validationID -> owner
 }
 
 func NewBackend(utxos common.ChainUTXOs, owners map[ids.ID]fx.Owner) Backend {

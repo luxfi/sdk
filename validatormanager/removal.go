@@ -144,7 +144,7 @@ func GetUptimeProofMessage(
 	network models.Network,
 	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
-	subnetID ids.ID,
+	chainID ids.ID,
 	blockchainID ids.ID,
 	validationID ids.ID,
 	uptime uint64,
@@ -168,7 +168,7 @@ func GetUptimeProofMessage(
 	}
 
 	messageHexStr := hex.EncodeToString(uptimeProofUnsignedMessage.Bytes())
-	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	return sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", chainID.String(), aggregatorQuorumPercentage)
 }
 
 func InitValidatorRemoval(
@@ -190,7 +190,7 @@ func InitValidatorRemoval(
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, ids.ID, *types.Transaction, error) {
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app,
 		network,
 		chainSpec,
@@ -248,7 +248,7 @@ func InitValidatorRemoval(
 				network,
 				aggregatorLogger,
 				0,
-				subnetID,
+				chainID,
 				blockchainID,
 				validationID,
 				uptimeSec,
@@ -318,7 +318,7 @@ func InitValidatorRemoval(
 		network,
 		aggregatorLogger,
 		standaloneUnsignedMsg,
-		subnetID,
+		chainID,
 		blockchainID,
 		managerAddress,
 		validationID,
@@ -335,7 +335,7 @@ func CompleteValidatorRemoval(
 	generateRawTxOnly bool,
 	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
-	subnetValidatorRegistrationSignedMessage *warp.Message,
+	chainValidatorRegistrationSignedMessage *warp.Message,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
 	if useACP99 {
@@ -345,7 +345,7 @@ func CompleteValidatorRemoval(
 			ownerAddress,
 			privateKey,
 			managerAddress,
-			subnetValidatorRegistrationSignedMessage,
+			chainValidatorRegistrationSignedMessage,
 			big.NewInt(0),
 			"complete validator removal",
 			ErrorSignatureToError,
@@ -359,7 +359,7 @@ func CompleteValidatorRemoval(
 		ownerAddress,
 		privateKey,
 		managerAddress,
-		subnetValidatorRegistrationSignedMessage,
+		chainValidatorRegistrationSignedMessage,
 		big.NewInt(0),
 		"complete validator removal",
 		ErrorSignatureToError,
@@ -384,7 +384,7 @@ func FinishValidatorRemoval(
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
 	managerAddress := crypto.HexToAddress(validatorManagerAddressStr)
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app,
 		network,
 		chainSpec,
@@ -398,7 +398,7 @@ func FinishValidatorRemoval(
 		rpcURL,
 		aggregatorLogger,
 		0,
-		subnetID,
+		chainID,
 		validationID,
 		false,
 		signatureAggregatorEndpoint,

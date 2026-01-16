@@ -4,10 +4,10 @@
 package builder
 
 import (
-	consensusctx "github.com/luxfi/consensus/context"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs/fee"
+	"github.com/luxfi/protocol/p/txs/fee"
 	"github.com/luxfi/vm/components/gas"
 )
 
@@ -22,16 +22,16 @@ type Context struct {
 	StaticFeeConfig   fee.StaticConfig
 }
 
-func NewConsensusContext(networkID uint32, luxAssetID ids.ID) (*consensusctx.Context, error) {
-	return NewConsensusContextWithChainID(networkID, constants.PlatformChainID, luxAssetID)
+func NewConsensusRuntime(networkID uint32, xAssetID ids.ID) (*runtime.Runtime, error) {
+	return NewConsensusRuntimeWithChainID(networkID, constants.PlatformChainID, xAssetID)
 }
 
-func NewConsensusContextWithChainID(networkID uint32, chainID ids.ID, luxAssetID ids.ID) (*consensusctx.Context, error) {
+func NewConsensusRuntimeWithChainID(networkID uint32, chainID ids.ID, xAssetID ids.ID) (*runtime.Runtime, error) {
 	lookup := ids.NewAliaser()
-	ctx := &consensusctx.Context{
+	rt := &runtime.Runtime{
 		NetworkID: networkID,
 		ChainID:   chainID,
-		XAssetID:  luxAssetID,
+		XAssetID:  xAssetID,
 	}
-	return ctx, lookup.Alias(chainID, Alias)
+	return rt, lookup.Alias(chainID, Alias)
 }
