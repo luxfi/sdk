@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/luxfi/geth/common"
-	"github.com/luxfi/log"
+	log "github.com/luxfi/log"
 	"github.com/luxfi/sdk/internal/evm"
 	"github.com/luxfi/sdk/internal/types"
 	"github.com/luxfi/sdk/network"
@@ -261,9 +261,9 @@ func (b *Builder) deployL1(ctx context.Context, blockchain *Blockchain, network 
 
 	// TODO: Implement actual L1 deployment using netrunner
 	// This would involve:
-	// 1. Creating subnet
+	// 1. Creating chain
 	// 2. Adding validators
-	// 3. Creating blockchain in subnet
+	// 3. Creating blockchain in chain
 	// 4. Starting blockchain
 
 	return nil

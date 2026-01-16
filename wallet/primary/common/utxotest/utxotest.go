@@ -14,15 +14,15 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
+	lux "github.com/luxfi/utxo"
 )
 
 func NewDeterministicChainUTXOs(t *testing.T, utxoSets map[ids.ID][]*lux.UTXO) *DeterministicChainUTXOs {
 	globalUTXOs := common.NewUTXOs()
-	for netID, utxos := range utxoSets {
+	for chainID, utxos := range utxoSets {
 		for _, utxo := range utxos {
 			require.NoError(
-				t, globalUTXOs.AddUTXO(context.Background(), netID, constants.PlatformChainID, utxo),
+				t, globalUTXOs.AddUTXO(context.Background(), chainID, constants.PlatformChainID, utxo),
 			)
 		}
 	}

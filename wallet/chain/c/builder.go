@@ -12,9 +12,9 @@ import (
 	"github.com/luxfi/math"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/secp256k1fx"
-	"github.com/luxfi/vm/utils"
+	"github.com/luxfi/utils"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 
 	ethcommon "github.com/luxfi/geth/common"
 )
@@ -388,12 +388,12 @@ func (b *builder) NewExportTx(
 	utils.Sort(inputs)
 	tx.Ins = inputs
 
-	consensusCtx, err := newConsensusContext(b.context)
+	consensusCtx, err := newConsensusRuntime(b.context)
 	if err != nil {
 		return nil, err
 	}
 	for _, out := range tx.ExportedOutputs {
-		out.InitCtx(consensusCtx)
+		out.InitRuntime(consensusCtx)
 	}
 	return tx, nil
 }

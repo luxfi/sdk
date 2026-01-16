@@ -9,13 +9,13 @@ import (
 
 	"github.com/luxfi/codec"
 	"github.com/luxfi/codec/linearcodec"
-	hashing "github.com/luxfi/crypto/hash"
+	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/components/lux"
+	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 // Tx represents a transaction on the C-Chain
@@ -194,7 +194,7 @@ func (tx *Tx) Sign(codec codec.Manager, signers [][]*secp256k1.PrivateKey) error
 
 		// Generate signature for each signer
 		for j, signer := range inputSigners {
-			sig, err := signer.SignHash(hashing.ComputeHash256(unsignedBytes))
+			sig, err := signer.SignHash(hash.ComputeHash256(unsignedBytes))
 			if err != nil {
 				return fmt.Errorf("failed to sign tx at input %d, signer %d: %w", i, j, err)
 			}
@@ -218,7 +218,7 @@ func (tx *Tx) Sign(codec codec.Manager, signers [][]*secp256k1.PrivateKey) error
 // Initialize initializes the transaction with computed ID and caches bytes
 func (tx *Tx) Initialize(unsignedBytes, signedBytes []byte) {
 	// Calculate transaction ID from unsigned bytes (standard for atomic txs)
-	tx.ID = ids.ID(hashing.ComputeHash256(unsignedBytes))
+	tx.ID = ids.ID(hash.ComputeHash256(unsignedBytes))
 
 	// Cache the unsigned and signed bytes for future use
 	tx.unsignedBytes = unsignedBytes

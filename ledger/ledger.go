@@ -5,13 +5,14 @@
 package ledger
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/luxfi/sdk/network"
-	"github.com/luxfi/vm/utils"
-
+	json "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
+	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/network"
 	"github.com/luxfi/version"
 )
 
@@ -145,7 +146,7 @@ func (dev *LedgerDevice) FindFunds(
 		}
 
 		// Get balance using UTXO-based approach
-		balance, err := utils.GetAddressBalance(addrID, endpoint)
+		balance, err := getAddressBalance(addrID, endpoint)
 		if err != nil {
 			return nil, err
 		}
@@ -161,6 +162,35 @@ func (dev *LedgerDevice) FindFunds(
 		return nil, fmt.Errorf("not enough funds on ledger")
 	}
 	return indices, nil
+}
+
+func getAddressBalance(address ids.ShortID, endpoint string) (uint64, error) {
+	type getBalanceRequest struct {
+		Addresses []string `json:"addresses"`
+	}
+	type getBalanceResponse struct {
+		Unlocked  json.Uint64            `json:"unlocked"`
+		Unlockeds map[ids.ID]json.Uint64 `json:"unlockeds"`
+	}
+
+	ctx := context.Background()
+	requester := rpc.NewEndpointRequester(endpoint + "/ext/P")
+	reply := &getBalanceResponse{}
+	if err := requester.SendRequest(ctx, "platform.getBalance", &getBalanceRequest{
+		Addresses: ids.ShortIDsToStrings([]ids.ShortID{address}),
+	}, reply); err != nil {
+		return 0, fmt.Errorf("failed to get balance: %w", err)
+	}
+
+	if reply.Unlocked > 0 {
+		return uint64(reply.Unlocked), nil
+	}
+
+	var totalUnlocked uint64
+	for _, balance := range reply.Unlockeds {
+		totalUnlocked += uint64(balance)
+	}
+	return totalUnlocked, nil
 }
 
 // GetAddresses returns Lux addresses for the given indices

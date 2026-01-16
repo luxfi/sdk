@@ -13,15 +13,15 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/components/lux"
+	lux "github.com/luxfi/utxo"
 )
 
 func NewDeterministicChainUTXOs(require *require.Assertions, utxoSets map[ids.ID][]*lux.UTXO) *DeterministicChainUTXOs {
 	globalUTXOs := NewUTXOs()
-	for netID, utxos := range utxoSets {
+	for chainID, utxos := range utxoSets {
 		for _, utxo := range utxos {
 			require.NoError(
-				globalUTXOs.AddUTXO(context.Background(), netID, constants.PlatformChainID, utxo),
+				globalUTXOs.AddUTXO(context.Background(), chainID, constants.PlatformChainID, utxo),
 			)
 		}
 	}

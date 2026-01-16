@@ -14,14 +14,14 @@ import (
 )
 
 // PoSValidatorManagerInitialize initializes contract [managerAddress] at [rpcURL], to
-// manage validators on [subnetID] using PoS specific settings.
+// manage validators on [chainID] using PoS specific settings.
 func PoSValidatorManagerInitialize(
 	rpcURL string,
 	managerAddress crypto.Address,
 	specializedManagerAddress crypto.Address,
 	managerOwnerPrivateKey string,
 	privateKey string,
-	subnetID [32]byte,
+	chainID [32]byte,
 	posParams PoSParams,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -77,7 +77,7 @@ func PoSValidatorManagerInitialize(
 		"initialize(((bytes32,uint64,uint8),uint256,uint256,uint64,uint16,uint8,uint256,address,bytes32))",
 		NativeTokenValidatorManagerSettingsV1_0_0{
 			BaseSettings: ValidatorManagerSettings{
-				SubnetID:               subnetID,
+				ChainID:                chainID,
 				ChurnPeriodSeconds:     defaultChurnPeriodSeconds,
 				MaximumChurnPercentage: defaultMaximumChurnPercentage,
 			},

@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/database"
 	"github.com/luxfi/math"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
+	lux "github.com/luxfi/utxo"
 
 	ethcommon "github.com/luxfi/geth/common"
 )

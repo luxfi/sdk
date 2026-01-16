@@ -14,9 +14,8 @@ type TokenInfo struct {
 }
 
 type NetworkData struct {
-	NetID                      ids.ID
-	SubnetID                   ids.ID // Deprecated: use NetID
-	BlockchainID               ids.ID
+	ChainID                    ids.ID   // Chain identifier (validator set)
+	BlockchainID               ids.ID   // Blockchain ID
 	RPCVersion                 int
 	RPCEndpoints               []string // RPC endpoints for the network
 	WSEndpoints                []string // WebSocket endpoints for the network
@@ -34,9 +33,8 @@ type MultisigTxInfo struct {
 type PermissionlessValidators struct {
 	TxID ids.ID
 }
-type ElasticNet struct {
-	NetID       ids.ID
-	SubnetID    ids.ID // Deprecated: use NetID
+type ElasticChain struct {
+	ChainID     ids.ID // Chain identifier
 	AssetID     ids.ID
 	PChainTXID  ids.ID
 	TokenName   string
@@ -45,8 +43,8 @@ type ElasticNet struct {
 	Txs         map[string]ids.ID
 }
 
-// ElasticChain is an alias for ElasticNet
-type ElasticChain = ElasticNet
+// ElasticNet is an alias for ElasticChain (deprecated)
+type ElasticNet = ElasticChain
 
 type Sidecar struct {
 	Name            string
@@ -54,18 +52,15 @@ type Sidecar struct {
 	VMID            string
 	VMVersion       string
 	RPCVersion      int
-	Net             string // Network name
-	Subnet          string `json:"subnet,omitempty"` // Deprecated: use Net
-	NetID           ids.ID // Network ID
-	SubnetID        ids.ID `json:"subnetID,omitempty"` // Deprecated: use NetID
+	Chain           string // Chain name
+	ChainID         ids.ID // Chain identifier (validator set)
 	BlockchainID    ids.ID
 	TokenName       string
 	TokenSymbol     string
-	ChainID         string
+	EVMChainID      string
 	Version         string
 	Networks        map[string]NetworkData
-	ElasticNet      map[string]ElasticNet
-	ElasticChain    map[string]ElasticNet // Alias for ElasticNet
+	ElasticChain    map[string]ElasticChain
 	ImportedFromLPM bool
 	ImportedVMID    string
 
@@ -75,7 +70,7 @@ type Sidecar struct {
 	CustomVMBuildScript string
 
 	// L1/L2 Architecture (2025)
-	Sovereign     bool   `json:"sovereign"`     // true for L1, false for L2/subnet
+	Sovereign     bool   `json:"sovereign"`     // true for L1, false for L2/chain
 	BaseChain     string `json:"baseChain"`     // For L2s: ethereum, lux-l1, lux, op-mainnet
 	BasedRollup   bool   `json:"basedRollup"`   // true for L1-sequenced rollups
 	SequencerType string `json:"sequencerType"` // based, centralized, distributed
@@ -97,7 +92,7 @@ type Sidecar struct {
 	UseACP99              bool   `json:"useACP99,omitempty"`              // Whether to use ACP-99
 
 	// Migration info
-	MigratedAt int64 `json:"migratedAt"` // When subnet became L1
+	MigratedAt int64 `json:"migratedAt"` // When chain became L1
 
 	// Chain layer (1=L1, 2=L2, 3=L3)
 	ChainLayer int `json:"chainLayer"` // Default 2 for backward compat
@@ -146,10 +141,9 @@ func (sc Sidecar) GetVMID() (string, error) {
 	return vmid, nil
 }
 
-// MigrationTx represents a net to L1 migration transaction
+// MigrationTx represents a chain to L1 migration transaction
 type MigrationTx struct {
-	NetID               ids.ID `json:"netId"`
-	SubnetID            ids.ID `json:"subnetId,omitempty"` // Deprecated: use NetID
+	ChainID             ids.ID `json:"chainId"`
 	BlockchainID        ids.ID `json:"blockchainId"`
 	ValidatorManagement string `json:"validatorManagement"`
 	RentalPlan          string `json:"rentalPlan"`

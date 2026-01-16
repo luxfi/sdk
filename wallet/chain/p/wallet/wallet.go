@@ -9,14 +9,14 @@ import (
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/vm/vms/platformvm/txs"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/vm/components/lux"
-	"github.com/luxfi/vm/secp256k1fx"
+	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 
+	vmsigner "github.com/luxfi/protocol/p/signer"
 	walletsigner "github.com/luxfi/sdk/wallet/chain/p/signer"
-	vmsigner "github.com/luxfi/vm/vms/platformvm/signer"
 )
 
 var _ Wallet = (*wallet)(nil)
@@ -98,7 +98,7 @@ type Wallet interface {
 	) (*txs.Tx, error)
 
 	// IssueCreateChainTx creates, signs, and issues a new chain in the named
-	// chain.
+	// network.
 	//
 	// - [chainID] specifies the chain to launch the chain in.
 	// - [genesis] specifies the initial state of the new chain.
@@ -115,12 +115,12 @@ type Wallet interface {
 		options ...common.Option,
 	) (*txs.Tx, error)
 
-	// IssueCreateSubnetTx creates, signs, and issues a new network with the
+	// IssueCreateNetworkTx creates, signs, and issues a new network with the
 	// specified owner.
 	//
 	// - [owner] specifies who has the ability to create new chains and add new
 	//   validators to the network.
-	IssueCreateSubnetTx(
+	IssueCreateNetworkTx(
 		owner *secp256k1fx.OutputOwners,
 		options ...common.Option,
 	) (*txs.Tx, error)
@@ -416,11 +416,11 @@ func (w *wallet) IssueCreateChainTx(
 	return w.IssueUnsignedTx(utx, options...)
 }
 
-func (w *wallet) IssueCreateSubnetTx(
+func (w *wallet) IssueCreateNetworkTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.Tx, error) {
-	utx, err := w.builder.NewCreateSubnetTx(owner, options...)
+	utx, err := w.builder.NewCreateNetworkTx(owner, options...)
 	if err != nil {
 		return nil, err
 	}

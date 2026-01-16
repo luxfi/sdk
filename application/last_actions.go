@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/luxfi/sdk/constants"
+	"github.com/luxfi/constants"
 	"go.uber.org/zap"
 )
 

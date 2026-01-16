@@ -9,16 +9,16 @@ import (
 	"fmt"
 
 	"github.com/luxfi/constants"
-	hashing "github.com/luxfi/crypto/hash"
+	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/database"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/vm/vms/platformvm/stakeable"
-	"github.com/luxfi/vm/vms/platformvm/txs"
-	"github.com/luxfi/vm/components/lux"
+	"github.com/luxfi/protocol/p/stakeable"
+	"github.com/luxfi/protocol/p/txs"
+	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/vm/secp256k1fx"
+	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var (
@@ -85,7 +85,7 @@ func (s *visitor) CreateChainTx(tx *txs.CreateChainTx) error {
 	if err != nil {
 		return err
 	}
-	chainAuthSigners, err := s.getAuthSigners(tx.ChainID, tx.ChainAuth)
+	chainAuthSigners, err := s.getAuthSigners(tx.ValidateNetworkID, tx.ChainAuth)
 	if err != nil {
 		return err
 	}
@@ -93,8 +93,7 @@ func (s *visitor) CreateChainTx(tx *txs.CreateChainTx) error {
 	return sign(s.tx, false, txSigners)
 }
 
-// Removed in regenesis
-func (s *visitor) CreateSubnetTx(tx *txs.CreateSubnetTx) error {
+func (s *visitor) CreateNetworkTx(tx *txs.CreateNetworkTx) error {
 	txSigners, err := s.getSigners(constants.PlatformChainID, tx.Ins)
 	if err != nil {
 		return err
@@ -334,7 +333,7 @@ func sign(tx *txs.Tx, signHash bool, txSigners [][]keychain.Signer) error {
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
-	unsignedHash := hashing.ComputeHash256(unsignedBytes)
+	unsignedHash := hash.ComputeHash256(unsignedBytes)
 
 	if expectedLen := len(txSigners); expectedLen != len(tx.Creds) {
 		tx.Creds = make([]verify.Verifiable, expectedLen)

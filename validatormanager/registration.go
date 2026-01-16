@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/sdk/validator"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	sdkwarp "github.com/luxfi/sdk/warp"
-	sdkutils "github.com/luxfi/vm/utils"
+	sdkutils "github.com/luxfi/utils"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 )
@@ -200,7 +200,7 @@ func GetRegisterL1ValidatorMessage(
 	network models.Network,
 	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
-	subnetID ids.ID,
+	chainID ids.ID,
 	blockchainID ids.ID,
 	managerAddress crypto.Address,
 	nodeID ids.NodeID,
@@ -211,14 +211,14 @@ func GetRegisterL1ValidatorMessage(
 	weight uint64,
 	alreadyInitialized bool,
 	initiateTxHash string,
-	registerSubnetValidatorUnsignedMessage *warp.UnsignedMessage,
+	registerChainValidatorUnsignedMessage *warp.UnsignedMessage,
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, ids.ID, error) {
 	var (
 		validationID ids.ID
 		err          error
 	)
-	if registerSubnetValidatorUnsignedMessage == nil {
+	if registerChainValidatorUnsignedMessage == nil {
 		if alreadyInitialized {
 			validationID, err = validator.GetValidationID(
 				rpcURL,
@@ -229,7 +229,7 @@ func GetRegisterL1ValidatorMessage(
 				return nil, ids.Empty, err
 			}
 			if initiateTxHash != "" {
-				registerSubnetValidatorUnsignedMessage, err = GetRegisterL1ValidatorMessageFromTx(
+				registerChainValidatorUnsignedMessage, err = GetRegisterL1ValidatorMessageFromTx(
 					rpcURL,
 					validationID,
 					initiateTxHash,
@@ -238,7 +238,7 @@ func GetRegisterL1ValidatorMessage(
 					return nil, ids.Empty, err
 				}
 			} else {
-				registerSubnetValidatorUnsignedMessage, err = SearchForRegisterL1ValidatorMessage(
+				registerChainValidatorUnsignedMessage, err = SearchForRegisterL1ValidatorMessage(
 					ctx,
 					rpcURL,
 					validationID,
@@ -249,7 +249,7 @@ func GetRegisterL1ValidatorMessage(
 			}
 		} else {
 			addressedCallPayload, err := warpMessage.NewRegisterL1Validator(
-				subnetID,
+				chainID,
 				nodeID,
 				blsPublicKey[:],
 				expiry,
@@ -261,24 +261,24 @@ func GetRegisterL1ValidatorMessage(
 				return nil, ids.Empty, err
 			}
 			validationID = addressedCallPayload.ValidationID()
-			registerSubnetValidatorAddressedCall, err := warpPayload.NewAddressedCall(
+			registerChainValidatorAddressedCall, err := warpPayload.NewAddressedCall(
 				managerAddress.Bytes(),
 				addressedCallPayload.AddressedCall.Bytes(),
 			)
 			if err != nil {
 				return nil, ids.Empty, err
 			}
-			registerSubnetValidatorUnsignedMessage, err = warp.NewUnsignedMessage(
+			registerChainValidatorUnsignedMessage, err = warp.NewUnsignedMessage(
 				network.ID(),
 				blockchainID,
-				registerSubnetValidatorAddressedCall.Bytes(),
+				registerChainValidatorAddressedCall.Bytes(),
 			)
 			if err != nil {
 				return nil, ids.Empty, err
 			}
 		}
 	} else {
-		payload := registerSubnetValidatorUnsignedMessage.Payload
+		payload := registerChainValidatorUnsignedMessage.Payload
 		parsedPayload, err := warpPayload.ParsePayload(payload)
 		if err != nil {
 			return nil, ids.Empty, fmt.Errorf("failed to parse payload: %w", err)
@@ -294,8 +294,8 @@ func GetRegisterL1ValidatorMessage(
 		validationID = reg.ValidationID()
 	}
 
-	messageHexStr := hex.EncodeToString(registerSubnetValidatorUnsignedMessage.Bytes())
-	standaloneSignedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", subnetID.String(), aggregatorQuorumPercentage)
+	messageHexStr := hex.EncodeToString(registerChainValidatorUnsignedMessage.Bytes())
+	standaloneSignedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, "", chainID.String(), aggregatorQuorumPercentage)
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("failed to get signed message: %w", err)
 	}
@@ -312,7 +312,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	rpcURL string,
 	aggregatorLogger luxlog.Logger,
 	aggregatorQuorumPercentage uint64,
-	subnetID ids.ID,
+	chainID ids.ID,
 	validationID ids.ID,
 	registered bool,
 	signatureAggregatorEndpoint string,
@@ -321,31 +321,31 @@ func GetPChainL1ValidatorRegistrationMessage(
 	if err != nil {
 		return nil, err
 	}
-	subnetValidatorRegistrationAddressedCall, err := warpPayload.NewAddressedCall(
+	chainValidatorRegistrationAddressedCall, err := warpPayload.NewAddressedCall(
 		nil,
 		addressedCallPayload.Bytes(),
 	)
 	if err != nil {
 		return nil, err
 	}
-	subnetConversionUnsignedMessage, err := warp.NewUnsignedMessage(
+	chainConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		network.ID(),
 		constants.PlatformChainID,
-		subnetValidatorRegistrationAddressedCall.Bytes(),
+		chainValidatorRegistrationAddressedCall.Bytes(),
 	)
 	if err != nil {
 		return nil, err
 	}
 	var justificationBytes []byte
 	if !registered {
-		justificationBytes, err = GetRegistrationJustification(ctx, rpcURL, validationID, subnetID)
+		justificationBytes, err = GetRegistrationJustification(ctx, rpcURL, validationID, chainID)
 		if err != nil {
 			return nil, err
 		}
 	}
 	justification := hex.EncodeToString(justificationBytes)
-	messageHexStr := hex.EncodeToString(subnetConversionUnsignedMessage.Bytes())
-	standaloneSignedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, justification, subnetID.String(), aggregatorQuorumPercentage)
+	messageHexStr := hex.EncodeToString(chainConversionUnsignedMessage.Bytes())
+	standaloneSignedMessage, err := sdkwarp.SignMessage(aggregatorLogger, signatureAggregatorEndpoint, messageHexStr, justification, chainID.String(), aggregatorQuorumPercentage)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +405,7 @@ func InitValidatorRegistration(
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
 ) (*warp.Message, ids.ID, *types.Transaction, error) {
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app,
 		network,
 		chainSpec,
@@ -522,7 +522,7 @@ func InitValidatorRegistration(
 		network,
 		aggregatorLogger,
 		0,
-		subnetID,
+		chainID,
 		blockchainID,
 		managerAddress,
 		nodeID,
@@ -554,7 +554,7 @@ func FinishValidatorRegistration(
 	validatorManagerAddressStr string,
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
-	subnetID, err := contract.GetSubnetID(
+	chainID, err := contract.GetNetworkID(
 		app,
 		network,
 		chainSpec,
@@ -569,7 +569,7 @@ func FinishValidatorRegistration(
 		rpcURL,
 		aggregatorLogger,
 		0,
-		subnetID,
+		chainID,
 		validationID,
 		true,
 		signatureAggregatorEndpoint,
@@ -644,7 +644,7 @@ func SearchForRegisterL1ValidatorMessage(
 		if err != nil {
 			return nil, err
 		}
-		msgs := evm.GetWarpMessagesFromLogs(sdkutils.PointersSlice(logs))
+		msgs := evm.GetWarpMessagesFromLogs(pointersSlice(logs))
 		for _, msg := range msgs {
 			payload := msg.Payload
 			addressedCall, err := warpPayload.ParseAddressedCall(payload)
@@ -665,17 +665,17 @@ func GetRegistrationJustification(
 	ctx context.Context,
 	rpcURL string,
 	validationID ids.ID,
-	subnetID ids.ID,
+	chainID ids.ID,
 ) ([]byte, error) {
 	const numBootstrapValidatorsToSearch = 100
 	for validationIndex := uint32(0); validationIndex < numBootstrapValidatorsToSearch; validationIndex++ {
-		bootstrapValidationID := subnetID.Append(validationIndex)
+		bootstrapValidationID := chainID.Append(validationIndex)
 		if bootstrapValidationID == validationID {
 			// TODO: Uncomment when L1ValidatorRegistrationJustification is available
 			// justification := platformvm.L1ValidatorRegistrationJustification{
-			// 	Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertSubnetToL1TxData{
-			// 		ConvertSubnetToL1TxData: &platformvm.SubnetIDIndex{
-			// 			SubnetID: subnetID[:],
+			// 	Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertChainToL1TxData{
+			// 		ConvertChainToL1TxData: &platformvm.ChainIDIndex{
+			// 			ChainID: chainID[:],
 			// 			Index:    validationIndex,
 			// 		},
 			// 	},
