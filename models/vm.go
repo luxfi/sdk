@@ -10,7 +10,8 @@ const (
 	EVM         = "Lux EVM"
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
-	ParsVM      = "Pars VM"
+	SessionVM   = "Session VM"
+	ParsVM      = "Pars VM" // Pars network (EVM + SessionVM)
 	CustomVM    = "Custom"
 )
 
@@ -22,6 +23,8 @@ func VMTypeFromString(s string) VMType {
 		return BlobVM
 	case TimestampVM:
 		return TimestampVM
+	case SessionVM:
+		return SessionVM
 	case ParsVM:
 		return ParsVM
 	default:
@@ -33,6 +36,8 @@ func (v VMType) RepoName() string {
 	switch v {
 	case EVM:
 		return constants.EVMRepoName
+	case SessionVM:
+		return "session" // github.com/luxfi/session
 	case ParsVM:
 		return "node" // github.com/parsdao/node
 	default:
@@ -45,6 +50,8 @@ func (v VMType) Org() string {
 	switch v {
 	case ParsVM:
 		return "parsdao"
+	case SessionVM:
+		return constants.LuxOrg // luxfi/session
 	default:
 		return constants.LuxOrg
 	}
