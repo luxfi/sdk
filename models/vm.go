@@ -10,6 +10,7 @@ const (
 	EVM         = "Lux EVM"
 	BlobVM      = "Blob VM"
 	TimestampVM = "Timestamp VM"
+	ParsVM      = "Pars VM"
 	CustomVM    = "Custom"
 )
 
@@ -21,6 +22,8 @@ func VMTypeFromString(s string) VMType {
 		return BlobVM
 	case TimestampVM:
 		return TimestampVM
+	case ParsVM:
+		return ParsVM
 	default:
 		return CustomVM
 	}
@@ -30,7 +33,19 @@ func (v VMType) RepoName() string {
 	switch v {
 	case EVM:
 		return constants.EVMRepoName
+	case ParsVM:
+		return "node" // github.com/parsdao/node
 	default:
 		return "unknown"
+	}
+}
+
+// Org returns the GitHub organization for the VM type.
+func (v VMType) Org() string {
+	switch v {
+	case ParsVM:
+		return "parsdao"
+	default:
+		return constants.LuxOrg
 	}
 }
