@@ -31,6 +31,7 @@ exclude (
 )
 
 require (
+	connectrpc.com/connect v1.19.1
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/chelnak/ysmrr v0.6.0
@@ -137,6 +138,9 @@ require (
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
+	github.com/luxfi/fhe v1.7.6-0.20260106060801-28e308e4c2f8 // indirect
+	github.com/luxfi/lattice/v7 v7.0.0 // indirect
+	github.com/luxfi/sdk/api v0.0.2 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -205,10 +209,10 @@ require (
 	github.com/luxfi/keys v1.0.7 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/p2p v1.18.7 // indirect
-	github.com/luxfi/precompile v0.4.3 // indirect
+	github.com/luxfi/precompile v0.4.5 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/tls v1.0.3
-	github.com/luxfi/upgrade v1.0.0 // indirect
+	github.com/luxfi/upgrade v1.0.0
 	github.com/luxfi/vm v1.0.16
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
