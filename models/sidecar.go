@@ -14,8 +14,8 @@ type TokenInfo struct {
 }
 
 type NetworkData struct {
-	ChainID                    ids.ID   // Chain identifier (validator set)
-	BlockchainID               ids.ID   // Blockchain ID
+	ChainID                    ids.ID // Chain identifier (validator set)
+	BlockchainID               ids.ID // Blockchain ID
 	RPCVersion                 int
 	RPCEndpoints               []string // RPC endpoints for the network
 	WSEndpoints                []string // WebSocket endpoints for the network

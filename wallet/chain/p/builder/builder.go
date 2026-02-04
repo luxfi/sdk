@@ -23,9 +23,9 @@ import (
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
+	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/gas"
 	"github.com/luxfi/vm/components/verify"
-	"github.com/luxfi/utxo/secp256k1fx"
 )
 
 var (
@@ -1882,7 +1882,7 @@ func (b *builder) spend(
 	// If excessLUX <= feeWithChange, we don't add the change output
 	// and we don't modify s.complexity (it stays without the change output)
 
-	utils.Sort(s.inputs)                                       // sort inputs
+	utils.Sort(s.inputs)                                    // sort inputs
 	lux.SortTransferableOutputs(s.changeOutputs, txs.Codec) // sort the change outputs
 	lux.SortTransferableOutputs(s.stakeOutputs, txs.Codec)  // sort stake outputs
 	return s.inputs, s.changeOutputs, s.stakeOutputs, nil

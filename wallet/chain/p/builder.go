@@ -1077,7 +1077,7 @@ func (b *txBuilder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                       // sort inputs
+	utils.Sort(inputs)                                    // sort inputs
 	lux.SortTransferableOutputs(changeOutputs, txs.Codec) // sort the change outputs
 	lux.SortTransferableOutputs(stakeOutputs, txs.Codec)  // sort stake outputs
 	return inputs, changeOutputs, stakeOutputs, nil

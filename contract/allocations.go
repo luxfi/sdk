@@ -10,11 +10,11 @@ import (
 	"github.com/luxfi/crypto"
 	"github.com/luxfi/evm/precompile/contracts/nativeminter"
 	"github.com/luxfi/genesis/pkg/genesis"
-	"github.com/luxfi/sdk/utils/fs"
 	"github.com/luxfi/geth/common"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/key"
 	"github.com/luxfi/sdk/models"
+	"github.com/luxfi/sdk/utils/fs"
 )
 
 // GetDefaultBlockchainAirdropKeyInfo returns information for the blockchain default allocation key.
