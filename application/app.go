@@ -13,13 +13,13 @@ import (
 	"github.com/luxfi/constants"
 	"github.com/luxfi/evm/core"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/sdk/utils/fs"
 	luxlog "github.com/luxfi/log"
 	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/sdk/lpm"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/luxfi/sdk/types"
+	"github.com/luxfi/sdk/utils/fs"
 )
 
 // Prompter is an alias for the prompts.Prompter interface

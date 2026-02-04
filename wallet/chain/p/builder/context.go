@@ -4,10 +4,10 @@
 package builder
 
 import (
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/txs/fee"
+	"github.com/luxfi/runtime"
 	"github.com/luxfi/vm/components/gas"
 )
 

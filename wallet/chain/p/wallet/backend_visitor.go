@@ -9,10 +9,10 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/protocol/p/txs"
 	"github.com/luxfi/protocol/p/warp"
 	"github.com/luxfi/protocol/p/warp/message"
 	"github.com/luxfi/protocol/p/warp/payload"
-	"github.com/luxfi/protocol/p/txs"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 )
