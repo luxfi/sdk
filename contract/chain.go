@@ -10,9 +10,9 @@ import (
 
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
-	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/application"
 	"github.com/luxfi/sdk/flags"
+	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/prompts"
 	"github.com/spf13/cobra"

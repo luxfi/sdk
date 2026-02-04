@@ -10,8 +10,8 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var _ Wallet = (*walletWithOptions)(nil)

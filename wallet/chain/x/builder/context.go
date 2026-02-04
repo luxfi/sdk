@@ -4,8 +4,8 @@
 package builder
 
 import (
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
+	"github.com/luxfi/runtime"
 )
 
 const Alias = "X"

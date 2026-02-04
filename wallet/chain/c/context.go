@@ -6,9 +6,9 @@ package c
 import (
 	"context"
 
-	"github.com/luxfi/runtime"
 	"github.com/luxfi/ids"
 	log "github.com/luxfi/log"
+	"github.com/luxfi/runtime"
 	sdkinfo "github.com/luxfi/sdk/info"
 )
 
