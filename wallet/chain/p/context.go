@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/luxfi/constants"
-	"github.com/luxfi/sdk/platformvm"
 	sdkinfo "github.com/luxfi/sdk/info"
+	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 )
 

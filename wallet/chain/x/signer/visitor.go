@@ -16,10 +16,10 @@ import (
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var (

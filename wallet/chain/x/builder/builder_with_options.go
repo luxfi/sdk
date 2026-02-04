@@ -8,8 +8,8 @@ import (
 	"github.com/luxfi/protocol/x/txs"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var _ Builder = (*builderWithOptions)(nil)
