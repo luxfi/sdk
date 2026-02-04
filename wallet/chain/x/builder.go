@@ -17,10 +17,10 @@ import (
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"
-	"github.com/luxfi/vm/components/verify"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
 	"github.com/luxfi/utxo/secp256k1fx"
+	"github.com/luxfi/vm/components/verify"
 )
 
 var (
@@ -629,7 +629,7 @@ func (b *txBuilder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                       // sort inputs
+	utils.Sort(inputs)                                   // sort inputs
 	lux.SortTransferableOutputs(outputs, Parser.Codec()) // sort the change outputs
 	return inputs, outputs, nil
 }

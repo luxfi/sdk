@@ -29,7 +29,7 @@ type Validator = GenesisValidator
 // Net represents a blockchain network with validator management capabilities
 // As above, so below - unified across all network layers (primary, L1, L2, L3)
 type Net struct {
-	ChainID               interface{} `json:"chainId"` // ids.ID
+	ChainID             interface{} `json:"chainId"` // ids.ID
 	BlockchainID        interface{} // ids.ID
 	OwnerAddress        *common.Address
 	RPC                 string
