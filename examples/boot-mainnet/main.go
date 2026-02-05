@@ -12,7 +12,6 @@ import (
 	"syscall"
 
 	luxlog "github.com/luxfi/log"
-	"github.com/luxfi/log/level"
 	"github.com/luxfi/sdk/blockchain"
 	"github.com/luxfi/sdk/config"
 	"github.com/luxfi/sdk/network"
@@ -20,7 +19,7 @@ import (
 
 func main() {
 	// Create logger
-	logger := luxlog.NewTestLogger(level.Info)
+	logger := luxlog.NewTestLogger(luxlog.InfoLevel)
 
 	// Create network configuration for mainnet
 	networkConfig := &config.NetworkConfig{
