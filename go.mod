@@ -39,7 +39,7 @@ require (
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/api v1.0.1
-	github.com/luxfi/bft v0.1.0
+	github.com/luxfi/bft v0.1.5
 	github.com/luxfi/consensus v1.22.63
 	github.com/luxfi/constants v1.4.4
 	github.com/luxfi/database v1.17.40
