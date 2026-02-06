@@ -390,60 +390,41 @@ type loggerAdapter struct {
 	logger log.Logger
 }
 
-func (l *loggerAdapter) Fatal(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
+// logFieldsToCtx converts log.Field slice to interface{} slice for the logger
+func logFieldsToCtx(fields []log.Field) []interface{} {
+	ctx := make([]interface{}, 0, len(fields)*2)
+	for _, f := range fields {
+		ctx = append(ctx, f.Key, f.Value)
 	}
-	l.logger.Fatal(msg, ctx...)
+	return ctx
+}
+
+func (l *loggerAdapter) Fatal(msg string, fields ...log.Field) {
+	l.logger.Fatal(msg, logFieldsToCtx(fields)...)
 }
 
 func (l *loggerAdapter) Error(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
-	}
-	l.logger.Error(msg, ctx...)
+	l.logger.Error(msg, logFieldsToCtx(fields)...)
 }
 
 func (l *loggerAdapter) Warn(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
-	}
-	l.logger.Warn(msg, ctx...)
+	l.logger.Warn(msg, logFieldsToCtx(fields)...)
 }
 
 func (l *loggerAdapter) Info(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
-	}
-	l.logger.Info(msg, ctx...)
+	l.logger.Info(msg, logFieldsToCtx(fields)...)
 }
 
 func (l *loggerAdapter) Trace(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
-	}
-	l.logger.Trace(msg, ctx...)
+	l.logger.Trace(msg, logFieldsToCtx(fields)...)
 }
 
 func (l *loggerAdapter) Debug(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
-	}
-	l.logger.Debug(msg, ctx...)
+	l.logger.Debug(msg, logFieldsToCtx(fields)...)
 }
 
 func (l *loggerAdapter) Verbo(msg string, fields ...log.Field) {
-	ctx := make([]interface{}, len(fields))
-	for i, f := range fields {
-		ctx[i] = f
-	}
-	l.logger.Verbo(msg, ctx...)
+	l.logger.Verbo(msg, logFieldsToCtx(fields)...)
 }
 
 // nodeIDToBFT converts ids.NodeID to bft.NodeID
