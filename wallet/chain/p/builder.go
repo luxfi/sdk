@@ -247,7 +247,9 @@ type Builder interface {
 // BuilderBackend specifies the required information needed to build unsigned
 // P-chain transactions.
 type BuilderBackend interface {
-	builder.Backend
+	// UTXOs returns the UTXOs for the given source chain.
+	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*lux.UTXO, error)
+	// GetTx returns the transaction with the given ID.
 	GetTx(ctx stdcontext.Context, txID ids.ID) (*txs.Tx, error)
 }
 
