@@ -40,22 +40,12 @@ func (kc *KeychainAdapter) Addresses() set.Set[ids.ShortID] {
 
 // Get implements wallet/keychain.Keychain (returns wallet/keychain.Signer, not utils/crypto/keychain.Signer)
 func (kc *KeychainAdapter) Get(addr ids.ShortID) (keychain.Signer, bool) {
-	signer, ok := kc.Keychain.Get(addr)
-	if !ok {
-		return nil, false
-	}
-	// secp256k1fx.luxSigner already implements wallet/keychain.Signer
-	return signer.(keychain.Signer), true
+	return kc.Keychain.Get(addr)
 }
 
 // GetEth implements c.EthKeychain
 func (kc *KeychainAdapter) GetEth(addr gethcommon.Address) (keychain.Signer, bool) {
-	signer, ok := kc.Keychain.GetEth(addr)
-	if !ok {
-		return nil, false
-	}
-	// secp256k1fx.luxSigner already implements wallet/keychain.Signer
-	return signer.(keychain.Signer), true
+	return kc.Keychain.GetEth(addr)
 }
 
 // EthAddresses implements c.EthKeychain
