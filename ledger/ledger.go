@@ -56,7 +56,7 @@ func (dev *LedgerDevice) Version() (v *version.Semantic, err error) {
 
 // Address returns the address at the given index
 func (dev *LedgerDevice) Address(hrp string, index uint32) (ids.ShortID, error) {
-	path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+	path := fmt.Sprintf("m/44'/60'/0'/0/%d", index)
 	resp, err := dev.device.GetPubKey(path, false, hrp, "P")
 	if err != nil {
 		return ids.ShortEmpty, err
@@ -95,7 +95,7 @@ func (dev *LedgerDevice) FindAddresses(addresses []string, maxIndex uint32) (map
 	indices := map[string]uint32{}
 	for index := uint32(0); index < maxIndex; index++ {
 		// Get the address from ledger at this index
-		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		path := fmt.Sprintf("m/44'/60'/0'/0/%d", index)
 		resp, err := dev.device.GetPubKey(path, false, "lux", "P")
 		if err != nil {
 			return nil, err
@@ -133,7 +133,7 @@ func (dev *LedgerDevice) FindFunds(
 	}
 	for index := uint32(0); index < maxIndex; index++ {
 		// Get the address from ledger at this index
-		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		path := fmt.Sprintf("m/44'/60'/0'/0/%d", index)
 		resp, err := dev.device.GetPubKey(path, false, "lux", "P")
 		if err != nil {
 			return []uint32{}, err
@@ -197,7 +197,7 @@ func getAddressBalance(address ids.ShortID, endpoint string) (uint64, error) {
 func (dev *LedgerDevice) GetAddresses(indices []uint32, hrp string, chainID string) ([]string, error) {
 	addresses := make([]string, len(indices))
 	for i, index := range indices {
-		path := fmt.Sprintf("m/44'/9000'/0'/0/%d", index)
+		path := fmt.Sprintf("m/44'/60'/0'/0/%d", index)
 		resp, err := dev.device.GetPubKey(path, false, hrp, chainID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get address at index %d: %w", index, err)
@@ -223,7 +223,7 @@ func (dev *LedgerDevice) SignHash(hash []byte, indices []uint32) ([][]byte, erro
 // Sign signs a hash with the ledger device for multiple indices
 func (dev *LedgerDevice) Sign(hash []byte, indices []uint32) ([][]byte, error) {
 	// Convert indices to BIP44 paths
-	pathPrefix := "m/44'/9000'/0'/0"
+	pathPrefix := "m/44'/60'/0'/0"
 	signingPaths := make([]string, len(indices))
 	for i, index := range indices {
 		signingPaths[i] = fmt.Sprintf("%d", index)
