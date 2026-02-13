@@ -17,15 +17,15 @@ import (
 )
 
 const (
-	// LUXCoinType is the BIP-44 coin type for LUX (9000')
-	LUXCoinType = 9000
+	// LUXCoinType is the BIP-44 coin type for LUX (60' = standard Ethereum)
+	LUXCoinType = 60
 
-	// DefaultDerivationPath is the standard BIP-44 path for LUX: m/44'/9000'/0'/0/0
-	DefaultDerivationPath = "m/44'/9000'/0'/0/0"
+	// DefaultDerivationPath is the standard BIP-44 path for LUX: m/44'/60'/0'/0/0
+	DefaultDerivationPath = "m/44'/60'/0'/0/0"
 )
 
 // DeriveKeyFromMnemonic derives a private key from a BIP-39 mnemonic using BIP-44 path.
-// Default path: m/44'/9000'/0'/0/0
+// Default path: m/44'/60'/0'/0/0
 func DeriveKeyFromMnemonic(mnemonic string, accountIndex uint32) ([]byte, error) {
 	if !bip39.IsMnemonicValid(mnemonic) {
 		return nil, fmt.Errorf("invalid mnemonic phrase")
@@ -35,7 +35,7 @@ func DeriveKeyFromMnemonic(mnemonic string, accountIndex uint32) ([]byte, error)
 }
 
 // DeriveKeyFromSeed derives a private key from a BIP-39 seed using BIP-44 path.
-// Path: m/44'/9000'/0'/0/{accountIndex}
+// Path: m/44'/60'/0'/0/{accountIndex}
 func DeriveKeyFromSeed(seed []byte, accountIndex uint32) ([]byte, error) {
 	// Create master key from seed
 	masterKey, err := bip32.NewMasterKey(seed)
@@ -43,32 +43,32 @@ func DeriveKeyFromSeed(seed []byte, accountIndex uint32) ([]byte, error) {
 		return nil, fmt.Errorf("failed to create master key: %w", err)
 	}
 
-	// BIP-44 path: m/44'/9000'/0'/0/{accountIndex}
+	// BIP-44 path: m/44'/60'/0'/0/{accountIndex} (standard Ethereum)
 	// m/44' (purpose)
 	key, err := masterKey.NewChildKey(bip32.FirstHardenedChild + 44)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive purpose: %w", err)
 	}
 
-	// m/44'/9000' (coin type for LUX)
+	// m/44'/60' (coin type - standard Ethereum)
 	key, err = key.NewChildKey(bip32.FirstHardenedChild + LUXCoinType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive coin type: %w", err)
 	}
 
-	// m/44'/9000'/0' (account)
+	// m/44'/60'/0' (account)
 	key, err = key.NewChildKey(bip32.FirstHardenedChild + 0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive account: %w", err)
 	}
 
-	// m/44'/9000'/0'/0 (change)
+	// m/44'/60'/0'/0 (change)
 	key, err = key.NewChildKey(0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive change: %w", err)
 	}
 
-	// m/44'/9000'/0'/0/{accountIndex} (address index)
+	// m/44'/60'/0'/0/{accountIndex} (address index)
 	key, err = key.NewChildKey(accountIndex)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive address index: %w", err)
