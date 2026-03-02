@@ -44,7 +44,7 @@ services:
 
   # PostgreSQL for state persistence
   postgres:
-    image: postgres:15-alpine
+    image: ghcr.io/hanzoai/sql:17-alpine
     environment:
       - POSTGRES_USER=lux
       - POSTGRES_PASSWORD=luxpass
