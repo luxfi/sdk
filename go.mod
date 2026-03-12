@@ -1,6 +1,6 @@
 module github.com/luxfi/sdk
 
-go 1.26
+go 1.26.1
 
 exclude github.com/luxfi/geth v1.16.1
 
