@@ -99,8 +99,6 @@ func NetworkFromNetworkID(networkID uint32) Network {
 		return Testnet
 	case constants.LocalNetworkID:
 		return Local
-	case constants.AvalancheLocalNetworkID:
-		return Local // Avalanche's local network ID (31337)
 	}
 	return Undefined
 }
