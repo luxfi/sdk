@@ -55,7 +55,7 @@ require (
 	github.com/luxfi/net v0.0.2
 	github.com/luxfi/netrunner v1.15.11
 	github.com/luxfi/protocol v0.0.3
-	github.com/luxfi/rpc v1.0.0
+	github.com/luxfi/rpc v1.0.1
 	github.com/luxfi/runtime v1.0.1
 	github.com/luxfi/utils v1.1.4
 	github.com/luxfi/utxo v0.2.4
