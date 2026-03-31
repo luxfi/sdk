@@ -18,9 +18,9 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/mock v0.6.0
 	go.uber.org/zap v1.27.1
-	golang.org/x/crypto v0.47.0
-	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
-	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/crypto v0.49.0
+	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
+	golang.org/x/net v0.51.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
@@ -41,7 +41,7 @@ require (
 	github.com/luxfi/api v1.0.1
 	github.com/luxfi/bft v0.1.5
 	github.com/luxfi/consensus v1.22.63
-	github.com/luxfi/constants v1.4.4
+	github.com/luxfi/constants v1.4.6
 	github.com/luxfi/database v1.17.40
 	github.com/luxfi/evm v0.8.35
 	github.com/luxfi/genesis v1.6.1
@@ -55,7 +55,7 @@ require (
 	github.com/luxfi/net v0.0.2
 	github.com/luxfi/netrunner v1.15.11
 	github.com/luxfi/protocol v0.0.3
-	github.com/luxfi/rpc v1.0.1
+	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/runtime v1.0.1
 	github.com/luxfi/utils v1.1.4
 	github.com/luxfi/utxo v0.2.4
@@ -64,8 +64,8 @@ require (
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/spf13/afero v1.15.0
-	golang.org/x/mod v0.32.0
-	golang.org/x/text v0.33.0
+	golang.org/x/mod v0.34.0
+	golang.org/x/text v0.35.0
 )
 
 require (
@@ -103,7 +103,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/emicklei/dot v1.10.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/ethereum/c-kzg-4844/v2 v2.1.5 // indirect
@@ -181,11 +181,11 @@ require (
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
-	gonum.org/v1/gonum v0.16.0 // indirect
+	gonum.org/v1/gonum v0.17.0 // indirect
 	google.golang.org/grpc v1.78.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
@@ -193,7 +193,7 @@ require (
 )
 
 require (
-	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251230134950-44c893854e3f // indirect
+	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20260311194731-d5b7577c683d // indirect
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/dgraph-io/badger/v4 v4.9.0 // indirect
