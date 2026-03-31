@@ -366,8 +366,8 @@ github.com/luxfi/precompile v0.4.6 h1:TsHminD42kobryViOj/aBTPlPA+kU840OOTbS7fpWv
 github.com/luxfi/precompile v0.4.6/go.mod h1:HrDssVg6EQjWhunwYEGUO5VngS8Veng6TRBQy0NuSMU=
 github.com/luxfi/protocol v0.0.3 h1:Teytlu6Gbd0HqJXuDvV84ArqRabEFR40yDNNQUOCpVE=
 github.com/luxfi/protocol v0.0.3/go.mod h1:ZSA1i7f2SlN129UG7rUZ+doHvf5/mtiurJMqRwGB4M8=
-github.com/luxfi/rpc v1.0.0 h1:G8o89gT+CT3SOj08A5FS5G92fovKrWxs941FmUz28CA=
-github.com/luxfi/rpc v1.0.0/go.mod h1:dhxzM5rFqNpEOOHB7+8YBQ9d/V4haa6/id9AQTIIJvQ=
+github.com/luxfi/rpc v1.0.1 h1:sD/ZobkjhtG1ZdVpXnyIU5tB2FwbKmvGwW+9nW3Ff/M=
+github.com/luxfi/rpc v1.0.1/go.mod h1:fUnLDV0ziJrKOltKmzpaTiTNyD2khaRcf/gmz14fD1o=
 github.com/luxfi/runtime v1.0.1 h1:cii3OsRiVSIl9jzfWFM6++62T1r6ZSGP+/3F0Ezhpqw=
 github.com/luxfi/runtime v1.0.1/go.mod h1:2hBKjzbEeE4dzrhUKH8dqkRgLEyiXz6GmuVusy3vJMs=
 github.com/luxfi/sampler v1.0.0 h1:k8Sf6otW83w4pQp0jXLA+g3J/joB7w7SqXQsWmNTOV0=
