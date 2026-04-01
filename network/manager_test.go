@@ -25,7 +25,7 @@ func TestNetworkManager_CreateNetwork(t *testing.T) {
 			params: &NetworkParams{
 				Name:             "test-local",
 				Type:             NetworkTypeLocal,
-				NumNodes:         5,
+				NumNodes:         3,
 				EnableMonitoring: false,
 			},
 			wantErr: false,
@@ -45,7 +45,7 @@ func TestNetworkManager_CreateNetwork(t *testing.T) {
 			params: &NetworkParams{
 				Name:     "test-invalid",
 				Type:     NetworkType("invalid"),
-				NumNodes: 5,
+				NumNodes: 3,
 			},
 			wantErr:     true,
 			expectedErr: "unsupported network type",
