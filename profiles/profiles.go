@@ -8,7 +8,7 @@
 // Available profiles:
 //   - standard: Conservative mainnet settings for production-safe operation
 //   - fast:     Balanced testnet settings for development
-//   - turbo:    Aggressive 5-node local network with 3/5 quorum
+//   - turbo:    Aggressive 3-node local network with 2/3 quorum
 //   - ultra:    Maximum aggression for single-node dev mode with K=1 consensus
 package profiles
 
@@ -193,9 +193,9 @@ func ValidateProfile(data map[string]interface{}) error {
 func DefaultProfileForNetwork(networkName string) string {
 	switch networkName {
 	case "mainnet":
-		return "turbo" // Ultra-fast for local 5-node mainnet
+		return "turbo" // Ultra-fast for local 3-node mainnet
 	case "testnet":
-		return "turbo" // Ultra-fast for local 5-node testnet
+		return "turbo" // Ultra-fast for local 3-node testnet
 	case "devnet", "local":
 		return "turbo"
 	case "dev":
