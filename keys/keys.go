@@ -95,25 +95,25 @@ func LoadKeyFromFile(path string) ([]byte, error) {
 }
 
 // LoadKeyFromEnv loads a key from environment variables.
-// Priority: 1) LUX_PRIVATE_KEY (hex), 2) LUX_MNEMONIC (24 words)
+// Priority: 1) PRIVATE_KEY (hex), 2) MNEMONIC (24 words)
 func LoadKeyFromEnv() ([]byte, error) {
-	if envKey := os.Getenv("LUX_PRIVATE_KEY"); envKey != "" {
+	if envKey := os.Getenv("PRIVATE_KEY"); envKey != "" {
 		keyBytes, err := hex.DecodeString(strings.TrimSpace(envKey))
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode LUX_PRIVATE_KEY: %w", err)
+			return nil, fmt.Errorf("failed to decode PRIVATE_KEY: %w", err)
 		}
 		return keyBytes, nil
 	}
 
-	if mnemonic := os.Getenv("LUX_MNEMONIC"); mnemonic != "" {
+	if mnemonic := os.Getenv("MNEMONIC"); mnemonic != "" {
 		return DeriveKeyFromMnemonic(mnemonic, 0)
 	}
 
-	return nil, fmt.Errorf("no key found: set LUX_PRIVATE_KEY or LUX_MNEMONIC environment variable")
+	return nil, fmt.Errorf("no key found: set PRIVATE_KEY or MNEMONIC environment variable")
 }
 
 // LoadKey loads a key from file, environment, or returns an error.
-// Priority: 1) keyPath if non-empty, 2) LUX_PRIVATE_KEY env, 3) LUX_MNEMONIC env
+// Priority: 1) keyPath if non-empty, 2) PRIVATE_KEY env, 3) MNEMONIC env
 func LoadKey(keyPath string) ([]byte, error) {
 	if keyPath != "" {
 		return LoadKeyFromFile(keyPath)

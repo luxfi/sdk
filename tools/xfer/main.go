@@ -3,7 +3,7 @@
 
 // xfer is a simple tool to transfer LUX from X-Chain to P-Chain
 // Usage: xfer -uri http://127.0.0.1:9630 -key ~/.lux/keys/mainnet-deployer.pk -amount 1000000000
-// Or set LUX_PRIVATE_KEY env var (hex format) or LUX_MNEMONIC env var (24 words)
+// Or set PRIVATE_KEY env var (hex format) or MNEMONIC env var (24 words)
 package main
 
 import (
