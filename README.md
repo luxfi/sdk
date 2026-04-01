@@ -258,7 +258,7 @@ The SDK uses netrunner for comprehensive network management:
 network, err := sdk.CreateNetwork(ctx, &network.NetworkParams{
     Name:             "test-network",
     Type:             network.NetworkTypeLocal,
-    NumNodes:         5,
+    NumNodes:         3,
     EnableStaking:    true,
     EnableMonitoring: true,
 })
