@@ -1,6 +1,6 @@
 {
   "name": "turbo",
-  "description": "Ultra-fast 5-node local network with K=3, Alpha=2/3, Beta=2",
+  "description": "Ultra-fast 3-node local network with K=3, Alpha=2/3, Beta=2",
   "consensus": {
     "sample-size": 3,
     "preference-quorum-size": 2,

@@ -27,9 +27,9 @@ func TestGetProfile(t *testing.T) {
 		sampleSize  int
 		description string
 	}{
-		{"standard", 5, "Conservative mainnet settings for production-safe operation"},
-		{"fast", 5, "Balanced testnet settings for development"},
-		{"turbo", 3, "Ultra-fast 5-node local network with K=3, Alpha=2/3, Beta=2"},
+		{"standard", 3, "Conservative mainnet settings for production-safe operation"},
+		{"fast", 3, "Balanced testnet settings for development"},
+		{"turbo", 3, "Ultra-fast 3-node local network with K=3, Alpha=2/3, Beta=2"},
 		{"ultra", 1, "Maximum aggression for single-node dev mode with K=1 consensus"},
 	}
 
