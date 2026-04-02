@@ -254,8 +254,7 @@ func FetchState(
 	utxos := walletcommon.NewUTXOs()
 	addrList := addrs.List()
 
-	// For now, only fetch P-chain UTXOs since that's what's needed for blockchain creation.
-	// X-chain UTXO fetching has codec issues that need further investigation.
+	// Fetch P-chain UTXOs
 	err = AddAllUTXOs(
 		ctx,
 		utxos,
@@ -267,6 +266,14 @@ func FetchState(
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	// Fetch X-chain UTXOs (needed for X→P export to fund subnet creation)
+	xChainUTXOs, _, _, xErr := xClient.GetAtomicUTXOs(ctx, addrList, "", 1024, ids.ShortEmpty, ids.Empty)
+	if xErr == nil {
+		for _, utxoBytes := range xChainUTXOs {
+			_ = utxos.AddUTXO(ctx, xCTX.BlockchainID, xCTX.BlockchainID, utxoBytes)
+		}
 	}
 	return &LUXState{
 		PClient: pClient,
