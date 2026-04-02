@@ -58,7 +58,7 @@ require (
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/runtime v1.0.1
 	github.com/luxfi/utils v1.1.4
-	github.com/luxfi/utxo v0.2.5
+	github.com/luxfi/utxo v0.2.6
 	github.com/luxfi/validators v1.0.0
 	github.com/melbahja/goph v1.4.0
 	github.com/olekukonko/tablewriter v1.0.9
