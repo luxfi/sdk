@@ -41,7 +41,7 @@ require (
 	github.com/luxfi/api v1.0.1
 	github.com/luxfi/bft v0.1.5
 	github.com/luxfi/consensus v1.22.63
-	github.com/luxfi/constants v1.4.6
+	github.com/luxfi/constants v1.4.7
 	github.com/luxfi/database v1.17.40
 	github.com/luxfi/evm v0.8.35
 	github.com/luxfi/genesis v1.6.1
