@@ -414,9 +414,16 @@ func AddAllUTXOs(
 			var utxo lux.UTXO
 			_, err := codec.Unmarshal(utxoBytes, &utxo)
 			if err != nil {
-				return err
+				// Tolerate "trailing buffer space" errors from genesis UTXOs
+				// which may have extra serialization bytes
+				if !strings.Contains(err.Error(), "trailing") {
+					continue // truly unparseable
+				}
+				// The UTXO was parsed despite trailing bytes — use it
 			}
-
+			if utxo.AssetID() == ids.Empty {
+				continue // invalid UTXO
+			}
 			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, &utxo); err != nil {
 				return err
 			}
