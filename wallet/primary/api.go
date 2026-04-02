@@ -268,13 +268,7 @@ func FetchState(
 		return nil, err
 	}
 
-	// Fetch X-chain UTXOs (needed for X→P export to fund subnet creation)
-	xChainUTXOs, _, _, xErr := xClient.GetAtomicUTXOs(ctx, addrList, "", 1024, ids.ShortEmpty, ids.Empty)
-	if xErr == nil {
-		for _, utxoBytes := range xChainUTXOs {
-			_ = utxos.AddUTXO(ctx, xCTX.BlockchainID, xCTX.BlockchainID, utxoBytes)
-		}
-	}
+	// X-chain UTXOs fetched separately when needed (codec type mismatch with AddUTXO)
 	return &LUXState{
 		PClient: pClient,
 		PCTX:    pCTX,
