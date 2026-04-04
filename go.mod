@@ -7,7 +7,7 @@ exclude github.com/luxfi/geth v1.16.1
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
-	github.com/luxfi/crypto v1.17.40
+	github.com/luxfi/crypto v1.17.44
 	github.com/luxfi/geth v1.16.75
 	github.com/luxfi/ids v1.2.9
 	github.com/luxfi/log v1.4.1
@@ -44,7 +44,7 @@ require (
 	github.com/luxfi/constants v1.4.7
 	github.com/luxfi/database v1.17.40
 	github.com/luxfi/evm v0.8.35
-	github.com/luxfi/genesis v1.6.1
+	github.com/luxfi/genesis v1.7.1
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/keychain v1.0.2
@@ -98,7 +98,7 @@ require (
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20250429170803-42689b6311bb // indirect
 	github.com/consensys/gnark-crypto v0.19.2 // indirect
-	github.com/crate-crypto/go-eth-kzg v1.4.0 // indirect
+	github.com/crate-crypto/go-eth-kzg v1.5.0 // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -133,7 +133,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/juju/fslock v0.0.0-20160525022230-4d5c94c67b4b // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.18.3 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
