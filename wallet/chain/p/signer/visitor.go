@@ -186,7 +186,7 @@ func (s *visitor) BaseTx(tx *txs.BaseTx) error {
 	return sign(s.tx, false, txSigners)
 }
 
-func (s *visitor) ConvertChainToL1Tx(tx *txs.ConvertChainToL1Tx) error {
+func (s *visitor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) error {
 	txSigners, err := s.getSigners(constants.PlatformChainID, tx.Ins)
 	if err != nil {
 		return err
