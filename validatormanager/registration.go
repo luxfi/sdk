@@ -673,8 +673,8 @@ func GetRegistrationJustification(
 		if bootstrapValidationID == validationID {
 			// TODO: Uncomment when L1ValidatorRegistrationJustification is available
 			// justification := platformvm.L1ValidatorRegistrationJustification{
-			// 	Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertChainToL1TxData{
-			// 		ConvertChainToL1TxData: &platformvm.ChainIDIndex{
+			// 	Preimage: &platformvm.L1ValidatorRegistrationJustification_ConvertNetworkToL1TxData{
+			// 		ConvertNetworkToL1TxData: &platformvm.ChainIDIndex{
 			// 			ChainID: chainID[:],
 			// 			Index:    validationIndex,
 			// 		},
