@@ -10,6 +10,7 @@ import (
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/protocol/p/status"
+	"github.com/luxfi/utxo"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/components/gas"
 )
@@ -21,11 +22,15 @@ type GetBalanceRequest struct {
 
 // GetBalanceResponse is the response from GetBalance
 type GetBalanceResponse struct {
-	Balance            json.Uint64 `json:"balance"`
-	Unlocked           json.Uint64 `json:"unlocked"`
-	LockedStakeable    json.Uint64 `json:"lockedStakeable"`
-	LockedNotStakeable json.Uint64 `json:"lockedNotStakeable"`
-	UTXOIDs            []ids.ID    `json:"utxoIDs"`
+	Balance             json.Uint64            `json:"balance"`
+	Unlocked            json.Uint64            `json:"unlocked"`
+	LockedStakeable     json.Uint64            `json:"lockedStakeable"`
+	LockedNotStakeable  json.Uint64            `json:"lockedNotStakeable"`
+	Balances            map[ids.ID]json.Uint64 `json:"balances"`
+	Unlockeds           map[ids.ID]json.Uint64 `json:"unlockeds"`
+	LockedStakeables    map[ids.ID]json.Uint64 `json:"lockedStakeables"`
+	LockedNotStakeables map[ids.ID]json.Uint64 `json:"lockedNotStakeables"`
+	UTXOIDs             []*utxo.UTXOID         `json:"utxoIDs"`
 }
 
 // GetNetArgs is the request for GetNet
@@ -109,14 +114,13 @@ type GetL1ValidatorReply struct {
 	Height                json.Uint64      `json:"height"`
 }
 
-// APIBlockchain represents a blockchain in the API response
+// APIBlockchain represents a blockchain in the API response.
+// NetID is the ID of the network (subnet) that validates this blockchain.
 type APIBlockchain struct {
-	ID       ids.ID   `json:"id"`
-	Name     string   `json:"name"`
-	ChainID  ids.ID   `json:"chainID"`
-	VMID     ids.ID   `json:"vmID"`
-	FxIDs    []ids.ID `json:"fxIDs,omitempty"`
-	Metadata string   `json:"metadata,omitempty"`
+	ID    ids.ID `json:"id"`
+	Name  string `json:"name"`
+	NetID ids.ID `json:"netID"`
+	VMID  ids.ID `json:"vmID"`
 }
 
 // GetBlockchainsReply is the response from GetBlockchains
