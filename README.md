@@ -582,7 +582,7 @@ log.Printf("Migration complete: %d contracts, %d users migrated",
 ```go
 // Fine-tune consensus for your use case
 consensus := &ConsensusParams{
-    SnowballParameters: SnowballParameters{
+    WaveParameters: WaveParameters{
         K:               21,  // Sample size
         AlphaPreference: 15,  // Quorum size
         AlphaConfidence: 19,  // Confidence threshold
