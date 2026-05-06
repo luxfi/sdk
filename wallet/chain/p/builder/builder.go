@@ -152,19 +152,19 @@ type Builder interface {
 		options ...common.Option,
 	) (*txs.TransferChainOwnershipTx, error)
 
-	// NewConvertNetworkToL1Tx converts the chain to a Permissionless L1.
+	// NewConvertChainToL1Tx converts the chain to a Permissionless L1.
 	//
 	// - [chainID] specifies the chain to be converted
 	// - [managerChainID] specifies which chain the manager is deployed on
 	// - [address] specifies the address of the manager
 	// - [validators] specifies the initial L1 validators of the L1
-	NewConvertNetworkToL1Tx(
+	NewConvertChainToL1Tx(
 		chainID ids.ID,
 		managerChainID ids.ID,
 		address []byte,
-		validators []*txs.ConvertNetworkToL1Validator,
+		validators []*txs.ConvertChainToL1Validator,
 		options ...common.Option,
-	) (*txs.ConvertNetworkToL1Tx, error)
+	) (*txs.ConvertChainToL1Tx, error)
 
 	// NewRegisterL1ValidatorTx adds a validator to an L1.
 	//
@@ -829,13 +829,13 @@ func (b *builder) NewTransferChainOwnershipTx(
 	return tx, b.initCtx(tx)
 }
 
-func (b *builder) NewConvertNetworkToL1Tx(
+func (b *builder) NewConvertChainToL1Tx(
 	chainID ids.ID,
 	managerChainID ids.ID,
 	address []byte,
-	validators []*txs.ConvertNetworkToL1Validator,
+	validators []*txs.ConvertChainToL1Validator,
 	options ...common.Option,
-) (*txs.ConvertNetworkToL1Tx, error) {
+) (*txs.ConvertChainToL1Tx, error) {
 	var luxToBurn uint64
 	for _, vdr := range validators {
 		var err error
@@ -865,7 +865,7 @@ func (b *builder) NewConvertNetworkToL1Tx(
 	bytesComplexity := gas.Dimensions{
 		gas.Bandwidth: additionalBytes,
 	}
-	validatorComplexity, err := fee.ConvertNetworkToL1ValidatorComplexity(validators...)
+	validatorComplexity, err := fee.ConvertChainToL1ValidatorComplexity(validators...)
 	if err != nil {
 		return nil, err
 	}
@@ -873,7 +873,7 @@ func (b *builder) NewConvertNetworkToL1Tx(
 	if err != nil {
 		return nil, err
 	}
-	complexity, err := fee.IntrinsicConvertNetworkToL1TxComplexities.Add(
+	complexity, err := fee.IntrinsicConvertChainToL1TxComplexities.Add(
 		&bytesComplexity,
 		&validatorComplexity,
 		&authComplexity,
@@ -895,7 +895,7 @@ func (b *builder) NewConvertNetworkToL1Tx(
 	}
 
 	utils.Sort(validators)
-	tx := &txs.ConvertNetworkToL1Tx{
+	tx := &txs.ConvertChainToL1Tx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
 			BlockchainID: constants.PlatformChainID,

@@ -148,14 +148,14 @@ func (w *withOptions) IssueTransferChainOwnershipTx(
 	)
 }
 
-func (w *withOptions) IssueConvertNetworkToL1Tx(
+func (w *withOptions) IssueConvertChainToL1Tx(
 	chainID ids.ID,
 	managerChainID ids.ID,
 	address []byte,
-	validators []*txs.ConvertNetworkToL1Validator,
+	validators []*txs.ConvertChainToL1Validator,
 	options ...common.Option,
 ) (*txs.Tx, error) {
-	return w.wallet.IssueConvertNetworkToL1Tx(
+	return w.wallet.IssueConvertChainToL1Tx(
 		chainID,
 		managerChainID,
 		address,
