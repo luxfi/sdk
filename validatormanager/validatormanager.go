@@ -295,7 +295,7 @@ func AddRewardCalculatorV2_0_0ToAllocations(
 }
 
 // SetupPoA sets up PoA manager after a successful execution of
-// ConvertNetworkToL1Tx on P-Chain.
+// ConvertChainToL1Tx on P-Chain.
 // Needs the list of validators for that tx,
 // [convertChainValidators], together with an evm [ownerAddress]
 // to set as the owner of the PoA manager.
@@ -321,7 +321,7 @@ func SetupPoA(
 }
 
 // SetupPoS sets up PoS manager after a successful execution of
-// ConvertNetworkToL1Tx on P-Chain.
+// ConvertChainToL1Tx on P-Chain.
 // Needs the list of validators for that tx,
 // [convertChainValidators], together with an evm [ownerAddress]
 // to set as the owner of the PoS manager.
