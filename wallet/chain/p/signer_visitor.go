@@ -388,8 +388,8 @@ func (s *signerVisitor) SetL1ValidatorWeightTx(tx *txs.SetL1ValidatorWeightTx) e
 	return sign(s.tx, true, txSigners)
 }
 
-// ConvertNetworkToL1Tx signs a ConvertNetworkToL1Tx
-func (s *signerVisitor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) error {
+// ConvertChainToL1Tx signs a ConvertChainToL1Tx
+func (s *signerVisitor) ConvertChainToL1Tx(tx *txs.ConvertChainToL1Tx) error {
 	txSigners, err := s.getSigners(constants.PrimaryNetworkID, tx.Ins)
 	if err != nil {
 		return err
