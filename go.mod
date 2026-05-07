@@ -40,11 +40,11 @@ require (
 	github.com/luxfi/address v1.0.1
 	github.com/luxfi/api v1.0.10
 	github.com/luxfi/bft v0.1.5
-	github.com/luxfi/consensus v1.22.85
-	github.com/luxfi/constants v1.4.7
+	github.com/luxfi/consensus v1.23.1
+	github.com/luxfi/constants v1.5.2
 	github.com/luxfi/database v1.18.3
-	github.com/luxfi/evm v0.8.35
-	github.com/luxfi/genesis v1.7.1
+	github.com/luxfi/evm v0.8.49
+	github.com/luxfi/genesis v1.9.2
 	github.com/luxfi/go-bip32 v1.0.2
 	github.com/luxfi/go-bip39 v1.1.2
 	github.com/luxfi/keychain v1.0.2
@@ -53,7 +53,7 @@ require (
 	github.com/luxfi/math v1.4.0
 	github.com/luxfi/math/safe v0.0.1
 	github.com/luxfi/net v0.0.4
-	github.com/luxfi/netrunner v1.18.0
+	github.com/luxfi/netrunner v1.18.1
 	github.com/luxfi/protocol v0.0.3
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/runtime v1.0.1
@@ -146,7 +146,8 @@ require (
 	github.com/luxfi/age v1.5.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/filesystem v0.0.1 // indirect
-	github.com/luxfi/node v1.24.22 // indirect
+	github.com/luxfi/gpu v1.0.1 // indirect
+	github.com/luxfi/node v1.26.2 // indirect
 	github.com/luxfi/trace v0.1.4 // indirect
 	github.com/luxfi/zapdb v1.10.0 // indirect
 	github.com/luxfi/zwing v0.5.2 // indirect
