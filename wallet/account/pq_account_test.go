@@ -8,7 +8,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/cloudflare/circl/sign/mldsa/mldsa65"
+	"github.com/luxfi/crypto/pq/mldsa/mldsa65"
 )
 
 // testMasterSeed is a fixed 64-byte BIP-39 seed for determinism tests.

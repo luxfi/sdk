@@ -6,7 +6,7 @@ package account
 import (
 	"fmt"
 
-	"github.com/cloudflare/circl/sign/mldsa/mldsa65"
+	"github.com/luxfi/crypto/pq/mldsa/mldsa65"
 	"github.com/luxfi/go-bip32"
 )
 
@@ -126,14 +126,20 @@ func NewPQAccount(
 	}
 
 	// Domain-separate the child seed into ξ for FIPS-204 KeyGen.
-	xiBytes, err := expandChildSeed(childSeed, customization, mldsa65.SeedSize)
+	// luxfi/crypto/pq/mldsa/mldsa65.NewKeyFromSeed accepts an arbitrary-length
+	// seed and internally cSHAKEs it to the 32-byte ξ per
+	// "LUX/FIPS204/MLDSA65/seed". We pre-domain-separate by role first so
+	// the same child seed across roles never collides, then hand the 32-byte
+	// ξ off to the package wrapper.
+	xi, err := expandChildSeed(childSeed, customization, mldsa65.SeedSize)
 	if err != nil {
 		return nil, fmt.Errorf("account: expand child seed: %w", err)
 	}
-	var xi [mldsa65.SeedSize]byte
-	copy(xi[:], xiBytes)
 
-	pk, sk := mldsa65.NewKeyFromSeed(&xi)
+	pk, sk, err := mldsa65.NewKeyFromSeed(xi)
+	if err != nil {
+		return nil, fmt.Errorf("account: ml-dsa-65 keygen: %w", err)
+	}
 	pubBytes := pk.Bytes()
 	privBytes := sk.Bytes()
 
@@ -180,8 +186,8 @@ func (a *PQAccount) Sign(digest [AccountIDSize]byte) ([]byte, error) {
 	}
 
 	ctx := []byte(CSHAKECustomizationTx)
-	sig := make([]byte, mldsa65.SignatureSize)
-	if err := mldsa65.SignTo(sk, digest[:], ctx, true, sig); err != nil {
+	sig, err := mldsa65.Sign(sk, digest[:], ctx, true)
+	if err != nil {
 		return nil, fmt.Errorf("account: ml-dsa-65 sign: %w", err)
 	}
 	return sig, nil
