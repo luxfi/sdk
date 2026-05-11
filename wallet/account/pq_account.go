@@ -31,11 +31,10 @@ const (
 	// rollout and pinned across all luxfi wallets.
 	coinTypeLux uint32 = 9000
 	// branchPQ is the hardened child index for the ML-DSA branch.
+	// Branch 1' on the same coin/chain is the secp256k1 classical-compat
+	// branch (genesis F35); branch 2' is the SLH-DSA recovery branch
+	// (recovery.go). PQAccount itself derives only on branchPQ.
 	branchPQ uint32 = 0
-	// branchClassical is the hardened child index for the secp256k1 branch.
-	// Kept here as a named constant for documentation; PQAccount itself
-	// only ever uses branchPQ.
-	branchClassical uint32 = 1
 )
 
 // PQAccount is an ML-DSA-65 native wallet account.
