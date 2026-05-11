@@ -23,6 +23,25 @@ import (
 var (
 	ErrInvalidKeyType = errors.New("invalid key type")
 	ErrKeyNotFound    = errors.New("key not found")
+
+	// ErrHybridSigTruncated is returned when a hybrid signature blob is
+	// too short to carry the two length-prefixed halves.
+	ErrHybridSigTruncated = errors.New("hybrid signature truncated")
+
+	// ErrHybridSigClassicalFailed is returned when the classical half of
+	// a hybrid signature does not verify under the supplied classical
+	// public key. Under AND-semantics, this fails the whole hybrid
+	// signature — even a valid PQ half cannot rescue it.
+	//
+	// Closes red-team F112 on the classical axis: previously the
+	// implicit "either half verifies" semantics let a forged hybrid
+	// pass as long as ONE half was correct; now both must pass.
+	ErrHybridSigClassicalFailed = errors.New("hybrid signature: classical half failed to verify")
+
+	// ErrHybridSigPQFailed is returned when the post-quantum half of a
+	// hybrid signature does not verify under the supplied PQ public
+	// key. Closes F112 on the PQ axis.
+	ErrHybridSigPQFailed = errors.New("hybrid signature: post-quantum half failed to verify")
 )
 
 // KeyType represents the type of cryptographic key
@@ -431,4 +450,131 @@ func (kc *PQKeychain) GetPQSigner(addr ids.ShortID) (*PQSigner, bool) {
 // SetDefaultType sets the default key type for new keys
 func (kc *PQKeychain) SetDefaultType(keyType KeyType) {
 	kc.defaultType = keyType
+}
+
+// =============================================================================
+// Hybrid signature AND-verification (closes red-team F112).
+//
+// PQSigner.SignHash / PQSigner.Sign emit a hybrid signature on a
+// KeyTypeHybridSecp256k1MLDSA44 / KeyTypeHybridSecp256k1SLHDSA128
+// signer as the concatenation:
+//
+//	[u16 BE classicalLen] || classicalSig || [u16 BE pqLen] || pqSig
+//
+// The previous verifier surface treated this as an OR — a forged
+// hybrid carrying a valid ECDSA half and a random "PQ" blob would
+// pass any "either half verifies" verifier, reducing hybrid security
+// to the weaker of the two halves (ECDSA).
+//
+// The verifiers below enforce AND: both halves MUST verify under
+// their respective public keys, or the entire hybrid signature is
+// refused. Returns typed sentinels (ErrHybridSig*) so call sites can
+// route on the exact failure axis without parsing error strings.
+//
+// One-way ordering: classical is checked first, PQ second. Both halves
+// must produce ok=true; any non-true result fails the hybrid. There is
+// no short-circuit on the classical refusal — verifiers still run the
+// PQ check so timing-side channels do not leak which half failed.
+
+// SplitHybridSignature parses a hybrid signature blob into its
+// classical and PQ halves using the length-prefix layout produced by
+// PQSigner. Returns ErrHybridSigTruncated on any structural failure.
+//
+// Exported so callers that want to dispatch verification through their
+// own keying setup (e.g. a wallet that holds the two public keys
+// separately) can reuse the parsing without taking the verify path.
+func SplitHybridSignature(sig []byte) (classical, pq []byte, err error) {
+	if len(sig) < 2 {
+		return nil, nil, ErrHybridSigTruncated
+	}
+	classicalLen := int(sig[0])<<8 | int(sig[1])
+	if 2+classicalLen+2 > len(sig) {
+		return nil, nil, ErrHybridSigTruncated
+	}
+	classical = sig[2 : 2+classicalLen]
+	pqLenOff := 2 + classicalLen
+	pqLen := int(sig[pqLenOff])<<8 | int(sig[pqLenOff+1])
+	pqStart := pqLenOff + 2
+	if pqStart+pqLen != len(sig) {
+		return nil, nil, ErrHybridSigTruncated
+	}
+	pq = sig[pqStart : pqStart+pqLen]
+	return classical, pq, nil
+}
+
+// VerifyHybridSecp256k1MLDSA verifies a hybrid signature produced by a
+// KeyTypeHybridSecp256k1MLDSA{44,65,87} signer over message msg. BOTH
+// halves must verify; either half failing fails the whole signature.
+// Closes F112.
+//
+// classicalPub is the secp256k1 public key. pqPub is the ML-DSA
+// public key carrying its own internal Mode setting. The classical
+// half is verified against the SHA-256 hash of msg (matching
+// PQSigner.Sign's hash-then-sign for the classical leg); the PQ half
+// is verified against the raw message (ML-DSA hashes internally).
+func VerifyHybridSecp256k1MLDSA(
+	classicalPub *secp256k1.PublicKey,
+	pqPub *mldsa.PublicKey,
+	msg []byte,
+	hybridSig []byte,
+) error {
+	classical, pq, err := SplitHybridSignature(hybridSig)
+	if err != nil {
+		return err
+	}
+	if classicalPub == nil {
+		return ErrInvalidKeyType
+	}
+	if pqPub == nil {
+		return ErrInvalidKeyType
+	}
+
+	hashed := sha256.Sum256(msg)
+	classicalOK := classicalPub.VerifyHash(hashed[:], classical)
+	pqOK := pqPub.VerifySignature(msg, pq)
+
+	// AND-semantics: BOTH must pass. We compute both halves before
+	// branching so a side-channel observer can't infer which half
+	// failed from short-circuit timing.
+	if !classicalOK {
+		return ErrHybridSigClassicalFailed
+	}
+	if !pqOK {
+		return ErrHybridSigPQFailed
+	}
+	return nil
+}
+
+// VerifyHybridSecp256k1SLHDSA verifies a hybrid signature produced by
+// a KeyTypeHybridSecp256k1SLHDSA{128,192,256} signer over message msg.
+// AND-semantics: BOTH halves must verify. Closes F112 on the
+// SLH-DSA axis.
+func VerifyHybridSecp256k1SLHDSA(
+	classicalPub *secp256k1.PublicKey,
+	pqPub *slhdsa.PublicKey,
+	msg []byte,
+	hybridSig []byte,
+) error {
+	classical, pq, err := SplitHybridSignature(hybridSig)
+	if err != nil {
+		return err
+	}
+	if classicalPub == nil {
+		return ErrInvalidKeyType
+	}
+	if pqPub == nil {
+		return ErrInvalidKeyType
+	}
+
+	hashed := sha256.Sum256(msg)
+	classicalOK := classicalPub.VerifyHash(hashed[:], classical)
+	pqOK := pqPub.VerifySignature(msg, pq)
+
+	if !classicalOK {
+		return ErrHybridSigClassicalFailed
+	}
+	if !pqOK {
+		return ErrHybridSigPQFailed
+	}
+	return nil
 }
