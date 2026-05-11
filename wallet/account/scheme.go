@@ -35,17 +35,19 @@ import "fmt"
 // scheme is wire-compatible with the consensus identity-scheme byte.
 //
 // 0x00..0x3F — reserved (classical / non-PQ space, kept disjoint from PQ).
-//   0x10  — secp256k1 (classical, allowed only under the classical-compat
-//           unsafe flag; strict-PQ chains refuse this).
+//
+//	0x10  — secp256k1 (classical, allowed only under the classical-compat
+//	        unsafe flag; strict-PQ chains refuse this).
 //
 // 0x40..0x4F — raw FIPS 204 ML-DSA, single-party identity signatures.
-//   0x41  — ML-DSA-44 (NIST Cat 2; dev/testnet only).
-//   0x42  — ML-DSA-65 (NIST Cat 3; production default).
-//   0x43  — ML-DSA-87 (NIST Cat 5; high-value identities).
+//
+//	0x41  — ML-DSA-44 (NIST Cat 2; dev/testnet only).
+//	0x42  — ML-DSA-65 (NIST Cat 3; production default).
+//	0x43  — ML-DSA-87 (NIST Cat 5; high-value identities).
 type WalletSchemeID uint8
 
 const (
-	WalletSchemeNone   WalletSchemeID = 0x00
+	WalletSchemeNone      WalletSchemeID = 0x00
 	WalletSchemeSecp256k1 WalletSchemeID = 0x10 // classical-compat (unsafe on strict-PQ chains)
 
 	WalletSchemeMLDSA44 WalletSchemeID = 0x41
@@ -91,16 +93,17 @@ func (s WalletSchemeID) IsClassicalCompat() bool {
 // confused with a hot signing key at the type boundary.
 //
 // 0x60..0x6F — SLH-DSA (FIPS 205), SHAKE-based parameter sets only.
-//   0x61  — SLH-DSA-SHAKE-128s (NIST Cat 1)
-//   0x62  — SLH-DSA-SHAKE-192s (NIST Cat 3; production default for cold recovery)
-//   0x63  — SLH-DSA-SHAKE-256s (NIST Cat 5)
+//
+//	0x61  — SLH-DSA-SHAKE-128s (NIST Cat 1)
+//	0x62  — SLH-DSA-SHAKE-192s (NIST Cat 3; production default for cold recovery)
+//	0x63  — SLH-DSA-SHAKE-256s (NIST Cat 5)
 type RecoverySchemeID uint8
 
 const (
-	RecoverySchemeNone        RecoverySchemeID = 0x00
-	RecoverySchemeSLHDSA128s  RecoverySchemeID = 0x61
-	RecoverySchemeSLHDSA192s  RecoverySchemeID = 0x62 // production default
-	RecoverySchemeSLHDSA256s  RecoverySchemeID = 0x63
+	RecoverySchemeNone       RecoverySchemeID = 0x00
+	RecoverySchemeSLHDSA128s RecoverySchemeID = 0x61
+	RecoverySchemeSLHDSA192s RecoverySchemeID = 0x62 // production default
+	RecoverySchemeSLHDSA256s RecoverySchemeID = 0x63
 )
 
 // String returns the canonical lowercase scheme name.

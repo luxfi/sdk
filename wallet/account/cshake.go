@@ -14,21 +14,21 @@ import (
 // customization string ("S") is what makes two cSHAKE invocations with the
 // same input message produce independent outputs. We use it three ways:
 //
-//   1. Per-role child-seed expansion. The BIP-32 child seed at
-//      m/44'/9000'/<chain>'/0'/<role>'/<account>' is expanded through
-//      cSHAKE-256 with the role's customization string into the 32-byte ξ
-//      that FIPS 204 §5.1 KeyGen consumes. Without the customization, a
-//      single leaked child seed would be re-usable across roles.
+//  1. Per-role child-seed expansion. The BIP-32 child seed at
+//     m/44'/9000'/<chain>'/0'/<role>'/<account>' is expanded through
+//     cSHAKE-256 with the role's customization string into the 32-byte ξ
+//     that FIPS 204 §5.1 KeyGen consumes. Without the customization, a
+//     single leaked child seed would be re-usable across roles.
 //
-//   2. AccountID derivation. AccountIDs hash the (chain, scheme, pubkey)
-//      triple under cSHAKE-256 with the "ACCOUNT_ID" customization so the
-//      same pubkey under different chains/schemes produces independent
-//      AccountIDs.
+//  2. AccountID derivation. AccountIDs hash the (chain, scheme, pubkey)
+//     triple under cSHAKE-256 with the "ACCOUNT_ID" customization so the
+//     same pubkey under different chains/schemes produces independent
+//     AccountIDs.
 //
-//   3. Recovery-seed expansion. SLH-DSA recovery accounts use the same
-//      role-customized cSHAKE-256 to expand the BIP-32 child seed into the
-//      three n-byte seeds (skSeed, skPrf, pkSeed) that FIPS 205 KeyGen
-//      consumes.
+//  3. Recovery-seed expansion. SLH-DSA recovery accounts use the same
+//     role-customized cSHAKE-256 to expand the BIP-32 child seed into the
+//     three n-byte seeds (skSeed, skPrf, pkSeed) that FIPS 205 KeyGen
+//     consumes.
 //
 // The strings are versioned ("/V1") so a future scheme rotation (e.g.,
 // migration to ML-DSA-87 by default or to a new derivation tree shape) can

@@ -11,12 +11,12 @@ import (
 
 // fakeEnvelope is a minimal TxAuthEnvelope for testing SignTx wiring.
 type fakeEnvelope struct {
-	digest       [AccountIDSize]byte
-	digestErr    error
-	attachErr    error
-	attachedSig  []byte
-	attachedPK   []byte
-	attachedSch  WalletSchemeID
+	digest      [AccountIDSize]byte
+	digestErr   error
+	attachErr   error
+	attachedSig []byte
+	attachedPK  []byte
+	attachedSch WalletSchemeID
 }
 
 func (e *fakeEnvelope) SigningDigest() ([AccountIDSize]byte, error) {

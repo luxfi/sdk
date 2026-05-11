@@ -48,13 +48,13 @@ const (
 // distinct field set (e.g., a KEM-wrapped DEK). Reading code dispatches
 // on Magic before unmarshalling.
 type KeystoreBlob struct {
-	Magic      [8]byte `json:"magic"`       // keystoreMagic
-	Version    uint8   `json:"version"`     // 1
-	SchemeID   uint8   `json:"scheme_id"`   // WalletSchemeID byte
-	Role       string  `json:"role"`        // AccountRole string
-	ChainID    uint32  `json:"chain_id"`    // for AccountID re-derivation
-	Path       string  `json:"path"`        // derivation path, audit only
-	AccountID  string  `json:"account_id"`  // hex(48), for human lookup
+	Magic     [8]byte `json:"magic"`      // keystoreMagic
+	Version   uint8   `json:"version"`    // 1
+	SchemeID  uint8   `json:"scheme_id"`  // WalletSchemeID byte
+	Role      string  `json:"role"`       // AccountRole string
+	ChainID   uint32  `json:"chain_id"`   // for AccountID re-derivation
+	Path      string  `json:"path"`       // derivation path, audit only
+	AccountID string  `json:"account_id"` // hex(48), for human lookup
 
 	Salt       []byte `json:"salt"`       // 16 bytes
 	Nonce      []byte `json:"nonce"`      // 12 bytes (AES-GCM)
