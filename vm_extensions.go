@@ -331,7 +331,7 @@ func (e *MPCExtension) Stop() error                     { return nil }
 
 type QuantumExtension struct {
 	Lattice       *LatticeCrypto
-	Corona      *RingtailConsensus
+	Corona      *CoronaConsensus
 	QuantumProofs *QuantumProofSystem
 }
 
@@ -342,7 +342,7 @@ type LatticeCrypto struct {
 	SecurityLevel     int // 128, 192, or 256 bits
 }
 
-type RingtailConsensus struct {
+type CoronaConsensus struct {
 	Rounds       int // 2-round consensus
 	Threshold    float64
 	Certificates map[ids.ID]*QuantumCertificate
@@ -371,7 +371,7 @@ func (e *QuantumExtension) Initialize(builder *VMBuilder) error {
 		SecurityLevel:     256,
 	}
 
-	e.Corona = &RingtailConsensus{
+	e.Corona = &CoronaConsensus{
 		Rounds:       2,
 		Threshold:    0.67,
 		Certificates: make(map[ids.ID]*QuantumCertificate),
