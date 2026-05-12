@@ -369,8 +369,8 @@ func TestPQKeychain_RingtailSupport(t *testing.T) {
 	}
 
 	// Test that corona key type is defined (ready for future implementation)
-	ringtailKc := NewPQKeychain(KeyTypeRingtail)
-	require.NotNil(ringtailKc, "Should be able to create keychain with KeyTypeRingtail")
+	ringtailKc := NewPQKeychain(KeyTypeRingSig)
+	require.NotNil(ringtailKc, "Should be able to create keychain with KeyTypeRingSig")
 
 	// Future corona ring signature implementation would add:
 	// - Ring signature generation
