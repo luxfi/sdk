@@ -271,8 +271,8 @@ func (kc *PQKeychain) AddSLHDSA(key *slhdsa.PrivateKey, keyType KeyType) ids.Sho
 }
 
 // TODO: implement when corona is available
-// AddRingtail adds a corona key to the keychain
-// func (kc *PQKeychain) AddRingtail(key *corona.PrivateKey) ids.ShortID {
+// AddRingSig adds a corona key to the keychain
+// func (kc *PQKeychain) AddRingSig(key *corona.PrivateKey) ids.ShortID {
 //	pubKey := key.PublicKey()
 //	addrBytes := ids.ShortID{}
 //	copy(addrBytes[:], pubKey.Bytes()[:20])
@@ -375,7 +375,7 @@ func (kc *PQKeychain) GenerateKey() (ids.ShortID, error) {
 	//	if err != nil {
 	//		return ids.ShortEmpty, err
 	//	}
-	//	return kc.AddRingtail(key), nil
+	//	return kc.AddRingSig(key), nil
 
 	case KeyTypeHybridSecp256k1MLDSA44:
 		classical, err := secp256k1.NewPrivateKey()
