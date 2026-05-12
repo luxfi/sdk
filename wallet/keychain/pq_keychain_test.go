@@ -342,16 +342,16 @@ func TestPQSigner_TypeSafety(t *testing.T) {
 	require.NotEqual(addr, addr2)
 }
 
-// TestPQKeychain_RingtailSupport tests ringtail ring signature support
+// TestPQKeychain_RingtailSupport tests corona ring signature support
 func TestPQKeychain_RingtailSupport(t *testing.T) {
 	require := require.New(t)
 
-	// Test that the PQ keychain is ready for future ringtail integration
+	// Test that the PQ keychain is ready for future corona integration
 	kc := NewPQKeychain(KeyTypeSecp256k1)
 	require.NotNil(kc)
 
 	// Verify that current keychain supports existing key types
-	// This lays groundwork for future ringtail ring signature support
+	// This lays groundwork for future corona ring signature support
 	supportedTypes := []KeyType{
 		KeyTypeSecp256k1,
 		KeyTypeMLDSA44,
@@ -368,11 +368,11 @@ func TestPQKeychain_RingtailSupport(t *testing.T) {
 		require.NotNil(testKc, "Should be able to create keychain with key type %v", keyType)
 	}
 
-	// Test that ringtail key type is defined (ready for future implementation)
+	// Test that corona key type is defined (ready for future implementation)
 	ringtailKc := NewPQKeychain(KeyTypeRingtail)
 	require.NotNil(ringtailKc, "Should be able to create keychain with KeyTypeRingtail")
 
-	// Future ringtail ring signature implementation would add:
+	// Future corona ring signature implementation would add:
 	// - Ring signature generation
 	// - Ring signature verification
 	// - Key ring management
