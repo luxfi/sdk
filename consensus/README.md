@@ -1,6 +1,6 @@
 # Quasar Consensus SDK
 
-The Quasar consensus module provides quantum-secure consensus primitives for building blockchain applications on the Lux network. This SDK encapsulates the Quasar protocol - a 2-round BFT consensus achieving sub-second finality with both classical (BLS) and post-quantum (ML-DSA/Ringtail) security.
+The Quasar consensus module provides quantum-secure consensus primitives for building blockchain applications on the Lux network. This SDK encapsulates the Quasar protocol - a 2-round BFT consensus achieving sub-second finality with both classical (BLS) and post-quantum (ML-DSA/Corona) security.
 
 ## Overview
 
@@ -43,7 +43,7 @@ const (
 
     // Hybrid signatures (classical + PQC)
     SignatureTypeHybrid   // BLS + ML-DSA combined
-    SignatureTypeRingtail // Lattice-based threshold signatures
+    SignatureTypeCorona // Lattice-based threshold signatures
 )
 
 // Signature is the core interface for all signature operations
@@ -186,14 +186,14 @@ hybridSig, err := signer.Sign(msg)
 valid := signer.Verify(msg, hybridSig)
 ```
 
-### Ringtail (Lattice-Based Threshold)
+### Corona (Lattice-Based Threshold)
 
-Ringtail provides post-quantum threshold signatures:
+Corona provides post-quantum threshold signatures:
 
 ```go
-// Create Ringtail threshold signer
+// Create Corona threshold signer
 // Parameters: threshold (t), total signers (n)
-signer, err := signature.NewRingtail(signature.RingtailConfig{
+signer, err := signature.NewCorona(signature.CoronaConfig{
     Threshold:     4,   // Minimum signers required
     TotalSigners:  7,   // Total signers in the group
     SecurityLevel: signature.SecurityLevelMedium,
@@ -435,5 +435,5 @@ See the full API documentation:
 ## Related Documentation
 
 - [LP-4110: Quasar Consensus Protocol](/lps/LPs/lp-4110-quasar-consensus-protocol.md)
-- [LP-7324: Ringtail Threshold Signature Precompile](/lps/LPs/lp-7324-ringtail-threshold-signature-precompile.md)
+- [LP-7324: Corona Threshold Signature Precompile](/lps/LPs/lp-7324-corona-threshold-signature-precompile.md)
 - [Consensus Architecture](/docs/MULTI_CONSENSUS_ARCHITECTURE.md)
