@@ -47,7 +47,7 @@ const (
 	KeyTypeMLKEM1024 // ML-KEM-1024
 
 	// Privacy-preserving
-	KeyTypeCorona // Ring signatures
+	KeyTypeRingSig // Ring signatures
 
 	// Hybrid modes (classical + post-quantum)
 	KeyTypeHybridSecp256k1MLDSA44
@@ -66,7 +66,7 @@ type PQSigner struct {
 	// Post-quantum keys
 	mldsaKey  interface{} // Can be *mldsa.PrivateKey44/65/87
 	slhdsaKey interface{} // Can be *slhdsa.PrivateKey128/192/256
-	// coronaKey *corona.PrivateKey // TODO: implement when available
+	// ringSigKey *corona.PrivateKey // TODO: implement when available
 
 	// For hybrid modes, we store both
 	hybridClassical *secp256k1.PrivateKey
@@ -103,13 +103,13 @@ func (s *PQSigner) SignHash(hash []byte) ([]byte, error) {
 		return nil, ErrInvalidKeyType
 
 	// TODO: implement corona when available
-	// case KeyTypeCorona:
-	//	if s.coronaKey == nil {
+	// case KeyTypeRingSig:
+	//	if s.ringSigKey == nil {
 	//		return nil, ErrInvalidKeyType
 	//	}
 	//	// Corona requires ring members for signing
 	//	// For now, we'll use a simple signature
-	//	return s.coronaKey.Sign(hash), nil
+	//	return s.ringSigKey.Sign(hash), nil
 
 	case KeyTypeHybridSecp256k1MLDSA44:
 		// Hybrid mode: concatenate both signatures
@@ -278,9 +278,9 @@ func (kc *PQKeychain) AddSLHDSA(key *slhdsa.PrivateKey, keyType KeyType) ids.Sho
 //	copy(addrBytes[:], pubKey.Bytes()[:20])
 //
 //	signer := &PQSigner{
-//		keyType:     KeyTypeCorona,
+//		keyType:     KeyTypeRingSig,
 //		address:     addrBytes,
-//		coronaKey: key,
+//		ringSigKey: key,
 //	}
 //
 //	kc.keysByAddress[addrBytes] = signer
@@ -370,7 +370,7 @@ func (kc *PQKeychain) GenerateKey() (ids.ShortID, error) {
 		return kc.AddSLHDSA(key, KeyTypeSLHDSA256), nil
 
 	// TODO: implement when corona is available
-	// case KeyTypeCorona:
+	// case KeyTypeRingSig:
 	//	key, err := corona.GenerateKey(rand.Reader)
 	//	if err != nil {
 	//		return ids.ShortEmpty, err
