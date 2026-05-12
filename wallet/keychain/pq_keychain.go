@@ -12,7 +12,7 @@ import (
 
 	// "github.com/luxfi/crypto/bls"      // TODO: Implement BLS support
 	// "github.com/luxfi/crypto/mlkem"    // TODO: Implement ML-KEM support
-	// "github.com/luxfi/crypto/ringtail" // TODO: Implement ringtail support
+	// "github.com/luxfi/crypto/corona" // TODO: Implement corona support
 	"github.com/luxfi/crypto/mldsa"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/crypto/slhdsa"
@@ -66,7 +66,7 @@ type PQSigner struct {
 	// Post-quantum keys
 	mldsaKey  interface{} // Can be *mldsa.PrivateKey44/65/87
 	slhdsaKey interface{} // Can be *slhdsa.PrivateKey128/192/256
-	// ringtailKey *ringtail.PrivateKey // TODO: implement when available
+	// ringtailKey *corona.PrivateKey // TODO: implement when available
 
 	// For hybrid modes, we store both
 	hybridClassical *secp256k1.PrivateKey
@@ -102,12 +102,12 @@ func (s *PQSigner) SignHash(hash []byte) ([]byte, error) {
 		}
 		return nil, ErrInvalidKeyType
 
-	// TODO: implement ringtail when available
+	// TODO: implement corona when available
 	// case KeyTypeRingtail:
 	//	if s.ringtailKey == nil {
 	//		return nil, ErrInvalidKeyType
 	//	}
-	//	// Ringtail requires ring members for signing
+	//	// Corona requires ring members for signing
 	//	// For now, we'll use a simple signature
 	//	return s.ringtailKey.Sign(hash), nil
 
@@ -270,9 +270,9 @@ func (kc *PQKeychain) AddSLHDSA(key *slhdsa.PrivateKey, keyType KeyType) ids.Sho
 	return addrBytes
 }
 
-// TODO: implement when ringtail is available
-// AddRingtail adds a ringtail key to the keychain
-// func (kc *PQKeychain) AddRingtail(key *ringtail.PrivateKey) ids.ShortID {
+// TODO: implement when corona is available
+// AddRingtail adds a corona key to the keychain
+// func (kc *PQKeychain) AddRingtail(key *corona.PrivateKey) ids.ShortID {
 //	pubKey := key.PublicKey()
 //	addrBytes := ids.ShortID{}
 //	copy(addrBytes[:], pubKey.Bytes()[:20])
@@ -369,9 +369,9 @@ func (kc *PQKeychain) GenerateKey() (ids.ShortID, error) {
 		}
 		return kc.AddSLHDSA(key, KeyTypeSLHDSA256), nil
 
-	// TODO: implement when ringtail is available
+	// TODO: implement when corona is available
 	// case KeyTypeRingtail:
-	//	key, err := ringtail.GenerateKey(rand.Reader)
+	//	key, err := corona.GenerateKey(rand.Reader)
 	//	if err != nil {
 	//		return ids.ShortEmpty, err
 	//	}
