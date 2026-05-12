@@ -51,7 +51,7 @@ type VMExtension interface {
 // FeatureSet defines features a VM can enable
 type FeatureSet struct {
 	// Consensus features
-	QuantumResistant bool // Ringtail lattice-based
+	QuantumResistant bool // Corona lattice-based
 	BLSAggregation   bool // BLS signature aggregation
 	VerkleWitnesses  bool // Verkle tree witnesses
 	FPC              bool // Fast Probabilistic Consensus
@@ -331,7 +331,7 @@ func (e *MPCExtension) Stop() error                     { return nil }
 
 type QuantumExtension struct {
 	Lattice       *LatticeCrypto
-	Ringtail      *RingtailConsensus
+	Corona      *RingtailConsensus
 	QuantumProofs *QuantumProofSystem
 }
 
@@ -371,7 +371,7 @@ func (e *QuantumExtension) Initialize(builder *VMBuilder) error {
 		SecurityLevel:     256,
 	}
 
-	e.Ringtail = &RingtailConsensus{
+	e.Corona = &RingtailConsensus{
 		Rounds:       2,
 		Threshold:    0.67,
 		Certificates: make(map[ids.ID]*QuantumCertificate),
