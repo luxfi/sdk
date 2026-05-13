@@ -168,7 +168,7 @@ func (v *backendVisitor) BaseTx(tx *txs.BaseTx) error {
 	return v.baseTx(tx)
 }
 
-func (v *backendVisitor) ConvertChainToL1Tx(*txs.ConvertChainToL1Tx) error {
+func (v *backendVisitor) ConvertNetworkToL1Tx(*txs.ConvertNetworkToL1Tx) error {
 	return nil
 }
 

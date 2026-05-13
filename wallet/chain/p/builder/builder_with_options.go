@@ -253,14 +253,14 @@ func (b *builderWithOptions) NewAddPermissionlessDelegatorTx(
 	)
 }
 
-func (b *builderWithOptions) NewConvertChainToL1Tx(
+func (b *builderWithOptions) NewConvertNetworkToL1Tx(
 	chainID ids.ID,
 	managerChainID ids.ID,
 	address []byte,
-	validators []*txs.ConvertChainToL1Validator,
+	validators []*txs.ConvertNetworkToL1Validator,
 	options ...common.Option,
-) (*txs.ConvertChainToL1Tx, error) {
-	return b.builder.NewConvertChainToL1Tx(
+) (*txs.ConvertNetworkToL1Tx, error) {
+	return b.builder.NewConvertNetworkToL1Tx(
 		chainID,
 		managerChainID,
 		address,
