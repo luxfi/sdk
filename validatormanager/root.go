@@ -200,7 +200,7 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 	chainID ids.ID,
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
-	convertChainValidators []*txs.ConvertChainToL1Validator,
+	convertChainValidators []*txs.ConvertNetworkToL1Validator,
 ) (*warp.UnsignedMessage, error) {
 	validators := []warpMessage.ChainToL1ConversionValidatorData{}
 	for _, convertChainValidator := range convertChainValidators {
@@ -245,14 +245,14 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 
 // InitializeValidatorsSet calls poa manager validators set init method,
 // passing to it the p-chain signed [chainConversionSignedMessage]
-// to verify p-chain already processed the associated ConvertChainToL1Tx
+// to verify p-chain already processed the associated ConvertNetworkToL1Tx
 func InitializeValidatorsSet(
 	rpcURL string,
 	managerAddress crypto.Address,
 	privateKey string,
 	chainID ids.ID,
 	managerBlockchainID ids.ID,
-	convertChainValidators []*txs.ConvertChainToL1Validator,
+	convertChainValidators []*txs.ConvertNetworkToL1Validator,
 	chainConversionSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
 	type InitialValidator struct {
