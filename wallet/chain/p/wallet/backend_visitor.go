@@ -123,7 +123,7 @@ func (b *backendVisitor) BaseTx(tx *txs.BaseTx) error {
 	return b.baseTx(tx)
 }
 
-func (b *backendVisitor) ConvertChainToL1Tx(tx *txs.ConvertChainToL1Tx) error {
+func (b *backendVisitor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) error {
 	for i, vdr := range tx.Validators {
 		b.b.setOwner(
 			tx.Chain.Append(uint32(i)),
