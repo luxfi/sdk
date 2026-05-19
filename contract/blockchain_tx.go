@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/rpc"
 )
 
