@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/keychain"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/txs"
 	lux "github.com/luxfi/utxo"
 )
 

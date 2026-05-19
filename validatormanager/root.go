@@ -8,7 +8,7 @@ import (
 	"math/big"
 
 	"github.com/luxfi/constants"
-	warpPayload "github.com/luxfi/protocol/p/warp/payload"
+	warpPayload "github.com/luxfi/proto/p/warp/payload"
 	"github.com/luxfi/sdk/models"
 
 	"github.com/luxfi/geth/core/types"
