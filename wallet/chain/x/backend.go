@@ -7,7 +7,7 @@ package x
 import (
 	"context"
 
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	"github.com/luxfi/sdk/wallet/chain/x/signer"
 	"github.com/luxfi/sdk/wallet/primary/common"

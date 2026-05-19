@@ -13,16 +13,16 @@ import (
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/fx"
-	"github.com/luxfi/protocol/p/status"
-	"github.com/luxfi/protocol/p/validators/fee"
+	"github.com/luxfi/proto/p/fx"
+	"github.com/luxfi/proto/p/status"
+	"github.com/luxfi/proto/p/validators/fee"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/utxo/secp256k1fx"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/api"
 	"github.com/luxfi/vm/components/gas"
 
-	platformapi "github.com/luxfi/protocol/p/api"
+	platformapi "github.com/luxfi/proto/p/api"
 )
 
 type Client struct {

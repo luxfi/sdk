@@ -54,7 +54,7 @@ require (
 	github.com/luxfi/math/safe v0.0.1
 	github.com/luxfi/net v0.0.4
 	github.com/luxfi/netrunner v1.18.2
-	github.com/luxfi/protocol v0.0.4
+	github.com/luxfi/proto v0.0.0-proto-rename
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/runtime v1.0.1
 	github.com/luxfi/utils v1.1.4
@@ -248,3 +248,7 @@ require (
 // Use local packages with correct codec (CreateNetworkTx, CreateChainTx)
 
 // Use local sdk/api module for platformvm
+
+// Local-dev overlay for the protocol → proto rename.
+// Strip once GitHub admin renames luxfi/protocol → luxfi/proto and a real tag exists.
+replace github.com/luxfi/proto => ../protocol

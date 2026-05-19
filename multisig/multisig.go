@@ -16,7 +16,7 @@ import (
 	"github.com/luxfi/vm/components/verify"
 
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 )
 
 type TxKind int64
