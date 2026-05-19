@@ -9,13 +9,13 @@ import (
 
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 
-	vmsigner "github.com/luxfi/protocol/p/signer"
+	vmsigner "github.com/luxfi/proto/p/signer"
 	walletsigner "github.com/luxfi/sdk/wallet/chain/p/signer"
 )
 
