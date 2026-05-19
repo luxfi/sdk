@@ -9,7 +9,7 @@ import (
 	json "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/status"
+	"github.com/luxfi/proto/p/status"
 	"github.com/luxfi/utxo"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/components/gas"

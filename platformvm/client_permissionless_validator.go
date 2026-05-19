@@ -8,8 +8,8 @@ import (
 
 	"github.com/luxfi/address"
 	"github.com/luxfi/ids"
-	"github.com/luxfi/protocol/p/api"
-	"github.com/luxfi/protocol/p/signer"
+	"github.com/luxfi/proto/p/api"
+	"github.com/luxfi/proto/p/signer"
 )
 
 // ClientStaker is the representation of a staker sent via client.
