@@ -12,7 +12,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math"
 	"github.com/luxfi/math/set"
-	"github.com/luxfi/protocol/x/txs"
+	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/sdk/wallet/primary/common"
 	"github.com/luxfi/utils"
 	lux "github.com/luxfi/utxo"

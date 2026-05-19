@@ -4,8 +4,8 @@
 package builder
 
 import (
-	"github.com/luxfi/protocol/x/block"
-	"github.com/luxfi/protocol/x/fxs"
+	"github.com/luxfi/proto/x/block"
+	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
 	"github.com/luxfi/utxo/secp256k1fx"

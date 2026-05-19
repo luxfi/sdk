@@ -6,7 +6,7 @@ package p
 import (
 	"time"
 
-	"github.com/luxfi/protocol/p/txs"
+	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/sdk/wallet/chain/p/builder"
 	"github.com/luxfi/sdk/wallet/chain/p/wallet"
