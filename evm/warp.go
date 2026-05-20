@@ -14,8 +14,8 @@ import (
 // GetWarpMessagesFromLogs gets all unsigned warp messages contained in [logs].
 func GetWarpMessagesFromLogs(
 	logs []*types.Log,
-) []*warp.Message {
-	messages := []*warp.Message{}
+) []*warp.UnsignedMessage {
+	messages := []*warp.UnsignedMessage{}
 	for _, txLog := range logs {
 		msg, err := evmWarp.UnpackSendWarpEventDataToMessage(txLog.Data)
 		if err == nil {
@@ -28,7 +28,7 @@ func GetWarpMessagesFromLogs(
 // ExtractWarpMessageFromLogs gets first unsigned warp message contained in [logs].
 func ExtractWarpMessageFromLogs(
 	logs []*types.Log,
-) (*warp.Message, error) {
+) (*warp.UnsignedMessage, error) {
 	messages := GetWarpMessagesFromLogs(logs)
 	if len(messages) == 0 {
 		return nil, fmt.Errorf("no warp message is present in evm logs")
@@ -39,7 +39,7 @@ func ExtractWarpMessageFromLogs(
 // ExtractWarpMessageFromReceipt gets first unsigned warp message contained in [receipt].
 func ExtractWarpMessageFromReceipt(
 	receipt *types.Receipt,
-) (*warp.Message, error) {
+) (*warp.UnsignedMessage, error) {
 	if receipt == nil {
 		return nil, fmt.Errorf("empty receipt was given")
 	}

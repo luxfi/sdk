@@ -43,7 +43,7 @@ func NewContextFromClients(
 		pChainID = constants.PlatformChainID
 	}
 
-	utxoAssetID, err := chainClient.GetStakingAssetID(ctx, constants.PrimaryNetworkID)
+	luxAssetID, err := chainClient.GetStakingAssetID(ctx, constants.PrimaryNetworkID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func NewContextFromClients(
 	return &builder.Context{
 		NetworkID:         networkID,
 		ChainID:           pChainID,
-		UTXOAssetID:       utxoAssetID,
+		XAssetID:          luxAssetID,
 		ComplexityWeights: dynamicFeeConfig.Weights,
 		GasPrice:          gasPriceMultiplier * gasPrice,
 	}, nil

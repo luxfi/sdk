@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	apitypes "github.com/luxfi/api/types"
+	json "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
@@ -21,8 +21,8 @@ type Client struct {
 // calls.
 // [uri] is the path to make API calls to.
 // For example:
-//   - http://1.2.3.4:9650/v1/index/C/block
-//   - http://1.2.3.4:9650/v1/index/X/tx
+//   - http://1.2.3.4:9650/ext/index/C/block
+//   - http://1.2.3.4:9650/ext/index/X/tx
 func NewClient(uri string) *Client {
 	return &Client{
 		Requester: rpc.NewEndpointRequester(uri),
@@ -36,8 +36,8 @@ func NewClient(uri string) *Client {
 func (c *Client) GetContainerRange(ctx context.Context, startIndex uint64, numToFetch int, options ...rpc.Option) ([]Container, error) {
 	var fcs GetContainerRangeResponse
 	err := c.Requester.SendRequest(ctx, "index.getContainerRange", &GetContainerRangeArgs{
-		StartIndex: apitypes.Uint64(startIndex),
-		NumToFetch: apitypes.Uint64(numToFetch),
+		StartIndex: json.Uint64(startIndex),
+		NumToFetch: json.Uint64(numToFetch),
 		Encoding:   formatting.Hex,
 	}, &fcs, options...)
 	if err != nil {
@@ -63,7 +63,7 @@ func (c *Client) GetContainerRange(ctx context.Context, startIndex uint64, numTo
 func (c *Client) GetContainerByIndex(ctx context.Context, index uint64, options ...rpc.Option) (Container, error) {
 	var fc FormattedContainer
 	err := c.Requester.SendRequest(ctx, "index.getContainerByIndex", &GetContainerByIndexArgs{
-		Index:    apitypes.Uint64(index),
+		Index:    json.Uint64(index),
 		Encoding: formatting.Hex,
 	}, &fc, options...)
 	if err != nil {

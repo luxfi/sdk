@@ -61,6 +61,7 @@ tmp-storage-testing
 
 # AI Assistant knowledge base symlinks
 AGENTS.md
+CLAUDE.md
 GEMINI.md
 GROK.md
 QWEN.md

@@ -201,7 +201,7 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
 	convertChainValidators []*txs.ConvertNetworkToL1Validator,
-) (*warp.Message, error) {
+) (*warp.UnsignedMessage, error) {
 	validators := []warpMessage.ChainToL1ConversionValidatorData{}
 	for _, convertChainValidator := range convertChainValidators {
 		validators = append(validators, warpMessage.ChainToL1ConversionValidatorData{
@@ -231,7 +231,7 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 	if err != nil {
 		return nil, err
 	}
-	chainConversionUnsignedMessage, err := warp.NewMessage(
+	chainConversionUnsignedMessage, err := warp.NewUnsignedMessage(
 		net.ID(),
 		constants.PlatformChainID,
 		chainConversionAddressedCall.Bytes(),
@@ -253,7 +253,7 @@ func InitializeValidatorsSet(
 	chainID ids.ID,
 	managerBlockchainID ids.ID,
 	convertChainValidators []*txs.ConvertNetworkToL1Validator,
-	chainConversionSignedMessage *warp.Envelope,
+	chainConversionSignedMessage *warp.Message,
 ) (*types.Transaction, *types.Receipt, error) {
 	type InitialValidator struct {
 		NodeID       []byte

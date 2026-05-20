@@ -1041,8 +1041,8 @@ func (rp *realPrompter) CaptureUint8(promptStr string) (uint8, error) {
 	}
 }
 
-// CaptureTestnetDuration captures a duration for testnet
-func (rp *realPrompter) CaptureTestnetDuration(promptStr string) (time.Duration, error) {
+// CaptureFujiDuration captures a duration for Fuji
+func (rp *realPrompter) CaptureFujiDuration(promptStr string) (time.Duration, error) {
 	return rp.CaptureDuration(promptStr)
 }
 

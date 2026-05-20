@@ -81,8 +81,7 @@ func (w *withOptions) NewAddValidatorTx(
 	)
 }
 
-// Deprecated: use NewAddValidatorTx. Retained for one release cycle of
-// wire compatibility only — validators validate networks, not chains.
+// Removed in regenesis
 func (w *withOptions) NewAddChainValidatorTx(
 	vdr *txs.ChainValidator,
 	options ...common.Option,

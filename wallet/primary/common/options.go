@@ -42,8 +42,8 @@ type Options struct {
 	customAddressesSet bool
 	customAddresses    set.Set[ids.ShortID]
 
-	customEVMAddressesSet bool
-	customEVMAddresses    set.Set[ethcommon.Address]
+	customEthAddressesSet bool
+	customEthAddresses    set.Set[ethcommon.Address]
 
 	baseFee *big.Int
 
@@ -99,14 +99,9 @@ func (o *Options) Addresses(defaultAddresses set.Set[ids.ShortID]) set.Set[ids.S
 	return defaultAddresses
 }
 
-// EVMAddresses returns the configured set of 20-byte EVM-runtime
-// account addresses (the format consumed by Lux C-Chain, downstream EVM L1s,
-// and every EVM-compatible chain). Naming reflects the data model
-// that consumes the value (EVM account), not the hash primitive that
-// derives it.
-func (o *Options) EVMAddresses(defaultAddresses set.Set[ethcommon.Address]) set.Set[ethcommon.Address] {
-	if o.customEVMAddressesSet {
-		return o.customEVMAddresses
+func (o *Options) EthAddresses(defaultAddresses set.Set[ethcommon.Address]) set.Set[ethcommon.Address] {
+	if o.customEthAddressesSet {
+		return o.customEthAddresses
 	}
 	return defaultAddresses
 }
@@ -172,13 +167,10 @@ func WithCustomAddresses(addrs set.Set[ids.ShortID]) Option {
 	}
 }
 
-// WithCustomEVMAddresses sets the option's filter to a custom set of
-// 20-byte EVM-runtime account addresses. The value IS "EVM-runtime
-// account address" — that's the data model.
-func WithCustomEVMAddresses(addrs set.Set[ethcommon.Address]) Option {
+func WithCustomEthAddresses(addrs set.Set[ethcommon.Address]) Option {
 	return func(o *Options) {
-		o.customEVMAddressesSet = true
-		o.customEVMAddresses = addrs
+		o.customEthAddressesSet = true
+		o.customEthAddresses = addrs
 	}
 }
 

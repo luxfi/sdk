@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	apitypes "github.com/luxfi/api/types"
+	json "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
@@ -57,7 +57,7 @@ func TestIndexClient(t *testing.T) {
 				*(reply.(*FormattedContainer)) = FormattedContainer{
 					ID:    id,
 					Bytes: bytesStr,
-					Index: apitypes.Uint64(10),
+					Index: json.Uint64(10),
 				}
 				return nil
 			},
@@ -118,7 +118,7 @@ func TestIndexClient(t *testing.T) {
 				*(reply.(*FormattedContainer)) = FormattedContainer{
 					ID:    id,
 					Bytes: bytesStr,
-					Index: apitypes.Uint64(10),
+					Index: json.Uint64(10),
 				}
 				return nil
 			},

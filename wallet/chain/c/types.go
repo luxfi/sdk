@@ -4,11 +4,11 @@
 package c
 
 import (
-	"errors"
-	"encoding/binary"
 	"fmt"
 	"math/big"
 
+	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/geth/common"
@@ -17,11 +17,6 @@ import (
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/verify"
 )
-
-// The C-chain atomic-tx flow has no wire encoder in this SDK: the EVM owns
-// that format and exposes no encoder here. Builders still construct the
-// in-memory tx, but Sign refuses (ErrNoAtomicWire) rather than emitting a
-// bespoke encoding that no chain parses.
 
 // Tx represents a transaction on the C-Chain
 type Tx struct {
@@ -139,53 +134,25 @@ type Status string
 
 // Constants
 const (
-	EVMOutputGas        = 100 // Implementation note
-	EVMInputGas         = 100 // Implementation note
+	codecVersion = 0
+	EVMOutputGas = 100 // Implementation note
+	EVMInputGas  = 100 // Implementation note
 
 	// Transaction status
 	Accepted = "Accepted"
 )
 
-// ErrNoAtomicWire reports that this SDK cannot serialize a C-chain atomic
-// tx. The C-chain atomic wire is owned by the EVM, which does not expose an
-// encoder here. Signing therefore refuses rather than producing bytes no
-// chain will accept.
-var ErrNoAtomicWire = errors.New("c: atomic tx wire is not implemented")
+// Variables
+var (
+	// Codec is the codec used for serialization
+	Codec codec.Manager
+)
 
-func marshalAtomicTxBytes(v interface{}) ([]byte, error) {
-	return nil, fmt.Errorf("%w: %T", ErrNoAtomicWire, v)
-}
-
-func appendBaseTx(buf []byte, b *BaseTx) []byte {
-	buf = appendUint32(buf, b.NetworkID)
-	buf = append(buf, b.BlockchainID[:]...)
-	buf = appendUint32(buf, uint32(len(b.Outs)))
-	for _, o := range b.Outs {
-		id := o.AssetID()
-		buf = append(buf, id[:]...)
-		buf = appendUint64(buf, o.Out.Amount())
-	}
-	buf = appendUint32(buf, uint32(len(b.Ins)))
-	for _, in := range b.Ins {
-		id := in.InputID()
-		buf = append(buf, id[:]...)
-		buf = appendUint64(buf, in.In.Amount())
-	}
-	buf = appendUint32(buf, uint32(len(b.Memo)))
-	buf = append(buf, b.Memo...)
-	return buf
-}
-
-func appendUint32(buf []byte, v uint32) []byte {
-	var tmp [4]byte
-	binary.BigEndian.PutUint32(tmp[:], v)
-	return append(buf, tmp[:]...)
-}
-
-func appendUint64(buf []byte, v uint64) []byte {
-	var tmp [8]byte
-	binary.BigEndian.PutUint64(tmp[:], v)
-	return append(buf, tmp[:]...)
+func init() {
+	// Initialize codec
+	Codec = codec.NewDefaultManager()
+	lcodec := linearcodec.NewDefault()
+	_ = Codec.RegisterCodec(codecVersion, lcodec) //nolint:errcheck // init only fails on invalid version
 }
 
 // CalculateDynamicFee calculates the dynamic fee based on EIP-1559
@@ -208,11 +175,10 @@ func CalculateDynamicFee(gasUsed uint64, baseFee *big.Int) (uint64, error) {
 	return totalFee.Uint64(), nil
 }
 
-// Sign signs the transaction with the provided private keys. It reports
-// ErrNoAtomicWire until the EVM exposes the C-chain atomic tx encoder.
-func (tx *Tx) Sign(signers [][]*secp256k1.PrivateKey) error {
+// Sign signs the transaction with the provided private keys
+func (tx *Tx) Sign(codec codec.Manager, signers [][]*secp256k1.PrivateKey) error {
 	// Serialize the unsigned transaction
-	unsignedBytes, err := marshalAtomicTxBytes(&tx.UnsignedAtomicTx)
+	unsignedBytes, err := codec.Marshal(codecVersion, &tx.UnsignedAtomicTx)
 	if err != nil {
 		return fmt.Errorf("failed to marshal unsigned tx: %w", err)
 	}
@@ -239,7 +205,7 @@ func (tx *Tx) Sign(signers [][]*secp256k1.PrivateKey) error {
 	}
 
 	// Serialize the signed transaction
-	signedBytes, err := marshalAtomicTxBytes(tx)
+	signedBytes, err := codec.Marshal(codecVersion, tx)
 	if err != nil {
 		return fmt.Errorf("failed to marshal signed tx: %w", err)
 	}

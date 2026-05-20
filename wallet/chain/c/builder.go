@@ -95,7 +95,7 @@ type BuilderBackend interface {
 
 type builder struct {
 	luxAddrs set.Set[ids.ShortID]
-	evmAddrs set.Set[ethcommon.Address]
+	ethAddrs set.Set[ethcommon.Address]
 	context  *Context
 	backend  BuilderBackend
 }
@@ -104,20 +104,19 @@ type builder struct {
 //
 //   - [luxAddrs] is the set of addresses in the LUX format that the builder
 //     assumes can be used when signing the transactions in the future.
-//   - [evmAddrs] is the set of 20-byte EVM-runtime account addresses
-//     that the builder assumes can be used when signing the transactions
-//     in the future.
+//   - [ethAddrs] is the set of addresses in the Eth format that the builder
+//     assumes can be used when signing the transactions in the future.
 //   - [backend] provides the required access to the chain's context and state
 //     to build out the transactions.
 func NewBuilder(
 	luxAddrs set.Set[ids.ShortID],
-	evmAddrs set.Set[ethcommon.Address],
+	ethAddrs set.Set[ethcommon.Address],
 	context *Context,
 	backend BuilderBackend,
 ) Builder {
 	return &builder{
 		luxAddrs: luxAddrs,
-		evmAddrs: evmAddrs,
+		ethAddrs: ethAddrs,
 		context:  context,
 		backend:  backend,
 	}
@@ -133,7 +132,7 @@ func (b *builder) GetBalance(
 	var (
 		ops          = common.NewOptions(options)
 		ctx          = ops.Context()
-		addrs        = ops.EVMAddresses(b.evmAddrs)
+		addrs        = ops.EthAddresses(b.ethAddrs)
 		totalBalance = new(big.Int)
 	)
 	for addr := range addrs {
@@ -160,11 +159,11 @@ func (b *builder) GetImportableBalance(
 	var (
 		addrs           = ops.Addresses(b.luxAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		utxoAssetID     = b.context.UTXOAssetID
+		luxAssetID      = b.context.XAssetID
 		balance         uint64
 	)
 	for _, utxo := range utxos {
-		amount, _, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, utxoAssetID)
+		amount, _, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, luxAssetID)
 		if !ok {
 			continue
 		}
@@ -194,13 +193,13 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.luxAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		utxoAssetID     = b.context.UTXOAssetID
+		luxAssetID      = b.context.XAssetID
 
 		importedInputs = make([]*lux.TransferableInput, 0, len(utxos))
 		importedAmount uint64
 	)
 	for _, utxo := range utxos {
-		amount, inputSigIndices, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, utxoAssetID)
+		amount, inputSigIndices, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, luxAssetID)
 		if !ok {
 			continue
 		}
@@ -236,7 +235,7 @@ func (b *builder) NewImportTx(
 
 	// We must initialize the bytes of the tx to calculate the initial cost
 	wrappedTx := &Tx{UnsignedAtomicTx: tx}
-	if err := wrappedTx.Sign(nil); err != nil {
+	if err := wrappedTx.Sign(Codec, nil); err != nil {
 		return nil, err
 	}
 
@@ -269,13 +268,13 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*UnsignedExportTx, error) {
 	var (
-		utxoAssetID     = b.context.UTXOAssetID
+		luxAssetID      = b.context.XAssetID
 		exportedOutputs = make([]*lux.TransferableOutput, len(outputs))
 		exportedAmount  uint64
 	)
 	for i, output := range outputs {
 		exportedOutputs[i] = &lux.TransferableOutput{
-			Asset: lux.Asset{ID: utxoAssetID},
+			Asset: lux.Asset{ID: luxAssetID},
 			FxID:  secp256k1fx.ID,
 			Out:   output,
 		}
@@ -287,7 +286,7 @@ func (b *builder) NewExportTx(
 		exportedAmount = newExportedAmount
 	}
 
-	lux.SortTransferableOutputs(exportedOutputs)
+	lux.SortTransferableOutputs(exportedOutputs, Codec)
 	tx := &UnsignedExportTx{
 		BaseTx: BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -299,7 +298,7 @@ func (b *builder) NewExportTx(
 
 	// We must initialize the bytes of the tx to calculate the initial cost
 	wrappedTx := &Tx{UnsignedAtomicTx: tx}
-	if err := wrappedTx.Sign(nil); err != nil {
+	if err := wrappedTx.Sign(Codec, nil); err != nil {
 		return nil, err
 	}
 
@@ -321,7 +320,7 @@ func (b *builder) NewExportTx(
 	var (
 		ops    = common.NewOptions(options)
 		ctx    = ops.Context()
-		addrs  = ops.EVMAddresses(b.evmAddrs)
+		addrs  = ops.EthAddresses(b.ethAddrs)
 		inputs = make([]*EVMInput, 0, addrs.Len())
 	)
 	for addr := range addrs {
@@ -376,7 +375,7 @@ func (b *builder) NewExportTx(
 		inputs = append(inputs, &EVMInput{
 			Address: addr,
 			Amount:  inputAmount,
-			AssetID: utxoAssetID,
+			AssetID: luxAssetID,
 			Nonce:   nonce,
 		})
 		amountToConsume -= inputAmount
@@ -403,9 +402,9 @@ func getSpendableAmount(
 	utxo *lux.UTXO,
 	addrs set.Set[ids.ShortID],
 	minIssuanceTime uint64,
-	utxoAssetID ids.ID,
+	luxAssetID ids.ID,
 ) (uint64, []uint32, bool) {
-	if utxo.Asset.ID != utxoAssetID {
+	if utxo.Asset.ID != luxAssetID {
 		// Only LUX can be imported
 		return 0, nil, false
 	}

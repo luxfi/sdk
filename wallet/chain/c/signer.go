@@ -21,6 +21,8 @@ import (
 	"github.com/luxfi/vm/components/verify"
 )
 
+const version = 0
+
 var (
 	_ Signer = (*txSigner)(nil)
 
@@ -44,20 +46,12 @@ type Signer interface {
 	SignAtomic(ctx context.Context, tx *Tx) error
 }
 
-// EVMKeychain is the interface for keychains that expose 20-byte
-// EVM-runtime account addresses (the format consumed by Lux C-Chain,
-// downstream EVM L1s, and every EVM-compatible chain).
-//
-// Naming: the value IS "EVM-runtime account address". The internal
-// derivation hashes the secp256k1 pubkey with Keccak256 — that's HOW
-// it's computed. The data model that consumes it (EVM account) is
-// WHAT it is.
-type EVMKeychain interface {
+type EthKeychain interface {
 	// The returned Signer can provide a signature for [addr]
-	GetByEVM(addr common.Address) (keychain.Signer, bool)
+	GetEth(addr common.Address) (keychain.Signer, bool)
 	// Returns the set of addresses for which the accessor keeps an associated
 	// signer
-	EVMAddresses() set.Set[common.Address]
+	EthAddresses() set.Set[common.Address]
 }
 
 type SignerBackend interface {
@@ -66,14 +60,14 @@ type SignerBackend interface {
 
 type txSigner struct {
 	luxKC   keychain.Keychain
-	evmKC   EVMKeychain
+	ethKC   EthKeychain
 	backend SignerBackend
 }
 
-func NewSigner(luxKC keychain.Keychain, evmKC EVMKeychain, backend SignerBackend) Signer {
+func NewSigner(luxKC keychain.Keychain, ethKC EthKeychain, backend SignerBackend) Signer {
 	return &txSigner{
 		luxKC:   luxKC,
-		evmKC:   evmKC,
+		ethKC:   ethKC,
 		backend: backend,
 	}
 }
@@ -145,7 +139,7 @@ func (s *txSigner) getExportSigners(ins []*EVMInput) [][]keychain.Signer {
 		inputSigners := make([]keychain.Signer, 1)
 		txSigners[credIndex] = inputSigners
 
-		key, ok := s.evmKC.GetByEVM(input.Address)
+		key, ok := s.ethKC.GetEth(input.Address)
 		if !ok {
 			// If we don't have access to the key, then we can't sign this
 			// transaction. However, we can attempt to partially sign it.
@@ -163,7 +157,7 @@ func SignUnsignedAtomic(ctx context.Context, signer Signer, utx UnsignedAtomicTx
 
 // TODO: remove [signHash] after the ledger supports signing all transactions.
 func sign(tx *Tx, signHash bool, txSigners [][]keychain.Signer) error {
-	unsignedBytes, err := marshalAtomicTxBytes(&tx.UnsignedAtomicTx)
+	unsignedBytes, err := Codec.Marshal(version, &tx.UnsignedAtomicTx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
@@ -224,7 +218,7 @@ func sign(tx *Tx, signHash bool, txSigners [][]keychain.Signer) error {
 		}
 	}
 
-	signedBytes, err := marshalAtomicTxBytes(tx)
+	signedBytes, err := Codec.Marshal(version, tx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal tx: %w", err)
 	}

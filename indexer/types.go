@@ -6,7 +6,7 @@ package indexer
 import (
 	"time"
 
-	apitypes "github.com/luxfi/api/types"
+	json "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 )
@@ -16,7 +16,7 @@ type FormattedContainer struct {
 	Bytes     string              `json:"bytes"`
 	Timestamp time.Time           `json:"timestamp"`
 	Encoding  formatting.Encoding `json:"encoding"`
-	Index     apitypes.Uint64     `json:"index"`
+	Index     json.Uint64         `json:"index"`
 }
 
 type GetLastAcceptedArgs struct {
@@ -24,13 +24,13 @@ type GetLastAcceptedArgs struct {
 }
 
 type GetContainerByIndexArgs struct {
-	Index    apitypes.Uint64     `json:"index"`
+	Index    json.Uint64         `json:"index"`
 	Encoding formatting.Encoding `json:"encoding"`
 }
 
 type GetContainerRangeArgs struct {
-	StartIndex apitypes.Uint64     `json:"startIndex"`
-	NumToFetch apitypes.Uint64     `json:"numToFetch"`
+	StartIndex json.Uint64         `json:"startIndex"`
+	NumToFetch json.Uint64         `json:"numToFetch"`
 	Encoding   formatting.Encoding `json:"encoding"`
 }
 
@@ -43,7 +43,7 @@ type GetIndexArgs struct {
 }
 
 type GetIndexResponse struct {
-	Index apitypes.Uint64 `json:"index"`
+	Index json.Uint64 `json:"index"`
 }
 
 type IsAcceptedArgs struct {

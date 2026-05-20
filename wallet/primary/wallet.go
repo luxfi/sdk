@@ -27,30 +27,30 @@ import (
 
 var _ Wallet = (*wallet)(nil)
 
-// KeychainAdapter adapts secp256k1fx.Keychain to BOTH
-// wallet/keychain.Keychain (UTXO-side) and c.EVMKeychain (EVM-side).
+// KeychainAdapter adapts secp256k1fx.Keychain to wallet/keychain.Keychain and c.EthKeychain interfaces.
+// This allows secp256k1fx.Keychain to be used with MakeWallet.
 type KeychainAdapter struct {
 	*secp256k1fx.Keychain
 }
 
-// Addresses implements wallet/keychain.Keychain (UTXO-side).
+// Addresses implements wallet/keychain.Keychain
 func (kc *KeychainAdapter) Addresses() set.Set[ids.ShortID] {
 	return kc.Keychain.Addrs
 }
 
-// Get implements keychain.Keychain (UTXO-side lookup by ShortID).
+// Get implements wallet/keychain.Keychain (returns wallet/keychain.Signer, not utils/crypto/keychain.Signer)
 func (kc *KeychainAdapter) Get(addr ids.ShortID) (keychain.Signer, bool) {
 	return kc.Keychain.Get(addr)
 }
 
-// GetByEVM implements c.EVMKeychain (EVM-side lookup by 20-byte addr).
-func (kc *KeychainAdapter) GetByEVM(addr gethcommon.Address) (keychain.Signer, bool) {
-	return kc.Keychain.GetByEVM(addr)
+// GetEth implements c.EthKeychain
+func (kc *KeychainAdapter) GetEth(addr gethcommon.Address) (keychain.Signer, bool) {
+	return kc.Keychain.GetEth(addr)
 }
 
-// EVMAddresses implements c.EVMKeychain (EVM-side address set).
-func (kc *KeychainAdapter) EVMAddresses() set.Set[gethcommon.Address] {
-	return kc.Keychain.EVMAddrs
+// EthAddresses implements c.EthKeychain
+func (kc *KeychainAdapter) EthAddresses() set.Set[gethcommon.Address] {
+	return kc.Keychain.EthAddrs
 }
 
 // NewKeychainAdapter creates a KeychainAdapter from a secp256k1fx.Keychain
@@ -106,7 +106,7 @@ type WalletConfig struct {
 	URI string // required
 	// Keys to use for signing all transactions.
 	LUXKeychain keychain.Keychain // required
-	EVMKeychain c.EVMKeychain     // required
+	EthKeychain c.EthKeychain     // required
 	// Set of P-chain transactions that the wallet should know about to be able
 	// to generate transactions.
 	PChainTxs map[ids.ID]*txs.Tx // optional
@@ -132,9 +132,9 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		return nil, err
 	}
 
-	// EVM state fetching disabled for now
-	// evmAddrs := config.EVMKeychain.EVMAddresses()
-	// ethState, err := FetchEVMState(ctx, config.URI, evmAddrs)
+	// Eth state fetching disabled for now
+	// ethAddrs := config.EthKeychain.EthAddresses()
+	// ethState, err := FetchEthState(ctx, config.URI, ethAddrs)
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -149,7 +149,7 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		if err != nil {
 			return nil, err
 		}
-		tx, err := txs.Parse(txBytes)
+		tx, err := txs.Parse(txs.Codec, txBytes)
 		if err != nil {
 			return nil, err
 		}
@@ -171,8 +171,8 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 	// cChainID := luxState.CCTX.BlockchainID
 	// cUTXOs := common.NewChainUTXOs(cChainID, luxState.UTXOs)
 	// cBackend := c.NewBackend(cUTXOs, nil)
-	// cBuilder := c.NewBuilder(luxAddrs, config.EVMKeychain.EVMAddresses(), luxState.CCTX, cBackend)
-	// cSigner := c.NewSigner(config.LUXKeychain, config.EVMKeychain, cBackend)
+	// cBuilder := c.NewBuilder(luxAddrs, config.EthKeychain.EthAddresses(), luxState.CCTX, cBackend)
+	// cSigner := c.NewSigner(config.LUXKeychain, config.EthKeychain, cBackend)
 
 	pClient := p.NewClient(luxState.PClient, pBackend)
 
