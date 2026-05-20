@@ -14,8 +14,8 @@ import (
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/luxfi/geth/ethclient"
 
+	"github.com/luxfi/codec"
 	"github.com/luxfi/constants"
-	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/rpc"
@@ -24,8 +24,10 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
+	lux "github.com/luxfi/utxo"
 
 	gethcommon "github.com/luxfi/geth/common"
+	ptxs "github.com/luxfi/proto/p/txs"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
@@ -72,7 +74,7 @@ type XClient struct {
 func NewXClient(uri, chainAlias string) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/v1/bc/%s", uri, chainAlias),
+			fmt.Sprintf("%s/ext/bc/%s", uri, chainAlias),
 		),
 	}
 }
@@ -84,7 +86,7 @@ func NewXClient(uri, chainAlias string) *XClient {
 func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/v1/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
+			fmt.Sprintf("%s/ext/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
 		),
 		networkID:    networkID,
 		blockchainID: blockchainID,
@@ -124,20 +126,31 @@ func (c *XClient) GetAtomicUTXOs(
 		formattedAddrs[i] = addrStr
 	}
 
+	// Query exchangevm.getUTXOs (Lux X-chain uses exchangevm service prefix)
 	res := &getUTXOsReply{}
-	err := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
+	err := c.requester.SendRequest(ctx, "exchangevm.getUTXOs", &getUTXOsArgs{
 		Addresses:   formattedAddrs,
 		SourceChain: sourceChain,
 		Limit:       limit,
 		Encoding:    "hex",
 	}, res, options...)
 	if err != nil {
-		return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: %w", err)
+		// If exchangevm service not available, try xvm for compatibility
+		err2 := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
+			Addresses:   formattedAddrs,
+			SourceChain: sourceChain,
+			Limit:       limit,
+			Encoding:    "hex",
+		}, res, options...)
+		if err2 != nil {
+			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: exchangevm error: %w, xvm error: %v", err, err2)
+		}
 	}
 
+	// Decode UTXOs from hex
 	utxos := make([][]byte, len(res.UTXOs))
 	for i, utxo := range res.UTXOs {
-		utxoBytes, err := formatting.Decode(formatting.Hex, utxo)
+		utxoBytes, err := hexDecode(utxo)
 		if err != nil {
 			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to decode UTXO %d: %w", i, err)
 		}
@@ -186,121 +199,85 @@ type getUTXOsReply struct {
 type LUXState struct {
 	PClient *platformvm.Client
 	PCTX    *pbuilder.Context
-	// X-Chain: opt-in via AttachXChain. Nil if not attached or not registered on this network.
 	XClient *XClient
 	XCTX    *xbuilder.Context
-	// C-Chain: opt-in via AttachCChain. EVM, fundamentally different from
-	// UTXO P/X — uses ethclient. Nil if not attached or not registered.
-	// CCTX would live in ./chain/c (EthClient + ChainID + GasPrice) — not
-	// a UTXOCtx. Wired through FetchEthState today.
+	// CClient *ethclient.Client // Not yet implemented
+	// CCTX    *c.Context         // Not yet implemented
 	UTXOs walletcommon.UTXOs
-
-	// uri and addrs are preserved so AttachXChain / AttachCChain can reuse them.
-	uri   string
-	addrs []ids.ShortID
 }
 
-// FetchPState fetches ONLY the P-Chain client + context + UTXOs.
-//
-// This is the canonical entry point. P-Chain is the only required chain
-// for sovereign-L1 spawn (CreateChainTx), validator ops, primary network
-// transactions. X-Chain (UTXO asset transfers) and C-Chain (EVM smart
-// contracts) are opt-in — call AttachXChain / AttachCChain on the
-// returned state if you need them.
-//
-// Sovereign-L1 callers: this is the function you want.
-// Don't call FetchState (it tries to pull X + C, which is wasteful when
-// they're not needed and breaks against P-only Quasar networks if not
-// fail-softed correctly).
-func FetchPState(
+func FetchState(
 	ctx context.Context,
 	uri string,
 	addrs set.Set[ids.ShortID],
-) (*LUXState, error) {
+) (
+	*LUXState,
+	error,
+) {
 	infoClient := sdkinfo.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
+	// C-chain client disabled for now
+	// cClient, err := ethclient.Dial(uri + "/ext/bc/C/rpc")
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to connect to C-chain: %w", err)
+	// }
 
 	pCTX, err := p.NewContextFromClients(ctx, infoClient, pClient)
 	if err != nil {
 		return nil, err
 	}
-	// Set the network ID on the pClient for proper bech32 address formatting.
-	// Without this, the client uses networkID=0 which maps to "custom" HRP fallback.
+
+	// Set the network ID on the pClient for proper bech32 address formatting
+	// Without this, the client uses networkID=0 which maps to "custom" HRP fallback
 	pClient.SetNetworkID(pCTX.NetworkID)
 
+	// For X-chain, we need to get the LUX asset ID and fees
+	// TODO: Get these from the xClient or infoClient
+	luxAssetID := pCTX.XAssetID
+	baseTxFee := uint64(1000000)         // 0.001 LUX
+	createAssetTxFee := uint64(10000000) // 0.01 LUX
+
+	xCTX, err := x.NewContextFromClients(ctx, infoClient, luxAssetID, baseTxFee, createAssetTxFee)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create X-chain client with context for proper address formatting
+	xClient := NewXClientWithContext(uri, pCTX.NetworkID, xCTX.BlockchainID)
+
+	// C-chain context disabled for now
+	// cCTX, err := c.NewContextFromClients(ctx, infoClient, pClient)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	utxos := walletcommon.NewUTXOs()
-	if err := AddAllUTXOs(
+	addrList := addrs.List()
+
+	// Fetch P-chain UTXOs
+	err = AddAllUTXOs(
 		ctx,
 		utxos,
 		pClient,
+		ptxs.Codec,
 		constants.PlatformChainID,
 		constants.PlatformChainID,
-		addrs.List(),
-	); err != nil {
+		addrList,
+	)
+	if err != nil {
 		return nil, err
 	}
 
+	// X-chain UTXOs fetched separately when needed (codec type mismatch with AddUTXO)
 	return &LUXState{
 		PClient: pClient,
 		PCTX:    pCTX,
-		UTXOs:   utxos,
-		uri:     uri,
-		addrs:   addrs.List(),
+		XClient: xClient,
+		XCTX:    xCTX,
+		// CClient: cClient, // Disabled
+		// CCTX:    cCTX,    // Disabled
+		UTXOs: utxos,
 	}, nil
-}
-
-// AttachXChain adds X-Chain client + context to the state. Fail-soft:
-// if X-Chain is not registered on this network (Quasar mainnet is P+C
-// only), returns the state unchanged with no error. Any other RPC
-// error is returned.
-func (s *LUXState) AttachXChain(ctx context.Context) error {
-	if s.XCTX != nil {
-		return nil // idempotent
-	}
-	infoClient := sdkinfo.NewClient(s.uri)
-	utxoAssetID := s.PCTX.UTXOAssetID
-	const (
-		baseTxFee        = uint64(1000000)  // 0.001 LUX
-		createAssetTxFee = uint64(10000000) // 0.01 LUX
-	)
-	xCTX, err := x.NewContextFromClients(ctx, infoClient, utxoAssetID, baseTxFee, createAssetTxFee)
-	if err != nil {
-		if isXChainNotEnabled(err) {
-			return nil // X-Chain not registered — opt-in attach is a no-op
-		}
-		return err
-	}
-	s.XCTX = xCTX
-	s.XClient = NewXClientWithContext(s.uri, s.PCTX.NetworkID, xCTX.BlockchainID)
-	// Without this the X wallet is built over an empty set and every tx
-	// reports insufficient funds regardless of balance.
-	return AddAllUTXOs(
-		ctx,
-		s.UTXOs,
-		s.XClient,
-		xCTX.BlockchainID,
-		xCTX.BlockchainID,
-		s.addrs,
-	)
-}
-
-// FetchState is the P+X convenience that pre-fetches P (required) and
-// X (opt-in via AttachXChain). Kept for back-compat. New callers
-// should use FetchPState + AttachXChain / AttachCChain explicitly so
-// the dependency graph is visible at the call site.
-func FetchState(
-	ctx context.Context,
-	uri string,
-	addrs set.Set[ids.ShortID],
-) (*LUXState, error) {
-	state, err := FetchPState(ctx, uri, addrs)
-	if err != nil {
-		return nil, err
-	}
-	if err := state.AttachXChain(ctx); err != nil {
-		return nil, err
-	}
-	return state, nil
 }
 
 type EthState struct {
@@ -314,7 +291,7 @@ func FetchEthState(
 	addrs set.Set[gethcommon.Address],
 ) (*EthState, error) {
 	path := fmt.Sprintf(
-		"%s/v1/%s/C/rpc",
+		"%s/ext/%s/C/rpc",
 		uri,
 		constants.ChainAliasPrefix,
 	)
@@ -368,17 +345,14 @@ func isRetryableError(err error) bool {
 }
 
 // AddAllUTXOs fetches all the UTXOs referenced by [addresses] that were sent
-// from [sourceChainID] to [destinationChainID] from the [client] and adds them
-// into [utxos]. If [ctx] expires, then the returned error will be immediately
-// reported.
-//
-// UTXOs are read ZAP-native (see zapUTXO): the node serves the envelope
-// utxo.UTXO.WireBytes() produces, and the zero-copy wire accessors read it
-// directly. No codec.Manager and no intermediate encoding sit on this path.
+// from [sourceChainID] to [destinationChainID] from the [client]. It then uses
+// [codec] to parse the returned UTXOs and it adds them into [utxos]. If [ctx]
+// expires, then the returned error will be immediately reported.
 func AddAllUTXOs(
 	ctx context.Context,
 	utxos walletcommon.UTXOs,
 	client UTXOClient,
+	codec codec.Manager,
 	sourceChainID ids.ID,
 	destinationChainID ids.ID,
 	addrs []ids.ShortID,
@@ -431,18 +405,20 @@ func AddAllUTXOs(
 		}
 
 		for _, utxoBytes := range utxosBytes {
-			utxo, err := zapUTXO(utxoBytes)
+			var utxo lux.UTXO
+			_, err := codec.Unmarshal(utxoBytes, &utxo)
 			if err != nil {
-				// A UTXO the node served and we cannot read is a wire
-				// disagreement, not a spendability question. Report it —
-				// silently skipping yields an empty set and surfaces later
-				// as an inscrutable "insufficient funds".
-				return fmt.Errorf("unreadable UTXO from %s: %w", sourceChainID, err)
+				// Tolerate "trailing buffer space" errors from genesis UTXOs
+				// which may have extra serialization bytes
+				if !strings.Contains(err.Error(), "trailing") {
+					continue // truly unparseable
+				}
+				// The UTXO was parsed despite trailing bytes — use it
 			}
 			if utxo.AssetID() == ids.Empty {
 				continue // invalid UTXO
 			}
-			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, utxo); err != nil {
+			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, &utxo); err != nil {
 				return err
 			}
 		}
@@ -511,22 +487,40 @@ func parseAddress(addr string) (chainPrefix, hrp string, addrBytes []byte, err e
 	return chainPrefix, hrp, addrBytes, nil
 }
 
-
-// isXChainNotEnabled detects the canonical "info.getBlockchainID returns
-// no-such-alias for X" error that surfaces when running against a P-only
-// network (one whose platform genesis does not include an XVM chain —
-// e.g. Quasar-era mainnet which only registers P + C). We match by
-// substring of the JSON-RPC error message rather than a typed sentinel
-// because the upstream info-service emits a free-form string; re-evaluate
-// this matcher if/when info.getBlockchainID gains a typed error path.
-//
-// Kept in lockstep with node/wallet/network/primary/api.go:isXChainNotEnabled
-// so the SDK and node wallets fail-soft on the same set of error messages.
-func isXChainNotEnabled(err error) bool {
-	if err == nil {
-		return false
+// hexDecode decodes a hex string (with or without 0x prefix)
+func hexDecode(s string) ([]byte, error) {
+	if len(s) >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X') {
+		s = s[2:]
 	}
-	msg := strings.ToLower(err.Error())
-	return strings.Contains(msg, "there is no id with alias: x") ||
-		strings.Contains(msg, "no chain with alias")
+	return hexDecodeString(s)
+}
+
+// hexDecodeString decodes a hex string without 0x prefix
+func hexDecodeString(s string) ([]byte, error) {
+	if len(s)%2 != 0 {
+		s = "0" + s
+	}
+	b := make([]byte, len(s)/2)
+	for i := 0; i < len(b); i++ {
+		h := hexValue(s[i*2])
+		l := hexValue(s[i*2+1])
+		if h == 255 || l == 255 {
+			return nil, fmt.Errorf("invalid hex character at position %d", i*2)
+		}
+		b[i] = h<<4 | l
+	}
+	return b, nil
+}
+
+func hexValue(c byte) byte {
+	switch {
+	case '0' <= c && c <= '9':
+		return c - '0'
+	case 'a' <= c && c <= 'f':
+		return c - 'a' + 10
+	case 'A' <= c && c <= 'F':
+		return c - 'A' + 10
+	default:
+		return 255
+	}
 }

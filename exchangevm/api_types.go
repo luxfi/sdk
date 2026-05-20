@@ -4,15 +4,15 @@
 package exchangevm
 
 import (
-	apitypes "github.com/luxfi/api/types"
+	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/formatting"
 )
 
 // GetTxFeeReply is the response from a GetTxFee call
 type GetTxFeeReply struct {
-	TxFee            apitypes.Uint64 `json:"txFee"`
-	CreateAssetTxFee apitypes.Uint64 `json:"createAssetTxFee"`
+	TxFee            json.Uint64 `json:"txFee"`
+	CreateAssetTxFee json.Uint64 `json:"createAssetTxFee"`
 }
 
 // GetTxStatusReply is the response from a GetTxStatus call
@@ -62,14 +62,14 @@ type GetBalanceArgs struct {
 
 // GetBalanceReply is the reply from GetBalance
 type GetBalanceReply struct {
-	Balance apitypes.Uint64 `json:"balance"`
-	UTXOIDs []string        `json:"utxoIDs"`
+	Balance json.Uint64 `json:"balance"`
+	UTXOIDs []string    `json:"utxoIDs"`
 }
 
 // Balance represents an asset balance
 type Balance struct {
-	Asset   string          `json:"asset"`
-	Balance apitypes.Uint64 `json:"balance"`
+	Asset   string      `json:"asset"`
+	Balance json.Uint64 `json:"balance"`
 }
 
 // GetAllBalancesArgs are arguments for GetAllBalances

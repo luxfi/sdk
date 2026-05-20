@@ -7,7 +7,6 @@ package models
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/luxfi/constants"
@@ -148,13 +147,8 @@ func (s Network) BootstrappingContext() (context.Context, func()) {
 	return ctx, cancel
 }
 
-// Endpoint returns the RPC endpoint for the network.
-// LUX_NODE_ENDPOINT env var overrides the canonical api.lux*.network
-// DNS for ops paths where the public endpoint isn't reachable.
+// Endpoint returns the RPC endpoint for the network
 func (s Network) Endpoint() string {
-	if ovr := os.Getenv("LUX_NODE_ENDPOINT"); ovr != "" {
-		return ovr
-	}
 	switch s {
 	case Mainnet:
 		return constants.MainnetAPIEndpoint
@@ -198,7 +192,7 @@ func (s Network) WSEndpoints() []string {
 // CChainEndpoint returns the C-Chain endpoint for the network
 func (s Network) CChainEndpoint() string {
 	baseEndpoint := s.Endpoint()
-	return fmt.Sprintf("%s/v1/bc/C/rpc", baseEndpoint)
+	return fmt.Sprintf("%s/ext/bc/C/rpc", baseEndpoint)
 }
 
 // CChainWSEndpoint returns the C-Chain WebSocket endpoint for the network
@@ -242,12 +236,12 @@ func GetNetworkFromSidecarNetworkName(name string) Network {
 
 // GetRPCEndpoint returns the RPC endpoint for a given base endpoint and blockchain ID
 func GetRPCEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/v1/bc/%s/rpc", baseEndpoint, blockchainID)
+	return fmt.Sprintf("%s/ext/bc/%s/rpc", baseEndpoint, blockchainID)
 }
 
 // GetWSEndpoint returns the WebSocket endpoint for a given base endpoint and blockchain ID
 func GetWSEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/v1/bc/%s/ws", baseEndpoint, blockchainID)
+	return fmt.Sprintf("%s/ext/bc/%s/ws", baseEndpoint, blockchainID)
 }
 
 // GenesisParams represents network genesis parameters
@@ -294,7 +288,7 @@ func (s Network) GenesisParams() *GenesisParams {
 func (s Network) BlockchainEndpoint(blockchainID string) string {
 	baseEndpoint := s.Endpoint()
 	if blockchainID == "" {
-		return fmt.Sprintf("%s/v1/bc/C/rpc", baseEndpoint)
+		return fmt.Sprintf("%s/ext/bc/C/rpc", baseEndpoint)
 	}
-	return fmt.Sprintf("%s/v1/bc/%s/rpc", baseEndpoint, blockchainID)
+	return fmt.Sprintf("%s/ext/bc/%s/rpc", baseEndpoint, blockchainID)
 }

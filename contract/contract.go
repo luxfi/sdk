@@ -413,7 +413,7 @@ func TxToMethodWithWarpMessage(
 	from crypto.Address,
 	privateKey string,
 	contractAddress crypto.Address,
-	warpMessage *luxWarp.Envelope,
+	warpMessage *luxWarp.Message,
 	payment *big.Int,
 	description string,
 	errorSignatureToError map[string]error,

@@ -13,7 +13,7 @@ const Alias = "X"
 type Context struct {
 	NetworkID        uint32
 	BlockchainID     ids.ID
-	UTXOAssetID      ids.ID
+	XAssetID         ids.ID
 	BaseTxFee        uint64
 	CreateAssetTxFee uint64
 }
@@ -21,14 +21,14 @@ type Context struct {
 func NewConsensusRuntime(
 	networkID uint32,
 	blockchainID ids.ID,
-	utxoAssetID ids.ID,
+	xAssetID ids.ID,
 ) (*runtime.Runtime, error) {
 	lookup := ids.NewAliaser()
 	rt := &runtime.Runtime{
-		NetworkID:   networkID,
-		ChainID:     blockchainID,
-		XChainID:    blockchainID,
-		UTXOAssetID: utxoAssetID,
+		NetworkID: networkID,
+		ChainID:   blockchainID,
+		XChainID:  blockchainID,
+		XAssetID:  xAssetID,
 	}
 	return rt, lookup.Alias(blockchainID, Alias)
 }

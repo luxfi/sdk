@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    runs-on: lux-build-amd64
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./sdk
@@ -25,7 +25,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.26.4'
+        go-version: '1.26.3'
         cache: true
         cache-dependency-path: sdk/go.sum
     

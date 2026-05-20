@@ -61,15 +61,22 @@ func (ms *Multisig) ToBytes() ([]byte, error) {
 	if ms.Undefined() {
 		return nil, ErrUndefinedTx
 	}
-	return ms.PChainTx.Bytes(), nil
+	txBytes, err := txs.Codec.Marshal(txs.CodecVersion, ms.PChainTx)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't marshal signed tx: %w", err)
+	}
+	return txBytes, nil
 }
 
 func (ms *Multisig) FromBytes(txBytes []byte) error {
-	tx, err := txs.Parse(txBytes)
-	if err != nil {
-		return fmt.Errorf("error parsing signed tx: %w", err)
+	var tx txs.Tx
+	if _, err := txs.Codec.Unmarshal(txBytes, &tx); err != nil {
+		return fmt.Errorf("error unmarshaling signed tx: %w", err)
 	}
-	ms.PChainTx = tx
+	if err := tx.Initialize(txs.Codec); err != nil {
+		return fmt.Errorf("error initializing signed tx: %w", err)
+	}
+	ms.PChainTx = &tx
 	return nil
 }
 

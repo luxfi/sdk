@@ -1,5 +1,3 @@
-<p align="center"><img src=".github/hero.svg" alt="sdk" width="880"></p>
-
 # Lux SDK
 
 The official Go SDK for building and managing Lux-compatible networks and blockchains. This SDK provides a unified interface integrating the full Lux ecosystem - netrunner for network orchestration, the CLI for user-friendly operations, and direct node APIs for high-performance applications.

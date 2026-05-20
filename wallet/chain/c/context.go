@@ -17,18 +17,18 @@ const Alias = "C"
 type Context struct {
 	NetworkID    uint32
 	BlockchainID ids.ID
-	UTXOAssetID  ids.ID
+	XAssetID     ids.ID
 }
 
-func NewContextFromURI(ctx context.Context, uri string, utxoAssetID ids.ID) (*Context, error) {
+func NewContextFromURI(ctx context.Context, uri string, luxAssetID ids.ID) (*Context, error) {
 	infoClient := sdkinfo.NewClient(uri)
-	return NewContextFromClients(ctx, infoClient, utxoAssetID)
+	return NewContextFromClients(ctx, infoClient, luxAssetID)
 }
 
 func NewContextFromClients(
 	ctx context.Context,
 	infoClient *sdkinfo.Client,
-	utxoAssetID ids.ID,
+	luxAssetID ids.ID,
 ) (*Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
@@ -43,17 +43,17 @@ func NewContextFromClients(
 	return &Context{
 		NetworkID:    networkID,
 		BlockchainID: blockchainID,
-		UTXOAssetID:  utxoAssetID,
+		XAssetID:     luxAssetID,
 	}, nil
 }
 
 func newConsensusRuntime(c *Context) (*runtime.Runtime, error) {
 	lookup := ids.NewAliaser()
 	rt := &runtime.Runtime{
-		NetworkID:   c.NetworkID,
-		ChainID:     c.BlockchainID,
-		UTXOAssetID: c.UTXOAssetID,
-		Log:         log.NoLog{},
+		NetworkID: c.NetworkID,
+		ChainID:   c.BlockchainID,
+		XAssetID:  c.XAssetID,
+		Log:       log.NoLog{},
 	}
 	return rt, lookup.Alias(c.BlockchainID, Alias)
 }
