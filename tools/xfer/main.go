@@ -51,7 +51,7 @@ func main() {
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         *uri,
 		LUXKeychain: kcAdapter,
-		EVMKeychain: kcAdapter,
+		EthKeychain: kcAdapter,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create wallet: %v", err)
@@ -75,14 +75,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to fetch state: %v", err)
 	}
-	utxoAssetID := luxState.XCTX.UTXOAssetID
+	luxAssetID := luxState.XCTX.XAssetID
 
 	xWallet := wallet.X()
 	exportTx, err := xWallet.IssueExportTx(
 		pChainID,
 		[]*lux.TransferableOutput{
 			{
-				Asset: lux.Asset{ID: utxoAssetID},
+				Asset: lux.Asset{ID: luxAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: *amount,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -109,7 +109,7 @@ func main() {
 	wallet, err = primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         *uri,
 		LUXKeychain: kcAdapter,
-		EVMKeychain: kcAdapter,
+		EthKeychain: kcAdapter,
 	})
 	if err != nil {
 		log.Fatalf("Failed to recreate wallet: %v", err)

@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
+	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
-	avajson "github.com/luxfi/utils/json"
 	"github.com/luxfi/vm/api"
 )
 
@@ -29,7 +29,7 @@ type Client struct {
 // NewClient returns an Exchange VM client for interacting with the X-Chain
 func NewClient(uri, chain string) *Client {
 	path := fmt.Sprintf(
-		"%s/v1/%s/%s",
+		"%s/ext/%s/%s",
 		uri,
 		constants.ChainAliasPrefix,
 		chain,
@@ -56,7 +56,7 @@ func (c *Client) GetBlock(ctx context.Context, blkID ids.ID, options ...rpc.Opti
 func (c *Client) GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedBlock{}
 	err := c.Requester.SendRequest(ctx, "exchangevm.getBlockByHeight", &api.GetBlockByHeightArgs{
-		Height:   avajson.Uint64(height),
+		Height:   json.Uint64(height),
 		Encoding: formatting.HexNC,
 	}, res, options...)
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *Client) GetAtomicUTXOs(
 	err := c.Requester.SendRequest(ctx, "exchangevm.getUTXOs", &api.GetUTXOsArgs{
 		Addresses:   ids.ShortIDsToStrings(addrs),
 		SourceChain: sourceChain,
-		Limit:       avajson.Uint32(limit),
+		Limit:       json.Uint32(limit),
 		StartIndex: api.Index{
 			Address: startAddress.String(),
 			UTXO:    startUTXOID.String(),

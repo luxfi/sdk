@@ -7,13 +7,13 @@ on:
     branches: [ main, develop ]
 
 env:
-  GO_VERSION: '1.26.4'
+  GO_VERSION: '1.26.3'
   CGO_ENABLED: '0'
 
 jobs:
   lint:
     name: Lint
-    runs-on: lux-build-amd64
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -43,7 +43,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        go: ['1.26.4']
+        go: ['1.26.3']
     steps:
     - uses: actions/checkout@v4
 
@@ -106,7 +106,7 @@ jobs:
 
   benchmark:
     name: Benchmark
-    runs-on: lux-build-amd64
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -137,7 +137,7 @@ jobs:
 
   security:
     name: Security Scan
-    runs-on: lux-build-amd64
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
@@ -164,7 +164,7 @@ jobs:
 
   release:
     name: Release
-    runs-on: lux-build-amd64
+    runs-on: ubuntu-latest
     needs: [lint, test, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:

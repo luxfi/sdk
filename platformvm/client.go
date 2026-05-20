@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	apitypes "github.com/luxfi/api/types"
+	json "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"
@@ -17,7 +17,6 @@ import (
 	"github.com/luxfi/proto/p/status"
 	"github.com/luxfi/proto/p/validators/fee"
 	"github.com/luxfi/rpc"
-	avajson "github.com/luxfi/utils/json"
 	"github.com/luxfi/utxo/secp256k1fx"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/api"
@@ -33,7 +32,7 @@ type Client struct {
 
 func NewClient(uri string) *Client {
 	return &Client{Requester: rpc.NewEndpointRequester(
-		uri + "/v1/P",
+		uri + "/ext/P",
 	)}
 }
 
@@ -41,7 +40,7 @@ func NewClient(uri string) *Client {
 // for proper bech32 address formatting
 func NewClientWithNetworkID(uri string, networkID uint32) *Client {
 	return &Client{
-		Requester: rpc.NewEndpointRequester(uri + "/v1/P"),
+		Requester: rpc.NewEndpointRequester(uri + "/ext/P"),
 		networkID: networkID,
 	}
 }
@@ -137,7 +136,7 @@ func (c *Client) GetAtomicUTXOs(
 	err = c.Requester.SendRequest(ctx, "platform.getUTXOs", &api.GetUTXOsArgs{
 		Addresses:   formattedAddrs,
 		SourceChain: sourceChain,
-		Limit:       avajson.Uint32(limit),
+		Limit:       json.Uint32(limit),
 		StartIndex:  startIndex,
 		Encoding:    formatting.Hex,
 	}, res, options...)
@@ -363,7 +362,7 @@ func (c *Client) SampleValidators(ctx context.Context, chainID ids.ID, sampleSiz
 	res := &SampleValidatorsReply{}
 	err := c.Requester.SendRequest(ctx, "platform.sampleValidators", &SampleValidatorsArgs{
 		ChainID: chainID,
-		Size:    Uint16(sampleSize),
+		Size:    json.Uint16(sampleSize),
 	}, res, options...)
 	return res.Validators, err
 }
@@ -501,7 +500,7 @@ func (c *Client) GetTotalStake(ctx context.Context, chainID ids.ID, options ...r
 	err := c.Requester.SendRequest(ctx, "platform.getTotalStake", &GetTotalStakeArgs{
 		ChainID: chainID,
 	}, res, options...)
-	var amount apitypes.Uint64
+	var amount json.Uint64
 	if chainID == constants.PrimaryNetworkID {
 		amount = res.Stake
 	} else {
@@ -570,7 +569,7 @@ func (c *Client) GetBlock(ctx context.Context, blockID ids.ID, options ...rpc.Op
 func (c *Client) GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedBlock{}
 	err := c.Requester.SendRequest(ctx, "platform.getBlockByHeight", &api.GetBlockByHeightArgs{
-		Height:   avajson.Uint64(height),
+		Height:   json.Uint64(height),
 		Encoding: formatting.HexNC,
 	}, res, options...)
 	if err != nil {

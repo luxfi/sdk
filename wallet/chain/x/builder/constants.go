@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2026, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
@@ -17,8 +17,7 @@ const (
 	PropertyFxIndex  = 2
 )
 
-// Parser reads X-chain blocks and txs. A tx names its own type on the wire,
-// so the parser carries only the fx set — there is no codec to construct.
+// Parser to support serialization and deserialization
 var Parser block.Parser
 
 func init() {

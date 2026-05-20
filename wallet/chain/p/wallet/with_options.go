@@ -70,19 +70,7 @@ func (w *withOptions) IssueAddValidatorTx(
 	)
 }
 
-// AddValidator — see Wallet.AddValidator. Convenience helper that issues
-// AddValidatorTx against the network the wallet is currently dialed to.
-func (w *withOptions) AddValidator(
-	vdr *txs.Validator,
-	rewardsOwner *secp256k1fx.OutputOwners,
-	delegationShares uint32,
-	options ...common.Option,
-) (*txs.Tx, error) {
-	return w.IssueAddValidatorTx(vdr, rewardsOwner, delegationShares, options...)
-}
-
-// Deprecated: use IssueAddValidatorTx. Retained for one release cycle of
-// wire compatibility only — validators validate networks, not chains.
+// Removed in regenesis
 func (w *withOptions) IssueAddChainValidatorTx(
 	vdr *txs.ChainValidator,
 	options ...common.Option,
@@ -93,9 +81,7 @@ func (w *withOptions) IssueAddChainValidatorTx(
 	)
 }
 
-// Deprecated: retained for one release cycle of wire compatibility only.
-// New code should manage validator lifecycle through the network-level
-// validator txs (AddValidatorTx + the L1 validator txs for sovereign L1s).
+// Removed in regenesis
 func (w *withOptions) IssueRemoveChainValidatorTx(
 	nodeID ids.NodeID,
 	chainID ids.ID,
