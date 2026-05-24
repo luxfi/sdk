@@ -51,7 +51,7 @@ func main() {
 	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         *uri,
 		LUXKeychain: kcAdapter,
-		EthKeychain: kcAdapter,
+		EVMKeychain: kcAdapter,
 	})
 	if err != nil {
 		log.Fatalf("Failed to create wallet: %v", err)
@@ -109,7 +109,7 @@ func main() {
 	wallet, err = primary.MakeWallet(ctx, &primary.WalletConfig{
 		URI:         *uri,
 		LUXKeychain: kcAdapter,
-		EthKeychain: kcAdapter,
+		EVMKeychain: kcAdapter,
 	})
 	if err != nil {
 		log.Fatalf("Failed to recreate wallet: %v", err)
