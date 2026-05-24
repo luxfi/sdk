@@ -95,7 +95,7 @@ type BuilderBackend interface {
 
 type builder struct {
 	luxAddrs set.Set[ids.ShortID]
-	ethAddrs set.Set[ethcommon.Address]
+	evmAddrs set.Set[ethcommon.Address]
 	context  *Context
 	backend  BuilderBackend
 }
@@ -104,19 +104,20 @@ type builder struct {
 //
 //   - [luxAddrs] is the set of addresses in the LUX format that the builder
 //     assumes can be used when signing the transactions in the future.
-//   - [ethAddrs] is the set of addresses in the Eth format that the builder
-//     assumes can be used when signing the transactions in the future.
+//   - [evmAddrs] is the set of 20-byte EVM-runtime account addresses
+//     that the builder assumes can be used when signing the transactions
+//     in the future.
 //   - [backend] provides the required access to the chain's context and state
 //     to build out the transactions.
 func NewBuilder(
 	luxAddrs set.Set[ids.ShortID],
-	ethAddrs set.Set[ethcommon.Address],
+	evmAddrs set.Set[ethcommon.Address],
 	context *Context,
 	backend BuilderBackend,
 ) Builder {
 	return &builder{
 		luxAddrs: luxAddrs,
-		ethAddrs: ethAddrs,
+		evmAddrs: evmAddrs,
 		context:  context,
 		backend:  backend,
 	}
@@ -132,7 +133,7 @@ func (b *builder) GetBalance(
 	var (
 		ops          = common.NewOptions(options)
 		ctx          = ops.Context()
-		addrs        = ops.EthAddresses(b.ethAddrs)
+		addrs        = ops.EVMAddresses(b.evmAddrs)
 		totalBalance = new(big.Int)
 	)
 	for addr := range addrs {
@@ -320,7 +321,7 @@ func (b *builder) NewExportTx(
 	var (
 		ops    = common.NewOptions(options)
 		ctx    = ops.Context()
-		addrs  = ops.EthAddresses(b.ethAddrs)
+		addrs  = ops.EVMAddresses(b.evmAddrs)
 		inputs = make([]*EVMInput, 0, addrs.Len())
 	)
 	for addr := range addrs {

@@ -46,12 +46,20 @@ type Signer interface {
 	SignAtomic(ctx context.Context, tx *Tx) error
 }
 
-type EthKeychain interface {
+// EVMKeychain is the interface for keychains that expose 20-byte
+// EVM-runtime account addresses (the format consumed by Lux C-Chain,
+// Partner EVM, Hanzo EVM, and every EVM-compatible chain).
+//
+// Naming: the value IS "EVM-runtime account address". The internal
+// derivation hashes the secp256k1 pubkey with Keccak256 — that's HOW
+// it's computed. The data model that consumes it (EVM account) is
+// WHAT it is.
+type EVMKeychain interface {
 	// The returned Signer can provide a signature for [addr]
-	GetEth(addr common.Address) (keychain.Signer, bool)
+	GetByEVM(addr common.Address) (keychain.Signer, bool)
 	// Returns the set of addresses for which the accessor keeps an associated
 	// signer
-	EthAddresses() set.Set[common.Address]
+	EVMAddresses() set.Set[common.Address]
 }
 
 type SignerBackend interface {
@@ -60,14 +68,14 @@ type SignerBackend interface {
 
 type txSigner struct {
 	luxKC   keychain.Keychain
-	ethKC   EthKeychain
+	evmKC   EVMKeychain
 	backend SignerBackend
 }
 
-func NewSigner(luxKC keychain.Keychain, ethKC EthKeychain, backend SignerBackend) Signer {
+func NewSigner(luxKC keychain.Keychain, evmKC EVMKeychain, backend SignerBackend) Signer {
 	return &txSigner{
 		luxKC:   luxKC,
-		ethKC:   ethKC,
+		evmKC:   evmKC,
 		backend: backend,
 	}
 }
@@ -139,7 +147,7 @@ func (s *txSigner) getExportSigners(ins []*EVMInput) [][]keychain.Signer {
 		inputSigners := make([]keychain.Signer, 1)
 		txSigners[credIndex] = inputSigners
 
-		key, ok := s.ethKC.GetEth(input.Address)
+		key, ok := s.evmKC.GetByEVM(input.Address)
 		if !ok {
 			// If we don't have access to the key, then we can't sign this
 			// transaction. However, we can attempt to partially sign it.
