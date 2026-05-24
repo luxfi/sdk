@@ -167,7 +167,7 @@ func (c *Client) WaitForHealthy(ctx context.Context, timeout time.Duration) erro
 				continue
 			}
 			// Check if health response indicates healthy
-			if health.GetClusterInfo() != nil {
+			if health.ClusterInfo != nil {
 				c.logger.Info("network is healthy")
 				return nil
 			}
