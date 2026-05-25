@@ -48,7 +48,7 @@ type Signer interface {
 
 // EVMKeychain is the interface for keychains that expose 20-byte
 // EVM-runtime account addresses (the format consumed by Lux C-Chain,
-// Partner EVM, Hanzo EVM, and every EVM-compatible chain).
+// downstream EVM L1s, and every EVM-compatible chain).
 //
 // Naming: the value IS "EVM-runtime account address". The internal
 // derivation hashes the secp256k1 pubkey with Keccak256 — that's HOW
