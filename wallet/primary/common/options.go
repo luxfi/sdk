@@ -100,7 +100,7 @@ func (o *Options) Addresses(defaultAddresses set.Set[ids.ShortID]) set.Set[ids.S
 }
 
 // EVMAddresses returns the configured set of 20-byte EVM-runtime
-// account addresses (the format consumed by Lux C-Chain, Partner EVM,
+// account addresses (the format consumed by Lux C-Chain, downstream EVM L1s,
 // and every EVM-compatible chain). Naming reflects the data model
 // that consumes the value (EVM account), not the hash primitive that
 // derives it.
