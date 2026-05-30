@@ -160,7 +160,7 @@ func (b *builder) GetImportableBalance(
 	var (
 		addrs           = ops.Addresses(b.luxAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 		balance         uint64
 	)
 	for _, utxo := range utxos {
@@ -194,7 +194,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.luxAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 
 		importedInputs = make([]*lux.TransferableInput, 0, len(utxos))
 		importedAmount uint64
@@ -269,7 +269,7 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*UnsignedExportTx, error) {
 	var (
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 		exportedOutputs = make([]*lux.TransferableOutput, len(outputs))
 		exportedAmount  uint64
 	)
