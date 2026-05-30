@@ -115,7 +115,7 @@ type GetL1ValidatorReply struct {
 }
 
 // APIBlockchain represents a blockchain in the API response.
-// NetID is the ID of the network (subnet) that validates this blockchain.
+// NetID is the ID of the network that validates this blockchain.
 type APIBlockchain struct {
 	ID    ids.ID `json:"id"`
 	Name  string `json:"name"`
