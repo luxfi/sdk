@@ -210,7 +210,7 @@ func (b *builder) NewBaseTx(
 	options ...common.Option,
 ) (*txs.BaseTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.BaseTxFee,
+		b.context.UTXOAssetID: b.context.BaseTxFee,
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -247,7 +247,7 @@ func (b *builder) NewCreateAssetTx(
 	options ...common.Option,
 ) (*txs.CreateAssetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.CreateAssetTxFee,
+		b.context.UTXOAssetID: b.context.CreateAssetTxFee,
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -289,7 +289,7 @@ func (b *builder) NewOperationTx(
 	options ...common.Option,
 ) (*txs.OperationTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.BaseTxFee,
+		b.context.UTXOAssetID: b.context.BaseTxFee,
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -376,7 +376,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 		txFee           = b.context.BaseTxFee
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
@@ -477,7 +477,7 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.BaseTxFee,
+		b.context.UTXOAssetID: b.context.BaseTxFee,
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
