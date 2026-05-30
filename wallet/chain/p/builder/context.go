@@ -16,22 +16,22 @@ const Alias = "P"
 type Context struct {
 	NetworkID         uint32
 	ChainID           ids.ID // Optional: if set, overrides default PlatformChainID
-	XAssetID          ids.ID
+	UTXOAssetID          ids.ID
 	ComplexityWeights gas.Dimensions
 	GasPrice          gas.Price
 	StaticFeeConfig   fee.StaticConfig
 }
 
-func NewConsensusRuntime(networkID uint32, xAssetID ids.ID) (*runtime.Runtime, error) {
-	return NewConsensusRuntimeWithChainID(networkID, constants.PlatformChainID, xAssetID)
+func NewConsensusRuntime(networkID uint32, utxoAssetID ids.ID) (*runtime.Runtime, error) {
+	return NewConsensusRuntimeWithChainID(networkID, constants.PlatformChainID, utxoAssetID)
 }
 
-func NewConsensusRuntimeWithChainID(networkID uint32, chainID ids.ID, xAssetID ids.ID) (*runtime.Runtime, error) {
+func NewConsensusRuntimeWithChainID(networkID uint32, chainID ids.ID, utxoAssetID ids.ID) (*runtime.Runtime, error) {
 	lookup := ids.NewAliaser()
 	rt := &runtime.Runtime{
 		NetworkID: networkID,
 		ChainID:   chainID,
-		XAssetID:  xAssetID,
+		UTXOAssetID:  utxoAssetID,
 	}
 	return rt, lookup.Alias(chainID, Alias)
 }

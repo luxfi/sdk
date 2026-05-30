@@ -233,7 +233,7 @@ func FetchState(
 
 	// For X-chain, we need to get the LUX asset ID and fees
 	// TODO: Get these from the xClient or infoClient
-	luxAssetID := pCTX.XAssetID
+	luxAssetID := pCTX.UTXOAssetID
 	baseTxFee := uint64(1000000)         // 0.001 LUX
 	createAssetTxFee := uint64(10000000) // 0.01 LUX
 
