@@ -153,7 +153,7 @@ type Builder interface {
 type Context struct {
 	NetworkID        uint32
 	BlockchainID     ids.ID
-	XAssetID         ids.ID
+	UTXOAssetID         ids.ID
 	BaseTxFee        uint64
 	CreateAssetTxFee uint64
 }
@@ -163,7 +163,7 @@ type Context struct {
 type BuilderBackend interface {
 	Context() *builder.Context
 	BlockchainID() ids.ID
-	XAssetID() ids.ID
+	UTXOAssetID() ids.ID
 	BaseTxFee() uint64
 	CreateAssetTxFee() uint64
 
@@ -208,7 +208,7 @@ func (b *txBuilder) NewBaseTx(
 	options ...common.Option,
 ) (*txs.BaseTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.XAssetID(): b.backend.BaseTxFee(),
+		b.backend.UTXOAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -244,7 +244,7 @@ func (b *txBuilder) NewCreateAssetTx(
 	options ...common.Option,
 ) (*txs.CreateAssetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.XAssetID(): b.backend.CreateAssetTxFee(),
+		b.backend.UTXOAssetID(): b.backend.CreateAssetTxFee(),
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -285,7 +285,7 @@ func (b *txBuilder) NewOperationTx(
 	options ...common.Option,
 ) (*txs.OperationTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.XAssetID(): b.backend.BaseTxFee(),
+		b.backend.UTXOAssetID(): b.backend.BaseTxFee(),
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -371,7 +371,7 @@ func (b *txBuilder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.backend.XAssetID()
+		luxAssetID      = b.backend.UTXOAssetID()
 		txFee           = b.backend.BaseTxFee()
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
@@ -469,7 +469,7 @@ func (b *txBuilder) NewExportTx(
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.XAssetID(): b.backend.BaseTxFee(),
+		b.backend.UTXOAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
