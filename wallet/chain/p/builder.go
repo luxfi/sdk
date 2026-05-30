@@ -327,7 +327,7 @@ func (b *txBuilder) NewAddValidatorTx(
 	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
-	luxAssetID := b.context.XAssetID
+	luxAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{
 		luxAssetID: b.context.StaticFeeConfig.AddNetworkValidatorFee,
 	}
@@ -361,7 +361,7 @@ func (b *txBuilder) NewAddChainValidatorTx(
 	options ...common.Option,
 ) (*txs.AddChainValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.StaticFeeConfig.AddChainValidatorFee,
+		b.context.UTXOAssetID: b.context.StaticFeeConfig.AddChainValidatorFee,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -394,7 +394,7 @@ func (b *txBuilder) NewRemoveChainValidatorTx(
 	options ...common.Option,
 ) (*txs.RemoveChainValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.StaticFeeConfig.TxFee,
+		b.context.UTXOAssetID: b.context.StaticFeeConfig.TxFee,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -427,12 +427,12 @@ func (b *txBuilder) NewAddDelegatorTx(
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.AddDelegatorTx, error) {
-	luxAssetID := b.context.XAssetID
+	luxAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{
 		luxAssetID: b.context.StaticFeeConfig.AddNetworkDelegatorFee,
 	}
 	toStake := map[ids.ID]uint64{
-		b.context.XAssetID: vdr.Wght,
+		b.context.UTXOAssetID: vdr.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
@@ -464,7 +464,7 @@ func (b *txBuilder) NewCreateChainTx(
 	options ...common.Option,
 ) (*txs.CreateChainTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.StaticFeeConfig.CreateChainTxFee,
+		b.context.UTXOAssetID: b.context.StaticFeeConfig.CreateChainTxFee,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -501,7 +501,7 @@ func (b *txBuilder) NewCreateNetworkTx(
 	options ...common.Option,
 ) (*txs.CreateNetworkTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.StaticFeeConfig.CreateNetworkTxFee,
+		b.context.UTXOAssetID: b.context.StaticFeeConfig.CreateNetworkTxFee,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -537,7 +537,7 @@ func (b *txBuilder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 		txFee           = b.context.StaticFeeConfig.TxFee
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
@@ -635,7 +635,7 @@ func (b *txBuilder) NewExportTx(
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.StaticFeeConfig.TxFee,
+		b.context.UTXOAssetID: b.context.StaticFeeConfig.TxFee,
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -685,7 +685,7 @@ func (b *txBuilder) NewTransformChainTx(
 	options ...common.Option,
 ) (*txs.TransformChainTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.StaticFeeConfig.TransformChainTxFee,
+		b.context.UTXOAssetID: b.context.StaticFeeConfig.TransformChainTxFee,
 		assetID:            maxSupply - initialSupply,
 	}
 	toStake := map[ids.ID]uint64{}
@@ -735,7 +735,7 @@ func (b *txBuilder) NewAddPermissionlessValidatorTx(
 	shares uint32,
 	options ...common.Option,
 ) (*txs.AddPermissionlessValidatorTx, error) {
-	luxAssetID := b.context.XAssetID
+	luxAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	if vdr.Chain == constants.PrimaryNetworkID {
 		toBurn[luxAssetID] = b.context.StaticFeeConfig.AddNetworkValidatorFee
@@ -777,7 +777,7 @@ func (b *txBuilder) NewAddPermissionlessDelegatorTx(
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.AddPermissionlessDelegatorTx, error) {
-	luxAssetID := b.context.XAssetID
+	luxAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	if vdr.Chain == constants.PrimaryNetworkID {
 		toBurn[luxAssetID] = b.context.StaticFeeConfig.AddNetworkDelegatorFee
