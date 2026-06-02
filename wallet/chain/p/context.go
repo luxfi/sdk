@@ -61,7 +61,7 @@ func NewContextFromClients(
 	return &builder.Context{
 		NetworkID:         networkID,
 		ChainID:           pChainID,
-		UTXOAssetID:          luxAssetID,
+		UTXOAssetID:       luxAssetID,
 		ComplexityWeights: dynamicFeeConfig.Weights,
 		GasPrice:          gasPriceMultiplier * gasPrice,
 	}, nil

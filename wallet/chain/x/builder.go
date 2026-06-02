@@ -153,7 +153,7 @@ type Builder interface {
 type Context struct {
 	NetworkID        uint32
 	BlockchainID     ids.ID
-	UTXOAssetID         ids.ID
+	UTXOAssetID      ids.ID
 	BaseTxFee        uint64
 	CreateAssetTxFee uint64
 }

@@ -686,7 +686,7 @@ func (b *txBuilder) NewTransformChainTx(
 ) (*txs.TransformChainTx, error) {
 	toBurn := map[ids.ID]uint64{
 		b.context.UTXOAssetID: b.context.StaticFeeConfig.TransformChainTxFee,
-		assetID:            maxSupply - initialSupply,
+		assetID:               maxSupply - initialSupply,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
