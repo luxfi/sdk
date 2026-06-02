@@ -331,7 +331,7 @@ func (e *MPCExtension) Stop() error                     { return nil }
 
 type QuantumExtension struct {
 	Lattice       *LatticeCrypto
-	Corona      *CoronaConsensus
+	Corona        *CoronaConsensus
 	QuantumProofs *QuantumProofSystem
 }
 
