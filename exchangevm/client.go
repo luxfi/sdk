@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	"github.com/luxfi/codec/jsonrpc"
+	avajson "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/formatting"
@@ -56,7 +56,7 @@ func (c *Client) GetBlock(ctx context.Context, blkID ids.ID, options ...rpc.Opti
 func (c *Client) GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedBlock{}
 	err := c.Requester.SendRequest(ctx, "exchangevm.getBlockByHeight", &api.GetBlockByHeightArgs{
-		Height:   json.Uint64(height),
+		Height:   avajson.Uint64(height),
 		Encoding: formatting.HexNC,
 	}, res, options...)
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *Client) GetAtomicUTXOs(
 	err := c.Requester.SendRequest(ctx, "exchangevm.getUTXOs", &api.GetUTXOsArgs{
 		Addresses:   ids.ShortIDsToStrings(addrs),
 		SourceChain: sourceChain,
-		Limit:       json.Uint32(limit),
+		Limit:       avajson.Uint32(limit),
 		StartIndex: api.Index{
 			Address: startAddress.String(),
 			UTXO:    startUTXOID.String(),

@@ -4,9 +4,10 @@
 package platformvm
 
 import (
+	"strconv"
 	"time"
 
-	json "github.com/luxfi/codec/jsonrpc"
+	apitypes "github.com/luxfi/api/types"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/status"
@@ -15,6 +16,33 @@ import (
 	"github.com/luxfi/vm/components/gas"
 )
 
+// Uint16 is a uint16 that marshals as a JSON string for compatibility with
+// the historical luxd JSON-RPC numeric wire (every numeric over the wire is
+// a string). luxfi/api/types ships Uint64/Uint32/Float64 but not Uint16;
+// this is a local 1:1 mirror sitting at the same external boundary.
+type Uint16 uint16
+
+const jsonNull = "null"
+
+func (u Uint16) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + strconv.FormatUint(uint64(u), 10) + `"`), nil
+}
+
+func (u *Uint16) UnmarshalJSON(b []byte) error {
+	str := string(b)
+	if str == jsonNull {
+		return nil
+	}
+	if len(str) >= 2 {
+		if lastIndex := len(str) - 1; str[0] == '"' && str[lastIndex] == '"' {
+			str = str[1:lastIndex]
+		}
+	}
+	val, err := strconv.ParseUint(str, 10, 16)
+	*u = Uint16(val)
+	return err
+}
+
 // GetBalanceRequest is the request for GetBalance
 type GetBalanceRequest struct {
 	Addresses []string `json:"addresses"`
@@ -22,15 +50,15 @@ type GetBalanceRequest struct {
 
 // GetBalanceResponse is the response from GetBalance
 type GetBalanceResponse struct {
-	Balance             json.Uint64            `json:"balance"`
-	Unlocked            json.Uint64            `json:"unlocked"`
-	LockedStakeable     json.Uint64            `json:"lockedStakeable"`
-	LockedNotStakeable  json.Uint64            `json:"lockedNotStakeable"`
-	Balances            map[ids.ID]json.Uint64 `json:"balances"`
-	Unlockeds           map[ids.ID]json.Uint64 `json:"unlockeds"`
-	LockedStakeables    map[ids.ID]json.Uint64 `json:"lockedStakeables"`
-	LockedNotStakeables map[ids.ID]json.Uint64 `json:"lockedNotStakeables"`
-	UTXOIDs             []*utxo.UTXOID         `json:"utxoIDs"`
+	Balance             apitypes.Uint64            `json:"balance"`
+	Unlocked            apitypes.Uint64            `json:"unlocked"`
+	LockedStakeable     apitypes.Uint64            `json:"lockedStakeable"`
+	LockedNotStakeable  apitypes.Uint64            `json:"lockedNotStakeable"`
+	Balances            map[ids.ID]apitypes.Uint64 `json:"balances"`
+	Unlockeds           map[ids.ID]apitypes.Uint64 `json:"unlockeds"`
+	LockedStakeables    map[ids.ID]apitypes.Uint64 `json:"lockedStakeables"`
+	LockedNotStakeables map[ids.ID]apitypes.Uint64 `json:"lockedNotStakeables"`
+	UTXOIDs             []*utxo.UTXOID             `json:"utxoIDs"`
 }
 
 // GetNetArgs is the request for GetNet
@@ -40,14 +68,14 @@ type GetNetArgs struct {
 
 // GetNetResponse is the response from GetNet
 type GetNetResponse struct {
-	IsPermissioned        bool        `json:"isPermissioned"`
-	ControlKeys           []string    `json:"controlKeys"`
-	Threshold             json.Uint32 `json:"threshold"`
-	Locktime              json.Uint64 `json:"locktime"`
-	NetTransformationTxID ids.ID      `json:"netTransformationTxID"`
-	ConversionID          ids.ID      `json:"conversionID"`
-	ManagerChainID        ids.ID      `json:"managerChainID"`
-	ManagerAddress        []byte      `json:"managerAddress"`
+	IsPermissioned        bool            `json:"isPermissioned"`
+	ControlKeys           []string        `json:"controlKeys"`
+	Threshold             apitypes.Uint32 `json:"threshold"`
+	Locktime              apitypes.Uint64 `json:"locktime"`
+	NetTransformationTxID ids.ID          `json:"netTransformationTxID"`
+	ConversionID          ids.ID          `json:"conversionID"`
+	ManagerChainID        ids.ID          `json:"managerChainID"`
+	ManagerAddress        []byte          `json:"managerAddress"`
 }
 
 // GetNetsArgs is the request for GetNets
@@ -57,9 +85,9 @@ type GetNetsArgs struct {
 
 // APINet represents a net in the API
 type APINet struct {
-	ID          ids.ID      `json:"id"`
-	ControlKeys []string    `json:"controlKeys"`
-	Threshold   json.Uint32 `json:"threshold"`
+	ID          ids.ID          `json:"id"`
+	ControlKeys []string        `json:"controlKeys"`
+	Threshold   apitypes.Uint32 `json:"threshold"`
 }
 
 // GetNetsResponse is the response from GetNets
@@ -95,9 +123,9 @@ type GetL1ValidatorArgs struct {
 
 // L1ValidatorOwner represents an owner in an L1 validator response
 type L1ValidatorOwner struct {
-	Locktime  json.Uint64 `json:"locktime"`
-	Threshold json.Uint32 `json:"threshold"`
-	Addresses []string    `json:"addresses"`
+	Locktime  apitypes.Uint64 `json:"locktime"`
+	Threshold apitypes.Uint32 `json:"threshold"`
+	Addresses []string        `json:"addresses"`
 }
 
 // GetL1ValidatorReply is the response from GetL1Validator
@@ -107,11 +135,11 @@ type GetL1ValidatorReply struct {
 	PublicKey             *[]byte          `json:"publicKey,omitempty"`
 	RemainingBalanceOwner L1ValidatorOwner `json:"remainingBalanceOwner"`
 	DeactivationOwner     L1ValidatorOwner `json:"deactivationOwner"`
-	StartTime             json.Uint64      `json:"startTime"`
-	Weight                json.Uint64      `json:"weight"`
-	MinNonce              *json.Uint64     `json:"minNonce,omitempty"`
-	Balance               *json.Uint64     `json:"balance,omitempty"`
-	Height                json.Uint64      `json:"height"`
+	StartTime             apitypes.Uint64  `json:"startTime"`
+	Weight                apitypes.Uint64  `json:"weight"`
+	MinNonce              *apitypes.Uint64 `json:"minNonce,omitempty"`
+	Balance               *apitypes.Uint64 `json:"balance,omitempty"`
+	Height                apitypes.Uint64  `json:"height"`
 }
 
 // APIBlockchain represents a blockchain in the API response.
@@ -146,14 +174,14 @@ type GetCurrentSupplyArgs struct {
 
 // GetCurrentSupplyReply is the response from GetCurrentSupply
 type GetCurrentSupplyReply struct {
-	Supply json.Uint64 `json:"supply"`
-	Height json.Uint64 `json:"height"`
+	Supply apitypes.Uint64 `json:"supply"`
+	Height apitypes.Uint64 `json:"height"`
 }
 
 // SampleValidatorsArgs is the request for SampleValidators
 type SampleValidatorsArgs struct {
-	ChainID ids.ID      `json:"chainID"`
-	Size    json.Uint16 `json:"size"`
+	ChainID ids.ID `json:"chainID"`
+	Size    Uint16 `json:"size"`
 }
 
 // SampleValidatorsReply is the response from SampleValidators
@@ -205,9 +233,9 @@ type GetStakeArgs struct {
 
 // GetStakeReply is the response from GetStake
 type GetStakeReply struct {
-	Stakeds  map[ids.ID]json.Uint64 `json:"stakeds"`
-	Outputs  []string               `json:"stakedOutputs"`
-	Encoding formatting.Encoding    `json:"encoding"`
+	Stakeds  map[ids.ID]apitypes.Uint64 `json:"stakeds"`
+	Outputs  []string                   `json:"stakedOutputs"`
+	Encoding formatting.Encoding        `json:"encoding"`
 }
 
 // GetMinStakeArgs is the request for GetMinStake
@@ -217,8 +245,8 @@ type GetMinStakeArgs struct {
 
 // GetMinStakeReply is the response from GetMinStake
 type GetMinStakeReply struct {
-	MinValidatorStake json.Uint64 `json:"minValidatorStake"`
-	MinDelegatorStake json.Uint64 `json:"minDelegatorStake"`
+	MinValidatorStake apitypes.Uint64 `json:"minValidatorStake"`
+	MinDelegatorStake apitypes.Uint64 `json:"minDelegatorStake"`
 }
 
 // GetTotalStakeArgs is the request for GetTotalStake
@@ -228,8 +256,8 @@ type GetTotalStakeArgs struct {
 
 // GetTotalStakeReply is the response from GetTotalStake
 type GetTotalStakeReply struct {
-	Stake  json.Uint64 `json:"stake,omitempty"`
-	Weight json.Uint64 `json:"weight,omitempty"`
+	Stake  apitypes.Uint64 `json:"stake,omitempty"`
+	Weight apitypes.Uint64 `json:"weight,omitempty"`
 }
 
 // GetRewardUTXOsReply is the response from GetRewardUTXOs
