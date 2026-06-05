@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	json "github.com/luxfi/codec/jsonrpc"
+	apitypes "github.com/luxfi/api/types"
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
 	"github.com/luxfi/rpc"
@@ -169,8 +169,8 @@ func getAddressBalance(address ids.ShortID, endpoint string) (uint64, error) {
 		Addresses []string `json:"addresses"`
 	}
 	type getBalanceResponse struct {
-		Unlocked  json.Uint64            `json:"unlocked"`
-		Unlockeds map[ids.ID]json.Uint64 `json:"unlockeds"`
+		Unlocked  apitypes.Uint64            `json:"unlocked"`
+		Unlockeds map[ids.ID]apitypes.Uint64 `json:"unlockeds"`
 	}
 
 	ctx := context.Background()
