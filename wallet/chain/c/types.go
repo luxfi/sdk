@@ -18,6 +18,15 @@ import (
 	"github.com/luxfi/vm/components/verify"
 )
 
+// LP-185 follow-up: this whole file is a residual codec scaffold. The
+// C-chain atomic-tx flow is dead code in the SDK runtime today (see
+// `wallet/primary/wallet.go:170-180`, where c-chain wallet wiring is
+// commented out pending an EVM client implementation). Once luxfi/node
+// ships a `vms/evm/wire` ZAP-native API for atomic txs (NewImportTx /
+// NewExportTx / WrapImportTx / WrapExportTx), delete the codec import
+// below, delete the package-init wire, and route Sign through ZAP buffer
+// accessors directly — no marshal pass, the buffer IS the wire.
+
 // Tx represents a transaction on the C-Chain
 type Tx struct {
 	ID               ids.ID
@@ -142,14 +151,20 @@ const (
 	Accepted = "Accepted"
 )
 
-// Variables
-var (
-	// Codec is the codec used for serialization
-	Codec codec.Manager
-)
+// Codec is the wire codec used for C-chain atomic-tx serialization.
+//
+// LP-185 scaffold: this is the upstream luxfi/codec linear codec, wired
+// via package init below. The C-chain atomic-tx path is not exercised by
+// the SDK runtime today (the primary-wallet wiring at
+// `wallet/primary/wallet.go:170-180` is commented out). The atomic-tx
+// ZAP API is the parallel-agent follow-on to LP-185 (predicate results +
+// gas state landed there; the atomic-tx ZAP wire is the next piece).
+// Until then, this codec serves the dead path so the wallet package
+// type-checks and the import won't regress to the legacy avalanchego
+// codec by mistake.
+var Codec codec.Manager
 
 func init() {
-	// Initialize codec
 	Codec = codec.NewDefaultManager()
 	lcodec := linearcodec.NewDefault()
 	_ = Codec.RegisterCodec(codecVersion, lcodec) //nolint:errcheck // init only fails on invalid version
@@ -175,10 +190,16 @@ func CalculateDynamicFee(gasUsed uint64, baseFee *big.Int) (uint64, error) {
 	return totalFee.Uint64(), nil
 }
 
-// Sign signs the transaction with the provided private keys
-func (tx *Tx) Sign(codec codec.Manager, signers [][]*secp256k1.PrivateKey) error {
+// Sign signs the transaction with the provided private keys.
+//
+// [wireCodec] is the C-chain atomic-tx wire codec; today callers pass the
+// upstream codec.Manager. When the LP-185 follow-on ships the ZAP-native
+// atomic-tx API, this signature lands as
+// `Sign(signers [][]*secp256k1.PrivateKey)` (no codec param — the buffer
+// IS the wire, no marshal pass).
+func (tx *Tx) Sign(wireCodec codec.Manager, signers [][]*secp256k1.PrivateKey) error {
 	// Serialize the unsigned transaction
-	unsignedBytes, err := codec.Marshal(codecVersion, &tx.UnsignedAtomicTx)
+	unsignedBytes, err := wireCodec.Marshal(codecVersion, &tx.UnsignedAtomicTx)
 	if err != nil {
 		return fmt.Errorf("failed to marshal unsigned tx: %w", err)
 	}
@@ -205,7 +226,7 @@ func (tx *Tx) Sign(codec codec.Manager, signers [][]*secp256k1.PrivateKey) error
 	}
 
 	// Serialize the signed transaction
-	signedBytes, err := codec.Marshal(codecVersion, tx)
+	signedBytes, err := wireCodec.Marshal(codecVersion, tx)
 	if err != nil {
 		return fmt.Errorf("failed to marshal signed tx: %w", err)
 	}

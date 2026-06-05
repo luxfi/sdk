@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	json "github.com/luxfi/codec/jsonrpc"
+	apitypes "github.com/luxfi/api/types"
+	avajson "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"
@@ -136,7 +137,7 @@ func (c *Client) GetAtomicUTXOs(
 	err = c.Requester.SendRequest(ctx, "platform.getUTXOs", &api.GetUTXOsArgs{
 		Addresses:   formattedAddrs,
 		SourceChain: sourceChain,
-		Limit:       json.Uint32(limit),
+		Limit:       avajson.Uint32(limit),
 		StartIndex:  startIndex,
 		Encoding:    formatting.Hex,
 	}, res, options...)
@@ -362,7 +363,7 @@ func (c *Client) SampleValidators(ctx context.Context, chainID ids.ID, sampleSiz
 	res := &SampleValidatorsReply{}
 	err := c.Requester.SendRequest(ctx, "platform.sampleValidators", &SampleValidatorsArgs{
 		ChainID: chainID,
-		Size:    json.Uint16(sampleSize),
+		Size:    Uint16(sampleSize),
 	}, res, options...)
 	return res.Validators, err
 }
@@ -500,7 +501,7 @@ func (c *Client) GetTotalStake(ctx context.Context, chainID ids.ID, options ...r
 	err := c.Requester.SendRequest(ctx, "platform.getTotalStake", &GetTotalStakeArgs{
 		ChainID: chainID,
 	}, res, options...)
-	var amount json.Uint64
+	var amount apitypes.Uint64
 	if chainID == constants.PrimaryNetworkID {
 		amount = res.Stake
 	} else {
@@ -569,7 +570,7 @@ func (c *Client) GetBlock(ctx context.Context, blockID ids.ID, options ...rpc.Op
 func (c *Client) GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedBlock{}
 	err := c.Requester.SendRequest(ctx, "platform.getBlockByHeight", &api.GetBlockByHeightArgs{
-		Height:   json.Uint64(height),
+		Height:   avajson.Uint64(height),
 		Encoding: formatting.HexNC,
 	}, res, options...)
 	if err != nil {

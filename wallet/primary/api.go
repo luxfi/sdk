@@ -14,7 +14,6 @@ import (
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/luxfi/geth/ethclient"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
@@ -32,6 +31,22 @@ import (
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
 )
+
+// UTXOUnmarshaler decodes a UTXO byte buffer into the destination.
+//
+// This is the minimal surface AddAllUTXOs needs to parse the bytes returned by
+// GetAtomicUTXOs. Concretely satisfied today by github.com/luxfi/codec.Manager
+// (linearcodec underneath), wired in via proto/p/txs.Codec and proto/x/txs.Codec.
+//
+// TODO(LP-023/LP-184): once proto/p/txs and proto/x/txs expose ZAP-native
+// WrapUTXO(b) accessors per LP-023 / LP-184 the new final Lux network wire,
+// drop this interface and consume the typed Wrap*UTXO API directly. Until
+// then we leave the upstream codec.Manager satisfying this interface so the
+// SDK's only wire dep on luxfi/codec is the implicit interface satisfaction
+// — no direct import.
+type UTXOUnmarshaler interface {
+	Unmarshal(bytes []byte, dest interface{}) (uint16, error)
+}
 
 const (
 	MainnetAPIURI = "https://api.lux.network"
@@ -346,13 +361,18 @@ func isRetryableError(err error) bool {
 
 // AddAllUTXOs fetches all the UTXOs referenced by [addresses] that were sent
 // from [sourceChainID] to [destinationChainID] from the [client]. It then uses
-// [codec] to parse the returned UTXOs and it adds them into [utxos]. If [ctx]
-// expires, then the returned error will be immediately reported.
+// [unmarshaler] to parse the returned UTXOs and it adds them into [utxos]. If
+// [ctx] expires, then the returned error will be immediately reported.
+//
+// [unmarshaler] is the chain's UTXO decoder. Today this is the upstream
+// proto/{p,x}/txs codec satisfying UTXOUnmarshaler implicitly; once the
+// upstream ZAP-native API ships (LP-023/LP-184), callers pass a typed
+// ZAP UTXO accessor instead.
 func AddAllUTXOs(
 	ctx context.Context,
 	utxos walletcommon.UTXOs,
 	client UTXOClient,
-	codec codec.Manager,
+	unmarshaler UTXOUnmarshaler,
 	sourceChainID ids.ID,
 	destinationChainID ids.ID,
 	addrs []ids.ShortID,
@@ -406,7 +426,7 @@ func AddAllUTXOs(
 
 		for _, utxoBytes := range utxosBytes {
 			var utxo lux.UTXO
-			_, err := codec.Unmarshal(utxoBytes, &utxo)
+			_, err := unmarshaler.Unmarshal(utxoBytes, &utxo)
 			if err != nil {
 				// Tolerate "trailing buffer space" errors from genesis UTXOs
 				// which may have extra serialization bytes
