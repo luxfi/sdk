@@ -428,7 +428,7 @@ func (b *builder) NewBaseTx(
 		return nil, err
 	}
 	outputs = append(outputs, changeOutputs...)
-	lux.SortTransferableOutputs(outputs, txs.Codec) // sort the outputs
+	lux.SortTransferableOutputs(outputs) // sort the outputs
 
 	tx := &txs.BaseTx{BaseTx: lux.BaseTx{
 		NetworkID:    b.context.NetworkID,
@@ -1239,7 +1239,7 @@ func (b *builder) NewImportTx(
 	}
 	outputs = append(outputs, changeOutputs...)
 
-	lux.SortTransferableOutputs(outputs, txs.Codec) // sort imported outputs
+	lux.SortTransferableOutputs(outputs) // sort imported outputs
 	tx := &txs.ImportTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -1299,7 +1299,7 @@ func (b *builder) NewExportTx(
 		return nil, err
 	}
 
-	lux.SortTransferableOutputs(outputs, txs.Codec) // sort exported outputs
+	lux.SortTransferableOutputs(outputs) // sort exported outputs
 	tx := &txs.ExportTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -1770,6 +1770,17 @@ func (b *builder) spend(
 	}
 
 	for _, utxo := range utxosByLUXAssetID.requested {
+		// If we don't need to burn or stake additional LUX and we have
+		// already consumed enough LUX to pay the required fee, stop
+		// consuming UTXOs before adding this one.
+		requiredFee, err := s.calculateFee()
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		if !s.shouldConsumeAsset(b.context.UTXOAssetID) && excessLUX >= requiredFee {
+			break
+		}
+
 		out, _, err := unwrapOutput(utxo.Out)
 		if err != nil {
 			return nil, nil, nil, err
@@ -1799,22 +1810,6 @@ func (b *builder) spend(
 		excessLUX, err = math.Add(excessLUX, excess)
 		if err != nil {
 			return nil, nil, nil, err
-		}
-
-		// Calculate fee AFTER adding the input to get accurate complexity
-		requiredFee, err := s.calculateFee()
-		if err != nil {
-			return nil, nil, nil, err
-		}
-
-		// If we don't need to burn or stake additional LUX and we have
-		// consumed enough LUX to pay the required fee, we should stop
-		// consuming UTXOs.
-		if !s.shouldConsumeAsset(b.context.UTXOAssetID) && excessLUX >= requiredFee {
-			// If we need to consume additional LUX, we should be returning the
-			// change to the change address.
-			ownerOverride = changeOwner
-			break
 		}
 
 		// If we need to consume additional LUX, we should be returning the
@@ -1883,8 +1878,8 @@ func (b *builder) spend(
 	// and we don't modify s.complexity (it stays without the change output)
 
 	utils.Sort(s.inputs)                                    // sort inputs
-	lux.SortTransferableOutputs(s.changeOutputs, txs.Codec) // sort the change outputs
-	lux.SortTransferableOutputs(s.stakeOutputs, txs.Codec)  // sort stake outputs
+	lux.SortTransferableOutputs(s.changeOutputs) // sort the change outputs
+	lux.SortTransferableOutputs(s.stakeOutputs)  // sort stake outputs
 	return s.inputs, s.changeOutputs, s.stakeOutputs, nil
 }
 

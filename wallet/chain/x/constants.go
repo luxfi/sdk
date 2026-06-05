@@ -4,8 +4,13 @@
 package x
 
 import (
+	"math"
+
+	"github.com/luxfi/codec"
+	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/proto/x/block"
 	"github.com/luxfi/proto/x/fxs"
+	xtxs "github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -20,9 +25,40 @@ const (
 // Parser to support serialization and deserialization
 var Parser block.Parser
 
+// newXVMParserCodecs is the canonical wiring for the proto/x XVM wire
+// codecs. proto/x carries no github.com/luxfi/codec import after the
+// Wave 1A rip (#101); construction of the linearcodec-backed managers
+// lives here so consumers can pick their codec implementation
+// (linearcodec today, zapcodec in a future wave) without touching
+// proto/x.
+//
+// Tx-level and fx-owned wire payload types are registered when this
+// bundle is handed to txs.NewParser — see parser.go fxOwnedTypes.
+func newXVMParserCodecs() (xtxs.ParserCodecs, error) {
+	c := linearcodec.NewDefault()
+	gc := linearcodec.NewDefault()
+	cm := codec.NewDefaultManager()
+	gcm := codec.NewManager(math.MaxInt32)
+	if err := cm.RegisterCodec(xtxs.CodecVersion, c); err != nil {
+		return xtxs.ParserCodecs{}, err
+	}
+	if err := gcm.RegisterCodec(xtxs.CodecVersion, gc); err != nil {
+		return xtxs.ParserCodecs{}, err
+	}
+	return xtxs.ParserCodecs{
+		Codec:           cm,
+		GenesisCodec:    gcm,
+		Registry:        c,
+		GenesisRegistry: gc,
+	}, nil
+}
+
 func init() {
-	var err error
-	Parser, err = block.NewParser([]fxs.Fx{
+	codecs, err := newXVMParserCodecs()
+	if err != nil {
+		panic(err)
+	}
+	Parser, err = block.NewParser(codecs, []fxs.Fx{
 		&secp256k1fx.Fx{},
 		&nftfx.Fx{},
 		&propertyfx.Fx{},

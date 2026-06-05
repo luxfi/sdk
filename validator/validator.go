@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	luxdjson "github.com/luxfi/codec/jsonrpc"
+	apitypes "github.com/luxfi/api/types"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/contract"
@@ -30,10 +30,10 @@ const (
 
 // CurrentValidatorInfo enables querying validation IDs from P-Chain.
 type CurrentValidatorInfo struct {
-	Weight       luxdjson.Uint64 `json:"weight"`
+	Weight       apitypes.Uint64 `json:"weight"`
 	NodeID       ids.NodeID      `json:"nodeID"`
 	ValidationID ids.ID          `json:"validationID"`
-	Balance      luxdjson.Uint64 `json:"balance"`
+	Balance      apitypes.Uint64 `json:"balance"`
 }
 
 func GetTotalWeight(network models.Network, chainID ids.ID) (uint64, error) {
