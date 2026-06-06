@@ -9,7 +9,6 @@ import (
 
 	"github.com/luxfi/address"
 	apitypes "github.com/luxfi/api/types"
-	avajson "github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"
@@ -18,6 +17,7 @@ import (
 	"github.com/luxfi/proto/p/status"
 	"github.com/luxfi/proto/p/validators/fee"
 	"github.com/luxfi/rpc"
+	avajson "github.com/luxfi/utils/json"
 	"github.com/luxfi/utxo/secp256k1fx"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/api"
