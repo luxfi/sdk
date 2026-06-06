@@ -7,7 +7,7 @@ exclude github.com/luxfi/geth v1.16.1
 require (
 	// Core dependencies for working packages
 	github.com/btcsuite/btcd/btcutil v1.1.6
-	github.com/luxfi/crypto v1.19.15
+	github.com/luxfi/crypto v1.19.17
 	github.com/luxfi/geth v1.16.98
 	github.com/luxfi/ids v1.2.10
 	github.com/luxfi/log v1.4.1
@@ -58,7 +58,7 @@ require (
 	github.com/luxfi/proto v1.1.0
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/runtime v1.1.0
-	github.com/luxfi/utils v1.1.4
+	github.com/luxfi/utils v1.1.5
 	github.com/luxfi/utxo v0.3.2
 	github.com/luxfi/validators v1.2.0
 	github.com/melbahja/goph v1.4.0
