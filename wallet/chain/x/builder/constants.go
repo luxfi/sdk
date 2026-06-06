@@ -1,16 +1,13 @@
-// Copyright (C) 2019-2025, Lux Industries, Inc. All rights reserved.
+// Copyright (C) 2019-2026, Lux Industries, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
 
 import (
-	"math"
-
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/proto/x/block"
 	"github.com/luxfi/proto/x/fxs"
 	xtxs "github.com/luxfi/proto/x/txs"
+	"github.com/luxfi/proto/zap_codec"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
 	"github.com/luxfi/utxo/secp256k1fx"
@@ -26,52 +23,38 @@ const (
 var Parser block.Parser
 
 // newXVMParserCodecs is the canonical wiring for the proto/x XVM wire
-// codecs. proto/x carries no github.com/luxfi/codec import after the
-// Wave 1A rip (#101); construction of the linearcodec-backed managers
-// lives in the SDK so consumers can pick their codec implementation
-// (linearcodec today, zapcodec in a future wave) without touching
-// proto/x.
+// codecs in the builder package. proto/x carries no
+// github.com/luxfi/codec import after the Wave 1A rip (#101);
+// construction is delegated to proto/zap_codec — the single canonical
+// site where the wire codec backend is chosen.
 //
-// STRUCTURAL KEEP (Wave 2E, #101). Mirror of
-// sdk/wallet/chain/x/constants.go for the builder package. The
-// luxfi/codec + luxfi/codec/linearcodec imports below are deliberate
-// and remain after the codec rip — they are the place where the wire
-// codec implementation is chosen and bound. proto/x's ParserCodecs is
-// a structural seam (four local interfaces, zero codec import) and
-// the wiring lives in exactly one place per consumer. The two
-// constants.go copies (this file + ../constants.go) differ only in
-// package name; they are kept in lockstep by hand because the wallet
-// builder and the wallet itself are distinct consumers that may
-// diverge if one migrates off linearcodec ahead of the other.
+// Wave 2G-Wallet (#101): the linearcodec/codec.Manager construction
+// that previously lived here is gone. proto/zap_codec.NewXVMParser
+// returns ZAP-native little-endian codec managers — see that package's
+// doc comment for the wire-format break vs the legacy linearcodec wire
+// bytes (LP-023 ZAP-native activation, forward-only).
+//
+// This file mirrors sdk/wallet/chain/x/constants.go — the two consumers
+// (wallet vs wallet-builder) intentionally share ONE construction
+// expression via proto/zap_codec so the wire codec is bound in EXACTLY
+// ONE place.
 //
 // Tx-level and fx-owned wire payload types are registered when this
 // bundle is handed to txs.NewParser — see parser.go fxOwnedTypes.
-func newXVMParserCodecs() (xtxs.ParserCodecs, error) {
-	c := linearcodec.NewDefault()
-	gc := linearcodec.NewDefault()
-	cm := codec.NewDefaultManager()
-	gcm := codec.NewManager(math.MaxInt32)
-	if err := cm.RegisterCodec(xtxs.CodecVersion, c); err != nil {
-		return xtxs.ParserCodecs{}, err
-	}
-	if err := gcm.RegisterCodec(xtxs.CodecVersion, gc); err != nil {
-		return xtxs.ParserCodecs{}, err
-	}
+func newXVMParserCodecs() xtxs.ParserCodecs {
+	runtime, genesis := zap_codec.NewXVMParser(xtxs.CodecVersion)
 	return xtxs.ParserCodecs{
-		Codec:           cm,
-		GenesisCodec:    gcm,
-		Registry:        c,
-		GenesisRegistry: gc,
-	}, nil
+		Codec:           runtime,
+		GenesisCodec:    genesis,
+		Registry:        runtime,
+		GenesisRegistry: genesis,
+	}
 }
 
 func init() {
-	codecs, err := newXVMParserCodecs()
-	if err != nil {
-		panic(err)
-	}
+	var err error
 	Parser, err = block.NewParser(
-		codecs,
+		newXVMParserCodecs(),
 		[]fxs.Fx{
 			&secp256k1fx.Fx{},
 			&nftfx.Fx{},
