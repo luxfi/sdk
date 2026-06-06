@@ -42,7 +42,7 @@ require (
 	github.com/luxfi/api v1.0.11
 	github.com/luxfi/bft v0.1.5
 	github.com/luxfi/consensus v1.25.0
-	github.com/luxfi/constants v1.5.7
+	github.com/luxfi/constants v1.5.8-0.20260603055356-93c2c2ceb9ca
 	github.com/luxfi/database v1.18.3
 	github.com/luxfi/evm v0.8.49
 	github.com/luxfi/genesis v1.12.15
@@ -55,7 +55,7 @@ require (
 	github.com/luxfi/math/safe v0.0.1
 	github.com/luxfi/net v0.0.4
 	github.com/luxfi/netrunner v1.18.5-0.20260519042948-50731517be59
-	github.com/luxfi/proto v1.1.0
+	github.com/luxfi/proto v1.2.1
 	github.com/luxfi/rpc v1.0.2
 	github.com/luxfi/runtime v1.1.0
 	github.com/luxfi/utils v1.1.5
@@ -70,11 +70,11 @@ require (
 )
 
 require (
-	github.com/luxfi/accel v1.1.4 // indirect
+	github.com/luxfi/accel v1.1.8 // indirect
 	github.com/luxfi/compress v0.0.5 // indirect
 	github.com/luxfi/concurrent v0.0.3 // indirect
 	github.com/luxfi/container v0.0.4 // indirect
-	github.com/luxfi/metric v1.5.5 // indirect
+	github.com/luxfi/metric v1.5.7 // indirect
 	github.com/luxfi/mock v0.1.1 // indirect
 	github.com/luxfi/timer v1.0.2 // indirect
 )
@@ -227,7 +227,7 @@ require (
 	github.com/luxfi/precompile v0.5.27 // indirect
 	github.com/luxfi/sampler v1.0.0 // indirect
 	github.com/luxfi/tls v1.0.3
-	github.com/luxfi/upgrade v1.0.0
+	github.com/luxfi/upgrade v1.0.1-0.20260603055252-f51810805436
 	github.com/luxfi/vm v1.0.40
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
