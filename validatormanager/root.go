@@ -225,6 +225,7 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 		return nil, err
 	}
 	chainConversionAddressedCall, err := warpPayload.NewAddressedCall(
+		PayloadCodec,
 		nil,
 		addressedCallPayload.Bytes(),
 	)

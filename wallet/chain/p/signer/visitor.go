@@ -329,7 +329,7 @@ func (s *visitor) getAuthSigners(ownerID ids.ID, auth verify.Verifiable) ([]keyc
 }
 
 func sign(tx *txs.Tx, signHash bool, txSigners [][]keychain.Signer) error {
-	unsignedBytes, err := txs.Codec.Marshal(txs.CodecVersion, &tx.Unsigned)
+	unsignedBytes, err := Codec.Marshal(txs.CodecVersion, &tx.Unsigned)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
@@ -390,7 +390,7 @@ func sign(tx *txs.Tx, signHash bool, txSigners [][]keychain.Signer) error {
 		}
 	}
 
-	signedBytes, err := txs.Codec.Marshal(txs.CodecVersion, tx)
+	signedBytes, err := Codec.Marshal(txs.CodecVersion, tx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal tx: %w", err)
 	}

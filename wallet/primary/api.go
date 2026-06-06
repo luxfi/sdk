@@ -26,7 +26,6 @@ import (
 	lux "github.com/luxfi/utxo"
 
 	gethcommon "github.com/luxfi/geth/common"
-	ptxs "github.com/luxfi/proto/p/txs"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
@@ -274,7 +273,7 @@ func FetchState(
 		ctx,
 		utxos,
 		pClient,
-		ptxs.Codec,
+		p.Codec,
 		constants.PlatformChainID,
 		constants.PlatformChainID,
 		addrList,
