@@ -4,11 +4,10 @@
 package c
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math/big"
 
-	"github.com/luxfi/codec"
-	"github.com/luxfi/codec/linearcodec"
 	"github.com/luxfi/crypto/hash"
 	"github.com/luxfi/crypto/secp256k1"
 	"github.com/luxfi/geth/common"
@@ -18,14 +17,18 @@ import (
 	"github.com/luxfi/vm/components/verify"
 )
 
-// LP-185 follow-up: this whole file is a residual codec scaffold. The
-// C-chain atomic-tx flow is dead code in the SDK runtime today (see
-// `wallet/primary/wallet.go:170-180`, where c-chain wallet wiring is
-// commented out pending an EVM client implementation). Once luxfi/node
-// ships a `vms/evm/wire` ZAP-native API for atomic txs (NewImportTx /
-// NewExportTx / WrapImportTx / WrapExportTx), delete the codec import
-// below, delete the package-init wire, and route Sign through ZAP buffer
-// accessors directly — no marshal pass, the buffer IS the wire.
+// LP-185 / Wave 2C of the codec rip (#101). The C-chain atomic-tx flow is
+// dead code in the SDK runtime today (see `wallet/primary/wallet.go:170-180`,
+// where c-chain wallet wiring is commented out pending an EVM client
+// implementation). This file used to carry a residual `codec.Manager`
+// scaffold from upstream luxfi/codec; that scaffold is now removed and the
+// few marshal points left in the package go through the deterministic
+// `marshalAtomicTxBytes` helper below.
+//
+// Once luxfi/node ships a `vms/evm/wire` ZAP-native API for atomic txs
+// (NewImportTx / NewExportTx / WrapImportTx / WrapExportTx), the helper
+// here can be deleted and Sign can route directly through ZAP buffer
+// accessors — the buffer IS the wire, no marshal pass.
 
 // Tx represents a transaction on the C-Chain
 type Tx struct {
@@ -143,31 +146,124 @@ type Status string
 
 // Constants
 const (
-	codecVersion = 0
-	EVMOutputGas = 100 // Implementation note
-	EVMInputGas  = 100 // Implementation note
+	codecVersion uint16 = 0
+	EVMOutputGas        = 100 // Implementation note
+	EVMInputGas         = 100 // Implementation note
 
 	// Transaction status
 	Accepted = "Accepted"
 )
 
-// Codec is the wire codec used for C-chain atomic-tx serialization.
+// marshalAtomicTxBytes returns a deterministic byte representation of any
+// supported atomic-tx shape. Layout:
 //
-// LP-185 scaffold: this is the upstream luxfi/codec linear codec, wired
-// via package init below. The C-chain atomic-tx path is not exercised by
-// the SDK runtime today (the primary-wallet wiring at
-// `wallet/primary/wallet.go:170-180` is commented out). The atomic-tx
-// ZAP API is the parallel-agent follow-on to LP-185 (predicate results +
-// gas state landed there; the atomic-tx ZAP wire is the next piece).
-// Until then, this codec serves the dead path so the wallet package
-// type-checks and the import won't regress to the legacy avalanchego
-// codec by mistake.
-var Codec codec.Manager
+//	[u16 version=0][kind byte][big-endian struct fields...]
+//
+// kind = 0x01 for *UnsignedImportTx, 0x02 for *UnsignedExportTx, 0x03 for
+// signed *Tx (UnsignedAtomicTx kind byte + creds), and 0x00 for an empty /
+// nil pointer (defensive — never expected). The encoding is purely an
+// implementation detail of this dead-path package; it exists only so
+// `tx.Sign` can produce a stable hash for tests. No external peer reads
+// these bytes.
+func marshalAtomicTxBytes(v interface{}) ([]byte, error) {
+	buf := make([]byte, 2)
+	binary.BigEndian.PutUint16(buf, codecVersion)
+	switch tx := v.(type) {
+	case *UnsignedAtomicTx:
+		if tx == nil || *tx == nil {
+			buf = append(buf, 0x00)
+			return buf, nil
+		}
+		return marshalAtomicTxBytes(*tx)
+	case *UnsignedImportTx:
+		buf = append(buf, 0x01)
+		buf = appendBaseTx(buf, &tx.BaseTx)
+		buf = append(buf, tx.SourceChain[:]...)
+		buf = appendUint32(buf, uint32(len(tx.ImportedInputs)))
+		for _, in := range tx.ImportedInputs {
+			id := in.InputID()
+			buf = append(buf, id[:]...)
+			buf = appendUint64(buf, in.In.Amount())
+		}
+		buf = appendUint32(buf, uint32(len(tx.Outs)))
+		for _, o := range tx.Outs {
+			buf = append(buf, o.Address.Bytes()...)
+			buf = appendUint64(buf, o.Amount)
+		}
+		return buf, nil
+	case *UnsignedExportTx:
+		buf = append(buf, 0x02)
+		buf = appendBaseTx(buf, &tx.BaseTx)
+		buf = append(buf, tx.DestinationChain[:]...)
+		buf = appendUint32(buf, uint32(len(tx.ExportedOutputs)))
+		for _, o := range tx.ExportedOutputs {
+			id := o.AssetID()
+			buf = append(buf, id[:]...)
+			buf = appendUint64(buf, o.Out.Amount())
+		}
+		buf = appendUint32(buf, uint32(len(tx.Ins)))
+		for _, in := range tx.Ins {
+			buf = append(buf, in.Address.Bytes()...)
+			buf = appendUint64(buf, in.Amount)
+			buf = append(buf, in.AssetID[:]...)
+			buf = appendUint64(buf, in.Nonce)
+		}
+		return buf, nil
+	case *Tx:
+		buf = append(buf, 0x03)
+		uBytes, err := marshalAtomicTxBytes(tx.UnsignedAtomicTx)
+		if err != nil {
+			return nil, err
+		}
+		buf = appendUint32(buf, uint32(len(uBytes)))
+		buf = append(buf, uBytes...)
+		buf = appendUint32(buf, uint32(len(tx.Creds)))
+		for _, c := range tx.Creds {
+			cred, ok := c.(*secp256k1fx.Credential)
+			if !ok {
+				return nil, fmt.Errorf("c.marshalAtomicTxBytes: unsupported credential type %T", c)
+			}
+			buf = appendUint32(buf, uint32(len(cred.Sigs)))
+			for _, sig := range cred.Sigs {
+				buf = append(buf, sig[:]...)
+			}
+		}
+		return buf, nil
+	default:
+		return nil, fmt.Errorf("c.marshalAtomicTxBytes: unsupported type %T", v)
+	}
+}
 
-func init() {
-	Codec = codec.NewDefaultManager()
-	lcodec := linearcodec.NewDefault()
-	_ = Codec.RegisterCodec(codecVersion, lcodec) //nolint:errcheck // init only fails on invalid version
+func appendBaseTx(buf []byte, b *BaseTx) []byte {
+	buf = appendUint32(buf, b.NetworkID)
+	buf = append(buf, b.BlockchainID[:]...)
+	buf = appendUint32(buf, uint32(len(b.Outs)))
+	for _, o := range b.Outs {
+		id := o.AssetID()
+		buf = append(buf, id[:]...)
+		buf = appendUint64(buf, o.Out.Amount())
+	}
+	buf = appendUint32(buf, uint32(len(b.Ins)))
+	for _, in := range b.Ins {
+		id := in.InputID()
+		buf = append(buf, id[:]...)
+		buf = appendUint64(buf, in.In.Amount())
+	}
+	buf = appendUint32(buf, uint32(len(b.Memo)))
+	buf = append(buf, b.Memo...)
+	return buf
+}
+
+func appendUint32(buf []byte, v uint32) []byte {
+	var tmp [4]byte
+	binary.BigEndian.PutUint32(tmp[:], v)
+	return append(buf, tmp[:]...)
+}
+
+func appendUint64(buf []byte, v uint64) []byte {
+	var tmp [8]byte
+	binary.BigEndian.PutUint64(tmp[:], v)
+	return append(buf, tmp[:]...)
 }
 
 // CalculateDynamicFee calculates the dynamic fee based on EIP-1559
@@ -192,14 +288,11 @@ func CalculateDynamicFee(gasUsed uint64, baseFee *big.Int) (uint64, error) {
 
 // Sign signs the transaction with the provided private keys.
 //
-// [wireCodec] is the C-chain atomic-tx wire codec; today callers pass the
-// upstream codec.Manager. When the LP-185 follow-on ships the ZAP-native
-// atomic-tx API, this signature lands as
-// `Sign(signers [][]*secp256k1.PrivateKey)` (no codec param — the buffer
-// IS the wire, no marshal pass).
-func (tx *Tx) Sign(wireCodec codec.Manager, signers [][]*secp256k1.PrivateKey) error {
+// The wire format is whatever `marshalAtomicTxBytes` produces — see that
+// helper's doc. No codec.Manager is needed; the buffer IS the wire.
+func (tx *Tx) Sign(signers [][]*secp256k1.PrivateKey) error {
 	// Serialize the unsigned transaction
-	unsignedBytes, err := wireCodec.Marshal(codecVersion, &tx.UnsignedAtomicTx)
+	unsignedBytes, err := marshalAtomicTxBytes(&tx.UnsignedAtomicTx)
 	if err != nil {
 		return fmt.Errorf("failed to marshal unsigned tx: %w", err)
 	}
@@ -226,7 +319,7 @@ func (tx *Tx) Sign(wireCodec codec.Manager, signers [][]*secp256k1.PrivateKey) e
 	}
 
 	// Serialize the signed transaction
-	signedBytes, err := wireCodec.Marshal(codecVersion, tx)
+	signedBytes, err := marshalAtomicTxBytes(tx)
 	if err != nil {
 		return fmt.Errorf("failed to marshal signed tx: %w", err)
 	}

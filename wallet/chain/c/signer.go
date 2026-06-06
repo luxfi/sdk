@@ -21,8 +21,6 @@ import (
 	"github.com/luxfi/vm/components/verify"
 )
 
-const version = 0
-
 var (
 	_ Signer = (*txSigner)(nil)
 
@@ -165,7 +163,7 @@ func SignUnsignedAtomic(ctx context.Context, signer Signer, utx UnsignedAtomicTx
 
 // TODO: remove [signHash] after the ledger supports signing all transactions.
 func sign(tx *Tx, signHash bool, txSigners [][]keychain.Signer) error {
-	unsignedBytes, err := Codec.Marshal(version, &tx.UnsignedAtomicTx)
+	unsignedBytes, err := marshalAtomicTxBytes(&tx.UnsignedAtomicTx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
@@ -226,7 +224,7 @@ func sign(tx *Tx, signHash bool, txSigners [][]keychain.Signer) error {
 		}
 	}
 
-	signedBytes, err := Codec.Marshal(version, tx)
+	signedBytes, err := marshalAtomicTxBytes(tx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal tx: %w", err)
 	}
