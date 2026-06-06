@@ -236,7 +236,7 @@ func (b *builder) NewImportTx(
 
 	// We must initialize the bytes of the tx to calculate the initial cost
 	wrappedTx := &Tx{UnsignedAtomicTx: tx}
-	if err := wrappedTx.Sign(Codec, nil); err != nil {
+	if err := wrappedTx.Sign(nil); err != nil {
 		return nil, err
 	}
 
@@ -287,7 +287,7 @@ func (b *builder) NewExportTx(
 		exportedAmount = newExportedAmount
 	}
 
-	lux.SortTransferableOutputs(exportedOutputs, Codec)
+	lux.SortTransferableOutputs(exportedOutputs)
 	tx := &UnsignedExportTx{
 		BaseTx: BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -299,7 +299,7 @@ func (b *builder) NewExportTx(
 
 	// We must initialize the bytes of the tx to calculate the initial cost
 	wrappedTx := &Tx{UnsignedAtomicTx: tx}
-	if err := wrappedTx.Sign(Codec, nil); err != nil {
+	if err := wrappedTx.Sign(nil); err != nil {
 		return nil, err
 	}
 
