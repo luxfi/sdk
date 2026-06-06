@@ -137,15 +137,15 @@ func (b *backendVisitor) ConvertNetworkToL1Tx(tx *txs.ConvertNetworkToL1Tx) erro
 }
 
 func (b *backendVisitor) RegisterL1ValidatorTx(tx *txs.RegisterL1ValidatorTx) error {
-	warpMessage, err := warp.ParseMessage(tx.Message)
+	warpMessage, err := warp.ParseMessage(WarpCodec, tx.Message)
 	if err != nil {
 		return err
 	}
-	addressedCallPayload, err := payload.ParseAddressedCall(warpMessage.Payload)
+	addressedCallPayload, err := payload.ParseAddressedCall(PayloadCodec, warpMessage.Payload)
 	if err != nil {
 		return err
 	}
-	registerL1ValidatorMessage, err := message.ParseRegisterL1Validator(addressedCallPayload.Payload)
+	registerL1ValidatorMessage, err := message.ParseRegisterL1Validator(MessageCodec, addressedCallPayload.Payload)
 	if err != nil {
 		return err
 	}
