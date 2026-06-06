@@ -32,6 +32,18 @@ var Parser block.Parser
 // (linearcodec today, zapcodec in a future wave) without touching
 // proto/x.
 //
+// STRUCTURAL KEEP (Wave 2E, #101). Mirror of
+// sdk/wallet/chain/x/constants.go for the builder package. The
+// luxfi/codec + luxfi/codec/linearcodec imports below are deliberate
+// and remain after the codec rip — they are the place where the wire
+// codec implementation is chosen and bound. proto/x's ParserCodecs is
+// a structural seam (four local interfaces, zero codec import) and
+// the wiring lives in exactly one place per consumer. The two
+// constants.go copies (this file + ../constants.go) differ only in
+// package name; they are kept in lockstep by hand because the wallet
+// builder and the wallet itself are distinct consumers that may
+// diverge if one migrates off linearcodec ahead of the other.
+//
 // Tx-level and fx-owned wire payload types are registered when this
 // bundle is handed to txs.NewParser — see parser.go fxOwnedTypes.
 func newXVMParserCodecs() (xtxs.ParserCodecs, error) {
