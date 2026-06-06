@@ -32,6 +32,17 @@ var Parser block.Parser
 // (linearcodec today, zapcodec in a future wave) without touching
 // proto/x.
 //
+// STRUCTURAL KEEP (Wave 2E, #101). This file is the canonical injection
+// point for the linearcodec wire managers consumed by proto/x. The
+// luxfi/codec + luxfi/codec/linearcodec imports below are deliberate
+// and remain after the codec rip — they are the place where the wire
+// codec implementation is chosen and bound. proto/x's ParserCodecs is
+// a structural seam (four local interfaces, zero codec import) and
+// the wiring lives in exactly one place per consumer (this file and
+// builder/constants.go for the wallet, genesis/builder for genesis).
+// To migrate proto/x off linearcodec, replace these constructors with
+// a zapcodec-backed manager — proto/x itself does not change.
+//
 // Tx-level and fx-owned wire payload types are registered when this
 // bundle is handed to txs.NewParser — see parser.go fxOwnedTypes.
 func newXVMParserCodecs() (xtxs.ParserCodecs, error) {
