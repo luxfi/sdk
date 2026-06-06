@@ -10,6 +10,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/rpc"
+	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 )
 
 type getTxArgs struct {
@@ -42,7 +43,7 @@ func GetBlockchainTx(endpoint string, blockchainID ids.ID) (*txs.CreateChainTx, 
 	}
 
 	var tx txs.Tx
-	if _, err = txs.Codec.Unmarshal(txBytes, &tx); err != nil {
+	if _, err = pwallet.Codec.Unmarshal(txBytes, &tx); err != nil {
 		return nil, fmt.Errorf("failed unmarshaling the createChainTx: %w", err)
 	}
 	createChainTx, ok := tx.Unsigned.(*txs.CreateChainTx)

@@ -149,7 +149,7 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		if err != nil {
 			return nil, err
 		}
-		tx, err := txs.Parse(txs.Codec, txBytes)
+		tx, err := txs.Parse(p.Codec, txBytes)
 		if err != nil {
 			return nil, err
 		}
