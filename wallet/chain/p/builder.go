@@ -327,12 +327,12 @@ func (b *txBuilder) NewAddValidatorTx(
 	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
-	luxAssetID := b.context.UTXOAssetID
+	utxoAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{
-		luxAssetID: b.context.StaticFeeConfig.AddNetworkValidatorFee,
+		utxoAssetID: b.context.StaticFeeConfig.AddNetworkValidatorFee,
 	}
 	toStake := map[ids.ID]uint64{
-		luxAssetID: vdr.Wght,
+		utxoAssetID: vdr.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
@@ -427,9 +427,9 @@ func (b *txBuilder) NewAddDelegatorTx(
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.AddDelegatorTx, error) {
-	luxAssetID := b.context.UTXOAssetID
+	utxoAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{
-		luxAssetID: b.context.StaticFeeConfig.AddNetworkDelegatorFee,
+		utxoAssetID: b.context.StaticFeeConfig.AddNetworkDelegatorFee,
 	}
 	toStake := map[ids.ID]uint64{
 		b.context.UTXOAssetID: vdr.Wght,
@@ -537,7 +537,7 @@ func (b *txBuilder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.UTXOAssetID
+		utxoAssetID     = b.context.UTXOAssetID
 		txFee           = b.context.StaticFeeConfig.TxFee
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
@@ -586,14 +586,14 @@ func (b *txBuilder) NewImportTx(
 	var (
 		inputs      []*lux.TransferableInput
 		outputs     = make([]*lux.TransferableOutput, 0, len(importedAmounts))
-		importedLUX = importedAmounts[luxAssetID]
+		importedLUX = importedAmounts[utxoAssetID]
 	)
 	if importedLUX > txFee {
-		importedAmounts[luxAssetID] -= txFee
+		importedAmounts[utxoAssetID] -= txFee
 	} else {
 		if importedLUX < txFee { // imported amount goes toward paying tx fee
 			toBurn := map[ids.ID]uint64{
-				luxAssetID: txFee - importedLUX,
+				utxoAssetID: txFee - importedLUX,
 			}
 			toStake := map[ids.ID]uint64{}
 			var err error
@@ -602,7 +602,7 @@ func (b *txBuilder) NewImportTx(
 				return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 			}
 		}
-		delete(importedAmounts, luxAssetID)
+		delete(importedAmounts, utxoAssetID)
 	}
 
 	for assetID, amount := range importedAmounts {
@@ -735,12 +735,12 @@ func (b *txBuilder) NewAddPermissionlessValidatorTx(
 	shares uint32,
 	options ...common.Option,
 ) (*txs.AddPermissionlessValidatorTx, error) {
-	luxAssetID := b.context.UTXOAssetID
+	utxoAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	if vdr.Chain == constants.PrimaryNetworkID {
-		toBurn[luxAssetID] = b.context.StaticFeeConfig.AddNetworkValidatorFee
+		toBurn[utxoAssetID] = b.context.StaticFeeConfig.AddNetworkValidatorFee
 	} else {
-		toBurn[luxAssetID] = b.context.StaticFeeConfig.AddChainValidatorFee
+		toBurn[utxoAssetID] = b.context.StaticFeeConfig.AddChainValidatorFee
 	}
 	toStake := map[ids.ID]uint64{
 		assetID: vdr.Wght,
@@ -777,12 +777,12 @@ func (b *txBuilder) NewAddPermissionlessDelegatorTx(
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.AddPermissionlessDelegatorTx, error) {
-	luxAssetID := b.context.UTXOAssetID
+	utxoAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	if vdr.Chain == constants.PrimaryNetworkID {
-		toBurn[luxAssetID] = b.context.StaticFeeConfig.AddNetworkDelegatorFee
+		toBurn[utxoAssetID] = b.context.StaticFeeConfig.AddNetworkDelegatorFee
 	} else {
-		toBurn[luxAssetID] = b.context.StaticFeeConfig.AddChainDelegatorFee
+		toBurn[utxoAssetID] = b.context.StaticFeeConfig.AddChainDelegatorFee
 	}
 	toStake := map[ids.ID]uint64{
 		assetID: vdr.Wght,
@@ -1079,7 +1079,7 @@ func (b *txBuilder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                    // sort inputs
+	utils.Sort(inputs)                         // sort inputs
 	lux.SortTransferableOutputs(changeOutputs) // sort the change outputs
 	lux.SortTransferableOutputs(stakeOutputs)  // sort stake outputs
 	return inputs, changeOutputs, stakeOutputs, nil
