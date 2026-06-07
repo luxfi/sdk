@@ -75,14 +75,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to fetch state: %v", err)
 	}
-	luxAssetID := luxState.XCTX.UTXOAssetID
+	utxoAssetID := luxState.XCTX.UTXOAssetID
 
 	xWallet := wallet.X()
 	exportTx, err := xWallet.IssueExportTx(
 		pChainID,
 		[]*lux.TransferableOutput{
 			{
-				Asset: lux.Asset{ID: luxAssetID},
+				Asset: lux.Asset{ID: utxoAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: *amount,
 					OutputOwners: secp256k1fx.OutputOwners{
