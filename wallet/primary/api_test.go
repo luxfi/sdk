@@ -223,8 +223,8 @@ func TestFetchState_XChainNotRegistered(t *testing.T) {
 	state, err := FetchState(context.Background(), srv.URL, addrs)
 	require.NoError(err, "FetchState must succeed in P-only mode")
 	require.NotNil(state)
-	require.NotNil(state.XCTX)
-	require.Equal(ids.Empty, state.XCTX.BlockchainID, "BlockchainID must be ids.Empty sentinel when X-Chain is not registered")
+	require.Nil(state.XCTX, "XCTX must be nil when X-Chain is not registered (no sentinel kludge)")
+	require.Nil(state.XClient, "XClient must be nil when X-Chain is not registered")
 	require.NotNil(state.PCTX)
 	require.NotNil(state.PClient)
 }
