@@ -213,103 +213,111 @@ type getUTXOsReply struct {
 type LUXState struct {
 	PClient *platformvm.Client
 	PCTX    *pbuilder.Context
+	// X-Chain: opt-in via AttachXChain. Nil if not attached or not registered on this network.
 	XClient *XClient
 	XCTX    *xbuilder.Context
-	// CClient *ethclient.Client // Not yet implemented
-	// CCTX    *c.Context         // Not yet implemented
+	// C-Chain: opt-in via AttachCChain. EVM, fundamentally different from
+	// UTXO P/X — uses ethclient. Nil if not attached or not registered.
+	// CCTX would live in ./chain/c (EthClient + ChainID + GasPrice) — not
+	// a UTXOCtx. Wired through FetchEthState today.
 	UTXOs walletcommon.UTXOs
+
+	// uri is preserved so AttachXChain / AttachCChain can reuse it.
+	uri string
 }
 
-func FetchState(
+// FetchPState fetches ONLY the P-Chain client + context + UTXOs.
+//
+// This is the canonical entry point. P-Chain is the only required chain
+// for sovereign-L1 spawn (CreateChainTx), validator ops, primary network
+// transactions. X-Chain (UTXO asset transfers) and C-Chain (EVM smart
+// contracts) are opt-in — call AttachXChain / AttachCChain on the
+// returned state if you need them.
+//
+// Liquidity / sovereign-L1 callers: this is the function you want.
+// Don't call FetchState (it tries to pull X + C, which is wasteful when
+// they're not needed and breaks against P-only Quasar networks if not
+// fail-softed correctly).
+func FetchPState(
 	ctx context.Context,
 	uri string,
 	addrs set.Set[ids.ShortID],
-) (
-	*LUXState,
-	error,
-) {
+) (*LUXState, error) {
 	infoClient := sdkinfo.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
-	// C-chain client disabled for now
-	// cClient, err := ethclient.Dial(uri + "/ext/bc/C/rpc")
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to connect to C-chain: %w", err)
-	// }
 
 	pCTX, err := p.NewContextFromClients(ctx, infoClient, pClient)
 	if err != nil {
 		return nil, err
 	}
-
-	// Set the network ID on the pClient for proper bech32 address formatting
-	// Without this, the client uses networkID=0 which maps to "custom" HRP fallback
+	// Set the network ID on the pClient for proper bech32 address formatting.
+	// Without this, the client uses networkID=0 which maps to "custom" HRP fallback.
 	pClient.SetNetworkID(pCTX.NetworkID)
 
-	// X-chain fees are derived from the P-chain context. The fee values
-	// here match the primary network defaults; once the upstream info-
-	// service exposes per-chain fees they'll be sourced from there.
-	luxAssetID := pCTX.UTXOAssetID
-	baseTxFee := uint64(1000000)         // 0.001 LUX
-	createAssetTxFee := uint64(10000000) // 0.01 LUX
-
-	// X-Chain is opt-in: Quasar-era networks may register only P + EVM
-	// chains on the primary network (mainnet today; testnet/devnet still
-	// carry the full P+C+Z+Q+T+B+D+X set). When the "X" alias is not
-	// served by the node, fall back to a P-only XCTX with BlockchainID =
-	// ids.Empty as the sentinel — wallet callers that only touch
-	// wallet.P() (CreateChainTx / ConvertNetworkToL1Tx / IssueBaseTx)
-	// continue to work, and X-Chain UTXO scans below short-circuit on
-	// the sentinel. Any non-alias error (network, codec, etc.) is fatal.
-	xCTX, err := x.NewContextFromClients(ctx, infoClient, luxAssetID, baseTxFee, createAssetTxFee)
-	if err != nil {
-		if !isXChainNotEnabled(err) {
-			return nil, err
-		}
-		xCTX = &xbuilder.Context{
-			NetworkID:        pCTX.NetworkID,
-			BlockchainID:     ids.Empty, // sentinel: X-Chain disabled in this network
-			UTXOAssetID:      luxAssetID,
-			BaseTxFee:        baseTxFee,
-			CreateAssetTxFee: createAssetTxFee,
-		}
-	}
-
-	// Create X-chain client with context for proper address formatting
-	xClient := NewXClientWithContext(uri, pCTX.NetworkID, xCTX.BlockchainID)
-
-	// C-chain context disabled for now
-	// cCTX, err := c.NewContextFromClients(ctx, infoClient, pClient)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	utxos := walletcommon.NewUTXOs()
-	addrList := addrs.List()
-
-	// Fetch P-chain UTXOs
-	err = AddAllUTXOs(
+	if err := AddAllUTXOs(
 		ctx,
 		utxos,
 		pClient,
 		p.Codec,
 		constants.PlatformChainID,
 		constants.PlatformChainID,
-		addrList,
-	)
-	if err != nil {
+		addrs.List(),
+	); err != nil {
 		return nil, err
 	}
 
-	// X-chain UTXOs fetched separately when needed (codec type mismatch with AddUTXO)
 	return &LUXState{
 		PClient: pClient,
 		PCTX:    pCTX,
-		XClient: xClient,
-		XCTX:    xCTX,
-		// CClient: cClient, // Disabled
-		// CCTX:    cCTX,    // Disabled
-		UTXOs: utxos,
+		UTXOs:   utxos,
+		uri:     uri,
 	}, nil
+}
+
+// AttachXChain adds X-Chain client + context to the state. Fail-soft:
+// if X-Chain is not registered on this network (Quasar mainnet is P+C
+// only), returns the state unchanged with no error. Any other RPC
+// error is returned.
+func (s *LUXState) AttachXChain(ctx context.Context) error {
+	if s.XCTX != nil {
+		return nil // idempotent
+	}
+	infoClient := sdkinfo.NewClient(s.uri)
+	luxAssetID := s.PCTX.UTXOAssetID
+	const (
+		baseTxFee        = uint64(1000000)  // 0.001 LUX
+		createAssetTxFee = uint64(10000000) // 0.01 LUX
+	)
+	xCTX, err := x.NewContextFromClients(ctx, infoClient, luxAssetID, baseTxFee, createAssetTxFee)
+	if err != nil {
+		if isXChainNotEnabled(err) {
+			return nil // X-Chain not registered — opt-in attach is a no-op
+		}
+		return err
+	}
+	s.XCTX = xCTX
+	s.XClient = NewXClientWithContext(s.uri, s.PCTX.NetworkID, xCTX.BlockchainID)
+	return nil
+}
+
+// FetchState is the P+X convenience that pre-fetches P (required) and
+// X (opt-in via AttachXChain). Kept for back-compat. New callers
+// should use FetchPState + AttachXChain / AttachCChain explicitly so
+// the dependency graph is visible at the call site.
+func FetchState(
+	ctx context.Context,
+	uri string,
+	addrs set.Set[ids.ShortID],
+) (*LUXState, error) {
+	state, err := FetchPState(ctx, uri, addrs)
+	if err != nil {
+		return nil, err
+	}
+	if err := state.AttachXChain(ctx); err != nil {
+		return nil, err
+	}
+	return state, nil
 }
 
 type EthState struct {
