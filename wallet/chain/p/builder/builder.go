@@ -446,10 +446,10 @@ func (b *builder) NewAddValidatorTx(
 	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
-	luxAssetID := b.context.UTXOAssetID
+	utxoAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{
-		luxAssetID: vdr.Wght,
+		utxoAssetID: vdr.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(
@@ -601,10 +601,10 @@ func (b *builder) NewAddDelegatorTx(
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.AddDelegatorTx, error) {
-	luxAssetID := b.context.UTXOAssetID
+	utxoAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{
-		luxAssetID: vdr.Wght,
+		utxoAssetID: vdr.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(
@@ -1139,7 +1139,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.UTXOAssetID
+		utxoAssetID     = b.context.UTXOAssetID
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
 		importedAmounts = make(map[ids.ID]uint64)
@@ -1186,7 +1186,7 @@ func (b *builder) NewImportTx(
 
 	outputs := make([]*lux.TransferableOutput, 0, len(importedAmounts))
 	for assetID, amount := range importedAmounts {
-		if assetID == luxAssetID {
+		if assetID == utxoAssetID {
 			continue
 		}
 
@@ -1224,7 +1224,7 @@ func (b *builder) NewImportTx(
 		toBurn  = map[ids.ID]uint64{}
 		toStake = map[ids.ID]uint64{}
 	)
-	excessLUX := importedAmounts[luxAssetID]
+	excessLUX := importedAmounts[utxoAssetID]
 
 	inputs, changeOutputs, _, err := b.spend(
 		toBurn,
@@ -1877,7 +1877,7 @@ func (b *builder) spend(
 	// If excessLUX <= feeWithChange, we don't add the change output
 	// and we don't modify s.complexity (it stays without the change output)
 
-	utils.Sort(s.inputs)                                    // sort inputs
+	utils.Sort(s.inputs)                         // sort inputs
 	lux.SortTransferableOutputs(s.changeOutputs) // sort the change outputs
 	lux.SortTransferableOutputs(s.stakeOutputs)  // sort stake outputs
 	return s.inputs, s.changeOutputs, s.stakeOutputs, nil
