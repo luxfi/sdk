@@ -231,10 +231,10 @@ require (
 	github.com/luxfi/math/big v0.1.0 // indirect
 	github.com/luxfi/p2p v1.21.1 // indirect
 	github.com/luxfi/precompile v0.5.27 // indirect
-	github.com/luxfi/sampler v1.0.0 // indirect
+	github.com/luxfi/sampler v1.1.0 // indirect
 	github.com/luxfi/tls v1.0.3
 	github.com/luxfi/upgrade v1.0.1-0.20260603055252-f51810805436
-	github.com/luxfi/vm v1.1.10
+	github.com/luxfi/vm v1.2.0
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
