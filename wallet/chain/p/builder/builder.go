@@ -1719,8 +1719,8 @@ func (b *builder) spend(
 	}
 
 	// LUX is handled last to account for fees.
-	utxosByLUXAssetID := splitByAssetID(utxosByLocktime.unlocked, b.context.UTXOAssetID)
-	for _, utxo := range utxosByLUXAssetID.other {
+	utxosByUTXOAssetID := splitByAssetID(utxosByLocktime.unlocked, b.context.UTXOAssetID)
+	for _, utxo := range utxosByUTXOAssetID.other {
 		assetID := utxo.AssetID()
 		if !s.shouldConsumeAsset(assetID) {
 			continue
@@ -1769,7 +1769,7 @@ func (b *builder) spend(
 		}
 	}
 
-	for _, utxo := range utxosByLUXAssetID.requested {
+	for _, utxo := range utxosByUTXOAssetID.requested {
 		// If we don't need to burn or stake additional LUX and we have
 		// already consumed enough LUX to pay the required fee, stop
 		// consuming UTXOs before adding this one.
