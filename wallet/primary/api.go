@@ -284,12 +284,12 @@ func (s *LUXState) AttachXChain(ctx context.Context) error {
 		return nil // idempotent
 	}
 	infoClient := sdkinfo.NewClient(s.uri)
-	luxAssetID := s.PCTX.UTXOAssetID
+	utxoAssetID := s.PCTX.UTXOAssetID
 	const (
 		baseTxFee        = uint64(1000000)  // 0.001 LUX
 		createAssetTxFee = uint64(10000000) // 0.01 LUX
 	)
-	xCTX, err := x.NewContextFromClients(ctx, infoClient, luxAssetID, baseTxFee, createAssetTxFee)
+	xCTX, err := x.NewContextFromClients(ctx, infoClient, utxoAssetID, baseTxFee, createAssetTxFee)
 	if err != nil {
 		if isXChainNotEnabled(err) {
 			return nil // X-Chain not registered — opt-in attach is a no-op

@@ -160,11 +160,11 @@ func (b *builder) GetImportableBalance(
 	var (
 		addrs           = ops.Addresses(b.luxAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.UTXOAssetID
+		utxoAssetID     = b.context.UTXOAssetID
 		balance         uint64
 	)
 	for _, utxo := range utxos {
-		amount, _, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, luxAssetID)
+		amount, _, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, utxoAssetID)
 		if !ok {
 			continue
 		}
@@ -194,13 +194,13 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.luxAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.UTXOAssetID
+		utxoAssetID     = b.context.UTXOAssetID
 
 		importedInputs = make([]*lux.TransferableInput, 0, len(utxos))
 		importedAmount uint64
 	)
 	for _, utxo := range utxos {
-		amount, inputSigIndices, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, luxAssetID)
+		amount, inputSigIndices, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, utxoAssetID)
 		if !ok {
 			continue
 		}
@@ -269,13 +269,13 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*UnsignedExportTx, error) {
 	var (
-		luxAssetID      = b.context.UTXOAssetID
+		utxoAssetID     = b.context.UTXOAssetID
 		exportedOutputs = make([]*lux.TransferableOutput, len(outputs))
 		exportedAmount  uint64
 	)
 	for i, output := range outputs {
 		exportedOutputs[i] = &lux.TransferableOutput{
-			Asset: lux.Asset{ID: luxAssetID},
+			Asset: lux.Asset{ID: utxoAssetID},
 			FxID:  secp256k1fx.ID,
 			Out:   output,
 		}
@@ -376,7 +376,7 @@ func (b *builder) NewExportTx(
 		inputs = append(inputs, &EVMInput{
 			Address: addr,
 			Amount:  inputAmount,
-			AssetID: luxAssetID,
+			AssetID: utxoAssetID,
 			Nonce:   nonce,
 		})
 		amountToConsume -= inputAmount
@@ -403,9 +403,9 @@ func getSpendableAmount(
 	utxo *lux.UTXO,
 	addrs set.Set[ids.ShortID],
 	minIssuanceTime uint64,
-	luxAssetID ids.ID,
+	utxoAssetID ids.ID,
 ) (uint64, []uint32, bool) {
-	if utxo.Asset.ID != luxAssetID {
+	if utxo.Asset.ID != utxoAssetID {
 		// Only LUX can be imported
 		return 0, nil, false
 	}
