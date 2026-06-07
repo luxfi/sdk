@@ -20,15 +20,15 @@ type Context struct {
 	UTXOAssetID  ids.ID
 }
 
-func NewContextFromURI(ctx context.Context, uri string, luxAssetID ids.ID) (*Context, error) {
+func NewContextFromURI(ctx context.Context, uri string, utxoAssetID ids.ID) (*Context, error) {
 	infoClient := sdkinfo.NewClient(uri)
-	return NewContextFromClients(ctx, infoClient, luxAssetID)
+	return NewContextFromClients(ctx, infoClient, utxoAssetID)
 }
 
 func NewContextFromClients(
 	ctx context.Context,
 	infoClient *sdkinfo.Client,
-	luxAssetID ids.ID,
+	utxoAssetID ids.ID,
 ) (*Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
@@ -43,7 +43,7 @@ func NewContextFromClients(
 	return &Context{
 		NetworkID:    networkID,
 		BlockchainID: blockchainID,
-		UTXOAssetID:  luxAssetID,
+		UTXOAssetID:  utxoAssetID,
 	}, nil
 }
 
