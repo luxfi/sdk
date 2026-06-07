@@ -245,15 +245,33 @@ func FetchState(
 	// Without this, the client uses networkID=0 which maps to "custom" HRP fallback
 	pClient.SetNetworkID(pCTX.NetworkID)
 
-	// For X-chain, we need to get the LUX asset ID and fees
-	// TODO: Get these from the xClient or infoClient
+	// X-chain fees are derived from the P-chain context. The fee values
+	// here match the primary network defaults; once the upstream info-
+	// service exposes per-chain fees they'll be sourced from there.
 	luxAssetID := pCTX.UTXOAssetID
 	baseTxFee := uint64(1000000)         // 0.001 LUX
 	createAssetTxFee := uint64(10000000) // 0.01 LUX
 
+	// X-Chain is opt-in: Quasar-era networks may register only P + EVM
+	// chains on the primary network (mainnet today; testnet/devnet still
+	// carry the full P+C+Z+Q+T+B+D+X set). When the "X" alias is not
+	// served by the node, fall back to a P-only XCTX with BlockchainID =
+	// ids.Empty as the sentinel — wallet callers that only touch
+	// wallet.P() (CreateChainTx / ConvertNetworkToL1Tx / IssueBaseTx)
+	// continue to work, and X-Chain UTXO scans below short-circuit on
+	// the sentinel. Any non-alias error (network, codec, etc.) is fatal.
 	xCTX, err := x.NewContextFromClients(ctx, infoClient, luxAssetID, baseTxFee, createAssetTxFee)
 	if err != nil {
-		return nil, err
+		if !isXChainNotEnabled(err) {
+			return nil, err
+		}
+		xCTX = &xbuilder.Context{
+			NetworkID:        pCTX.NetworkID,
+			BlockchainID:     ids.Empty, // sentinel: X-Chain disabled in this network
+			UTXOAssetID:      luxAssetID,
+			BaseTxFee:        baseTxFee,
+			CreateAssetTxFee: createAssetTxFee,
+		}
 	}
 
 	// Create X-chain client with context for proper address formatting
@@ -542,4 +560,23 @@ func hexValue(c byte) byte {
 	default:
 		return 255
 	}
+}
+
+// isXChainNotEnabled detects the canonical "info.getBlockchainID returns
+// no-such-alias for X" error that surfaces when running against a P-only
+// network (one whose platform genesis does not include an XVM chain —
+// e.g. Quasar-era mainnet which only registers P + C). We match by
+// substring of the JSON-RPC error message rather than a typed sentinel
+// because the upstream info-service emits a free-form string; re-evaluate
+// this matcher if/when info.getBlockchainID gains a typed error path.
+//
+// Kept in lockstep with node/wallet/network/primary/api.go:isXChainNotEnabled
+// so the SDK and node wallets fail-soft on the same set of error messages.
+func isXChainNotEnabled(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "there is no id with alias: x") ||
+		strings.Contains(msg, "no chain with alias")
 }
