@@ -69,7 +69,17 @@ type Builder interface {
 		options ...common.Option,
 	) (*txs.BaseTx, error)
 
-	// NewAddValidatorTx creates a new validator of the primary network.
+	// NewAddValidatorTx creates a new validator of the primary network the
+	// builder is configured against.
+	//
+	// This is the universal "add a validator to a network" transaction —
+	// validators validate networks (not chains); chains live on networks.
+	// The target network is whichever primary network the builder's context
+	// is bound to (the Lux primary network, networkID 1/2/3/1337; or a
+	// sovereign L1's own primary network with its own dedicated networkID).
+	//
+	// Stake outputs are synthesized internally from the validator weight;
+	// the caller does not pass StakeOuts.
 	//
 	// - [vdr] specifies all the details of the validation period such as the
 	//   startTime, endTime, stake weight, and nodeID.
@@ -89,6 +99,13 @@ type Builder interface {
 	//
 	// - [vdr] specifies all the details of the validation period such as the
 	//   startTime, endTime, sampling weight, nodeID, and chainID.
+	//
+	// Deprecated: validators validate networks, not chains. Chains live on
+	// networks (created by CreateChainTx). Use NewAddValidatorTx — that's
+	// the universal "add a validator to a network" path, whether the target
+	// is the Lux primary network or a sovereign L1's own primary network.
+	// The wallet/builder's connection context determines which network is
+	// targeted. Retained for one release cycle of wire compatibility only.
 	NewAddChainValidatorTx(
 		vdr *txs.ChainValidator,
 		options ...common.Option,
