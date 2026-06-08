@@ -48,7 +48,18 @@ type Wallet interface {
 	) (*txs.Tx, error)
 
 	// IssueAddValidatorTx creates, signs, and issues a new validator of the
-	// primary network.
+	// primary network the wallet is currently connected to.
+	//
+	// This is the universal "add a validator to a network" transaction.
+	// Validators validate networks (not chains); chains live on networks.
+	// The target network is determined by the wallet's connection context —
+	// the wallet's RPC endpoint dictates which primary network's P-chain
+	// receives the tx:
+	//
+	//   - the Lux primary network (networkID 1/2/3/1337), OR
+	//   - a sovereign L1's own primary network (its own dedicated networkID).
+	//
+	// To target a different network, dial that network first then call this.
 	//
 	// - [vdr] specifies all the details of the validation period such as the
 	//   startTime, endTime, stake weight, and nodeID.
@@ -64,11 +75,38 @@ type Wallet interface {
 		options ...common.Option,
 	) (*txs.Tx, error)
 
+	// AddValidator is the canonical one-call convenience helper to add a
+	// validator to the network the wallet is currently connected to.
+	//
+	// It is exactly equivalent to IssueAddValidatorTx — same parameters,
+	// same return — and exists to make the decomplected model explicit at
+	// the API surface: from a caller's perspective, there is ONE way to
+	// add a validator (this method), and the target network is determined
+	// by the wallet's connection context. Whether the caller is wiring up
+	// the Lux primary network or a downstream sovereign L1's own primary
+	// network, the call is the same — just dial the right network first.
+	//
+	// To target a different network, dial that network first then call this.
+	AddValidator(
+		vdr *txs.Validator,
+		rewardsOwner *secp256k1fx.OutputOwners,
+		delegationShares uint32,
+		options ...common.Option,
+	) (*txs.Tx, error)
+
 	// IssueAddChainValidatorTx creates, signs, and issues a new validator of a
 	// chain.
 	//
 	// - [vdr] specifies all the details of the validation period such as the
 	//   startTime, endTime, sampling weight, nodeID, and chainID.
+	//
+	// Deprecated: validators validate networks, not chains. Chains live on
+	// networks (created by CreateChainTx). Use IssueAddValidatorTx — that's
+	// the universal "add a validator to a network" path, whether the target
+	// is the Lux primary network or a sovereign L1's own primary network.
+	// The wallet's connection context determines which network is targeted.
+	// This method is retained for one release cycle of wire compatibility
+	// only and will be removed.
 	IssueAddChainValidatorTx(
 		vdr *txs.ChainValidator,
 		options ...common.Option,
@@ -78,6 +116,10 @@ type Wallet interface {
 	// that removes a validator of a chain.
 	//
 	// - [nodeID] is the validator being removed from [chainID].
+	//
+	// Deprecated: retained for one release cycle of wire compatibility only.
+	// New code should manage validator lifecycle through the network-level
+	// validator txs (AddValidatorTx + the L1 validator txs for sovereign L1s).
 	IssueRemoveChainValidatorTx(
 		nodeID ids.NodeID,
 		chainID ids.ID,
@@ -364,6 +406,24 @@ func (w *wallet) IssueAddValidatorTx(
 		return nil, err
 	}
 	return w.IssueUnsignedTx(utx, options...)
+}
+
+// AddValidator adds a validator to the network the wallet is currently
+// connected to (Lux primary or a sovereign L1's own primary — same tx,
+// just different target networkID determined by the wallet's RPC endpoint).
+// To target a different network, dial that network first then call this.
+//
+// This is the recommended one-call helper for the common case where the
+// caller already holds a wallet dialed to the right network — there is no
+// need to thread chainIDs or auth proofs through. From a caller's
+// perspective there is ONE add-validator entry point: this method.
+func (w *wallet) AddValidator(
+	vdr *txs.Validator,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	delegationShares uint32,
+	options ...common.Option,
+) (*txs.Tx, error) {
+	return w.IssueAddValidatorTx(vdr, rewardsOwner, delegationShares, options...)
 }
 
 func (w *wallet) IssueAddChainValidatorTx(
