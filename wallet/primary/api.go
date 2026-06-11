@@ -234,7 +234,7 @@ type LUXState struct {
 // contracts) are opt-in — call AttachXChain / AttachCChain on the
 // returned state if you need them.
 //
-// Liquidity / sovereign-L1 callers: this is the function you want.
+// Sovereign-L1 callers: this is the function you want.
 // Don't call FetchState (it tries to pull X + C, which is wasteful when
 // they're not needed and breaks against P-only Quasar networks if not
 // fail-softed correctly).
