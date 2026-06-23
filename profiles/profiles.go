@@ -64,11 +64,20 @@ type NetworkConfig struct {
 	PingFrequency         string `json:"ping-frequency"`
 }
 
-// BFTConsensus derives Byzantine-fault-tolerant consensus parameters matching
-// Avalanche's safety profile for a validator set of size n. It is the single source
-// of truth for consensus safety: a deploy should derive K/alpha from the LIVE
-// validator count, never hardcode them (the live K=5/alpha=3 drift was sub-BFT —
-// 2*3-5 = 1 < floor((5-1)/3)+1 = 2 — which the consensus engine correctly refuses).
+// Consensus derives the sampling-consensus parameters (the lux/consensus engine's
+// alpha-of-K snowball/snowman knobs: K=sample, alpha=quorum, beta=commit) for a
+// validator set of size n. Consensus is Byzantine-fault-tolerant by construction —
+// there is no non-BFT variant — so the result always satisfies the engine invariant
+// 2*alpha - K >= floor((K-1)/3)+1; "BFT" is implied, not a flavor.
+//
+// This is the ENGINE/agreement layer, NOT post-quantum finality. Quasar (lux/quasar,
+// the per-round QuasarCert + pqLayers in the CR's spec.consensus) seals each agreed
+// event in a PQ weighted certificate ON TOP of this — a separate concern; this struct
+// carries no PQ config.
+//
+// It is the single source of truth for sampling safety: a deploy derives K/alpha from
+// the LIVE validator count, never hardcodes them (the live K=5/alpha=3 drift was
+// sub-BFT — 2*3-5 = 1 < floor((5-1)/3)+1 = 2 — which the engine correctly refuses).
 //
 //   - K (sample size)  = min(n, 20)        — Avalanche caps the poll sample at 20.
 //   - alpha (quorum)   = ceil(0.75*K)      — Avalanche's 15/20 = 75% ratio (K>=4).
@@ -76,10 +85,9 @@ type NetworkConfig struct {
 //                                            the Byzantine floor is used to preserve
 //                                            liveness (one tolerable fault).
 //
-// The result always satisfies the engine invariant 2*alpha - K >= floor((K-1)/3)+1.
 // Examples: n=5 -> K=5,alpha=4 (80%); n=20+ -> K=20,alpha=15 (exactly Avalanche);
 // n=3 -> K=3,alpha=2 (67%, BFT-minimal).
-func BFTConsensus(n int) ConsensusConfig {
+func Consensus(n int) ConsensusConfig {
 	k := n
 	if k < 1 {
 		k = 1
