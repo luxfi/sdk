@@ -5,9 +5,9 @@ package profiles
 
 import "testing"
 
-// TestBFTConsensus_MatchesAvalanche pins the Avalanche-grade derivation: K=min(20,N),
+// TestConsensus_MatchesAvalanche pins the Avalanche-grade derivation: K=min(20,N),
 // alpha=ceil(0.75K) at the 15/20 ratio, BFT-safe at every size.
-func TestBFTConsensus_MatchesAvalanche(t *testing.T) {
+func TestConsensus_MatchesAvalanche(t *testing.T) {
 	cases := []struct {
 		n, wantK, wantAlpha int
 	}{
@@ -20,13 +20,13 @@ func TestBFTConsensus_MatchesAvalanche(t *testing.T) {
 		{50, 20, 15}, // capped at K=20, Avalanche
 	}
 	for _, c := range cases {
-		got := BFTConsensus(c.n)
+		got := Consensus(c.n)
 		if got.SampleSize != c.wantK || got.PreferenceQuorumSize != c.wantAlpha || got.ConfidenceQuorumSize != c.wantAlpha {
-			t.Errorf("BFTConsensus(%d) = K=%d alpha=%d, want K=%d alpha=%d",
+			t.Errorf("Consensus(%d) = K=%d alpha=%d, want K=%d alpha=%d",
 				c.n, got.SampleSize, got.PreferenceQuorumSize, c.wantK, c.wantAlpha)
 		}
 		if !IsByzantineSafe(got.SampleSize, got.PreferenceQuorumSize) {
-			t.Errorf("BFTConsensus(%d) = K=%d alpha=%d is NOT Byzantine-safe", c.n, got.SampleSize, got.PreferenceQuorumSize)
+			t.Errorf("Consensus(%d) = K=%d alpha=%d is NOT Byzantine-safe", c.n, got.SampleSize, got.PreferenceQuorumSize)
 		}
 	}
 }
