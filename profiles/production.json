@@ -1,0 +1,29 @@
+{
+  "name": "production",
+  "description": "Avalanche-grade BFT consensus for live multi-validator networks. K=5/alpha=4 (80% quorum, >= Avalanche's 15/20 = 75%), Byzantine-safe (2*4-5 = 3 >= 2). For the current 5-validator Lux primary networks; for larger sets derive via profiles.BFTConsensus (K=min(20,N), alpha=ceil(0.75K), e.g. K=20/alpha=15 = exactly Avalanche).",
+  "consensus": {
+    "sample-size": 5,
+    "preference-quorum-size": 4,
+    "confidence-quorum-size": 4,
+    "commit-threshold": 20,
+    "concurrent-repolls": 4,
+    "optimal-processing": 10,
+    "max-processing": 256,
+    "frontier-poll-frequency": "100ms"
+  },
+  "health": {
+    "check-frequency": "2s",
+    "averager-halflife": "10s"
+  },
+  "network": {
+    "max-reconnect-delay": "1m",
+    "initial-reconnect-delay": "1s",
+    "initial-timeout": "5s",
+    "minimum-timeout": "2s",
+    "maximum-timeout": "10s",
+    "timeout-halflife": "5m",
+    "read-handshake-timeout": "15s",
+    "ping-timeout": "30s",
+    "ping-frequency": "22s"
+  }
+}

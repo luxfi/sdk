@@ -64,6 +64,63 @@ type NetworkConfig struct {
 	PingFrequency         string `json:"ping-frequency"`
 }
 
+// BFTConsensus derives Byzantine-fault-tolerant consensus parameters matching
+// Avalanche's safety profile for a validator set of size n. It is the single source
+// of truth for consensus safety: a deploy should derive K/alpha from the LIVE
+// validator count, never hardcode them (the live K=5/alpha=3 drift was sub-BFT —
+// 2*3-5 = 1 < floor((5-1)/3)+1 = 2 — which the consensus engine correctly refuses).
+//
+//   - K (sample size)  = min(n, 20)        — Avalanche caps the poll sample at 20.
+//   - alpha (quorum)   = ceil(0.75*K)      — Avalanche's 15/20 = 75% ratio (K>=4).
+//                                            For K<=3, 75% would force unanimity, so
+//                                            the Byzantine floor is used to preserve
+//                                            liveness (one tolerable fault).
+//
+// The result always satisfies the engine invariant 2*alpha - K >= floor((K-1)/3)+1.
+// Examples: n=5 -> K=5,alpha=4 (80%); n=20+ -> K=20,alpha=15 (exactly Avalanche);
+// n=3 -> K=3,alpha=2 (67%, BFT-minimal).
+func BFTConsensus(n int) ConsensusConfig {
+	k := n
+	if k < 1 {
+		k = 1
+	}
+	if k > 20 {
+		k = 20 // Avalanche samples at most 20 validators per poll
+	}
+	var alpha int
+	if k >= 4 {
+		alpha = (3*k + 3) / 4 // ceil(0.75*k): Avalanche's 75% ratio, BFT-safe + 1+ fault-tolerant
+	} else {
+		alpha = bftAlphaFloor(k) // tiny sets: BFT minimum keeps the chain live
+	}
+	return ConsensusConfig{
+		SampleSize:           k,
+		PreferenceQuorumSize: alpha,
+		ConfidenceQuorumSize: alpha,
+		CommitThreshold:      20, // Avalanche mainnet finalization depth (BetaRogue)
+		ConcurrentRepolls:    4,  // Avalanche default
+		OptimalProcessing:    10, // Avalanche default
+		MaxProcessing:        256,
+		FrontierPollFreq:     "100ms",
+	}
+}
+
+// bftAlphaFloor returns the smallest alpha satisfying the engine's Byzantine-safety
+// invariant 2*alpha - K >= floor((K-1)/3)+1 (i.e. alpha >= ceil((K + floor((K-1)/3)+1) / 2)).
+func bftAlphaFloor(k int) int {
+	need := (k-1)/3 + 1
+	return (k + need + 1) / 2
+}
+
+// IsByzantineSafe reports whether a sample/quorum pair satisfies the consensus
+// engine's Byzantine-safety invariant. Use it to validate any consensus config.
+func IsByzantineSafe(sampleSize, quorumSize int) bool {
+	if sampleSize < 1 || quorumSize < 1 || quorumSize > sampleSize {
+		return false
+	}
+	return 2*quorumSize-sampleSize >= (sampleSize-1)/3+1
+}
+
 // GetProfile loads a profile by name.
 // Returns error if profile not found or invalid.
 func GetProfile(name string) (*Profile, error) {
