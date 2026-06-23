@@ -1,6 +1,6 @@
 {
   "name": "production",
-  "description": "Avalanche-grade BFT consensus for live multi-validator networks. K=5/alpha=4 (80% quorum, >= Avalanche's 15/20 = 75%), Byzantine-safe (2*4-5 = 3 >= 2). For the current 5-validator Lux primary networks; for larger sets derive via profiles.BFTConsensus (K=min(20,N), alpha=ceil(0.75K), e.g. K=20/alpha=15 = exactly Avalanche).",
+  "description": "Avalanche-grade BFT consensus for live multi-validator networks. K=5/alpha=4 (80% quorum, >= Avalanche's 15/20 = 75%), Byzantine-safe (2*4-5 = 3 >= 2). For the current 5-validator Lux primary networks; for larger sets derive via profiles.Consensus (K=min(20,N), alpha=ceil(0.75K), e.g. K=20/alpha=15 = exactly Avalanche).",
   "consensus": {
     "sample-size": 5,
     "preference-quorum-size": 4,
