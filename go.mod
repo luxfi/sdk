@@ -144,7 +144,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/luxfi/age v1.5.0 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
-	github.com/luxfi/corona v0.10.2 // indirect
+	github.com/luxfi/corona v0.10.3 // indirect
 	github.com/luxfi/crypto/ipa v1.2.4 // indirect
 	github.com/luxfi/filesystem v0.0.1 // indirect
 	github.com/luxfi/gpu v1.0.1 // indirect
