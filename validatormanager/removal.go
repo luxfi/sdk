@@ -37,7 +37,7 @@ func InitializeValidatorRemoval(
 	privateKey string,
 	validationID ids.ID,
 	isPoS bool,
-	uptimeProofSignedMessage *warp.Message,
+	uptimeProofSignedMessage *warp.Envelope,
 	force bool,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
@@ -149,7 +149,7 @@ func GetUptimeProofMessage(
 	validationID ids.ID,
 	uptime uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	uptimePayload, err := messages.NewValidatorUptime(validationID, uptime)
 	if err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func GetUptimeProofMessage(
 	if err != nil {
 		return nil, err
 	}
-	uptimeProofUnsignedMessage, err := warp.NewUnsignedMessage(
+	uptimeProofUnsignedMessage, err := warp.NewMessage(
 		network.ID(),
 		blockchainID,
 		addressedCall.Bytes(),
@@ -189,7 +189,7 @@ func InitValidatorRemoval(
 	useACP99 bool,
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, ids.ID, *types.Transaction, error) {
+) (*warp.Envelope, ids.ID, *types.Transaction, error) {
 	chainID, err := contract.GetNetworkID(
 		app,
 		network,
@@ -220,7 +220,7 @@ func InitValidatorRemoval(
 		return nil, ids.Empty, nil, fmt.Errorf("node %s is not a L1 validator", nodeID)
 	}
 
-	var unsignedMessage *warp.UnsignedMessage
+	var unsignedMessage *warp.Message
 	if initiateTxHash != "" {
 		unsignedMessage, err = GetL1ValidatorWeightMessageFromTx(
 			rpcURL,
@@ -235,7 +235,7 @@ func InitValidatorRemoval(
 
 	var receipt *types.Receipt
 	if unsignedMessage == nil {
-		signedUptimeProof := &warp.Message{}
+		signedUptimeProof := &warp.Envelope{}
 		if isPoS {
 			if uptimeSec == 0 {
 				uptimeSec, err = GetL1ValidatorUptimeSeconds(rpcURL, nodeID)
@@ -302,9 +302,9 @@ func InitValidatorRemoval(
 	}
 
 	// Convert node warp message back to standalone for GetL1ValidatorWeightMessage
-	var standaloneUnsignedMsg *warp.UnsignedMessage
+	var standaloneUnsignedMsg *warp.Message
 	if unsignedMessage != nil {
-		standaloneUnsignedMsg, err = warp.NewUnsignedMessage(
+		standaloneUnsignedMsg, err = warp.NewMessage(
 			unsignedMessage.NetworkID,
 			unsignedMessage.SourceChainID,
 			unsignedMessage.Payload,
@@ -335,7 +335,7 @@ func CompleteValidatorRemoval(
 	generateRawTxOnly bool,
 	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
-	chainValidatorRegistrationSignedMessage *warp.Message,
+	chainValidatorRegistrationSignedMessage *warp.Envelope,
 	useACP99 bool,
 ) (*types.Transaction, *types.Receipt, error) {
 	if useACP99 {

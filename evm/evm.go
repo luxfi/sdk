@@ -518,7 +518,7 @@ func (client Client) WaitForEVMBootstrapped(timeout time.Duration) error {
 func (client Client) TransactWithWarpMessage(
 	from crypto.Address,
 	privateKeyStr string,
-	warpMessage *warp.Message,
+	warpMessage *warp.Envelope,
 	contract crypto.Address,
 	callData []byte,
 	value *big.Int,
@@ -552,10 +552,14 @@ func (client Client) TransactWithWarpMessage(
 	if err != nil {
 		return nil, err
 	}
+	warpMessageBytes, err := warpMessage.Bytes()
+	if err != nil {
+		return nil, err
+	}
 	accessList := types.AccessList{
 		types.AccessTuple{
 			Address:     evmWarp.ContractAddress,
-			StorageKeys: evmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessage.Bytes())),
+			StorageKeys: evmUtils.BytesToHashSlice(predicate.PackPredicate(warpMessageBytes)),
 		},
 	}
 	msg := ethereum.CallMsg{
