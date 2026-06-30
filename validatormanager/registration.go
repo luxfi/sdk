@@ -211,9 +211,9 @@ func GetRegisterL1ValidatorMessage(
 	weight uint64,
 	alreadyInitialized bool,
 	initiateTxHash string,
-	registerChainValidatorUnsignedMessage *warp.UnsignedMessage,
+	registerChainValidatorUnsignedMessage *warp.Message,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, ids.ID, error) {
+) (*warp.Envelope, ids.ID, error) {
 	var (
 		validationID ids.ID
 		err          error
@@ -268,7 +268,7 @@ func GetRegisterL1ValidatorMessage(
 			if err != nil {
 				return nil, ids.Empty, err
 			}
-			registerChainValidatorUnsignedMessage, err = warp.NewUnsignedMessage(
+			registerChainValidatorUnsignedMessage, err = warp.NewMessage(
 				network.ID(),
 				blockchainID,
 				registerChainValidatorAddressedCall.Bytes(),
@@ -303,7 +303,7 @@ func GetRegisterL1ValidatorMessage(
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("failed to convert warp message: %w", err)
 	}
-	return signedMessage.(*warp.Message), validationID, nil
+	return signedMessage.(*warp.Envelope), validationID, nil
 }
 
 func GetPChainL1ValidatorRegistrationMessage(
@@ -316,7 +316,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	validationID ids.ID,
 	registered bool,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	addressedCallPayload, err := warpMessage.NewL1ValidatorRegistration(validationID, registered)
 	if err != nil {
 		return nil, err
@@ -328,7 +328,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	if err != nil {
 		return nil, err
 	}
-	chainConversionUnsignedMessage, err := warp.NewUnsignedMessage(
+	chainConversionUnsignedMessage, err := warp.NewMessage(
 		network.ID(),
 		constants.PlatformChainID,
 		chainValidatorRegistrationAddressedCall.Bytes(),
@@ -353,7 +353,7 @@ func GetPChainL1ValidatorRegistrationMessage(
 	if err != nil {
 		return nil, err
 	}
-	return nodeWarpMsg.(*warp.Message), nil
+	return nodeWarpMsg.(*warp.Envelope), nil
 }
 
 // CompleteValidatorRegistration is the last step of flow for adding a new validator.
@@ -363,7 +363,7 @@ func CompleteValidatorRegistration(
 	generateRawTxOnly bool,
 	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
-	l1ValidatorRegistrationSignedMessage *warp.Message,
+	l1ValidatorRegistrationSignedMessage *warp.Envelope,
 ) (*types.Transaction, *types.Receipt, error) {
 	return contract.TxToMethodWithWarpMessage(
 		rpcURL,
@@ -404,7 +404,7 @@ func InitValidatorRegistration(
 	useACP99 bool,
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, ids.ID, *types.Transaction, error) {
+) (*warp.Envelope, ids.ID, *types.Transaction, error) {
 	chainID, err := contract.GetNetworkID(
 		app,
 		network,
@@ -508,7 +508,7 @@ func InitValidatorRegistration(
 		ux.Logger.PrintToUser("%s", luxlog.LightBlue.Wrap("The validator registration was already initialized. Proceeding to the next step"))
 	}
 
-	var unsignedMessage *warp.UnsignedMessage
+	var unsignedMessage *warp.Message
 	if receipt != nil {
 		unsignedMessage, err = evm.ExtractWarpMessageFromReceipt(receipt)
 		if err != nil {
@@ -613,7 +613,7 @@ func SearchForRegisterL1ValidatorMessage(
 	ctx context.Context,
 	rpcURL string,
 	validationID ids.ID,
-) (*warp.UnsignedMessage, error) {
+) (*warp.Message, error) {
 	client, err := evm.GetClient(rpcURL)
 	if err != nil {
 		return nil, err
@@ -713,7 +713,7 @@ func GetRegisterL1ValidatorMessageFromTx(
 	rpcURL string,
 	validationID ids.ID,
 	txHash string,
-) (*warp.UnsignedMessage, error) {
+) (*warp.Message, error) {
 	client, err := evm.GetClient(rpcURL)
 	if err != nil {
 		return nil, err
