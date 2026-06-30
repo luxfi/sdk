@@ -70,7 +70,7 @@ func InitValidatorWeightChange(
 	weight uint64,
 	initiateTxHash string,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, ids.ID, *types.Transaction, error) {
+) (*warp.Envelope, ids.ID, *types.Transaction, error) {
 	chainID, err := contract.GetNetworkID(
 		app,
 		network,
@@ -101,7 +101,7 @@ func InitValidatorWeightChange(
 		return nil, ids.Empty, nil, fmt.Errorf("node %s is not a L1 validator", nodeID)
 	}
 
-	var unsignedMessage *warp.UnsignedMessage
+	var unsignedMessage *warp.Message
 	if initiateTxHash != "" {
 		unsignedMessage, err = GetL1ValidatorWeightMessageFromTx(
 			rpcURL,
@@ -152,7 +152,7 @@ func InitValidatorWeightChange(
 		}
 		// Convert node warp to standalone warp
 		if nodeWarpMsg != nil {
-			unsignedMessage, err = warp.NewUnsignedMessage(
+			unsignedMessage, err = warp.NewMessage(
 				nodeWarpMsg.NetworkID,
 				nodeWarpMsg.SourceChainID,
 				nodeWarpMsg.Payload,
@@ -192,7 +192,7 @@ func CompleteValidatorWeightChange(
 	generateRawTxOnly bool,
 	ownerAddress crypto.Address,
 	privateKey string, // not need to be owner atm
-	pchainL1ValidatorRegistrationSignedMessage *warp.Message,
+	pchainL1ValidatorRegistrationSignedMessage *warp.Envelope,
 ) (*types.Transaction, *types.Receipt, error) {
 	// No conversion needed - already using the right warp type
 	nodeWarpMsg := pchainL1ValidatorRegistrationSignedMessage
@@ -224,7 +224,7 @@ func FinishValidatorWeightChange(
 	validationID ids.ID,
 	aggregatorLogger luxlog.Logger,
 	validatorManagerAddressStr string,
-	l1ValidatorRegistrationSignedMessage *warp.Message,
+	l1ValidatorRegistrationSignedMessage *warp.Envelope,
 	weight uint64,
 	signatureAggregatorEndpoint string,
 ) (*types.Transaction, error) {
@@ -290,7 +290,7 @@ func GetL1ValidatorWeightMessage(
 	network models.Network,
 	aggregatorLogger luxlog.Logger,
 	// message is given
-	unsignedMessage *warp.UnsignedMessage,
+	unsignedMessage *warp.Message,
 	chainID ids.ID,
 	blockchainID ids.ID,
 	managerAddress crypto.Address,
@@ -298,7 +298,7 @@ func GetL1ValidatorWeightMessage(
 	nonce uint64,
 	weight uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	if unsignedMessage == nil {
 		addressedCallPayload, err := localWarpMessage.NewL1ValidatorWeight(
 			validationID,
@@ -315,7 +315,7 @@ func GetL1ValidatorWeightMessage(
 		if err != nil {
 			return nil, err
 		}
-		unsignedMessage, err = warp.NewUnsignedMessage(
+		unsignedMessage, err = warp.NewMessage(
 			network.ID(),
 			blockchainID,
 			addressedCall.Bytes(),
@@ -334,15 +334,15 @@ func GetPChainL1ValidatorWeightMessage(
 	aggregatorQuorumPercentage uint64,
 	chainID ids.ID,
 	// message is given
-	l1SignedMessage *warp.Message,
+	l1SignedMessage *warp.Envelope,
 	// needed to generate full message contents
 	validationID ids.ID,
 	nonce uint64,
 	weight uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	if l1SignedMessage != nil {
-		addressedCall, err := warpPayload.ParseAddressedCall(l1SignedMessage.UnsignedMessage.Payload)
+		addressedCall, err := warpPayload.ParseAddressedCall(l1SignedMessage.Message.Payload)
 		if err != nil {
 			return nil, err
 		}
@@ -369,7 +369,7 @@ func GetPChainL1ValidatorWeightMessage(
 	if err != nil {
 		return nil, err
 	}
-	unsignedMessage, err := warp.NewUnsignedMessage(
+	unsignedMessage, err := warp.NewMessage(
 		network.ID(),
 		constants.PlatformChainID,
 		addressedCall.Bytes(),
@@ -386,7 +386,7 @@ func GetL1ValidatorWeightMessageFromTx(
 	validationID ids.ID,
 	weight uint64,
 	txHash string,
-) (*warp.UnsignedMessage, error) {
+) (*warp.Message, error) {
 	client, err := evm.GetClient(rpcURL)
 	if err != nil {
 		return nil, err
@@ -404,7 +404,7 @@ func GetL1ValidatorWeightMessageFromTx(
 			if err == nil {
 				if weightMsg.ValidationID == validationID && weightMsg.Weight == weight {
 					// Convert node warp message to standalone
-					standaloneMsg, err := warp.NewUnsignedMessage(
+					standaloneMsg, err := warp.NewMessage(
 						msg.NetworkID,
 						msg.SourceChainID,
 						msg.Payload,
@@ -425,7 +425,7 @@ func SearchForL1ValidatorWeightMessage(
 	rpcURL string,
 	validationID ids.ID,
 	weight uint64,
-) (*warp.UnsignedMessage, error) {
+) (*warp.Message, error) {
 	maxBlocksToSearch := int64(5000000)
 	client, err := evm.GetClient(rpcURL)
 	if err != nil {
@@ -466,7 +466,7 @@ func SearchForL1ValidatorWeightMessage(
 				if err == nil {
 					if weightMsg.ValidationID == validationID && weightMsg.Weight == weight {
 						// Convert node warp message to standalone
-						standaloneMsg, err := warp.NewUnsignedMessage(
+						standaloneMsg, err := warp.NewMessage(
 							msg.NetworkID,
 							msg.SourceChainID,
 							msg.Payload,

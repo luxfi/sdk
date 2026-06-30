@@ -1805,19 +1805,19 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	callData := []byte{1, 2, 3, 4, 5}
 	value := big.NewInt(1000000000000000000) // 1 ETH
 	sourceChainID := ids.ID{1, 2, 3}
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(
+	unsignedMessage, err := luxWarp.NewMessage(
 		0, // NetworkID
 		sourceChainID,
 		[]byte{4, 5, 6},
 	)
 	require.NoError(t, err)
-	warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
+	warpMessage, err := luxWarp.NewEnvelope(unsignedMessage, luxWarp.BitSetSignature{}, nil, nil)
 	require.NoError(t, err)
 	tests := []struct {
 		name              string
 		from              crypto.Address
 		privateKey        string
-		warpMessage       *luxWarp.Message
+		warpMessage       *luxWarp.Envelope
 		contract          crypto.Address
 		callData          []byte
 		value             *big.Int
