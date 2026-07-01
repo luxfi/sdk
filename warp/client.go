@@ -35,7 +35,7 @@ type client struct {
 // Deprecated: The IPCs API is deprecated. The Index API should be used instead.
 func NewClient(uri string) Client {
 	return &client{requester: rpc.NewEndpointRequester(
-		uri + "/ext/ipcs",
+		uri + "/v1/ipcs",
 	)}
 }
 
