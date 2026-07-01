@@ -25,7 +25,7 @@ type staticClient struct {
 // NewClient returns an XVM client for interacting with the xvm static api
 func NewStaticClient(uri string) StaticClient {
 	return &staticClient{requester: rpc.NewEndpointRequester(
-		uri + "/ext/vm/xvm",
+		uri + "/v1/vm/xvm",
 	)}
 }
 

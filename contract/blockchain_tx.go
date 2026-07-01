@@ -25,7 +25,7 @@ type formattedTx struct {
 
 // GetBlockchainTx retrieves a blockchain CreateChainTx from the network.
 func GetBlockchainTx(endpoint string, blockchainID ids.ID) (*txs.CreateChainTx, error) {
-	requester := rpc.NewEndpointRequester(endpoint + "/ext/P")
+	requester := rpc.NewEndpointRequester(endpoint + "/v1/P")
 	ctx, cancel := apiRequestContext()
 	defer cancel()
 

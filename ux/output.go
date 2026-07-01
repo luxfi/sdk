@@ -104,7 +104,7 @@ func PrintTableEndpoints(clusterInfo *rpcpb.ClusterInfo) {
 	for _, nodeName := range clusterInfo.NodeNames {
 		nodeInfo := nodeInfos[nodeName]
 		for blockchainID, chainInfo := range clusterInfo.CustomChains {
-			_ = table.Append([]string{nodeInfo.Name, chainInfo.ChainName, fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/ext/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.ChainName)}) //nolint:errcheck
+			_ = table.Append([]string{nodeInfo.Name, chainInfo.ChainName, fmt.Sprintf("%s/v1/bc/%s/rpc", nodeInfo.GetUri(), blockchainID), fmt.Sprintf("%s/v1/bc/%s/rpc", nodeInfo.GetUri(), chainInfo.ChainName)}) //nolint:errcheck
 		}
 	}
 	_ = table.Render() //nolint:errcheck

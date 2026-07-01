@@ -19,7 +19,7 @@ type Client struct {
 
 func NewClient(uri string) *Client {
 	return &Client{Requester: rpc.NewEndpointRequester(
-		uri + "/ext/admin",
+		uri + "/v1/admin",
 	)}
 }
 

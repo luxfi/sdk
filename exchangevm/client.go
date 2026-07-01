@@ -29,7 +29,7 @@ type Client struct {
 // NewClient returns an Exchange VM client for interacting with the X-Chain
 func NewClient(uri, chain string) *Client {
 	path := fmt.Sprintf(
-		"%s/ext/%s/%s",
+		"%s/v1/%s/%s",
 		uri,
 		constants.ChainAliasPrefix,
 		chain,
