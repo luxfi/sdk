@@ -33,7 +33,7 @@ type Client struct {
 
 func NewClient(uri string) *Client {
 	return &Client{Requester: rpc.NewEndpointRequester(
-		uri + "/ext/P",
+		uri + "/v1/P",
 	)}
 }
 
@@ -41,7 +41,7 @@ func NewClient(uri string) *Client {
 // for proper bech32 address formatting
 func NewClientWithNetworkID(uri string, networkID uint32) *Client {
 	return &Client{
-		Requester: rpc.NewEndpointRequester(uri + "/ext/P"),
+		Requester: rpc.NewEndpointRequester(uri + "/v1/P"),
 		networkID: networkID,
 	}
 }

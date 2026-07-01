@@ -14,7 +14,7 @@
 // `GOWORK=off go test ./...` stays green. Build/import this file only inside the
 // lux workspace (where evm resolves) or with `-tags livedial`:
 //
-//	c, err := aichain.Dial("https://api.lux.network/ext/bc/C/rpc", privKeyHex)
+//	c, err := aichain.Dial("https://api.lux.network/v1/bc/C/rpc", privKeyHex)
 //
 // Everywhere else, construct the Client directly from any EVMBackend
 // (aichain.NewClient) — luxfi/evm/ethclient.Client satisfies that interface, so
