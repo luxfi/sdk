@@ -88,7 +88,7 @@ type XClient struct {
 func NewXClient(uri, chainAlias string) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/ext/bc/%s", uri, chainAlias),
+			fmt.Sprintf("%s/v1/bc/%s", uri, chainAlias),
 		),
 	}
 }
@@ -100,7 +100,7 @@ func NewXClient(uri, chainAlias string) *XClient {
 func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/ext/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
+			fmt.Sprintf("%s/v1/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
 		),
 		networkID:    networkID,
 		blockchainID: blockchainID,
@@ -331,7 +331,7 @@ func FetchEthState(
 	addrs set.Set[gethcommon.Address],
 ) (*EthState, error) {
 	path := fmt.Sprintf(
-		"%s/ext/%s/C/rpc",
+		"%s/v1/%s/C/rpc",
 		uri,
 		constants.ChainAliasPrefix,
 	)

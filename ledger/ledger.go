@@ -174,7 +174,7 @@ func getAddressBalance(address ids.ShortID, endpoint string) (uint64, error) {
 	}
 
 	ctx := context.Background()
-	requester := rpc.NewEndpointRequester(endpoint + "/ext/P")
+	requester := rpc.NewEndpointRequester(endpoint + "/v1/P")
 	reply := &getBalanceResponse{}
 	if err := requester.SendRequest(ctx, "platform.getBalance", &getBalanceRequest{
 		Addresses: ids.ShortIDsToStrings([]ids.ShortID{address}),

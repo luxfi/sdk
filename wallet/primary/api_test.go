@@ -46,7 +46,7 @@ func TestIsXChainNotEnabled(t *testing.T) {
 }
 
 // fakeInfoServer is a minimal JSON-RPC 2.0 server impersonating an
-// /ext/info endpoint exposing GetNetworkID, GetBlockchainID, GetTxFee.
+// /v1/info endpoint exposing GetNetworkID, GetBlockchainID, GetTxFee.
 // Behavior is controlled by xChainServed: when false, info.getBlockchainID
 // for alias "X" responds with the canonical "no ID with alias: X" error.
 type fakeInfoServer struct {
@@ -202,14 +202,14 @@ func TestFetchState_XChainNotRegistered(t *testing.T) {
 
 	fake := &fakeInfoServer{xChainServed: false}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ext/info", fake.handleInfo)
-	mux.HandleFunc("/ext/bc/P", fake.handlePChain)
-	mux.HandleFunc("/ext/P", fake.handlePChain)
+	mux.HandleFunc("/v1/info", fake.handleInfo)
+	mux.HandleFunc("/v1/bc/P", fake.handlePChain)
+	mux.HandleFunc("/v1/P", fake.handlePChain)
 	// Reject any non-P-Chain call: the SDK fallback MUST NOT touch
 	// platform.getUTXOs against the X-Chain alias when XCTX.BlockchainID
 	// is the sentinel. If anything else gets called the test fails fast.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/ext/bc/X") {
+		if strings.Contains(r.URL.Path, "/v1/bc/X") {
 			t.Errorf("SDK called X-Chain endpoint %s in P-only mode", r.URL.Path)
 		}
 		http.NotFound(w, r)
@@ -236,9 +236,9 @@ func TestFetchState_XChainRegistered(t *testing.T) {
 
 	fake := &fakeInfoServer{xChainServed: true}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/ext/info", fake.handleInfo)
-	mux.HandleFunc("/ext/bc/P", fake.handlePChain)
-	mux.HandleFunc("/ext/P", fake.handlePChain)
+	mux.HandleFunc("/v1/info", fake.handleInfo)
+	mux.HandleFunc("/v1/bc/P", fake.handlePChain)
+	mux.HandleFunc("/v1/P", fake.handlePChain)
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 

@@ -18,7 +18,7 @@ services:
     volumes:
       - luxd-data:/var/lib/lux
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9650/ext/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9650/v1/health"]
       interval: 10s
       timeout: 5s
       retries: 5

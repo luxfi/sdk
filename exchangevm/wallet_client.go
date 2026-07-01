@@ -29,7 +29,7 @@ type WalletClient struct {
 // `luxfi/node/wallet/chain/x.Wallet` utility.
 func NewWalletClient(uri, chain string) *WalletClient {
 	path := fmt.Sprintf(
-		"%s/ext/%s/%s/wallet",
+		"%s/v1/%s/%s/wallet",
 		uri,
 		constants.ChainAliasPrefix,
 		chain,
