@@ -13,7 +13,7 @@ env:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     steps:
     - uses: actions/checkout@v4
 
@@ -106,7 +106,7 @@ jobs:
 
   benchmark:
     name: Benchmark
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     steps:
     - uses: actions/checkout@v4
 
@@ -137,7 +137,7 @@ jobs:
 
   security:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     steps:
     - uses: actions/checkout@v4
 
@@ -164,7 +164,7 @@ jobs:
 
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: lux-build-amd64
     needs: [lint, test, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
