@@ -15,6 +15,7 @@ import (
 	"github.com/luxfi/geth/ethclient"
 
 	"github.com/luxfi/constants"
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/rpc"
@@ -123,31 +124,20 @@ func (c *XClient) GetAtomicUTXOs(
 		formattedAddrs[i] = addrStr
 	}
 
-	// Query exchangevm.getUTXOs (Lux X-chain uses exchangevm service prefix)
 	res := &getUTXOsReply{}
-	err := c.requester.SendRequest(ctx, "exchangevm.getUTXOs", &getUTXOsArgs{
+	err := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
 		Addresses:   formattedAddrs,
 		SourceChain: sourceChain,
 		Limit:       limit,
 		Encoding:    "hex",
 	}, res, options...)
 	if err != nil {
-		// If exchangevm service not available, try xvm for compatibility
-		err2 := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
-			Addresses:   formattedAddrs,
-			SourceChain: sourceChain,
-			Limit:       limit,
-			Encoding:    "hex",
-		}, res, options...)
-		if err2 != nil {
-			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: exchangevm error: %w, xvm error: %v", err, err2)
-		}
+		return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: %w", err)
 	}
 
-	// Decode UTXOs from hex
 	utxos := make([][]byte, len(res.UTXOs))
 	for i, utxo := range res.UTXOs {
-		utxoBytes, err := hexDecode(utxo)
+		utxoBytes, err := formatting.Decode(formatting.Hex, utxo)
 		if err != nil {
 			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to decode UTXO %d: %w", i, err)
 		}
@@ -205,8 +195,9 @@ type LUXState struct {
 	// a UTXOCtx. Wired through FetchEthState today.
 	UTXOs walletcommon.UTXOs
 
-	// uri is preserved so AttachXChain / AttachCChain can reuse it.
-	uri string
+	// uri and addrs are preserved so AttachXChain / AttachCChain can reuse them.
+	uri   string
+	addrs []ids.ShortID
 }
 
 // FetchPState fetches ONLY the P-Chain client + context + UTXOs.
@@ -254,6 +245,7 @@ func FetchPState(
 		PCTX:    pCTX,
 		UTXOs:   utxos,
 		uri:     uri,
+		addrs:   addrs.List(),
 	}, nil
 }
 
@@ -280,7 +272,16 @@ func (s *LUXState) AttachXChain(ctx context.Context) error {
 	}
 	s.XCTX = xCTX
 	s.XClient = NewXClientWithContext(s.uri, s.PCTX.NetworkID, xCTX.BlockchainID)
-	return nil
+	// Without this the X wallet is built over an empty set and every tx
+	// reports insufficient funds regardless of balance.
+	return AddAllUTXOs(
+		ctx,
+		s.UTXOs,
+		s.XClient,
+		xCTX.BlockchainID,
+		xCTX.BlockchainID,
+		s.addrs,
+	)
 }
 
 // FetchState is the P+X convenience that pre-fetches P (required) and
@@ -510,43 +511,6 @@ func parseAddress(addr string) (chainPrefix, hrp string, addrBytes []byte, err e
 	return chainPrefix, hrp, addrBytes, nil
 }
 
-// hexDecode decodes a hex string (with or without 0x prefix)
-func hexDecode(s string) ([]byte, error) {
-	if len(s) >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X') {
-		s = s[2:]
-	}
-	return hexDecodeString(s)
-}
-
-// hexDecodeString decodes a hex string without 0x prefix
-func hexDecodeString(s string) ([]byte, error) {
-	if len(s)%2 != 0 {
-		s = "0" + s
-	}
-	b := make([]byte, len(s)/2)
-	for i := 0; i < len(b); i++ {
-		h := hexValue(s[i*2])
-		l := hexValue(s[i*2+1])
-		if h == 255 || l == 255 {
-			return nil, fmt.Errorf("invalid hex character at position %d", i*2)
-		}
-		b[i] = h<<4 | l
-	}
-	return b, nil
-}
-
-func hexValue(c byte) byte {
-	switch {
-	case '0' <= c && c <= '9':
-		return c - '0'
-	case 'a' <= c && c <= 'f':
-		return c - 'a' + 10
-	case 'A' <= c && c <= 'F':
-		return c - 'A' + 10
-	default:
-		return 255
-	}
-}
 
 // isXChainNotEnabled detects the canonical "info.getBlockchainID returns
 // no-such-alias for X" error that surfaces when running against a P-only

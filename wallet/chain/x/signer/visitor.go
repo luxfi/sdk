@@ -14,7 +14,6 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
-	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
@@ -219,8 +218,9 @@ func (s *visitor) getOpsSigners(ctx context.Context, sourceChainID ids.ID, ops [
 }
 
 func sign(tx *txs.Tx, creds []verify.Verifiable, txSigners [][]keychain.Signer) error {
-	codec := builder.Parser.Codec()
-	unsignedBytes, err := codec.Marshal(txs.CodecVersion, &tx.Unsigned)
+	// Sign over the chain's own unsigned wire bytes; Initialize then binds
+	// signed = unsigned ‖ creds, the exact concatenation the chain parses.
+	unsignedBytes, err := txs.UnsignedBytes(tx.Unsigned)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
@@ -291,10 +291,5 @@ func sign(tx *txs.Tx, creds []verify.Verifiable, txSigners [][]keychain.Signer) 
 		}
 	}
 
-	signedBytes, err := codec.Marshal(txs.CodecVersion, tx)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal tx: %w", err)
-	}
-	tx.SetBytes(unsignedBytes, signedBytes)
-	return nil
+	return tx.Initialize()
 }
