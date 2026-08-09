@@ -105,14 +105,13 @@ func (f *fakeInfoServer) handleInfo(w http.ResponseWriter, r *http.Request) {
 		}
 	case "info.getTxFee":
 		resp.Result = map[string]interface{}{
-			"createAssetTxFee":             "10000000",
-			"createSubnetTxFee":            "1000000000",
-			"transformSubnetTxFee":         "10000000000",
-			"createBlockchainTxFee":        "1000000000",
+			"createAssetTxFee":              "10000000",
+			"createNetworkTxFee":            "1000000000",
+			"createChainTxFee":              "1000000000",
 			"addPrimaryNetworkValidatorFee": "0",
 			"addPrimaryNetworkDelegatorFee": "0",
-			"addSubnetValidatorFee":         "1000000",
-			"addSubnetDelegatorFee":         "1000000",
+			"addNetworkValidatorFee":        "1000000",
+			"addNetworkDelegatorFee":        "1000000",
 			"txFee":                         "1000000",
 		}
 	default:
