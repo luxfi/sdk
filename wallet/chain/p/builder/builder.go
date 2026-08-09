@@ -951,7 +951,7 @@ func (b *builder) NewRegisterL1ValidatorTx(
 			gas.Bandwidth: uint64(len(memo)),
 		}
 	)
-	warpComplexity, err := fee.WarpComplexity(WarpCodec, message)
+	warpComplexity, err := fee.WarpComplexity(message)
 	if err != nil {
 		return nil, err
 	}
@@ -1003,7 +1003,7 @@ func (b *builder) NewSetL1ValidatorWeightTx(
 			gas.Bandwidth: uint64(len(memo)),
 		}
 	)
-	warpComplexity, err := fee.WarpComplexity(WarpCodec, message)
+	warpComplexity, err := fee.WarpComplexity(message)
 	if err != nil {
 		return nil, err
 	}

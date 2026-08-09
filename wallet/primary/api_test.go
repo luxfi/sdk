@@ -228,6 +228,38 @@ func TestFetchState_XChainNotRegistered(t *testing.T) {
 	require.NotNil(state.PClient)
 }
 
+
+// handleXChain answers the single X-Chain read the wallet makes: xvm.getUTXOs.
+// The X wallet is built over this set, so a state fetch that never calls it
+// would leave the wallet unable to spend.
+func (f *fakeInfoServer) handleXChain(w http.ResponseWriter, r *http.Request) {
+	body, _ := io.ReadAll(r.Body)
+	defer r.Body.Close()
+	var req struct {
+		ID     int    `json:"id"`
+		Method string `json:"method"`
+	}
+	if err := json.Unmarshal(body, &req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	resp := map[string]interface{}{
+		"jsonrpc": "2.0",
+		"id":      req.ID,
+		"result": map[string]interface{}{
+			"numFetched": "0",
+			"utxos":      []string{},
+			"endIndex": map[string]string{
+				"address": "X-lux1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzu5uf3",
+				"utxo":    "11111111111111111111111111111111LpoYY",
+			},
+			"encoding": "hex",
+		},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 // TestFetchState_XChainRegistered verifies the happy path is unchanged:
 // when the X alias resolves, XCTX.BlockchainID is non-empty.
 func TestFetchState_XChainRegistered(t *testing.T) {
@@ -238,6 +270,7 @@ func TestFetchState_XChainRegistered(t *testing.T) {
 	mux.HandleFunc("/v1/info", fake.handleInfo)
 	mux.HandleFunc("/v1/bc/P", fake.handlePChain)
 	mux.HandleFunc("/v1/P", fake.handlePChain)
+	mux.HandleFunc("/v1/bc/X", fake.handleXChain)
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 
@@ -247,4 +280,5 @@ func TestFetchState_XChainRegistered(t *testing.T) {
 	state, err := FetchState(context.Background(), srv.URL, addrs)
 	require.NoError(err)
 	require.NotEqual(ids.Empty, state.XCTX.BlockchainID, "BlockchainID must be set when X-Chain is registered")
+	require.NotNil(state.XClient, "XClient must be set when X-Chain is registered")
 }
