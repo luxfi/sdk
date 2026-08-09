@@ -23,29 +23,12 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
-	lux "github.com/luxfi/utxo"
 
 	gethcommon "github.com/luxfi/geth/common"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
 )
-
-// UTXOUnmarshaler decodes a UTXO byte buffer into the destination.
-//
-// This is the minimal surface AddAllUTXOs needs to parse the bytes returned by
-// GetAtomicUTXOs. Concretely satisfied today by github.com/luxfi/codec.Manager
-// (linearcodec underneath), wired in via proto/p/txs.Codec and proto/x/txs.Codec.
-//
-// TODO(LP-023/LP-184): once proto/p/txs and proto/x/txs expose ZAP-native
-// WrapUTXO(b) accessors per LP-023 / LP-184 the new final Lux network wire,
-// drop this interface and consume the typed Wrap*UTXO API directly. Until
-// then we leave the upstream codec.Manager satisfying this interface so the
-// SDK's only wire dep on luxfi/codec is the implicit interface satisfaction
-// — no direct import.
-type UTXOUnmarshaler interface {
-	Unmarshal(bytes []byte, dest interface{}) (uint16, error)
-}
 
 const (
 	MainnetAPIURI = "https://api.lux.network"
@@ -259,7 +242,6 @@ func FetchPState(
 		ctx,
 		utxos,
 		pClient,
-		p.Codec,
 		constants.PlatformChainID,
 		constants.PlatformChainID,
 		addrs.List(),
@@ -385,19 +367,17 @@ func isRetryableError(err error) bool {
 }
 
 // AddAllUTXOs fetches all the UTXOs referenced by [addresses] that were sent
-// from [sourceChainID] to [destinationChainID] from the [client]. It then uses
-// [unmarshaler] to parse the returned UTXOs and it adds them into [utxos]. If
-// [ctx] expires, then the returned error will be immediately reported.
+// from [sourceChainID] to [destinationChainID] from the [client] and adds them
+// into [utxos]. If [ctx] expires, then the returned error will be immediately
+// reported.
 //
-// [unmarshaler] is the chain's UTXO decoder. Today this is the upstream
-// proto/{p,x}/txs codec satisfying UTXOUnmarshaler implicitly; once the
-// upstream ZAP-native API ships (LP-023/LP-184), callers pass a typed
-// ZAP UTXO accessor instead.
+// UTXOs are read ZAP-native (see zapUTXO): the node serves the envelope
+// utxo.UTXO.WireBytes() produces, and the zero-copy wire accessors read it
+// directly. No codec.Manager and no intermediate encoding sit on this path.
 func AddAllUTXOs(
 	ctx context.Context,
 	utxos walletcommon.UTXOs,
 	client UTXOClient,
-	unmarshaler UTXOUnmarshaler,
 	sourceChainID ids.ID,
 	destinationChainID ids.ID,
 	addrs []ids.ShortID,
@@ -450,20 +430,18 @@ func AddAllUTXOs(
 		}
 
 		for _, utxoBytes := range utxosBytes {
-			var utxo lux.UTXO
-			_, err := unmarshaler.Unmarshal(utxoBytes, &utxo)
+			utxo, err := zapUTXO(utxoBytes)
 			if err != nil {
-				// Tolerate "trailing buffer space" errors from genesis UTXOs
-				// which may have extra serialization bytes
-				if !strings.Contains(err.Error(), "trailing") {
-					continue // truly unparseable
-				}
-				// The UTXO was parsed despite trailing bytes — use it
+				// A UTXO the node served and we cannot read is a wire
+				// disagreement, not a spendability question. Report it —
+				// silently skipping yields an empty set and surfaces later
+				// as an inscrutable "insufficient funds".
+				return fmt.Errorf("unreadable UTXO from %s: %w", sourceChainID, err)
 			}
 			if utxo.AssetID() == ids.Empty {
 				continue // invalid UTXO
 			}
-			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, &utxo); err != nil {
+			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, utxo); err != nil {
 				return err
 			}
 		}
