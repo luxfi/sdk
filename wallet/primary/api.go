@@ -15,6 +15,7 @@ import (
 	"github.com/luxfi/geth/ethclient"
 
 	"github.com/luxfi/constants"
+	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/rpc"
@@ -23,29 +24,12 @@ import (
 	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
-	lux "github.com/luxfi/utxo"
 
 	gethcommon "github.com/luxfi/geth/common"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
 )
-
-// UTXOUnmarshaler decodes a UTXO byte buffer into the destination.
-//
-// This is the minimal surface AddAllUTXOs needs to parse the bytes returned by
-// GetAtomicUTXOs. Concretely satisfied today by github.com/luxfi/codec.Manager
-// (linearcodec underneath), wired in via proto/p/txs.Codec and proto/x/txs.Codec.
-//
-// TODO(LP-023/LP-184): once proto/p/txs and proto/x/txs expose ZAP-native
-// WrapUTXO(b) accessors per LP-023 / LP-184 the new final Lux network wire,
-// drop this interface and consume the typed Wrap*UTXO API directly. Until
-// then we leave the upstream codec.Manager satisfying this interface so the
-// SDK's only wire dep on luxfi/codec is the implicit interface satisfaction
-// — no direct import.
-type UTXOUnmarshaler interface {
-	Unmarshal(bytes []byte, dest interface{}) (uint16, error)
-}
 
 const (
 	MainnetAPIURI = "https://api.lux.network"
@@ -140,31 +124,20 @@ func (c *XClient) GetAtomicUTXOs(
 		formattedAddrs[i] = addrStr
 	}
 
-	// Query exchangevm.getUTXOs (Lux X-chain uses exchangevm service prefix)
 	res := &getUTXOsReply{}
-	err := c.requester.SendRequest(ctx, "exchangevm.getUTXOs", &getUTXOsArgs{
+	err := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
 		Addresses:   formattedAddrs,
 		SourceChain: sourceChain,
 		Limit:       limit,
 		Encoding:    "hex",
 	}, res, options...)
 	if err != nil {
-		// If exchangevm service not available, try xvm for compatibility
-		err2 := c.requester.SendRequest(ctx, "xvm.getUTXOs", &getUTXOsArgs{
-			Addresses:   formattedAddrs,
-			SourceChain: sourceChain,
-			Limit:       limit,
-			Encoding:    "hex",
-		}, res, options...)
-		if err2 != nil {
-			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: exchangevm error: %w, xvm error: %v", err, err2)
-		}
+		return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to get UTXOs: %w", err)
 	}
 
-	// Decode UTXOs from hex
 	utxos := make([][]byte, len(res.UTXOs))
 	for i, utxo := range res.UTXOs {
-		utxoBytes, err := hexDecode(utxo)
+		utxoBytes, err := formatting.Decode(formatting.Hex, utxo)
 		if err != nil {
 			return nil, ids.ShortID{}, ids.Empty, fmt.Errorf("failed to decode UTXO %d: %w", i, err)
 		}
@@ -222,8 +195,9 @@ type LUXState struct {
 	// a UTXOCtx. Wired through FetchEthState today.
 	UTXOs walletcommon.UTXOs
 
-	// uri is preserved so AttachXChain / AttachCChain can reuse it.
-	uri string
+	// uri and addrs are preserved so AttachXChain / AttachCChain can reuse them.
+	uri   string
+	addrs []ids.ShortID
 }
 
 // FetchPState fetches ONLY the P-Chain client + context + UTXOs.
@@ -259,7 +233,6 @@ func FetchPState(
 		ctx,
 		utxos,
 		pClient,
-		p.Codec,
 		constants.PlatformChainID,
 		constants.PlatformChainID,
 		addrs.List(),
@@ -272,6 +245,7 @@ func FetchPState(
 		PCTX:    pCTX,
 		UTXOs:   utxos,
 		uri:     uri,
+		addrs:   addrs.List(),
 	}, nil
 }
 
@@ -298,7 +272,16 @@ func (s *LUXState) AttachXChain(ctx context.Context) error {
 	}
 	s.XCTX = xCTX
 	s.XClient = NewXClientWithContext(s.uri, s.PCTX.NetworkID, xCTX.BlockchainID)
-	return nil
+	// Without this the X wallet is built over an empty set and every tx
+	// reports insufficient funds regardless of balance.
+	return AddAllUTXOs(
+		ctx,
+		s.UTXOs,
+		s.XClient,
+		xCTX.BlockchainID,
+		xCTX.BlockchainID,
+		s.addrs,
+	)
 }
 
 // FetchState is the P+X convenience that pre-fetches P (required) and
@@ -385,19 +368,17 @@ func isRetryableError(err error) bool {
 }
 
 // AddAllUTXOs fetches all the UTXOs referenced by [addresses] that were sent
-// from [sourceChainID] to [destinationChainID] from the [client]. It then uses
-// [unmarshaler] to parse the returned UTXOs and it adds them into [utxos]. If
-// [ctx] expires, then the returned error will be immediately reported.
+// from [sourceChainID] to [destinationChainID] from the [client] and adds them
+// into [utxos]. If [ctx] expires, then the returned error will be immediately
+// reported.
 //
-// [unmarshaler] is the chain's UTXO decoder. Today this is the upstream
-// proto/{p,x}/txs codec satisfying UTXOUnmarshaler implicitly; once the
-// upstream ZAP-native API ships (LP-023/LP-184), callers pass a typed
-// ZAP UTXO accessor instead.
+// UTXOs are read ZAP-native (see zapUTXO): the node serves the envelope
+// utxo.UTXO.WireBytes() produces, and the zero-copy wire accessors read it
+// directly. No codec.Manager and no intermediate encoding sit on this path.
 func AddAllUTXOs(
 	ctx context.Context,
 	utxos walletcommon.UTXOs,
 	client UTXOClient,
-	unmarshaler UTXOUnmarshaler,
 	sourceChainID ids.ID,
 	destinationChainID ids.ID,
 	addrs []ids.ShortID,
@@ -450,20 +431,18 @@ func AddAllUTXOs(
 		}
 
 		for _, utxoBytes := range utxosBytes {
-			var utxo lux.UTXO
-			_, err := unmarshaler.Unmarshal(utxoBytes, &utxo)
+			utxo, err := zapUTXO(utxoBytes)
 			if err != nil {
-				// Tolerate "trailing buffer space" errors from genesis UTXOs
-				// which may have extra serialization bytes
-				if !strings.Contains(err.Error(), "trailing") {
-					continue // truly unparseable
-				}
-				// The UTXO was parsed despite trailing bytes — use it
+				// A UTXO the node served and we cannot read is a wire
+				// disagreement, not a spendability question. Report it —
+				// silently skipping yields an empty set and surfaces later
+				// as an inscrutable "insufficient funds".
+				return fmt.Errorf("unreadable UTXO from %s: %w", sourceChainID, err)
 			}
 			if utxo.AssetID() == ids.Empty {
 				continue // invalid UTXO
 			}
-			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, &utxo); err != nil {
+			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, utxo); err != nil {
 				return err
 			}
 		}
@@ -532,43 +511,6 @@ func parseAddress(addr string) (chainPrefix, hrp string, addrBytes []byte, err e
 	return chainPrefix, hrp, addrBytes, nil
 }
 
-// hexDecode decodes a hex string (with or without 0x prefix)
-func hexDecode(s string) ([]byte, error) {
-	if len(s) >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X') {
-		s = s[2:]
-	}
-	return hexDecodeString(s)
-}
-
-// hexDecodeString decodes a hex string without 0x prefix
-func hexDecodeString(s string) ([]byte, error) {
-	if len(s)%2 != 0 {
-		s = "0" + s
-	}
-	b := make([]byte, len(s)/2)
-	for i := 0; i < len(b); i++ {
-		h := hexValue(s[i*2])
-		l := hexValue(s[i*2+1])
-		if h == 255 || l == 255 {
-			return nil, fmt.Errorf("invalid hex character at position %d", i*2)
-		}
-		b[i] = h<<4 | l
-	}
-	return b, nil
-}
-
-func hexValue(c byte) byte {
-	switch {
-	case '0' <= c && c <= '9':
-		return c - '0'
-	case 'a' <= c && c <= 'f':
-		return c - 'a' + 10
-	case 'A' <= c && c <= 'F':
-		return c - 'A' + 10
-	default:
-		return 255
-	}
-}
 
 // isXChainNotEnabled detects the canonical "info.getBlockchainID returns
 // no-such-alias for X" error that surfaces when running against a P-only

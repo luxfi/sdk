@@ -18,6 +18,7 @@ import (
 	"github.com/luxfi/proto/p/fx"
 	"github.com/luxfi/proto/p/signer"
 	"github.com/luxfi/proto/p/stakeable"
+	"github.com/luxfi/proto/p/security"
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/txs/fee"
 	"github.com/luxfi/sdk/wallet/primary/common"
@@ -778,6 +779,9 @@ func (b *builder) NewCreateNetworkTx(
 			Memo:         memo,
 		}},
 		Owner: owner,
+		// Restake the parent, no own validator set: the network's security is
+		// entirely inherited and its owner is the authority.
+		Security: security.Mode{RestakeParent: true},
 	}
 	return tx, b.initCtx(tx)
 }
@@ -947,7 +951,7 @@ func (b *builder) NewRegisterL1ValidatorTx(
 			gas.Bandwidth: uint64(len(memo)),
 		}
 	)
-	warpComplexity, err := fee.WarpComplexity(WarpCodec, message)
+	warpComplexity, err := fee.WarpComplexity(message)
 	if err != nil {
 		return nil, err
 	}
@@ -999,7 +1003,7 @@ func (b *builder) NewSetL1ValidatorWeightTx(
 			gas.Bandwidth: uint64(len(memo)),
 		}
 	)
-	warpComplexity, err := fee.WarpComplexity(WarpCodec, message)
+	warpComplexity, err := fee.WarpComplexity(message)
 	if err != nil {
 		return nil, err
 	}
