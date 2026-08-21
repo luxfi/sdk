@@ -17,7 +17,6 @@ import (
 
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/txs"
-	pwallet "github.com/luxfi/sdk/wallet/chain/p"
 )
 
 type TxKind int64
@@ -62,22 +61,15 @@ func (ms *Multisig) ToBytes() ([]byte, error) {
 	if ms.Undefined() {
 		return nil, ErrUndefinedTx
 	}
-	txBytes, err := pwallet.Codec.Marshal(txs.CodecVersion, ms.PChainTx)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't marshal signed tx: %w", err)
-	}
-	return txBytes, nil
+	return ms.PChainTx.Bytes(), nil
 }
 
 func (ms *Multisig) FromBytes(txBytes []byte) error {
-	var tx txs.Tx
-	if _, err := pwallet.Codec.Unmarshal(txBytes, &tx); err != nil {
-		return fmt.Errorf("error unmarshaling signed tx: %w", err)
+	tx, err := txs.Parse(txBytes)
+	if err != nil {
+		return fmt.Errorf("error parsing signed tx: %w", err)
 	}
-	if err := tx.Initialize(pwallet.Codec); err != nil {
-		return fmt.Errorf("error initializing signed tx: %w", err)
-	}
-	ms.PChainTx = &tx
+	ms.PChainTx = tx
 	return nil
 }
 
