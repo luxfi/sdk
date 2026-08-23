@@ -88,7 +88,7 @@ func genPkg(dir, name string) (string, bool) {
 		syn = "Package " + pname
 	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "---\ntitle: %s\ndescription: %s\n---\n\n", pname, inline(syn))
+	fmt.Fprintf(&b, "---\ntitle: \"%s\"\ndescription: \"%s\"\n---\n\n", pname, inline(syn))
 	b.WriteString("{/* Generated from godoc by tools/docgen — edit the Go source, not this file. */}\n\n")
 	fmt.Fprintf(&b, "```go\nimport \"%s/%s\"\n```\n\n", mod, name)
 	if d.Doc != "" {
