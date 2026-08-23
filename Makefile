@@ -132,3 +132,7 @@ help:
 	@echo "  docker-test      - Run tests in Docker"
 	@echo "  ci-local         - Run CI checks locally"
 	@echo "  help             - Show this help message"
+
+.PHONY: docs
+docs: ## Generate the Go SDK reference (godoc) into docs.lux.network
+	GOWORK=off go run ./tools/docgen $(HOME)/work/lux/docs/apps/docs/content/docs/sdk/go/packages .
