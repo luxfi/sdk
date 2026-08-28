@@ -1,4 +1,4 @@
-// Copyright (C) 2020-2025, Lux Partners Limited All rights reserved.
+// Copyright (C) 2020-2025, Lux Industries Inc All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Package types provides common type definitions used across the SDK.

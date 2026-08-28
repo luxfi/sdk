@@ -1,4 +1,4 @@
-// Copyright (C) 2026, Lux Partners Limited. All rights reserved.
+// Copyright (C) 2026, Lux Industries Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 import { keccak256, type Hex } from "viem";

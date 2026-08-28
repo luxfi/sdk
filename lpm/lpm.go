@@ -1,4 +1,4 @@
-// Copyright (C) 2025, Lux Partners Limited All rights reserved.
+// Copyright (C) 2025, Lux Industries Inc All rights reserved.
 
 // Package lpm provides Lux Plugin Manager client wrapper for CLI integration.
 package lpm
