@@ -280,7 +280,7 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold text-fd-foreground">Lux SDK</span>
-              <span className="text-sm text-fd-muted-foreground">by Lux Partners</span>
+              <span className="text-sm text-fd-muted-foreground">by Lux Industries Inc</span>
             </div>
             <div className="flex items-center gap-6">
               <Link
@@ -310,7 +310,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mt-8 text-center text-sm text-fd-muted-foreground">
-            Released under the MIT License. Copyright 2025 Lux Partners.
+            Released under the MIT License. Copyright 2025 Lux Industries Inc.
           </div>
         </div>
       </footer>
