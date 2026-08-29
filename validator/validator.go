@@ -7,14 +7,15 @@ package validator
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/luxfi/sdk/constants"
 
-	luxdjson "github.com/luxfi/utils/json"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/contract"
 	"github.com/luxfi/sdk/models"
 	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/utils"
+	luxdjson "github.com/luxfi/utils/json"
 
 	"github.com/luxfi/crypto"
 )
@@ -163,7 +164,7 @@ func GetValidatorKind(
 func GetCurrentValidators(network models.Network, chainID ids.ID) ([]CurrentValidatorInfo, error) {
 	ctx, cancel := apiRequestContext()
 	defer cancel()
-	requester := rpc.NewEndpointRequester(network.Endpoint() + "/ext/P")
+	requester := rpc.NewEndpointRequester(constants.Chain(network.Endpoint(), "P"))
 	res := &platformvm.GetCurrentValidatorsReply{}
 	if err := requester.SendRequest(
 		ctx,

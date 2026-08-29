@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/constants"
 )
 
 var _ StaticClient = (*staticClient)(nil)
@@ -25,7 +26,7 @@ type staticClient struct {
 // NewClient returns an XVM client for interacting with the xvm static api
 func NewStaticClient(uri string) StaticClient {
 	return &staticClient{requester: rpc.NewEndpointRequester(
-		uri + "/ext/vm/xvm",
+		constants.VM(uri, "xvm"),
 	)}
 }
 

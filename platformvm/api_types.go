@@ -35,7 +35,7 @@ type GetBalanceResponse struct {
 
 // GetNetArgs is the request for GetNet
 type GetNetArgs struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // GetNetResponse is the response from GetNet
@@ -69,7 +69,7 @@ type GetNetsResponse struct {
 
 // GetStakingAssetIDArgs is the request for GetStakingAssetID
 type GetStakingAssetIDArgs struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // GetStakingAssetIDResponse is the response from GetStakingAssetID
@@ -79,7 +79,7 @@ type GetStakingAssetIDResponse struct {
 
 // GetCurrentValidatorsArgs is the request for GetCurrentValidators
 type GetCurrentValidatorsArgs struct {
-	ChainID ids.ID       `json:"chainID"`
+	ChainID ids.ID       `json:"netID"`
 	NodeIDs []ids.NodeID `json:"nodeIDs"`
 }
 
@@ -102,7 +102,7 @@ type L1ValidatorOwner struct {
 
 // GetL1ValidatorReply is the response from GetL1Validator
 type GetL1ValidatorReply struct {
-	ChainID               ids.ID           `json:"chainID"`
+	ChainID               ids.ID           `json:"netID"`
 	NodeID                ids.NodeID       `json:"nodeID"`
 	PublicKey             *[]byte          `json:"publicKey,omitempty"`
 	RemainingBalanceOwner L1ValidatorOwner `json:"remainingBalanceOwner"`
@@ -141,7 +141,7 @@ type GetTxStatusResponse struct {
 
 // GetCurrentSupplyArgs is the request for GetCurrentSupply
 type GetCurrentSupplyArgs struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // GetCurrentSupplyReply is the response from GetCurrentSupply
@@ -152,7 +152,7 @@ type GetCurrentSupplyReply struct {
 
 // SampleValidatorsArgs is the request for SampleValidators
 type SampleValidatorsArgs struct {
-	ChainID ids.ID      `json:"chainID"`
+	ChainID ids.ID      `json:"netID"`
 	Size    json.Uint16 `json:"size"`
 }
 
@@ -178,12 +178,12 @@ type ValidatedByArgs struct {
 
 // ValidatedByResponse is the response from ValidatedBy
 type ValidatedByResponse struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // ValidatesArgs is the request for Validates
 type ValidatesArgs struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // ValidatesResponse is the response from Validates
@@ -212,7 +212,7 @@ type GetStakeReply struct {
 
 // GetMinStakeArgs is the request for GetMinStake
 type GetMinStakeArgs struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // GetMinStakeReply is the response from GetMinStake
@@ -223,7 +223,7 @@ type GetMinStakeReply struct {
 
 // GetTotalStakeArgs is the request for GetTotalStake
 type GetTotalStakeArgs struct {
-	ChainID ids.ID `json:"chainID"`
+	ChainID ids.ID `json:"netID"`
 }
 
 // GetTotalStakeReply is the response from GetTotalStake
@@ -246,7 +246,7 @@ type GetTimestampReply struct {
 // GetValidatorsAtArgs is the request for GetValidatorsAt
 type GetValidatorsAtArgs struct {
 	Height  interface{} `json:"height"`
-	ChainID ids.ID      `json:"chainID"`
+	ChainID ids.ID      `json:"netID"`
 }
 
 // GetValidatorsAtReply is the response from GetValidatorsAt
