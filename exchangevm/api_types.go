@@ -4,7 +4,7 @@
 package exchangevm
 
 import (
-	"github.com/luxfi/codec/jsonrpc"
+	"github.com/luxfi/utils/json"
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/formatting"
 )

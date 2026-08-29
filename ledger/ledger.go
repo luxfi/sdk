@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	json "github.com/luxfi/codec/jsonrpc"
+	json "github.com/luxfi/utils/json"
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
 	"github.com/luxfi/rpc"

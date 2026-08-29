@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	"github.com/luxfi/codec/jsonrpc"
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
+	"github.com/luxfi/utils/json"
 	"github.com/luxfi/vm/api"
 )
 
