@@ -201,7 +201,7 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 	managerBlockchainID ids.ID,
 	managerAddress crypto.Address,
 	convertChainValidators []*txs.ConvertNetworkToL1Validator,
-) (*warp.UnsignedMessage, error) {
+) (*warp.Message, error) {
 	validators := []warpMessage.ChainToL1ConversionValidatorData{}
 	for _, convertChainValidator := range convertChainValidators {
 		validators = append(validators, warpMessage.ChainToL1ConversionValidatorData{
@@ -231,7 +231,7 @@ func GetPChainChainToL1ConversionUnsignedMessage(
 	if err != nil {
 		return nil, err
 	}
-	chainConversionUnsignedMessage, err := warp.NewUnsignedMessage(
+	chainConversionUnsignedMessage, err := warp.NewMessage(
 		net.ID(),
 		constants.PlatformChainID,
 		chainConversionAddressedCall.Bytes(),

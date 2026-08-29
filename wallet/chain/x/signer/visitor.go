@@ -14,7 +14,6 @@ import (
 	"github.com/luxfi/keychain"
 	"github.com/luxfi/proto/x/fxs"
 	"github.com/luxfi/proto/x/txs"
-	"github.com/luxfi/sdk/wallet/chain/x/builder"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
@@ -219,10 +218,11 @@ func (s *visitor) getOpsSigners(ctx context.Context, sourceChainID ids.ID, ops [
 }
 
 func sign(tx *txs.Tx, creds []verify.Verifiable, txSigners [][]keychain.Signer) error {
-	codec := builder.Parser.Codec()
-	unsignedBytes, err := codec.Marshal(txs.CodecVersion, &tx.Unsigned)
+	// The tx carries its own ZAP encoding, so the unsigned buffer comes from
+	// the tx itself rather than from a codec and a version.
+	unsignedBytes, err := txs.UnsignedBytes(tx.Unsigned)
 	if err != nil {
-		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
+		return fmt.Errorf("couldn't encode unsigned tx: %w", err)
 	}
 
 	if expectedLen := len(txSigners); expectedLen != len(tx.Creds) {
@@ -291,10 +291,10 @@ func sign(tx *txs.Tx, creds []verify.Verifiable, txSigners [][]keychain.Signer) 
 		}
 	}
 
-	signedBytes, err := codec.Marshal(txs.CodecVersion, tx)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal tx: %w", err)
+	// Initialize re-derives the unsigned buffer, appends the credentials just
+	// populated, and binds the tx ID from the result.
+	if err := tx.Initialize(); err != nil {
+		return err
 	}
-	tx.SetBytes(unsignedBytes, signedBytes)
 	return nil
 }

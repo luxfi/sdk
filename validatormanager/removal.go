@@ -158,7 +158,7 @@ func GetUptimeProofMessage(
 	if err != nil {
 		return nil, err
 	}
-	uptimeProofUnsignedMessage, err := warp.NewUnsignedMessage(
+	uptimeProofUnsignedMessage, err := warp.NewMessage(
 		network.ID(),
 		blockchainID,
 		addressedCall.Bytes(),
@@ -220,7 +220,7 @@ func InitValidatorRemoval(
 		return nil, ids.Empty, nil, fmt.Errorf("node %s is not a L1 validator", nodeID)
 	}
 
-	var unsignedMessage *warp.UnsignedMessage
+	var unsignedMessage *warp.Message
 	if initiateTxHash != "" {
 		unsignedMessage, err = GetL1ValidatorWeightMessageFromTx(
 			rpcURL,
@@ -302,9 +302,9 @@ func InitValidatorRemoval(
 	}
 
 	// Convert node warp message back to standalone for GetL1ValidatorWeightMessage
-	var standaloneUnsignedMsg *warp.UnsignedMessage
+	var standaloneUnsignedMsg *warp.Message
 	if unsignedMessage != nil {
-		standaloneUnsignedMsg, err = warp.NewUnsignedMessage(
+		standaloneUnsignedMsg, err = warp.NewMessage(
 			unsignedMessage.NetworkID,
 			unsignedMessage.SourceChainID,
 			unsignedMessage.Payload,

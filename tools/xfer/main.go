@@ -75,7 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to fetch state: %v", err)
 	}
-	luxAssetID := luxState.XCTX.XAssetID
+	luxAssetID := luxState.XCTX.UTXOAssetID
 
 	xWallet := wallet.X()
 	exportTx, err := xWallet.IssueExportTx(

@@ -214,7 +214,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/luxfi/cache v1.2.1 // indirect
-	github.com/luxfi/codec v1.1.4
 	github.com/luxfi/config v1.1.2 // indirect
 	github.com/luxfi/formatting v1.0.1
 	github.com/luxfi/hid v0.9.3 // indirect

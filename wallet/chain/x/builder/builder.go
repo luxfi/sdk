@@ -210,7 +210,7 @@ func (b *builder) NewBaseTx(
 	options ...common.Option,
 ) (*txs.BaseTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.BaseTxFee,
+		b.context.UTXOAssetID: b.context.BaseTxFee,
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -227,7 +227,7 @@ func (b *builder) NewBaseTx(
 		return nil, err
 	}
 	outputs = append(outputs, changeOutputs...)
-	lux.SortTransferableOutputs(outputs, Parser.Codec()) // sort the outputs
+	lux.SortTransferableOutputs(outputs) // sort the outputs
 
 	tx := &txs.BaseTx{BaseTx: lux.BaseTx{
 		NetworkID:    b.context.NetworkID,
@@ -247,7 +247,7 @@ func (b *builder) NewCreateAssetTx(
 	options ...common.Option,
 ) (*txs.CreateAssetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.CreateAssetTxFee,
+		b.context.UTXOAssetID: b.context.CreateAssetTxFee,
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -255,7 +255,6 @@ func (b *builder) NewCreateAssetTx(
 		return nil, err
 	}
 
-	codec := Parser.Codec()
 	states := make([]*txs.InitialState, 0, len(initialState))
 	for fxIndex, outs := range initialState {
 		state := &txs.InitialState{
@@ -263,7 +262,7 @@ func (b *builder) NewCreateAssetTx(
 			FxID:    fxIndexToID[fxIndex],
 			Outs:    outs,
 		}
-		state.Sort(codec) // sort the outputs
+		state.Sort() // sort the outputs
 		states = append(states, state)
 	}
 
@@ -289,7 +288,7 @@ func (b *builder) NewOperationTx(
 	options ...common.Option,
 ) (*txs.OperationTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.BaseTxFee,
+		b.context.UTXOAssetID: b.context.BaseTxFee,
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -297,7 +296,7 @@ func (b *builder) NewOperationTx(
 		return nil, err
 	}
 
-	txs.SortOperations(operations, Parser.Codec())
+	txs.SortOperations(operations)
 	tx := &txs.OperationTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -376,7 +375,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 		txFee           = b.context.BaseTxFee
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
@@ -456,7 +455,7 @@ func (b *builder) NewImportTx(
 		})
 	}
 
-	lux.SortTransferableOutputs(outputs, Parser.Codec())
+	lux.SortTransferableOutputs(outputs)
 	tx := &txs.ImportTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -477,7 +476,7 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.context.XAssetID: b.context.BaseTxFee,
+		b.context.UTXOAssetID: b.context.BaseTxFee,
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -494,7 +493,7 @@ func (b *builder) NewExportTx(
 		return nil, err
 	}
 
-	lux.SortTransferableOutputs(outputs, Parser.Codec())
+	lux.SortTransferableOutputs(outputs)
 	tx := &txs.ExportTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -640,8 +639,8 @@ func (b *builder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                   // sort inputs
-	lux.SortTransferableOutputs(outputs, Parser.Codec()) // sort the change outputs
+	utils.Sort(inputs)                   // sort inputs
+	lux.SortTransferableOutputs(outputs) // sort the change outputs
 	return inputs, outputs, nil
 }
 
