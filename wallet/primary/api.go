@@ -15,10 +15,11 @@ import (
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/luxfi/geth/ethclient"
 
-	"github.com/luxfi/constants"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/constants"
 	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/platformvm"
 	"github.com/luxfi/sdk/wallet/chain/p"
@@ -72,7 +73,7 @@ type XClient struct {
 func NewXClient(uri, chainAlias string) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/v1/bc/%s", uri, chainAlias),
+			constants.Chain(uri, chainAlias),
 		),
 	}
 }
@@ -84,7 +85,7 @@ func NewXClient(uri, chainAlias string) *XClient {
 func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/v1/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
+			constants.Chain(uri, "X"), // Use alias, not blockchain ID (avoids EOF issues)
 		),
 		networkID:    networkID,
 		blockchainID: blockchainID,
@@ -110,7 +111,7 @@ func (c *XClient) GetAtomicUTXOs(
 ) ([][]byte, ids.ShortID, ids.ID, error) {
 	// Format addresses using blockchain ID prefix for local networks
 	formattedAddrs := make([]string, len(addrs))
-	hrp := constants.GetHRP(c.networkID)
+	hrp := luxconstants.GetHRP(c.networkID)
 	for i, addr := range addrs {
 		// Use blockchain ID as chain prefix for proper address formatting
 		chainPrefix := c.blockchainID.String()
@@ -257,8 +258,8 @@ func FetchState(
 		ctx,
 		utxos,
 		pClient,
-		constants.PlatformChainID,
-		constants.PlatformChainID,
+		luxconstants.PlatformChainID,
+		luxconstants.PlatformChainID,
 		addrList,
 	)
 	if err != nil {
@@ -295,12 +296,7 @@ func FetchEthState(
 	uri string,
 	addrs set.Set[gethcommon.Address],
 ) (*EthState, error) {
-	path := fmt.Sprintf(
-		"%s/ext/%s/C/rpc",
-		uri,
-		constants.ChainAliasPrefix,
-	)
-	client, err := ethclient.Dial(path)
+	client, err := ethclient.Dial(constants.Chain(uri, "C") + "/rpc")
 	if err != nil {
 		return nil, err
 	}

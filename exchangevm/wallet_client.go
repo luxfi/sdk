@@ -5,12 +5,11 @@ package exchangevm
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/luxfi/constants"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/vm/api"
 )
 
@@ -28,14 +27,8 @@ type WalletClient struct {
 // Deprecated: Transactions should be issued using the
 // `luxfi/node/wallet/chain/x.Wallet` utility.
 func NewWalletClient(uri, chain string) *WalletClient {
-	path := fmt.Sprintf(
-		"%s/ext/%s/%s/wallet",
-		uri,
-		constants.ChainAliasPrefix,
-		chain,
-	)
 	return &WalletClient{
-		Requester: rpc.NewEndpointRequester(path),
+		Requester: rpc.NewEndpointRequester(constants.Chain(uri, chain) + "/wallet"),
 	}
 }
 

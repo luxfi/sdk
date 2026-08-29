@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	json "github.com/luxfi/utils/json"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"
@@ -17,6 +16,8 @@ import (
 	"github.com/luxfi/proto/p/status"
 	"github.com/luxfi/proto/p/validators/fee"
 	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/constants"
+	json "github.com/luxfi/utils/json"
 	"github.com/luxfi/utxo/secp256k1fx"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/api"
@@ -31,16 +32,14 @@ type Client struct {
 }
 
 func NewClient(uri string) *Client {
-	return &Client{Requester: rpc.NewEndpointRequester(
-		uri + "/ext/P",
-	)}
+	return &Client{Requester: rpc.NewEndpointRequester(constants.Chain(uri, "P"))}
 }
 
 // NewClientWithNetworkID returns a new platformvm.Client with the network ID set
 // for proper bech32 address formatting
 func NewClientWithNetworkID(uri string, networkID uint32) *Client {
 	return &Client{
-		Requester: rpc.NewEndpointRequester(uri + "/ext/P"),
+		Requester: rpc.NewEndpointRequester(constants.Chain(uri, "P")),
 		networkID: networkID,
 	}
 }
