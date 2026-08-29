@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	luxdjson "github.com/luxfi/codec/jsonrpc"
+	luxdjson "github.com/luxfi/utils/json"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/contract"
