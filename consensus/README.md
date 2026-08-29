@@ -434,6 +434,6 @@ See the full API documentation:
 
 ## Related Documentation
 
-- [LP-4110: Quasar Consensus Protocol](/lps/LPs/lp-4110-quasar-consensus-protocol.md)
-- [LP-7324: Corona Threshold Signature Precompile](/lps/LPs/lp-7324-corona-threshold-signature-precompile.md)
+- [LP-0110: Quasar Unified Consensus Protocol](/lps/LPs/lp-0110-quasar-consensus.md)
+- [LP-4440: Corona — Module-LWE Threshold Signatures](/lps/LPs/lp-4440-corona-threshold-signatures.md)
 - [Consensus Architecture](/docs/MULTI_CONSENSUS_ARCHITECTURE.md)
