@@ -8,26 +8,24 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/big"
 	"strings"
 	"time"
 
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/luxfi/geth/ethclient"
 
-	"github.com/luxfi/codec"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/rpc"
 	sdkinfo "github.com/luxfi/sdk/info"
 	"github.com/luxfi/sdk/platformvm"
-	"github.com/luxfi/sdk/wallet/chain/c"
 	"github.com/luxfi/sdk/wallet/chain/p"
 	"github.com/luxfi/sdk/wallet/chain/x"
 	lux "github.com/luxfi/utxo"
 
 	gethcommon "github.com/luxfi/geth/common"
-	ptxs "github.com/luxfi/proto/p/txs"
 	pbuilder "github.com/luxfi/sdk/wallet/chain/p/builder"
 	xbuilder "github.com/luxfi/sdk/wallet/chain/x/builder"
 	walletcommon "github.com/luxfi/sdk/wallet/primary/common"
@@ -233,7 +231,7 @@ func FetchState(
 
 	// For X-chain, we need to get the LUX asset ID and fees
 	// TODO: Get these from the xClient or infoClient
-	luxAssetID := pCTX.XAssetID
+	luxAssetID := pCTX.UTXOAssetID
 	baseTxFee := uint64(1000000)         // 0.001 LUX
 	createAssetTxFee := uint64(10000000) // 0.01 LUX
 
@@ -259,7 +257,6 @@ func FetchState(
 		ctx,
 		utxos,
 		pClient,
-		ptxs.Codec,
 		constants.PlatformChainID,
 		constants.PlatformChainID,
 		addrList,
@@ -280,9 +277,17 @@ func FetchState(
 	}, nil
 }
 
+// Account is what an EVM address holds: a balance and a nonce, read off the
+// client below. It carried no wire of its own and lived in a wallet package
+// that no longer exists.
+type Account struct {
+	Balance *big.Int
+	Nonce   uint64
+}
+
 type EthState struct {
 	Client   *ethclient.Client
-	Accounts map[gethcommon.Address]*c.Account
+	Accounts map[gethcommon.Address]*Account
 }
 
 func FetchEthState(
@@ -300,7 +305,7 @@ func FetchEthState(
 		return nil, err
 	}
 
-	accounts := make(map[gethcommon.Address]*c.Account, addrs.Len())
+	accounts := make(map[gethcommon.Address]*Account, addrs.Len())
 	for addr := range addrs {
 		// Convert ethereum address to geth address
 		gethAddr := gethcommon.Address(addr)
@@ -312,7 +317,7 @@ func FetchEthState(
 		if err != nil {
 			return nil, err
 		}
-		accounts[addr] = &c.Account{
+		accounts[addr] = &Account{
 			Balance: balance,
 			Nonce:   nonce,
 		}
@@ -352,7 +357,6 @@ func AddAllUTXOs(
 	ctx context.Context,
 	utxos walletcommon.UTXOs,
 	client UTXOClient,
-	codec codec.Manager,
 	sourceChainID ids.ID,
 	destinationChainID ids.ID,
 	addrs []ids.ShortID,
@@ -405,20 +409,17 @@ func AddAllUTXOs(
 		}
 
 		for _, utxoBytes := range utxosBytes {
-			var utxo lux.UTXO
-			_, err := codec.Unmarshal(utxoBytes, &utxo)
+			// The UTXO decodes itself from its own wire bytes; there is no
+			// codec to hand it. ParseUTXO is strict, so a genesis UTXO with
+			// trailing bytes is rejected here rather than tolerated.
+			utxo, err := lux.ParseUTXO(utxoBytes)
 			if err != nil {
-				// Tolerate "trailing buffer space" errors from genesis UTXOs
-				// which may have extra serialization bytes
-				if !strings.Contains(err.Error(), "trailing") {
-					continue // truly unparseable
-				}
-				// The UTXO was parsed despite trailing bytes — use it
+				continue // unparseable
 			}
 			if utxo.AssetID() == ids.Empty {
 				continue // invalid UTXO
 			}
-			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, &utxo); err != nil {
+			if err := utxos.AddUTXO(ctx, sourceChainID, destinationChainID, utxo); err != nil {
 				return err
 			}
 		}
