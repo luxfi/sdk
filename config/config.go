@@ -51,7 +51,7 @@ func DefaultNetworkConfig() *NetworkConfig {
 		NetrunnerEndpoint: "localhost:8080",
 		NodeEndpoint:      "http://localhost:9650",
 		NetworkID:         12345, // Local network ID
-		APIEndpoint:       "/ext/bc/C/rpc",
+		APIEndpoint:       "/v1/bc/C/rpc",
 		P2PPort:           9651,
 		HTTPPort:          9650,
 		StakingPort:       9652,
