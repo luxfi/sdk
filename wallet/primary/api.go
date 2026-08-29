@@ -72,7 +72,7 @@ type XClient struct {
 func NewXClient(uri, chainAlias string) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/ext/bc/%s", uri, chainAlias),
+			fmt.Sprintf("%s/v1/bc/%s", uri, chainAlias),
 		),
 	}
 }
@@ -84,7 +84,7 @@ func NewXClient(uri, chainAlias string) *XClient {
 func NewXClientWithContext(uri string, networkID uint32, blockchainID ids.ID) *XClient {
 	return &XClient{
 		requester: rpc.NewEndpointRequester(
-			fmt.Sprintf("%s/ext/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
+			fmt.Sprintf("%s/v1/bc/X", uri), // Use alias, not blockchain ID (avoids EOF issues)
 		),
 		networkID:    networkID,
 		blockchainID: blockchainID,
@@ -215,7 +215,7 @@ func FetchState(
 	infoClient := sdkinfo.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
 	// C-chain client disabled for now
-	// cClient, err := ethclient.Dial(uri + "/ext/bc/C/rpc")
+	// cClient, err := ethclient.Dial(uri + "/v1/bc/C/rpc")
 	// if err != nil {
 	// 	return nil, fmt.Errorf("failed to connect to C-chain: %w", err)
 	// }
