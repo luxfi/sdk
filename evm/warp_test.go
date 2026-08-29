@@ -28,7 +28,7 @@ func TestGetWarpMessagesFromLogs(t *testing.T) {
 	require.Empty(t, messages)
 	// Test case 3: Log with valid warp message
 	chainID := ids.ID{}
-	unsignedWarpMessage, err := warp.NewUnsignedMessage(
+	unsignedWarpMessage, err := warp.NewMessage(
 		0,
 		chainID,
 		[]byte{},
@@ -45,11 +45,11 @@ func TestGetWarpMessagesFromLogs(t *testing.T) {
 	}
 	logs = []*types.Log{validLog}
 	messages = GetWarpMessagesFromLogs(logs)
-	require.Equal(t, messages, []*warp.UnsignedMessage{unsignedWarpMessage})
+	require.Equal(t, messages, []*warp.Message{unsignedWarpMessage})
 	// Test case 4: Multiple logs with mixed valid and invalid messages
 	logs = []*types.Log{validLog, invalidLog}
 	messages = GetWarpMessagesFromLogs(logs)
-	require.Equal(t, messages, []*warp.UnsignedMessage{unsignedWarpMessage})
+	require.Equal(t, messages, []*warp.Message{unsignedWarpMessage})
 }
 
 func TestExtractWarpMessageFromLogs(t *testing.T) {
@@ -71,7 +71,7 @@ func TestExtractWarpMessageFromLogs(t *testing.T) {
 	require.Contains(t, err.Error(), "no warp message is present in evm logs")
 	// Test case 3: Log with valid warp message
 	chainID := ids.ID{}
-	unsignedWarpMessage, err := warp.NewUnsignedMessage(
+	unsignedWarpMessage, err := warp.NewMessage(
 		0,
 		chainID,
 		[]byte{},
@@ -125,7 +125,7 @@ func TestExtractWarpMessageFromReceipt(t *testing.T) {
 	require.Contains(t, err.Error(), "no warp message is present in evm logs")
 	// Test case 4: Receipt with valid warp message
 	chainID2 := ids.ID{}
-	unsignedWarpMessage, err := warp.NewUnsignedMessage(
+	unsignedWarpMessage, err := warp.NewMessage(
 		0,
 		chainID2,
 		[]byte{},

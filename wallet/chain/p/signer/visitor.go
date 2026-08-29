@@ -329,11 +329,13 @@ func (s *visitor) getAuthSigners(ownerID ids.ID, auth verify.Verifiable) ([]keyc
 }
 
 func sign(tx *txs.Tx, signHash bool, txSigners [][]keychain.Signer) error {
-	unsignedBytes, err := txs.Codec.Marshal(txs.CodecVersion, &tx.Unsigned)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
-	}
+	// The unsigned buffer IS the wire — the tx carries its own ZAP encoding,
+	// so there is no codec to marshal through and no version to pass. This is
+	// the same call the node makes in txs.Tx.Sign.
+	unsignedBytes := tx.Unsigned.Bytes()
 	unsignedHash := hash.ComputeHash256(unsignedBytes)
+
+	var err error
 
 	if expectedLen := len(txSigners); expectedLen != len(tx.Creds) {
 		tx.Creds = make([]verify.Verifiable, expectedLen)
@@ -390,10 +392,8 @@ func sign(tx *txs.Tx, signHash bool, txSigners [][]keychain.Signer) error {
 		}
 	}
 
-	signedBytes, err := txs.Codec.Marshal(txs.CodecVersion, tx)
-	if err != nil {
-		return fmt.Errorf("couldn't marshal tx: %w", err)
-	}
-	tx.SetBytes(unsignedBytes, signedBytes)
-	return nil
+	// Signed bytes are unsigned ‖ credentials, and the tx ID is their hash.
+	// Initialize does both from the Creds just populated, so neither the
+	// concatenation nor the ID is restated here.
+	return tx.Initialize()
 }

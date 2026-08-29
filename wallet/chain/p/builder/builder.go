@@ -428,7 +428,7 @@ func (b *builder) NewBaseTx(
 		return nil, err
 	}
 	outputs = append(outputs, changeOutputs...)
-	lux.SortTransferableOutputs(outputs, txs.Codec) // sort the outputs
+	lux.SortTransferableOutputs(outputs) // sort the outputs
 
 	tx := &txs.BaseTx{BaseTx: lux.BaseTx{
 		NetworkID:    b.context.NetworkID,
@@ -446,7 +446,7 @@ func (b *builder) NewAddValidatorTx(
 	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
-	luxAssetID := b.context.XAssetID
+	luxAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{
 		luxAssetID: vdr.Wght,
@@ -601,7 +601,7 @@ func (b *builder) NewAddDelegatorTx(
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*txs.AddDelegatorTx, error) {
-	luxAssetID := b.context.XAssetID
+	luxAssetID := b.context.UTXOAssetID
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{
 		luxAssetID: vdr.Wght,
@@ -847,7 +847,7 @@ func (b *builder) NewConvertNetworkToL1Tx(
 
 	var (
 		toBurn = map[ids.ID]uint64{
-			b.context.XAssetID: luxToBurn,
+			b.context.UTXOAssetID: luxToBurn,
 		}
 		toStake = map[ids.ID]uint64{}
 		ops     = common.NewOptions(options)
@@ -920,7 +920,7 @@ func (b *builder) NewRegisterL1ValidatorTx(
 ) (*txs.RegisterL1ValidatorTx, error) {
 	var (
 		toBurn = map[ids.ID]uint64{
-			b.context.XAssetID: balance,
+			b.context.UTXOAssetID: balance,
 		}
 		toStake = map[ids.ID]uint64{}
 
@@ -1026,7 +1026,7 @@ func (b *builder) NewIncreaseL1ValidatorBalanceTx(
 ) (*txs.IncreaseL1ValidatorBalanceTx, error) {
 	var (
 		toBurn = map[ids.ID]uint64{
-			b.context.XAssetID: balance,
+			b.context.UTXOAssetID: balance,
 		}
 		toStake        = map[ids.ID]uint64{}
 		ops            = common.NewOptions(options)
@@ -1139,7 +1139,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		luxAssetID      = b.context.XAssetID
+		luxAssetID      = b.context.UTXOAssetID
 
 		importedInputs  = make([]*lux.TransferableInput, 0, len(utxos))
 		importedAmounts = make(map[ids.ID]uint64)
@@ -1239,7 +1239,7 @@ func (b *builder) NewImportTx(
 	}
 	outputs = append(outputs, changeOutputs...)
 
-	lux.SortTransferableOutputs(outputs, txs.Codec) // sort imported outputs
+	lux.SortTransferableOutputs(outputs) // sort imported outputs
 	tx := &txs.ImportTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -1299,7 +1299,7 @@ func (b *builder) NewExportTx(
 		return nil, err
 	}
 
-	lux.SortTransferableOutputs(outputs, txs.Codec) // sort exported outputs
+	lux.SortTransferableOutputs(outputs) // sort exported outputs
 	tx := &txs.ExportTx{
 		BaseTx: txs.BaseTx{BaseTx: lux.BaseTx{
 			NetworkID:    b.context.NetworkID,
@@ -1719,8 +1719,8 @@ func (b *builder) spend(
 	}
 
 	// LUX is handled last to account for fees.
-	utxosByLUXAssetID := splitByAssetID(utxosByLocktime.unlocked, b.context.XAssetID)
-	for _, utxo := range utxosByLUXAssetID.other {
+	utxosByLUUTXOAssetID := splitByAssetID(utxosByLocktime.unlocked, b.context.UTXOAssetID)
+	for _, utxo := range utxosByLUUTXOAssetID.other {
 		assetID := utxo.AssetID()
 		if !s.shouldConsumeAsset(assetID) {
 			continue
@@ -1769,7 +1769,7 @@ func (b *builder) spend(
 		}
 	}
 
-	for _, utxo := range utxosByLUXAssetID.requested {
+	for _, utxo := range utxosByLUUTXOAssetID.requested {
 		out, _, err := unwrapOutput(utxo.Out)
 		if err != nil {
 			return nil, nil, nil, err
@@ -1795,7 +1795,7 @@ func (b *builder) spend(
 			return nil, nil, nil, err
 		}
 
-		excess := s.consumeAsset(b.context.XAssetID, out.Amt)
+		excess := s.consumeAsset(b.context.UTXOAssetID, out.Amt)
 		excessLUX, err = math.Add(excessLUX, excess)
 		if err != nil {
 			return nil, nil, nil, err
@@ -1810,7 +1810,7 @@ func (b *builder) spend(
 		// If we don't need to burn or stake additional LUX and we have
 		// consumed enough LUX to pay the required fee, we should stop
 		// consuming UTXOs.
-		if !s.shouldConsumeAsset(b.context.XAssetID) && excessLUX >= requiredFee {
+		if !s.shouldConsumeAsset(b.context.UTXOAssetID) && excessLUX >= requiredFee {
 			// If we need to consume additional LUX, we should be returning the
 			// change to the change address.
 			ownerOverride = changeOwner
@@ -1835,7 +1835,7 @@ func (b *builder) spend(
 			"%w: provided UTXOs needed %d more nLUX (%q)",
 			ErrInsufficientFunds,
 			requiredFee-excessLUX,
-			b.context.XAssetID,
+			b.context.UTXOAssetID,
 		)
 	}
 
@@ -1846,7 +1846,7 @@ func (b *builder) spend(
 	}
 	excessLUXOutput := &lux.TransferableOutput{
 		Asset: lux.Asset{
-			ID: b.context.XAssetID,
+			ID: b.context.UTXOAssetID,
 		},
 		Out: secpExcessLUXOutput,
 	}
@@ -1883,8 +1883,8 @@ func (b *builder) spend(
 	// and we don't modify s.complexity (it stays without the change output)
 
 	utils.Sort(s.inputs)                                    // sort inputs
-	lux.SortTransferableOutputs(s.changeOutputs, txs.Codec) // sort the change outputs
-	lux.SortTransferableOutputs(s.stakeOutputs, txs.Codec)  // sort stake outputs
+	lux.SortTransferableOutputs(s.changeOutputs) // sort the change outputs
+	lux.SortTransferableOutputs(s.stakeOutputs)  // sort stake outputs
 	return s.inputs, s.changeOutputs, s.stakeOutputs, nil
 }
 
@@ -1915,7 +1915,7 @@ func (b *builder) authorize(ownerID ids.ID, options *common.Options) (*secp256k1
 }
 
 func (b *builder) initCtx(tx txs.UnsignedTx) error {
-	ctx, err := NewConsensusRuntime(b.context.NetworkID, b.context.XAssetID)
+	ctx, err := NewConsensusRuntime(b.context.NetworkID, b.context.UTXOAssetID)
 	if err != nil {
 		return err
 	}

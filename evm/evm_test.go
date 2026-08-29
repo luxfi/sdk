@@ -1805,14 +1805,15 @@ func TestTransactWithWarpMessage(t *testing.T) {
 	callData := []byte{1, 2, 3, 4, 5}
 	value := big.NewInt(1000000000000000000) // 1 ETH
 	sourceChainID := ids.ID{1, 2, 3}
-	unsignedMessage, err := luxWarp.NewUnsignedMessage(
+	unsignedMessage, err := luxWarp.NewMessage(
 		0, // NetworkID
 		sourceChainID,
 		[]byte{4, 5, 6},
 	)
 	require.NoError(t, err)
-	warpMessage, err := luxWarp.NewMessage(unsignedMessage, &luxWarp.BitSetSignature{})
-	require.NoError(t, err)
+	// A Message is flat now — it carries no signature of its own, so there is
+	// no second type to wrap it in. Signatures live on an Envelope.
+	warpMessage := unsignedMessage
 	tests := []struct {
 		name              string
 		from              crypto.Address

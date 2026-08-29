@@ -41,9 +41,10 @@ func GetBlockchainTx(endpoint string, blockchainID ids.ID) (*txs.CreateChainTx, 
 		return nil, err
 	}
 
-	var tx txs.Tx
-	if _, err = txs.Codec.Unmarshal(txBytes, &tx); err != nil {
-		return nil, fmt.Errorf("failed unmarshaling the createChainTx: %w", err)
+	// The tx decodes itself from its own ZAP wire bytes.
+	tx, err := txs.Parse(txBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed parsing the createChainTx: %w", err)
 	}
 	createChainTx, ok := tx.Unsigned.(*txs.CreateChainTx)
 	if !ok {
