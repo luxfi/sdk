@@ -183,7 +183,7 @@ func InitValidatorWeightChange(
 		weight,
 		signatureAggregatorEndpoint,
 	)
-	return signedMsg, validationID, nil, err
+	return &signedMsg.Message, validationID, nil, err
 }
 
 func CompleteValidatorWeightChange(
@@ -275,7 +275,7 @@ func FinishValidatorWeightChange(
 		generateRawTxOnly,
 		ownerAddress,
 		privateKey,
-		signedMessage,
+		&signedMessage.Message,
 	)
 	if err != nil {
 		return nil, evm.TransactionError(tx, err, "failure completing validator weight change")
@@ -298,7 +298,7 @@ func GetL1ValidatorWeightMessage(
 	nonce uint64,
 	weight uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	if unsignedMessage == nil {
 		addressedCallPayload, err := localWarpMessage.NewL1ValidatorWeight(
 			validationID,
@@ -340,7 +340,7 @@ func GetPChainL1ValidatorWeightMessage(
 	nonce uint64,
 	weight uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	if l1SignedMessage != nil {
 		addressedCall, err := warpPayload.ParseAddressedCall(l1SignedMessage.Payload)
 		if err != nil {
