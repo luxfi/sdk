@@ -5,6 +5,7 @@ package contract
 
 import (
 	"fmt"
+	"github.com/luxfi/sdk/constants"
 
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
@@ -24,7 +25,7 @@ type formattedTx struct {
 
 // GetBlockchainTx retrieves a blockchain CreateChainTx from the network.
 func GetBlockchainTx(endpoint string, blockchainID ids.ID) (*txs.CreateChainTx, error) {
-	requester := rpc.NewEndpointRequester(endpoint + "/ext/P")
+	requester := rpc.NewEndpointRequester(constants.Chain(endpoint, "P"))
 	ctx, cancel := apiRequestContext()
 	defer cancel()
 

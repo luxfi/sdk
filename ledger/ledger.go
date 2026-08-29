@@ -7,6 +7,7 @@ package ledger
 import (
 	"context"
 	"fmt"
+	"github.com/luxfi/sdk/constants"
 
 	"github.com/luxfi/ids"
 	luxledger "github.com/luxfi/ledger"
@@ -174,7 +175,7 @@ func getAddressBalance(address ids.ShortID, endpoint string) (uint64, error) {
 	}
 
 	ctx := context.Background()
-	requester := rpc.NewEndpointRequester(endpoint + "/ext/P")
+	requester := rpc.NewEndpointRequester(constants.Chain(endpoint, "P"))
 	reply := &getBalanceResponse{}
 	if err := requester.SendRequest(ctx, "platform.getBalance", &getBalanceRequest{
 		Addresses: ids.ShortIDsToStrings([]ids.ShortID{address}),

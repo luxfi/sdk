@@ -6,15 +6,14 @@ package exchangevm
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/luxfi/address"
 	"github.com/luxfi/consensus/core/choices"
-	"github.com/luxfi/constants"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
+	"github.com/luxfi/sdk/constants"
 	"github.com/luxfi/utils/json"
 	"github.com/luxfi/vm/api"
 )
@@ -28,21 +27,13 @@ type Client struct {
 
 // NewClient returns an Exchange VM client for interacting with the X-Chain
 func NewClient(uri, chain string) *Client {
-	path := fmt.Sprintf(
-		"%s/ext/%s/%s",
-		uri,
-		constants.ChainAliasPrefix,
-		chain,
-	)
-	return &Client{
-		Requester: rpc.NewEndpointRequester(path),
-	}
+	return &Client{Requester: rpc.NewEndpointRequester(constants.Chain(uri, chain))}
 }
 
 // GetBlock returns the block with the given id.
 func (c *Client) GetBlock(ctx context.Context, blkID ids.ID, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedBlock{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getBlock", &api.GetBlockArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getBlock", &api.GetBlockArgs{
 		BlockID:  blkID,
 		Encoding: formatting.HexNC,
 	}, res, options...)
@@ -55,7 +46,7 @@ func (c *Client) GetBlock(ctx context.Context, blkID ids.ID, options ...rpc.Opti
 // GetBlockByHeight returns the block at the given height.
 func (c *Client) GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedBlock{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getBlockByHeight", &api.GetBlockByHeightArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getBlockByHeight", &api.GetBlockByHeightArgs{
 		Height:   json.Uint64(height),
 		Encoding: formatting.HexNC,
 	}, res, options...)
@@ -68,7 +59,7 @@ func (c *Client) GetBlockByHeight(ctx context.Context, height uint64, options ..
 // GetHeight returns the height of the last accepted block.
 func (c *Client) GetHeight(ctx context.Context, options ...rpc.Option) (uint64, error) {
 	res := &api.GetHeightResponse{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getHeight", struct{}{}, res, options...)
+	err := c.Requester.SendRequest(ctx, "xvm.getHeight", struct{}{}, res, options...)
 	return uint64(res.Height), err
 }
 
@@ -79,7 +70,7 @@ func (c *Client) IssueTx(ctx context.Context, txBytes []byte, options ...rpc.Opt
 		return ids.Empty, err
 	}
 	res := &api.JSONTxID{}
-	err = c.Requester.SendRequest(ctx, "exchangevm.issueTx", &api.FormattedTx{
+	err = c.Requester.SendRequest(ctx, "xvm.issueTx", &api.FormattedTx{
 		Tx:       txStr,
 		Encoding: formatting.Hex,
 	}, res, options...)
@@ -92,7 +83,7 @@ func (c *Client) IssueTx(ctx context.Context, txBytes []byte, options ...rpc.Opt
 // used instead to determine if the tx was accepted.
 func (c *Client) GetTxStatus(ctx context.Context, txID ids.ID, options ...rpc.Option) (choices.Status, error) {
 	res := &GetTxStatusReply{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getTxStatus", &api.JSONTxID{
+	err := c.Requester.SendRequest(ctx, "xvm.getTxStatus", &api.JSONTxID{
 		TxID: txID,
 	}, res, options...)
 	return res.Status, err
@@ -101,7 +92,7 @@ func (c *Client) GetTxStatus(ctx context.Context, txID ids.ID, options ...rpc.Op
 // GetTx returns the byte representation of txID.
 func (c *Client) GetTx(ctx context.Context, txID ids.ID, options ...rpc.Option) ([]byte, error) {
 	res := &api.FormattedTx{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getTx", &api.GetTxArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getTx", &api.GetTxArgs{
 		TxID:     txID,
 		Encoding: formatting.Hex,
 	}, res, options...)
@@ -135,7 +126,7 @@ func (c *Client) GetAtomicUTXOs(
 	options ...rpc.Option,
 ) ([][]byte, ids.ShortID, ids.ID, error) {
 	res := &api.GetUTXOsReply{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getUTXOs", &api.GetUTXOsArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getUTXOs", &api.GetUTXOsArgs{
 		Addresses:   ids.ShortIDsToStrings(addrs),
 		SourceChain: sourceChain,
 		Limit:       json.Uint32(limit),
@@ -168,7 +159,7 @@ func (c *Client) GetAtomicUTXOs(
 // GetAssetDescription returns a description of assetID.
 func (c *Client) GetAssetDescription(ctx context.Context, assetID string, options ...rpc.Option) (*GetAssetDescriptionReply, error) {
 	res := &GetAssetDescriptionReply{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getAssetDescription", &GetAssetDescriptionArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getAssetDescription", &GetAssetDescriptionArgs{
 		AssetID: assetID,
 	}, res, options...)
 	return res, err
@@ -188,7 +179,7 @@ func (c *Client) GetBalance(
 	options ...rpc.Option,
 ) (*GetBalanceReply, error) {
 	res := &GetBalanceReply{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getBalance", &GetBalanceArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getBalance", &GetBalanceArgs{
 		Address:        addr.String(),
 		AssetID:        assetID,
 		IncludePartial: includePartial,
@@ -206,7 +197,7 @@ func (c *Client) GetAllBalances(
 	options ...rpc.Option,
 ) ([]Balance, error) {
 	res := &GetAllBalancesReply{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getAllBalances", &GetAllBalancesArgs{
+	err := c.Requester.SendRequest(ctx, "xvm.getAllBalances", &GetAllBalancesArgs{
 		JSONAddress:    api.JSONAddress{Address: addr.String()},
 		IncludePartial: includePartial,
 	}, res, options...)
@@ -216,7 +207,7 @@ func (c *Client) GetAllBalances(
 // GetTxFee returns the cost to issue certain transactions.
 func (c *Client) GetTxFee(ctx context.Context, options ...rpc.Option) (uint64, uint64, error) {
 	res := &GetTxFeeReply{}
-	err := c.Requester.SendRequest(ctx, "exchangevm.getTxFee", struct{}{}, res, options...)
+	err := c.Requester.SendRequest(ctx, "xvm.getTxFee", struct{}{}, res, options...)
 	return uint64(res.TxFee), uint64(res.CreateAssetTxFee), err
 }
 

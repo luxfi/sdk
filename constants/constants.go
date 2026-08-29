@@ -6,6 +6,7 @@
 package constants
 
 import (
+	"strings"
 	"time"
 
 	luxconstants "github.com/luxfi/constants"
@@ -86,3 +87,44 @@ const (
 	SnapshotPrefix      = luxconstants.SnapshotPrefix
 	DefaultSnapshotName = luxconstants.DefaultSnapshotName
 )
+
+// Base is the prefix every luxd route hangs off. There is one -- /v1/info,
+// /v1/health, /v1/chain/P -- and the /ext prefix it replaced is gone from the
+// node entirely, so an address built any other way is a 404.
+const Base = "/v1"
+
+// Route is the address of one of a node's APIs on the node at uri.
+//
+// It is the ONE place this SDK composes a node address. Before it there were
+// ten, every one of them carrying the /ext prefix the node stopped serving,
+// which is the shape this drift always takes: an address is a string, a string
+// is cheap to repeat, and each copy is somewhere to be wrong on its own.
+func Route(uri string, parts ...string) string {
+	var b strings.Builder
+	b.WriteString(strings.TrimSuffix(uri, "/"))
+	b.WriteString(Base)
+	for _, p := range parts {
+		b.WriteByte('/')
+		b.WriteString(strings.Trim(p, "/"))
+	}
+	return b.String()
+}
+
+// Chain is the address of one chain's API -- /v1/chain/P, /v1/chain/X.
+//
+// The segment is luxconstants.ChainAliasPrefix and not a literal because it
+// MOVED: it was "bc" and is "chain". The node answers the old spelling too, so
+// that callers may roll after it does; reading the constant is what makes this
+// SDK one of the callers that has.
+func Chain(uri, alias string) string {
+	return Route(uri, luxconstants.ChainAliasPrefix, alias)
+}
+
+// VM is the address of a VM's static API: the handlers a VM serves before any
+// chain of it exists, so they are keyed by the VM and not by a chain.
+func VM(uri, name string) string {
+	return Route(uri, luxconstants.VMAliasPrefix, name)
+}
+
+// Index is the address of one chain's index API -- /v1/index/C/block.
+func Index(uri, chain, what string) string { return Route(uri, "index", chain, what) }
