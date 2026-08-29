@@ -149,7 +149,7 @@ func GetUptimeProofMessage(
 	validationID ids.ID,
 	uptime uint64,
 	signatureAggregatorEndpoint string,
-) (*warp.Message, error) {
+) (*warp.Envelope, error) {
 	uptimePayload, err := messages.NewValidatorUptime(validationID, uptime)
 	if err != nil {
 		return nil, err
@@ -235,7 +235,7 @@ func InitValidatorRemoval(
 
 	var receipt *types.Receipt
 	if unsignedMessage == nil {
-		signedUptimeProof := &warp.Message{}
+		signedUptimeProof := &warp.Envelope{}
 		if isPoS {
 			if uptimeSec == 0 {
 				uptimeSec, err = GetL1ValidatorUptimeSeconds(rpcURL, nodeID)
@@ -267,7 +267,7 @@ func InitValidatorRemoval(
 			ownerPrivateKey,
 			validationID,
 			isPoS,
-			signedUptimeProof, // is empty for non-PoS
+			&signedUptimeProof.Message, // is empty for non-PoS
 			force,
 			useACP99,
 		)
@@ -326,7 +326,7 @@ func InitValidatorRemoval(
 		0,
 		signatureAggregatorEndpoint,
 	)
-	return signedMsg, validationID, nil, err
+	return &signedMsg.Message, validationID, nil, err
 }
 
 func CompleteValidatorRemoval(

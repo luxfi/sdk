@@ -40,7 +40,7 @@ type AggregateSignatureResponse struct {
 
 // SignMessage sends a request to the signature aggregator to sign a message.
 // It returns the signed warp message or an error if the operation fails.
-func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, message, justification, signingChainID string, quorumPercentage uint64) (*warp.Message, error) {
+func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, message, justification, signingChainID string, quorumPercentage uint64) (*warp.Envelope, error) {
 	if quorumPercentage == 0 {
 		quorumPercentage = DefaultQuorumPercentage
 	} else if quorumPercentage > 100 {
@@ -146,8 +146,9 @@ func SignMessage(logger luxlog.Logger, signatureAggregatorEndpoint string, messa
 			continue
 		}
 
-		// Parse the signed message
-		signedMessage, err := warp.ParseMessage(signedMessageBytes)
+		// What the aggregator returns is a message plus the signatures
+		// gathered over it — an Envelope. A Message carries no signature.
+		signedMessage, err := warp.ParseEnvelope(signedMessageBytes)
 		if err != nil {
 			lastErr = fmt.Errorf("error parsing signed message: %w", err)
 			logger.Error("Error parsing signed message",
