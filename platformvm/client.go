@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	json "github.com/luxfi/codec/jsonrpc"
+	json "github.com/luxfi/utils/json"
 	"github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"

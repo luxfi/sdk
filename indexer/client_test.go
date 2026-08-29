@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	json "github.com/luxfi/codec/jsonrpc"
+	json "github.com/luxfi/utils/json"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
