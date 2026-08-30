@@ -38,7 +38,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/luxfi/address v1.0.1
-	github.com/luxfi/api v1.0.11
+	github.com/luxfi/api v1.1.14
 	github.com/luxfi/bft v0.1.5
 	github.com/luxfi/consensus v1.24.0
 	github.com/luxfi/constants v1.5.2

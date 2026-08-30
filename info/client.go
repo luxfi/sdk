@@ -39,7 +39,11 @@ func (c *Client) GetNodeID(ctx context.Context, options ...rpc.Option) (ids.Node
 func (c *Client) GetNodeIP(ctx context.Context, options ...rpc.Option) (netip.AddrPort, error) {
 	res := &apiinfo.GetNodeIPReply{}
 	err := c.Requester.SendRequest(ctx, apiinfo.MethodGetNodeIP, struct{}{}, res, options...)
-	return res.IP, err
+	// The reply carries the address as the text it has always been on the JSON
+	// wire. A netip.AddrPort cannot cross a wire whose fields are offsets:
+	// every one of its own fields is unexported, so it derived an empty layout
+	// and arrived blank with no error to say so.
+	return res.IP.AddrPort(), err
 }
 
 func (c *Client) GetNetworkID(ctx context.Context, options ...rpc.Option) (uint32, error) {
@@ -90,7 +94,10 @@ func (c *Client) Uptime(ctx context.Context, options ...rpc.Option) (*apiinfo.Up
 	return res, err
 }
 
-func (c *Client) GetVMs(ctx context.Context, options ...rpc.Option) (map[ids.ID][]string, error) {
+// GetVMs are the VMs installed on the node, in id order. A list rather than a
+// map because that is what the node answers with — a map has no layout on a
+// wire whose fields are offsets, and no order for two reads to agree on.
+func (c *Client) GetVMs(ctx context.Context, options ...rpc.Option) (apiinfo.VMAliases, error) {
 	res := &apiinfo.GetVMsReply{}
 	err := c.Requester.SendRequest(ctx, apiinfo.MethodGetVMs, struct{}{}, res, options...)
 	return res.VMs, err
