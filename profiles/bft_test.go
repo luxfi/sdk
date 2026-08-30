@@ -11,11 +11,11 @@ func TestConsensus_MatchesAvalanche(t *testing.T) {
 	cases := []struct {
 		n, wantK, wantAlpha int
 	}{
-		{1, 1, 1},   // single node
-		{3, 3, 2},   // tiny: BFT-minimal (67%), keeps one tolerable fault
-		{4, 4, 3},   // 75%
-		{5, 5, 4},   // current Lux nets: 80% >= Avalanche's 75%
-		{8, 8, 6},   // 75%
+		{1, 1, 1},    // single node
+		{3, 3, 2},    // tiny: BFT-minimal (67%), keeps one tolerable fault
+		{4, 4, 3},    // 75%
+		{5, 5, 4},    // current Lux nets: 80% >= Avalanche's 75%
+		{8, 8, 6},    // 75%
 		{20, 20, 15}, // exactly Avalanche
 		{50, 20, 15}, // capped at K=20, Avalanche
 	}

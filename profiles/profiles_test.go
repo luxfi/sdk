@@ -4,20 +4,20 @@
 package profiles
 
 import (
+	"slices"
 	"testing"
 )
 
 func TestListProfiles(t *testing.T) {
-	names := ListProfiles()
-	if len(names) != 4 {
-		t.Errorf("expected 4 profiles, got %d: %v", len(names), names)
-	}
+	// The set is spelled out rather than counted so that adding or dropping a
+	// profile is a deliberate edit here. "production" arrived with the
+	// Avalanche-grade consensus derivation and this list never caught up --
+	// it could not, because the package's tests had stopped compiling.
+	want := []string{"fast", "production", "standard", "turbo", "ultra"}
 
-	expected := []string{"fast", "standard", "turbo", "ultra"}
-	for i, name := range expected {
-		if names[i] != name {
-			t.Errorf("profile %d: expected %q, got %q", i, name, names[i])
-		}
+	got := ListProfiles()
+	if !slices.Equal(got, want) {
+		t.Errorf("ListProfiles() = %v, want %v", got, want)
 	}
 }
 
