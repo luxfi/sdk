@@ -113,9 +113,9 @@ func Route(uri string, parts ...string) string {
 // Chain is the address of one chain's API -- /v1/chain/P, /v1/chain/X.
 //
 // The segment is luxconstants.ChainAliasPrefix and not a literal because it
-// MOVED: it was "bc" and is "chain". The node answers the old spelling too, so
-// that callers may roll after it does; reading the constant is what makes this
-// SDK one of the callers that has.
+// MOVED: it was "bc" and is "chain", and the node deleted "bc" rather than
+// serving both. Reading the constant is what carried this SDK across that
+// move; a copy of the old spelling would just be a 404 spelled out longhand.
 func Chain(uri, alias string) string {
 	return Route(uri, luxconstants.ChainAliasPrefix, alias)
 }
