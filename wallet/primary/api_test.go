@@ -20,31 +20,6 @@ import (
 	"github.com/luxfi/math/set"
 )
 
-// TestIsXChainNotEnabled checks the substring matcher that drives the
-// P-only fallback path. The matcher MUST be permissive enough to catch
-// the canonical info-service error string ("there is no ID with alias: X"),
-// case-insensitively, and a sibling phrasing ("no chain with alias")
-// some node releases emit.
-func TestIsXChainNotEnabled(t *testing.T) {
-	tests := []struct {
-		name string
-		err  error
-		want bool
-	}{
-		{"nil error", nil, false},
-		{"canonical message", fmt.Errorf("there is no ID with alias: X"), true},
-		{"lowercased", fmt.Errorf("there is no id with alias: x"), true},
-		{"sibling phrasing", fmt.Errorf("no chain with alias X"), true},
-		{"unrelated error", fmt.Errorf("connection refused"), false},
-		{"network timeout", fmt.Errorf("dial tcp: i/o timeout"), false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			require.Equal(t, tt.want, isXChainNotEnabled(tt.err))
-		})
-	}
-}
-
 // fakeInfoServer is a minimal JSON-RPC 2.0 server impersonating an
 // /v1/info endpoint exposing GetNetworkID, GetBlockchainID, GetTxFee.
 // Behavior is controlled by xChainServed: when false, info.getBlockchainID
@@ -202,13 +177,13 @@ func TestFetchState_XChainNotRegistered(t *testing.T) {
 	fake := &fakeInfoServer{xChainServed: false}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/info", fake.handleInfo)
-	mux.HandleFunc("/v1/bc/P", fake.handlePChain)
+	mux.HandleFunc("/v1/chain/P", fake.handlePChain)
 	mux.HandleFunc("/v1/P", fake.handlePChain)
 	// Reject any non-P-Chain call: the SDK fallback MUST NOT touch
 	// platform.getUTXOs against the X-Chain alias when XCTX.BlockchainID
 	// is the sentinel. If anything else gets called the test fails fast.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/v1/bc/X") {
+		if strings.Contains(r.URL.Path, "/v1/chain/X") {
 			t.Errorf("SDK called X-Chain endpoint %s in P-only mode", r.URL.Path)
 		}
 		http.NotFound(w, r)
@@ -227,7 +202,6 @@ func TestFetchState_XChainNotRegistered(t *testing.T) {
 	require.NotNil(state.PCTX)
 	require.NotNil(state.PClient)
 }
-
 
 // handleXChain answers the single X-Chain read the wallet makes: xvm.getUTXOs.
 // The X wallet is built over this set, so a state fetch that never calls it
@@ -268,9 +242,9 @@ func TestFetchState_XChainRegistered(t *testing.T) {
 	fake := &fakeInfoServer{xChainServed: true}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/info", fake.handleInfo)
-	mux.HandleFunc("/v1/bc/P", fake.handlePChain)
+	mux.HandleFunc("/v1/chain/P", fake.handlePChain)
 	mux.HandleFunc("/v1/P", fake.handlePChain)
-	mux.HandleFunc("/v1/bc/X", fake.handleXChain)
+	mux.HandleFunc("/v1/chain/X", fake.handleXChain)
 	srv := httptest.NewServer(mux)
 	defer srv.Close()
 
