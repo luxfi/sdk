@@ -39,7 +39,7 @@ import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { AIChainClient, type ModelSpec } from "@luxfi/aichain";
 
-const transport = http("https://api.lux.network/v1/bc/C/rpc");
+const transport = http("https://api.lux.network/v1/chain/C/rpc");
 const publicClient = createPublicClient({ transport });
 const account = privateKeyToAccount("0x…");
 const walletClient = createWalletClient({ account, transport });
