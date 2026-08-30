@@ -216,7 +216,7 @@ func FetchState(
 	infoClient := sdkinfo.NewClient(uri)
 	pClient := platformvm.NewClient(uri)
 	// C-chain client disabled for now
-	// cClient, err := ethclient.Dial(uri + "/v1/bc/C/rpc")
+	// cClient, err := ethclient.Dial(constants.Chain(uri, "C") + "/rpc")
 	// if err != nil {
 	// 	return nil, fmt.Errorf("failed to connect to C-chain: %w", err)
 	// }

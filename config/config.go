@@ -6,6 +6,8 @@ package config
 
 import (
 	"math/big"
+
+	"github.com/luxfi/sdk/constants"
 )
 
 // Config represents the SDK configuration
@@ -51,7 +53,7 @@ func DefaultNetworkConfig() *NetworkConfig {
 		NetrunnerEndpoint: "localhost:8080",
 		NodeEndpoint:      "http://localhost:9650",
 		NetworkID:         12345, // Local network ID
-		APIEndpoint:       "/v1/bc/C/rpc",
+		APIEndpoint:       constants.Chain("", "C") + "/rpc",
 		P2PPort:           9651,
 		HTTPPort:          9650,
 		StakingPort:       9652,

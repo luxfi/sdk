@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/luxfi/constants"
+	sdkconstants "github.com/luxfi/sdk/constants"
 )
 
 type Network int64
@@ -192,7 +193,7 @@ func (s Network) WSEndpoints() []string {
 // CChainEndpoint returns the C-Chain endpoint for the network
 func (s Network) CChainEndpoint() string {
 	baseEndpoint := s.Endpoint()
-	return fmt.Sprintf("%s/v1/bc/C/rpc", baseEndpoint)
+	return sdkconstants.Chain(baseEndpoint, "C") + "/rpc"
 }
 
 // CChainWSEndpoint returns the C-Chain WebSocket endpoint for the network
@@ -236,12 +237,12 @@ func GetNetworkFromSidecarNetworkName(name string) Network {
 
 // GetRPCEndpoint returns the RPC endpoint for a given base endpoint and blockchain ID
 func GetRPCEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/v1/bc/%s/rpc", baseEndpoint, blockchainID)
+	return sdkconstants.Chain(baseEndpoint, blockchainID) + "/rpc"
 }
 
 // GetWSEndpoint returns the WebSocket endpoint for a given base endpoint and blockchain ID
 func GetWSEndpoint(baseEndpoint string, blockchainID string) string {
-	return fmt.Sprintf("%s/v1/bc/%s/ws", baseEndpoint, blockchainID)
+	return sdkconstants.Chain(baseEndpoint, blockchainID) + "/ws"
 }
 
 // GenesisParams represents network genesis parameters
@@ -288,7 +289,7 @@ func (s Network) GenesisParams() *GenesisParams {
 func (s Network) BlockchainEndpoint(blockchainID string) string {
 	baseEndpoint := s.Endpoint()
 	if blockchainID == "" {
-		return fmt.Sprintf("%s/v1/bc/C/rpc", baseEndpoint)
+		return sdkconstants.Chain(baseEndpoint, "C") + "/rpc"
 	}
-	return fmt.Sprintf("%s/v1/bc/%s/rpc", baseEndpoint, blockchainID)
+	return sdkconstants.Chain(baseEndpoint, blockchainID) + "/rpc"
 }
