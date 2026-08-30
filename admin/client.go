@@ -17,6 +17,21 @@ type Client struct {
 	Requester rpc.EndpointRequester
 }
 
+// index keys a reply's list by the name it appears under on the JSON wire.
+// The admin replies are objects on the wire and ordered lists in Go, so every
+// one of them needs the same turn, and this is the one place that does it.
+func index[E any, K comparable, V any](es []E, by func(E) (K, V)) map[K]V {
+	if len(es) == 0 {
+		return nil
+	}
+	m := make(map[K]V, len(es))
+	for _, e := range es {
+		k, v := by(e)
+		m[k] = v
+	}
+	return m
+}
+
 func NewClient(uri string) *Client {
 	return &Client{Requester: rpc.NewEndpointRequester(
 		uri + "/v1/admin",
@@ -67,8 +82,12 @@ func (c *Client) Stacktrace(ctx context.Context, options ...rpc.Option) error {
 
 func (c *Client) LoadVMs(ctx context.Context, options ...rpc.Option) (map[ids.ID][]string, map[ids.ID]string, error) {
 	res := &apiadmin.LoadVMsReply{}
-	err := c.Requester.SendRequest(ctx, "admin.loadVMs", struct{}{}, res, options...)
-	return res.NewVMs, res.FailedVMs, err
+	if err := c.Requester.SendRequest(ctx, "admin.loadVMs", struct{}{}, res, options...); err != nil {
+		return nil, nil, err
+	}
+	return index(res.NewVMs, func(e apiadmin.LoadedVM) (ids.ID, []string) { return e.VM, e.Aliases }),
+		index(res.FailedVMs, func(e apiadmin.FailedVM) (ids.ID, string) { return e.VM, e.Error }),
+		nil
 }
 
 func (c *Client) SetLoggerLevel(
@@ -79,12 +98,16 @@ func (c *Client) SetLoggerLevel(
 	options ...rpc.Option,
 ) (map[string]apiadmin.LogAndDisplayLevels, error) {
 	res := &apiadmin.LoggerLevelReply{}
-	err := c.Requester.SendRequest(ctx, "admin.setLoggerLevel", &apiadmin.SetLoggerLevelArgs{
+	if err := c.Requester.SendRequest(ctx, "admin.setLoggerLevel", &apiadmin.SetLoggerLevelArgs{
 		LoggerName:   loggerName,
 		LogLevel:     logLevel,
 		DisplayLevel: displayLevel,
-	}, res, options...)
-	return res.LoggerLevels, err
+	}, res, options...); err != nil {
+		return nil, err
+	}
+	return index(res.LoggerLevels, func(e apiadmin.LoggerLevel) (string, apiadmin.LogAndDisplayLevels) {
+		return e.Logger, e.Levels
+	}), nil
 }
 
 func (c *Client) GetLoggerLevel(
@@ -93,10 +116,14 @@ func (c *Client) GetLoggerLevel(
 	options ...rpc.Option,
 ) (map[string]apiadmin.LogAndDisplayLevels, error) {
 	res := &apiadmin.LoggerLevelReply{}
-	err := c.Requester.SendRequest(ctx, "admin.getLoggerLevel", &apiadmin.GetLoggerLevelArgs{
+	if err := c.Requester.SendRequest(ctx, "admin.getLoggerLevel", &apiadmin.GetLoggerLevelArgs{
 		LoggerName: loggerName,
-	}, res, options...)
-	return res.LoggerLevels, err
+	}, res, options...); err != nil {
+		return nil, err
+	}
+	return index(res.LoggerLevels, func(e apiadmin.LoggerLevel) (string, apiadmin.LogAndDisplayLevels) {
+		return e.Logger, e.Levels
+	}), nil
 }
 
 func (c *Client) GetConfig(ctx context.Context, options ...rpc.Option) (interface{}, error) {
@@ -123,8 +150,10 @@ func (c *Client) DBGet(ctx context.Context, key []byte, options ...rpc.Option) (
 
 func (c *Client) ListVMs(ctx context.Context, options ...rpc.Option) (map[string]apiadmin.VMInfo, error) {
 	res := &apiadmin.ListVMsReply{}
-	err := c.Requester.SendRequest(ctx, "admin.listVMs", struct{}{}, res, options...)
-	return res.VMs, err
+	if err := c.Requester.SendRequest(ctx, "admin.listVMs", struct{}{}, res, options...); err != nil {
+		return nil, err
+	}
+	return index(res.VMs, func(e apiadmin.VMInfo) (string, apiadmin.VMInfo) { return e.ID, e }), nil
 }
 
 func (c *Client) Snapshot(ctx context.Context, path string, since uint64, options ...rpc.Option) (uint64, error) {

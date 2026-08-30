@@ -178,8 +178,8 @@ func TestReloadInstalledVMs(t *testing.T) {
 			ids.GenerateTestID(): "uh-oh",
 		}
 		mockClient := Client{Requester: NewMockClient(&apiadmin.LoadVMsReply{
-			NewVMs:    expectedNewVMs,
-			FailedVMs: expectedFailedVMs,
+			NewVMs:    loadedVMs(expectedNewVMs),
+			FailedVMs: failedVMs(expectedFailedVMs),
 		}, nil)}
 
 		loadedVMs, failedVMs, err := mockClient.LoadVMs(context.Background())
@@ -231,7 +231,7 @@ func TestSetLoggerLevel(t *testing.T) {
 			c := Client{
 				Requester: NewMockClient(
 					&apiadmin.LoggerLevelReply{
-						LoggerLevels: tt.serviceResponse,
+						LoggerLevels: loggerLevels(tt.serviceResponse),
 					},
 					tt.serviceErr,
 				),
@@ -284,7 +284,7 @@ func TestGetLoggerLevel(t *testing.T) {
 			c := Client{
 				Requester: NewMockClient(
 					&apiadmin.LoggerLevelReply{
-						LoggerLevels: tt.serviceResponse,
+						LoggerLevels: loggerLevels(tt.serviceResponse),
 					},
 					tt.serviceErr,
 				),
@@ -339,4 +339,41 @@ func TestGetConfig(t *testing.T) {
 			require.Equal(resp, res)
 		})
 	}
+}
+
+// The admin replies are an object on the JSON wire and an ordered list in Go.
+// These build the list a node would send from the map a caller expects back,
+// so each test says its case once, in the shape it is asserting on.
+
+func loadedVMs(m map[ids.ID][]string) apiadmin.LoadedVMs {
+	if m == nil {
+		return nil
+	}
+	out := make(apiadmin.LoadedVMs, 0, len(m))
+	for vm, aliases := range m {
+		out = append(out, apiadmin.LoadedVM{VM: vm, Aliases: aliases})
+	}
+	return out
+}
+
+func failedVMs(m map[ids.ID]string) apiadmin.FailedVMs {
+	if m == nil {
+		return nil
+	}
+	out := make(apiadmin.FailedVMs, 0, len(m))
+	for vm, msg := range m {
+		out = append(out, apiadmin.FailedVM{VM: vm, Error: msg})
+	}
+	return out
+}
+
+func loggerLevels(m map[string]apiadmin.LogAndDisplayLevels) apiadmin.LoggerLevels {
+	if m == nil {
+		return nil
+	}
+	out := make(apiadmin.LoggerLevels, 0, len(m))
+	for logger, levels := range m {
+		out = append(out, apiadmin.LoggerLevel{Logger: logger, Levels: levels})
+	}
+	return out
 }
