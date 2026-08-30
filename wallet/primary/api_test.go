@@ -20,6 +20,29 @@ import (
 	"github.com/luxfi/math/set"
 )
 
+// TestIsXChainNotEnabled checks the matcher that decides whether a missing
+// X-Chain is this network's shape or a real failure. It must catch the
+// canonical info-service string case-insensitively, and the sibling phrasing
+// some node releases emit, and nothing else.
+func TestIsXChainNotEnabled(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{"nil error", nil, false},
+		{"canonical message", fmt.Errorf("there is no ID with alias: X"), true},
+		{"lowercased", fmt.Errorf("there is no id with alias: x"), true},
+		{"sibling phrasing", fmt.Errorf("no chain with alias X"), true},
+		{"unrelated error", fmt.Errorf("connection refused"), false},
+		{"network timeout", fmt.Errorf("dial tcp: i/o timeout"), false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.want, isXChainNotEnabled(tt.err))
+		})
+	}
+}
+
 // fakeInfoServer is a minimal JSON-RPC 2.0 server impersonating an
 // /v1/info endpoint exposing GetNetworkID, GetBlockchainID, GetTxFee.
 // Behavior is controlled by xChainServed: when false, info.getBlockchainID
