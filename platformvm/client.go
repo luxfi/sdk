@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/luxfi/address"
-	"github.com/luxfi/constants"
+	luxconstants "github.com/luxfi/constants"
 	"github.com/luxfi/crypto/bls"
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
@@ -51,7 +51,7 @@ func (c *Client) SetNetworkID(networkID uint32) {
 
 // formatAddresses converts ShortIDs to bech32 P-Chain addresses
 func (c *Client) formatAddresses(addrs []ids.ShortID) ([]string, error) {
-	hrp := constants.GetHRP(c.networkID)
+	hrp := luxconstants.GetHRP(c.networkID)
 	formatted := make([]string, len(addrs))
 	for i, addr := range addrs {
 		addrStr, err := address.Format("P", hrp, addr[:])
@@ -120,7 +120,7 @@ func (c *Client) GetAtomicUTXOs(
 	// Build start index - only include address/UTXO if they're non-empty
 	var startIndex api.Index
 	if startAddress != ids.ShortEmpty || startUTXOID != ids.Empty {
-		hrp := constants.GetHRP(c.networkID)
+		hrp := luxconstants.GetHRP(c.networkID)
 		startAddrStr, err := address.Format("P", hrp, startAddress[:])
 		if err != nil {
 			return nil, ids.ShortID{}, ids.Empty, err
@@ -500,7 +500,7 @@ func (c *Client) GetTotalStake(ctx context.Context, chainID ids.ID, options ...r
 		ChainID: chainID,
 	}, res, options...)
 	var amount json.Uint64
-	if chainID == constants.PrimaryNetworkID {
+	if chainID == luxconstants.PrimaryNetworkID {
 		amount = res.Stake
 	} else {
 		amount = res.Weight
