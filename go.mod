@@ -9,7 +9,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.6
 	github.com/luxfi/crypto v1.20.5
 	github.com/luxfi/geth v1.20.2
-	github.com/luxfi/ids v1.3.2
+	github.com/luxfi/ids v1.3.4
 	github.com/luxfi/log v1.4.3
 	github.com/luxfi/version v1.0.1
 	github.com/luxfi/warp v1.24.1
@@ -21,7 +21,7 @@ require (
 	golang.org/x/crypto v0.54.0
 	golang.org/x/exp v0.0.0-20260529124908-c761662dc8c9 // indirect
 	golang.org/x/net v0.57.0 // indirect
-	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -190,7 +190,7 @@ require (
 	github.com/luxfi/math/safe v0.0.1 // indirect
 	github.com/luxfi/mdns v0.1.1 // indirect
 	github.com/luxfi/mlwe v0.3.0 // indirect
-	github.com/luxfi/node v1.36.178 // indirect
+	github.com/luxfi/node v1.36.179 // indirect
 	github.com/luxfi/pq v1.1.0 // indirect
 	github.com/luxfi/pulsar v1.9.2 // indirect
 	github.com/luxfi/staking v1.6.1 // indirect
@@ -243,7 +243,7 @@ require (
 	github.com/zap-proto/go v1.3.0 // indirect
 	github.com/zap-proto/http v0.3.5 // indirect
 	github.com/zap-proto/mcp v1.0.5 // indirect
-	github.com/zap-proto/zip v1.36.31 // indirect
+	github.com/zap-proto/zip v1.36.38 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
 	go.mongodb.org/mongo-driver v1.17.9 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -272,7 +272,7 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/luxfi/cache v1.3.1 // indirect
 	github.com/luxfi/config v1.1.2 // indirect
-	github.com/luxfi/formatting v1.1.1
+	github.com/luxfi/formatting v1.1.3
 	github.com/luxfi/hid v0.9.3 // indirect
 	github.com/luxfi/keys v1.4.2 // indirect
 	github.com/luxfi/math/big v0.1.0 // indirect
@@ -290,7 +290,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260825221802-da73d73af1c5 // indirect
 )
 
 // Use local packages with correct codec (CreateNetworkTx, CreateChainTx)
