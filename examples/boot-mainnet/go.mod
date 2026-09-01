@@ -37,23 +37,23 @@ require (
 	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/luxfi/accel v1.2.4 // indirect
 	github.com/luxfi/address v1.1.1 // indirect
-	github.com/luxfi/api v1.1.1 // indirect
+	github.com/luxfi/api v1.1.9 // indirect
 	github.com/luxfi/atomic v1.0.0 // indirect
 	github.com/luxfi/cache v1.3.1 // indirect
 	github.com/luxfi/compress v0.1.1 // indirect
 	github.com/luxfi/concurrent v0.1.1 // indirect
 	github.com/luxfi/config v1.1.2 // indirect
-	github.com/luxfi/consensus v1.36.2 // indirect
+	github.com/luxfi/consensus v1.36.81 // indirect
 	github.com/luxfi/constants v1.6.2 // indirect
-	github.com/luxfi/container v0.2.1 // indirect
+	github.com/luxfi/container v0.2.2 // indirect
 	github.com/luxfi/crypto v1.20.5 // indirect
 	github.com/luxfi/crypto/ipa v1.2.4 // indirect
-	github.com/luxfi/database v1.21.1 // indirect
+	github.com/luxfi/database v1.21.5 // indirect
 	github.com/luxfi/evm v1.104.10 // indirect
 	github.com/luxfi/filesystem v0.0.1 // indirect
 	github.com/luxfi/formatting v1.1.1 // indirect
 	github.com/luxfi/genesis v1.16.2 // indirect
-	github.com/luxfi/geth v1.20.1 // indirect
+	github.com/luxfi/geth v1.20.2 // indirect
 	github.com/luxfi/go-bip32 v1.1.0 // indirect
 	github.com/luxfi/go-bip39 v1.2.0 // indirect
 	github.com/luxfi/ids v1.3.2 // indirect
@@ -82,7 +82,7 @@ require (
 	github.com/luxfi/utxo v0.5.8 // indirect
 	github.com/luxfi/validators v1.3.1 // indirect
 	github.com/luxfi/version v1.0.1 // indirect
-	github.com/luxfi/vm v1.3.1 // indirect
+	github.com/luxfi/vm v1.3.16 // indirect
 	github.com/luxfi/warp v1.24.1 // indirect
 	github.com/luxfi/zap v1.2.6 // indirect
 	github.com/luxfi/zapcodec v1.1.1 // indirect
