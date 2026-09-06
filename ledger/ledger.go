@@ -13,7 +13,7 @@ import (
 	luxledger "github.com/luxfi/ledger"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/network"
-	json "github.com/luxfi/utils/json"
+	json "github.com/luxfi/util/json"
 	"github.com/luxfi/version"
 )
 

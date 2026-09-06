@@ -20,7 +20,7 @@ import (
 	"github.com/luxfi/geth/core/types"
 	"github.com/luxfi/sdk/evm"
 	"github.com/luxfi/sdk/ux"
-	sdkUtils "github.com/luxfi/utils"
+	sdkUtils "github.com/luxfi/util"
 	luxWarp "github.com/luxfi/warp"
 )
 
