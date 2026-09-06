@@ -17,7 +17,7 @@ import (
 	"github.com/luxfi/proto/p/validators/fee"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/constants"
-	json "github.com/luxfi/utils/json"
+	json "github.com/luxfi/util/json"
 	"github.com/luxfi/utxo/secp256k1fx"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/api"

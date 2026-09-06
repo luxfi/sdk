@@ -9,7 +9,7 @@ import (
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/proto/p/status"
-	json "github.com/luxfi/utils/json"
+	json "github.com/luxfi/util/json"
 	"github.com/luxfi/utxo"
 	validators "github.com/luxfi/validators"
 	"github.com/luxfi/vm/components/gas"
