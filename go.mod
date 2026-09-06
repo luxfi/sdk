@@ -42,7 +42,7 @@ require (
 	github.com/luxfi/address v1.1.1
 	github.com/luxfi/api v1.1.14
 	github.com/luxfi/bft v0.1.5
-	github.com/luxfi/consensus v1.36.80
+	github.com/luxfi/consensus v1.36.81
 	github.com/luxfi/constants v1.6.4
 	github.com/luxfi/database v1.21.5
 	github.com/luxfi/evm v1.104.50
@@ -58,7 +58,7 @@ require (
 	github.com/luxfi/proto v1.4.10
 	github.com/luxfi/rpc v1.1.0
 	github.com/luxfi/runtime v1.3.1
-	github.com/luxfi/utils v1.3.1
+	github.com/luxfi/util v1.3.4
 	github.com/luxfi/utxo v0.5.10
 	github.com/luxfi/validators v1.3.3
 	github.com/melbahja/goph v1.4.0
@@ -197,6 +197,7 @@ require (
 	github.com/luxfi/sys v0.1.0 // indirect
 	github.com/luxfi/threshold v1.12.6 // indirect
 	github.com/luxfi/trace v1.2.1 // indirect
+	github.com/luxfi/utils v1.3.1 // indirect
 	github.com/luxfi/zap v1.2.7 // indirect
 	github.com/luxfi/zapdb v1.10.6 // indirect
 	github.com/luxfi/zwing v0.6.1 // indirect
@@ -281,7 +282,7 @@ require (
 	github.com/luxfi/sampler v1.1.0 // indirect
 	github.com/luxfi/tls v1.1.1
 	github.com/luxfi/upgrade v1.0.3
-	github.com/luxfi/vm v1.3.14
+	github.com/luxfi/vm v1.3.18
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.0.9 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0 // indirect

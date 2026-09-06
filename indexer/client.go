@@ -10,7 +10,7 @@ import (
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
-	json "github.com/luxfi/utils/json"
+	json "github.com/luxfi/util/json"
 )
 
 type Client struct {

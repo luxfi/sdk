@@ -6,7 +6,7 @@ package exchangevm
 import (
 	"github.com/luxfi/consensus/core/choices"
 	"github.com/luxfi/formatting"
-	"github.com/luxfi/utils/json"
+	"github.com/luxfi/util/json"
 )
 
 // GetTxFeeReply is the response from a GetTxFee call

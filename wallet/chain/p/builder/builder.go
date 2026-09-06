@@ -21,7 +21,7 @@ import (
 	"github.com/luxfi/proto/p/txs"
 	"github.com/luxfi/proto/p/txs/fee"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/utils"
+	"github.com/luxfi/util"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/secp256k1fx"
 	"github.com/luxfi/vm/components/gas"

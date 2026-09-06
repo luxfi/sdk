@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/ids"
 	"github.com/luxfi/rpc"
 	"github.com/luxfi/sdk/constants"
-	"github.com/luxfi/utils/json"
+	"github.com/luxfi/util/json"
 	"github.com/luxfi/vm/api"
 )
 

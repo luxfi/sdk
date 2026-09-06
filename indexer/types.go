@@ -8,7 +8,7 @@ import (
 
 	"github.com/luxfi/formatting"
 	"github.com/luxfi/ids"
-	json "github.com/luxfi/utils/json"
+	json "github.com/luxfi/util/json"
 )
 
 type FormattedContainer struct {

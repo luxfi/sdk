@@ -28,7 +28,7 @@ import (
 	"github.com/luxfi/sdk/validator"
 	warpMessage "github.com/luxfi/sdk/validatormanager/warp"
 	sdkwarp "github.com/luxfi/sdk/warp"
-	sdkutils "github.com/luxfi/utils"
+	sdkutils "github.com/luxfi/util"
 	"github.com/luxfi/warp"
 	warpPayload "github.com/luxfi/warp/payload"
 )

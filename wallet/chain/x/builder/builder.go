@@ -14,7 +14,7 @@ import (
 	"github.com/luxfi/math/set"
 	"github.com/luxfi/proto/x/txs"
 	"github.com/luxfi/sdk/wallet/primary/common"
-	"github.com/luxfi/utils"
+	"github.com/luxfi/util"
 	lux "github.com/luxfi/utxo"
 	"github.com/luxfi/utxo/nftfx"
 	"github.com/luxfi/utxo/propertyfx"
